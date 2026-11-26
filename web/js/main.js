@@ -12,14 +12,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126n';
-import { audio } from './audio.js?v=20261126n';
-import { music, resolveRegionTheme } from './music.js?v=20261126n';
-import { pyRunner } from './pyRunner.js?v=20261126n';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126n';
-import { SpriteManager } from './sprites.js?v=20261126n';
-import { WorldEngine } from './world.js?v=20261126n';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126n';
+} from './api.js?v=20261126o';
+import { audio } from './audio.js?v=20261126o';
+import { music, resolveRegionTheme } from './music.js?v=20261126o';
+import { pyRunner } from './pyRunner.js?v=20261126o';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126o';
+import { SpriteManager } from './sprites.js?v=20261126o';
+import { WorldEngine } from './world.js?v=20261126o';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126o';
+import { playCutscene } from './cutscene.js?v=20261126o';
 
 const state = {
   gameConfig: null,
@@ -875,6 +876,37 @@ async function handleEntityInteract(entity) {
       return;
     }
     const alreadySolved = completed.has(trial.id);
+
+    // Pre-Boss Cut-Scene trigger (once per Realm when facing an unsolved Boss Trial)
+    const preBossBeats = realm?.cutscenes?.preBoss;
+    const preBossKey = `${realm.id}:preBoss`;
+    if (
+      !alreadySolved &&
+      realm?.cutscenes?.bossTrialId === trial.id &&
+      Array.isArray(preBossBeats) &&
+      preBossBeats.length > 0 &&
+      !(save.seenCutscenes || []).includes(preBossKey)
+    ) {
+      state.world.setPaused(true);
+      music.setTheme('vault');
+      audio.playBossIntro();
+      await playCutscene({
+        title: '⚔️ BOSS ENCOUNTER',
+        subtitle: `${realm.name} — ${trial.title}`,
+        beats: preBossBeats,
+        save,
+        sprites: state.sprites,
+        eraKey,
+        realmId: realm.id,
+        finalButtonLabel: '⚔️ Face the Boss Trial!',
+      });
+      if (!Array.isArray(save.seenCutscenes)) save.seenCutscenes = [];
+      if (!save.seenCutscenes.includes(preBossKey)) {
+        save.seenCutscenes.push(preBossKey);
+      }
+      await persistSave();
+    }
+
     const hasBridgeUnlock = (entity.dynamicTiles || []).some((d) => d.tileWhenUnlocked === 'bridge_wood');
     const hasGateUnlock = (entity.dynamicTiles || []).some((d) => d.tileWhenUnlocked === 'mossy_gate_open');
     const unlockNote = hasBridgeUnlock
@@ -928,6 +960,45 @@ async function handleEntityInteract(entity) {
     }
     const realm = state.activeRealm;
     const alreadyRescued = rescued.has(entity.refId);
+    const postBossBeats = realm?.cutscenes?.postBoss;
+
+    // Post-Boss Cut-Scene trigger on first rescue of a Realm's Dragon
+    if (!alreadyRescued && Array.isArray(postBossBeats) && postBossBeats.length > 0) {
+      state.world.setPaused(true);
+      audio.playVaultShatter();
+      audio.playDragonRescue();
+      const bitNum = realm?.number ?? save.rescuedDragons.length + 1;
+      const dragonName = realm?.dragon?.name || 'the Dragon';
+      const dragonTitle = realm?.dragon?.title || 'Dragon Guardian';
+      const upgradeNote = realm?.miniVisualUpgrade || 'Portal unlocked!';
+
+      await playCutscene({
+        title: `✨ BIT ${bitNum} RESTORED`,
+        subtitle: `${dragonName} — ${dragonTitle}`,
+        beats: postBossBeats,
+        save,
+        sprites: state.sprites,
+        eraKey,
+        realmId: realm.id,
+        finalButtonLabel: '✨ Claim Bit & Continue!',
+      });
+
+      if (!save.rescuedDragons.includes(entity.refId)) {
+        save.rescuedDragons.push(entity.refId);
+      }
+      const postBossKey = `${realm.id}:postBoss`;
+      if (!Array.isArray(save.seenCutscenes)) save.seenCutscenes = [];
+      if (!save.seenCutscenes.includes(postBossKey)) {
+        save.seenCutscenes.push(postBossKey);
+      }
+      showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
+      await refreshLiveContent();
+      updateHud();
+      await persistSave();
+      state.world.setPaused(false);
+      return;
+    }
+
     state.modals.openDragonRescueModal({
       realm,
       spriteKey: entity.spriteKey,

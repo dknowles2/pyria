@@ -121,6 +121,30 @@ class RetroAudio {
     this.playTone(260, 0.1, 'triangle', 0.06, 0);
     this.playTone(196, 0.16, 'triangle', 0.06, 0.1);
   }
+
+  playBossIntro() {
+    const notes = [
+      [392.0, 0.12],
+      [369.99, 0.12],
+      [329.63, 0.14],
+      [246.94, 0.28],
+    ];
+    let t = 0;
+    for (const [f, d] of notes) {
+      this.playTone(f, d, 'sawtooth', 0.065, t);
+      this.playTone(f / 2, d, 'square', 0.045, t);
+      t += d + 0.02;
+    }
+  }
+
+  playVaultShatter() {
+    const burst = [1046.5, 1318.5, 880, 1567.98, 1760, 2093];
+    burst.forEach((f, i) => {
+      this.playTone(f, 0.07, 'square', 0.055, i * 0.035);
+    });
+    this.playTone(523.25, 0.25, 'triangle', 0.07, 0.24);
+    this.playTone(783.99, 0.3, 'triangle', 0.07, 0.32);
+  }
 }
 
 export const audio = new RetroAudio();

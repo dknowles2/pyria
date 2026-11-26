@@ -181,7 +181,56 @@
           },
           "difficultyOverride": null
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-01-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Halt, {heroName}! You actually made it across Whispering Meadow? No matter\u2014my three Lightning Coils will keep Spark caged FOREVER!"
+          },
+          {
+            "speaker": "Spark",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Bzzzt! Don't listen to him, {heroName}! Find the strongest coil with max() and shout the unlock signal\u2014I know you can do it!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to zap Lord Null's lock with real Python, {heroName}? Let's rescue Spark!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Impossible! You cracked the Lightning Lock?! Fine\u2014try surviving my Mossy Ruins, {heroName}! Returning None... OUT!"
+          },
+          {
+            "speaker": "Spark",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "BZZZT-BOOM! I'm free! Take the First Bit, {heroName}\u2014watch the meadow grass dance and fireflies light up the night!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! One Dragon rescued and Bit 1 restored! Step through the portal whenever you're ready for Mossy Ruins!"
+          }
+        ]
+      }
     },
     {
       "id": "realm-02-ruins",
@@ -359,7 +408,56 @@
           },
           "difficultyOverride": null
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-02-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Back again, {heroName}? Variables won't save you now! Pebble's Sanctum needs BOTH a secret word box AND the exact math code!"
+          },
+          {
+            "speaker": "Pebble",
+            "spriteKey": "pebble",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Rumble-clack! You're a natural with variable boxes, {heroName}! Put my name in one box, add the two key stones in another, and smash this lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "You've practiced every single piece in these ruins, {heroName}! Let's show Lord Null what a Code-Tamer can do!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "NOOO! My stone vault\u2014shattered by TWO variables?! You'll melt in Cinder Cavern, {heroName}! Mark my pixels!"
+          },
+          {
+            "speaker": "Pebble",
+            "spriteKey": "pebble",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "RUMBLE-ROAR! Freedom feels fantastic! Take Bit 2, {heroName}\u2014feel the stone walls gain rich shadows and depth!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "Two Dragons down, {heroName}! You're officially a Variable Master\u2014next stop, Cinder Cavern!"
+          }
+        ]
+      }
     },
     {
       "id": "realm-03-cavern",
@@ -546,7 +644,56 @@
           },
           "difficultyOverride": null
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-03-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to the heat, {heroName}! Emberwing's Magma Lock only obeys true `if / else` logic\u2014one wrong branch and you're toast!"
+          },
+          {
+            "speaker": "Emberwing",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "WHOOSH! Stand strong, {heroName}! Your ember_power is stronger than Null's lock\u2014compare them with `>` and set me free!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Don't forget the colon `:` and 4-space indent, {heroName}! Let's turn up the heat on Lord Null!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "GAH! Outsmarted by an `if` statement?! Enjoy freezing your boots off in Frostbite Hollow, {heroName}!"
+          },
+          {
+            "speaker": "Emberwing",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROOOAAAR! The magma chains are dust! Take Bit 3, {heroName}\u2014let warm firelight and glowing embers fill the caverns!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "Emberwing is flying free! Bit 3 is ours, {heroName}\u2014grab your warm tunic for Frostbite Hollow!"
+          }
+        ]
+      }
     },
     {
       "id": "realm-04-hollow",
@@ -727,7 +874,56 @@
           },
           "difficultyOverride": null
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-04-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Brrr\u2014feeling chilly, {heroName}? Glacier's Crystal Vault has THREE frozen branches! Pick the wrong `elif` and you'll be a popsicle!"
+          },
+          {
+            "speaker": "Glacier",
+            "spriteKey": "glacier",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay calm and sharp, {heroName}! Multiply your frost crystals and guide Python straight to the `>= 20` branch!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! `if`, `elif`, `else`\u2014you've got this down cold, {heroName}! Let's break the ice!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "WHAT?! Every branch\u2014flawless?! Let's see you untangle my scrambled echoes in Echo Woods, {heroName}!"
+          },
+          {
+            "speaker": "Glacier",
+            "spriteKey": "glacier",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "Crystalline perfection, {heroName}! Take Bit 4\u2014let sparkling snowflakes drift across the hollow!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "HALFWAY to 16-Bit, {heroName}! Four Dragons rescued and Bit 4 restored\u2014onward to Echo Woods!"
+          }
+        ]
+      }
     },
     {
       "id": "realm-05-woods",
@@ -909,7 +1105,56 @@
           },
           "difficultyOverride": null
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-05-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Mwahahaha! Welcome to Echo Woods, {heroName}! I scrambled Bramble's password with messy spaces and lowercase letters\u2014good luck!"
+          },
+          {
+            "speaker": "Bramble",
+            "spriteKey": "bramble",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Rustle-roar! Clean the chant with `.strip().upper()` and check BOTH rules with `and`, {heroName}! The forest believes in you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "String methods + `and` logic\u2014our ultimate combo! Let's wake up Bramble, {heroName}!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Curses! `.strip().upper()` ruined my favorite messy glitch! You'll never survive the depths of Sunken Crypt, {heroName}!"
+          },
+          {
+            "speaker": "Bramble",
+            "spriteKey": "bramble",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "WOOOSH! The canopy sings again! Take Bit 5, {heroName}\u2014watch golden wisps dance through the leaves!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "Five Dragons free, {heroName}! Next stop: the flooded halls of Sunken Crypt!"
+          }
+        ]
+      }
     },
     {
       "id": "realm-06-crypt",
@@ -1098,7 +1343,56 @@
           },
           "difficultyOverride": null
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-06-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "You're in deep water now, {heroName}! Mire's Bell Chamber combines math, string methods, AND boolean logic\u2014my toughest lock yet!"
+          },
+          {
+            "speaker": "Mire",
+            "spriteKey": "mire",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Blub-roar! Take a deep breath, {heroName}! Multiply the bubble power, clean my name into uppercase, and combine both checks with `and`!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Everything we've learned across SIX Realms comes together right here, {heroName}! Let's free Mire!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "IMPOSSIBLE!! Six Dragons rescued?! I'm retreating to Obsidian Keep\u2014don't you dare follow me, {heroName}!"
+          },
+          {
+            "speaker": "Mire",
+            "spriteKey": "mire",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "SPLASH-BOOM! The diving bell is open! Take Bit 6, {heroName}\u2014watch every river and pond in Pyria shimmer!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "SIX BITS RESTORED! You're an unstoppable Code-Tamer, {heroName}\u2014only two Dragons left until the 16-Bit Era!"
+          }
+        ]
+      }
     },
     {
       "id": "realm-07-keep",
