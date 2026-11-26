@@ -796,25 +796,58 @@ export class WorldEngine {
 
       if (ent.type === 'trial') {
         const isDone = completed.has(ent.refId);
-        ctx.fillStyle = isDone ? '#34d399' : '#facc15';
-        ctx.beginPath();
-        ctx.arc(ex, ey, isDone ? 2.6 : 3.1, 0, Math.PI * 2);
-        ctx.fill();
+        if (isDone) {
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.arc(ex, ey, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#052016';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 7px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('✓', ex, ey + 0.5);
+        } else {
+          // Pulsing outer halo + unmistakable gold '!' badge
+          ctx.fillStyle = `rgba(250, 204, 21, ${(0.25 + 0.35 * pulse).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(ex, ey, 7.5 + pulse * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#facc15';
+          ctx.beginPath();
+          ctx.arc(ex, ey, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#0b1020';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.fillStyle = '#0b1020';
+          ctx.font = '900 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('!', ex, ey + 0.5);
+        }
       } else if (ent.type === 'chest' && !openedChests.has(ent.id)) {
         ctx.fillStyle = '#f59e0b';
-        ctx.fillRect(ex - 2, ey - 2, 4, 4);
-      } else if (ent.type === 'vault') {
-        ctx.fillStyle = `rgba(239, 68, 68, ${(0.7 + 0.3 * pulse).toFixed(2)})`;
-        ctx.beginPath();
-        ctx.arc(ex, ey, 3.6 + pulse * 0.9, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#fecaca';
+        ctx.fillRect(ex - 2.5, ey - 2.5, 5, 5);
+        ctx.strokeStyle = '#0b1020';
         ctx.lineWidth = 1;
+        ctx.strokeRect(ex - 2.5, ey - 2.5, 5, 5);
+      } else if (ent.type === 'vault') {
+        ctx.fillStyle = `rgba(239, 68, 68, ${(0.75 + 0.25 * pulse).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(ex, ey, 5 + pulse * 1.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fef2f2';
+        ctx.lineWidth = 1.3;
         ctx.stroke();
       } else if (ent.type === 'portal') {
         ctx.fillStyle = '#38bdf8';
         ctx.beginPath();
-        ctx.arc(ex, ey, 2.8, 0, Math.PI * 2);
+        ctx.arc(ex, ey, 3.2, 0, Math.PI * 2);
         ctx.fill();
       }
     }

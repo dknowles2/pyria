@@ -18,7 +18,7 @@ import { music, resolveRegionTheme } from './music.js?v=20261126e';
 import { pyRunner } from './pyRunner.js?v=20261126e';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126e';
 import { SpriteManager } from './sprites.js?v=20261126e';
-import { WorldEngine } from './world.js?v=20261126e';
+import { WorldEngine } from './world.js?v=20261126g';
 import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126e';
 
 const state = {
