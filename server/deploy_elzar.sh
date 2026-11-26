@@ -25,8 +25,9 @@ COPYFILE_DISABLE=1 tar -C "${REPO_ROOT}" \
   --exclude 'sidecar' \
   --exclude '__pycache__' \
   --exclude '*.pyc' \
+  --exclude '._*' \
   --exclude '.DS_Store' \
-  -czf - web content assets server | ssh "${HOST}" "tar -xzf - -C ${REMOTE_DIR}"
+  -czf - web content assets server | ssh "${HOST}" "tar -xzf - -C ${REMOTE_DIR} && find ${REMOTE_DIR} -name '._*' -delete"
 
 if [[ "${RESTART}" == "true" ]]; then
   echo "Installing & restarting user systemd service pyria.service on ${HOST}..."

@@ -1453,20 +1453,50 @@ function wireTrackerEvents() {
 
 // ==================== WIRE UI EVENTS ====================
 function wireEvents() {
-  // Tabs
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const target = btn.dataset.tab;
-      document.querySelectorAll('.tab-btn').forEach((b) => {
-        const active = b.dataset.tab === target;
-        b.classList.toggle('active', active);
-        b.setAttribute('aria-selected', String(active));
-      });
-      document.querySelectorAll('.tab-panel').forEach((p) => {
-        p.classList.toggle('active', p.id === `tab-${target}`);
-      });
+  // Tabs (sticky across refreshes via URL hash + localStorage)
+  const VALID_TABS = new Set(['progress', 'story', 'health', 'assets']);
+  const activateTab = (target, { updateUrl = true } = {}) => {
+    const tab = VALID_TABS.has(target) ? target : 'progress';
+    document.querySelectorAll('.tab-btn').forEach((b) => {
+      const active = b.dataset.tab === tab;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', String(active));
     });
+    document.querySelectorAll('.tab-panel').forEach((p) => {
+      p.classList.toggle('active', p.id === `tab-${tab}`);
+    });
+    try {
+      localStorage.setItem('pyria_builder_tab', tab);
+    } catch {
+      // ignore storage errors
+    }
+    if (updateUrl && window.location.hash !== `#${tab}`) {
+      history.replaceState(null, '', `#${tab}`);
+    }
+  };
+
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
   });
+
+  window.addEventListener('hashchange', () => {
+    const hashTab = window.location.hash.replace(/^#/, '');
+    if (VALID_TABS.has(hashTab)) activateTab(hashTab, { updateUrl: false });
+  });
+
+  const initialHashTab = window.location.hash.replace(/^#/, '');
+  let savedTab = null;
+  try {
+    savedTab = localStorage.getItem('pyria_builder_tab');
+  } catch {
+    savedTab = null;
+  }
+  const initialTab = VALID_TABS.has(initialHashTab)
+    ? initialHashTab
+    : VALID_TABS.has(savedTab)
+      ? savedTab
+      : 'progress';
+  activateTab(initialTab, { updateUrl: false });
 
   // Live controls
   $('#btn-toggle-live').addEventListener('click', () => {
