@@ -1,0 +1,468 @@
+{
+  "version": "1.0.0",
+  "tilesetId": "meadow_ruins",
+  "tileSize": 16,
+  "tileIds": [
+    "grass",
+    "grass_flower",
+    "dirt_path",
+    "water",
+    "bridge_wood",
+    "bridge_broken",
+    "stone_floor",
+    "stone_wall",
+    "tree",
+    "bush",
+    "campfire",
+    "anvil",
+    "statue",
+    "mossy_gate_closed",
+    "mossy_gate_open",
+    "chest_closed",
+    "chest_open",
+    "vault_shrine",
+    "torch",
+    "portal"
+  ],
+  "npcKeys": [
+    "elder_ada",
+    "bram",
+    "spark",
+    "pebble",
+    "lord_null"
+  ],
+  "eras": {
+    "8bit": {
+      "tilesetImage": "8bit/meadow_ruins.png",
+      "tilesetSize": {
+        "width": 80,
+        "height": 64
+      },
+      "npcsImage": "8bit/npcs_and_dragons.png",
+      "npcsSize": {
+        "width": 80,
+        "height": 16
+      },
+      "tiles": {
+        "grass": {
+          "col": 0,
+          "row": 0,
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "grass_flower": {
+          "col": 1,
+          "row": 0,
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "dirt_path": {
+          "col": 2,
+          "row": 0,
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "water": {
+          "col": 3,
+          "row": 0,
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bridge_wood": {
+          "col": 4,
+          "row": 0,
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bridge_broken": {
+          "col": 0,
+          "row": 1,
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "stone_floor": {
+          "col": 1,
+          "row": 1,
+          "x": 16,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "stone_wall": {
+          "col": 2,
+          "row": 1,
+          "x": 32,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "tree": {
+          "col": 3,
+          "row": 1,
+          "x": 48,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "bush": {
+          "col": 4,
+          "row": 1,
+          "x": 64,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "campfire": {
+          "col": 0,
+          "row": 2,
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "anvil": {
+          "col": 1,
+          "row": 2,
+          "x": 16,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "statue": {
+          "col": 2,
+          "row": 2,
+          "x": 32,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "mossy_gate_closed": {
+          "col": 3,
+          "row": 2,
+          "x": 48,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "mossy_gate_open": {
+          "col": 4,
+          "row": 2,
+          "x": 64,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "chest_closed": {
+          "col": 0,
+          "row": 3,
+          "x": 0,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "chest_open": {
+          "col": 1,
+          "row": 3,
+          "x": 16,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "vault_shrine": {
+          "col": 2,
+          "row": 3,
+          "x": 32,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "torch": {
+          "col": 3,
+          "row": 3,
+          "x": 48,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "portal": {
+          "col": 4,
+          "row": 3,
+          "x": 64,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        }
+      },
+      "npcs": {
+        "elder_ada": {
+          "col": 0,
+          "row": 0,
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bram": {
+          "col": 1,
+          "row": 0,
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "spark": {
+          "col": 2,
+          "row": 0,
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "pebble": {
+          "col": 3,
+          "row": 0,
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "lord_null": {
+          "col": 4,
+          "row": 0,
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      }
+    },
+    "16bit": {
+      "tilesetImage": "16bit/meadow_ruins.png",
+      "tilesetSize": {
+        "width": 80,
+        "height": 64
+      },
+      "npcsImage": "16bit/npcs_and_dragons.png",
+      "npcsSize": {
+        "width": 80,
+        "height": 16
+      },
+      "tiles": {
+        "grass": {
+          "col": 0,
+          "row": 0,
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "grass_flower": {
+          "col": 1,
+          "row": 0,
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "dirt_path": {
+          "col": 2,
+          "row": 0,
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "water": {
+          "col": 3,
+          "row": 0,
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bridge_wood": {
+          "col": 4,
+          "row": 0,
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bridge_broken": {
+          "col": 0,
+          "row": 1,
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "stone_floor": {
+          "col": 1,
+          "row": 1,
+          "x": 16,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "stone_wall": {
+          "col": 2,
+          "row": 1,
+          "x": 32,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "tree": {
+          "col": 3,
+          "row": 1,
+          "x": 48,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "bush": {
+          "col": 4,
+          "row": 1,
+          "x": 64,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        "campfire": {
+          "col": 0,
+          "row": 2,
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "anvil": {
+          "col": 1,
+          "row": 2,
+          "x": 16,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "statue": {
+          "col": 2,
+          "row": 2,
+          "x": 32,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "mossy_gate_closed": {
+          "col": 3,
+          "row": 2,
+          "x": 48,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "mossy_gate_open": {
+          "col": 4,
+          "row": 2,
+          "x": 64,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        "chest_closed": {
+          "col": 0,
+          "row": 3,
+          "x": 0,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "chest_open": {
+          "col": 1,
+          "row": 3,
+          "x": 16,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "vault_shrine": {
+          "col": 2,
+          "row": 3,
+          "x": 32,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "torch": {
+          "col": 3,
+          "row": 3,
+          "x": 48,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "portal": {
+          "col": 4,
+          "row": 3,
+          "x": 64,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        }
+      },
+      "npcs": {
+        "elder_ada": {
+          "col": 0,
+          "row": 0,
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bram": {
+          "col": 1,
+          "row": 0,
+          "x": 16,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "spark": {
+          "col": 2,
+          "row": 0,
+          "x": 32,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "pebble": {
+          "col": 3,
+          "row": 0,
+          "x": 48,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "lord_null": {
+          "col": 4,
+          "row": 0,
+          "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        }
+      }
+    }
+  }
+}

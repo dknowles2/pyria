@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyria — Walkable World &amp; Tilemap Previewer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-alt: #131c31;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --gold: #facc15;
+      --green: #4ade80;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      background: var(--panel-alt);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    header h1 { margin: 0; font-size: 1.1rem; }
+    header h1 span { color: var(--gold); }
+    .sub { font-size: 0.82rem; color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .btn-group {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+      background: var(--panel);
+    }
+    button {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 11px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    button:hover { background: #26354d; }
+    button.active {
+      background: var(--accent);
+      color: #082f49;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .btn-group button { border: none; border-radius: 0; border-right: 1px solid var(--border); }
+    .btn-group button:last-child { border-right: none; }
+
+    .main {
+      display: grid;
+      grid-template-columns: minmax(520px, 1fr) 310px;
+      gap: 14px;
+      padding: 14px 18px 24px;
+      max-width: 1420px;
+      margin: 0 auto;
+    }
+    @media (max-width: 980px) { .main { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .canvas-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #090e1a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      overflow: auto;
+    }
+    canvas {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      max-width: 100%;
+      height: auto;
+    }
+    .hud-bar {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .hud-bar strong { color: var(--gold); }
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+    .section { margin-bottom: 14px; }
+    .trial-list { display: flex; flex-direction: column; gap: 6px; }
+    .trial-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .inspector {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 9px 10px;
+      font-size: 0.82rem;
+      min-height: 112px;
+    }
+    .inspector .tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #0ea5e933;
+      color: var(--accent);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .hint { font-size: 0.77rem; color: var(--muted); margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1><span>Pyria</span> Walkable World &amp; Tilemap Previewer</h1>
+      <div class="sub">Walk with <strong>WASD / Arrow keys</strong> • Click any NPC, Trial, Chest, Vault, or Portal to inspect</div>
+    </div>
+    <div class="controls">
+      <div class="btn-group" id="realmGroup">
+        <button data-realm="realm-01-meadow" class="active">Realm 1: Whispering Meadow</button>
+        <button data-realm="realm-02-ruins">Realm 2: Mossy Ruins</button>
+      </div>
+      <div class="btn-group" id="eraGroup">
+        <button data-era="8bit" class="active">8-Bit Era (NES)</button>
+        <button data-era="16bit">16-Bit Era (SNES)</button>
+      </div>
+      <button id="toggleGridBtn">Grid: OFF</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="card">
+      <div class="canvas-wrap">
+        <canvas id="worldCanvas" width="1024" height="768"></canvas>
+        <div class="hud-bar">
+          <div id="hudZone">Zone: <strong>—</strong></div>
+          <div id="hudPos">Hero: (0, 0) • Facing: down</div>
+          <div id="hudMode">Era: 8-Bit</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="card">
+      <div class="section">
+        <h2>Trials Solved (Dynamic World)</h2>
+        <div style="display:flex; gap:6px; margin-bottom:8px;">
+          <button id="solveAllBtn">Solve All</button>
+          <button id="resetTrialsBtn">Reset</button>
+        </div>
+        <div class="trial-list" id="trialList"></div>
+        <div class="hint">Toggling Trials replaces broken bridges / closed gates in real time using each entity's <code>dynamicTiles</code>.</div>
+      </div>
+
+      <div class="section">
+        <h2>Entity Inspector</h2>
+        <div class="inspector" id="inspectorBox">
+          Walk near or click an NPC, Trial trigger, Chest, Vault, or Portal to inspect it.
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Controls</h2>
+        <div class="hint">
+          • <strong>WASD / Arrows</strong>: Walk Hero + trailing Pip<br/>
+          • <strong>E / Space</strong>: Interact with nearby entity or open Chest<br/>
+          • <strong>8-Bit ↔ 16-Bit</strong>: Live era upgrade preview
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- file:// fallback bundle generated by assets/tilesets/build_tilesets.py -->
+  <script src="maps_bundle.js"></script>
+  <script>
+    const TILE_SIZE = 16;
+    const SCALE = 2; // 32x24 * 16 * 2 = 1024x768 crisp nearest-neighbor canvas
+    const DIRECTIONS = ["down", "up", "left", "right"];
+    const TILE_IDS = [
+      "grass", "grass_flower", "dirt_path", "water", "bridge_wood",
+      "bridge_broken", "stone_floor", "stone_wall", "tree", "bush",
+      "campfire", "anvil", "statue", "mossy_gate_closed", "mossy_gate_open",
+      "chest_closed", "chest_open", "vault_shrine", "torch", "portal"
+    ];
+    const NPC_KEYS = ["elder_ada", "bram", "spark", "pebble", "lord_null"];
+
+    const state = {
+      era: "8bit",
+      realmId: "realm-01-meadow",
+      maps: {},
+      showGrid: false,
+      solvedTrials: new Set(),
+      openedChests: new Set(),
+      hero: { x: 4, y: 12, dir: "down", frame: 0 },
+      pip: { x: 3, y: 12, dir: "down", frame: 0 },
+      selectedEntity: null,
+      images: {}
+    };
+
+    function loadImage(key, src) {
+      return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => { state.images[key] = img; resolve(img); };
+        img.onerror = () => resolve(null);
+        img.src = src;
+      });
+    }
+
+    async function loadAllAssets() {
+      const jobs = [];
+      for (const era of ["8bit", "16bit"]) {
+        jobs.push(loadImage(`tiles_${era}`, `../tilesets/${era}/meadow_ruins.png`));
+        jobs.push(loadImage(`npcs_${era}`, `../tilesets/${era}/npcs_and_dragons.png`));
+        for (const layer of ["shadow", "skin_warm_tan", "boots_default", "tunic_emerald", "hair_spiky", "hat_explorer", "pip_base"]) {
+          jobs.push(loadImage(`sprite_${era}_${layer}`, `../sprites/${era}/${layer}.png`));
+        }
+      }
+      await Promise.all(jobs);
+    }
+
+    async function loadMaps() {
+      // Try live fetch first (HTTP), fall back to maps_bundle.js (file://)
+      for (const id of ["realm-01-meadow", "realm-02-ruins"]) {
+        try {
+          const res = await fetch(`../../content/maps/${id}.json`);
+          if (res.ok) {
+            state.maps[id] = await res.json();
+            continue;
+          }
+        } catch (_) {}
+        if (window.PYRIA_MAPS_BUNDLE && window.PYRIA_MAPS_BUNDLE[id]) {
+          state.maps[id] = window.PYRIA_MAPS_BUNDLE[id];
+        }
+      }
+    }
+
+    function currentMap() {
+      return state.maps[state.realmId] || null;
+    }
+
+    function buildEffectiveGrid(map) {
+      const ground = map.layers.ground.map(r => r.slice());
+      const decor = map.layers.decor.map(r => r.slice());
+      const collision = map.layers.collision.map(r => r.slice());
+
+      for (const ent of map.entities || []) {
+        const trialKey = ent.type === "trial" ? ent.refId : ent.requiredTrialId;
+        const solved = Boolean(trialKey && state.solvedTrials.has(trialKey));
+        if (Array.isArray(ent.dynamicTiles)) {
+          for (const dt of ent.dynamicTiles) {
+            const tx = dt.x, ty = dt.y;
+            if (ty >= 0 && ty < map.height && tx >= 0 && tx < map.width) {
+              const tileVal = solved ? (dt.tileWhenUnlocked ?? dt.tile) : (dt.tileWhenLocked ?? null);
+              const collVal = solved ? (dt.collisionWhenUnlocked ?? dt.collision) : dt.collisionWhenLocked;
+              if (dt.layer === "ground" && tileVal) ground[ty][tx] = tileVal;
+              if (dt.layer === "decor" && tileVal !== undefined) decor[ty][tx] = tileVal;
+              if (typeof collVal === "number") collision[ty][tx] = collVal;
+            }
+          }
+        }
+        if (ent.type === "chest" && state.openedChests.has(ent.id)) {
+          decor[ent.y][ent.x] = "chest_open";
+        }
+      }
+      return { ground, decor, collision };
+    }
+
+    function selectRealm(realmId) {
+      state.realmId = realmId;
+      const map = currentMap();
+      if (map) {
+        state.hero.x = map.spawn.x;
+        state.hero.y = map.spawn.y;
+        state.hero.dir = "down";
+        state.pip.x = Math.max(0, map.spawn.x - 1);
+        state.pip.y = map.spawn.y;
+        state.pip.dir = "down";
+      }
+      state.selectedEntity = null;
+      renderTrialCheckboxes();
+      render();
+    }
+
+    function renderTrialCheckboxes() {
+      const root = document.getElementById("trialList");
+      root.innerHTML = "";
+      const map = currentMap();
+      if (!map) return;
+      const trials = (map.entities || []).filter(e => e.type === "trial");
+      for (const t of trials) {
+        const row = document.createElement("label");
+        row.className = "trial-row";
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = state.solvedTrials.has(t.refId);
+        cb.addEventListener("change", () => {
+          if (cb.checked) state.solvedTrials.add(t.refId);
+          else state.solvedTrials.delete(t.refId);
+          render();
+        });
+        row.appendChild(cb);
+        const span = document.createElement("span");
+        span.textContent = `${t.refId}: ${t.label}`;
+        row.appendChild(span);
+        root.appendChild(row);
+      }
+    }
+
+    function showEntity(ent) {
+      state.selectedEntity = ent;
+      const box = document.getElementById("inspectorBox");
+      if (!ent) {
+        box.textContent = "Walk near or click an NPC, Trial trigger, Chest, Vault, or Portal to inspect it.";
+        return;
+      }
+      const extras = [];
+      if (ent.refId) extras.push(`<div><strong>refId:</strong> <code>${ent.refId}</code></div>`);
+      if (ent.shardReward) extras.push(`<div><strong>Reward:</strong> ${ent.shardReward} Byte Shards</div>`);
+      if (ent.requiredTrialId) {
+        const ok = state.solvedTrials.has(ent.requiredTrialId);
+        extras.push(`<div><strong>Requires:</strong> <code>${ent.requiredTrialId}</code> (${ok ? "SOLVED" : "LOCKED"})</div>`);
+      }
+      if (ent.type === "chest") {
+        const opened = state.openedChests.has(ent.id);
+        extras.push(`<div><strong>Status:</strong> ${opened ? "Opened!" : "Closed (press E or Space nearby)"}</div>`);
+      }
+      if (Array.isArray(ent.dynamicTiles) && ent.dynamicTiles.length) {
+        extras.push(`<div><strong>Dynamic Tiles:</strong> updates ${ent.dynamicTiles.length} tile(s) when solved</div>`);
+      }
+      box.innerHTML = `<div class="tag">${ent.type}</div><div style="font-weight:700; margin-bottom:4px;">${ent.label}</div><div>Tile (${ent.x}, ${ent.y})</div>${extras.join("")}`;
+    }
+
+    function drawTile(ctx, tileId, gx, gy) {
+      const idx = TILE_IDS.indexOf(tileId);
+      if (idx < 0) return;
+      const img = state.images[`tiles_${state.era}`];
+      if (!img) return;
+      const col = idx % 5;
+      const row = Math.floor(idx / 5);
+      ctx.drawImage(img, col * 16, row * 16, 16, 16, gx * 16 * SCALE, gy * 16 * SCALE, 16 * SCALE, 16 * SCALE);
+    }
+
+    function drawNpc(ctx, spriteKey, gx, gy) {
+      const idx = NPC_KEYS.indexOf(spriteKey);
+      if (idx < 0) return;
+      const img = state.images[`npcs_${state.era}`];
+      if (!img) return;
+      ctx.drawImage(img, idx * 16, 0, 16, 16, gx * 16 * SCALE, gy * 16 * SCALE, 16 * SCALE, 16 * SCALE);
+    }
+
+    function drawHeroAndPip(ctx) {
+      const era = state.era;
+      const dirIdx = DIRECTIONS.indexOf(state.hero.dir);
+      const frames = era === "8bit" ? 2 : 4;
+      const fIdx = state.hero.frame % frames;
+
+      // Draw Pip (16x16 in both eras)
+      const pipImg = state.images[`sprite_${era}_pip_base`];
+      if (pipImg) {
+        const pDir = DIRECTIONS.indexOf(state.pip.dir);
+        ctx.drawImage(pipImg, (state.pip.frame % frames) * 16, pDir * 16, 16, 16, state.pip.x * 16 * SCALE, state.pip.y * 16 * SCALE, 16 * SCALE, 16 * SCALE);
+      }
+
+      // Draw layered Hero
+      const fw = era === "8bit" ? 16 : 32;
+      const drawW = (era === "8bit" ? 16 : 28) * SCALE;
+      const drawH = drawW;
+      const ox = state.hero.x * 16 * SCALE + (16 * SCALE - drawW) / 2;
+      const oy = state.hero.y * 16 * SCALE + (16 * SCALE - drawH);
+      for (const layer of ["shadow", "skin_warm_tan", "boots_default", "tunic_emerald", "hair_spiky", "hat_explorer"]) {
+        const img = state.images[`sprite_${era}_${layer}`];
+        if (img) {
+          ctx.drawImage(img, fIdx * fw, dirIdx * fw, fw, fw, ox, oy, drawW, drawH);
+        }
+      }
+    }
+
+    function render() {
+      const canvas = document.getElementById("worldCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const map = currentMap();
+      if (!map) {
+        ctx.fillStyle = "#f8fafc";
+        ctx.font = "16px monospace";
+        ctx.fillText("Map JSON not found. Run build_tilesets.py to refresh maps_bundle.js.", 24, 48);
+        return;
+      }
+
+      const { ground, decor } = buildEffectiveGrid(map);
+      for (let y = 0; y < map.height; y++) {
+        for (let x = 0; x < map.width; x++) {
+          drawTile(ctx, ground[y][x], x, y);
+          if (decor[y][x]) drawTile(ctx, decor[y][x], x, y);
+        }
+      }
+
+      // Entities
+      for (const ent of map.entities || []) {
+        if (NPC_KEYS.includes(ent.spriteKey)) {
+          drawNpc(ctx, ent.spriteKey, ent.x, ent.y);
+        } else if (TILE_IDS.includes(ent.spriteKey) && decor[ent.y][ent.x] !== ent.spriteKey) {
+          drawTile(ctx, ent.spriteKey, ent.x, ent.y);
+        }
+      }
+
+      drawHeroAndPip(ctx);
+
+      if (state.showGrid) {
+        ctx.strokeStyle = "rgba(255,255,255,0.12)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= map.width; x++) {
+          ctx.beginPath(); ctx.moveTo(x * 16 * SCALE, 0); ctx.lineTo(x * 16 * SCALE, map.height * 16 * SCALE); ctx.stroke();
+        }
+        for (let y = 0; y <= map.height; y++) {
+          ctx.beginPath(); ctx.moveTo(0, y * 16 * SCALE); ctx.lineTo(map.width * 16 * SCALE, y * 16 * SCALE); ctx.stroke();
+        }
+      }
+
+      // HUD region & coords
+      const region = (map.regions || []).find(r =>
+        state.hero.x >= r.x && state.hero.x < r.x + r.width &&
+        state.hero.y >= r.y && state.hero.y < r.y + r.height
+      );
+      document.getElementById("hudZone").innerHTML = `Zone: <strong>${region ? region.name : map.name}</strong>`;
+      document.getElementById("hudPos").textContent = `Hero: (${state.hero.x}, ${state.hero.y}) • Facing: ${state.hero.dir}`;
+      document.getElementById("hudMode").textContent = `Era: ${state.era === "8bit" ? "8-Bit NES" : "16-Bit SNES"}`;
+    }
+
+    function tryMove(dx, dy, dir) {
+      const map = currentMap();
+      if (!map) return;
+      state.hero.dir = dir;
+      const nx = state.hero.x + dx;
+      const ny = state.hero.y + dy;
+      if (nx < 0 || ny < 0 || nx >= map.width || ny >= map.height) { render(); return; }
+      const { collision } = buildEffectiveGrid(map);
+      if (collision[ny][nx] === 0) {
+        state.pip.x = state.hero.x;
+        state.pip.y = state.hero.y;
+        state.pip.dir = dir;
+        state.hero.x = nx;
+        state.hero.y = ny;
+        state.hero.frame = (state.hero.frame + 1) % 4;
+        state.pip.frame = (state.pip.frame + 1) % 4;
+      }
+      // Auto-inspect adjacent entity
+      const near = (map.entities || []).find(e => Math.abs(e.x - state.hero.x) + Math.abs(e.y - state.hero.y) <= 1);
+      if (near) showEntity(near);
+      render();
+    }
+
+    function interactNearby() {
+      const map = currentMap();
+      if (!map) return;
+      const near = (map.entities || []).find(e => Math.abs(e.x - state.hero.x) + Math.abs(e.y - state.hero.y) <= 1);
+      if (!near) return;
+      if (near.type === "chest") {
+        state.openedChests.add(near.id);
+      } else if (near.type === "trial") {
+        if (state.solvedTrials.has(near.refId)) state.solvedTrials.delete(near.refId);
+        else state.solvedTrials.add(near.refId);
+        renderTrialCheckboxes();
+      }
+      showEntity(near);
+      render();
+    }
+
+    // Event wiring
+    document.getElementById("realmGroup").addEventListener("click", e => {
+      if (!e.target.dataset.realm) return;
+      document.querySelectorAll("#realmGroup button").forEach(b => b.classList.toggle("active", b === e.target));
+      selectRealm(e.target.dataset.realm);
+    });
+    document.getElementById("eraGroup").addEventListener("click", e => {
+      if (!e.target.dataset.era) return;
+      state.era = e.target.dataset.era;
+      document.querySelectorAll("#eraGroup button").forEach(b => b.classList.toggle("active", b === e.target));
+      render();
+    });
+    document.getElementById("toggleGridBtn").addEventListener("click", e => {
+      state.showGrid = !state.showGrid;
+      e.target.classList.toggle("active", state.showGrid);
+      e.target.textContent = state.showGrid ? "Grid: ON" : "Grid: OFF";
+      render();
+    });
+    document.getElementById("solveAllBtn").addEventListener("click", () => {
+      const map = currentMap();
+      if (!map) return;
+      for (const e of map.entities || []) if (e.type === "trial") state.solvedTrials.add(e.refId);
+      renderTrialCheckboxes();
+      render();
+    });
+    document.getElementById("resetTrialsBtn").addEventListener("click", () => {
+      state.solvedTrials.clear();
+      state.openedChests.clear();
+      renderTrialCheckboxes();
+      render();
+    });
+
+    document.getElementById("worldCanvas").addEventListener("click", e => {
+      const map = currentMap();
+      if (!map) return;
+      const rect = e.target.getBoundingClientRect();
+      const tx = Math.floor(((e.clientX - rect.left) / rect.width) * map.width);
+      const ty = Math.floor(((e.clientY - rect.top) / rect.height) * map.height);
+      const hit = (map.entities || []).find(ent => ent.x === tx && ent.y === ty);
+      showEntity(hit || { type: "tile", label: `${map.layers.ground[ty][tx]}${map.layers.decor[ty][tx] ? " + " + map.layers.decor[ty][tx] : ""}`, x: tx, y: ty });
+    });
+
+    window.addEventListener("keydown", e => {
+      const k = e.key.toLowerCase();
+      if (k === "arrowup" || k === "w") { e.preventDefault(); tryMove(0, -1, "up"); }
+      else if (k === "arrowdown" || k === "s") { e.preventDefault(); tryMove(0, 1, "down"); }
+      else if (k === "arrowleft" || k === "a") { e.preventDefault(); tryMove(-1, 0, "left"); }
+      else if (k === "arrowright" || k === "d") { e.preventDefault(); tryMove(1, 0, "right"); }
+      else if (k === "e" || k === " ") { e.preventDefault(); interactNearby(); }
+    });
+
+    (async () => {
+      await Promise.all([loadAllAssets(), loadMaps()]);
+      selectRealm("realm-01-meadow");
+    })();
+  </script>
+</body>
+</html>
