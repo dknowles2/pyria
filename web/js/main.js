@@ -12,14 +12,14 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126d';
-import { audio } from './audio.js?v=20261126d';
-import { music, resolveRegionTheme } from './music.js?v=20261126d';
-import { pyRunner } from './pyRunner.js?v=20261126d';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126d';
-import { SpriteManager } from './sprites.js?v=20261126d';
-import { WorldEngine } from './world.js?v=20261126d';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126d';
+} from './api.js?v=20261126e';
+import { audio } from './audio.js?v=20261126e';
+import { music, resolveRegionTheme } from './music.js?v=20261126e';
+import { pyRunner } from './pyRunner.js?v=20261126e';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126e';
+import { SpriteManager } from './sprites.js?v=20261126e';
+import { WorldEngine } from './world.js?v=20261126e';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126e';
 
 const state = {
   gameConfig: null,
