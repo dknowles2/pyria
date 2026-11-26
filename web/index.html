@@ -57,12 +57,12 @@
             <button id="btn-charcreate-music" class="btn btn-sm btn-ghost" title="Toggle Background Music">
               🎵 Music: On
             </button>
-            <div id="charcreate-py-status" class="py-status pill pill-muted">Loading Python...</div>
+            <div id="charcreate-py-status" class="py-status pill pill-muted hidden">Loading Python...</div>
           </div>
         </header>
 
         <div class="charcreate-grid">
-          <!-- Left: Live Sprite Preview + Spellbook -->
+          <!-- Left: Live Hero Stage + Live Python Preview (Visual) OR Starter Spellbook (Advanced) -->
           <div class="card charcreate-preview-card">
             <div class="preview-stage">
               <canvas id="charcreate-canvas" width="160" height="112" class="pixel-canvas preview-canvas-lg"></canvas>
@@ -72,23 +72,12 @@
               </div>
             </div>
 
-            <div class="hero-summary-grid">
-              <div class="summary-chip">
-                <span class="chip-label">Hero Name</span>
-                <strong id="preview-val-name">Rowan</strong>
+            <div id="cc-live-python-box" class="live-py-preview-box">
+              <div class="live-py-preview-header">
+                <span>🐍 Live Python Preview</span>
+                <span class="hint-sub">Generated from your picks</span>
               </div>
-              <div class="summary-chip">
-                <span class="chip-label">Skin Tone</span>
-                <strong id="preview-val-skin">warm_tan</strong>
-              </div>
-              <div class="summary-chip">
-                <span class="chip-label">Hairstyle</span>
-                <strong id="preview-val-hair">spiky</strong>
-              </div>
-              <div class="summary-chip">
-                <span class="chip-label">Tunic</span>
-                <strong id="preview-val-tunic">emerald</strong>
-              </div>
+              <pre id="cc-live-python-preview" class="live-py-code"></pre>
             </div>
 
             <div id="charcreate-spellbook-box" class="spellbook-box hidden">
@@ -97,15 +86,10 @@
             </div>
           </div>
 
-          <!-- Right: Visual Hero Forge (default) OR Advanced Mode Python Editor -->
+          <!-- Right: Visual Hero Forge Controls (default) OR Advanced Mode Python Editor -->
           <div class="card charcreate-editor-card">
             <div class="forge-mode-header">
-              <div>
-                <h3 id="forge-panel-title" style="margin:0;">Hero Forge</h3>
-                <p id="forge-panel-subtitle" class="muted-text">
-                  Pick your hero's name and style below — Pip will write the Python preview for you!
-                </p>
-              </div>
+              <h3 id="forge-panel-title" style="margin:0;">Hero Forge</h3>
               <button id="btn-charcreate-advanced" type="button" class="btn btn-sm btn-ghost forge-mode-toggle" aria-pressed="false">
                 ⚡ Advanced Mode: Write Python
               </button>
@@ -143,15 +127,7 @@
                 <div id="cc-tunic-pills" class="picker-pills"></div>
               </div>
 
-              <div class="live-py-preview-box">
-                <div class="live-py-preview-header">
-                  <span>🐍 Live Python Preview</span>
-                  <span class="hint-sub">Updates as you customize!</span>
-                </div>
-                <pre id="cc-live-python-preview" class="live-py-code"></pre>
-              </div>
-
-              <div class="editor-actions">
+              <div class="editor-actions" style="margin-top:4px;">
                 <button id="btn-charcreate-start" type="button" class="btn btn-primary btn-lg" style="width:100%;">
                   ✦ Start Adventure
                 </button>
