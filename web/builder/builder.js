@@ -255,6 +255,8 @@ function getEventBadge(eventType) {
       return { cls: 'pill-blue', text: '✨ New Hero' };
     case 'realm_entered':
       return { cls: 'pill-blue', text: '🚪 Entered Realm' };
+    case 'parent_override':
+      return { cls: 'pill-violet', text: '🛡️ Parent Override' };
     default:
       return { cls: 'pill-muted', text: eventType || 'Event' };
   }
@@ -1063,6 +1065,12 @@ function renderTrackerChecklist(mapData, realmMeta, save, items) {
               else if (it.locked) icon = '🔒';
               else if (it.kind === 'vault') icon = '🐉';
               else if (it.kind === 'portal') icon = '🌀';
+              const overrideBtnHtml =
+                it.kind === 'trial' && save && save.id
+                  ? it.done
+                    ? `<button type="button" class="btn-override-reset" data-override-trial="${escapeHtml(it.entity.refId)}" data-override-title="${escapeHtml(it.title)}" data-override-solved="false" title="Reset Trial to unsolved">↺ Reset</button>`
+                    : `<button type="button" class="btn-override-done" data-override-trial="${escapeHtml(it.entity.refId)}" data-override-title="${escapeHtml(it.title)}" data-override-solved="true" title="Mark Trial complete and award Byte Shards">✓ Mark Done</button>`
+                  : '';
               return `
                 <div class="tracker-row ${it.done ? 'done' : ''} ${highlightId === it.id ? 'highlighted' : ''}" data-entity-id="${escapeHtml(it.id)}">
                   <div class="tracker-row-main">
@@ -1072,7 +1080,10 @@ function renderTrackerChecklist(mapData, realmMeta, save, items) {
                       <div class="tracker-row-meta">${escapeHtml(it.subtitle)} · ${escapeHtml(it.regionName)}</div>
                     </div>
                   </div>
-                  <span class="tracker-coords">(${it.x}, ${it.y})</span>
+                  <div class="tracker-row-right">
+                    ${overrideBtnHtml}
+                    <span class="tracker-coords">(${it.x}, ${it.y})</span>
+                  </div>
                 </div>
               `;
             })
@@ -1115,6 +1126,41 @@ function renderTrackerChecklist(mapData, realmMeta, save, items) {
       syncChecklistHighlight();
       updateTrackerCallout(mapData, items);
       drawTrackerMap(mapData, save);
+    });
+  });
+
+  listEl.querySelectorAll('[data-override-trial]').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!save || !save.id) return;
+      const trialId = btn.dataset.overrideTrial;
+      const title = btn.dataset.overrideTitle || trialId;
+      const solved = btn.dataset.overrideSolved === 'true';
+
+      btn.disabled = true;
+      try {
+        const res = await apiFetch(
+          `/api/builder/saves/${encodeURIComponent(save.id)}/override-trial`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ trialId, solved, awardShards: solved }),
+          }
+        );
+        const delta = Number(res.shardsDelta) || 0;
+        if (solved) {
+          showToast(
+            delta > 0
+              ? `Marked "${title}" complete (+${delta} Shards)`
+              : `Marked "${title}" complete`
+          );
+        } else {
+          showToast(`Reset "${title}" to unsolved`);
+        }
+        await loadProgressFull();
+      } catch (err) {
+        showToast(`Override failed: ${err.message}`, true);
+        btn.disabled = false;
+      }
     });
   });
 }

@@ -447,6 +447,115 @@ class PyriaServerTestCase(unittest.TestCase):
                 iso_srv.server_close()
                 t.join(timeout=3)
 
+    def test_parent_trial_override_endpoint(self) -> None:
+        # Create a hero with a trial draft in place
+        status, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {
+                "heroName": "Aria",
+                "realmId": "realm-01-meadow",
+                "byteShards": 10,
+                "solvedTrials": [],
+                "completedTrials": [],
+                "trialDrafts": {"trial-01-01": "print('wip')"},
+            },
+        )
+        self.assertEqual(status, 201)
+        save_id = json.loads(raw)["save"]["id"]
+
+        # 404 on unknown save
+        self.assertEqual(
+            self._request(
+                "POST",
+                "/api/builder/saves/missing-id/override-trial",
+                {"trialId": "trial-01-01", "solved": True},
+            )[0],
+            404,
+        )
+
+        # 400 on missing trialId / non-bool solved
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/builder/saves/{save_id}/override-trial",
+                {"solved": True},
+            )[0],
+            400,
+        )
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/builder/saves/{save_id}/override-trial",
+                {"trialId": "trial-01-01"},
+            )[0],
+            400,
+        )
+
+        # Passcode guard respected
+        os.environ["PYRIA_BUILDER_PASSCODE"] = "dad-key"
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/builder/saves/{save_id}/override-trial",
+                {"trialId": "trial-01-01", "solved": True},
+            )[0],
+            401,
+        )
+        os.environ.pop("PYRIA_BUILDER_PASSCODE", None)
+
+        # 1. Mark trial-01-01 complete (default awardShards=True)
+        status, _, raw = self._request(
+            "POST",
+            f"/api/builder/saves/{save_id}/override-trial",
+            {"trialId": "trial-01-01", "solved": True, "awardShards": True},
+        )
+        self.assertEqual(status, 200)
+        res1 = json.loads(raw)
+        self.assertTrue(res1["ok"])
+        self.assertGreater(res1["shardsDelta"], 0)
+        expected_shards = 10 + res1["shardsDelta"]
+        self.assertEqual(res1["save"]["state"]["byteShards"], expected_shards)
+        self.assertIn("trial-01-01", res1["save"]["state"]["solvedTrials"])
+        self.assertIn("trial-01-01", res1["save"]["state"]["completedTrials"])
+        self.assertNotIn("trial-01-01", res1["save"]["state"].get("trialDrafts", {}))
+        self.assertEqual(res1["save"]["stats"]["solvedCount"], 1)
+
+        # 2. Idempotency: marking already-solved trial complete again awards 0 shards
+        status, _, raw = self._request(
+            "POST",
+            f"/api/builder/saves/{save_id}/override-trial",
+            {"trialId": "trial-01-01", "solved": True, "awardShards": True},
+        )
+        self.assertEqual(status, 200)
+        res2 = json.loads(raw)
+        self.assertEqual(res2["shardsDelta"], 0)
+        self.assertEqual(res2["save"]["state"]["byteShards"], expected_shards)
+        self.assertEqual(res2["save"]["state"]["solvedTrials"].count("trial-01-01"), 1)
+
+        # 3. Reset trial-01-01 to unsolved
+        status, _, raw = self._request(
+            "POST",
+            f"/api/builder/saves/{save_id}/override-trial",
+            {"trialId": "trial-01-01", "solved": False},
+        )
+        self.assertEqual(status, 200)
+        res3 = json.loads(raw)
+        self.assertEqual(res3["shardsDelta"], 0)
+        self.assertNotIn("trial-01-01", res3["save"]["state"]["solvedTrials"])
+        self.assertNotIn("trial-01-01", res3["save"]["state"]["completedTrials"])
+        self.assertEqual(res3["save"]["stats"]["solvedCount"], 0)
+
+        # 4. Verify parent_override events logged in activity_events
+        status, _, raw = self._request("GET", "/api/builder/activity?since=0&limit=50")
+        self.assertEqual(status, 200)
+        override_events = [
+            e for e in json.loads(raw)["events"] if e["eventType"] == "parent_override"
+        ]
+        self.assertEqual(len(override_events), 3)
+        self.assertIn("complete", override_events[0]["summary"])
+        self.assertIn("reset", override_events[2]["summary"].lower())
+
 
 if __name__ == "__main__":
     unittest.main()
