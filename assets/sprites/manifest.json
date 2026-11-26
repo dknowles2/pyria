@@ -1,0 +1,262 @@
+{
+  "version": "1.0.0",
+  "catalogContract": "../../content/catalog.json",
+  "directions": [
+    "down",
+    "up",
+    "left",
+    "right"
+  ],
+  "sheetLayout": {
+    "rows": "directions (0=down, 1=up, 2=left, 3=right)",
+    "columns": "animation frames (0..frameCount-1)"
+  },
+  "eras": {
+    "era-01-8bit": {
+      "key": "8bit",
+      "name": "8-Bit Era (NES)",
+      "heroFrameSize": {
+        "width": 16,
+        "height": 16
+      },
+      "heroFramesPerDirection": 2,
+      "heroSheetSize": {
+        "width": 32,
+        "height": 64
+      },
+      "pipFrameSize": {
+        "width": 16,
+        "height": 16
+      },
+      "pipFramesPerDirection": 2,
+      "pipSheetSize": {
+        "width": 32,
+        "height": 64
+      },
+      "recommendedFps": 5
+    },
+    "era-02-16bit": {
+      "key": "16bit",
+      "name": "16-Bit Era (SNES)",
+      "heroFrameSize": {
+        "width": 32,
+        "height": 32
+      },
+      "heroFramesPerDirection": 4,
+      "heroSheetSize": {
+        "width": 128,
+        "height": 128
+      },
+      "pipFrameSize": {
+        "width": 16,
+        "height": 16
+      },
+      "pipFramesPerDirection": 4,
+      "pipSheetSize": {
+        "width": 64,
+        "height": 64
+      },
+      "recommendedFps": 8
+    }
+  },
+  "layerOrder": {
+    "default": [
+      "shadow",
+      "back_behind",
+      "skin",
+      "footwear",
+      "torso",
+      "hair",
+      "headgear",
+      "back_front",
+      "offhand",
+      "aura"
+    ],
+    "up": [
+      "shadow",
+      "offhand",
+      "skin",
+      "footwear",
+      "torso",
+      "hair",
+      "headgear",
+      "back_behind",
+      "back_front",
+      "aura"
+    ]
+  },
+  "fullCoverageHeadgear": [
+    "hat_dragon_helm"
+  ],
+  "layers": {
+    "shadow": {
+      "default": {
+        "8bit": "8bit/shadow.png",
+        "16bit": "16bit/shadow.png"
+      }
+    },
+    "skin": {
+      "ivory": {
+        "8bit": "8bit/skin_ivory.png",
+        "16bit": "16bit/skin_ivory.png"
+      },
+      "peach": {
+        "8bit": "8bit/skin_peach.png",
+        "16bit": "16bit/skin_peach.png"
+      },
+      "olive": {
+        "8bit": "8bit/skin_olive.png",
+        "16bit": "16bit/skin_olive.png"
+      },
+      "warm_tan": {
+        "8bit": "8bit/skin_warm_tan.png",
+        "16bit": "16bit/skin_warm_tan.png"
+      },
+      "bronze": {
+        "8bit": "8bit/skin_bronze.png",
+        "16bit": "16bit/skin_bronze.png"
+      },
+      "deep_brown": {
+        "8bit": "8bit/skin_deep_brown.png",
+        "16bit": "16bit/skin_deep_brown.png"
+      }
+    },
+    "hair": {
+      "spiky": {
+        "8bit": "8bit/hair_spiky.png",
+        "16bit": "16bit/hair_spiky.png",
+        "8bit_tucked": "8bit/hair_spiky_tucked.png",
+        "16bit_tucked": "16bit/hair_spiky_tucked.png"
+      },
+      "windswept": {
+        "8bit": "8bit/hair_windswept.png",
+        "16bit": "16bit/hair_windswept.png",
+        "8bit_tucked": "8bit/hair_windswept_tucked.png",
+        "16bit_tucked": "16bit/hair_windswept_tucked.png"
+      },
+      "curly": {
+        "8bit": "8bit/hair_curly.png",
+        "16bit": "16bit/hair_curly.png",
+        "8bit_tucked": "8bit/hair_curly_tucked.png",
+        "16bit_tucked": "16bit/hair_curly_tucked.png"
+      },
+      "braided": {
+        "8bit": "8bit/hair_braided.png",
+        "16bit": "16bit/hair_braided.png",
+        "8bit_tucked": "8bit/hair_braided_tucked.png",
+        "16bit_tucked": "16bit/hair_braided_tucked.png"
+      },
+      "ponytail": {
+        "8bit": "8bit/hair_ponytail.png",
+        "16bit": "16bit/hair_ponytail.png",
+        "8bit_tucked": "8bit/hair_ponytail_tucked.png",
+        "16bit_tucked": "16bit/hair_ponytail_tucked.png"
+      },
+      "cropped": {
+        "8bit": "8bit/hair_cropped.png",
+        "16bit": "16bit/hair_cropped.png",
+        "8bit_tucked": "8bit/hair_cropped_tucked.png",
+        "16bit_tucked": "16bit/hair_cropped_tucked.png"
+      }
+    },
+    "torso": {
+      "tunic_emerald": {
+        "value": "emerald",
+        "8bit": "8bit/tunic_emerald.png",
+        "16bit": "16bit/tunic_emerald.png"
+      },
+      "tunic_crimson": {
+        "value": "crimson",
+        "8bit": "8bit/tunic_crimson.png",
+        "16bit": "16bit/tunic_crimson.png"
+      },
+      "tunic_navy": {
+        "value": "navy",
+        "8bit": "8bit/tunic_navy.png",
+        "16bit": "16bit/tunic_navy.png"
+      },
+      "tunic_amber": {
+        "value": "amber",
+        "8bit": "8bit/tunic_amber.png",
+        "16bit": "16bit/tunic_amber.png"
+      },
+      "tunic_violet": {
+        "value": "violet",
+        "8bit": "8bit/tunic_violet.png",
+        "16bit": "16bit/tunic_violet.png"
+      },
+      "tunic_slate": {
+        "value": "slate",
+        "8bit": "8bit/tunic_slate.png",
+        "16bit": "16bit/tunic_slate.png"
+      }
+    },
+    "footwear": {
+      "boots_default": {
+        "8bit": "8bit/boots_default.png",
+        "16bit": "16bit/boots_default.png"
+      },
+      "boots_swift": {
+        "8bit": "8bit/boots_swift.png",
+        "16bit": "16bit/boots_swift.png"
+      }
+    },
+    "headgear": {
+      "hat_explorer": {
+        "tucksHair": false,
+        "8bit": "8bit/hat_explorer.png",
+        "16bit": "16bit/hat_explorer.png"
+      },
+      "hat_dragon_helm": {
+        "tucksHair": true,
+        "8bit": "8bit/hat_dragon_helm.png",
+        "16bit": "16bit/hat_dragon_helm.png"
+      },
+      "hat_wizard_cap": {
+        "tucksHair": false,
+        "8bit": "8bit/hat_wizard_cap.png",
+        "16bit": "16bit/hat_wizard_cap.png"
+      }
+    },
+    "back": {
+      "cloak_tide": {
+        "8bit_back": "8bit/cloak_tide_back.png",
+        "8bit_front": "8bit/cloak_tide_front.png",
+        "16bit_back": "16bit/cloak_tide_back.png",
+        "16bit_front": "16bit/cloak_tide_front.png"
+      }
+    },
+    "offhand": {
+      "shield_oak": {
+        "8bit": "8bit/shield_oak.png",
+        "16bit": "16bit/shield_oak.png"
+      },
+      "shield_coral": {
+        "8bit": "8bit/shield_coral.png",
+        "16bit": "16bit/shield_coral.png"
+      }
+    },
+    "aura": {
+      "aura_charisma_1": {
+        "8bit": "8bit/aura_charisma_1.png",
+        "16bit": "16bit/aura_charisma_1.png"
+      },
+      "aura_courage_1": {
+        "8bit": "8bit/aura_courage_1.png",
+        "16bit": "16bit/aura_courage_1.png"
+      }
+    },
+    "companion": {
+      "pip_base": {
+        "8bit": "8bit/pip_base.png",
+        "16bit": "16bit/pip_base.png"
+      }
+    },
+    "companion_neck": {
+      "pip_scarf_ember": {
+        "8bit": "8bit/pip_scarf_ember.png",
+        "16bit": "16bit/pip_scarf_ember.png"
+      }
+    }
+  }
+}

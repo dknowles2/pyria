@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyria — Modular Hero Sprite Previewer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --panel-alt: #131c31;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --gold: #facc15;
+      --green: #4ade80;
+      --danger: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+    header {
+      background: var(--panel-alt);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      letter-spacing: 0.02em;
+    }
+    header h1 span { color: var(--gold); }
+    .subtitle { color: var(--muted); font-size: 0.85rem; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.15fr) minmax(320px, 1fr);
+      gap: 16px;
+      padding: 16px 20px 28px;
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .btn-group {
+      display: inline-flex;
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    button {
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    button:hover { background: #26354d; }
+    button.active {
+      background: var(--accent);
+      color: #082f49;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .btn-group button {
+      border: none;
+      border-radius: 0;
+      border-right: 1px solid var(--border);
+    }
+    .btn-group button:last-child { border-right: none; }
+
+    .stages {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+    .stage-box {
+      background: radial-gradient(circle at 50% 60%, #1e293b 0%, #0b1220 100%);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 250px;
+      position: relative;
+    }
+    .stage-box.era-8 { border-top: 3px solid var(--green); }
+    .stage-box.era-16 { border-top: 3px solid var(--accent); }
+    .stage-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .stage-header strong { color: var(--text); }
+    .hero-name-plate {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+
+    .sprite-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 14px;
+      margin: auto 0;
+      padding: 8px 0;
+    }
+    .sprite-stack {
+      position: relative;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .sprite-layer {
+      position: absolute;
+      inset: 0;
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .status-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 0.75rem;
+    }
+    .pill {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 9px;
+      color: var(--muted);
+    }
+    .pill.hi {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .control-group {
+      margin-bottom: 10px;
+    }
+    .control-group label {
+      display: block;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      font-size: 0.78rem;
+      padding: 4px 9px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      border: 1px solid rgba(255,255,255,0.45);
+      display: inline-block;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 158px;
+      background: #090e1a;
+      color: #e2e8f0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.84rem;
+      resize: vertical;
+    }
+    .console-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .console-log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      color: var(--green);
+      min-height: 1.2em;
+    }
+    .console-log.err { color: var(--danger); }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1><span>Pyria</span> Modular Hero Sprite Previewer</h1>
+      <div class="subtitle">Deterministic 8-Bit (16×16) &amp; 16-Bit (32×32) layered sprites synced with <code>content/catalog.json</code></div>
+    </div>
+    <div class="btn-group" id="eraModeGroup">
+      <button data-era-mode="both" class="active">Side-by-Side</button>
+      <button data-era-mode="8bit">8-Bit (16×16)</button>
+      <button data-era-mode="16bit">16-Bit (32×32)</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Left Column: Live Sprite Stage + Python Console -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <section class="card">
+        <div class="toolbar">
+          <div class="btn-group" id="dirGroup">
+            <button data-dir="down" class="active">Down</button>
+            <button data-dir="up">Up</button>
+            <button data-dir="left">Left</button>
+            <button data-dir="right">Right</button>
+          </div>
+          <button id="toggleAnimBtn" class="active">Walk: ON</button>
+          <div class="btn-group" id="scaleGroup">
+            <button data-scale="4">4×</button>
+            <button data-scale="6" class="active">6×</button>
+            <button data-scale="8">8×</button>
+          </div>
+        </div>
+
+        <div class="stages" id="stages">
+          <div class="stage-box era-8" id="stage8">
+            <div class="stage-header"><strong>8-Bit Era (NES)</strong><span>16×16 • 2 frames</span></div>
+            <div class="hero-name-plate" id="namePlate8">Rowan</div>
+            <div class="sprite-row">
+              <div class="sprite-stack" id="hero8"></div>
+              <div class="sprite-stack" id="pip8"></div>
+            </div>
+          </div>
+
+          <div class="stage-box era-16" id="stage16">
+            <div class="stage-header"><strong>16-Bit Era (SNES)</strong><span>32×32 • 4 frames</span></div>
+            <div class="hero-name-plate" id="namePlate16">Rowan</div>
+            <div class="sprite-row">
+              <div class="sprite-stack" id="hero16"></div>
+              <div class="sprite-stack" id="pip16"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status-pills" id="statusPills"></div>
+      </section>
+
+      <section class="card">
+        <h2>Python Customization Console</h2>
+        <div class="presets">
+          <button data-preset="starter">Preset: Starter Explorer</button>
+          <button data-preset="knight">Preset: Emberwing Knight</button>
+          <button data-preset="wizard">Preset: Star-Loop Wizard</button>
+          <button data-preset="tide">Preset: Tide-Weaver Hero</button>
+        </div>
+        <textarea id="codeInput" spellcheck="false"></textarea>
+        <div class="console-bar">
+          <div class="console-log" id="consoleLog">Ready — type Python calls or click controls.</div>
+          <button id="runCodeBtn" class="active">Run Python</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Column: Modular Layer Controls -->
+    <section class="card">
+      <h2>Modular Hero &amp; Pip Layers</h2>
+      <div id="controlsRoot"></div>
+    </section>
+  </main>
+
+  <script>
+    const DIRECTIONS = ["down", "up", "left", "right"];
+    const FULL_COVERAGE_HATS = new Set(["hat_dragon_helm"]);
+
+    const LAYER_ORDER = {
+      default: ["shadow", "back_behind", "skin", "footwear", "torso", "hair", "headgear", "back_front", "offhand", "aura"],
+      up:      ["shadow", "offhand", "skin", "footwear", "torso", "hair", "headgear", "back_behind", "back_front", "aura"]
+    };
+
+    const OPTIONS = [
+      {
+        key: "skin", label: "Skin Tone — preview_skin()",
+        items: [
+          { value: "ivory", label: "ivory", swatch: "#F6D6B8" },
+          { value: "peach", label: "peach", swatch: "#F1BE98" },
+          { value: "olive", label: "olive", swatch: "#CFA978" },
+          { value: "warm_tan", label: "warm_tan", swatch: "#C98F5D" },
+          { value: "bronze", label: "bronze", swatch: "#A5673F" },
+          { value: "deep_brown", label: "deep_brown", swatch: "#75442A" },
+        ]
+      },
+      {
+        key: "hair", label: "Hairstyle — preview_hair()",
+        items: [
+          { value: "spiky", label: "spiky" },
+          { value: "windswept", label: "windswept" },
+          { value: "curly", label: "curly" },
+          { value: "braided", label: "braided" },
+          { value: "ponytail", label: "ponytail" },
+          { value: "cropped", label: "cropped" },
+        ]
+      },
+      {
+        key: "tunic", label: "Tunic Color — preview_tunic() / set_tunic_color()",
+        items: [
+          { value: "emerald", label: "emerald", swatch: "#248F55" },
+          { value: "crimson", label: "crimson", swatch: "#C42E2E" },
+          { value: "navy", label: "navy", swatch: "#244B8A" },
+          { value: "amber", label: "amber", swatch: "#D97706" },
+          { value: "violet", label: "violet", swatch: "#7C3AED" },
+          { value: "slate", label: "slate", swatch: "#475569" },
+        ]
+      },
+      {
+        key: "headgear", label: "Headgear — wear_hat()",
+        items: [
+          { value: null, label: "None" },
+          { value: "hat_explorer", label: "explorer" },
+          { value: "hat_dragon_helm", label: "dragon_helm" },
+          { value: "hat_wizard_cap", label: "wizard_cap" },
+        ]
+      },
+      {
+        key: "back", label: "Cloak (Z-swaps on Up) — equip_cloak()",
+        items: [
+          { value: null, label: "None" },
+          { value: "cloak_tide", label: "tide", swatch: "#0D9488" },
+        ]
+      },
+      {
+        key: "footwear", label: "Footwear — equip_boots()",
+        items: [
+          { value: "boots_default", label: "default" },
+          { value: "boots_swift", label: "swift" },
+        ]
+      },
+      {
+        key: "offhand", label: "Offhand Shield — equip_shield()",
+        items: [
+          { value: null, label: "None" },
+          { value: "shield_oak", label: "oak" },
+          { value: "shield_coral", label: "coral" },
+        ]
+      },
+      {
+        key: "aura", label: "Stat Aura — add_charisma(1) / add_courage(1)",
+        items: [
+          { value: null, label: "None" },
+          { value: "aura_charisma_1", label: "charisma" },
+          { value: "aura_courage_1", label: "courage" },
+        ]
+      },
+      {
+        key: "pipScarf", label: "Pip Companion Flair — equip_pip_scarf()",
+        items: [
+          { value: null, label: "None" },
+          { value: "pip_scarf_ember", label: "ember", swatch: "#EF4444" },
+        ]
+      }
+    ];
+
+    const PRESETS = {
+      starter: {
+        name: "Rowan", skin: "warm_tan", hair: "spiky", tunic: "emerald",
+        headgear: "hat_explorer", back: null, footwear: "boots_default",
+        offhand: "shield_oak", aura: "aura_charisma_1", pipScarf: null
+      },
+      knight: {
+        name: "Ember", skin: "bronze", hair: "cropped", tunic: "crimson",
+        headgear: "hat_dragon_helm", back: null, footwear: "boots_swift",
+        offhand: "shield_oak", aura: "aura_courage_1", pipScarf: "pip_scarf_ember"
+      },
+      wizard: {
+        name: "Lyra", skin: "ivory", hair: "braided", tunic: "violet",
+        headgear: "hat_wizard_cap", back: null, footwear: "boots_swift",
+        offhand: null, aura: "aura_charisma_1", pipScarf: null
+      },
+      tide: {
+        name: "Kai", skin: "deep_brown", hair: "curly", tunic: "navy",
+        headgear: null, back: "cloak_tide", footwear: "boots_swift",
+        offhand: "shield_coral", aura: "aura_courage_1", pipScarf: "pip_scarf_ember"
+      }
+    };
+
+    const state = {
+      ...PRESETS.starter,
+      eraMode: "both",
+      direction: "down",
+      animate: true,
+      scale: 6,
+      tick: 0
+    };
+
+    function getLayerPaths(era) {
+      const order = state.direction === "up" ? LAYER_ORDER.up : LAYER_ORDER.default;
+      const tucked = FULL_COVERAGE_HATS.has(state.headgear);
+      const paths = [];
+      for (const slot of order) {
+        if (slot === "shadow") paths.push(`${era}/shadow.png`);
+        else if (slot === "back_behind" && state.back) paths.push(`${era}/${state.back}_back.png`);
+        else if (slot === "back_front" && state.back) paths.push(`${era}/${state.back}_front.png`);
+        else if (slot === "skin") paths.push(`${era}/skin_${state.skin}.png`);
+        else if (slot === "footwear") paths.push(`${era}/${state.footwear}.png`);
+        else if (slot === "torso") paths.push(`${era}/tunic_${state.tunic}.png`);
+        else if (slot === "hair") paths.push(`${era}/hair_${state.hair}${tucked ? "_tucked" : ""}.png`);
+        else if (slot === "headgear" && state.headgear) paths.push(`${era}/${state.headgear}.png`);
+        else if (slot === "offhand" && state.offhand) paths.push(`${era}/${state.offhand}.png`);
+        else if (slot === "aura" && state.aura) paths.push(`${era}/${state.aura}.png`);
+      }
+      return paths;
+    }
+
+    function renderStack(el, paths, frameW, frameH, framesPerDir, scale, frameIdx, dirIdx) {
+      const dispW = frameW * scale;
+      const dispH = frameH * scale;
+      el.style.width = `${dispW}px`;
+      el.style.height = `${dispH}px`;
+      el.innerHTML = "";
+      const bgW = frameW * framesPerDir * scale;
+      const bgH = frameH * DIRECTIONS.length * scale;
+      const posX = -(frameIdx * dispW);
+      const posY = -(dirIdx * dispH);
+      for (const p of paths) {
+        const div = document.createElement("div");
+        div.className = "sprite-layer";
+        div.style.backgroundImage = `url("${p}")`;
+        div.style.backgroundSize = `${bgW}px ${bgH}px`;
+        div.style.backgroundPosition = `${posX}px ${posY}px`;
+        el.appendChild(div);
+      }
+    }
+
+    function renderSprites() {
+      const dirIdx = DIRECTIONS.indexOf(state.direction);
+      const f8 = state.animate ? (state.tick % 2) : 0;
+      const f16 = state.animate ? (state.tick % 4) : 0;
+
+      document.getElementById("stage8").style.display = (state.eraMode === "16bit") ? "none" : "flex";
+      document.getElementById("stage16").style.display = (state.eraMode === "8bit") ? "none" : "flex";
+      document.getElementById("namePlate8").textContent = state.name;
+      document.getElementById("namePlate16").textContent = state.name;
+
+      // Keep 8-bit (16x16) visually comparable to 16-bit (32x32)
+      const scale8 = state.scale;
+      const scale16 = Math.max(3, Math.round(state.scale * 0.65));
+      const pipScale = Math.max(3, Math.round(state.scale * 0.65));
+
+      renderStack(document.getElementById("hero8"), getLayerPaths("8bit"), 16, 16, 2, scale8, f8, dirIdx);
+      renderStack(
+        document.getElementById("pip8"),
+        state.pipScarf ? ["8bit/pip_base.png", `8bit/${state.pipScarf}.png`] : ["8bit/pip_base.png"],
+        16, 16, 2, pipScale, f8, dirIdx
+      );
+
+      renderStack(document.getElementById("hero16"), getLayerPaths("16bit"), 32, 32, 4, scale16, f16, dirIdx);
+      renderStack(
+        document.getElementById("pip16"),
+        state.pipScarf ? ["16bit/pip_base.png", `16bit/${state.pipScarf}.png`] : ["16bit/pip_base.png"],
+        16, 16, 4, pipScale, f16, dirIdx
+      );
+
+      const pills = document.getElementById("statusPills");
+      const items = [
+        { text: `Direction: ${state.direction}`, hi: false },
+        { text: `8-Bit Frame: ${f8}/2`, hi: false },
+        { text: `16-Bit Frame: ${f16}/4`, hi: false }
+      ];
+      if (FULL_COVERAGE_HATS.has(state.headgear)) {
+        items.push({ text: "Hair auto-tucked under Dragon Helm", hi: true });
+      }
+      if (state.back && state.direction === "up") {
+        items.push({ text: "Cloak Z-swapped to front (facing up)", hi: true });
+      }
+      pills.innerHTML = items.map(i => `<span class="pill ${i.hi ? "hi" : ""}">${i.text}</span>`).join("");
+    }
+
+    function stateToPython() {
+      const lines = [
+        `set_name("${state.name}")`,
+        `preview_skin("${state.skin}")`,
+        `preview_hair("${state.hair}")`,
+        `preview_tunic("${state.tunic}")`
+      ];
+      if (state.headgear) lines.push(`wear_hat("${state.headgear.replace(/^hat_/, "")}")`);
+      if (state.back) lines.push(`equip_cloak("${state.back.replace(/^cloak_/, "")}")`);
+      if (state.footwear && state.footwear !== "boots_default") {
+        lines.push(`equip_boots("${state.footwear.replace(/^boots_/, "")}")`);
+      }
+      if (state.offhand) lines.push(`equip_shield("${state.offhand.replace(/^shield_/, "")}")`);
+      if (state.aura === "aura_charisma_1") lines.push(`add_charisma(1)`);
+      if (state.aura === "aura_courage_1") lines.push(`add_courage(1)`);
+      if (state.pipScarf) lines.push(`equip_pip_scarf("${state.pipScarf.replace(/^pip_scarf_/, "")}")`);
+      lines.push(`confirm_hero()`);
+      return lines.join("\n");
+    }
+
+    function syncControlsUI() {
+      document.querySelectorAll("#controlsRoot button[data-key]").forEach(btn => {
+        const k = btn.dataset.key;
+        const v = btn.dataset.val === "__null__" ? null : btn.dataset.val;
+        btn.classList.toggle("active", state[k] === v);
+      });
+    }
+
+    function buildControls() {
+      const root = document.getElementById("controlsRoot");
+      root.innerHTML = "";
+      for (const group of OPTIONS) {
+        const wrap = document.createElement("div");
+        wrap.className = "control-group";
+        const lbl = document.createElement("label");
+        lbl.textContent = group.label;
+        wrap.appendChild(lbl);
+        const row = document.createElement("div");
+        row.className = "chip-row";
+        for (const item of group.items) {
+          const btn = document.createElement("button");
+          btn.className = "chip";
+          btn.dataset.key = group.key;
+          btn.dataset.val = item.value === null ? "__null__" : item.value;
+          if (item.swatch) {
+            const sw = document.createElement("span");
+            sw.className = "swatch";
+            sw.style.background = item.swatch;
+            btn.appendChild(sw);
+          }
+          btn.appendChild(document.createTextNode(item.label));
+          btn.addEventListener("click", () => {
+            state[group.key] = item.value;
+            syncControlsUI();
+            document.getElementById("codeInput").value = stateToPython();
+            renderSprites();
+          });
+          row.appendChild(btn);
+        }
+        wrap.appendChild(row);
+        root.appendChild(wrap);
+      }
+      syncControlsUI();
+    }
+
+    function runPythonCode() {
+      const log = document.getElementById("consoleLog");
+      const src = document.getElementById("codeInput").value;
+      const lines = src.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith("#"));
+      const validSkin = new Set(["ivory", "peach", "olive", "warm_tan", "bronze", "deep_brown"]);
+      const validHair = new Set(["spiky", "windswept", "curly", "braided", "ponytail", "cropped"]);
+      const validTunic = new Set(["emerald", "crimson", "navy", "amber", "violet", "slate"]);
+      const hatMap = { explorer: "hat_explorer", dragon_helm: "hat_dragon_helm", wizard_cap: "hat_wizard_cap", none: null };
+      const cloakMap = { tide: "cloak_tide", none: null };
+      const bootsMap = { default: "boots_default", swift: "boots_swift" };
+      const shieldMap = { oak: "shield_oak", coral: "shield_coral", none: null };
+      const scarfMap = { ember: "pip_scarf_ember", none: null };
+
+      // Reset optional gear before replaying script so removed calls take effect
+      const next = {
+        ...state,
+        headgear: null, back: null, footwear: "boots_default",
+        offhand: null, aura: null, pipScarf: null
+      };
+      let executed = 0;
+
+      for (const line of lines) {
+        const m = line.match(/^([a-z_]+)\((.*)\)$/);
+        if (!m) {
+          log.className = "console-log err";
+          log.textContent = `Syntax hint: couldn't parse "${line}"`;
+          return;
+        }
+        const fn = m[1];
+        const rawArg = m[2].trim();
+        const strMatch = rawArg.match(/^["']([^"']*)["']$/);
+        const arg = strMatch ? strMatch[1] : rawArg;
+
+        if (fn === "set_name" && strMatch && arg.length >= 2 && arg.length <= 16) {
+          next.name = arg;
+        } else if (fn === "preview_skin" && validSkin.has(arg)) {
+          next.skin = arg;
+        } else if (fn === "preview_hair" && validHair.has(arg)) {
+          next.hair = arg;
+        } else if ((fn === "preview_tunic" || fn === "set_tunic_color") && validTunic.has(arg)) {
+          next.tunic = arg;
+        } else if (fn === "wear_hat" && arg in hatMap) {
+          next.headgear = hatMap[arg];
+        } else if (fn === "equip_cloak" && arg in cloakMap) {
+          next.back = cloakMap[arg];
+        } else if (fn === "equip_boots" && arg in bootsMap) {
+          next.footwear = bootsMap[arg];
+        } else if (fn === "equip_shield" && arg in shieldMap) {
+          next.offhand = shieldMap[arg];
+        } else if (fn === "add_charisma") {
+          next.aura = "aura_charisma_1";
+        } else if (fn === "add_courage") {
+          next.aura = "aura_courage_1";
+        } else if (fn === "equip_pip_scarf" && arg in scarfMap) {
+          next.pipScarf = scarfMap[arg];
+        } else if (fn === "confirm_hero") {
+          // valid lock-in call
+        } else {
+          log.className = "console-log err";
+          log.textContent = `Unknown call or value: ${line}`;
+          return;
+        }
+        executed++;
+      }
+
+      Object.assign(state, next);
+      syncControlsUI();
+      renderSprites();
+      log.className = "console-log";
+      log.textContent = `Executed ${executed} Python call(s) for ${state.name}!`;
+    }
+
+    // Bind top-level UI controls
+    document.getElementById("eraModeGroup").addEventListener("click", e => {
+      if (!e.target.dataset.eraMode) return;
+      state.eraMode = e.target.dataset.eraMode;
+      document.querySelectorAll("#eraModeGroup button").forEach(b => b.classList.toggle("active", b === e.target));
+      renderSprites();
+    });
+
+    document.getElementById("dirGroup").addEventListener("click", e => {
+      if (!e.target.dataset.dir) return;
+      state.direction = e.target.dataset.dir;
+      document.querySelectorAll("#dirGroup button").forEach(b => b.classList.toggle("active", b === e.target));
+      renderSprites();
+    });
+
+    document.getElementById("scaleGroup").addEventListener("click", e => {
+      if (!e.target.dataset.scale) return;
+      state.scale = Number(e.target.dataset.scale);
+      document.querySelectorAll("#scaleGroup button").forEach(b => b.classList.toggle("active", b === e.target));
+      renderSprites();
+    });
+
+    document.getElementById("toggleAnimBtn").addEventListener("click", e => {
+      state.animate = !state.animate;
+      e.target.classList.toggle("active", state.animate);
+      e.target.textContent = state.animate ? "Walk: ON" : "Walk: OFF";
+      renderSprites();
+    });
+
+    document.querySelectorAll("button[data-preset]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        Object.assign(state, PRESETS[btn.dataset.preset]);
+        syncControlsUI();
+        document.getElementById("codeInput").value = stateToPython();
+        renderSprites();
+        const log = document.getElementById("consoleLog");
+        log.className = "console-log";
+        log.textContent = `Loaded preset: ${state.name}`;
+      });
+    });
+
+    document.getElementById("runCodeBtn").addEventListener("click", runPythonCode);
+
+    // Keyboard arrow shortcuts for facing direction (when not typing in textarea)
+    window.addEventListener("keydown", e => {
+      if (document.activeElement && document.activeElement.tagName === "TEXTAREA") return;
+      const map = { ArrowDown: "down", ArrowUp: "up", ArrowLeft: "left", ArrowRight: "right" };
+      if (map[e.key]) {
+        state.direction = map[e.key];
+        document.querySelectorAll("#dirGroup button").forEach(b => b.classList.toggle("active", b.dataset.dir === state.direction));
+        renderSprites();
+      }
+    });
+
+    buildControls();
+    document.getElementById("codeInput").value = stateToPython();
+    renderSprites();
+    setInterval(() => {
+      if (state.animate) {
+        state.tick = (state.tick + 1) % 4;
+        renderSprites();
+      }
+    }, 220);
+  </script>
+</body>
+</html>
