@@ -1,4 +1,6 @@
 export type DifficultyMode = "explorer" | "standard" | "challenge";
+export type Direction = "down" | "up" | "left" | "right";
+export type SpriteEraKey = "8bit" | "16bit";
 
 export interface DifficultyOverride {
   mode: DifficultyMode;
@@ -192,4 +194,162 @@ export interface TrialTestResult {
   pipFriendlyHint: string;
   timedOut?: boolean;
   durationMs?: number;
+}
+
+/* Sprite & World Bundle Types */
+
+export interface SpriteEraSpec {
+  key: SpriteEraKey;
+  name: string;
+  heroFrameSize: { width: number; height: number };
+  heroFramesPerDirection: number;
+  heroSheetSize: { width: number; height: number };
+  pipFrameSize: { width: number; height: number };
+  pipFramesPerDirection: number;
+  pipSheetSize: { width: number; height: number };
+  recommendedFps: number;
+}
+
+export interface SpriteManifest {
+  version: string;
+  directions: Direction[];
+  eras: Record<string, SpriteEraSpec>;
+  layerOrder: {
+    default: string[];
+    up: string[];
+  };
+  fullCoverageHeadgear: string[];
+  layers: {
+    shadow: Record<string, { "8bit": string; "16bit": string }>;
+    skin: Record<string, { "8bit": string; "16bit": string }>;
+    hair: Record<
+      string,
+      {
+        "8bit": string;
+        "16bit": string;
+        "8bit_tucked": string;
+        "16bit_tucked": string;
+      }
+    >;
+    torso: Record<string, { value?: string; "8bit": string; "16bit": string }>;
+    footwear: Record<string, { "8bit": string; "16bit": string }>;
+    headgear: Record<
+      string,
+      { tucksHair?: boolean; "8bit": string; "16bit": string }
+    >;
+    back: Record<
+      string,
+      {
+        "8bit_back": string;
+        "8bit_front": string;
+        "16bit_back": string;
+        "16bit_front": string;
+      }
+    >;
+    offhand: Record<string, { "8bit": string; "16bit": string }>;
+    aura: Record<string, { "8bit": string; "16bit": string }>;
+    companion: Record<string, { "8bit": string; "16bit": string }>;
+    companion_neck: Record<string, { "8bit": string; "16bit": string }>;
+  };
+}
+
+export interface SpriteBundle {
+  manifest: SpriteManifest;
+  images: Record<string, string>;
+}
+
+export interface TileRect {
+  col: number;
+  row: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface TilesetEraSpec {
+  tilesetImage: string;
+  tilesetSize: { width: number; height: number };
+  npcsImage: string;
+  npcsSize: { width: number; height: number };
+  tiles: Record<string, TileRect>;
+  npcs: Record<string, TileRect>;
+}
+
+export interface TilesetManifest {
+  version: string;
+  tilesetId: string;
+  tileSize: number;
+  tileIds: string[];
+  npcKeys: string[];
+  eras: Record<SpriteEraKey, TilesetEraSpec>;
+}
+
+export interface DynamicTile {
+  x: number;
+  y: number;
+  layer: "ground" | "decor";
+  tileWhenLocked: string;
+  tileWhenUnlocked: string;
+  collisionWhenLocked: 0 | 1;
+  collisionWhenUnlocked: 0 | 1;
+}
+
+export interface MapRegion {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface MapEntity {
+  id: string;
+  type: "npc" | "trial" | "chest" | "vault" | "portal" | "workshop";
+  x: number;
+  y: number;
+  label: string;
+  refId: string | null;
+  spriteKey: string;
+  shardReward?: number;
+  requiredTrialId?: string | null;
+  dynamicTiles?: DynamicTile[];
+}
+
+export interface RealmMap {
+  id: string;
+  realmId: string;
+  name: string;
+  width: number;
+  height: number;
+  tileSize: number;
+  tilesetId: string;
+  spawn: { x: number; y: number };
+  layers: {
+    ground: string[][];
+    decor: (string | null)[][];
+    collision: (0 | 1)[][];
+  };
+  regions: MapRegion[];
+  entities: MapEntity[];
+}
+
+export interface WorldBundle {
+  tilesetManifest: TilesetManifest;
+  tilesetImages: Record<string, string>;
+  maps: RealmMap[];
+}
+
+export interface HeroLoadout {
+  name: string;
+  skin: string;
+  hair: string;
+  tunic: string; // e.g. "emerald" (maps to torso key "tunic_emerald")
+  hat: string | null; // e.g. "hat_explorer" | null
+  boots: string; // "boots_default" | "boots_swift"
+  cloak: string | null; // "cloak_tide" | null
+  shield: string | null; // "shield_oak" | "shield_coral" | null
+  aura: string | null; // "aura_charisma_1" | "aura_courage_1" | null
+  pipScarf: boolean;
 }
