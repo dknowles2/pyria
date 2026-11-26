@@ -35,6 +35,7 @@ html, body {
   padding: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   background: radial-gradient(circle at top, #182342 0%, var(--bg-deep) 65%);
   color: var(--text-main);
   font-family: var(--font-ui);
