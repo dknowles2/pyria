@@ -32,7 +32,7 @@ if [[ "${RESTART}" == "true" ]]; then
   echo "Installing & restarting user systemd service pyria.service on ${HOST}..."
   ssh "${HOST}" "cp ${REMOTE_DIR}/server/pyria.service \$HOME/.config/systemd/user/pyria.service && systemctl --user daemon-reload && systemctl --user enable pyria.service && systemctl --user restart pyria.service && sleep 1 && systemctl --user status --no-pager pyria.service"
   echo "Checking health endpoint on ${HOST}..."
-  ssh "${HOST}" "python3 -c \"import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=5).read().decode())\""
+  ssh "${HOST}" "python3 -c \"import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5).read().decode())\""
 else
   echo "Sync complete. Pass --restart to install/restart pyria.service on ${HOST}."
 fi
