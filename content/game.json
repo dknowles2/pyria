@@ -22,7 +22,7 @@
       "name": "Pip",
       "role": "Dragon Sidekick & Code Guide",
       "personality": "Playful, curious, encouraging tiny glitch-hatchling who translates scary Python errors into friendly clues and offers 3-tier hints.",
-      "catchphrase": "Chirp! One line at a time, Code-Tamer — we've got this!"
+      "catchphrase": "Chirp! One line at a time, Code-Tamer \u2014 we've got this!"
     },
     {
       "id": "elder-ada",
@@ -58,28 +58,28 @@
       "id": "print_output",
       "label": "Printing Output",
       "minEra": "era-01-8bit",
-      "maxBasicRealm": 2,
+      "maxBasicRealm": 4,
       "description": "Displaying messages to the console using print()."
     },
     {
       "id": "strings",
       "label": "Strings & Text",
       "minEra": "era-01-8bit",
-      "maxBasicRealm": 3,
+      "maxBasicRealm": 4,
       "description": "Creating, quoting, and combining text values."
     },
     {
       "id": "variables",
       "label": "Variables",
       "minEra": "era-01-8bit",
-      "maxBasicRealm": 4,
+      "maxBasicRealm": 5,
       "description": "Storing and updating named values with =."
     },
     {
       "id": "basic_math",
       "label": "Basic Math",
       "minEra": "era-01-8bit",
-      "maxBasicRealm": 4,
+      "maxBasicRealm": 5,
       "description": "Using +, -, *, //, and % with numbers and variables."
     },
     {
