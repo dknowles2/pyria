@@ -12,15 +12,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126p';
-import { audio } from './audio.js?v=20261126p';
-import { music, resolveRegionTheme } from './music.js?v=20261126p';
-import { pyRunner } from './pyRunner.js?v=20261126p';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126p';
-import { SpriteManager } from './sprites.js?v=20261126p';
-import { WorldEngine } from './world.js?v=20261126p';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126p';
-import { playCutscene } from './cutscene.js?v=20261126p';
+} from './api.js?v=20261126q';
+import { audio } from './audio.js?v=20261126q';
+import { music, resolveRegionTheme } from './music.js?v=20261126q';
+import { pyRunner } from './pyRunner.js?v=20261126q';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126q';
+import { SpriteManager } from './sprites.js?v=20261126q';
+import { WorldEngine } from './world.js?v=20261126q';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126q';
+import { playCutscene } from './cutscene.js?v=20261126q';
 
 const state = {
   gameConfig: null,

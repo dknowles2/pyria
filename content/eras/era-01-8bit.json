@@ -482,9 +482,58 @@
       "trials": [
         {
           "id": "trial-03-01",
-          "title": "Your First if Check (Lava Heat Alarm)",
-          "storyPrompt": "Welcome to Cinder Cavern! An `if` statement lets Python make a decision: if a test is True, Python runs the indented code underneath! Remember two rules: put a colon `:` at the end of the `if` line, and indent the code inside by 4 spaces.",
-          "objective": "Start with heat = 80 and alarm = \"OFF\". Write an if statement: if heat > 50:, set alarm = \"ON\" and shout(\"Shield up!\").",
+          "trialType": "multiple_choice",
+          "title": "Spot the Right if Spell!",
+          "storyPrompt": "Welcome to Cinder Cavern! An `if` statement lets Python make a decision\u2014when a check is True, Python runs the indented code underneath. Two golden rules: (1) put a colon `:` at the end of the `if` line, and (2) indent the line inside by 4 spaces. Tap the ONE valid Python `if` spell below!",
+          "objective": "Choose the valid Python `if` statement that has both a colon `:` and 4-space indentation.",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "conditionals_if"
+          ],
+          "shardReward": 35,
+          "unlockId": "tunic-crimson",
+          "codeSnippet": "heat = 80\n# Which if-statement below is valid Python?",
+          "choices": [
+            {
+              "id": "a",
+              "label": "Option A",
+              "code": "if heat > 50\n    shout(\"Shield up!\")",
+              "explanation": "Close! Look at the end of `if heat > 50`\u2014it's missing the colon `:`! Python always needs a `:` at the end of an `if` line."
+            },
+            {
+              "id": "b",
+              "label": "Option B",
+              "code": "if heat > 50:\n    shout(\"Shield up!\")",
+              "explanation": "Spot on! It has `heat > 50:` with the colon at the end AND 4 spaces of indentation before `shout(\"Shield up!\")`!"
+            },
+            {
+              "id": "c",
+              "label": "Option C",
+              "code": "if heat > 50:\nshout(\"Shield up!\")",
+              "explanation": "Almost! The colon `:` is there, but `shout(\"Shield up!\")` needs 4 spaces of indentation so Python knows it belongs INSIDE the `if`!"
+            },
+            {
+              "id": "d",
+              "label": "Option D",
+              "code": "if heat = 50:\n    shout(\"Shield up!\")",
+              "explanation": "Tricky! One `=` puts a value into a box\u2014it can't compare inside an `if`! Use `>`, `<`, or `==` to compare."
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip points at the two golden rules: 'Check for BOTH a colon `:` at the end of the `if` line AND 4 spaces before `shout(...)`!'",
+            "tier2_pattern": "Valid pattern:\nif heat > 50:\n    shout(\"Shield up!\")",
+            "tier3_walkthrough": "Tap Option B\u2014it has the colon `:` after `50` and 4 spaces of indentation on the next line!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Missing Colon!",
+          "storyPrompt": "Now it's your turn to fix a real `if` spell! Lord Null snuck into Cinder Cavern and stole ONE tiny symbol from the `if` line. Spot what's missing, add it back, and run the spell!",
+          "objective": "Fix the syntax bug in the `if heat > 50` line so `alarm` becomes \"ON\" and Python shouts \"Shield up!\".",
           "concepts": [
             "variables",
             "comparisons",
@@ -492,73 +541,49 @@
             "print_output"
           ],
           "shardReward": 35,
-          "unlockId": "tunic-crimson",
+          "unlockId": null,
+          "bugSummary": "Lord Null stole the colon (:) from the end of the `if` line! Put `:` back and run the spell.",
           "starterCode": {
-            "explorer": "heat = 80\nalarm = \"OFF\"\n# Notice the colon : at the end and 4 spaces of indent below!\nif heat > 50:\n    alarm = \"ON\"\n    # Now shout \"Shield up!\" (keep the 4-space indent!)\n    \n",
-            "standard": "heat = 80\nalarm = \"OFF\"\n# If heat > 50, set alarm = \"ON\" and shout(\"Shield up!\")\n",
-            "challenge": "heat = 80\nalarm = \"OFF\"\n# When heat > 50, switch alarm to \"ON\" and shout \"Shield up!\".\n"
+            "explorer": "heat = 80\nalarm = \"OFF\"\n# Look at the end of the next line \u2014 something is missing!\nif heat > 50\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
+            "standard": "heat = 80\nalarm = \"OFF\"\nif heat > 50\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
+            "challenge": "heat = 80\nalarm = \"OFF\"\nif heat > 50\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n"
           },
           "referenceSolution": "heat = 80\nalarm = \"OFF\"\nif heat > 50:\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
           "testCode": "assert alarm == \"ON\", f'Expected alarm == \"ON\", got {alarm!r}'\nassert OUTPUT.strip() == \"Shield up!\", f'Expected \"Shield up!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at the colon: 'Every if line ends with : and every line inside the if block is indented 4 spaces!'",
-            "tier2_pattern": "if heat > 50:\n    alarm = \"ON\"\n    shout(\"Shield up!\")",
-            "tier3_walkthrough": "Add this indented line inside the if block:\n    shout(\"Shield up!\")"
-          },
-          "difficultyOverride": null
-        },
-        {
-          "id": "trial-03-02",
-          "title": "True or False? (Your First Boolean Box)",
-          "storyPrompt": "In Python, a Boolean is a special yes-or-no value: either `True` or `False` (always capital T or F, and NO quotes!). A comparison like `lava_temp > 500` automatically turns into `True` or `False`!",
-          "objective": "Set lava_temp = 850 and create a boolean variable is_too_hot = lava_temp > 500, then say(is_too_hot).",
-          "concepts": [
-            "variables",
-            "booleans",
-            "comparisons",
-            "print_output"
-          ],
-          "shardReward": 35,
-          "unlockId": null,
-          "starterCode": {
-            "explorer": "lava_temp = 850\n# Compare lava_temp to 500 using > to get True or False:\nis_too_hot = lava_temp > \nsay(is_too_hot)\n",
-            "standard": "lava_temp = 850\n# Set is_too_hot using a comparison with 500, then say(is_too_hot)\n",
-            "challenge": "# Store 850 in lava_temp, set is_too_hot to whether lava_temp > 500, and say(is_too_hot).\n"
-          },
-          "referenceSolution": "lava_temp = 850\nis_too_hot = lava_temp > 500\nsay(is_too_hot)\n",
-          "testCode": "assert lava_temp == 850\nassert is_too_hot is True, f'Expected is_too_hot to be True, got {is_too_hot!r}'\nassert OUTPUT.strip() == 'True', f'Expected printed True, got {OUTPUT.strip()!r}'\n",
-          "hints": {
-            "tier1_nudge": "Pip fans himself: 'lava_temp > 500 asks Python a yes/no question and puts True into the is_too_hot box!'",
-            "tier2_pattern": "is_too_hot = lava_temp > 500\nsay(is_too_hot)",
-            "tier3_walkthrough": "Write:\nis_too_hot = lava_temp > 500\nsay(is_too_hot)"
+            "tier1_nudge": "Pip taps line 3: 'Every `if` line in Python MUST end with a colon `:`!'",
+            "tier2_pattern": "Change `if heat > 50` to `if heat > 50:`",
+            "tier3_walkthrough": "Add `:` right after `50` so line 3 reads:\nif heat > 50:"
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-03-03",
-          "title": "Two Paths: if and else",
-          "storyPrompt": "What if an `if` check is False? That's where `else:` comes in! Python runs the `if` block when the test is True, and the `else:` block as the backup plan when it is False. Check your water_level box to see if the lava bridge is COOL or HOT!",
-          "objective": "Start with water_level = 30. Write an if / else statement: if water_level >= 50, set bridge = \"COOL\"; else, set bridge = \"HOT\". Then say(bridge).",
+          "trialType": "fix_bug",
+          "title": "Fix = vs ==!",
+          "storyPrompt": "Another sabotage from Lord Null! Remember: ONE equals sign `=` puts a value into a variable box (`password = \"EMBER\"`), while TWO equals signs `==` asks 'Are these two values equal?' Fix Lord Null's `if` check!",
+          "objective": "Fix `=` to `==` in the `if` line so the gate opens and shouts \"Gate open!\".",
           "concepts": [
             "variables",
-            "booleans",
+            "strings",
             "comparisons",
             "conditionals_if",
             "print_output"
           ],
           "shardReward": 40,
           "unlockId": null,
+          "bugSummary": "Lord Null swapped `==` for `=` in the `if` line! Remember: `=` puts into a box, `==` compares.",
           "starterCode": {
-            "explorer": "water_level = 30\nif water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    # Set bridge to \"HOT\" here (4 spaces indent!)\n    \nsay(bridge)\n",
-            "standard": "water_level = 30\n# Use if water_level >= 50 / else to set bridge to \"COOL\" or \"HOT\", then say(bridge)\n",
-            "challenge": "water_level = 30\n# Set bridge to \"COOL\" if water_level >= 50, otherwise \"HOT\", then say(bridge).\n"
+            "explorer": "password = \"EMBER\"\ngate = \"LOCKED\"\n# Fix the single = on the next line to == so Python compares!\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
+            "standard": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
+            "challenge": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n"
           },
-          "referenceSolution": "water_level = 30\nif water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    bridge = \"HOT\"\nsay(bridge)\n",
-          "testCode": "assert bridge == \"HOT\", f'Expected bridge == \"HOT\" for water_level 30, got {bridge!r}'\nassert OUTPUT.strip() == \"HOT\", f'Expected printed \"HOT\", got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password == \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
+          "testCode": "assert gate == \"OPEN\", f'Expected gate == \"OPEN\", got {gate!r}'\nassert OUTPUT.strip() == \"Gate open!\", f'Expected \"Gate open!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip fans the steam: 'Since 30 is NOT >= 50, Python skips the if block and runs the else: block!'",
-            "tier2_pattern": "if water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    bridge = \"HOT\"\nsay(bridge)",
-            "tier3_walkthrough": "Inside the else: block, write:\n    bridge = \"HOT\""
+            "tier1_nudge": "Pip grins: 'Use TWO equals signs `==` whenever you ask if two values match inside an `if`!'",
+            "tier2_pattern": "Change `if password = \"EMBER\":` to `if password == \"EMBER\":`",
+            "tier3_walkthrough": "Add a second `=` so the line reads:\nif password == \"EMBER\":"
           },
           "difficultyOverride": null
         },
@@ -716,36 +741,54 @@
       "trials": [
         {
           "id": "trial-04-01",
-          "title": "Two-Path Frost Check (if / else Review)",
-          "storyPrompt": "Code-Tamer Secret: `say()` and `shout()` were training spells powered by real Python's `print()`! Starting in Frostbite Hollow, let's use real `print()` like pro Python coders! Brrr\u2014welcome to Frostbite Hollow! Before learning 3-way choices, let's warm up with a quick `if / else` check on the frozen trail. If `temp <= 0`, the path is `\"FROZEN\"`; otherwise it is `\"WATER\"`.",
-          "objective": "Given temp = -5, use if / else to set path = \"FROZEN\" if temp <= 0 else \"WATER\", then print(path).",
+          "trialType": "multiple_choice",
+          "title": "Predict the if / elif / else Path!",
+          "storyPrompt": "Code-Tamer Secret: `say()` and `shout()` were training spells powered by real Python's `print()`! Starting in Frostbite Hollow, let's use real `print()` like pro Python coders! When you have THREE choices, Python uses `if`, `elif` (short for 'else if'), and `else`\u2014and stops at the FIRST True branch. Read the code below: what will Python `print()`?",
+          "objective": "Trace the `if / elif / else` code with `temp = 20` and choose what Python will `print()`.",
           "concepts": [
-            "variables",
+            "conditionals_elif_else",
             "comparisons",
-            "conditionals_if",
             "print_output"
           ],
           "shardReward": 40,
           "unlockId": "tunic-navy",
-          "starterCode": {
-            "explorer": "temp = -5\nif temp <= 0:\n    path = \"FROZEN\"\nelse:\n    # Set path to \"WATER\":\n    \nprint(path)\n",
-            "standard": "temp = -5\n# If temp <= 0 set path = \"FROZEN\", else \"WATER\", then print(path)\n",
-            "challenge": "temp = -5\n# Classify path as \"FROZEN\" (temp <= 0) or \"WATER\" and print(path).\n"
-          },
-          "referenceSolution": "temp = -5\nif temp <= 0:\n    path = \"FROZEN\"\nelse:\n    path = \"WATER\"\nprint(path)\n",
-          "testCode": "assert path == \"FROZEN\", f'Expected \"FROZEN\", got {path!r}'\nassert OUTPUT.strip() == \"FROZEN\", f'Expected printed \"FROZEN\", got {OUTPUT.strip()!r}'\n",
+          "codeSnippet": "temp = 20\nif temp <= 0:\n    print(\"FROZEN\")\nelif temp <= 25:\n    print(\"CHILLY\")\nelse:\n    print(\"WARM\")",
+          "choices": [
+            {
+              "id": "a",
+              "label": "FROZEN",
+              "explanation": "Not quite! `temp` is `20`, and `20 <= 0` is False, so Python skips the first `if` branch."
+            },
+            {
+              "id": "b",
+              "label": "CHILLY",
+              "explanation": "Nailed it! `20 <= 0` is False, so Python checks `elif temp <= 25`\u2014that's True! Python prints `CHILLY` and skips `else`."
+            },
+            {
+              "id": "c",
+              "label": "WARM",
+              "explanation": "Almost! `else` only runs if BOTH `if` and `elif` are False\u2014but `20 <= 25` IS True!"
+            },
+            {
+              "id": "d",
+              "label": "FROZEN, CHILLY, and WARM",
+              "explanation": "Good guess, but Python only runs ONE branch in an `if / elif / else` chain\u2014the very first one that is True!"
+            }
+          ],
+          "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip winks: 'Remember, print() works just like say() and shout()! Put path = \"WATER\" inside else: and call print(path).'",
-            "tier2_pattern": "if temp <= 0:\n    path = \"FROZEN\"\nelse:\n    path = \"WATER\"\nprint(path)",
-            "tier3_walkthrough": "Inside else:, write:\n    path = \"WATER\""
+            "tier1_nudge": "Pip traces with a claw: 'Plug 20 in for temp: is 20 <= 0? No! Is 20 <= 25? Yes!'",
+            "tier2_pattern": "Python checks top-to-bottom and runs ONLY the first True branch (`elif temp <= 25:`).",
+            "tier3_walkthrough": "Tap Option B (`CHILLY`) because 20 is not <= 0, but 20 IS <= 25!"
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-04-02",
-          "title": "Three Paths! Meet elif",
-          "storyPrompt": "What if there are THREE choices instead of two? Python gives us `elif` (short for 'else if') for the middle check! Python checks `if` first, then `elif`, and finally `else` if neither matched.",
-          "objective": "Given temp = 5, use if / elif / else to set ice_state to \"frozen\" if temp <= 0, \"slush\" if temp <= 10, or \"melted\" otherwise. Then print(ice_state).",
+          "trialType": "fix_bug",
+          "title": "Fix the Frozen elif Gate!",
+          "storyPrompt": "Lord Null froze the `elif` gate by stealing a colon `:`! Just like `if` and `else`, `elif` ALWAYS needs a colon `:` at the end of its line. Put `:` back and run the spell using real `print()`!",
+          "objective": "Fix the missing colon `:` on the `elif` line so Python sets `ice_state = \"slush\"` and prints `slush`.",
           "concepts": [
             "conditionals_elif_else",
             "comparisons",
@@ -753,17 +796,18 @@
           ],
           "shardReward": 45,
           "unlockId": null,
+          "bugSummary": "Lord Null stole the colon (:) from the `elif` line! Add `:` after `elif temp <= 10` and run it.",
           "starterCode": {
-            "explorer": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    # Set ice_state to \"slush\" here:\n    \nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
-            "standard": "temp = 5\n# Use if / elif / else to set ice_state (\"frozen\" <= 0, \"slush\" <= 10, else \"melted\") and print it\n",
-            "challenge": "temp = 5\n# Classify temp into ice_state (\"frozen\", \"slush\", \"melted\") using if/elif/else and print it.\n"
+            "explorer": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\n# Add the missing colon : at the end of the elif line!\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+            "standard": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+            "challenge": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n"
           },
           "referenceSolution": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
           "testCode": "assert ice_state == \"slush\", f'Expected \"slush\" for temp 5, got {ice_state!r}'\nassert OUTPUT.strip() == \"slush\", f'Expected printed \"slush\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at temp = 5: '5 is NOT <= 0, so Python checks elif temp <= 10\u2014and that one is True!'",
-            "tier2_pattern": "if temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"",
-            "tier3_walkthrough": "Inside the elif block, write:\n    ice_state = \"slush\""
+            "tier1_nudge": "Pip shivers: 'Check the end of `elif temp <= 10`\u2014it needs a colon `:` just like `if` and `else`!'",
+            "tier2_pattern": "Change `elif temp <= 10` to `elif temp <= 10:`",
+            "tier3_walkthrough": "Add `:` at the end of line 4:\nelif temp <= 10:"
           },
           "difficultyOverride": null
         },
@@ -947,35 +991,55 @@
       "trials": [
         {
           "id": "trial-05-01",
-          "title": "Shout It Out: .upper()",
-          "storyPrompt": "Welcome to Echo Woods! Strings in Python have built-in mini-spells called **methods** that you attach with a dot `.`. Calling `whisper.upper()` turns every letter into ALL CAPS!",
-          "objective": "Given whisper = \"bramble\", create shout = whisper.upper() and print(shout).",
+          "trialType": "multiple_choice",
+          "title": "Predict .lower() & and!",
+          "storyPrompt": "Welcome to Echo Woods! Two new tools appear here: `.lower()` turns a string into lowercase letters, and `and` requires BOTH sides of an `if` check to be True. Read the spell below\u2014what will Python `print()`?",
+          "objective": "Trace `.lower()` and `and` in the snippet below and pick the exact output.",
           "concepts": [
             "string_methods",
-            "variables",
+            "boolean_logic",
+            "conditionals_if",
             "print_output"
           ],
           "shardReward": 45,
           "unlockId": "hat-wizard-cap",
-          "starterCode": {
-            "explorer": "whisper = \"bramble\"\n# Attach .upper() to whisper so every letter becomes CAPITAL:\nshout = whisper.\nprint(shout)\n",
-            "standard": "whisper = \"bramble\"\n# Convert whisper to uppercase using .upper() into shout, then print(shout)\n",
-            "challenge": "whisper = \"bramble\"\n# Uppercase whisper into shout with .upper() and print(shout).\n"
-          },
-          "referenceSolution": "whisper = \"bramble\"\nshout = whisper.upper()\nprint(shout)\n",
-          "testCode": "assert shout == \"BRAMBLE\", f'Expected \"BRAMBLE\", got {shout!r}'\nassert OUTPUT.strip() == \"BRAMBLE\", f'Expected printed \"BRAMBLE\", got {OUTPUT.strip()!r}'\n",
+          "codeSnippet": "word = \"ECHO\".lower()\nhas_key = True\nif word == \"echo\" and has_key:\n    print(\"OPEN\")\nelse:\n    print(\"LOCKED\")",
+          "choices": [
+            {
+              "id": "a",
+              "label": "OPEN",
+              "explanation": "Awesome! `\"ECHO\".lower()` becomes `\"echo\"`, so `word == \"echo\"` is True AND `has_key` is True\u2014both sides of `and` are True, so it prints `OPEN`!"
+            },
+            {
+              "id": "b",
+              "label": "LOCKED",
+              "explanation": "Not quite! Look at line 1: `\"ECHO\".lower()` turns `\"ECHO\"` into lowercase `\"echo\"`, so BOTH sides of `and` are True!"
+            },
+            {
+              "id": "c",
+              "label": "ECHO",
+              "explanation": "Look at the `print(...)` lines\u2014the spell only prints either `\"OPEN\"` or `\"LOCKED\"`!"
+            },
+            {
+              "id": "d",
+              "label": "Nothing prints",
+              "explanation": "Because there is an `else:`, one of the two branches ALWAYS runs!"
+            }
+          ],
+          "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip cups his paws: 'Don't forget the parentheses () at the end of .upper()!'",
-            "tier2_pattern": "shout = whisper.upper()\nprint(shout)",
-            "tier3_walkthrough": "Write:\nshout = whisper.upper()\nprint(shout)"
+            "tier1_nudge": "Pip whispers: 'First figure out what \"ECHO\".lower() turns into\u2014all lowercase letters!'",
+            "tier2_pattern": "word becomes \"echo\", so (\"echo\" == \"echo\") and True -> True!",
+            "tier3_walkthrough": "Tap Option A (`OPEN`) because both sides of `and` are True!"
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-05-02",
-          "title": "Trim & Whisper: .strip() and .lower()",
-          "storyPrompt": "Echo Trees add messy extra spaces around passwords! `.strip()` trims spaces off both ends, and `.lower()` turns every letter lowercase. You can chain them together: `raw.strip().lower()`!",
-          "objective": "Given raw = \"  ECHO  \", clean it into clean = raw.strip().lower() and print(clean).",
+          "trialType": "fix_bug",
+          "title": "Fix the Echo Woods Logic!",
+          "storyPrompt": "Lord Null sabotaged the Echo Tree cleaner by stealing the parentheses `()` off the end of `.lower`! Without `()`, Python doesn't actually RUN the method. Put `()` back so `clean` becomes `\"echo\"`!",
+          "objective": "Fix `raw.strip().lower` to `raw.strip().lower()` so Python cleans the string and prints `echo`.",
           "concepts": [
             "string_methods",
             "variables",
@@ -983,17 +1047,18 @@
           ],
           "shardReward": 45,
           "unlockId": null,
+          "bugSummary": "Lord Null stole the parentheses `()` from `.lower`! Add `()` at the end so Python actually runs the method.",
           "starterCode": {
-            "explorer": "raw = \"  ECHO  \"\n# Chain .strip() and .lower() together:\nclean = raw.strip().\nprint(clean)\n",
-            "standard": "raw = \"  ECHO  \"\n# Trim spaces and lowercase raw into clean using .strip().lower(), then print(clean)\n",
-            "challenge": "raw = \"  ECHO  \"\n# Normalize raw into clean with .strip().lower() and print(clean).\n"
+            "explorer": "raw = \"  ECHO  \"\n# Put () at the end of .lower so Python runs the method!\nclean = raw.strip().lower\nprint(clean)\n",
+            "standard": "raw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n",
+            "challenge": "raw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n"
           },
           "referenceSolution": "raw = \"  ECHO  \"\nclean = raw.strip().lower()\nprint(clean)\n",
           "testCode": "assert clean == \"echo\", f'Expected \"echo\", got {clean!r}'\nassert OUTPUT.strip() == \"echo\", f'Expected printed \"echo\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip whispers: '.strip() removes outer spaces and .lower() makes it lowercase!'",
-            "tier2_pattern": "clean = raw.strip().lower()\nprint(clean)",
-            "tier3_walkthrough": "Write:\nclean = raw.strip().lower()\nprint(clean)"
+            "tier1_nudge": "Pip taps the parentheses keys: 'Methods like `.strip()` and `.lower()` ALWAYS need `()` to run!'",
+            "tier2_pattern": "Change `raw.strip().lower` to `raw.strip().lower()`",
+            "tier3_walkthrough": "Add `()` at the end of line 2:\nclean = raw.strip().lower()"
           },
           "difficultyOverride": null
         },

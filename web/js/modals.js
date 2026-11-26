@@ -7,7 +7,7 @@ import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126p';
+} from './autocomplete.js?v=20261126q';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -317,14 +317,15 @@ export class ModalManager {
       });
       this.content.querySelector('#btn-trial-practice')?.addEventListener('click', () => {
         audio.playClick();
-        renderEditorView(true);
+        if (trial.trialType === 'multiple_choice') {
+          renderMultipleChoiceView(true);
+        } else {
+          renderEditorView(true);
+        }
       });
     };
 
-    const renderCelebrationView = ({ stdout, isPractice }) => {
-      const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
-      const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
-
+    const renderCelebrationView = ({ stdout, explanation, isPractice }) => {
       this.open(
         `
         <div class="modal-header">
@@ -344,10 +345,11 @@ export class ModalManager {
           <p class="dialogue-text">
             ${
               isPractice
-                ? 'Chirp! Your Python spell passed again! (Byte Shards were already claimed for this Trial.)'
+                ? 'Chirp! Spot-on answer again! (Byte Shards were already claimed for this Trial.)'
                 : `Chirp! Pip does a backflip! You earned <strong style="color: var(--accent-gold);">+${trial.shardReward} Byte Shards</strong> and saved your progress!`
             }
           </p>
+          ${explanation ? `<div class="objective-box" style="width:100%; text-align:left;"><strong>🐉 Pip explains:</strong> ${escapeHtml(explanation)}</div>` : ''}
           ${!isPractice && unlockNote ? `<div class="upgrade-callout" style="width:100%;">✨ ${escapeHtml(unlockNote)}</div>` : ''}
           ${!isPractice && unlockItem ? `<p class="muted-text" style="margin:0;">New blueprint ready in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</p>` : ''}
           ${stdout ? `<div class="console-stdout" style="width:100%; text-align:left;">Output:\n${escapeHtml(stdout)}</div>` : ''}
@@ -359,6 +361,143 @@ export class ModalManager {
         `,
         'modal-compact'
       );
+
+      this.content.querySelectorAll('[data-close]').forEach((btn) => {
+        btn.addEventListener('click', () => this.close());
+      });
+    };
+
+    const renderMultipleChoiceView = (isPractice) => {
+      const choices = Array.isArray(trial.choices) ? trial.choices : [];
+      const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+      this.open(
+        `
+        <div class="modal-header">
+          <div>
+            <h2>${isPractice ? '✓ ' : '🧠 '}${escapeHtml(trial.title)}</h2>
+            <div class="modal-badges">
+              <span class="pill pill-violet">🧠 Predict &amp; Choose</span>
+              <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
+              ${
+                isPractice
+                  ? '<span class="pill pill-green">✓ COMPLETED · Practice Mode (No Extra Shards)</span>'
+                  : `<span class="pill pill-gold">+${trial.shardReward} Byte Shards</span>`
+              }
+              ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn-sm btn-ghost" data-close>✕</button>
+        </div>
+
+        <p class="dialogue-text">${escapeHtml(trial.storyPrompt)}</p>
+
+        <div class="objective-box">
+          <strong>Question:</strong> ${escapeHtml(trial.objective)}
+          ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
+        </div>
+
+        ${trial.codeSnippet ? `<pre class="mc-code-snippet"><code>${escapeHtml(trial.codeSnippet)}</code></pre>` : ''}
+
+        <div id="mc-choices-grid" class="mc-choices-grid">
+          ${choices
+            .map(
+              (c, idx) => `
+              <button type="button" class="mc-choice-card" data-choice-id="${escapeHtml(c.id)}">
+                <span class="mc-letter">${letters[idx] || idx + 1}</span>
+                <div class="mc-choice-body">
+                  <div class="mc-choice-label">${escapeHtml(c.label)}</div>
+                  ${c.code ? `<pre class="mc-choice-code">${escapeHtml(c.code)}</pre>` : ''}
+                </div>
+              </button>
+            `
+            )
+            .join('')}
+        </div>
+
+        <div class="editor-actions">
+          <button id="btn-trial-hint" class="btn btn-gold" ${maxHints === 0 ? 'disabled' : ''}>
+            💡 Ask Pip (Hint 1/${maxHints})
+          </button>
+        </div>
+
+        <div id="trial-hints-area" class="hidden"></div>
+
+        <div id="trial-output" class="pip-console">
+          <div class="pip-console-header">🐉 Pip says:</div>
+          <div class="pip-console-body">Read the Python spell carefully and tap the answer you predict!</div>
+        </div>
+        `,
+        'modal-wide'
+      );
+
+      const hintBtn = this.content.querySelector('#btn-trial-hint');
+      const hintsArea = this.content.querySelector('#trial-hints-area');
+      const outputEl = this.content.querySelector('#trial-output');
+
+      hintBtn?.addEventListener('click', () => {
+        if (hintsUsed >= maxHints) return;
+        audio.playClick();
+        hintsUsed += 1;
+        hintsArea.classList.remove('hidden');
+
+        const shown = hintTiers.slice(0, hintsUsed).map((t) => {
+          const text = trial.hints?.[t.key] || '';
+          return `
+            <div class="hint-box" style="margin-bottom:8px;">
+              <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
+              <div>${escapeHtml(text)}</div>
+            </div>
+          `;
+        });
+        hintsArea.innerHTML = shown.join('');
+
+        if (hintsUsed >= maxHints) {
+          hintBtn.textContent = `💡 All ${maxHints} Hints Shown`;
+          hintBtn.disabled = true;
+        } else {
+          hintBtn.textContent = `💡 Ask Pip (Hint ${hintsUsed + 1}/${maxHints})`;
+        }
+      });
+
+      this.content.querySelectorAll('.mc-choice-card').forEach((card) => {
+        card.addEventListener('click', async () => {
+          const choiceId = card.dataset.choiceId;
+          const choice = choices.find((c) => c.id === choiceId);
+          if (!choice) return;
+          const isCorrect = choice.id === trial.correctChoiceId;
+
+          if (onAttempt) {
+            onAttempt({
+              trialId: trial.id,
+              passed: isCorrect,
+              hintsUsed,
+              code: `choice:${choice.id} (${choice.label})`,
+            });
+          }
+
+          if (isCorrect) {
+            card.classList.add('correct');
+            audio.playSuccess();
+            if (onSolved) {
+              await onSolved(trial);
+            }
+            renderCelebrationView({
+              stdout: null,
+              explanation: choice.explanation || '',
+              isPractice,
+            });
+          } else {
+            card.classList.add('wrong');
+            audio.playError();
+            outputEl.className = 'pip-console error';
+            outputEl.innerHTML = `
+              <div class="pip-console-header">🐉 Not quite — try another choice!</div>
+              <div class="pip-console-body">${escapeHtml(choice.explanation || 'Look closely at each line of the Python spell and try again!')}</div>
+            `;
+          }
+        });
+      });
 
       this.content.querySelectorAll('[data-close]').forEach((btn) => {
         btn.addEventListener('click', () => this.close());
@@ -377,13 +516,15 @@ export class ModalManager {
 
       const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
       const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
+      const isFixBug = trial.trialType === 'fix_bug';
 
       this.open(
         `
         <div class="modal-header">
           <div>
-            <h2>${isPractice ? '✓ ' : '★ '}${escapeHtml(trial.title)}</h2>
+            <h2>${isPractice ? '✓ ' : isFixBug ? '🐛 ' : '★ '}${escapeHtml(trial.title)}</h2>
             <div class="modal-badges">
+              ${isFixBug ? '<span class="pill pill-rose">🐛 Fix the Bug!</span>' : ''}
               <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
               <span class="pill pill-violet" id="trial-diff-badge">Mode: ${escapeHtml(currentMode)}</span>
               ${
@@ -404,6 +545,17 @@ export class ModalManager {
           <strong>Objective:</strong> ${escapeHtml(trial.objective)}
           ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
         </div>
+
+        ${
+          isFixBug
+            ? `
+              <div class="bug-banner">
+                <div class="bug-banner-title">🐛 Fix the Bug!</div>
+                <div>${escapeHtml(trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!')}</div>
+              </div>
+            `
+            : ''
+        }
 
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <span class="muted-text">Write real Python 3 below (Tab indents 4 spaces, Ctrl/Cmd+Enter runs):</span>
@@ -561,6 +713,8 @@ export class ModalManager {
 
     if (alreadySolved) {
       renderCompletedSummary();
+    } else if (trial.trialType === 'multiple_choice') {
+      renderMultipleChoiceView(false);
     } else {
       renderEditorView(false);
     }
