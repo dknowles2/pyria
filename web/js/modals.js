@@ -12,6 +12,51 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+const PYTHON_QUICK_KEYS = [
+  { label: 'Tab (4 sp)', insert: '    ', cursorOffset: 4 },
+  { label: '( )', insert: '()', cursorOffset: 1 },
+  { label: '" "', insert: '""', cursorOffset: 1 },
+  { label: ':', insert: ':', cursorOffset: 1 },
+  { label: '=', insert: ' = ', cursorOffset: 3 },
+  { label: '==', insert: ' == ', cursorOffset: 4 },
+  { label: '_', insert: '_', cursorOffset: 1 },
+  { label: '+', insert: ' + ', cursorOffset: 3 },
+  { label: '-', insert: ' - ', cursorOffset: 3 },
+  { label: '*', insert: ' * ', cursorOffset: 3 },
+  { label: 'print()', insert: 'print()', cursorOffset: 6 },
+];
+
+function renderQuickKeysHtml(id) {
+  return `
+    <div id="${id}" class="py-quick-keys" aria-label="Python Quick Keys">
+      ${PYTHON_QUICK_KEYS.map(
+        (k, idx) => `<button type="button" class="py-qk-btn" data-qk-idx="${idx}">${escapeHtml(k.label)}</button>`
+      ).join('')}
+    </div>
+  `;
+}
+
+function wireQuickKeysBar(barEl, textarea) {
+  if (!barEl || !textarea) return;
+  barEl.querySelectorAll('.py-qk-btn').forEach((btn) => {
+    const insertKey = (e) => {
+      e.preventDefault();
+      const spec = PYTHON_QUICK_KEYS[Number(btn.dataset.qkIdx)];
+      if (!spec) return;
+      textarea.focus();
+      const start = textarea.selectionStart ?? textarea.value.length;
+      const end = textarea.selectionEnd ?? start;
+      const val = textarea.value;
+      textarea.value = val.slice(0, start) + spec.insert + val.slice(end);
+      const nextPos = start + spec.cursorOffset;
+      textarea.selectionStart = textarea.selectionEnd = nextPos;
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    btn.addEventListener('pointerdown', insertKey);
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+  });
+}
+
 export function attachCodeEditorKeys(textarea, onRun) {
   textarea.addEventListener('keydown', (e) => {
     if (e.key === 'Tab') {
@@ -175,7 +220,21 @@ export class ModalManager {
   }
 
   // ==================== PYTHON TRIAL MODAL ====================
-  openTrialModal({ trial, realm, gameConfig, catalog, save, alreadySolved, unlockNote, onSolved, onAttempt }) {
+  openTrialModal({
+    trial,
+    realm,
+    gameConfig,
+    catalog,
+    save,
+    alreadySolved,
+    unlockNote,
+    savedDraft,
+    onDraftChange,
+    onDraftFlush,
+    onDraftClear,
+    onSolved,
+    onAttempt,
+  }) {
     audio.playClick();
     music.setDucked(true);
     const diff = resolveDifficulty(gameConfig, realm, trial);
@@ -282,6 +341,15 @@ export class ModalManager {
     };
 
     const renderEditorView = (isPractice) => {
+      const starterText = trial.starterCode[currentMode] || trial.starterCode.standard || '';
+      const hasRestoredDraft =
+        !isPractice &&
+        typeof savedDraft === 'string' &&
+        savedDraft.trim().length > 0 &&
+        savedDraft !== starterText;
+      const initialCode = hasRestoredDraft ? savedDraft : starterText;
+      let skipFlushOnClose = false;
+
       this.open(
         `
         <div class="modal-header">
@@ -295,6 +363,7 @@ export class ModalManager {
                   ? '<span class="pill pill-green">✓ COMPLETED · Practice Mode (No Extra Shards)</span>'
                   : `<span class="pill pill-gold">+${trial.shardReward} Byte Shards</span>`
               }
+              <span id="trial-draft-badge" class="pill pill-gold ${hasRestoredDraft ? '' : 'hidden'}">💾 Restored your saved draft</span>
               ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
             </div>
           </div>
@@ -318,7 +387,9 @@ export class ModalManager {
           </div>
         </div>
 
-        <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off">${escapeHtml(trial.starterCode[currentMode] || trial.starterCode.standard || '')}</textarea>
+        ${renderQuickKeysHtml('trial-quick-keys')}
+
+        <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text">${escapeHtml(initialCode)}</textarea>
 
         <div class="editor-actions">
           <button id="btn-trial-run" class="btn btn-primary">▶ Run Python Spell</button>
@@ -345,6 +416,20 @@ export class ModalManager {
       const hintsArea = this.content.querySelector('#trial-hints-area');
       const outputEl = this.content.querySelector('#trial-output');
       const diffBadge = this.content.querySelector('#trial-diff-badge');
+      const draftBadge = this.content.querySelector('#trial-draft-badge');
+
+      wireQuickKeysBar(this.content.querySelector('#trial-quick-keys'), codeEl);
+
+      if (!isPractice) {
+        codeEl.addEventListener('input', () => {
+          if (onDraftChange) onDraftChange(codeEl.value);
+        });
+        this.addCleanup(() => {
+          if (!skipFlushOnClose && onDraftFlush) {
+            onDraftFlush(codeEl.value);
+          }
+        });
+      }
 
       const updateModeButtons = () => {
         this.content.querySelectorAll('[data-mode]').forEach((b) => {
@@ -359,6 +444,8 @@ export class ModalManager {
         btn.addEventListener('click', () => {
           currentMode = btn.dataset.mode;
           codeEl.value = trial.starterCode[currentMode] || '';
+          draftBadge?.classList.add('hidden');
+          if (!isPractice && onDraftClear) onDraftClear();
           updateModeButtons();
           audio.playClick();
         });
@@ -366,6 +453,8 @@ export class ModalManager {
 
       resetBtn.addEventListener('click', () => {
         codeEl.value = trial.starterCode[currentMode] || '';
+        draftBadge?.classList.add('hidden');
+        if (!isPractice && onDraftClear) onDraftClear();
         audio.playClick();
       });
 
@@ -410,6 +499,10 @@ export class ModalManager {
 
         if (result.passed) {
           audio.playSuccess();
+          skipFlushOnClose = true;
+          if (!isPractice && onDraftClear) {
+            onDraftClear();
+          }
           // Immediately persist solved state so closing/Escape can never lose progress!
           if (onSolved) {
             await onSolved(trial);
@@ -506,7 +599,8 @@ export class ModalManager {
         </div>
 
         <div style="display:flex; flex-direction:column; gap:12px;">
-          <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off"># Click any item on the left or type Python calls here!
+          ${renderQuickKeysHtml('ws-quick-keys')}
+          <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text"># Click any item on the left or type Python calls here!
 # Example:
 # wear_hat("explorer")
 </textarea>
@@ -532,6 +626,8 @@ export class ModalManager {
     const outputEl = this.content.querySelector('#ws-output');
     const shardsPill = this.content.querySelector('#ws-shards-pill');
     const statsPill = this.content.querySelector('#ws-stats-pill');
+
+    wireQuickKeysBar(this.content.querySelector('#ws-quick-keys'), codeEl);
 
     const animInterval = setInterval(() => {
       previewFrame += 1;

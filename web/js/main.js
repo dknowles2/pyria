@@ -144,6 +144,83 @@ function getTrial(trialId) {
   return { trial: null, realm: null };
 }
 
+// ==================== TRIAL DRAFT AUTO-SAVE ====================
+let draftPersistTimer = null;
+
+function readLocalDrafts(saveId) {
+  if (!saveId) return {};
+  try {
+    const raw = localStorage.getItem(`pyria_drafts_${saveId}`);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeLocalDrafts(saveId, drafts) {
+  if (!saveId) return;
+  try {
+    localStorage.setItem(`pyria_drafts_${saveId}`, JSON.stringify(drafts || {}));
+  } catch {
+    // ignore quota errors
+  }
+}
+
+function getTrialDraft(save, trialId) {
+  if (!save || !trialId) return null;
+  const local = readLocalDrafts(save.id);
+  if (typeof local[trialId] === 'string' && local[trialId].trim().length > 0) {
+    return local[trialId];
+  }
+  const serverDraft = save.trialDrafts?.[trialId];
+  if (typeof serverDraft === 'string' && serverDraft.trim().length > 0) {
+    return serverDraft;
+  }
+  return null;
+}
+
+function updateTrialDraft(save, trialId, code, { immediatePersist = false } = {}) {
+  if (!save || !trialId) return;
+  if (!save.trialDrafts || typeof save.trialDrafts !== 'object') {
+    save.trialDrafts = {};
+  }
+  save.trialDrafts[trialId] = code;
+  const local = readLocalDrafts(save.id);
+  local[trialId] = code;
+  writeLocalDrafts(save.id, local);
+
+  if (draftPersistTimer) {
+    clearTimeout(draftPersistTimer);
+    draftPersistTimer = null;
+  }
+  if (immediatePersist) {
+    persistSave().catch(() => {});
+  } else {
+    draftPersistTimer = setTimeout(() => {
+      draftPersistTimer = null;
+      persistSave().catch(() => {});
+    }, 800);
+  }
+}
+
+function clearTrialDraft(save, trialId) {
+  if (!save || !trialId) return;
+  if (draftPersistTimer) {
+    clearTimeout(draftPersistTimer);
+    draftPersistTimer = null;
+  }
+  if (save.trialDrafts && trialId in save.trialDrafts) {
+    delete save.trialDrafts[trialId];
+  }
+  const local = readLocalDrafts(save.id);
+  if (trialId in local) {
+    delete local[trialId];
+    writeLocalDrafts(save.id, local);
+  }
+  persistSave().catch(() => {});
+}
+
 // ==================== PERSISTENCE ====================
 async function persistSave() {
   if (!state.activeSave || !state.activeSave.id) return;
@@ -764,6 +841,10 @@ async function handleEntityInteract(entity) {
       save,
       alreadySolved,
       unlockNote,
+      savedDraft: alreadySolved ? null : getTrialDraft(save, trial.id),
+      onDraftChange: (code) => updateTrialDraft(save, trial.id, code, { immediatePersist: false }),
+      onDraftFlush: (code) => updateTrialDraft(save, trial.id, code, { immediatePersist: true }),
+      onDraftClear: () => clearTrialDraft(save, trial.id),
       onAttempt: (attempt) => {
         logAttempt(save.id, attempt).catch((err) => console.warn('Attempt log failed:', err));
       },
@@ -986,26 +1067,40 @@ function wireControls() {
     state.world?.triggerInteract();
   });
 
+  $('.dpad')?.addEventListener('contextmenu', (e) => e.preventDefault());
+
   document.querySelectorAll('.dpad-btn').forEach((btn) => {
     const dir = btn.dataset.dir;
     const action = btn.dataset.action;
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
     if (action === 'interact') {
-      btn.addEventListener('click', () => state.world?.triggerInteract());
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        state.world?.triggerInteract();
+      });
       return;
     }
     if (!dir) return;
     const start = (e) => {
       e.preventDefault();
+      btn.classList.add('pressed');
+      try {
+        btn.setPointerCapture?.(e.pointerId);
+      } catch {
+        // ignore if unsupported
+      }
       state.world?.setDpadDirection(dir);
     };
     const stop = (e) => {
-      e.preventDefault();
+      if (e) e.preventDefault();
+      btn.classList.remove('pressed');
       state.world?.setDpadDirection(null);
     };
     btn.addEventListener('pointerdown', start);
     btn.addEventListener('pointerup', stop);
-    btn.addEventListener('pointerleave', stop);
     btn.addEventListener('pointercancel', stop);
+    btn.addEventListener('lostpointercapture', stop);
+    btn.addEventListener('pointerleave', stop);
   });
 
   // Pyodide status indicators
