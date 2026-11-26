@@ -7,7 +7,7 @@ import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js';
+} from './autocomplete.js?v=20261126p';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -17,7 +17,7 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-const PYTHON_QUICK_KEYS = [
+const BASE_QUICK_KEYS = [
   { label: 'Tab (4 sp)', insert: '    ', cursorOffset: 4 },
   { label: '( )', insert: '()', cursorOffset: 1 },
   { label: '" "', insert: '""', cursorOffset: 1 },
@@ -28,25 +28,38 @@ const PYTHON_QUICK_KEYS = [
   { label: '+', insert: ' + ', cursorOffset: 3 },
   { label: '-', insert: ' - ', cursorOffset: 3 },
   { label: '*', insert: ' * ', cursorOffset: 3 },
-  { label: 'print()', insert: 'print()', cursorOffset: 6 },
 ];
 
-function renderQuickKeysHtml(id) {
+function getQuickKeysForContext({ useTrainingSpells = false } = {}) {
+  if (useTrainingSpells) {
+    return [
+      ...BASE_QUICK_KEYS,
+      { label: 'say()', insert: 'say()', cursorOffset: 4 },
+      { label: 'shout()', insert: 'shout()', cursorOffset: 6 },
+    ];
+  }
+  return [
+    ...BASE_QUICK_KEYS,
+    { label: 'print()', insert: 'print()', cursorOffset: 6 },
+  ];
+}
+
+function renderQuickKeysHtml(id, keys) {
   return `
     <div id="${id}" class="py-quick-keys" aria-label="Python Quick Keys">
-      ${PYTHON_QUICK_KEYS.map(
+      ${keys.map(
         (k, idx) => `<button type="button" class="py-qk-btn" data-qk-idx="${idx}">${escapeHtml(k.label)}</button>`
       ).join('')}
     </div>
   `;
 }
 
-function wireQuickKeysBar(barEl, textarea) {
+function wireQuickKeysBar(barEl, textarea, keys) {
   if (!barEl || !textarea) return;
   barEl.querySelectorAll('.py-qk-btn').forEach((btn) => {
     const insertKey = (e) => {
       e.preventDefault();
-      const spec = PYTHON_QUICK_KEYS[Number(btn.dataset.qkIdx)];
+      const spec = keys[Number(btn.dataset.qkIdx)];
       if (!spec) return;
       textarea.focus();
       const start = textarea.selectionStart ?? textarea.value.length;
@@ -263,6 +276,9 @@ export class ModalManager {
     });
 
     const renderCompletedSummary = () => {
+      const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
+      const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
+
       this.open(
         `
         <div class="modal-header">
@@ -306,6 +322,9 @@ export class ModalManager {
     };
 
     const renderCelebrationView = ({ stdout, isPractice }) => {
+      const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
+      const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
+
       this.open(
         `
         <div class="modal-header">
@@ -356,6 +375,9 @@ export class ModalManager {
       const initialCode = hasRestoredDraft ? savedDraft : starterText;
       let skipFlushOnClose = false;
 
+      const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
+      const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
+
       this.open(
         `
         <div class="modal-header">
@@ -393,7 +415,7 @@ export class ModalManager {
           </div>
         </div>
 
-        ${renderQuickKeysHtml('trial-quick-keys')}
+        ${renderQuickKeysHtml('trial-quick-keys', trialQuickKeys)}
 
         <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text">${escapeHtml(initialCode)}</textarea>
 
@@ -424,7 +446,7 @@ export class ModalManager {
       const diffBadge = this.content.querySelector('#trial-diff-badge');
       const draftBadge = this.content.querySelector('#trial-draft-badge');
 
-      wireQuickKeysBar(this.content.querySelector('#trial-quick-keys'), codeEl);
+      wireQuickKeysBar(this.content.querySelector('#trial-quick-keys'), codeEl, trialQuickKeys);
 
       const trialSuggestions = buildTrialSuggestions({ realm, era, trial });
       const destroyTrialAc = attachAutocomplete(codeEl, () => trialSuggestions);
@@ -582,6 +604,8 @@ export class ModalManager {
         .join('');
     };
 
+    const wsQuickKeys = getQuickKeysForContext({ useTrainingSpells: false });
+
     this.open(
       `
       <div class="modal-header">
@@ -616,7 +640,7 @@ export class ModalManager {
         </div>
 
         <div style="display:flex; flex-direction:column; gap:12px;">
-          ${renderQuickKeysHtml('ws-quick-keys')}
+          ${renderQuickKeysHtml('ws-quick-keys', wsQuickKeys)}
           <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text"># Click any item on the left or type Python calls here!
 # Example:
 # wear_hat("explorer")
@@ -645,7 +669,7 @@ export class ModalManager {
     const balanceVal = this.content.querySelector('#ws-balance-value');
     const statsPill = this.content.querySelector('#ws-stats-pill');
 
-    wireQuickKeysBar(this.content.querySelector('#ws-quick-keys'), codeEl);
+    wireQuickKeysBar(this.content.querySelector('#ws-quick-keys'), codeEl, wsQuickKeys);
 
     const destroyWsAc = attachAutocomplete(codeEl, () => buildWorkshopSuggestions(catalog, workingSave));
     this.addCleanup(destroyWsAc);

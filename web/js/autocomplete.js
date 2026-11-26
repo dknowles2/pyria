@@ -339,14 +339,25 @@ export function buildTrialSuggestions({ realm, era, trial }) {
   const realmNum = Number(realm?.number) || 1;
   const isEra2 = era?.id === 'era-02-16bit';
   const effectiveRealm = isEra2 ? 99 : realmNum;
+  const usesTrainingSpells = !isEra2 && realmNum <= 3;
 
-  const list = [
-    // Realm 1+
-    { label: 'print("...")', matchText: 'print', snippet: 'print("$0")', category: 'fn', description: 'Display text or numbers in the output' },
-    { label: 'len(text)', matchText: 'len', snippet: 'len($0)', category: 'fn', description: 'Count how many letters or items are inside' },
-    { label: 'str(value)', matchText: 'str', snippet: 'str($0)', category: 'fn', description: 'Turn a number into text' },
-    { label: 'int(value)', matchText: 'int', snippet: 'int($0)', category: 'fn', description: 'Turn text into a whole number' },
-  ];
+  const list = usesTrainingSpells
+    ? [
+        // Realms 1–3: Pyria training spells first, with real print() also available
+        { label: 'say("...")', matchText: 'say', snippet: 'say("$0")', category: 'fn', description: 'Speak a message or value (Pyria training spell for print)' },
+        { label: 'shout("...")', matchText: 'shout', snippet: 'shout("$0")', category: 'fn', description: 'Shout a password or command (Pyria training spell for print)' },
+        { label: 'print("...")', matchText: 'print', snippet: 'print("$0")', category: 'fn', description: 'Real Python built-in (same as say/shout)' },
+        { label: 'len(text)', matchText: 'len', snippet: 'len($0)', category: 'fn', description: 'Count how many letters or items are inside' },
+        { label: 'str(value)', matchText: 'str', snippet: 'str($0)', category: 'fn', description: 'Turn a number into text' },
+        { label: 'int(value)', matchText: 'int', snippet: 'int($0)', category: 'fn', description: 'Turn text into a whole number' },
+      ]
+    : [
+        // Realm 4+ and Era 2: real print() right at the top!
+        { label: 'print("...")', matchText: 'print', snippet: 'print("$0")', category: 'fn', description: 'Display text or numbers in the output' },
+        { label: 'len(text)', matchText: 'len', snippet: 'len($0)', category: 'fn', description: 'Count how many letters or items are inside' },
+        { label: 'str(value)', matchText: 'str', snippet: 'str($0)', category: 'fn', description: 'Turn a number into text' },
+        { label: 'int(value)', matchText: 'int', snippet: 'int($0)', category: 'fn', description: 'Turn text into a whole number' },
+      ];
 
   if (effectiveRealm >= 2) {
     list.push(

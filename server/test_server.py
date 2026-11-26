@@ -317,6 +317,20 @@ class PyriaServerTestCase(unittest.TestCase):
         self.assertIn("Hello, Pyria!", res["stdout"])
         self.assertTrue(res["pipFriendlyHint"])
 
+        # /api/builder/test-trial PASS with say() and shout() aliases
+        status, _, raw = self._request(
+            "POST",
+            "/api/builder/test-trial",
+            {
+                "code": 'say("hi")\nshout("HI")\n',
+                "testCode": 'assert "hi\\nHI\\n" == OUTPUT',
+            },
+        )
+        self.assertEqual(status, 200)
+        res = json.loads(raw)
+        self.assertTrue(res["passed"])
+        self.assertEqual(res["stdout"], "hi\nHI\n")
+
         # /api/builder/test-trial FAIL
         status, _, raw = self._request(
             "POST",

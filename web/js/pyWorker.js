@@ -43,7 +43,10 @@ def _pyria_run_trial(payload_json):
     student_code = payload.get("studentCode", "")
     test_code = payload.get("testCode", "")
 
-    ns = {}
+    ns = {
+        "say": print,
+        "shout": print,
+    }
     buf = io.StringIO()
     stage = "student"
     try:
