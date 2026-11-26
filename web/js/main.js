@@ -12,14 +12,14 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126c';
-import { audio } from './audio.js?v=20261126c';
-import { music, resolveRegionTheme } from './music.js?v=20261126c';
-import { pyRunner } from './pyRunner.js?v=20261126c';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126c';
-import { SpriteManager } from './sprites.js?v=20261126c';
-import { WorldEngine } from './world.js?v=20261126c';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126c';
+} from './api.js?v=20261126d';
+import { audio } from './audio.js?v=20261126d';
+import { music, resolveRegionTheme } from './music.js?v=20261126d';
+import { pyRunner } from './pyRunner.js?v=20261126d';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126d';
+import { SpriteManager } from './sprites.js?v=20261126d';
+import { WorldEngine } from './world.js?v=20261126d';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126d';
 
 const state = {
   gameConfig: null,
@@ -1126,12 +1126,16 @@ function wireControls() {
       centerY = rect.top + rect.height / 2;
     };
 
-    const applyVirtualDir = (dir) => {
+    const applyVirtualVec = (vx, vy) => {
       if (!state.world) return;
-      if (typeof state.world.setVirtualDirection === 'function') {
-        state.world.setVirtualDirection(dir);
-      } else if (typeof state.world.setDpadDirection === 'function') {
-        state.world.setDpadDirection(dir);
+      if (typeof state.world.setVirtualVector === 'function') {
+        state.world.setVirtualVector(vx, vy);
+      } else if (vx === 0 && vy === 0) {
+        state.world.setVirtualDirection?.(null);
+      } else if (Math.abs(vx) > Math.abs(vy)) {
+        state.world.setVirtualDirection?.(vx < 0 ? 'left' : 'right');
+      } else {
+        state.world.setVirtualDirection?.(vy < 0 ? 'up' : 'down');
       }
     };
 
@@ -1146,11 +1150,12 @@ function wireControls() {
       nubEl.style.transform = `translate3d(${nx.toFixed(1)}px, ${ny.toFixed(1)}px, 0)`;
 
       if (dist < DEADZONE) {
-        applyVirtualDir(null);
-      } else if (Math.abs(dx) > Math.abs(dy)) {
-        applyVirtualDir(dx < 0 ? 'left' : 'right');
+        applyVirtualVec(0, 0);
       } else {
-        applyVirtualDir(dy < 0 ? 'up' : 'down');
+        // Smooth 360° analog / diagonal movement (scaled 0.45..1.0 past deadzone)
+        const norm = Math.min(1, (dist - DEADZONE) / (MAX_RADIUS - DEADZONE));
+        const speedScale = 0.45 + 0.55 * norm;
+        applyVirtualVec(Math.cos(angle) * speedScale, Math.sin(angle) * speedScale);
       }
     };
 
@@ -1159,7 +1164,7 @@ function wireControls() {
       mouseDragging = false;
       joystickEl.classList.remove('active');
       nubEl.style.transform = 'translate3d(0, 0, 0)';
-      applyVirtualDir(null);
+      applyVirtualVec(0, 0);
     };
 
     joystickEl.addEventListener('contextmenu', (e) => e.preventDefault());

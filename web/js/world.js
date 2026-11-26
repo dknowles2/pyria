@@ -73,6 +73,7 @@ export class WorldEngine {
     // Input state
     this.keys = new Set();
     this.dpadDir = null;
+    this.virtualVec = { dx: 0, dy: 0 };
     this.paused = false;
 
     // Visual ambiance particles (fireflies for Bit 1, dust motes for Bit 2)
@@ -111,6 +112,7 @@ export class WorldEngine {
     this._onBlur = () => {
       this.keys.clear();
       this.dpadDir = null;
+      this.virtualVec = { dx: 0, dy: 0 };
     };
 
     const handleCanvasTap = (clientX, clientY) => {
@@ -236,11 +238,25 @@ export class WorldEngine {
     if (paused) {
       this.keys.clear();
       this.dpadDir = null;
+      this.virtualVec = { dx: 0, dy: 0 };
     }
+  }
+
+  setVirtualVector(dx, dy) {
+    const mag = Math.hypot(dx || 0, dy || 0);
+    if (mag < 0.01) {
+      this.virtualVec = { dx: 0, dy: 0 };
+      this.dpadDir = null;
+      return;
+    }
+    const clamped = Math.min(1, mag);
+    this.virtualVec = { dx: (dx / mag) * clamped, dy: (dy / mag) * clamped };
+    this.dpadDir = null;
   }
 
   setVirtualDirection(dir) {
     this.dpadDir = dir || null;
+    this.virtualVec = { dx: 0, dy: 0 };
   }
 
   setDpadDirection(dir) {
@@ -407,6 +423,9 @@ export class WorldEngine {
       const inv = 1 / Math.SQRT2;
       dx *= inv;
       dy *= inv;
+    }
+    if (dx === 0 && dy === 0 && (this.virtualVec.dx !== 0 || this.virtualVec.dy !== 0)) {
+      return { dx: this.virtualVec.dx, dy: this.virtualVec.dy };
     }
     return { dx, dy };
   }
