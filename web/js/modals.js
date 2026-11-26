@@ -555,23 +555,27 @@ export class ModalManager {
 
     const renderCatalogHtml = () => {
       const owned = new Set(workingSave.ownedUnlockIds || []);
+      const currentShards = Number(workingSave.byteShards) || 0;
       return (catalog.unlockables || [])
         .map((item) => {
           const isOwned = owned.has(item.id);
-          const canAfford = workingSave.byteShards >= item.shardCost;
+          const cost = Number(item.shardCost) || 0;
+          const canAfford = currentShards >= cost;
+          const missing = Math.max(0, cost - currentShards);
+          const stateClass = isOwned ? 'owned' : canAfford ? 'affordable' : 'unaffordable';
           const badge = isOwned
-            ? '<span class="pill pill-green">Owned</span>'
+            ? '<span class="pill pill-green">✓ Owned (Free to Equip)</span>'
             : canAfford
-              ? `<span class="pill pill-gold">✦ ${item.shardCost}</span>`
-              : `<span class="pill pill-rose">✦ ${item.shardCost}</span>`;
+              ? `<span class="pill pill-gold">💎 ${cost} Shards · Ready to Forge!</span>`
+              : `<span class="pill pill-rose">${cost} 💎 · 🔒 Need ${missing} more</span>`;
           return `
-            <div class="catalog-item ${isOwned ? 'owned' : ''}" data-call="${escapeHtml(item.functionCall)}">
+            <div class="catalog-item ${stateClass}" data-call="${escapeHtml(item.functionCall)}">
               <div>
                 <div class="catalog-item-title">${escapeHtml(item.name)}</div>
                 <div class="catalog-item-call">${escapeHtml(item.functionCall)}</div>
                 <div class="catalog-item-desc">${escapeHtml(item.description)}</div>
               </div>
-              <div>${badge}</div>
+              <div class="catalog-item-badge">${badge}</div>
             </div>
           `;
         })
@@ -584,7 +588,7 @@ export class ModalManager {
         <div>
           <h2>⚒ Bram's Tinkerer Workshop</h2>
           <div class="modal-badges">
-            <span class="pill pill-gold" id="ws-shards-pill">✦ ${workingSave.byteShards} Byte Shards</span>
+            <span class="pill pill-gold" id="ws-shards-pill">💎 ${workingSave.byteShards} Byte Shards</span>
             <span class="pill pill-blue" id="ws-stats-pill">Charisma: ${workingSave.stats.charisma} · Courage: ${workingSave.stats.courage}</span>
           </div>
         </div>
@@ -602,6 +606,9 @@ export class ModalManager {
             <div class="preview-controls">
               <button id="ws-turn-btn" class="btn btn-sm btn-ghost">↻ Turn Hero</button>
             </div>
+          </div>
+          <div id="ws-balance-banner" class="ws-balance-banner">
+            💎 Your Byte Shards: <strong id="ws-balance-value">${workingSave.byteShards}</strong>
           </div>
           <div id="ws-catalog" class="catalog-list">
             ${renderCatalogHtml()}
@@ -635,6 +642,7 @@ export class ModalManager {
     const clearBtn = this.content.querySelector('#ws-clear-btn');
     const outputEl = this.content.querySelector('#ws-output');
     const shardsPill = this.content.querySelector('#ws-shards-pill');
+    const balanceVal = this.content.querySelector('#ws-balance-value');
     const statsPill = this.content.querySelector('#ws-stats-pill');
 
     wireQuickKeysBar(this.content.querySelector('#ws-quick-keys'), codeEl);
@@ -699,7 +707,8 @@ export class ModalManager {
         workingSave.ownedUnlockIds = [...res.ownedUnlockIds];
         workingSave.byteShards = res.byteShards;
 
-        shardsPill.textContent = `✦ ${workingSave.byteShards} Byte Shards`;
+        shardsPill.textContent = `💎 ${workingSave.byteShards} Byte Shards`;
+        if (balanceVal) balanceVal.textContent = String(workingSave.byteShards);
         statsPill.textContent = `Charisma: ${workingSave.stats.charisma} · Courage: ${workingSave.stats.courage}`;
         catalogEl.innerHTML = renderCatalogHtml();
         wireCatalogClicks();
@@ -716,11 +725,29 @@ export class ModalManager {
         }
       } else {
         audio.playError();
-        outputEl.className = 'pip-console error';
-        outputEl.innerHTML = `
-          <div class="pip-console-header">🐉 Pip's Forge Clue:</div>
-          <div class="pip-console-body">${escapeHtml(res.pipMessage)}</div>
-        `;
+        const shardMatch = String(res.errorMessage || '').match(
+          /Not enough Byte Shards for (.+?)! You need (\d+) Shards, but you have (\d+)/i
+        );
+        if (shardMatch) {
+          const itemName = shardMatch[1];
+          const neededCost = Number(shardMatch[2]);
+          const haveShards = Number(shardMatch[3]);
+          const missing = Math.max(1, neededCost - haveShards);
+          outputEl.className = 'pip-console error ws-insufficient-alert';
+          outputEl.innerHTML = `
+            <div class="pip-console-header">🔒 Not enough Byte Shards!</div>
+            <div class="pip-console-body">
+              You have <strong>${haveShards} 💎</strong>, and <strong>${escapeHtml(itemName)}</strong> costs
+              <strong>${neededCost} 💎</strong> — earn <strong>${missing} more Byte Shards</strong> from Trials or hidden chests!
+            </div>
+          `;
+        } else {
+          outputEl.className = 'pip-console error';
+          outputEl.innerHTML = `
+            <div class="pip-console-header">🐉 Pip's Forge Clue:</div>
+            <div class="pip-console-body">${escapeHtml(res.pipMessage)}</div>
+          `;
+        }
       }
     };
 
