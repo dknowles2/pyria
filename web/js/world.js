@@ -224,7 +224,7 @@ export class WorldEngine {
   getDynamicStateMap() {
     const overrides = new Map();
     if (!this.map || !this.save) return overrides;
-    const completed = new Set(this.save.completedTrials || []);
+    const completed = new Set(this.save.solvedTrials || this.save.completedTrials || []);
 
     for (const ent of this.map.entities || []) {
       if (!Array.isArray(ent.dynamicTiles)) continue;
@@ -449,7 +449,7 @@ export class WorldEngine {
 
     ctx.imageSmoothingEnabled = false;
     const dynamicOverrides = this.getDynamicStateMap();
-    const completed = new Set(this.save.completedTrials || []);
+    const completed = new Set(this.save.solvedTrials || this.save.completedTrials || []);
     const openedChests = new Set(this.save.openedChests || []);
     const rescued = new Set(this.save.rescuedDragons || []);
 
@@ -617,17 +617,49 @@ export class WorldEngine {
       if (!ent.dynamicTiles && !this.map.layers.decor[ent.y]?.[ent.x] && ent.spriteKey) {
         this.sprites.drawTile(ctx, ent.spriteKey, this.eraKey, sx, sy, TILE_PX, TILE_PX);
       }
-      // Floating glowing Python Rune marker
-      const markerColor = isDone ? '#34d399' : '#38bdf8';
-      ctx.fillStyle = isDone ? 'rgba(52, 211, 153, 0.22)' : 'rgba(56, 189, 248, 0.25)';
-      ctx.beginPath();
-      ctx.arc(sx + TILE_PX / 2, sy + TILE_PX / 2, TILE_PX * 0.36, 0, Math.PI * 2);
-      ctx.fill();
 
-      ctx.fillStyle = markerColor;
-      ctx.font = 'bold 14px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(isDone ? '✓' : '★', sx + TILE_PX / 2, sy + 6 + bob);
+      const cx = sx + TILE_PX / 2;
+      if (isDone) {
+        // Unmistakable steady green completed checkmark badge
+        const cy = sy + 6;
+        ctx.fillStyle = '#059669';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#a7f3d0';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✓', cx, cy + 1);
+        ctx.textBaseline = 'alphabetic';
+      } else {
+        // Pulsing active Trial beacon
+        const pulse = 0.5 + 0.5 * Math.sin(this.time * 5 + ent.x);
+        ctx.fillStyle = `rgba(56, 189, 248, ${(0.18 + pulse * 0.22).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(cx, sy + TILE_PX / 2, TILE_PX * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        const cy = sy + 4 + bob;
+        ctx.fillStyle = '#f6c945';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fef08a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#1f1300';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('!', cx, cy + 1);
+        ctx.textBaseline = 'alphabetic';
+      }
     }
 
     // Highlight ring when hero is close enough to interact

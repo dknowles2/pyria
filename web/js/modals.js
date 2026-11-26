@@ -173,7 +173,7 @@ export class ModalManager {
   }
 
   // ==================== PYTHON TRIAL MODAL ====================
-  openTrialModal({ trial, realm, gameConfig, catalog, save, alreadySolved, onSolved, onAttempt }) {
+  openTrialModal({ trial, realm, gameConfig, catalog, save, alreadySolved, unlockNote, onSolved, onAttempt }) {
     audio.playClick();
     const diff = resolveDifficulty(gameConfig, realm, trial);
     let currentMode = diff.mode || 'standard';
@@ -194,165 +194,248 @@ export class ModalManager {
       return found ? found.label : cid;
     });
 
-    this.open(
-      `
-      <div class="modal-header">
-        <div>
-          <h2>★ ${escapeHtml(trial.title)}</h2>
-          <div class="modal-badges">
-            <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
-            <span class="pill pill-violet" id="trial-diff-badge">Mode: ${escapeHtml(currentMode)}</span>
-            <span class="pill pill-gold">+${trial.shardReward} Byte Shards</span>
-            ${alreadySolved ? '<span class="pill pill-green">✓ Solved</span>' : ''}
-            ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+    const renderCompletedSummary = () => {
+      this.open(
+        `
+        <div class="modal-header">
+          <div>
+            <h2>✓ ${escapeHtml(trial.title)}</h2>
+            <div class="modal-badges">
+              <span class="pill pill-green">✓ COMPLETED</span>
+              <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
+              ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn-sm btn-ghost" data-close>✕</button>
+        </div>
+
+        <div class="trial-complete-card">
+          <div class="trial-complete-icon">✓</div>
+          <h3 class="trial-complete-title">Trial Already Mastered!</h3>
+          <p class="dialogue-text">
+            You've already mastered this Trial and claimed its <strong>${trial.shardReward} Byte Shards</strong>!
+          </p>
+          <p class="muted-text" style="margin:0;">
+            <strong>Objective:</strong> ${escapeHtml(trial.objective)}
+          </p>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-trial-practice" class="btn btn-ghost">Practice Again (No Extra Shards)</button>
+          <button class="btn btn-primary" data-close>Close</button>
+        </div>
+        `,
+        'modal-compact'
+      );
+
+      this.content.querySelectorAll('[data-close]').forEach((btn) => {
+        btn.addEventListener('click', () => this.close());
+      });
+      this.content.querySelector('#btn-trial-practice')?.addEventListener('click', () => {
+        audio.playClick();
+        renderEditorView(true);
+      });
+    };
+
+    const renderCelebrationView = ({ stdout, isPractice }) => {
+      this.open(
+        `
+        <div class="modal-header">
+          <div>
+            <h2>✓ ${escapeHtml(trial.title)}</h2>
+            <div class="modal-badges">
+              <span class="pill pill-green">${isPractice ? '✓ PRACTICE COMPLETE' : '✓ TRIAL COMPLETE'}</span>
+              <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-ghost" data-close>✕</button>
+        </div>
+
+        <div class="trial-complete-card">
+          <div class="trial-complete-icon">✓</div>
+          <h3 class="trial-complete-title">${isPractice ? 'Great Practice Run!' : '🎉 Trial Complete!'}</h3>
+          <p class="dialogue-text">
+            ${
+              isPractice
+                ? 'Chirp! Your Python spell passed again! (Byte Shards were already claimed for this Trial.)'
+                : `Chirp! Pip does a backflip! You earned <strong style="color: var(--accent-gold);">+${trial.shardReward} Byte Shards</strong> and saved your progress!`
+            }
+          </p>
+          ${!isPractice && unlockNote ? `<div class="upgrade-callout" style="width:100%;">✨ ${escapeHtml(unlockNote)}</div>` : ''}
+          ${!isPractice && unlockItem ? `<p class="muted-text" style="margin:0;">New blueprint ready in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</p>` : ''}
+          ${stdout ? `<div class="console-stdout" style="width:100%; text-align:left;">Output:\n${escapeHtml(stdout)}</div>` : ''}
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary btn-lg" data-close>✦ Continue Exploring</button>
+        </div>
+        `,
+        'modal-compact'
+      );
+
+      this.content.querySelectorAll('[data-close]').forEach((btn) => {
+        btn.addEventListener('click', () => this.close());
+      });
+    };
+
+    const renderEditorView = (isPractice) => {
+      this.open(
+        `
+        <div class="modal-header">
+          <div>
+            <h2>${isPractice ? '✓ ' : '★ '}${escapeHtml(trial.title)}</h2>
+            <div class="modal-badges">
+              <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
+              <span class="pill pill-violet" id="trial-diff-badge">Mode: ${escapeHtml(currentMode)}</span>
+              ${
+                isPractice
+                  ? '<span class="pill pill-green">✓ COMPLETED · Practice Mode (No Extra Shards)</span>'
+                  : `<span class="pill pill-gold">+${trial.shardReward} Byte Shards</span>`
+              }
+              ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn-sm btn-ghost" data-close>✕</button>
+        </div>
+
+        <p class="dialogue-text">${escapeHtml(trial.storyPrompt)}</p>
+
+        <div class="objective-box">
+          <strong>Objective:</strong> ${escapeHtml(trial.objective)}
+          ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span class="muted-text">Write real Python 3 below (Tab indents 4 spaces, Ctrl/Cmd+Enter runs):</span>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span class="muted-text" style="font-size:12px;">Starter:</span>
+            <button class="btn btn-sm btn-ghost" data-mode="explorer">Explorer</button>
+            <button class="btn btn-sm btn-ghost" data-mode="standard">Standard</button>
+            <button class="btn btn-sm btn-ghost" data-mode="challenge">Challenge</button>
           </div>
         </div>
-        <button class="btn btn-sm btn-ghost" data-close>✕</button>
-      </div>
 
-      <p class="dialogue-text">${escapeHtml(trial.storyPrompt)}</p>
+        <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off">${escapeHtml(trial.starterCode[currentMode] || trial.starterCode.standard || '')}</textarea>
 
-      <div class="objective-box">
-        <strong>Objective:</strong> ${escapeHtml(trial.objective)}
-        ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
-      </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-        <span class="muted-text">Write real Python 3 below (Tab indents 4 spaces, Ctrl/Cmd+Enter runs):</span>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <span class="muted-text" style="font-size:12px;">Starter:</span>
-          <button class="btn btn-sm btn-ghost" data-mode="explorer">Explorer</button>
-          <button class="btn btn-sm btn-ghost" data-mode="standard">Standard</button>
-          <button class="btn btn-sm btn-ghost" data-mode="challenge">Challenge</button>
+        <div class="editor-actions">
+          <button id="btn-trial-run" class="btn btn-primary">▶ Run Python Spell</button>
+          <button id="btn-trial-hint" class="btn btn-gold" ${maxHints === 0 ? 'disabled' : ''}>
+            💡 Ask Pip (Hint 1/${maxHints})
+          </button>
+          <button id="btn-trial-reset" class="btn btn-ghost">↺ Reset Code</button>
         </div>
-      </div>
 
-      <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off">${escapeHtml(trial.starterCode[currentMode] || trial.starterCode.standard || '')}</textarea>
+        <div id="trial-hints-area" class="hidden"></div>
 
-      <div class="editor-actions">
-        <button id="btn-trial-run" class="btn btn-primary">▶ Run Python Spell</button>
-        <button id="btn-trial-hint" class="btn btn-gold" ${maxHints === 0 ? 'disabled' : ''}>
-          💡 Ask Pip (Hint 1/${maxHints})
-        </button>
-        <button id="btn-trial-reset" class="btn btn-ghost">↺ Reset Code</button>
-      </div>
+        <div id="trial-output" class="pip-console">
+          <div class="pip-console-header">🐉 Pip is watching your spellbook:</div>
+          <div class="pip-console-body">Write your Python code above and press <strong>Run Python Spell</strong>!</div>
+        </div>
+        `,
+        'modal-wide'
+      );
 
-      <div id="trial-hints-area" class="hidden"></div>
+      const codeEl = this.content.querySelector('#trial-code');
+      const runBtn = this.content.querySelector('#btn-trial-run');
+      const hintBtn = this.content.querySelector('#btn-trial-hint');
+      const resetBtn = this.content.querySelector('#btn-trial-reset');
+      const hintsArea = this.content.querySelector('#trial-hints-area');
+      const outputEl = this.content.querySelector('#trial-output');
+      const diffBadge = this.content.querySelector('#trial-diff-badge');
 
-      <div id="trial-output" class="pip-console">
-        <div class="pip-console-header">🐉 Pip is watching your spellbook:</div>
-        <div class="pip-console-body">Write your Python code above and press <strong>Run Python Spell</strong>!</div>
-      </div>
+      const updateModeButtons = () => {
+        this.content.querySelectorAll('[data-mode]').forEach((b) => {
+          b.classList.toggle('btn-sky', b.dataset.mode === currentMode);
+          b.classList.toggle('btn-ghost', b.dataset.mode !== currentMode);
+        });
+        diffBadge.textContent = `Mode: ${currentMode}`;
+      };
+      updateModeButtons();
 
-      <div id="trial-victory-bar" class="modal-footer hidden">
-        <button id="btn-trial-claim" class="btn btn-primary btn-lg">✦ Claim Reward & Continue!</button>
-      </div>
-      `,
-      'modal-wide'
-    );
-
-    const codeEl = this.content.querySelector('#trial-code');
-    const runBtn = this.content.querySelector('#btn-trial-run');
-    const hintBtn = this.content.querySelector('#btn-trial-hint');
-    const resetBtn = this.content.querySelector('#btn-trial-reset');
-    const hintsArea = this.content.querySelector('#trial-hints-area');
-    const outputEl = this.content.querySelector('#trial-output');
-    const victoryBar = this.content.querySelector('#trial-victory-bar');
-    const claimBtn = this.content.querySelector('#btn-trial-claim');
-    const diffBadge = this.content.querySelector('#trial-diff-badge');
-
-    const updateModeButtons = () => {
-      this.content.querySelectorAll('[data-mode]').forEach((b) => {
-        b.classList.toggle('btn-sky', b.dataset.mode === currentMode);
-        b.classList.toggle('btn-ghost', b.dataset.mode !== currentMode);
+      this.content.querySelectorAll('[data-mode]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          currentMode = btn.dataset.mode;
+          codeEl.value = trial.starterCode[currentMode] || '';
+          updateModeButtons();
+          audio.playClick();
+        });
       });
-      diffBadge.textContent = `Mode: ${currentMode}`;
-    };
-    updateModeButtons();
 
-    this.content.querySelectorAll('[data-mode]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        currentMode = btn.dataset.mode;
+      resetBtn.addEventListener('click', () => {
         codeEl.value = trial.starterCode[currentMode] || '';
-        updateModeButtons();
         audio.playClick();
       });
-    });
 
-    resetBtn.addEventListener('click', () => {
-      codeEl.value = trial.starterCode[currentMode] || '';
-      audio.playClick();
-    });
+      hintBtn.addEventListener('click', () => {
+        if (hintsUsed >= maxHints) return;
+        audio.playClick();
+        hintsUsed += 1;
+        hintsArea.classList.remove('hidden');
 
-    hintBtn.addEventListener('click', () => {
-      if (hintsUsed >= maxHints) return;
-      audio.playClick();
-      hintsUsed += 1;
-      hintsArea.classList.remove('hidden');
+        const shown = hintTiers.slice(0, hintsUsed).map((t) => {
+          const text = trial.hints?.[t.key] || '';
+          return `
+            <div class="hint-box" style="margin-bottom:8px;">
+              <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
+              <div>${escapeHtml(text)}</div>
+            </div>
+          `;
+        });
+        hintsArea.innerHTML = shown.join('');
 
-      const shown = hintTiers.slice(0, hintsUsed).map((t) => {
-        const text = trial.hints?.[t.key] || '';
-        return `
-          <div class="hint-box" style="margin-bottom:8px;">
-            <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
-            <div>${escapeHtml(text)}</div>
-          </div>
-        `;
+        if (hintsUsed >= maxHints) {
+          hintBtn.textContent = `💡 All ${maxHints} Hints Shown`;
+          hintBtn.disabled = true;
+        } else {
+          hintBtn.textContent = `💡 Ask Pip (Hint ${hintsUsed + 1}/${maxHints})`;
+        }
       });
-      hintsArea.innerHTML = shown.join('');
 
-      if (hintsUsed >= maxHints) {
-        hintBtn.textContent = `💡 All ${maxHints} Hints Shown`;
-        hintBtn.disabled = true;
-      } else {
-        hintBtn.textContent = `💡 Ask Pip (Hint ${hintsUsed + 1}/${maxHints})`;
-      }
-    });
+      const runSpell = async () => {
+        const code = codeEl.value;
+        runBtn.disabled = true;
+        runBtn.textContent = 'Running...';
+        audio.playCodeRun();
 
-    const runSpell = async () => {
-      const code = codeEl.value;
-      runBtn.disabled = true;
-      runBtn.textContent = 'Running...';
-      audio.playCodeRun();
+        const result = await pyRunner.runTrial(code, trial.testCode, diff.showRawTracebacks);
+        runBtn.disabled = false;
+        runBtn.textContent = '▶ Run Python Spell';
 
-      const result = await pyRunner.runTrial(code, trial.testCode, diff.showRawTracebacks);
-      runBtn.disabled = false;
-      runBtn.textContent = '▶ Run Python Spell';
+        if (onAttempt) {
+          onAttempt({ trialId: trial.id, passed: result.passed, hintsUsed, code });
+        }
 
-      if (onAttempt) {
-        onAttempt({ trialId: trial.id, passed: result.passed, hintsUsed, code });
-      }
+        if (result.passed) {
+          audio.playSuccess();
+          // Immediately persist solved state so closing/Escape can never lose progress!
+          if (onSolved) {
+            await onSolved(trial);
+          }
+          renderCelebrationView({ stdout: result.stdout, isPractice });
+        } else {
+          audio.playError();
+          outputEl.className = 'pip-console error';
+          outputEl.innerHTML = `
+            <div class="pip-console-header">🐉 Pip's Clue:</div>
+            <div class="pip-console-body">${escapeHtml(result.pipMessage)}</div>
+            ${result.stdout ? `<div class="console-stdout">Your print() output:\n${escapeHtml(result.stdout)}</div>` : ''}
+            ${result.rawTraceback ? `<div class="console-traceback">${escapeHtml(result.rawTraceback)}</div>` : ''}
+          `;
+        }
+      };
 
-      if (result.passed) {
-        audio.playSuccess();
-        outputEl.className = 'pip-console success';
-        outputEl.innerHTML = `
-          <div class="pip-console-header">🎉 Trial Complete! Pip does a backflip!</div>
-          <div class="pip-console-body">${escapeHtml(result.pipMessage)}</div>
-          ${result.stdout ? `<div class="console-stdout">Output:\n${escapeHtml(result.stdout)}</div>` : ''}
-        `;
-        victoryBar.classList.remove('hidden');
-        claimBtn.onclick = () => {
-          this.close();
-          if (onSolved) onSolved(trial);
-        };
-      } else {
-        audio.playError();
-        outputEl.className = 'pip-console error';
-        outputEl.innerHTML = `
-          <div class="pip-console-header">🐉 Pip's Clue:</div>
-          <div class="pip-console-body">${escapeHtml(result.pipMessage)}</div>
-          ${result.stdout ? `<div class="console-stdout">Your print() output:\n${escapeHtml(result.stdout)}</div>` : ''}
-          ${result.rawTraceback ? `<div class="console-traceback">${escapeHtml(result.rawTraceback)}</div>` : ''}
-        `;
-      }
+      runBtn.addEventListener('click', runSpell);
+      attachCodeEditorKeys(codeEl, runSpell);
+      this.content.querySelectorAll('[data-close]').forEach((btn) => {
+        btn.addEventListener('click', () => this.close());
+      });
     };
 
-    runBtn.addEventListener('click', runSpell);
-    attachCodeEditorKeys(codeEl, runSpell);
-    this.content.querySelectorAll('[data-close]').forEach((btn) => {
-      btn.addEventListener('click', () => this.close());
-    });
+    if (alreadySolved) {
+      renderCompletedSummary();
+    } else {
+      renderEditorView(false);
+    }
   }
 
   // ==================== BRAM'S WORKSHOP MODAL ====================

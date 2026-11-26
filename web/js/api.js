@@ -43,6 +43,7 @@ export function createDefaultSaveState(heroName = 'Rowan', appearance = {}) {
       charisma: 0,
       courage: 0,
     },
+    solvedTrials: [],
     completedTrials: [],
     rescuedDragons: [],
     openedChests: [],
@@ -66,6 +67,12 @@ export function normalizeSave(raw) {
     merged.appearance || {}
   );
 
+  const solvedSet = new Set([
+    ...(Array.isArray(merged.solvedTrials) ? merged.solvedTrials : []),
+    ...(Array.isArray(merged.completedTrials) ? merged.completedTrials : []),
+  ]);
+  const solvedTrials = [...solvedSet];
+
   return {
     id: merged.id || raw.id || null,
     heroName: merged.heroName || merged.hero_name || defaults.heroName,
@@ -81,7 +88,8 @@ export function normalizeSave(raw) {
       charisma: merged.stats?.charisma ?? 0,
       courage: merged.stats?.courage ?? 0,
     },
-    completedTrials: Array.isArray(merged.completedTrials) ? [...merged.completedTrials] : [],
+    solvedTrials,
+    completedTrials: [...solvedTrials],
     rescuedDragons: Array.isArray(merged.rescuedDragons) ? [...merged.rescuedDragons] : [],
     openedChests: Array.isArray(merged.openedChests) ? [...merged.openedChests] : [],
     ownedUnlockIds: Array.isArray(merged.ownedUnlockIds) ? [...merged.ownedUnlockIds] : [],
