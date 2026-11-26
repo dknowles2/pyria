@@ -1656,3 +1656,110 @@ textarea, input, pre, code {
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* ==================== MULTIPLE-CHOICE & FIX-THE-BUG TRIALS ==================== */
+.mc-code-snippet {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--bg-code);
+  border: 2px solid var(--border-bright);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #e2f1ff;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.mc-choices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.mc-choice-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  padding: 14px 15px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-subtle);
+  background: var(--bg-panel-alt);
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 0.14s ease, background 0.14s ease, transform 0.08s ease;
+}
+
+.mc-choice-card:hover {
+  border-color: var(--accent-sky);
+  background: #223055;
+  transform: translateY(-1px);
+}
+
+.mc-choice-card.correct {
+  border-color: var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.22);
+}
+
+.mc-choice-card.wrong {
+  border-color: var(--accent-rose);
+  background: rgba(251, 113, 133, 0.18);
+  opacity: 0.82;
+}
+
+.mc-letter {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px solid var(--accent-sky);
+  color: var(--accent-sky);
+  font-weight: 900;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mc-choice-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.mc-choice-label {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.mc-choice-code {
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-code);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: #bae6fd;
+  white-space: pre-wrap;
+}
+
+.bug-banner {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--accent-rose);
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.18), rgba(245, 158, 11, 0.14));
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.bug-banner-title {
+  font-weight: 900;
+  color: #fde68a;
+  margin-bottom: 3px;
+  font-size: 14.5px;
+}
