@@ -12,14 +12,14 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126l';
-import { audio } from './audio.js?v=20261126e';
-import { music, resolveRegionTheme } from './music.js?v=20261126e';
-import { pyRunner } from './pyRunner.js?v=20261126e';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126e';
-import { SpriteManager } from './sprites.js?v=20261126e';
-import { WorldEngine } from './world.js?v=20261126g';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126i';
+} from './api.js?v=20261126n';
+import { audio } from './audio.js?v=20261126n';
+import { music, resolveRegionTheme } from './music.js?v=20261126n';
+import { pyRunner } from './pyRunner.js?v=20261126n';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126n';
+import { SpriteManager } from './sprites.js?v=20261126n';
+import { WorldEngine } from './world.js?v=20261126n';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126n';
 
 const state = {
   gameConfig: null,
@@ -327,19 +327,19 @@ function updateHud() {
     state.sprites.drawHero(ctx, save.appearance, eraKey, 'down', 0, 0, 0, 32, 32);
   }
 
-  // Rescued dragon badges
+  // Rescued dragons summary (data-driven across all Realms in the current Era)
   const dragonsEl = $('#hud-dragons');
   const rescued = new Set(save.rescuedDragons || []);
-  const verticalSliceDragons = [
-    { id: 'dragon-spark', name: 'Spark', icon: '⚡' },
-    { id: 'dragon-pebble', name: 'Pebble', icon: '🪨' },
-  ];
-  dragonsEl.innerHTML = verticalSliceDragons
-    .map((d) => {
-      const has = rescued.has(d.id);
-      return `<span class="dragon-badge ${has ? 'rescued' : ''}">${d.icon} ${d.name}${has ? ' ✓' : ''}</span>`;
-    })
-    .join('');
+  const eraRealms = state.era?.realms || [];
+  const totalDragons = eraRealms.length || 8;
+  const rescuedInEra = eraRealms.filter((r) => r.dragon && rescued.has(r.dragon.id));
+  const currentDragon = state.activeRealm?.dragon;
+  const currentRescued = currentDragon && rescued.has(currentDragon.id);
+  const dragonSummaryHtml = `<span class="dragon-badge ${rescuedInEra.length > 0 ? 'rescued' : ''}" title="Rescued Dragons in ${state.era?.name || '8-Bit Era'}">🐉 ${rescuedInEra.length}/${totalDragons}</span>`;
+  const currentDragonHtml = currentDragon
+    ? `<span class="dragon-badge ${currentRescued ? 'rescued' : ''}">${currentDragon.name}${currentRescued ? ' ✓' : ''}</span>`
+    : '';
+  dragonsEl.innerHTML = dragonSummaryHtml + currentDragonHtml;
 
   // Dynamic Pip objective tip (100% driven by the Realm's actual trial list)
   const realmDragon = state.activeRealm?.dragon;
@@ -778,13 +778,18 @@ async function enterOverworld(save) {
   showScreen('screen-game');
   state.world.setPaused(false);
 
-  const targetRealm = save.realmId === 'realm-02-ruins' ? 'realm-02-ruins' : 'realm-01-meadow';
+  const targetRealm = save.realmId && getRealm(save.realmId) ? save.realmId : 'realm-01-meadow';
   const spawnOverride =
     save.position && save.position.realmId === targetRealm
       ? { x: save.position.x, y: save.position.y }
       : null;
 
-  await loadRealm(targetRealm, spawnOverride);
+  try {
+    await loadRealm(targetRealm, spawnOverride);
+  } catch (err) {
+    console.warn(`Could not load map for ${targetRealm}, falling back to realm-01-meadow:`, err);
+    await loadRealm('realm-01-meadow', null);
+  }
 }
 
 // ==================== ENTITY INTERACTIONS ====================
@@ -797,16 +802,19 @@ async function handleEntityInteract(entity) {
   if (entity.type === 'npc') {
     const npc = getNpc(entity.refId);
     if (entity.refId === 'elder-ada') {
-      const realmTrials = state.activeRealm?.trials || [];
+      const realm = state.activeRealm;
+      const realmTrials = realm?.trials || [];
       const solvedCount = realmTrials.filter((t) => completed.has(t.id)).length;
       const nextTrial = realmTrials.find((t) => !completed.has(t.id));
-      let msg = state.activeRealm?.storyIntro || npc.personality;
-      if (rescued.has('dragon-spark')) {
-        msg = `Wonderful work, ${save.heroName}! Spark is free and Bit 1 is restored. Step through the shimmering Portal north of Spark's vault to reach Mossy Ruins and rescue Pebble!`;
+      const dragon = realm?.dragon;
+      const dragonFree = Boolean(dragon && rescued.has(dragon.id));
+      let msg = realm?.storyIntro || npc.personality;
+      if (dragonFree) {
+        msg = `Wonderful work, ${save.heroName}! ${dragon.name} is free and Bit ${realm.number} is restored! Step through the glowing exit Portal to continue your quest through Pyria!`;
       } else if (solvedCount > 0 && nextTrial) {
-        msg = `You've conquered ${solvedCount} of ${realmTrials.length} Trials in ${state.activeRealm?.name}, ${save.heroName}! Follow the gold ! marker on your minimap to find "${nextTrial.title}".`;
-      } else if (solvedCount >= realmTrials.length && realmTrials.length > 0) {
-        msg = `All ${realmTrials.length} Trials are solved, ${save.heroName}! Head to Spark's Logic Vault (the glowing red dot on your minimap) to rescue Spark!`;
+        msg = `You've conquered ${solvedCount} of ${realmTrials.length} Trials in ${realm?.name}, ${save.heroName}! Follow the gold ! marker on your minimap to find "${nextTrial.title}".`;
+      } else if (solvedCount >= realmTrials.length && realmTrials.length > 0 && dragon) {
+        msg = `All ${realmTrials.length} Trials are solved, ${save.heroName}! Head to ${dragon.name}'s Logic Vault (the glowing red dot on your minimap) to rescue ${dragon.name}!`;
       }
       state.modals.openNpcDialogue({ npc, spriteKey: entity.spriteKey, message: msg, eraKey });
     } else if (entity.refId === 'bram') {
@@ -928,12 +936,10 @@ async function handleEntityInteract(entity) {
       onConfirm: async () => {
         if (!alreadyRescued) {
           save.rescuedDragons.push(entity.refId);
-          // Automatic visual flourish when rescuing Spark!
-          if (entity.refId === 'dragon-spark') {
-            showToast('✨ Bit 1 Restored! Meadow fireflies awakened & Portal unlocked!');
-          } else if (entity.refId === 'dragon-pebble') {
-            showToast('✨ Bit 2 Restored! Mossy Ruins awakened!');
-          }
+          const bitNum = realm?.number ?? save.rescuedDragons.length;
+          const dragonName = realm?.dragon?.name || 'the Dragon';
+          const upgradeNote = realm?.miniVisualUpgrade || 'Portal unlocked!';
+          showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
           await refreshLiveContent();
           updateHud();
           await persistSave();
@@ -949,21 +955,37 @@ async function handleEntityInteract(entity) {
       showToast('Complete the Realm Trials to activate this Portal!');
       return;
     }
-    if (entity.refId === 'realm-02-ruins') {
-      if (!rescued.has('dragon-spark')) {
-        showToast('Talk to Spark in the vault right below first to rescue them!');
-        return;
+
+    const currentRealm = state.activeRealm;
+    const targetRealm = getRealm(entity.refId);
+    const isForwardPortal =
+      Boolean(entity.requiredTrialId) ||
+      (targetRealm && currentRealm && Number(targetRealm.number) > Number(currentRealm.number));
+
+    if (isForwardPortal && currentRealm?.dragon?.id && !rescued.has(currentRealm.dragon.id)) {
+      audio.playError();
+      showToast(`Rescue ${currentRealm.dragon.name} in the Logic Vault first!`);
+      return;
+    }
+
+    const targetRealmId = entity.refId;
+    try {
+      let mapData = state.mapsCache.get(targetRealmId);
+      if (!mapData) {
+        mapData = await fetchMap(targetRealmId);
+        state.mapsCache.set(targetRealmId, mapData);
       }
       audio.playPortal();
-      await loadRealm('realm-02-ruins');
+      await loadRealm(targetRealmId);
       await persistSave();
-    } else if (entity.refId === 'realm-03-cavern') {
+    } catch {
       audio.playDragonRescue();
+      const nextRealmName = targetRealm?.name || 'the next Realm';
       state.modals.openNpcDialogue({
         npc: getNpc('elder-ada'),
         spriteKey: 'elder_ada',
         eraKey,
-        message: `Bravo, ${save.heroName}! You conquered both Whispering Meadow and Mossy Ruins and rescued Spark & Pebble! Cinder Cavern awaits in the next chapter — feel free to return to Whispering Meadow or forge more gear at Bram's Workshop!`,
+        message: `Chapter Complete, ${save.heroName}! You've conquered ${currentRealm?.name || 'this Realm'} and rescued ${save.rescuedDragons.length} dragons! Stay tuned for ${nextRealmName} — feel free to return to Whispering Meadow or forge more gear at Bram's Workshop!`,
         extraAction: {
           label: 'Return to Whispering Meadow',
           onClick: async () => {

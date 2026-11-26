@@ -29,7 +29,11 @@
     "bram",
     "spark",
     "pebble",
-    "lord_null"
+    "lord_null",
+    "emberwing",
+    "glacier",
+    "bramble",
+    "mire"
   ],
   "eras": {
     "8bit": {
@@ -40,7 +44,7 @@
       },
       "npcsImage": "8bit/npcs_and_dragons.png",
       "npcsSize": {
-        "width": 80,
+        "width": 144,
         "height": 16
       },
       "tiles": {
@@ -242,6 +246,38 @@
           "col": 4,
           "row": 0,
           "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "emberwing": {
+          "col": 5,
+          "row": 0,
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "glacier": {
+          "col": 6,
+          "row": 0,
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bramble": {
+          "col": 7,
+          "row": 0,
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "mire": {
+          "col": 8,
+          "row": 0,
+          "x": 128,
           "y": 0,
           "width": 16,
           "height": 16
@@ -256,7 +292,7 @@
       },
       "npcsImage": "16bit/npcs_and_dragons.png",
       "npcsSize": {
-        "width": 80,
+        "width": 144,
         "height": 16
       },
       "tiles": {
@@ -458,6 +494,38 @@
           "col": 4,
           "row": 0,
           "x": 64,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "emberwing": {
+          "col": 5,
+          "row": 0,
+          "x": 80,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "glacier": {
+          "col": 6,
+          "row": 0,
+          "x": 96,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "bramble": {
+          "col": 7,
+          "row": 0,
+          "x": 112,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        "mire": {
+          "col": 8,
+          "row": 0,
+          "x": 128,
           "y": 0,
           "width": 16,
           "height": 16

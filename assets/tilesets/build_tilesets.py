@@ -6,9 +6,9 @@ Pure Python 3 (stdlib only: zlib, struct, json, pathlib) — zero external depen
 Generates:
   - assets/tilesets/8bit/meadow_ruins.png       (80x64, 5x4 grid of 16x16 NES Zelda tiles)
   - assets/tilesets/16bit/meadow_ruins.png      (80x64, 5x4 grid of 16x16 SNES ALTTP tiles)
-  - assets/tilesets/8bit/npcs_and_dragons.png   (80x16, 5x1 grid of 16x16 sprites)
-  - assets/tilesets/16bit/npcs_and_dragons.png  (80x16, 5x1 grid of 16x16 sprites)
-  - assets/tilesets/manifest.json               (exact coordinates for all 20 tiles + 5 NPCs/dragons)
+  - assets/tilesets/8bit/npcs_and_dragons.png   (144x16, 9x1 grid of 16x16 sprites)
+  - assets/tilesets/16bit/npcs_and_dragons.png  (144x16, 9x1 grid of 16x16 sprites)
+  - assets/tilesets/manifest.json               (exact coordinates for all 20 tiles + 9 NPCs/dragons)
   - assets/world/maps_bundle.js                 (file:// fallback bundle if content/maps/*.json exist)
   - assets/world/realm01_meadow_comparison.png  (8-bit vs 16-bit side-by-side Realm 1 render)
 """
@@ -37,7 +37,17 @@ TILE_IDS = [
     "chest_closed", "chest_open", "vault_shrine", "torch", "portal",
 ]
 
-NPC_KEYS = ["elder_ada", "bram", "spark", "pebble", "lord_null"]
+NPC_KEYS = [
+    "elder_ada",
+    "bram",
+    "spark",
+    "pebble",
+    "lord_null",
+    "emberwing",
+    "glacier",
+    "bramble",
+    "mire",
+]
 
 SHEET_COLS = 5
 TILE_SIZE = 16
@@ -774,12 +784,126 @@ def build_npcs(era: str) -> Dict[str, Canvas]:
         "C": hx("#EC4899"),
     })
 
+    # 6. emberwing (Realm 3 Crimson & Molten-Gold Flame Dragon Guardian)
+    emberwing = from_grid([
+        "..O..Y....Y..O..",
+        ".OHO.ORRRRO.OHO.",
+        "..OORRRRRRRROO..",
+        ".OORRERGGERROO..",
+        "OWFFORRRRRROFFWO",
+        "OwwFORGGGGROFwwO",
+        ".OOFORGGGGROFOO.",
+        "..OO.ORGGRO.OO..",
+        "....ORRGGRO..Y..",
+        "....ORR..RROFY..",
+        "...OOR....ROO...",
+        "....OO....OO....",
+        "................",
+        "................",
+        "................",
+        "................",
+    ], {
+        "O": O, "E": E,
+        "R": hx("#DC2626") if is16 else hx("#E11D48"),
+        "F": hx("#F97316"),
+        "W": hx("#FB923C") if is16 else hx("#F97316"),
+        "w": hx("#991B1B"),
+        "G": hx("#FACC15"),
+        "Y": hx("#FEF08A"),
+        "H": hx("#FDE68A"),
+    })
+
+    # 7. glacier (Realm 4 Icy Cyan, Frost-Blue & Silver-White Ice Wyvern)
+    glacier = from_grid([
+        "...W..OOOO..W...",
+        "..OWO.OSSO.OWO..",
+        "...OOCSSSSCOO...",
+        "..OCCESSSSECCO..",
+        "OWWCOCCSSCCOCWWO",
+        "ObbCOCCWWCCOCbbO",
+        ".OOOCOCCWWCOCOO.",
+        "...OO.OCCO.OO...",
+        "....OCCWWCCO....",
+        "....OCC..CCO....",
+        "...OOb....bOO...",
+        "....OO....OO....",
+        "................",
+        "................",
+        "................",
+        "................",
+    ], {
+        "O": O, "E": E,
+        "W": hx("#F8FAFC"),
+        "S": hx("#BAE6FD") if is16 else hx("#E0F2FE"),
+        "C": hx("#38BDF8") if is16 else hx("#0EA5E9"),
+        "b": hx("#0369A1"),
+    })
+
+    # 8. bramble (Realm 5 Emerald, Moss-Green & Warm Bark Forest Dragon)
+    bramble = from_grid([
+        "..B..O....O..B..",
+        ".OBBOOGGGGOOBBO.",
+        "..OOOGLLLLGOOO..",
+        "..OGGEGLLGEGGO..",
+        "OmmGOGGGGGOGGmmO",
+        "OdmGOGMMMMOGGmdO",
+        ".OOOGOGMMGOGOOO.",
+        "...OO.OGGO.OO...",
+        "....OGGMMGGO....",
+        "....OGG..GGO....",
+        "...OOB....BOO...",
+        "....OO....OO....",
+        "................",
+        "................",
+        "................",
+        "................",
+    ], {
+        "O": O, "E": E,
+        "B": hx("#92400E") if is16 else hx("#7C4820"),
+        "L": hx("#86EFAC") if is16 else hx("#4ADE80"),
+        "G": hx("#16A34A") if is16 else hx("#22C55E"),
+        "M": hx("#BEF264"),
+        "m": hx("#4ADE80"),
+        "d": hx("#14532D"),
+    })
+
+    # 9. mire (Realm 6 Deep Teal, Bioluminescent Lime & Slate Swamp Dragon)
+    mire = from_grid([
+        "....L.OOOO.L....",
+        "...OLOTTTTOLO...",
+        "..OOTTTLLTTTOO..",
+        "..OTTLSTTSLTTO..",
+        "OSSTOTTLLTOTTSOO".replace("TSOO", "TSSO"),
+        "OdSTOTTLLTOTTsdO",
+        ".OOOTOTTTTOTOOO.",
+        "...OO.OTTO.OO...",
+        "....OTTLSTTO....",
+        "....OTT..TTO....",
+        "...OOd....dOO...",
+        "....OO....OO....",
+        "................",
+        "................",
+        "................",
+        "................",
+    ], {
+        "O": O,
+        "T": hx("#0F766E") if is16 else hx("#115E59"),
+        "S": hx("#64748B") if is16 else hx("#475569"),
+        "s": hx("#334155"),
+        "d": hx("#1E293B"),
+        "L": hx("#A3E635") if is16 else hx("#BEF264"),
+    })
+
     return {
         "elder_ada": ada,
         "bram": bram,
         "spark": spark,
         "pebble": pebble,
         "lord_null": lord_null,
+        "emberwing": emberwing,
+        "glacier": glacier,
+        "bramble": bramble,
+        "mire": mire,
     }
 
 

@@ -385,7 +385,7 @@
         {
           "id": "trial-03-01",
           "title": "Your First if Check (Lava Heat Alarm)",
-          "storyPrompt": "Welcome to Cinder Cavern! Now that you know variables, an `if` statement lets Python make a decision: if a test is True, Python runs the indented code underneath! Remember two rules: put a colon `:` at the end of the `if` line, and indent the code inside by 4 spaces.",
+          "storyPrompt": "Welcome to Cinder Cavern! An `if` statement lets Python make a decision: if a test is True, Python runs the indented code underneath! Remember two rules: put a colon `:` at the end of the `if` line, and indent the code inside by 4 spaces.",
           "objective": "Start with heat = 80 and alarm = \"OFF\". Write an if statement: if heat > 50:, set alarm = \"ON\" and print(\"Shield up!\").",
           "concepts": [
             "variables",
@@ -411,6 +411,33 @@
         },
         {
           "id": "trial-03-02",
+          "title": "True or False? (Your First Boolean Box)",
+          "storyPrompt": "In Python, a Boolean is a special yes-or-no value: either `True` or `False` (always capital T or F, and NO quotes!). A comparison like `lava_temp > 500` automatically turns into `True` or `False`!",
+          "objective": "Set lava_temp = 850 and create a boolean variable is_too_hot = lava_temp > 500, then print(is_too_hot).",
+          "concepts": [
+            "variables",
+            "booleans",
+            "comparisons",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "lava_temp = 850\n# Compare lava_temp to 500 using > to get True or False:\nis_too_hot = lava_temp > \nprint(is_too_hot)\n",
+            "standard": "lava_temp = 850\n# Set is_too_hot using a comparison with 500, then print(is_too_hot)\n",
+            "challenge": "# Store 850 in lava_temp, set is_too_hot to whether lava_temp > 500, and print(is_too_hot).\n"
+          },
+          "referenceSolution": "lava_temp = 850\nis_too_hot = lava_temp > 500\nprint(is_too_hot)\n",
+          "testCode": "assert lava_temp == 850\nassert is_too_hot is True, f'Expected is_too_hot to be True, got {is_too_hot!r}'\nassert OUTPUT.strip() == 'True', f'Expected printed True, got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip fans himself: 'lava_temp > 500 asks Python a yes/no question and puts True into the is_too_hot box!'",
+            "tier2_pattern": "is_too_hot = lava_temp > 500\nprint(is_too_hot)",
+            "tier3_walkthrough": "Write:\nis_too_hot = lava_temp > 500\nprint(is_too_hot)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-03",
           "title": "Two Paths: if and else",
           "storyPrompt": "What if an `if` check is False? That's where `else:` comes in! Python runs the `if` block when the test is True, and the `else:` block as the backup plan when it is False. Check your water_level box to see if the lava bridge is COOL or HOT!",
           "objective": "Start with water_level = 30. Write an if / else statement: if water_level >= 50, set bridge = \"COOL\"; else, set bridge = \"HOT\". Then print(bridge).",
@@ -438,10 +465,37 @@
           "difficultyOverride": null
         },
         {
-          "id": "trial-03-03",
+          "id": "trial-03-04",
+          "title": "Checking Numbers with ==",
+          "storyPrompt": "Watch out for one of Python's coolest tricks! ONE equals sign `=` puts a value into a box (`gems = 7`), while TWO equals signs `==` asks 'Are these two values equal?' Check if your gems box holds exactly 7!",
+          "objective": "Start with gems = 7 and door = \"SHUT\". Write an if statement checking if gems == 7: set door = \"OPEN\" and print(\"Click!\").",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "gems = 7\ndoor = \"SHUT\"\n# Use == (two equals signs!) to ask if gems equals 7:\nif gems == 7:\n    door = \"OPEN\"\n    # Print \"Click!\" here (4 spaces indent!)\n    \n",
+            "standard": "gems = 7\ndoor = \"SHUT\"\n# If gems == 7, set door = \"OPEN\" and print(\"Click!\")\n",
+            "challenge": "gems = 7\ndoor = \"SHUT\"\n# Open door and print \"Click!\" when gems equals 7.\n"
+          },
+          "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    print(\"Click!\")\n",
+          "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"Click!\", f'Expected \"Click!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps two keys: 'Use == to check equality, and indent both lines inside the if!'",
+            "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    print(\"Click!\")",
+            "tier3_walkthrough": "Add:\n    print(\"Click!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-05",
           "title": "The Secret Word Lock (== with Strings)",
-          "storyPrompt": "Emberwing's magma lock checks a secret password! Remember: ONE equals sign `=` puts a value into a variable box, while TWO equals signs `==` asks 'Are these two values equal?' Check if password == \"EMBER\" to free Emberwing!",
-          "objective": "Start with password = \"EMBER\" and gate_status = \"LOCKED\". Write an if statement checking if password == \"EMBER\": set gate_status = \"OPEN\" and print(\"Emberwing is free!\").",
+          "storyPrompt": "You can use `==` with words (strings) too! Just make sure the spelling and capital letters match inside the quotes. Check whether `password == \"EMBER\"` to crack the magma seal!",
+          "objective": "Start with password = \"EMBER\" and seal = \"INTACT\". Write an if statement checking if password == \"EMBER\": set seal = \"BROKEN\" and print(\"Seal broken!\").",
           "concepts": [
             "variables",
             "strings",
@@ -449,19 +503,46 @@
             "conditionals_if",
             "print_output"
           ],
-          "shardReward": 50,
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "password = \"EMBER\"\nseal = \"INTACT\"\n# Check if password equals \"EMBER\" using ==:\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    # Print \"Seal broken!\" here:\n    \n",
+            "standard": "password = \"EMBER\"\nseal = \"INTACT\"\n# If password == \"EMBER\", set seal = \"BROKEN\" and print(\"Seal broken!\")\n",
+            "challenge": "password = \"EMBER\"\nseal = \"INTACT\"\n# Break the seal and print \"Seal broken!\" if password matches \"EMBER\".\n"
+          },
+          "referenceSolution": "password = \"EMBER\"\nseal = \"INTACT\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    print(\"Seal broken!\")\n",
+          "testCode": "assert seal == \"BROKEN\", f'Expected seal == \"BROKEN\", got {seal!r}'\nassert OUTPUT.strip() == \"Seal broken!\", f'Expected \"Seal broken!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Remember quotes around \"EMBER\" and two equals signs == to compare!'",
+            "tier2_pattern": "if password == \"EMBER\":\n    seal = \"BROKEN\"\n    print(\"Seal broken!\")",
+            "tier3_walkthrough": "Add:\n    print(\"Seal broken!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-06",
+          "title": "Unchain Emberwing (Conditionals Capstone)",
+          "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds `ember_power = 75`, and the lock has `lock_power = 60`. Use an `if / else` check to compare the two boxes and set Emberwing free!",
+          "objective": "Given ember_power = 75 and lock_power = 60, write an if / else: if ember_power > lock_power, set gate_status = \"OPEN\" and print(\"Emberwing is free!\"); else, set gate_status = \"LOCKED\".",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 55,
           "unlockId": "hat-dragon-helm",
           "starterCode": {
-            "explorer": "password = \"EMBER\"\ngate_status = \"LOCKED\"\n# Use == (two equals signs!) to check if password equals \"EMBER\":\nif password == \"EMBER\":\n    gate_status = \"OPEN\"\n    # Print \"Emberwing is free!\" here (keep 4-space indent!)\n    \n",
-            "standard": "password = \"EMBER\"\ngate_status = \"LOCKED\"\n# If password == \"EMBER\", set gate_status = \"OPEN\" and print(\"Emberwing is free!\")\n",
-            "challenge": "password = \"EMBER\"\ngate_status = \"LOCKED\"\n# Check if password equals \"EMBER\"; if so, set gate_status = \"OPEN\" and print \"Emberwing is free!\".\n"
+            "explorer": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\nelse:\n    # Set gate_status to \"LOCKED\" here:\n    \n",
+            "standard": "ember_power = 75\nlock_power = 60\n# If ember_power > lock_power, set gate_status = \"OPEN\" and print \"Emberwing is free!\"; else set gate_status = \"LOCKED\"\n",
+            "challenge": "ember_power = 75\nlock_power = 60\n# Compare ember_power > lock_power with if/else to set gate_status (\"OPEN\" or \"LOCKED\") and announce Emberwing's freedom.\n"
           },
-          "referenceSolution": "password = \"EMBER\"\ngate_status = \"LOCKED\"\nif password == \"EMBER\":\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\n",
+          "referenceSolution": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"\n",
           "testCode": "assert gate_status == \"OPEN\", f'Expected gate_status == \"OPEN\", got {gate_status!r}'\nassert OUTPUT.strip() == \"Emberwing is free!\", f'Expected \"Emberwing is free!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Use == to compare! And keep both gate_status = \"OPEN\" and print(...) indented 4 spaces inside the if!'",
-            "tier2_pattern": "if password == \"EMBER\":\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")",
-            "tier3_walkthrough": "Add:\n    print(\"Emberwing is free!\")"
+            "tier1_nudge": "Pip glows orange: 'Write the backup plan inside else: with 4 spaces of indent!'",
+            "tier2_pattern": "if ember_power > lock_power:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"",
+            "tier3_walkthrough": "Finish the else block with:\n    gate_status = \"LOCKED\""
           },
           "difficultyOverride": null
         }
@@ -488,26 +569,161 @@
       "trials": [
         {
           "id": "trial-04-01",
-          "title": "Thermometer of the Ice Gate",
-          "storyPrompt": "Glacier's gate shifts depending on the temperature. Check temp = -15 and decide whether the ice is frozen, slush, or melted!",
-          "objective": "Given temp = -15, use if / elif / else to set ice_state to \"frozen\" if temp <= 0, \"slush\" if temp <= 10, or \"melted\" otherwise.",
+          "title": "Two-Path Frost Check (if / else Review)",
+          "storyPrompt": "Brrr\u2014welcome to Frostbite Hollow! Before learning 3-way choices, let's warm up with a quick `if / else` check on the frozen trail. If `temp <= 0`, the path is `\"FROZEN\"`; otherwise it is `\"WATER\"`.",
+          "objective": "Given temp = -5, use if / else to set path = \"FROZEN\" if temp <= 0 else \"WATER\", then print(path).",
           "concepts": [
-            "conditionals_elif_else",
-            "comparisons"
+            "variables",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
           ],
-          "shardReward": 45,
+          "shardReward": 40,
           "unlockId": "tunic-navy",
           "starterCode": {
-            "explorer": "temp = -15\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    # Set ice_state to \"melted\"\n    \n",
-            "standard": "temp = -15\n# Use if / elif / else to set ice_state to \"frozen\", \"slush\", or \"melted\"\n",
-            "challenge": "temp = -15\n# Classify temp into ice_state (\"frozen\" <= 0, \"slush\" <= 10, else \"melted\").\n"
+            "explorer": "temp = -5\nif temp <= 0:\n    path = \"FROZEN\"\nelse:\n    # Set path to \"WATER\":\n    \nprint(path)\n",
+            "standard": "temp = -5\n# If temp <= 0 set path = \"FROZEN\", else \"WATER\", then print(path)\n",
+            "challenge": "temp = -5\n# Classify path as \"FROZEN\" (temp <= 0) or \"WATER\" and print(path).\n"
           },
-          "referenceSolution": "temp = -15\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\n",
-          "testCode": "assert ice_state == \"frozen\", f'Expected \"frozen\" for temp -15, got {ice_state!r}'\n",
+          "referenceSolution": "temp = -5\nif temp <= 0:\n    path = \"FROZEN\"\nelse:\n    path = \"WATER\"\nprint(path)\n",
+          "testCode": "assert path == \"FROZEN\", f'Expected \"FROZEN\", got {path!r}'\nassert OUTPUT.strip() == \"FROZEN\", f'Expected printed \"FROZEN\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip shivers: 'Use if for the first check, elif for the middle check, and else for everything else!'",
+            "tier1_nudge": "Pip shivers: 'Remember <= means less than or equal to! Put path = \"WATER\" inside else:.'",
+            "tier2_pattern": "if temp <= 0:\n    path = \"FROZEN\"\nelse:\n    path = \"WATER\"\nprint(path)",
+            "tier3_walkthrough": "Inside else:, write:\n    path = \"WATER\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-04-02",
+          "title": "Three Paths! Meet elif",
+          "storyPrompt": "What if there are THREE choices instead of two? Python gives us `elif` (short for 'else if') for the middle check! Python checks `if` first, then `elif`, and finally `else` if neither matched.",
+          "objective": "Given temp = 5, use if / elif / else to set ice_state to \"frozen\" if temp <= 0, \"slush\" if temp <= 10, or \"melted\" otherwise. Then print(ice_state).",
+          "concepts": [
+            "conditionals_elif_else",
+            "comparisons",
+            "print_output"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    # Set ice_state to \"slush\" here:\n    \nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+            "standard": "temp = 5\n# Use if / elif / else to set ice_state (\"frozen\" <= 0, \"slush\" <= 10, else \"melted\") and print it\n",
+            "challenge": "temp = 5\n# Classify temp into ice_state (\"frozen\", \"slush\", \"melted\") using if/elif/else and print it.\n"
+          },
+          "referenceSolution": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+          "testCode": "assert ice_state == \"slush\", f'Expected \"slush\" for temp 5, got {ice_state!r}'\nassert OUTPUT.strip() == \"slush\", f'Expected printed \"slush\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at temp = 5: '5 is NOT <= 0, so Python checks elif temp <= 10\u2014and that one is True!'",
             "tier2_pattern": "if temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"",
-            "tier3_walkthrough": "Complete the else branch with:\n    ice_state = \"melted\""
+            "tier3_walkthrough": "Inside the elif block, write:\n    ice_state = \"slush\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-04-03",
+          "title": "Snowstorm Wind Gauge",
+          "storyPrompt": "Icy winds howl across the canyon! Let's practice `if / elif / else` again, this time checking from highest to lowest using `>=`.",
+          "objective": "Given wind = 45, set weather to \"BLIZZARD\" if wind >= 60, \"GUSTY\" if wind >= 30, or \"CALM\" otherwise. Then print(weather).",
+          "concepts": [
+            "conditionals_elif_else",
+            "comparisons",
+            "print_output"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    # Set weather to \"CALM\":\n    \nprint(weather)\n",
+            "standard": "wind = 45\n# Use if / elif / else for BLIZZARD (>=60), GUSTY (>=30), or CALM, then print(weather)\n",
+            "challenge": "wind = 45\n# Classify wind into weather (\"BLIZZARD\" >= 60, \"GUSTY\" >= 30, else \"CALM\") and print it.\n"
+          },
+          "referenceSolution": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)\n",
+          "testCode": "assert weather == \"GUSTY\", f'Expected \"GUSTY\", got {weather!r}'\nassert OUTPUT.strip() == \"GUSTY\", f'Expected printed \"GUSTY\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip holds onto his ears: 'Check >= 60 first, then elif >= 30, then else for everything smaller!'",
+            "tier2_pattern": "if wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"",
+            "tier3_walkthrough": "Finish the else block with:\n    weather = \"CALM\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-04-04",
+          "title": "Four-Tier Explorer Badge",
+          "storyPrompt": "You can stack MORE than one `elif`! An ancient frost-pedestal awards a badge based on how many Byte Shards you carry: GOLD (`>= 80`), SILVER (`>= 40`), BRONZE (`>= 10`), or STARTER.",
+          "objective": "Given shards = 55, use if / elif / elif / else to set badge to \"GOLD\" (>=80), \"SILVER\" (>=40), \"BRONZE\" (>=10), or \"STARTER\", then print(badge).",
+          "concepts": [
+            "conditionals_elif_else",
+            "comparisons",
+            "print_output"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "shards = 55\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    # Set badge to \"BRONZE\":\n    \nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
+            "standard": "shards = 55\n# Use if / elif / elif / else for GOLD (>=80), SILVER (>=40), BRONZE (>=10), or STARTER, then print(badge)\n",
+            "challenge": "shards = 55\n# Assign badge (\"GOLD\", \"SILVER\", \"BRONZE\", \"STARTER\") by shard tier and print(badge).\n"
+          },
+          "referenceSolution": "shards = 55\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    badge = \"BRONZE\"\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
+          "testCode": "assert badge == \"SILVER\", f'Expected \"SILVER\" for 55 shards, got {badge!r}'\nassert OUTPUT.strip() == \"SILVER\", f'Expected printed \"SILVER\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip sparkles: 'Python stops at the FIRST True branch\u2014so 55 matches SILVER!'",
+            "tier2_pattern": "elif shards >= 10:\n    badge = \"BRONZE\"",
+            "tier3_walkthrough": "Add:\n    badge = \"BRONZE\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-04-05",
+          "title": "Matching Rune Words with elif",
+          "storyPrompt": "Just like numbers, `elif` works great with string `==` checks! The Crystal Obelisk reacts differently to `\"FIRE\"`, `\"ICE\"`, or any other word.",
+          "objective": "Given rune = \"ICE\", use if / elif / else: if rune == \"FIRE\" set action = \"MELT\", elif rune == \"ICE\" set action = \"GLOW\", else set action = \"WAIT\". Then print(action).",
+          "concepts": [
+            "conditionals_elif_else",
+            "strings",
+            "comparisons",
+            "print_output"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\nelif rune == \"ICE\":\n    # Set action to \"GLOW\":\n    \nelse:\n    action = \"WAIT\"\nprint(action)\n",
+            "standard": "rune = \"ICE\"\n# Check rune with if/elif/else (\"FIRE\"->\"MELT\", \"ICE\"->\"GLOW\", else \"WAIT\") and print(action)\n",
+            "challenge": "rune = \"ICE\"\n# Map rune to action (\"MELT\", \"GLOW\", or \"WAIT\") with if/elif/else and print(action).\n"
+          },
+          "referenceSolution": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\nelif rune == \"ICE\":\n    action = \"GLOW\"\nelse:\n    action = \"WAIT\"\nprint(action)\n",
+          "testCode": "assert action == \"GLOW\", f'Expected \"GLOW\", got {action!r}'\nassert OUTPUT.strip() == \"GLOW\", f'Expected printed \"GLOW\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps the obelisk: 'Use == to check each string rune, and quotes around \"GLOW\"!'",
+            "tier2_pattern": "elif rune == \"ICE\":\n    action = \"GLOW\"",
+            "tier3_walkthrough": "Inside the elif block, write:\n    action = \"GLOW\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-04-06",
+          "title": "Free Glacier (Multi-Branch Capstone)",
+          "storyPrompt": "Glacier's crystal vault needs at least 20 frost crystals! You found 4 clusters with 5 crystals each (`4 * 5`). Calculate `crystals`, then use `if / elif / else` to open Glacier's Vault!",
+          "objective": "Set crystals = 4 * 5. If crystals >= 20, set vault_open = True and print(\"Glacier is free!\"); elif crystals >= 10, set vault_open = False; else, set vault_open = False.",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "conditionals_elif_else",
+            "booleans",
+            "print_output"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    # Print \"Glacier is free!\" here:\n    \nelif crystals >= 10:\n    vault_open = False\nelse:\n    vault_open = False\n",
+            "standard": "crystals = 4 * 5\n# Use if/elif/else: >=20 sets vault_open = True and prints \"Glacier is free!\", >=10 or else sets vault_open = False\n",
+            "challenge": "# Compute crystals = 4 * 5 and use if/elif/else to set vault_open (True when >= 20) and print \"Glacier is free!\".\n"
+          },
+          "referenceSolution": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")\nelif crystals >= 10:\n    vault_open = False\nelse:\n    vault_open = False\n",
+          "testCode": "assert crystals == 20, f'Expected crystals == 20, got {crystals!r}'\nassert vault_open is True, f'Expected vault_open is True, got {vault_open!r}'\nassert OUTPUT.strip() == \"Glacier is free!\", f'Expected \"Glacier is free!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: '4 * 5 is 20, which matches crystals >= 20! Keep print() indented 4 spaces.'",
+            "tier2_pattern": "if crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")",
+            "tier3_walkthrough": "Add:\n    print(\"Glacier is free!\")"
           },
           "difficultyOverride": null
         }
@@ -535,26 +751,161 @@
       "trials": [
         {
           "id": "trial-05-01",
-          "title": "Untangle the Canopy Chant",
-          "storyPrompt": "The Echo Trees captured a messy whisper: \"  bramble wake  \". Clean off the outer spaces, shout it in ALL CAPS, and verify it with 'and'!",
-          "objective": "Clean raw_chant = \"  bramble wake  \" using .strip().upper() into chant, then set is_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5).",
+          "title": "Shout It Out: .upper()",
+          "storyPrompt": "Welcome to Echo Woods! Strings in Python have built-in mini-spells called **methods** that you attach with a dot `.`. Calling `whisper.upper()` turns every letter into ALL CAPS!",
+          "objective": "Given whisper = \"bramble\", create shout = whisper.upper() and print(shout).",
           "concepts": [
             "string_methods",
-            "boolean_logic"
+            "variables",
+            "print_output"
           ],
-          "shardReward": 50,
+          "shardReward": 45,
           "unlockId": "hat-wizard-cap",
           "starterCode": {
-            "explorer": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\n# Check BOTH chant == \"BRAMBLE WAKE\" and len(chant) > 5\nis_valid = \n",
-            "standard": "raw_chant = \"  bramble wake  \"\n# Clean raw_chant into chant with .strip().upper(), then compute is_valid using and\n",
-            "challenge": "raw_chant = \"  bramble wake  \"\n# Normalize raw_chant into chant and verify it equals \"BRAMBLE WAKE\" and has length > 5 in is_valid.\n"
+            "explorer": "whisper = \"bramble\"\n# Attach .upper() to whisper so every letter becomes CAPITAL:\nshout = whisper.\nprint(shout)\n",
+            "standard": "whisper = \"bramble\"\n# Convert whisper to uppercase using .upper() into shout, then print(shout)\n",
+            "challenge": "whisper = \"bramble\"\n# Uppercase whisper into shout with .upper() and print(shout).\n"
           },
-          "referenceSolution": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\nis_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5)\n",
-          "testCode": "assert chant == \"BRAMBLE WAKE\", f'Expected \"BRAMBLE WAKE\", got {chant!r}'\nassert is_valid is True, f'Expected is_valid to be True, got {is_valid!r}'\n",
+          "referenceSolution": "whisper = \"bramble\"\nshout = whisper.upper()\nprint(shout)\n",
+          "testCode": "assert shout == \"BRAMBLE\", f'Expected \"BRAMBLE\", got {shout!r}'\nassert OUTPUT.strip() == \"BRAMBLE\", f'Expected printed \"BRAMBLE\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: '.strip() trims outer spaces, .upper() makes ALL CAPS, and \"and\" requires both sides to be True!'",
-            "tier2_pattern": "chant = raw_chant.strip().upper()\nis_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5)",
-            "tier3_walkthrough": "Write:\nchant = raw_chant.strip().upper()\nis_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5)"
+            "tier1_nudge": "Pip cups his paws: 'Don't forget the parentheses () at the end of .upper()!'",
+            "tier2_pattern": "shout = whisper.upper()\nprint(shout)",
+            "tier3_walkthrough": "Write:\nshout = whisper.upper()\nprint(shout)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-05-02",
+          "title": "Trim & Whisper: .strip() and .lower()",
+          "storyPrompt": "Echo Trees add messy extra spaces around passwords! `.strip()` trims spaces off both ends, and `.lower()` turns every letter lowercase. You can chain them together: `raw.strip().lower()`!",
+          "objective": "Given raw = \"  ECHO  \", clean it into clean = raw.strip().lower() and print(clean).",
+          "concepts": [
+            "string_methods",
+            "variables",
+            "print_output"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = \"  ECHO  \"\n# Chain .strip() and .lower() together:\nclean = raw.strip().\nprint(clean)\n",
+            "standard": "raw = \"  ECHO  \"\n# Trim spaces and lowercase raw into clean using .strip().lower(), then print(clean)\n",
+            "challenge": "raw = \"  ECHO  \"\n# Normalize raw into clean with .strip().lower() and print(clean).\n"
+          },
+          "referenceSolution": "raw = \"  ECHO  \"\nclean = raw.strip().lower()\nprint(clean)\n",
+          "testCode": "assert clean == \"echo\", f'Expected \"echo\", got {clean!r}'\nassert OUTPUT.strip() == \"echo\", f'Expected printed \"echo\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip whispers: '.strip() removes outer spaces and .lower() makes it lowercase!'",
+            "tier2_pattern": "clean = raw.strip().lower()\nprint(clean)",
+            "tier3_walkthrough": "Write:\nclean = raw.strip().lower()\nprint(clean)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-05-03",
+          "title": "Both Must Be True: and",
+          "storyPrompt": "Sometimes a dungeon door needs TWO things to be True at once! Python's `and` keyword checks BOTH sides: `has_key and has_torch` is only `True` if you have the key AND the torch.",
+          "objective": "Given has_key = True and has_torch = True, set can_enter = has_key and has_torch, then if can_enter: print(\"Enter!\").",
+          "concepts": [
+            "boolean_logic",
+            "booleans",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "has_key = True\nhas_torch = True\n# Combine both booleans with and:\ncan_enter = has_key and \nif can_enter:\n    print(\"Enter!\")\n",
+            "standard": "has_key = True\nhas_torch = True\n# Set can_enter = has_key and has_torch, then if can_enter: print(\"Enter!\")\n",
+            "challenge": "has_key = True\nhas_torch = True\n# Combine with and into can_enter and print \"Enter!\" when True.\n"
+          },
+          "referenceSolution": "has_key = True\nhas_torch = True\ncan_enter = has_key and has_torch\nif can_enter:\n    print(\"Enter!\")\n",
+          "testCode": "assert can_enter is True, f'Expected can_enter is True, got {can_enter!r}'\nassert OUTPUT.strip() == \"Enter!\", f'Expected \"Enter!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip holds up a key and a torch: 'Write has_key and has_torch\u2014lowercase and!'",
+            "tier2_pattern": "can_enter = has_key and has_torch\nif can_enter:\n    print(\"Enter!\")",
+            "tier3_walkthrough": "Complete the line with:\ncan_enter = has_key and has_torch"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-05-04",
+          "title": "Either One Works: or",
+          "storyPrompt": "A fallen ravine blocks the forest path! You can cross if you have a rope OR if you have wings. Python's `or` keyword is `True` as long as AT LEAST ONE side is `True`!",
+          "objective": "Given has_rope = False and has_wings = True, set can_cross = has_rope or has_wings, then if can_cross: print(\"Crossed!\").",
+          "concepts": [
+            "boolean_logic",
+            "booleans",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "has_rope = False\nhas_wings = True\n# Use or so either rope OR wings lets you cross:\ncan_cross = has_rope or \nif can_cross:\n    print(\"Crossed!\")\n",
+            "standard": "has_rope = False\nhas_wings = True\n# Set can_cross = has_rope or has_wings, then if can_cross: print(\"Crossed!\")\n",
+            "challenge": "has_rope = False\nhas_wings = True\n# Combine with or into can_cross and print \"Crossed!\" if True.\n"
+          },
+          "referenceSolution": "has_rope = False\nhas_wings = True\ncan_cross = has_rope or has_wings\nif can_cross:\n    print(\"Crossed!\")\n",
+          "testCode": "assert can_cross is True, f'Expected can_cross is True, got {can_cross!r}'\nassert OUTPUT.strip() == \"Crossed!\", f'Expected \"Crossed!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip flaps his tiny wings: 'With or, only ONE side needs to be True!'",
+            "tier2_pattern": "can_cross = has_rope or has_wings\nif can_cross:\n    print(\"Crossed!\")",
+            "tier3_walkthrough": "Complete with:\ncan_cross = has_rope or has_wings"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-05-05",
+          "title": "Flip It Around: not",
+          "storyPrompt": "Python's `not` keyword flips a Boolean upside down: `not False` becomes `True`, and `not True` becomes `False`! Check if Bramble is `not is_asleep` so you can talk to him.",
+          "objective": "Given is_asleep = False and status = \"QUIET\", write: if not is_asleep:, set status = \"AWAKE\" and print(\"Bramble hears you!\").",
+          "concepts": [
+            "boolean_logic",
+            "booleans",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "is_asleep = False\nstatus = \"QUIET\"\n# not False becomes True!\nif not is_asleep:\n    status = \"AWAKE\"\n    # Print \"Bramble hears you!\" here:\n    \n",
+            "standard": "is_asleep = False\nstatus = \"QUIET\"\n# Use if not is_asleep: to set status = \"AWAKE\" and print(\"Bramble hears you!\")\n",
+            "challenge": "is_asleep = False\nstatus = \"QUIET\"\n# If not is_asleep, set status = \"AWAKE\" and print \"Bramble hears you!\".\n"
+          },
+          "referenceSolution": "is_asleep = False\nstatus = \"QUIET\"\nif not is_asleep:\n    status = \"AWAKE\"\n    print(\"Bramble hears you!\")\n",
+          "testCode": "assert status == \"AWAKE\", f'Expected \"AWAKE\", got {status!r}'\nassert OUTPUT.strip() == \"Bramble hears you!\", f'Expected \"Bramble hears you!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip nods: 'not flips False into True, so Python runs the indented lines!'",
+            "tier2_pattern": "if not is_asleep:\n    status = \"AWAKE\"\n    print(\"Bramble hears you!\")",
+            "tier3_walkthrough": "Add:\n    print(\"Bramble hears you!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-05-06",
+          "title": "Awaken Bramble (Logic & Strings Capstone)",
+          "storyPrompt": "Bramble's canopy vault captured a messy whisper: `\"  bramble wake  \"`. Clean it with `.strip().upper()`, then use `and` to check BOTH that it equals `\"BRAMBLE WAKE\"` AND has more than 5 letters!",
+          "objective": "Clean raw_chant = \"  bramble wake  \" into chant = raw_chant.strip().upper(). If (chant == \"BRAMBLE WAKE\") and (len(chant) > 5), set gate_open = True and print(\"Bramble is free!\").",
+          "concepts": [
+            "string_methods",
+            "boolean_logic",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\ngate_open = False\nif (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    # Print \"Bramble is free!\" here:\n    \n",
+            "standard": "raw_chant = \"  bramble wake  \"\ngate_open = False\n# Clean raw_chant into chant with .strip().upper(), then check with and to open gate and print \"Bramble is free!\"\n",
+            "challenge": "raw_chant = \"  bramble wake  \"\ngate_open = False\n# Normalize raw_chant into chant; if it equals \"BRAMBLE WAKE\" and len(chant) > 5, set gate_open = True and print \"Bramble is free!\".\n"
+          },
+          "referenceSolution": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\ngate_open = False\nif (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    print(\"Bramble is free!\")\n",
+          "testCode": "assert chant == \"BRAMBLE WAKE\", f'Expected \"BRAMBLE WAKE\", got {chant!r}'\nassert gate_open is True, 'Expected gate_open is True'\nassert OUTPUT.strip() == \"Bramble is free!\", f'Expected \"Bramble is free!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Clean the string first, then check both conditions with and!'",
+            "tier2_pattern": "if (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    print(\"Bramble is free!\")",
+            "tier3_walkthrough": "Add:\n    print(\"Bramble is free!\")"
           },
           "difficultyOverride": null
         }
@@ -584,26 +935,166 @@
         {
           "id": "trial-06-01",
           "title": "Diving Bell Air Gauge",
-          "storyPrompt": "Your diving bell starts with 60 air units and uses 12 units per minute for 3 minutes. Compute how much air remains and trigger the right alert!",
-          "objective": "Compute remaining_air = 60 - (12 * 3), then use if / elif / else to set alert to \"DANGER\" if remaining_air < 15, \"CAUTION\" if remaining_air < 30, or \"SAFE\" otherwise.",
+          "storyPrompt": "Welcome to the Sunken Crypt! Your diving bell starts with 60 air units and uses 12 units per minute for 3 minutes. Combine variables, math, and `if / elif / else` to display the right alert!",
+          "objective": "Compute remaining_air = 60 - (12 * 3), then use if / elif / else to set alert to \"DANGER\" (<15), \"CAUTION\" (<30), or \"SAFE\", and print(alert).",
           "concepts": [
             "variables",
             "basic_math",
-            "conditionals_elif_else"
+            "conditionals_elif_else",
+            "print_output"
           ],
-          "shardReward": 55,
+          "shardReward": 50,
           "unlockId": "cloak-tide",
           "starterCode": {
-            "explorer": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    # Set alert to \"SAFE\"\n    \n",
-            "standard": "# Compute remaining_air = 60 - (12 * 3), then set alert to DANGER (<15), CAUTION (<30), or SAFE\n",
-            "challenge": "# Calculate remaining_air after 3 minutes (12/min from 60) and set alert (DANGER / CAUTION / SAFE).\n"
+            "explorer": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    # Set alert to \"SAFE\":\n    \nprint(alert)\n",
+            "standard": "# Compute remaining_air = 60 - (12 * 3), set alert to DANGER (<15), CAUTION (<30), or SAFE, and print(alert)\n",
+            "challenge": "# Calculate remaining_air = 60 - (12 * 3), classify alert (DANGER / CAUTION / SAFE), and print(alert).\n"
           },
-          "referenceSolution": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    alert = \"SAFE\"\n",
-          "testCode": "assert remaining_air == 24, f'Expected remaining_air == 24, got {remaining_air}'\nassert alert == \"CAUTION\", f'Expected alert == \"CAUTION\", got {alert!r}'\n",
+          "referenceSolution": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    alert = \"SAFE\"\nprint(alert)\n",
+          "testCode": "assert remaining_air == 24, f'Expected 24, got {remaining_air!r}'\nassert alert == \"CAUTION\", f'Expected \"CAUTION\", got {alert!r}'\nassert OUTPUT.strip() == \"CAUTION\", f'Expected printed \"CAUTION\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip counts bubbles: '60 minus 36 leaves 24\u2014which branch does 24 fall into?'",
-            "tier2_pattern": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    alert = \"SAFE\"",
-            "tier3_walkthrough": "Finish the else branch with:\n    alert = \"SAFE\""
+            "tier2_pattern": "else:\n    alert = \"SAFE\"\nprint(alert)",
+            "tier3_walkthrough": "Inside else:, write:\n    alert = \"SAFE\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-06-02",
+          "title": "Normalize the Crypt Rune",
+          "storyPrompt": "Water-stained runes line the canal gate: `\"  TIDE  \"`. Clean it with `.strip().lower()`, then branch with `if / elif / else` to open the sluice valve!",
+          "objective": "Clean raw_rune = \"  TIDE  \" into rune = raw_rune.strip().lower(). If rune == \"tide\", set valve = \"OPEN\"; elif rune == \"stone\", set valve = \"SHUT\"; else set valve = \"WAIT\". Print(valve).",
+          "concepts": [
+            "string_methods",
+            "conditionals_elif_else",
+            "print_output"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw_rune = \"  TIDE  \"\nrune = raw_rune.strip().lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    # Set valve to \"WAIT\":\n    \nprint(valve)\n",
+            "standard": "raw_rune = \"  TIDE  \"\n# Clean into rune with .strip().lower(), set valve (\"tide\"->\"OPEN\", \"stone\"->\"SHUT\", else \"WAIT\"), and print(valve)\n",
+            "challenge": "raw_rune = \"  TIDE  \"\n# Normalize raw_rune to lowercase/trimmed rune, map to valve (OPEN/SHUT/WAIT), and print(valve).\n"
+          },
+          "referenceSolution": "raw_rune = \"  TIDE  \"\nrune = raw_rune.strip().lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
+          "testCode": "assert rune == \"tide\", f'Expected \"tide\", got {rune!r}'\nassert valve == \"OPEN\", f'Expected \"OPEN\", got {valve!r}'\nassert OUTPUT.strip() == \"OPEN\", f'Expected printed \"OPEN\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip splashes: '.strip().lower() turns \"  TIDE  \" into \"tide\"!'",
+            "tier2_pattern": "else:\n    valve = \"WAIT\"\nprint(valve)",
+            "tier3_walkthrough": "Inside else:, write:\n    valve = \"WAIT\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-06-03",
+          "title": "Twin Pressure Valves (and + Comparisons)",
+          "storyPrompt": "Two underwater pressure gauges guard the flooded bridge. BOTH `left_psi` and `right_psi` must be at least 30 for the seal to balance!",
+          "objective": "Given left_psi = 40, right_psi = 40, and seal = \"UNBALANCED\", if (left_psi >= 30) and (right_psi >= 30), set seal = \"BALANCED\" and print(seal).",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "boolean_logic",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\nif (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    # Print seal here:\n    \n",
+            "standard": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\n# If both left_psi >= 30 and right_psi >= 30, set seal = \"BALANCED\" and print(seal)\n",
+            "challenge": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\n# Balance seal and print it when both gauges are >= 30.\n"
+          },
+          "referenceSolution": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\nif (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    print(seal)\n",
+          "testCode": "assert seal == \"BALANCED\", f'Expected \"BALANCED\", got {seal!r}'\nassert OUTPUT.strip() == \"BALANCED\", f'Expected printed \"BALANCED\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip checks both dials: 'Pass seal (without quotes!) to print(seal).'",
+            "tier2_pattern": "if (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    print(seal)",
+            "tier3_walkthrough": "Add:\n    print(seal)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-06-04",
+          "title": "Flood Pump Emergency (or + Math)",
+          "storyPrompt": "Water is rising in the Lower Cistern! Add the two depth readings (`18 + 7`). If `depth > 20` OR `leak` is True, switch on the emergency pumps!",
+          "objective": "Set depth = 18 + 7, leak = False, and pump_on = False. If (depth > 20) or leak, set pump_on = True and print(\"Pumps active!\").",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "boolean_logic",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "depth = 18 + 7\nleak = False\npump_on = False\nif (depth > 20) or leak:\n    pump_on = True\n    # Print \"Pumps active!\" here:\n    \n",
+            "standard": "depth = 18 + 7\nleak = False\npump_on = False\n# If (depth > 20) or leak, set pump_on = True and print(\"Pumps active!\")\n",
+            "challenge": "# Compute depth = 18 + 7 with leak = False; if depth > 20 or leak, set pump_on = True and print \"Pumps active!\".\n"
+          },
+          "referenceSolution": "depth = 18 + 7\nleak = False\npump_on = False\nif (depth > 20) or leak:\n    pump_on = True\n    print(\"Pumps active!\")\n",
+          "testCode": "assert depth == 25, f'Expected depth == 25, got {depth!r}'\nassert pump_on is True, 'Expected pump_on is True'\nassert OUTPUT.strip() == \"Pumps active!\", f'Expected \"Pumps active!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip watches the gauge: '18 + 7 is 25, which is > 20, so the or condition is True!'",
+            "tier2_pattern": "if (depth > 20) or leak:\n    pump_on = True\n    print(\"Pumps active!\")",
+            "tier3_walkthrough": "Add:\n    print(\"Pumps active!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-06-05",
+          "title": "Crypt Ferry Weight Check",
+          "storyPrompt": "A wooden skiff carries 3 stone chests weighing 15 units each across the marsh. Multiply to find `total_weight`, then use `if / else` to make sure it is `<= 50`!",
+          "objective": "Set chests = 3, weight_each = 15, total_weight = chests * weight_each. If total_weight <= 50, set boat = \"SAFE\"; else set boat = \"TOO HEAVY\". Print(boat).",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    # Set boat to \"TOO HEAVY\":\n    \nprint(boat)\n",
+            "standard": "chests = 3\nweight_each = 15\n# Compute total_weight = chests * weight_each, set boat (\"SAFE\" if <= 50 else \"TOO HEAVY\"), and print(boat)\n",
+            "challenge": "chests = 3\nweight_each = 15\n# Multiply into total_weight, classify boat (\"SAFE\" <= 50 else \"TOO HEAVY\"), and print(boat).\n"
+          },
+          "referenceSolution": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    boat = \"TOO HEAVY\"\nprint(boat)\n",
+          "testCode": "assert total_weight == 45, f'Expected 45, got {total_weight!r}'\nassert boat == \"SAFE\", f'Expected \"SAFE\", got {boat!r}'\nassert OUTPUT.strip() == \"SAFE\", f'Expected printed \"SAFE\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip balances on the bow: '3 * 15 is 45, which is <= 50!'",
+            "tier2_pattern": "else:\n    boat = \"TOO HEAVY\"\nprint(boat)",
+            "tier3_walkthrough": "Inside else:, write:\n    boat = \"TOO HEAVY\""
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-06-06",
+          "title": "Release Mire (Sunken Crypt Capstone)",
+          "storyPrompt": "Mire's underwater bell-chamber needs BOTH enough bubble power (`5 * 6`) AND Mire's name cleaned into uppercase! Combine math, `.strip().upper()`, and `and` to free Mire!",
+          "objective": "Set bubbles = 5 * 6, call = \"  mire  \".strip().upper(), and mire_free = False. If (bubbles >= 25) and (call == \"MIRE\"), set mire_free = True and print(\"Mire is free!\").",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "string_methods",
+            "boolean_logic",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "bubbles = 5 * 6\ncall = \"  mire  \".strip().upper()\nmire_free = False\nif (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    # Print \"Mire is free!\" here:\n    \n",
+            "standard": "bubbles = 5 * 6\ncall = \"  mire  \".strip().upper()\nmire_free = False\n# If (bubbles >= 25) and (call == \"MIRE\"), set mire_free = True and print(\"Mire is free!\")\n",
+            "challenge": "# Compute bubbles = 5 * 6, normalize \"  mire  \" to call, and if bubbles >= 25 and call == \"MIRE\", set mire_free = True and print \"Mire is free!\".\n"
+          },
+          "referenceSolution": "bubbles = 5 * 6\ncall = \"  mire  \".strip().upper()\nmire_free = False\nif (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")\n",
+          "testCode": "assert bubbles == 30, f'Expected 30, got {bubbles!r}'\nassert call == \"MIRE\", f'Expected \"MIRE\", got {call!r}'\nassert mire_free is True, 'Expected mire_free is True'\nassert OUTPUT.strip() == \"Mire is free!\", f'Expected \"Mire is free!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers in a bubble helmet: '5 * 6 is 30 and call becomes \"MIRE\"\u2014both sides of and are True!'",
+            "tier2_pattern": "if (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")",
+            "tier3_walkthrough": "Add:\n    print(\"Mire is free!\")"
           },
           "difficultyOverride": null
         }

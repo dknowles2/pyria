@@ -699,16 +699,28 @@ export class WorldEngine {
       item.draw();
     }
 
-    // 3. Bit Restored Ambiance Particles
-    if (sparkRescued || pebbleRescued) {
+    // 3. Biome Ambiance Particles (per-Realm palette; subtle ambient glow or full Bit Restored radiance)
+    const BIOME_PARTICLE_RGB = {
+      'realm-01-meadow': '253, 224, 71',  // gold fireflies
+      'realm-02-ruins': '167, 243, 208',  // emerald dust motes
+      'realm-03-cavern': '251, 146, 60',  // glowing orange embers
+      'realm-04-hollow': '186, 230, 253', // icy-blue snowflakes
+      'realm-05-woods': '190, 242, 100',  // lime/gold wisps
+      'realm-06-crypt': '45, 212, 191',   // misty teal spores
+    };
+    const anyRescued = rescued.size > 0;
+    const isAtmosphericBiome = ['realm-03-cavern', 'realm-04-hollow', 'realm-05-woods', 'realm-06-crypt'].includes(
+      this.map.realmId
+    );
+    if (anyRescued || isAtmosphericBiome) {
+      const rgb = BIOME_PARTICLE_RGB[this.map.realmId] || '253, 224, 71';
+      const intensity = anyRescued ? 1.0 : 0.6;
       for (const p of this.particles) {
         const sx = p.x - camX;
         const sy = p.y - camY;
         if (sx < -8 || sy < -8 || sx > this.canvas.width + 8 || sy > this.canvas.height + 8) continue;
-        const alpha = 0.35 + 0.45 * Math.sin(this.time * 3.5 + p.phase);
-        ctx.fillStyle = this.map.realmId === 'realm-02-ruins'
-          ? `rgba(167, 243, 208, ${alpha.toFixed(2)})`
-          : `rgba(253, 224, 71, ${alpha.toFixed(2)})`;
+        const alpha = (0.3 + 0.48 * Math.sin(this.time * 3.5 + p.phase)) * intensity;
+        ctx.fillStyle = `rgba(${rgb}, ${alpha.toFixed(2)})`;
         ctx.fillRect(Math.round(sx), Math.round(sy), 4, 4);
       }
     }
