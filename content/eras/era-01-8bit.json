@@ -14,10 +14,10 @@
         "name": "Spark",
         "title": "Hatchling of the First Pulse",
         "element": "Lightning",
-        "rescueDialogue": "Bzzzt—thank you, Code-Tamer! My pixel wings are buzzing again! Here—take the First Bit and watch the grass come alive!"
+        "rescueDialogue": "Bzzzt\u2014thank you, Code-Tamer! My pixel wings are buzzing again! Here\u2014take the First Bit and watch the grass come alive!"
       },
       "miniVisualUpgrade": "Bit 1 Restored: Swaying 2-frame meadow grass and sparkling firefly pixels appear.",
-      "storyIntro": "Lord Null has drained Pyria down to flat 8-bit pixels! In Whispering Meadow, tiny lightning dragon Spark is trapped inside a silent rune cage. Pip nudges your spellbook—time to cast your first Python commands.",
+      "storyIntro": "Lord Null has drained Pyria down to flat 8-bit pixels! In Whispering Meadow, tiny lightning dragon Spark is trapped inside a silent rune cage. Pip nudges your spellbook\u2014time to cast your first Python commands.",
       "storyOutro": "With a joyful crackle, Spark bursts free and restores Bit 1! The meadow grass begins to sway in the breeze, and Bram waves from his Workshop.",
       "primaryConcepts": [
         "function_calls",
@@ -47,7 +47,7 @@
           "testCode": "assert OUTPUT.strip() == \"Hello, Pyria!\", f\"Expected 'Hello, Pyria!' but got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip whispers: 'Python uses print() to speak aloud, and text needs quotes around it!'",
-            "tier2_pattern": "Pattern: print(\"your message here\") — check capital H, the comma, capital P, and the exclamation mark!",
+            "tier2_pattern": "Pattern: print(\"your message here\") \u2014 check capital H, the comma, capital P, and the exclamation mark!",
             "tier3_walkthrough": "Type this exact line:\nprint(\"Hello, Pyria!\")"
           },
           "difficultyOverride": null
@@ -71,7 +71,7 @@
           "referenceSolution": "print(\"Wake up, Spark!\")\nprint(\"The meadow needs you!\")\n",
           "testCode": "lines = [line.strip() for line in OUTPUT.strip().splitlines()]\nassert len(lines) == 2, f\"Expected 2 lines of output, got {len(lines)}\"\nassert lines[0] == \"Wake up, Spark!\", f\"Line 1 was {lines[0]!r}\"\nassert lines[1] == \"The meadow needs you!\", f\"Line 2 was {lines[1]!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip hops between the two stones: 'You can use print() twice—one on each line!'",
+            "tier1_nudge": "Pip hops between the two stones: 'You can use print() twice\u2014one on each line!'",
             "tier2_pattern": "Write two lines:\nprint(\"First line\")\nprint(\"Second line\")",
             "tier3_walkthrough": "Write both lines exactly like this:\nprint(\"Wake up, Spark!\")\nprint(\"The meadow needs you!\")"
           },
@@ -102,6 +102,84 @@
             "tier3_walkthrough": "Type:\nprint(len(\"SPARKLIGHT\"))"
           },
           "difficultyOverride": null
+        },
+        {
+          "id": "trial-01-04",
+          "title": "Stitch the Dragon Banner",
+          "storyPrompt": "A torn cloth banner hangs over the Orchard Shrine. Combine two string pieces with + so the meadow knows your title!",
+          "objective": "Set prefix = \"Code-\" and title = \"Tamer\", combine them into banner = prefix + title, and print(banner).",
+          "concepts": [
+            "strings",
+            "variables",
+            "print_output"
+          ],
+          "shardReward": 30,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "prefix = \"Code-\"\ntitle = \"Tamer\"\n# Combine prefix and title with + into banner, then print(banner)\nbanner = \n",
+            "standard": "prefix = \"Code-\"\ntitle = \"Tamer\"\n# Create banner by joining prefix and title with +, then print it\n",
+            "challenge": "# Store \"Code-\" in prefix, \"Tamer\" in title, join them into banner, and print banner.\n"
+          },
+          "referenceSolution": "prefix = \"Code-\"\ntitle = \"Tamer\"\nbanner = prefix + title\nprint(banner)\n",
+          "testCode": "assert banner == \"Code-Tamer\", f'Expected banner == \"Code-Tamer\", got {banner!r}'\nassert OUTPUT.strip() == \"Code-Tamer\", f'Expected printed \"Code-Tamer\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip tugs the banner: 'You can glue two strings together in Python using the + sign!'",
+            "tier2_pattern": "banner = prefix + title\nprint(banner)",
+            "tier3_walkthrough": "Add these two lines:\nbanner = prefix + title\nprint(banner)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-01-05",
+          "title": "Count the Firefly Lanterns",
+          "storyPrompt": "Three firefly groves glow around the northern glade: 4 lanterns in the west, 7 in the east, and 5 in the north. Add them up to light the Sanctuary gate!",
+          "objective": "Create west_lanterns = 4, east_lanterns = 7, north_lanterns = 5, compute total_lanterns as their sum, and print(total_lanterns).",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\n# Add all three lantern variables into total_lanterns and print it\ntotal_lanterns = \n",
+            "standard": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\n# Sum the three counts into total_lanterns and print(total_lanterns)\n",
+            "challenge": "# Store 4, 7, and 5 in west_lanterns, east_lanterns, north_lanterns, sum into total_lanterns, and print it.\n"
+          },
+          "referenceSolution": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\ntotal_lanterns = west_lanterns + east_lanterns + north_lanterns\nprint(total_lanterns)\n",
+          "testCode": "assert total_lanterns == 16, f'Expected total_lanterns == 16, got {total_lanterns}'\nassert OUTPUT.strip() == \"16\", f'Expected printed \"16\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chases a firefly: 'Use + twice to add all three variables on one line!'",
+            "tier2_pattern": "total_lanterns = west_lanterns + east_lanterns + north_lanterns\nprint(total_lanterns)",
+            "tier3_walkthrough": "Write:\ntotal_lanterns = west_lanterns + east_lanterns + north_lanterns\nprint(total_lanterns)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-01-06",
+          "title": "Unseal Spark's Lightning Vault",
+          "storyPrompt": "Three lightning coils hum outside Spark's inner vault with power levels 18, 42, and 29. Find the strongest coil using max() and shout the unlock signal!",
+          "objective": "Given coil_a = 18, coil_b = 42, coil_c = 29, set peak_power = max(coil_a, coil_b, coil_c) and print(\"SPARK READY!\").",
+          "concepts": [
+            "function_calls",
+            "variables",
+            "print_output"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\npeak_power = max(coil_a, coil_b, coil_c)\n# Now print \"SPARK READY!\" to open the vault\n",
+            "standard": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\n# Use max() to find peak_power, then print \"SPARK READY!\"\n",
+            "challenge": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\n# Store the highest coil value in peak_power using max() and print \"SPARK READY!\".\n"
+          },
+          "referenceSolution": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\npeak_power = max(coil_a, coil_b, coil_c)\nprint(\"SPARK READY!\")\n",
+          "testCode": "assert peak_power == 42, f'Expected peak_power == 42, got {peak_power}'\nassert OUTPUT.strip() == \"SPARK READY!\", f'Expected \"SPARK READY!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip's scales crackle: 'max(a, b, c) picks the biggest number automatically!'",
+            "tier2_pattern": "peak_power = max(coil_a, coil_b, coil_c)\nprint(\"SPARK READY!\")",
+            "tier3_walkthrough": "Add:\nprint(\"SPARK READY!\")"
+          },
+          "difficultyOverride": null
         }
       ]
     },
@@ -114,7 +192,7 @@
         "name": "Pebble",
         "title": "Guardian of Ancient Stone",
         "element": "Earth",
-        "rescueDialogue": "Rumble-clack! You solved the ruins without breaking a single tile! Take Bit 2—feel the ground gain depth!"
+        "rescueDialogue": "Rumble-clack! You solved the ruins without breaking a single tile! Take Bit 2\u2014feel the ground gain depth!"
       },
       "miniVisualUpgrade": "Bit 2 Restored: Shaded 8-bit cliff edges, cracked ruin bricks, and tumbling dust particles.",
       "storyIntro": "Beyond the meadow lie the Mossy Ruins, where stone dragon Pebble sleeps under a heavy math-sealed archway. Elder Ada teaches you to store numbers in variables.",
@@ -199,6 +277,83 @@
             "tier3_walkthrough": "Add:\nshards_per_slot = shards // slots\nleftover_shards = shards % slots"
           },
           "difficultyOverride": null
+        },
+        {
+          "id": "trial-02-04",
+          "title": "Torchlight Fuel Formula",
+          "storyPrompt": "The Torchlight Gallery has 4 halls with 6 torches each, plus 5 bonus torches by the gate. Each torch needs 3 drops of ember-oil. Calculate the total fuel!",
+          "objective": "Given halls = 4, torches_per_hall = 6, bonus_torches = 5, compute total_torches = (halls * torches_per_hall) + bonus_torches and fuel_needed = total_torches * 3.",
+          "concepts": [
+            "variables",
+            "basic_math"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "halls = 4\ntorches_per_hall = 6\nbonus_torches = 5\ntotal_torches = (halls * torches_per_hall) + bonus_torches\n# Multiply total_torches by 3 to get fuel_needed\nfuel_needed = \n",
+            "standard": "halls = 4\ntorches_per_hall = 6\nbonus_torches = 5\n# Compute total_torches and fuel_needed (3 oil drops per torch)\n",
+            "challenge": "halls = 4\ntorches_per_hall = 6\nbonus_torches = 5\n# Calculate total_torches across all halls plus bonus torches, then fuel_needed at 3 per torch.\n"
+          },
+          "referenceSolution": "halls = 4\ntorches_per_hall = 6\nbonus_torches = 5\ntotal_torches = (halls * torches_per_hall) + bonus_torches\nfuel_needed = total_torches * 3\n",
+          "testCode": "assert total_torches == 29, f'Expected total_torches == 29, got {total_torches}'\nassert fuel_needed == 87, f'Expected fuel_needed == 87, got {fuel_needed}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts on his claws: 'First find total_torches (4 * 6 + 5 = 29), then multiply by 3!'",
+            "tier2_pattern": "total_torches = (halls * torches_per_hall) + bonus_torches\nfuel_needed = total_torches * 3",
+            "tier3_walkthrough": "Set:\nfuel_needed = total_torches * 3"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-02-05",
+          "title": "Carve the Golem's Nameplate",
+          "storyPrompt": "A stone golem guards the upper chasm bridge. Carve its bronze nameplate by combining its name string with its Realm number using str()!",
+          "objective": "Given golem_name = \"PEBBLE\" and ruin_level = 2, set plate = golem_name + \" #\" + str(ruin_level) and print(plate).",
+          "concepts": [
+            "variables",
+            "strings",
+            "function_calls"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "golem_name = \"PEBBLE\"\nruin_level = 2\n# Convert ruin_level with str() so you can join it with strings!\nplate = golem_name + \" #\" + str(???)\nprint(plate)\n",
+            "standard": "golem_name = \"PEBBLE\"\nruin_level = 2\n# Build plate as \"PEBBLE #2\" using str(ruin_level), then print(plate)\n",
+            "challenge": "golem_name = \"PEBBLE\"\nruin_level = 2\n# Assemble plate = \"PEBBLE #2\" from the variables using str() and print it.\n"
+          },
+          "referenceSolution": "golem_name = \"PEBBLE\"\nruin_level = 2\nplate = golem_name + \" #\" + str(ruin_level)\nprint(plate)\n",
+          "testCode": "assert plate == \"PEBBLE #2\", f'Expected plate == \"PEBBLE #2\", got {plate!r}'\nassert OUTPUT.strip() == \"PEBBLE #2\", f'Expected printed \"PEBBLE #2\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip warns: 'Python can only + two strings together\u2014wrap the number in str(ruin_level) first!'",
+            "tier2_pattern": "plate = golem_name + \" #\" + str(ruin_level)\nprint(plate)",
+            "tier3_walkthrough": "Write:\nplate = golem_name + \" #\" + str(ruin_level)\nprint(plate)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-02-06",
+          "title": "Unlock Pebble's Inner Sanctum",
+          "storyPrompt": "Two giant stone counterweights hang at 19 and 34. Use abs() to measure the exact positive gap between them, then compute the sanctum lock code!",
+          "objective": "Given stone_a = 19 and stone_b = 34, compute gap = abs(stone_a - stone_b) and vault_code = (gap * 4) + 10, then print(vault_code).",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "function_calls"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "stone_a = 19\nstone_b = 34\ngap = abs(stone_a - stone_b)\n# Multiply gap by 4 and add 10 to get vault_code, then print(vault_code)\nvault_code = \n",
+            "standard": "stone_a = 19\nstone_b = 34\n# Use abs(stone_a - stone_b) for gap, compute vault_code = (gap * 4) + 10, and print it\n",
+            "challenge": "stone_a = 19\nstone_b = 34\n# Find the positive difference gap with abs(), compute vault_code = (gap * 4) + 10, and print it.\n"
+          },
+          "referenceSolution": "stone_a = 19\nstone_b = 34\ngap = abs(stone_a - stone_b)\nvault_code = (gap * 4) + 10\nprint(vault_code)\n",
+          "testCode": "assert gap == 15, f'Expected gap == 15, got {gap}'\nassert vault_code == 70, f'Expected vault_code == 70, got {vault_code}'\nassert OUTPUT.strip() == \"70\", f'Expected printed \"70\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'abs() turns negative numbers positive\u2014so abs(19 - 34) gives 15!'",
+            "tier2_pattern": "gap = abs(stone_a - stone_b)\nvault_code = (gap * 4) + 10\nprint(vault_code)",
+            "tier3_walkthrough": "Add:\nvault_code = (gap * 4) + 10\nprint(vault_code)"
+          },
+          "difficultyOverride": null
         }
       ]
     },
@@ -211,7 +366,7 @@
         "name": "Emberwing",
         "title": "Sovereign of Living Flame",
         "element": "Fire",
-        "rescueDialogue": "WHOOSH! You stood firm against the magma locks! Take Bit 3—let the caverns glow with warm firelight!"
+        "rescueDialogue": "WHOOSH! You stood firm against the magma locks! Take Bit 3\u2014let the caverns glow with warm firelight!"
       },
       "miniVisualUpgrade": "Bit 3 Restored: Dynamic warm torchlight palette swaps and rising glowing ember pixels.",
       "storyIntro": "Deep beneath the ruins glows Cinder Cavern. Majestic flame dragon Emberwing is chained above a bubbling magma pool. Only True/False logic and if-statements can cool the locks.",
@@ -310,7 +465,7 @@
         "name": "Glacier",
         "title": "Keeper of Crystal Frost",
         "element": "Ice",
-        "rescueDialogue": "Cool precision, Code-Tamer! You chose the exact right branch. Take Bit 4—let the frost crystals sparkle!"
+        "rescueDialogue": "Cool precision, Code-Tamer! You chose the exact right branch. Take Bit 4\u2014let the frost crystals sparkle!"
       },
       "miniVisualUpgrade": "Bit 4 Restored: Falling pixel snowflakes and reflective ice-tile highlights.",
       "storyIntro": "An icy canyon chills the northern border of the 8-Bit Flatlands. Ice dragon Glacier is sealed behind three temperature runes that respond to if, elif, and else.",
@@ -356,7 +511,7 @@
         "name": "Bramble",
         "title": "Whisperer of the Canopy",
         "element": "Forest",
-        "rescueDialogue": "Rustle-roar! You untangled the forest echoes cleanly! Take Bit 5—hear the woods sing again!"
+        "rescueDialogue": "Rustle-roar! You untangled the forest echoes cleanly! Take Bit 5\u2014hear the woods sing again!"
       },
       "miniVisualUpgrade": "Bit 5 Restored: Layered canopy shadows and fluttering leaf sprites.",
       "storyIntro": "In Echo Woods, gnarled trees scramble every password into messy spaces and lowercase letters. Forest dragon Bramble needs string methods and boolean logic to hear you clearly.",
@@ -403,7 +558,7 @@
         "name": "Mire",
         "title": "Warden of the Deep Marsh",
         "element": "Water",
-        "rescueDialogue": "Splash! Your air calculations kept us both afloat! Take Bit 6—watch the waters ripple!"
+        "rescueDialogue": "Splash! Your air calculations kept us both afloat! Take Bit 6\u2014watch the waters ripple!"
       },
       "miniVisualUpgrade": "Bit 6 Restored: Animated 3-frame water tiles and rising bubble pixels.",
       "storyIntro": "Flooded halls lie beneath Echo Woods. Water dragon Mire is sealed inside an underwater bell-chamber where math and multi-branch logic control the air valves.",
@@ -435,7 +590,7 @@
           "referenceSolution": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    alert = \"SAFE\"\n",
           "testCode": "assert remaining_air == 24, f'Expected remaining_air == 24, got {remaining_air}'\nassert alert == \"CAUTION\", f'Expected alert == \"CAUTION\", got {alert!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip counts bubbles: '60 minus 36 leaves 24—which branch does 24 fall into?'",
+            "tier1_nudge": "Pip counts bubbles: '60 minus 36 leaves 24\u2014which branch does 24 fall into?'",
             "tier2_pattern": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    alert = \"SAFE\"",
             "tier3_walkthrough": "Finish the else branch with:\n    alert = \"SAFE\""
           },
@@ -452,10 +607,10 @@
         "name": "Gale",
         "title": "Sovereign of the Sky-Winds",
         "element": "Wind",
-        "rescueDialogue": "Whoooosh! Loops make you unstoppable, Code-Tamer! Take Bit 7—the skies above Pyria are clearing!"
+        "rescueDialogue": "Whoooosh! Loops make you unstoppable, Code-Tamer! Take Bit 7\u2014the skies above Pyria are clearing!"
       },
       "miniVisualUpgrade": "Bit 7 Restored: Parallax drifting pixel clouds and wind-streak particle trails.",
-      "storyIntro": "Atop the jagged Obsidian Keep, wind dragon Gale is bound by five spinning storm turbines. Writing the same command five times is too slow—time for Python for-loops!",
+      "storyIntro": "Atop the jagged Obsidian Keep, wind dragon Gale is bound by five spinning storm turbines. Writing the same command five times is too slow\u2014time for Python for-loops!",
       "storyOutro": "Gale unleashes a joyful tailwind and restores Bit 7! Real Python tracebacks now appear alongside Pip's hints so you can debug like a master.",
       "primaryConcepts": [
         "for_loops",
@@ -486,7 +641,7 @@
           "referenceSolution": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")\n",
           "testCode": "assert total_wind == 15, f'Expected total_wind == 15, got {total_wind}'\nlines = [line.strip() for line in OUTPUT.strip().splitlines()]\nassert lines == [\"Turbine ready!\"] * 5, f'Expected 5 \"Turbine ready!\" lines, got {lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip spins in a circle: 'range(1, 6) gives you 1, 2, 3, 4, 5—remember it stops right before 6!'",
+            "tier1_nudge": "Pip spins in a circle: 'range(1, 6) gives you 1, 2, 3, 4, 5\u2014remember it stops right before 6!'",
             "tier2_pattern": "for power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")",
             "tier3_walkthrough": "Inside the loop, indent and add:\n    print(\"Turbine ready!\")"
           },
@@ -503,11 +658,11 @@
         "name": "Nova",
         "title": "Keeper of the Eighth Bit",
         "element": "Starlight",
-        "rescueDialogue": "ALL EIGHT BITS ARE WHOLE! Hold tight, Code-Tamer—Pyria is evolving into the 16-Bit Era!"
+        "rescueDialogue": "ALL EIGHT BITS ARE WHOLE! Hold tight, Code-Tamer\u2014Pyria is evolving into the 16-Bit Era!"
       },
-      "miniVisualUpgrade": "Bit 8 Restored — ERA UPGRADE! The entire world flashes with starlight and upgrades from 8-Bit NES graphics to lush 16-Bit SNES pixel art!",
+      "miniVisualUpgrade": "Bit 8 Restored \u2014 ERA UPGRADE! The entire world flashes with starlight and upgrades from 8-Bit NES graphics to lush 16-Bit SNES pixel art!",
       "storyIntro": "Lord Null waits inside his floating Pixel Citadel, holding the eighth dragon Nova hostage behind an 8-Bit Barrier. Combine variables, math, conditionals, and loops to shatter it!",
-      "storyOutro": "Nova's starlight unites all eight rescued dragons! Lord Null retreats across the sea as Pyria blooms into 16-Bit color—welcome to the Sunken Isles!",
+      "storyOutro": "Nova's starlight unites all eight rescued dragons! Lord Null retreats across the sea as Pyria blooms into 16-Bit color\u2014welcome to the Sunken Isles!",
       "primaryConcepts": [
         "variables",
         "basic_math",
