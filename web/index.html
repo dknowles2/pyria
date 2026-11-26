@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyria: Return of the Bits</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- ==================== SCREEN 1: TITLE & SAVE PICKER ==================== -->
+    <section id="screen-title" class="screen active">
+      <div class="title-shell">
+        <header class="title-hero">
+          <div class="title-badge">PYTHON ADVENTURE RPG</div>
+          <h1 class="game-title">PYRIA</h1>
+          <p class="game-subtitle">Return of the Bits</p>
+          <p class="title-blurb">
+            Lord Null drained Pyria down to 8-bit pixels! Cast real Python spells alongside your dragon sidekick
+            <strong>Pip</strong> to rescue the lost dragons and bring the world back to life.
+          </p>
+          <div class="title-preview-wrap">
+            <canvas id="title-preview-canvas" width="96" height="64" class="pixel-canvas"></canvas>
+          </div>
+          <div class="title-actions">
+            <button id="btn-new-adventure" class="btn btn-primary btn-lg">
+              ✦ Start New Adventure
+            </button>
+          </div>
+        </header>
+
+        <section class="saves-panel card">
+          <div class="panel-header">
+            <h2>Saved Heroes</h2>
+            <span id="saves-count" class="pill pill-muted">Loading...</span>
+          </div>
+          <div id="saves-list" class="saves-list">
+            <div class="empty-state">Checking Elder Ada's Great Compiler for saved heroes...</div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 2: PYTHON CHARACTER CREATION ==================== -->
+    <section id="screen-charcreate" class="screen">
+      <div class="charcreate-shell">
+        <header class="screen-topbar">
+          <button id="btn-charcreate-back" class="btn btn-ghost">← Back to Title</button>
+          <div class="topbar-title">
+            <span class="pill pill-gold">PROLOGUE</span>
+            <h2>Forge Your Code-Tamer Hero</h2>
+          </div>
+          <div id="charcreate-py-status" class="py-status pill pill-muted">Loading Python...</div>
+        </header>
+
+        <div class="charcreate-grid">
+          <!-- Left: Live Sprite Preview + Spellbook -->
+          <div class="card charcreate-preview-card">
+            <div class="preview-stage">
+              <canvas id="charcreate-canvas" width="160" height="112" class="pixel-canvas preview-canvas-lg"></canvas>
+              <div class="preview-controls">
+                <button id="btn-preview-turn" class="btn btn-sm btn-ghost" title="Turn hero">↻ Turn</button>
+                <button id="btn-preview-era" class="btn btn-sm btn-ghost" title="Preview 8-Bit vs 16-Bit">8-Bit View</button>
+              </div>
+            </div>
+
+            <div class="hero-summary-grid">
+              <div class="summary-chip">
+                <span class="chip-label">Hero Name</span>
+                <strong id="preview-val-name">Rowan</strong>
+              </div>
+              <div class="summary-chip">
+                <span class="chip-label">Skin Tone</span>
+                <strong id="preview-val-skin">warm_tan</strong>
+              </div>
+              <div class="summary-chip">
+                <span class="chip-label">Hairstyle</span>
+                <strong id="preview-val-hair">spiky</strong>
+              </div>
+              <div class="summary-chip">
+                <span class="chip-label">Tunic</span>
+                <strong id="preview-val-tunic">emerald</strong>
+              </div>
+            </div>
+
+            <div class="spellbook-box">
+              <h3>Starter Spellbook <span class="hint-sub">(click any pill to insert)</span></h3>
+              <div id="charcreate-spellbook" class="spell-pills"></div>
+            </div>
+          </div>
+
+          <!-- Right: Real Python Editor + Pip Output -->
+          <div class="card charcreate-editor-card">
+            <div class="editor-header">
+              <div>
+                <h3>Hero Forge Python Editor</h3>
+                <p class="muted-text">
+                  Edit the Python function calls below to customize your hero. Include <code>confirm_hero()</code> when you're ready to enter Whispering Meadow!
+                </p>
+              </div>
+            </div>
+
+            <textarea id="charcreate-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+
+            <div class="editor-actions">
+              <button id="btn-charcreate-run" class="btn btn-primary">▶ Run Python</button>
+              <button id="btn-charcreate-reset" class="btn btn-ghost">↺ Reset Starter Code</button>
+            </div>
+
+            <div id="charcreate-output" class="pip-console">
+              <div class="pip-console-header">🐉 Pip says:</div>
+              <div class="pip-console-body">
+                Try changing the name, skin, hair, or tunic inside the quotes and press <strong>Run Python</strong>!
+                Remove or comment out <code>confirm_hero()</code> if you want to preview first.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 3: OVERWORLD GAME ==================== -->
+    <section id="screen-game" class="screen">
+      <!-- Top HUD -->
+      <header class="hud-bar">
+        <div class="hud-left">
+          <div class="hud-portrait-wrap">
+            <canvas id="hud-portrait" width="32" height="32" class="pixel-canvas"></canvas>
+          </div>
+          <div class="hud-identity">
+            <div id="hud-hero-name" class="hud-hero-name">Code-Tamer</div>
+            <div class="hud-realm-row">
+              <span id="hud-era-badge" class="pill pill-blue">8-Bit Era</span>
+              <span id="hud-realm-name" class="hud-realm-name">Whispering Meadow</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-center">
+          <div class="hud-stat" title="Byte Shards">
+            <span class="stat-icon">✦</span>
+            <span id="hud-shards" class="stat-value">0</span>
+            <span class="stat-label">Shards</span>
+          </div>
+          <div id="hud-dragons" class="hud-dragons" title="Rescued Dragons">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <button id="btn-hud-workshop" class="btn btn-sm btn-gold" title="Open Bram's Workshop">
+            ⚒ Workshop
+          </button>
+          <button id="btn-hud-era-toggle" class="btn btn-sm btn-ghost" title="Toggle 8-Bit / 16-Bit Art Style">
+            8-Bit
+          </button>
+          <button id="btn-hud-mute" class="btn btn-sm btn-ghost" title="Toggle Sound">
+            🔊
+          </button>
+          <button id="btn-hud-menu" class="btn btn-sm btn-ghost" title="Return to Save Picker">
+            Saves
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Canvas Stage -->
+      <main class="world-stage">
+        <canvas id="world-canvas" class="pixel-canvas world-canvas"></canvas>
+
+        <!-- Region Banner -->
+        <div id="region-banner" class="region-banner hidden">Elder Ada's Clearing</div>
+
+        <!-- Contextual Interact Prompt -->
+        <button id="interact-prompt" class="interact-prompt hidden">
+          <span class="keycap">E</span>
+          <span id="interact-prompt-label">Talk to Elder Ada</span>
+        </button>
+
+        <!-- Toast Notifications -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- On-screen Touch / Click D-Pad & Action Button -->
+        <div class="touch-controls">
+          <div class="dpad" aria-label="Directional Pad">
+            <button class="dpad-btn dpad-up" data-dir="up" aria-label="Move Up">▲</button>
+            <button class="dpad-btn dpad-left" data-dir="left" aria-label="Move Left">◀</button>
+            <button class="dpad-btn dpad-center" data-action="interact" aria-label="Interact">●</button>
+            <button class="dpad-btn dpad-right" data-dir="right" aria-label="Move Right">▶</button>
+            <button class="dpad-btn dpad-down" data-dir="down" aria-label="Move Down">▼</button>
+          </div>
+          <button id="btn-touch-interact" class="btn btn-primary touch-interact-btn">
+            Interact (E)
+          </button>
+        </div>
+      </main>
+
+      <!-- Bottom Objective / Pip Bar -->
+      <footer class="bottom-bar">
+        <div class="pip-tip">
+          <span class="pip-tag">🐉 Pip</span>
+          <span id="hud-objective">Walk with WASD or Arrow keys. Press E or click nearby to talk to Elder Ada!</span>
+        </div>
+        <div id="hud-py-status" class="py-status pill pill-muted">Python: Loading...</div>
+      </footer>
+    </section>
+
+    <!-- ==================== MODAL LAYER ==================== -->
+    <div id="modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div id="modal-content" class="modal-card">
+        <!-- Rendered dynamically by modals.js -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/main.js"></script>
+</body>
+</html>

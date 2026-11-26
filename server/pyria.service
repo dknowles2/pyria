@@ -1,0 +1,21 @@
+[Unit]
+Description=Pyria Python-Learning RPG Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pyria
+Group=pyria
+WorkingDirectory=/opt/pyria
+ExecStart=/usr/bin/python3 /opt/pyria/server/app.py --host 127.0.0.1 --port 8080 --root /opt/pyria --db /var/lib/pyria/pyria.sqlite3
+Restart=on-failure
+RestartSec=3
+StateDirectory=pyria
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/pyria
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
