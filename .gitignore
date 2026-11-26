@@ -12,6 +12,9 @@ __pycache__/
 .venv/
 
 # Local runtime state / DBs
+data/
 *.db
 *.sqlite
 *.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
