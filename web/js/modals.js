@@ -511,7 +511,7 @@ export class ModalManager {
           audio.playSuccess();
           skipFlushOnClose = true;
           if (!isPractice && onDraftClear) {
-            onDraftClear();
+            onDraftClear({ skipPersist: true });
           }
           // Immediately persist solved state so closing/Escape can never lose progress!
           if (onSolved) {
