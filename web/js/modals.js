@@ -1,6 +1,7 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
 import { audio } from './audio.js';
+import { music } from './music.js';
 import { pyRunner } from './pyRunner.js';
 
 function escapeHtml(str) {
@@ -74,6 +75,7 @@ export class ModalManager {
     this.runCleanups();
     this.backdrop.classList.add('hidden');
     this.content.innerHTML = '';
+    music.setDucked(false);
     if (this.onPauseChange) this.onPauseChange(false);
   }
 
@@ -175,6 +177,7 @@ export class ModalManager {
   // ==================== PYTHON TRIAL MODAL ====================
   openTrialModal({ trial, realm, gameConfig, catalog, save, alreadySolved, unlockNote, onSolved, onAttempt }) {
     audio.playClick();
+    music.setDucked(true);
     const diff = resolveDifficulty(gameConfig, realm, trial);
     let currentMode = diff.mode || 'standard';
     let hintsUsed = 0;
@@ -441,6 +444,7 @@ export class ModalManager {
   // ==================== BRAM'S WORKSHOP MODAL ====================
   openWorkshopModal({ catalog, save, eraKey, onSaveUpdated }) {
     audio.playClick();
+    music.setDucked(true);
     let workingSave = structuredClone(save);
     let previewDirIndex = 0;
     const dirs = ['down', 'right', 'up', 'left'];

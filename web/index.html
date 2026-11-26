@@ -26,6 +26,9 @@
             <button id="btn-new-adventure" class="btn btn-primary btn-lg">
               ✦ Start New Adventure
             </button>
+            <button id="btn-title-music" class="btn btn-ghost btn-lg" title="Toggle Background Music">
+              🎵 Music: On
+            </button>
           </div>
         </header>
 
@@ -50,7 +53,12 @@
             <span class="pill pill-gold">PROLOGUE</span>
             <h2>Forge Your Code-Tamer Hero</h2>
           </div>
-          <div id="charcreate-py-status" class="py-status pill pill-muted">Loading Python...</div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="btn-charcreate-music" class="btn btn-sm btn-ghost" title="Toggle Background Music">
+              🎵 Music: On
+            </button>
+            <div id="charcreate-py-status" class="py-status pill pill-muted">Loading Python...</div>
+          </div>
         </header>
 
         <div class="charcreate-grid">
@@ -157,7 +165,10 @@
           <button id="btn-hud-era-toggle" class="btn btn-sm btn-ghost" title="Toggle 8-Bit / 16-Bit Art Style">
             8-Bit
           </button>
-          <button id="btn-hud-mute" class="btn btn-sm btn-ghost" title="Toggle Sound">
+          <button id="btn-hud-music" class="btn btn-sm btn-ghost" title="Toggle Background Music">
+            🎵 Music: On
+          </button>
+          <button id="btn-hud-mute" class="btn btn-sm btn-ghost" title="Toggle Sound Effects">
             🔊
           </button>
           <button id="btn-hud-menu" class="btn btn-sm btn-ghost" title="Return to Save Picker">

@@ -277,6 +277,14 @@ html, body {
   border-radius: var(--radius-md);
 }
 
+.title-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .saves-panel {
   padding: 20px;
 }
