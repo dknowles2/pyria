@@ -40,9 +40,46 @@ const state = {
   },
   ccDirIndex: 0,
   ccEraKey: '8bit',
+  ccAdvancedMode: false,
   ccAnimTimer: null,
   titleAnimTimer: null,
 };
+
+const SKIN_SWATCHES = {
+  ivory: '#fde6d2',
+  peach: '#f7c8a4',
+  olive: '#d5b283',
+  warm_tan: '#c68d5c',
+  bronze: '#965c36',
+  deep_brown: '#5b341d',
+};
+
+const TUNIC_SWATCHES = {
+  emerald: '#10b981',
+  crimson: '#ef4444',
+  navy: '#2563eb',
+  amber: '#f59e0b',
+  violet: '#8b5cf6',
+  slate: '#64748b',
+};
+
+function formatOptionLabel(val) {
+  return String(val || '')
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function buildHeroForgePython(appearance) {
+  const safeName = String(appearance.name || 'Rowan').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  return [
+    `set_name("${safeName}")`,
+    `preview_skin("${appearance.skin}")`,
+    `preview_hair("${appearance.hair}")`,
+    `preview_tunic("${appearance.tunic}")`,
+    'confirm_hero()',
+  ].join('\n') + '\n';
+}
 
 const DIRS = ['down', 'right', 'up', 'left'];
 
@@ -287,6 +324,147 @@ function updateCharCreateSummary() {
   $('#preview-val-skin').textContent = state.ccAppearance.skin;
   $('#preview-val-hair').textContent = state.ccAppearance.hair;
   $('#preview-val-tunic').textContent = state.ccAppearance.tunic;
+
+  const livePyEl = $('#cc-live-python-preview');
+  if (livePyEl) {
+    livePyEl.textContent = buildHeroForgePython(state.ccAppearance).trimEnd();
+  }
+}
+
+function syncVisualPickerSelection() {
+  const nameInput = $('#cc-name-input');
+  if (nameInput && nameInput.value !== state.ccAppearance.name) {
+    nameInput.value = state.ccAppearance.name || '';
+  }
+  document.querySelectorAll('#cc-skin-pills .picker-pill').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.value === state.ccAppearance.skin);
+  });
+  document.querySelectorAll('#cc-hair-pills .picker-pill').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.value === state.ccAppearance.hair);
+  });
+  document.querySelectorAll('#cc-tunic-pills .picker-pill').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.value === state.ccAppearance.tunic);
+  });
+}
+
+function setCharCreateMode(advanced) {
+  state.ccAdvancedMode = Boolean(advanced);
+  const toggleBtn = $('#btn-charcreate-advanced');
+  const visualPanel = $('#charcreate-visual-panel');
+  const advancedPanel = $('#charcreate-advanced-panel');
+  const spellbookBox = $('#charcreate-spellbook-box');
+  const titleEl = $('#forge-panel-title');
+  const subtitleEl = $('#forge-panel-subtitle');
+
+  if (state.ccAdvancedMode) {
+    // Sync latest visual selections into the Python editor
+    $('#charcreate-code').value = buildHeroForgePython(state.ccAppearance);
+    visualPanel?.classList.add('hidden');
+    advancedPanel?.classList.remove('hidden');
+    spellbookBox?.classList.remove('hidden');
+    if (toggleBtn) {
+      toggleBtn.textContent = '✨ Switch to Visual Mode';
+      toggleBtn.classList.add('active');
+      toggleBtn.setAttribute('aria-pressed', 'true');
+    }
+    if (titleEl) titleEl.textContent = 'Hero Forge Python Editor';
+    if (subtitleEl) {
+      subtitleEl.innerHTML =
+        'Edit the Python function calls below to customize your hero. Include <code>confirm_hero()</code> when ready!';
+    }
+  } else {
+    syncVisualPickerSelection();
+    updateCharCreateSummary();
+    advancedPanel?.classList.add('hidden');
+    spellbookBox?.classList.add('hidden');
+    visualPanel?.classList.remove('hidden');
+    if (toggleBtn) {
+      toggleBtn.textContent = '⚡ Advanced Mode: Write Python';
+      toggleBtn.classList.remove('active');
+      toggleBtn.setAttribute('aria-pressed', 'false');
+    }
+    if (titleEl) titleEl.textContent = 'Hero Forge';
+    if (subtitleEl) {
+      subtitleEl.textContent =
+        "Pick your hero's name and style below — Pip will write the Python preview for you!";
+    }
+  }
+}
+
+function buildVisualHeroPickers() {
+  const cc = state.catalog?.characterCreation;
+  if (!cc) return;
+
+  const renderGroup = (containerSel, values, field, swatches = null) => {
+    const container = $(containerSel);
+    if (!container) return;
+    container.innerHTML = '';
+    for (const val of values || []) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'picker-pill';
+      btn.dataset.value = val;
+      if (swatches && swatches[val]) {
+        const dot = document.createElement('span');
+        dot.className = 'swatch-dot';
+        dot.style.background = swatches[val];
+        btn.appendChild(dot);
+      }
+      const label = document.createElement('span');
+      label.textContent = formatOptionLabel(val);
+      btn.appendChild(label);
+      btn.addEventListener('click', () => {
+        audio.playClick();
+        state.ccAppearance[field] = val;
+        syncVisualPickerSelection();
+        updateCharCreateSummary();
+      });
+      container.appendChild(btn);
+    }
+  };
+
+  renderGroup('#cc-skin-pills', cc.allowedValues.skin, 'skin', SKIN_SWATCHES);
+  renderGroup('#cc-hair-pills', cc.allowedValues.hair, 'hair', null);
+  renderGroup('#cc-tunic-pills', cc.allowedValues.tunic, 'tunic', TUNIC_SWATCHES);
+}
+
+async function launchAdventureFromHeroForge(errorEl) {
+  const cleanedName = String(state.ccAppearance.name || '').trim();
+  if (cleanedName.length < 2 || cleanedName.length > 16) {
+    audio.playError();
+    if (errorEl) {
+      errorEl.textContent = 'Hero name must be between 2 and 16 characters long!';
+      errorEl.classList.remove('hidden');
+    }
+    return false;
+  }
+  if (errorEl) errorEl.classList.add('hidden');
+
+  if (state.ccAnimTimer) {
+    clearInterval(state.ccAnimTimer);
+    state.ccAnimTimer = null;
+  }
+
+  const newSavePayload = createDefaultSaveState(cleanedName, {
+    skin: state.ccAppearance.skin,
+    hair: state.ccAppearance.hair,
+    tunic: state.ccAppearance.tunic,
+  });
+
+  try {
+    const created = await createSave(newSavePayload);
+    audio.playSuccess();
+    await enterOverworld(created);
+    showToast(`Welcome to Pyria, ${created.heroName}!`);
+    return true;
+  } catch (err) {
+    audio.playError();
+    if (errorEl) {
+      errorEl.textContent = `Could not save hero: ${err.message}`;
+      errorEl.classList.remove('hidden');
+    }
+    return false;
+  }
 }
 
 function buildCharCreateSpellbook() {
@@ -365,7 +543,10 @@ function openCharCreateScreen() {
   state.ccDirIndex = 0;
   state.ccEraKey = '8bit';
   $('#btn-preview-era').textContent = '8-Bit View';
-  $('#charcreate-code').value = cc.starterCode || '';
+  $('#charcreate-code').value = cc.starterCode || buildHeroForgePython(state.ccAppearance);
+  $('#cc-visual-error')?.classList.add('hidden');
+  setCharCreateMode(false);
+  syncVisualPickerSelection();
   updateCharCreateSummary();
 
   const outEl = $('#charcreate-output');
@@ -408,6 +589,7 @@ async function runCharCreateCode() {
 
   if (res.appearance) {
     state.ccAppearance = { ...state.ccAppearance, ...res.appearance };
+    syncVisualPickerSelection();
     updateCharCreateSummary();
   }
 
@@ -729,6 +911,38 @@ function wireControls() {
     audio.playClick();
   });
 
+  $('#btn-charcreate-advanced').addEventListener('click', () => {
+    audio.playClick();
+    setCharCreateMode(!state.ccAdvancedMode);
+  });
+
+  $('#cc-name-input').addEventListener('input', (e) => {
+    state.ccAppearance.name = e.target.value;
+    $('#cc-visual-error')?.classList.add('hidden');
+    updateCharCreateSummary();
+  });
+
+  $('#cc-name-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('#btn-charcreate-start')?.click();
+    }
+  });
+
+  $('#btn-charcreate-start').addEventListener('click', async () => {
+    const startBtn = $('#btn-charcreate-start');
+    startBtn.disabled = true;
+    startBtn.textContent = 'Starting Adventure...';
+    const ok = await launchAdventureFromHeroForge($('#cc-visual-error'));
+    if (!ok) {
+      startBtn.disabled = false;
+      startBtn.textContent = '✦ Start Adventure';
+    } else {
+      startBtn.disabled = false;
+      startBtn.textContent = '✦ Start Adventure';
+    }
+  });
+
   $('#btn-charcreate-run').addEventListener('click', runCharCreateCode);
   $('#btn-charcreate-reset').addEventListener('click', () => {
     $('#charcreate-code').value = state.catalog?.characterCreation?.starterCode || '';
@@ -856,6 +1070,7 @@ async function init() {
     });
 
     wireControls();
+    buildVisualHeroPickers();
     buildCharCreateSpellbook();
     startTitlePreview();
     await refreshSavesList();
