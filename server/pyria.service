@@ -6,7 +6,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=%h/pyria
-ExecStart=/usr/bin/python3 %h/pyria/server/app.py --host 127.0.0.1 --port 8080 --root %h/pyria --db %h/.local/share/pyria/pyria.sqlite3
+ExecStart=/usr/bin/python3 %h/pyria/server/app.py --host 127.0.0.1 --port 8000 --root %h/pyria --db %h/.local/share/pyria/pyria.sqlite3
 Restart=on-failure
 RestartSec=3
 
