@@ -3,10 +3,70 @@
 // src/server/index.ts
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { readFile as readFile2 } from "node:fs/promises";
-import path2 from "node:path";
+import { readFile as readFile3 } from "node:fs/promises";
+import path3 from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+
+// src/server/assets.ts
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
+async function readPngAsDataUri(filePath) {
+  const buf = await readFile(filePath);
+  return `data:image/png;base64,${buf.toString("base64")}`;
+}
+async function loadSpriteBundle(assetsDir2) {
+  const spritesDir = path.join(assetsDir2, "sprites");
+  const manifestPath = path.join(spritesDir, "manifest.json");
+  const manifestRaw = await readFile(manifestPath, "utf8");
+  const manifest = JSON.parse(manifestRaw);
+  const images = {};
+  for (const eraFolder of ["8bit", "16bit"]) {
+    const dirPath = path.join(spritesDir, eraFolder);
+    let entries = [];
+    try {
+      entries = await readdir(dirPath);
+    } catch {
+      continue;
+    }
+    entries.sort();
+    for (const file of entries) {
+      if (!file.endsWith(".png")) continue;
+      const relKey = `${eraFolder}/${file}`;
+      images[relKey] = await readPngAsDataUri(path.join(dirPath, file));
+    }
+  }
+  return { manifest, images };
+}
+async function loadWorldBundle(contentDir2, assetsDir2) {
+  const tilesetsDir = path.join(assetsDir2, "tilesets");
+  const manifestPath = path.join(tilesetsDir, "manifest.json");
+  const manifestRaw = await readFile(manifestPath, "utf8");
+  const tilesetManifest = JSON.parse(manifestRaw);
+  const tilesetImages = {};
+  const expectedFiles = [
+    "8bit/meadow_ruins.png",
+    "16bit/meadow_ruins.png",
+    "8bit/npcs_and_dragons.png",
+    "16bit/npcs_and_dragons.png"
+  ];
+  for (const rel of expectedFiles) {
+    const full = path.join(tilesetsDir, rel);
+    tilesetImages[rel] = await readPngAsDataUri(full);
+  }
+  const mapsDir = path.join(contentDir2, "maps");
+  const maps = [];
+  try {
+    const entries = (await readdir(mapsDir)).sort();
+    for (const file of entries) {
+      if (!file.endsWith(".json") || file === "schema.json") continue;
+      const raw = await readFile(path.join(mapsDir, file), "utf8");
+      maps.push(JSON.parse(raw));
+    }
+  } catch {
+  }
+  return { tilesetManifest, tilesetImages, maps };
+}
 
 // src/server/pythonRunner.ts
 import { spawn } from "node:child_process";
@@ -193,12 +253,12 @@ async function runTrialTest(code, testCode, timeoutMs = 3e3) {
 // src/server/store.ts
 import {
   mkdir,
-  readdir,
-  readFile,
+  readdir as readdir2,
+  readFile as readFile2,
   rename,
   writeFile
 } from "node:fs/promises";
-import path from "node:path";
+import path2 from "node:path";
 var DEFAULT_GAME_CONFIG = {
   title: "Pyria",
   version: "0.1.0",
@@ -223,7 +283,7 @@ var DEFAULT_CATALOG = {
 };
 async function readJsonSafe(filePath) {
   try {
-    const raw = await readFile(filePath, "utf8");
+    const raw = await readFile2(filePath, "utf8");
     return JSON.parse(raw);
   } catch (err) {
     if (err && typeof err === "object" && "code" in err && err.code === "ENOENT") {
@@ -233,7 +293,7 @@ async function readJsonSafe(filePath) {
   }
 }
 async function writeJsonAtomic(filePath, data) {
-  const dir = path.dirname(filePath);
+  const dir = path2.dirname(filePath);
   await mkdir(dir, { recursive: true });
   const tmpPath = `${filePath}.tmp.${process.pid}.${Date.now()}`;
   await writeFile(tmpPath, JSON.stringify(data, null, 2) + "\n", "utf8");
@@ -242,19 +302,19 @@ async function writeJsonAtomic(filePath, data) {
 var ContentStore = class {
   contentDir;
   constructor(contentDir2) {
-    this.contentDir = path.resolve(contentDir2);
+    this.contentDir = path2.resolve(contentDir2);
   }
   get gamePath() {
-    return path.join(this.contentDir, "game.json");
+    return path2.join(this.contentDir, "game.json");
   }
   get catalogPath() {
-    return path.join(this.contentDir, "catalog.json");
+    return path2.join(this.contentDir, "catalog.json");
   }
   get erasDir() {
-    return path.join(this.contentDir, "eras");
+    return path2.join(this.contentDir, "eras");
   }
   eraPath(eraId) {
-    return path.join(this.erasDir, `${eraId}.json`);
+    return path2.join(this.erasDir, `${eraId}.json`);
   }
   async loadGameConfig() {
     const data = await readJsonSafe(this.gamePath);
@@ -301,7 +361,7 @@ var ContentStore = class {
     const cfg = gameConfig ?? (await this.loadGameConfig()).config;
     const ordered = [...cfg.eraOrder];
     try {
-      const files = await readdir(this.erasDir);
+      const files = await readdir2(this.erasDir);
       for (const file of files) {
         if (!file.endsWith(".json")) continue;
         const id = file.slice(0, -5);
@@ -611,7 +671,7 @@ var ContentStore = class {
 };
 
 // src/server/index.ts
-var __dirname = path2.dirname(fileURLToPath(import.meta.url));
+var __dirname = path3.dirname(fileURLToPath(import.meta.url));
 var APP_URI = "ui://pyria-builder/app.html";
 var MCP_APP_MIME = "text/html;profile=mcp-app";
 var PANE_META = {
@@ -626,21 +686,31 @@ var PANE_META = {
 var APP_ONLY_META = {
   ui: { visibility: ["app"] }
 };
-function parseContentDir(argv) {
+function parseCliFlag(argv, flagName) {
+  const prefix = `--${flagName}=`;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg.startsWith("--content-dir=")) {
-      return arg.slice("--content-dir=".length);
+    if (arg.startsWith(prefix)) {
+      return arg.slice(prefix.length);
     }
-    if (arg === "--content-dir" && argv[i + 1]) {
+    if (arg === `--${flagName}` && argv[i + 1]) {
       return argv[i + 1];
     }
   }
-  return process.env.PYRIA_CONTENT_DIR || "/Users/dknowles/src/pyria/content";
+  return null;
+}
+function resolveDirs(argv) {
+  const contentDir2 = path3.resolve(
+    parseCliFlag(argv, "content-dir") || process.env.PYRIA_CONTENT_DIR || "/Users/dknowles/src/pyria/content"
+  );
+  const assetsDir2 = path3.resolve(
+    parseCliFlag(argv, "assets-dir") || process.env.PYRIA_ASSETS_DIR || path3.resolve(contentDir2, "../assets")
+  );
+  return { contentDir: contentDir2, assetsDir: assetsDir2 };
 }
 async function loadAppHtml() {
-  const htmlPath = process.env.PYRIA_APP_HTML || path2.join(__dirname, "app.html");
-  return readFile2(htmlPath, "utf8");
+  const htmlPath = process.env.PYRIA_APP_HTML || path3.join(__dirname, "app.html");
+  return readFile3(htmlPath, "utf8");
 }
 var DifficultyModeSchema = z.enum(["explorer", "standard", "challenge"]);
 var DifficultyOverrideSchema = z.object({
@@ -700,17 +770,17 @@ function formatOverviewText(overview) {
   }
   return lines.join("\n");
 }
-var contentDir = parseContentDir(process.argv.slice(2));
+var { contentDir, assetsDir } = resolveDirs(process.argv.slice(2));
 var store = new ContentStore(contentDir);
 var server = new McpServer({
   name: "pyria-builder",
-  version: "1.0.0"
+  version: "1.1.0"
 });
 server.registerResource(
   "Pyria Builder App",
   APP_URI,
   {
-    description: "Interactive Pyria Builder sidecar UI for authoring Realms, Trials, Pip hints, and testing Python solutions.",
+    description: "Interactive Pyria Builder sidecar UI for authoring Realms, Trials, Pip hints, Hero sprites, and walkable Realm maps.",
     mimeType: MCP_APP_MIME,
     _meta: {
       ui: {
@@ -740,7 +810,7 @@ server.registerTool(
   "open_pyria_builder",
   {
     title: "Pyria Builder",
-    description: "Open the Pyria Builder sidecar UI to browse and edit Eras, Realms, Trials, Pip hints, Byte Shard rewards, and difficulty overrides. All arguments are optional.",
+    description: "Open the Pyria Builder sidecar UI to browse and edit Eras, Realms, Trials, Pip hints, Hero sprites, walkable maps, and difficulty overrides. All arguments are optional.",
     inputSchema: {
       eraId: z.string().optional().describe("Optional Era ID to select (e.g. era-01-8bit)"),
       realmId: z.string().optional().describe("Optional Realm ID to select"),
@@ -1077,6 +1147,72 @@ server.registerTool(
         catalog
       }
     };
+  }
+);
+server.registerTool(
+  "app_get_sprite_bundle",
+  {
+    title: "Get Sprite Bundle",
+    description: "App-only helper returning assets/sprites/manifest.json and all 8-bit/16-bit sprite PNGs as base64 data URIs.",
+    inputSchema: {},
+    _meta: APP_ONLY_META
+  },
+  async () => {
+    try {
+      const bundle = await loadSpriteBundle(assetsDir);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Loaded sprite bundle (${Object.keys(bundle.images).length} PNGs).`
+          }
+        ],
+        structuredContent: bundle
+      };
+    } catch (err) {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text",
+            text: `Failed to load sprite bundle from ${assetsDir}: ${err instanceof Error ? err.message : String(err)}`
+          }
+        ]
+      };
+    }
+  }
+);
+server.registerTool(
+  "app_get_world_bundle",
+  {
+    title: "Get World Bundle",
+    description: "App-only helper returning assets/tilesets/manifest.json, the 4 tileset/NPC PNGs as base64 data URIs, and all content/maps/*.json realm maps.",
+    inputSchema: {},
+    _meta: APP_ONLY_META
+  },
+  async () => {
+    try {
+      const bundle = await loadWorldBundle(contentDir, assetsDir);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Loaded world bundle (${Object.keys(bundle.tilesetImages).length} tileset PNGs, ${bundle.maps.length} maps).`
+          }
+        ],
+        structuredContent: bundle
+      };
+    } catch (err) {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text",
+            text: `Failed to load world bundle: ${err instanceof Error ? err.message : String(err)}`
+          }
+        ]
+      };
+    }
   }
 );
 async function main() {

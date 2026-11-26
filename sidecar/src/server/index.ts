@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import { loadSpriteBundle, loadWorldBundle } from "./assets.js";
 import { runTrialTest } from "./pythonRunner.js";
 import { ContentStore } from "./store.js";
 
@@ -25,17 +26,32 @@ const APP_ONLY_META = {
   ui: { visibility: ["app"] },
 };
 
-function parseContentDir(argv: string[]): string {
+function parseCliFlag(argv: string[], flagName: string): string | null {
+  const prefix = `--${flagName}=`;
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg.startsWith("--content-dir=")) {
-      return arg.slice("--content-dir=".length);
+    if (arg.startsWith(prefix)) {
+      return arg.slice(prefix.length);
     }
-    if (arg === "--content-dir" && argv[i + 1]) {
+    if (arg === `--${flagName}` && argv[i + 1]) {
       return argv[i + 1];
     }
   }
-  return process.env.PYRIA_CONTENT_DIR || "/Users/dknowles/src/pyria/content";
+  return null;
+}
+
+function resolveDirs(argv: string[]): { contentDir: string; assetsDir: string } {
+  const contentDir = path.resolve(
+    parseCliFlag(argv, "content-dir") ||
+      process.env.PYRIA_CONTENT_DIR ||
+      "/Users/dknowles/src/pyria/content"
+  );
+  const assetsDir = path.resolve(
+    parseCliFlag(argv, "assets-dir") ||
+      process.env.PYRIA_ASSETS_DIR ||
+      path.resolve(contentDir, "../assets")
+  );
+  return { contentDir, assetsDir };
 }
 
 async function loadAppHtml(): Promise<string> {
@@ -112,12 +128,12 @@ function formatOverviewText(
   return lines.join("\n");
 }
 
-const contentDir = parseContentDir(process.argv.slice(2));
+const { contentDir, assetsDir } = resolveDirs(process.argv.slice(2));
 const store = new ContentStore(contentDir);
 
 const server = new McpServer({
   name: "pyria-builder",
-  version: "1.0.0",
+  version: "1.1.0",
 });
 
 // UI Resource
@@ -126,7 +142,7 @@ server.registerResource(
   APP_URI,
   {
     description:
-      "Interactive Pyria Builder sidecar UI for authoring Realms, Trials, Pip hints, and testing Python solutions.",
+      "Interactive Pyria Builder sidecar UI for authoring Realms, Trials, Pip hints, Hero sprites, and walkable Realm maps.",
     mimeType: MCP_APP_MIME,
     _meta: {
       ui: {
@@ -159,7 +175,7 @@ server.registerTool(
   {
     title: "Pyria Builder",
     description:
-      "Open the Pyria Builder sidecar UI to browse and edit Eras, Realms, Trials, Pip hints, Byte Shard rewards, and difficulty overrides. All arguments are optional.",
+      "Open the Pyria Builder sidecar UI to browse and edit Eras, Realms, Trials, Pip hints, Hero sprites, walkable maps, and difficulty overrides. All arguments are optional.",
     inputSchema: {
       eraId: z.string().optional().describe("Optional Era ID to select (e.g. era-01-8bit)"),
       realmId: z.string().optional().describe("Optional Realm ID to select"),
@@ -511,7 +527,7 @@ server.registerTool(
   }
 );
 
-// 10. App-only helper to load catalog + NPCs for reference tab
+// 10. App-only helper: catalog + NPCs
 server.registerTool(
   "app_get_catalog",
   {
@@ -531,6 +547,78 @@ server.registerTool(
         catalog,
       },
     };
+  }
+);
+
+// 11. App-only helper: modular Hero & Pip sprite bundle (base64 data URIs)
+server.registerTool(
+  "app_get_sprite_bundle",
+  {
+    title: "Get Sprite Bundle",
+    description:
+      "App-only helper returning assets/sprites/manifest.json and all 8-bit/16-bit sprite PNGs as base64 data URIs.",
+    inputSchema: {},
+    _meta: APP_ONLY_META,
+  },
+  async () => {
+    try {
+      const bundle = await loadSpriteBundle(assetsDir);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Loaded sprite bundle (${Object.keys(bundle.images).length} PNGs).`,
+          },
+        ],
+        structuredContent: bundle as unknown as Record<string, unknown>,
+      };
+    } catch (err) {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text",
+            text: `Failed to load sprite bundle from ${assetsDir}: ${err instanceof Error ? err.message : String(err)}`,
+          },
+        ],
+      };
+    }
+  }
+);
+
+// 12. App-only helper: tileset PNGs + Realm tilemaps
+server.registerTool(
+  "app_get_world_bundle",
+  {
+    title: "Get World Bundle",
+    description:
+      "App-only helper returning assets/tilesets/manifest.json, the 4 tileset/NPC PNGs as base64 data URIs, and all content/maps/*.json realm maps.",
+    inputSchema: {},
+    _meta: APP_ONLY_META,
+  },
+  async () => {
+    try {
+      const bundle = await loadWorldBundle(contentDir, assetsDir);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Loaded world bundle (${Object.keys(bundle.tilesetImages).length} tileset PNGs, ${bundle.maps.length} maps).`,
+          },
+        ],
+        structuredContent: bundle as unknown as Record<string, unknown>,
+      };
+    } catch (err) {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text",
+            text: `Failed to load world bundle: ${err instanceof Error ? err.message : String(err)}`,
+          },
+        ],
+      };
+    }
   }
 );
 
