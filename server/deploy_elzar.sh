@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Deploy Pyria (web/, content/, assets/, server/) to elzar over SSH/rsync.
+# Deploy Pyria to elzar (~/pyria) and manage its user systemd service.
 # Usage:
-#   ./server/deploy_elzar.sh                # rsync files only
-#   ./server/deploy_elzar.sh --restart      # rsync + restart systemd service
+#   ./server/deploy_elzar.sh                # sync files only
+#   ./server/deploy_elzar.sh --restart      # sync + install/restart user systemd service + health check
 
 HOST="${PYRIA_DEPLOY_HOST:-elzar}"
-REMOTE_DIR="${PYRIA_REMOTE_DIR:-/opt/pyria}"
+REMOTE_DIR="${PYRIA_REMOTE_DIR:-\$HOME/pyria}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RESTART=false
 
@@ -16,22 +16,23 @@ if [[ "${1:-}" == "--restart" ]]; then
 fi
 
 echo "Syncing Pyria from ${REPO_ROOT} to ${HOST}:${REMOTE_DIR}..."
-rsync -avz --delete \
+ssh "${HOST}" "mkdir -p ${REMOTE_DIR} \$HOME/.local/share/pyria \$HOME/.config/systemd/user"
+
+COPYFILE_DISABLE=1 tar -C "${REPO_ROOT}" \
+  --no-xattrs \
   --exclude '.git' \
-  --exclude 'data/' \
-  --exclude 'sidecar/' \
-  --exclude '__pycache__/' \
+  --exclude 'data' \
+  --exclude 'sidecar' \
+  --exclude '__pycache__' \
   --exclude '*.pyc' \
   --exclude '.DS_Store' \
-  "${REPO_ROOT}/web" \
-  "${REPO_ROOT}/content" \
-  "${REPO_ROOT}/assets" \
-  "${REPO_ROOT}/server" \
-  "${HOST}:${REMOTE_DIR}/"
+  -czf - web content assets server | ssh "${HOST}" "tar -xzf - -C ${REMOTE_DIR}"
 
 if [[ "${RESTART}" == "true" ]]; then
-  echo "Restarting pyria.service on ${HOST}..."
-  ssh "${HOST}" "sudo systemctl restart pyria.service && sudo systemctl status --no-pager pyria.service"
+  echo "Installing & restarting user systemd service pyria.service on ${HOST}..."
+  ssh "${HOST}" "cp ${REMOTE_DIR}/server/pyria.service \$HOME/.config/systemd/user/pyria.service && systemctl --user daemon-reload && systemctl --user enable pyria.service && systemctl --user restart pyria.service && sleep 1 && systemctl --user status --no-pager pyria.service"
+  echo "Checking health endpoint on ${HOST}..."
+  ssh "${HOST}" "python3 -c \"import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8080/api/health', timeout=5).read().decode())\""
 else
-  echo "Sync complete. Pass --restart to restart pyria.service on ${HOST}."
+  echo "Sync complete. Pass --restart to install/restart pyria.service on ${HOST}."
 fi
