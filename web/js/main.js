@@ -14,6 +14,7 @@ import {
   createDefaultSaveState,
 } from './api.js';
 import { audio } from './audio.js';
+import { music } from './music.js';
 import { pyRunner } from './pyRunner.js';
 import { SpriteManager } from './sprites.js';
 import { WorldEngine } from './world.js';
@@ -48,10 +49,23 @@ const DIRS = ['down', 'right', 'up', 'left'];
 // ==================== DOM HELPERS ====================
 const $ = (sel) => document.querySelector(sel);
 
+function syncMusicButtons() {
+  const on = music.isEnabled();
+  const label = on ? '🎵 Music: On' : '🎵 Music: Off';
+  for (const sel of ['#btn-hud-music', '#btn-title-music', '#btn-charcreate-music']) {
+    const btn = $(sel);
+    if (btn) btn.textContent = label;
+  }
+}
+
 function showScreen(screenId) {
   document.querySelectorAll('.screen').forEach((s) => s.classList.remove('active'));
   const target = $(`#${screenId}`);
   if (target) target.classList.add('active');
+
+  if (screenId === 'screen-title' || screenId === 'screen-charcreate') {
+    music.setTheme('title');
+  }
 
   if (state.world) {
     state.world.setPaused(screenId !== 'screen-game');
@@ -451,6 +465,8 @@ async function loadRealm(realmId, spawnOverride = null) {
   }
   state.activeMap = mapData;
   state.world.loadMap(mapData, state.activeSave, spawnOverride);
+  music.setTheme(realm.id === 'realm-02-ruins' ? 'ruins' : 'meadow');
+  music.setEra(state.activeSave.visualEra === '16bit' ? '16bit' : '8bit');
   updateHud();
   showToast(`Entered ${realm.name}!`);
 }
@@ -704,6 +720,7 @@ function wireControls() {
   $('#btn-preview-era').addEventListener('click', () => {
     state.ccEraKey = state.ccEraKey === '8bit' ? '16bit' : '8bit';
     $('#btn-preview-era').textContent = state.ccEraKey === '16bit' ? '16-Bit View' : '8-Bit View';
+    music.setEra(state.ccEraKey);
     audio.playClick();
   });
 
@@ -721,10 +738,21 @@ function wireControls() {
     audio.playClick();
     state.activeSave.visualEra = state.activeSave.visualEra === '16bit' ? '8bit' : '16bit';
     state.world.setEraKey(state.activeSave.visualEra);
+    music.setEra(state.activeSave.visualEra);
     updateHud();
-    showToast(`Switched graphics to ${state.activeSave.visualEra === '16bit' ? '16-Bit SNES' : '8-Bit NES'} style!`);
+    showToast(`Switched graphics & music to ${state.activeSave.visualEra === '16bit' ? '16-Bit SNES' : '8-Bit NES'} style!`);
     await persistSave();
   });
+
+  for (const sel of ['#btn-hud-music', '#btn-title-music', '#btn-charcreate-music']) {
+    $(sel)?.addEventListener('click', () => {
+      music.toggle();
+      audio.playClick();
+      syncMusicButtons();
+    });
+  }
+  music.onChange(() => syncMusicButtons());
+  syncMusicButtons();
 
   $('#btn-hud-mute').addEventListener('click', () => {
     audio.toggleMute();
