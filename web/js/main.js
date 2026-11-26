@@ -320,11 +320,6 @@ function startTitlePreview() {
 
 // ==================== CHARACTER CREATION ====================
 function updateCharCreateSummary() {
-  $('#preview-val-name').textContent = state.ccAppearance.name || 'Code-Tamer';
-  $('#preview-val-skin').textContent = state.ccAppearance.skin;
-  $('#preview-val-hair').textContent = state.ccAppearance.hair;
-  $('#preview-val-tunic').textContent = state.ccAppearance.tunic;
-
   const livePyEl = $('#cc-live-python-preview');
   if (livePyEl) {
     livePyEl.textContent = buildHeroForgePython(state.ccAppearance).trimEnd();
@@ -352,42 +347,39 @@ function setCharCreateMode(advanced) {
   const toggleBtn = $('#btn-charcreate-advanced');
   const visualPanel = $('#charcreate-visual-panel');
   const advancedPanel = $('#charcreate-advanced-panel');
+  const livePyBox = $('#cc-live-python-box');
   const spellbookBox = $('#charcreate-spellbook-box');
+  const pyStatusEl = $('#charcreate-py-status');
   const titleEl = $('#forge-panel-title');
-  const subtitleEl = $('#forge-panel-subtitle');
 
   if (state.ccAdvancedMode) {
     // Sync latest visual selections into the Python editor
     $('#charcreate-code').value = buildHeroForgePython(state.ccAppearance);
     visualPanel?.classList.add('hidden');
+    livePyBox?.classList.add('hidden');
     advancedPanel?.classList.remove('hidden');
     spellbookBox?.classList.remove('hidden');
+    pyStatusEl?.classList.remove('hidden');
     if (toggleBtn) {
       toggleBtn.textContent = '✨ Switch to Visual Mode';
       toggleBtn.classList.add('active');
       toggleBtn.setAttribute('aria-pressed', 'true');
     }
-    if (titleEl) titleEl.textContent = 'Hero Forge Python Editor';
-    if (subtitleEl) {
-      subtitleEl.innerHTML =
-        'Edit the Python function calls below to customize your hero. Include <code>confirm_hero()</code> when ready!';
-    }
+    if (titleEl) titleEl.textContent = 'Hero Forge (Python)';
   } else {
     syncVisualPickerSelection();
     updateCharCreateSummary();
     advancedPanel?.classList.add('hidden');
     spellbookBox?.classList.add('hidden');
+    pyStatusEl?.classList.add('hidden');
     visualPanel?.classList.remove('hidden');
+    livePyBox?.classList.remove('hidden');
     if (toggleBtn) {
       toggleBtn.textContent = '⚡ Advanced Mode: Write Python';
       toggleBtn.classList.remove('active');
       toggleBtn.setAttribute('aria-pressed', 'false');
     }
     if (titleEl) titleEl.textContent = 'Hero Forge';
-    if (subtitleEl) {
-      subtitleEl.textContent =
-        "Pick your hero's name and style below — Pip will write the Python preview for you!";
-    }
   }
 }
 
@@ -1021,10 +1013,11 @@ function wireControls() {
     const els = [$('#charcreate-py-status'), $('#hud-py-status')];
     for (const el of els) {
       if (!el) continue;
+      const keepHidden = el.id === 'charcreate-py-status' && !state.ccAdvancedMode;
       el.textContent = status.label;
       el.className = `py-status pill ${
         status.state === 'ready' ? 'pill-green' : status.state === 'error' ? 'pill-rose' : 'pill-muted'
-      }`;
+      }${keepHidden ? ' hidden' : ''}`;
     }
   });
 }
