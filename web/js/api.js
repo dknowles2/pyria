@@ -102,15 +102,19 @@ export function normalizeSave(raw) {
 }
 
 export async function fetchConfig() {
-  return requestJson('/api/config');
+  return requestJson(`/api/config?_ts=${Date.now()}`, { cache: 'no-store' });
 }
 
 export async function fetchEra(eraId) {
-  return requestJson(`/content/eras/${encodeURIComponent(eraId)}.json`);
+  return requestJson(`/content/eras/${encodeURIComponent(eraId)}.json?_ts=${Date.now()}`, {
+    cache: 'no-store',
+  });
 }
 
 export async function fetchMap(realmId) {
-  return requestJson(`/content/maps/${encodeURIComponent(realmId)}.json`);
+  return requestJson(`/content/maps/${encodeURIComponent(realmId)}.json?_ts=${Date.now()}`, {
+    cache: 'no-store',
+  });
 }
 
 export async function fetchSpriteManifest() {
