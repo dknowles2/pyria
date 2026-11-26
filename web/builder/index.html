@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pyria Parent &amp; Builder Console</title>
-  <link rel="stylesheet" href="/builder/builder.css" />
+  <link rel="stylesheet" href="/builder/builder.css?v=20261126f" />
 </head>
 <body>
   <div id="builder-app">
@@ -127,6 +127,58 @@
           </div>
         </section>
       </div>
+
+      <!-- Realm Progress & Live Interactive Map Tracker -->
+      <section class="card tracker-section">
+        <div class="tracker-header">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <h2 style="margin:0; font-size:17px;">🗺️ Realm Progress &amp; Live Map Tracker</h2>
+            <span id="tracker-hero-pill" class="pill pill-blue">Hero: —</span>
+          </div>
+          <div class="tracker-controls">
+            <select id="tracker-realm-select" class="input input-sm" aria-label="Select Realm">
+              <option value="realm-01-meadow">1. Whispering Meadow</option>
+              <option value="realm-02-ruins">2. Mossy Ruins</option>
+            </select>
+            <div id="tracker-filter-segmented" class="segmented">
+              <button type="button" class="seg-btn active" data-tracker-filter="remaining">Remaining Only</button>
+              <button type="button" class="seg-btn" data-tracker-filter="all">All Items</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="tracker-summary-pills" class="tracker-summary-pills">
+          <span class="pill pill-muted">Loading Realm progress...</span>
+        </div>
+
+        <div class="tracker-grid">
+          <!-- Left: What's Left Checklist -->
+          <div id="tracker-checklist" class="tracker-checklist">
+            <div class="empty-state">Select a Hero to inspect remaining Trials, Chests, and Dragon Vault.</div>
+          </div>
+
+          <!-- Right: Live 64x48 Interactive Realm Map -->
+          <div class="tracker-map-col">
+            <div class="tracker-map-wrap">
+              <canvas id="tracker-map-canvas" width="512" height="384" class="tracker-map-canvas"></canvas>
+              <div id="tracker-map-empty" class="empty-state hidden" style="position:absolute; inset:16px; display:flex; align-items:center; justify-content:center;">
+                No interactive map file available for this Realm yet.
+              </div>
+            </div>
+            <div id="tracker-callout" class="tracker-callout">
+              Hover or click any checklist item or map pin to locate it!
+            </div>
+            <div class="tracker-legend">
+              <span><i class="leg-dot leg-hero"></i> Hero</span>
+              <span><i class="leg-dot leg-trial-open"></i> Unsolved Trial (!)</span>
+              <span><i class="leg-dot leg-trial-done"></i> Solved Trial (✓)</span>
+              <span><i class="leg-dot leg-chest"></i> Chest</span>
+              <span><i class="leg-dot leg-vault"></i> Dragon Vault</span>
+              <span><i class="leg-dot leg-npc"></i> NPC / Portal</span>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- ==================== TAB 2: STORY & TRIALS ==================== -->
@@ -338,6 +390,6 @@
     <div id="toast-container" class="toast-container"></div>
   </div>
 
-  <script type="module" src="/builder/builder.js"></script>
+  <script type="module" src="/builder/builder.js?v=20261126f"></script>
 </body>
 </html>

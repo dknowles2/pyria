@@ -18,6 +18,38 @@ const state = {
   selectedEraId: null,
   selectedRealmId: null,
   selectedTrialId: null,
+
+  // Realm Progress & Live Map Tracker state
+  mapsCache: new Map(),
+  trackerRealmId: 'realm-01-meadow',
+  trackerManualRealm: false,
+  trackerFilter: 'remaining', // 'remaining' | 'all'
+  trackerHoverEntityId: null,
+  trackerPinnedEntityId: null,
+  trackerAnimRaf: null,
+};
+
+const MAP_TILE_COLORS = {
+  grass: '#2d6a4f',
+  grass_flower: '#40916c',
+  dirt_path: '#b08968',
+  water: '#1d6fa5',
+  bridge_wood: '#d4a373',
+  bridge_broken: '#7f5539',
+  stone_floor: '#64748b',
+  stone_wall: '#334155',
+  tree: '#1b4332',
+  bush: '#2d5a27',
+  campfire: '#f97316',
+  anvil: '#94a3b8',
+  statue: '#cbd5e1',
+  mossy_gate_closed: '#9a3412',
+  mossy_gate_open: '#4d7c0f',
+  chest_closed: '#f59e0b',
+  chest_open: '#78716c',
+  vault_shrine: '#dc2626',
+  torch: '#fb923c',
+  portal: '#38bdf8',
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -198,8 +230,11 @@ function renderHeroCards() {
     card.addEventListener('click', () => {
       const id = card.dataset.saveId;
       state.selectedHeroId = state.selectedHeroId === id ? null : id;
+      state.trackerManualRealm = false;
+      state.trackerPinnedEntityId = null;
       renderHeroCards();
       renderActivityStream();
+      refreshRealmTracker();
     });
   });
 }
@@ -322,6 +357,7 @@ async function loadProgressFull() {
   renderSummaryStrip();
   renderHeroCards();
   renderActivityStream();
+  refreshRealmTracker();
 }
 
 async function pollLiveUpdates() {
@@ -360,6 +396,7 @@ async function pollLiveUpdates() {
     renderSummaryStrip();
     renderHeroCards();
     renderActivityStream(newIds);
+    refreshRealmTracker();
   } catch (err) {
     console.warn('Live poll paused/failed:', err.message);
   }
@@ -424,6 +461,8 @@ async function loadOverview() {
   renderRealmEditor();
   renderConceptHealth();
   renderHeroCards(); // refresh realm names/trial counts
+  populateTrackerRealmSelect();
+  refreshRealmTracker();
 }
 
 function renderEraRealmTree() {
@@ -799,6 +838,573 @@ function renderConceptHealth() {
   });
 }
 
+// ==================== REALM PROGRESS & LIVE MAP TRACKER ====================
+function getActiveTrackerSave() {
+  if (!state.saves.length) return null;
+  if (state.selectedHeroId) {
+    const found = state.saves.find((s) => s.id === state.selectedHeroId);
+    if (found) return found;
+  }
+  return state.saves[0];
+}
+
+function getSaveStateObj(save) {
+  if (!save) return {};
+  return save.state && typeof save.state === 'object' ? save.state : save;
+}
+
+function getSolvedSetForSave(save) {
+  const st = getSaveStateObj(save);
+  return new Set([
+    ...(Array.isArray(st.solvedTrials) ? st.solvedTrials : []),
+    ...(Array.isArray(st.completedTrials) ? st.completedTrials : []),
+  ]);
+}
+
+function populateTrackerRealmSelect() {
+  const sel = $('#tracker-realm-select');
+  if (!sel || !state.overview) return;
+  const options = [];
+  for (const era of state.overview.eras || []) {
+    for (const r of era.realms || []) {
+      options.push(`<option value="${escapeHtml(r.id)}">${r.number}. ${escapeHtml(r.name)}</option>`);
+    }
+  }
+  if (options.length) {
+    sel.innerHTML = options.join('');
+    sel.value = state.trackerRealmId;
+  }
+}
+
+async function fetchRealmMapCached(realmId) {
+  if (!realmId) return null;
+  if (state.mapsCache.has(realmId)) {
+    return state.mapsCache.get(realmId);
+  }
+  try {
+    const res = await fetch(`/content/maps/${encodeURIComponent(realmId)}.json`);
+    if (!res.ok) {
+      state.mapsCache.set(realmId, null);
+      return null;
+    }
+    const data = await res.json();
+    state.mapsCache.set(realmId, data);
+    return data;
+  } catch {
+    state.mapsCache.set(realmId, null);
+    return null;
+  }
+}
+
+function findRegionNameForTile(mapData, x, y) {
+  for (const r of mapData?.regions || []) {
+    if (x >= r.x && x < r.x + r.width && y >= r.y && y < r.y + r.height) {
+      return r.name;
+    }
+  }
+  return mapData?.name || 'Overworld';
+}
+
+function buildTrackerItems(mapData, realmMeta, save) {
+  const solved = getSolvedSetForSave(save);
+  const st = getSaveStateObj(save);
+  const openedChests = new Set(Array.isArray(st.openedChests) ? st.openedChests : []);
+  const rescuedDragons = new Set(Array.isArray(st.rescuedDragons) ? st.rescuedDragons : []);
+  const trialsById = new Map((realmMeta?.trials || []).map((t) => [t.id, t]));
+
+  const trials = [];
+  const chests = [];
+  const milestones = [];
+
+  for (const ent of mapData?.entities || []) {
+    const regionName = findRegionNameForTile(mapData, ent.x, ent.y);
+    if (ent.type === 'trial') {
+      const tObj = trialsById.get(ent.refId);
+      const isDone = solved.has(ent.refId);
+      trials.push({
+        id: ent.id,
+        entity: ent,
+        kind: 'trial',
+        title: tObj?.title || ent.label,
+        subtitle: `${ent.refId} · +${tObj?.shardReward ?? 0} 💎`,
+        regionName,
+        x: ent.x,
+        y: ent.y,
+        done: isDone,
+        statusLabel: isDone ? 'Solved' : 'Remaining',
+      });
+    } else if (ent.type === 'chest') {
+      const isDone = openedChests.has(ent.id);
+      chests.push({
+        id: ent.id,
+        entity: ent,
+        kind: 'chest',
+        title: ent.label,
+        subtitle: `+${ent.shardReward ?? 15} 💎 Byte Shards`,
+        regionName,
+        x: ent.x,
+        y: ent.y,
+        done: isDone,
+        statusLabel: isDone ? 'Opened' : 'Unopened',
+      });
+    } else if (ent.type === 'vault') {
+      const isRescued = rescuedDragons.has(ent.refId);
+      const isUnlocked = !ent.requiredTrialId || solved.has(ent.requiredTrialId);
+      milestones.push({
+        id: ent.id,
+        entity: ent,
+        kind: 'vault',
+        title: ent.label,
+        subtitle: realmMeta?.dragon?.name ? `Dragon: ${realmMeta.dragon.name}` : 'Dragon Vault',
+        regionName,
+        x: ent.x,
+        y: ent.y,
+        done: isRescued,
+        locked: !isRescued && !isUnlocked,
+        statusLabel: isRescued ? 'Rescued' : isUnlocked ? 'Ready to Rescue!' : 'Locked',
+      });
+    } else if (ent.type === 'portal') {
+      const isUnlocked = !ent.requiredTrialId || solved.has(ent.requiredTrialId);
+      milestones.push({
+        id: ent.id,
+        entity: ent,
+        kind: 'portal',
+        title: ent.label,
+        subtitle: `Destination: ${ent.refId || 'Next Realm'}`,
+        regionName,
+        x: ent.x,
+        y: ent.y,
+        done: false,
+        locked: !isUnlocked,
+        statusLabel: isUnlocked ? 'Active' : 'Locked',
+      });
+    }
+  }
+
+  return { trials, chests, milestones, all: [...trials, ...chests, ...milestones] };
+}
+
+function getActiveHighlightId() {
+  return state.trackerHoverEntityId || state.trackerPinnedEntityId || null;
+}
+
+function updateTrackerCallout(mapData, items) {
+  const calloutEl = $('#tracker-callout');
+  if (!calloutEl) return;
+  const targetId = getActiveHighlightId();
+  if (!targetId || !mapData) {
+    calloutEl.innerHTML = 'Hover or click any checklist item or map pin to locate it!';
+    return;
+  }
+  const item = items.all.find((i) => i.id === targetId);
+  if (item) {
+    calloutEl.innerHTML = `
+      <strong>${escapeHtml(item.title)}</strong>
+      <span class="pill ${item.done ? 'pill-green' : item.locked ? 'pill-rose' : 'pill-gold'}" style="margin:0 6px;">${escapeHtml(item.statusLabel)}</span>
+      <span class="hint-sub">${escapeHtml(item.regionName)} · (${item.x}, ${item.y})</span>
+    `;
+    return;
+  }
+  const ent = (mapData.entities || []).find((e) => e.id === targetId);
+  if (ent) {
+    const regionName = findRegionNameForTile(mapData, ent.x, ent.y);
+    calloutEl.innerHTML = `
+      <strong>${escapeHtml(ent.label)}</strong>
+      <span class="pill pill-violet" style="margin:0 6px;">${escapeHtml(ent.type)}</span>
+      <span class="hint-sub">${escapeHtml(regionName)} · (${ent.x}, ${ent.y})</span>
+    `;
+  }
+}
+
+function renderTrackerChecklist(mapData, realmMeta, save, items) {
+  const listEl = $('#tracker-checklist');
+  const summaryEl = $('#tracker-summary-pills');
+  if (!listEl || !summaryEl) return;
+
+  const trialsLeft = items.trials.filter((t) => !t.done).length;
+  const chestsLeft = items.chests.filter((c) => !c.done).length;
+  const vaultItem = items.milestones.find((m) => m.kind === 'vault');
+  const dragonName = realmMeta?.dragon?.name || 'Dragon';
+  const dragonStatus = vaultItem ? vaultItem.statusLabel : 'Unknown';
+
+  summaryEl.innerHTML = `
+    <span class="pill ${trialsLeft === 0 ? 'pill-green' : 'pill-gold'}">
+      ${trialsLeft === 0 ? `✓ All ${items.trials.length} Trials Solved` : `Trials: ${trialsLeft}/${items.trials.length} left`}
+    </span>
+    <span class="pill ${chestsLeft === 0 ? 'pill-green' : 'pill-gold'}">
+      ${chestsLeft === 0 ? `✓ All ${items.chests.length} Chests Opened` : `Chests: ${chestsLeft}/${items.chests.length} left`}
+    </span>
+    <span class="pill ${dragonStatus === 'Rescued' ? 'pill-green' : dragonStatus === 'Locked' ? 'pill-rose' : 'pill-blue'}">
+      🐉 ${escapeHtml(dragonName)}: ${escapeHtml(dragonStatus)}
+    </span>
+  `;
+
+  if (!mapData) {
+    listEl.innerHTML = '<div class="empty-state">This Realm does not have a playable overworld map yet.</div>';
+    return;
+  }
+
+  const filterFn = (item) => (state.trackerFilter === 'remaining' ? !item.done : true);
+  const highlightId = getActiveHighlightId();
+
+  const renderGroup = (title, groupItems) => {
+    const visible = groupItems.filter(filterFn);
+    if (!visible.length) return '';
+    return `
+      <div>
+        <div class="tracker-group-title">${escapeHtml(title)}</div>
+        <div style="display:flex; flex-direction:column; gap:5px;">
+          ${visible
+            .map((it) => {
+              const iconCls = it.done ? 'done' : it.locked ? 'locked' : 'open';
+              let icon = '○';
+              if (it.done) icon = '✓';
+              else if (it.kind === 'chest') icon = '📦';
+              else if (it.locked) icon = '🔒';
+              else if (it.kind === 'vault') icon = '🐉';
+              else if (it.kind === 'portal') icon = '🌀';
+              return `
+                <div class="tracker-row ${it.done ? 'done' : ''} ${highlightId === it.id ? 'highlighted' : ''}" data-entity-id="${escapeHtml(it.id)}">
+                  <div class="tracker-row-main">
+                    <span class="tracker-status-icon ${iconCls}">${icon}</span>
+                    <div style="min-width:0;">
+                      <div class="tracker-row-title">${escapeHtml(it.title)}</div>
+                      <div class="tracker-row-meta">${escapeHtml(it.subtitle)} · ${escapeHtml(it.regionName)}</div>
+                    </div>
+                  </div>
+                  <span class="tracker-coords">(${it.x}, ${it.y})</span>
+                </div>
+              `;
+            })
+            .join('')}
+        </div>
+      </div>
+    `;
+  };
+
+  const html = [
+    renderGroup('Python Trials', items.trials),
+    renderGroup('Byte Shard Chests', items.chests),
+    renderGroup('Dragon Vault & Portal', items.milestones),
+  ]
+    .filter(Boolean)
+    .join('');
+
+  listEl.innerHTML =
+    html ||
+    '<div class="empty-state">🎉 Everything in this Realm is complete! Switch to <strong>All Items</strong> to review.</div>';
+
+  listEl.querySelectorAll('.tracker-row').forEach((row) => {
+    const eid = row.dataset.entityId;
+    row.addEventListener('mouseenter', () => {
+      state.trackerHoverEntityId = eid;
+      syncChecklistHighlight();
+      updateTrackerCallout(mapData, items);
+      drawTrackerMap(mapData, save);
+    });
+    row.addEventListener('mouseleave', () => {
+      if (state.trackerHoverEntityId === eid) {
+        state.trackerHoverEntityId = null;
+        syncChecklistHighlight();
+        updateTrackerCallout(mapData, items);
+        drawTrackerMap(mapData, save);
+      }
+    });
+    row.addEventListener('click', () => {
+      state.trackerPinnedEntityId = state.trackerPinnedEntityId === eid ? null : eid;
+      syncChecklistHighlight();
+      updateTrackerCallout(mapData, items);
+      drawTrackerMap(mapData, save);
+    });
+  });
+}
+
+function syncChecklistHighlight() {
+  const activeId = getActiveHighlightId();
+  document.querySelectorAll('#tracker-checklist .tracker-row').forEach((row) => {
+    row.classList.toggle('highlighted', row.dataset.entityId === activeId);
+  });
+}
+
+function drawTrackerMap(mapData, save) {
+  const canvas = $('#tracker-map-canvas');
+  const emptyEl = $('#tracker-map-empty');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  if (!mapData) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    emptyEl?.classList.remove('hidden');
+    return;
+  }
+  emptyEl?.classList.add('hidden');
+
+  const tilePx = 8;
+  const targetW = mapData.width * tilePx;
+  const targetH = mapData.height * tilePx;
+  if (canvas.width !== targetW || canvas.height !== targetH) {
+    canvas.width = targetW;
+    canvas.height = targetH;
+  }
+
+  const solved = getSolvedSetForSave(save);
+  const st = getSaveStateObj(save);
+  const openedChests = new Set(Array.isArray(st.openedChests) ? st.openedChests : []);
+  const rescuedDragons = new Set(Array.isArray(st.rescuedDragons) ? st.rescuedDragons : []);
+
+  // Build dynamic tile overrides from Hero's solvedTrials
+  const overrides = new Map();
+  for (const ent of mapData.entities || []) {
+    if (!Array.isArray(ent.dynamicTiles)) continue;
+    const unlocked = Boolean(ent.refId && solved.has(ent.refId));
+    for (const dt of ent.dynamicTiles) {
+      overrides.set(`${dt.x},${dt.y}`, {
+        layer: dt.layer,
+        tile: unlocked ? dt.tileWhenUnlocked : dt.tileWhenLocked,
+      });
+    }
+  }
+
+  // 1. Render terrain tiles
+  for (let y = 0; y < mapData.height; y++) {
+    for (let x = 0; x < mapData.width; x++) {
+      const ov = overrides.get(`${x},${y}`);
+      let gTile = mapData.layers.ground[y][x];
+      if (ov && ov.layer === 'ground') gTile = ov.tile;
+      let dTile = mapData.layers.decor[y][x];
+      if (ov && ov.layer === 'decor') dTile = ov.tile;
+
+      const key = dTile && MAP_TILE_COLORS[dTile] ? dTile : gTile;
+      ctx.fillStyle = MAP_TILE_COLORS[key] || '#1e293b';
+      ctx.fillRect(x * tilePx, y * tilePx, tilePx, tilePx);
+    }
+  }
+
+  // 2. Subtle named region labels
+  ctx.save();
+  ctx.font = 'bold 10px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (const r of mapData.regions || []) {
+    const cx = (r.x + r.width / 2) * tilePx;
+    const cy = (r.y + r.height / 2) * tilePx;
+    ctx.fillStyle = 'rgba(8, 12, 23, 0.55)';
+    const w = Math.min(r.width * tilePx - 6, ctx.measureText(r.name).width + 10);
+    ctx.fillRect(cx - w / 2, cy - 7, w, 14);
+    ctx.fillStyle = 'rgba(238, 243, 255, 0.72)';
+    ctx.fillText(r.name, cx, cy);
+  }
+  ctx.restore();
+
+  const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 220);
+  const highlightId = getActiveHighlightId();
+
+  // 3. Draw entity pins
+  for (const ent of mapData.entities || []) {
+    const cx = (ent.x + 0.5) * tilePx;
+    const cy = (ent.y + 0.5) * tilePx;
+
+    if (ent.type === 'trial') {
+      const isDone = solved.has(ent.refId);
+      ctx.fillStyle = isDone ? '#059669' : '#eab308';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = isDone ? '#a7f3d0' : '#fef08a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = isDone ? '#ffffff' : '#1f1300';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(isDone ? '✓' : '!', cx, cy + 0.5);
+    } else if (ent.type === 'chest') {
+      const isOpen = openedChests.has(ent.id);
+      ctx.fillStyle = isOpen ? 'rgba(52, 211, 153, 0.55)' : '#f59e0b';
+      ctx.fillRect(cx - 4.5, cy - 4.5, 9, 9);
+      ctx.strokeStyle = isOpen ? '#a7f3d0' : '#fef3c7';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(cx - 4.5, cy - 4.5, 9, 9);
+    } else if (ent.type === 'vault') {
+      const isRescued = rescuedDragons.has(ent.refId);
+      ctx.fillStyle = isRescued ? '#f6c945' : '#ef4444';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('★', cx, cy + 0.5);
+    } else {
+      // NPC, Workshop, Portal -> blue/violet diamond
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = ent.type === 'portal' ? '#38bdf8' : '#a78bfa';
+      ctx.fillRect(-4, -4, 8, 8);
+      ctx.strokeStyle = '#eef3ff';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(-4, -4, 8, 8);
+      ctx.restore();
+    }
+
+    // Pulsing targeting ring when highlighted from checklist or map hover/click
+    if (highlightId === ent.id) {
+      ctx.strokeStyle = `rgba(255, 255, 255, ${(0.65 + 0.35 * pulse).toFixed(2)})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 11 + pulse * 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 15 + pulse * 4, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  // 4. Hero's live position (pulsing cyan/white ring when Hero is in this Realm)
+  const posObj = st.position || st.playerPos || null;
+  const heroRealmId = posObj?.realmId || st.realmId || 'realm-01-meadow';
+  if (save && heroRealmId === mapData.realmId && posObj && Number.isFinite(posObj.x) && Number.isFinite(posObj.y)) {
+    const hx = (posObj.x + 0.5) * tilePx;
+    const hy = (posObj.y + 0.5) * tilePx;
+    ctx.fillStyle = `rgba(56, 189, 248, ${(0.35 + 0.35 * pulse).toFixed(2)})`;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 8 + pulse * 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(hx, hy, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+let lastTrackerContext = { mapData: null, items: null, save: null };
+
+async function refreshRealmTracker() {
+  const save = getActiveTrackerSave();
+  const heroPill = $('#tracker-hero-pill');
+  const realmSelect = $('#tracker-realm-select');
+  const st = getSaveStateObj(save);
+
+  if (heroPill) {
+    heroPill.textContent = save ? `Hero: ${save.heroName || st.heroName || 'Hero'}` : 'Hero: None';
+  }
+
+  if (!state.trackerManualRealm && st.realmId) {
+    state.trackerRealmId = st.realmId;
+  }
+  if (realmSelect && realmSelect.value !== state.trackerRealmId) {
+    realmSelect.value = state.trackerRealmId;
+  }
+
+  const { realm } = getRealmMeta(state.trackerRealmId);
+  const mapData = await fetchRealmMapCached(state.trackerRealmId);
+  const items = buildTrackerItems(mapData, realm, save);
+  lastTrackerContext = { mapData, items, save };
+
+  renderTrackerChecklist(mapData, realm, save, items);
+  updateTrackerCallout(mapData, items);
+  drawTrackerMap(mapData, save);
+}
+
+function wireTrackerEvents() {
+  const realmSel = $('#tracker-realm-select');
+  realmSel?.addEventListener('change', () => {
+    state.trackerRealmId = realmSel.value;
+    state.trackerManualRealm = true;
+    state.trackerPinnedEntityId = null;
+    state.trackerHoverEntityId = null;
+    refreshRealmTracker();
+  });
+
+  document.querySelectorAll('#tracker-filter-segmented .seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.trackerFilter = btn.dataset.trackerFilter;
+      document.querySelectorAll('#tracker-filter-segmented .seg-btn').forEach((b) => {
+        b.classList.toggle('active', b.dataset.trackerFilter === state.trackerFilter);
+      });
+      refreshRealmTracker();
+    });
+  });
+
+  const canvas = $('#tracker-map-canvas');
+  if (canvas) {
+    const findNearestEntityOnCanvas = (e) => {
+      const { mapData } = lastTrackerContext;
+      if (!mapData) return null;
+      const rect = canvas.getBoundingClientRect();
+      const px = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const py = (e.clientY - rect.top) * (canvas.height / rect.height);
+      const tilePx = canvas.width / mapData.width;
+      let nearest = null;
+      let bestDist = 14;
+      for (const ent of mapData.entities || []) {
+        const ex = (ent.x + 0.5) * tilePx;
+        const ey = (ent.y + 0.5) * tilePx;
+        const d = Math.hypot(px - ex, py - ey);
+        if (d < bestDist) {
+          bestDist = d;
+          nearest = ent;
+        }
+      }
+      return nearest;
+    };
+
+    canvas.addEventListener('mousemove', (e) => {
+      const ent = findNearestEntityOnCanvas(e);
+      const nextId = ent ? ent.id : null;
+      if (nextId !== state.trackerHoverEntityId) {
+        state.trackerHoverEntityId = nextId;
+        syncChecklistHighlight();
+        updateTrackerCallout(lastTrackerContext.mapData, lastTrackerContext.items || { all: [] });
+        drawTrackerMap(lastTrackerContext.mapData, lastTrackerContext.save);
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      if (state.trackerHoverEntityId !== null) {
+        state.trackerHoverEntityId = null;
+        syncChecklistHighlight();
+        updateTrackerCallout(lastTrackerContext.mapData, lastTrackerContext.items || { all: [] });
+        drawTrackerMap(lastTrackerContext.mapData, lastTrackerContext.save);
+      }
+    });
+
+    canvas.addEventListener('click', (e) => {
+      const ent = findNearestEntityOnCanvas(e);
+      state.trackerPinnedEntityId = ent ? ent.id : null;
+      syncChecklistHighlight();
+      updateTrackerCallout(lastTrackerContext.mapData, lastTrackerContext.items || { all: [] });
+      drawTrackerMap(lastTrackerContext.mapData, lastTrackerContext.save);
+      if (ent) {
+        const row = document.querySelector(`#tracker-checklist .tracker-row[data-entity-id="${CSS.escape(ent.id)}"]`);
+        row?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  }
+
+  // Lightweight pulse animation for Hero dot & targeting ring when Live Progress tab is visible
+  const pulseTick = () => {
+    const liveTab = $('#tab-live');
+    if (liveTab?.classList.contains('active') && lastTrackerContext.mapData) {
+      drawTrackerMap(lastTrackerContext.mapData, lastTrackerContext.save);
+    }
+    state.trackerAnimRaf = requestAnimationFrame(pulseTick);
+  };
+  state.trackerAnimRaf = requestAnimationFrame(pulseTick);
+}
+
 // ==================== WIRE UI EVENTS ====================
 function wireEvents() {
   // Tabs
@@ -880,6 +1486,7 @@ function wireEvents() {
 // ==================== BOOTSTRAP ====================
 async function init() {
   wireEvents();
+  wireTrackerEvents();
   try {
     await Promise.all([loadOverview(), loadProgressFull()]);
   } catch (err) {
