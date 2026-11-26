@@ -19,7 +19,7 @@ import { pyRunner } from './pyRunner.js?v=20261126e';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126e';
 import { SpriteManager } from './sprites.js?v=20261126e';
 import { WorldEngine } from './world.js?v=20261126g';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126e';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126i';
 
 const state = {
   gameConfig: null,
@@ -205,7 +205,7 @@ function updateTrialDraft(save, trialId, code, { immediatePersist = false } = {}
   }
 }
 
-function clearTrialDraft(save, trialId) {
+function clearTrialDraft(save, trialId, { skipPersist = false } = {}) {
   if (!save || !trialId) return;
   if (draftPersistTimer) {
     clearTimeout(draftPersistTimer);
@@ -219,25 +219,39 @@ function clearTrialDraft(save, trialId) {
     delete local[trialId];
     writeLocalDrafts(save.id, local);
   }
-  persistSave().catch(() => {});
+  if (!skipPersist) {
+    persistSave().catch(() => {});
+  }
 }
 
 // ==================== PERSISTENCE ====================
-async function persistSave() {
-  if (!state.activeSave || !state.activeSave.id) return;
-  try {
-    if (state.world && state.activeMap) {
-      state.activeSave.position = {
-        realmId: state.activeMap.realmId,
-        x: Math.floor(state.world.hero.x),
-        y: Math.floor(state.world.hero.y),
-      };
-    }
-    const updated = await updateSave(state.activeSave.id, state.activeSave);
-    state.activeSave = { ...state.activeSave, ...updated };
-  } catch (err) {
-    console.warn('Could not persist save:', err);
-  }
+let persistQueue = Promise.resolve();
+
+function persistSave() {
+  if (!state.activeSave || !state.activeSave.id) return Promise.resolve();
+  persistQueue = persistQueue
+    .catch(() => {})
+    .then(async () => {
+      if (!state.activeSave || !state.activeSave.id) return;
+      try {
+        if (state.world && state.activeMap) {
+          state.activeSave.position = {
+            realmId: state.activeMap.realmId,
+            x: Math.floor(state.world.hero.x),
+            y: Math.floor(state.world.hero.y),
+          };
+        }
+        // Snapshot current in-memory save and send serially; never clobber newer local mutations!
+        const snapshot = JSON.parse(JSON.stringify(state.activeSave));
+        const updated = await updateSave(snapshot.id, snapshot);
+        if (state.activeSave && state.activeSave.id === snapshot.id && updated?.updatedAt) {
+          state.activeSave.updatedAt = updated.updatedAt;
+        }
+      } catch (err) {
+        console.warn('Could not persist save:', err);
+      }
+    });
+  return persistQueue;
 }
 
 function getSolvedTrialsSet(save) {
@@ -854,7 +868,7 @@ async function handleEntityInteract(entity) {
       savedDraft: alreadySolved ? null : getTrialDraft(save, trial.id),
       onDraftChange: (code) => updateTrialDraft(save, trial.id, code, { immediatePersist: false }),
       onDraftFlush: (code) => updateTrialDraft(save, trial.id, code, { immediatePersist: true }),
-      onDraftClear: () => clearTrialDraft(save, trial.id),
+      onDraftClear: (opts) => clearTrialDraft(save, trial.id, opts),
       onAttempt: (attempt) => {
         logAttempt(save.id, attempt).catch((err) => console.warn('Attempt log failed:', err));
       },
