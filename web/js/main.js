@@ -12,14 +12,14 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js';
-import { audio } from './audio.js';
-import { music, resolveRegionTheme } from './music.js';
-import { pyRunner } from './pyRunner.js';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js';
-import { SpriteManager } from './sprites.js';
-import { WorldEngine } from './world.js';
-import { ModalManager, attachCodeEditorKeys } from './modals.js';
+} from './api.js?v=20261126c';
+import { audio } from './audio.js?v=20261126c';
+import { music, resolveRegionTheme } from './music.js?v=20261126c';
+import { pyRunner } from './pyRunner.js?v=20261126c';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126c';
+import { SpriteManager } from './sprites.js?v=20261126c';
+import { WorldEngine } from './world.js?v=20261126c';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126c';
 
 const state = {
   gameConfig: null,
@@ -1126,6 +1126,15 @@ function wireControls() {
       centerY = rect.top + rect.height / 2;
     };
 
+    const applyVirtualDir = (dir) => {
+      if (!state.world) return;
+      if (typeof state.world.setVirtualDirection === 'function') {
+        state.world.setVirtualDirection(dir);
+      } else if (typeof state.world.setDpadDirection === 'function') {
+        state.world.setDpadDirection(dir);
+      }
+    };
+
     const updateStick = (clientX, clientY) => {
       const dx = clientX - centerX;
       const dy = clientY - centerY;
@@ -1137,11 +1146,11 @@ function wireControls() {
       nubEl.style.transform = `translate3d(${nx.toFixed(1)}px, ${ny.toFixed(1)}px, 0)`;
 
       if (dist < DEADZONE) {
-        state.world?.setVirtualDirection(null);
+        applyVirtualDir(null);
       } else if (Math.abs(dx) > Math.abs(dy)) {
-        state.world?.setVirtualDirection(dx < 0 ? 'left' : 'right');
+        applyVirtualDir(dx < 0 ? 'left' : 'right');
       } else {
-        state.world?.setVirtualDirection(dy < 0 ? 'up' : 'down');
+        applyVirtualDir(dy < 0 ? 'up' : 'down');
       }
     };
 
@@ -1150,7 +1159,7 @@ function wireControls() {
       mouseDragging = false;
       joystickEl.classList.remove('active');
       nubEl.style.transform = 'translate3d(0, 0, 0)';
-      state.world?.setVirtualDirection(null);
+      applyVirtualDir(null);
     };
 
     joystickEl.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -1171,33 +1180,30 @@ function wireControls() {
       { passive: false }
     );
 
-    joystickEl.addEventListener(
-      'touchmove',
-      (e) => {
-        e.preventDefault();
-        if (activeTouchId === null) return;
-        for (const t of e.changedTouches) {
-          if (t.identifier === activeTouchId) {
-            updateStick(t.clientX, t.clientY);
-            break;
-          }
-        }
-      },
-      { passive: false }
-    );
-
-    const endTouchStick = (e) => {
-      e.preventDefault();
+    const onWindowTouchMove = (e) => {
       if (activeTouchId === null) return;
-      for (const t of e.changedTouches) {
+      for (const t of e.touches) {
         if (t.identifier === activeTouchId) {
-          resetStick();
-          break;
+          e.preventDefault();
+          updateStick(t.clientX, t.clientY);
+          return;
         }
       }
     };
-    joystickEl.addEventListener('touchend', endTouchStick, { passive: false });
-    joystickEl.addEventListener('touchcancel', endTouchStick, { passive: false });
+
+    const endTouchStick = (e) => {
+      if (activeTouchId === null) return;
+      for (const t of e.changedTouches) {
+        if (t.identifier === activeTouchId) {
+          e.preventDefault();
+          resetStick();
+          return;
+        }
+      }
+    };
+    window.addEventListener('touchmove', onWindowTouchMove, { passive: false });
+    window.addEventListener('touchend', endTouchStick, { passive: false });
+    window.addEventListener('touchcancel', endTouchStick, { passive: false });
 
     // Desktop mouse drag support
     joystickEl.addEventListener('mousedown', (e) => {
