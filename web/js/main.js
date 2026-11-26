@@ -14,7 +14,7 @@ import {
   createDefaultSaveState,
 } from './api.js';
 import { audio } from './audio.js';
-import { music } from './music.js';
+import { music, resolveRegionTheme } from './music.js';
 import { pyRunner } from './pyRunner.js';
 import { SpriteManager } from './sprites.js';
 import { WorldEngine } from './world.js';
@@ -64,7 +64,7 @@ function showScreen(screenId) {
   if (target) target.classList.add('active');
 
   if (screenId === 'screen-title' || screenId === 'screen-charcreate') {
-    music.setTheme('title');
+    music.setTheme('title', { immediate: true });
   }
 
   if (state.world) {
@@ -465,7 +465,12 @@ async function loadRealm(realmId, spawnOverride = null) {
   }
   state.activeMap = mapData;
   state.world.loadMap(mapData, state.activeSave, spawnOverride);
-  music.setTheme(realm.id === 'realm-02-ruins' ? 'ruins' : 'meadow');
+  const startX = Math.floor(state.world.hero.x);
+  const startY = Math.floor(state.world.hero.y);
+  const startRegion = (mapData.regions || []).find(
+    (r) => startX >= r.x && startX < r.x + r.width && startY >= r.y && startY < r.y + r.height
+  );
+  music.setTheme(resolveRegionTheme(startRegion?.id, realm.id), { immediate: true });
   music.setEra(state.activeSave.visualEra === '16bit' ? '16bit' : '8bit');
   updateHud();
   showToast(`Entered ${realm.name}!`);
@@ -834,6 +839,9 @@ async function init() {
     let regionHideTimer = null;
     state.world = new WorldEngine($('#world-canvas'), state.sprites, {
       onRegionChange: (region) => {
+        if (state.activeRealm) {
+          music.setTheme(resolveRegionTheme(region?.id, state.activeRealm.id));
+        }
         const banner = $('#region-banner');
         if (!banner || !region) return;
         banner.textContent = region.name;
