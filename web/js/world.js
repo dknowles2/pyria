@@ -158,12 +158,14 @@ export class WorldEngine {
     };
 
     this._onResize = () => this.resizeCanvas();
+    this._onContextMenu = (e) => e.preventDefault();
 
     window.addEventListener('keydown', this._onKeyDown);
     window.addEventListener('keyup', this._onKeyUp);
     window.addEventListener('blur', this._onBlur);
     window.addEventListener('resize', this._onResize);
     this.canvas.addEventListener('click', this._onCanvasClick);
+    this.canvas.addEventListener('contextmenu', this._onContextMenu);
   }
 
   destroy() {
@@ -173,6 +175,7 @@ export class WorldEngine {
     window.removeEventListener('blur', this._onBlur);
     window.removeEventListener('resize', this._onResize);
     this.canvas.removeEventListener('click', this._onCanvasClick);
+    this.canvas.removeEventListener('contextmenu', this._onContextMenu);
   }
 
   resizeCanvas() {

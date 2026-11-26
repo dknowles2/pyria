@@ -41,6 +41,21 @@ html, body {
   font-size: 15px;
   line-height: 1.45;
   overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, .btn {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+textarea, input, pre, code {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 
 #app {
@@ -706,6 +721,10 @@ html, body {
 /* ==================== OVERWORLD HUD & STAGE ==================== */
 #screen-game {
   overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
 }
 
 .hud-bar {
@@ -875,6 +894,10 @@ html, body {
   justify-content: center;
   background: #080c17;
   overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .world-canvas {
@@ -882,6 +905,10 @@ html, body {
   width: 100%;
   height: 100%;
   cursor: pointer;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .region-banner {
@@ -991,11 +1018,15 @@ html, body {
 
 .dpad {
   display: grid;
-  grid-template-columns: repeat(3, 40px);
-  grid-template-rows: repeat(3, 40px);
-  gap: 4px;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 5px;
   pointer-events: auto;
-  opacity: 0.78;
+  opacity: 0.82;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .dpad:hover {
@@ -1003,19 +1034,77 @@ html, body {
 }
 
 .dpad-btn {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(15, 23, 42, 0.88);
   border: 2px solid var(--border-bright);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--text-main);
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
   touch-action: none;
 }
 
-.dpad-btn:active {
+.dpad-btn:active,
+.dpad-btn.pressed {
   background: var(--accent-sky);
   color: #061b29;
+}
+
+@media (pointer: coarse), (max-width: 1100px) {
+  .dpad {
+    grid-template-columns: repeat(3, 56px);
+    grid-template-rows: repeat(3, 56px);
+    gap: 6px;
+    opacity: 0.92;
+  }
+
+  .dpad-btn {
+    font-size: 20px;
+  }
+
+  .touch-interact-btn {
+    min-height: 52px;
+    padding: 12px 20px;
+    font-size: 15px;
+    opacity: 0.95;
+  }
+}
+
+/* ==================== PYTHON QUICK-KEYS BAR (iPad Ergonomics) ==================== */
+.py-quick-keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(12, 18, 34, 0.9);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.py-qk-btn {
+  padding: 6px 10px;
+  min-height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--border-bright);
+  background: var(--bg-panel-alt);
+  color: var(--accent-sky);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.py-qk-btn:hover,
+.py-qk-btn:active {
+  background: #24365e;
+  color: #e0f2fe;
+  border-color: var(--accent-sky);
 }
 
 .dpad-up { grid-column: 2; grid-row: 1; }
