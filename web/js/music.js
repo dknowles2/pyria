@@ -33,7 +33,16 @@ export function resolveRegionTheme(regionId, realmId) {
   if (regionId && REGION_THEME_MAP[regionId]) {
     return REGION_THEME_MAP[regionId];
   }
-  return realmId === 'realm-02-ruins' ? 'ruins' : 'meadow';
+  const idLower = String(regionId || '').toLowerCase();
+  if (idLower) {
+    if (/vault|sanctum|shrine/.test(idLower)) return 'vault';
+    if (/camp|workshop/.test(idLower)) return 'camp';
+    if (/stream|river|glade|grove|pool|cistern|spring|marsh/.test(idLower)) return 'stream';
+  }
+  if (realmId === 'realm-01-meadow' || realmId === 'realm-05-woods') {
+    return 'meadow';
+  }
+  return 'ruins';
 }
 
 // MIDI note number -> frequency in Hz
