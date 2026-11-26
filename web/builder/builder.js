@@ -1454,9 +1454,10 @@ function wireTrackerEvents() {
 // ==================== WIRE UI EVENTS ====================
 function wireEvents() {
   // Tabs (sticky across refreshes via URL hash + localStorage)
-  const VALID_TABS = new Set(['progress', 'story', 'health', 'assets']);
+  const VALID_TABS = new Set(['live', 'story', 'health', 'assets']);
+  const normalizeTab = (t) => (t === 'progress' ? 'live' : VALID_TABS.has(t) ? t : 'live');
   const activateTab = (target, { updateUrl = true } = {}) => {
-    const tab = VALID_TABS.has(target) ? target : 'progress';
+    const tab = normalizeTab(target);
     document.querySelectorAll('.tab-btn').forEach((b) => {
       const active = b.dataset.tab === tab;
       b.classList.toggle('active', active);
@@ -1481,7 +1482,7 @@ function wireEvents() {
 
   window.addEventListener('hashchange', () => {
     const hashTab = window.location.hash.replace(/^#/, '');
-    if (VALID_TABS.has(hashTab)) activateTab(hashTab, { updateUrl: false });
+    if (hashTab) activateTab(hashTab, { updateUrl: false });
   });
 
   const initialHashTab = window.location.hash.replace(/^#/, '');
@@ -1491,11 +1492,11 @@ function wireEvents() {
   } catch {
     savedTab = null;
   }
-  const initialTab = VALID_TABS.has(initialHashTab)
-    ? initialHashTab
-    : VALID_TABS.has(savedTab)
-      ? savedTab
-      : 'progress';
+  const initialTab = initialHashTab
+    ? normalizeTab(initialHashTab)
+    : savedTab
+      ? normalizeTab(savedTab)
+      : 'live';
   activateTab(initialTab, { updateUrl: false });
 
   // Live controls
