@@ -5,6 +5,36 @@ const MASTER_GAIN = 0.14;
 const DUCKED_MULTIPLIER = 0.3;
 const LOOKAHEAD_SEC = 0.14;
 const SCHEDULER_INTERVAL_MS = 50;
+const REGION_DEBOUNCE_MS = 300;
+const CROSSFADE_OUT_MS = 180;
+const CROSSFADE_IN_SEC = 0.22;
+
+// Explicit region ID -> theme mapping for Realm 1 & Realm 2 maps
+export const REGION_THEME_MAP = {
+  // Realm 1: Whispering Meadow
+  'elder-ada-clearing': 'meadow',
+  'whispering-statues-grove': 'meadow',
+  'bram-workshop-camp': 'camp',
+  'sparkling-stream': 'stream',
+  'sunlit-orchard': 'stream',
+  'firefly-glade': 'stream',
+  'spark-logic-vault': 'vault',
+  // Realm 2: Mossy Ruins
+  'ruin-vestibule': 'ruins',
+  'pillar-courtyard': 'ruins',
+  'sunken-cistern': 'stream',
+  'torchlight-gallery': 'ruins',
+  'golem-forge': 'ruins',
+  'ancient-treasury': 'ruins',
+  'pebble-logic-vault': 'vault',
+};
+
+export function resolveRegionTheme(regionId, realmId) {
+  if (regionId && REGION_THEME_MAP[regionId]) {
+    return REGION_THEME_MAP[regionId];
+  }
+  return realmId === 'realm-02-ruins' ? 'ruins' : 'meadow';
+}
 
 // MIDI note number -> frequency in Hz
 function midiToFreq(midi) {
@@ -89,6 +119,64 @@ const THEMES = {
     ].map((ch) => (ch ? ch.map(n) : null)),
   },
 
+  // Cozy, warm, bouncy camp melody (F Major) for Bram's Workshop Camp
+  camp: {
+    bpm: 112,
+    lead: [
+      'A4', '-', 'C5', 'D5', 'C5', '-', 'A4', '-',
+      'G4', 'A4', 'F4', '-', 'D4', '-', '-', '-',
+      'Bb4', '-', 'A4', 'G4', 'A4', '-', 'C5', '-',
+      'G4', '-', 'A4', 'G4', 'F4', '-', '-', '-',
+    ].map(n),
+    bass: [
+      'F2', '-', 'C3', '-', 'F2', '-', 'C3', '-',
+      'D2', '-', 'A2', '-', 'D2', '-', 'A2', '-',
+      'Bb1', '-', 'F2', '-', 'Bb1', '-', 'F2', '-',
+      'C2', '-', 'G2', '-', 'C2', '-', 'E2', '-',
+    ].map(n),
+    arp: [
+      'F3', 'A3', 'C4', 'A3', 'F3', 'A3', 'C4', 'A3',
+      'D3', 'F3', 'A3', 'F3', 'D3', 'F3', 'A3', 'F3',
+      'Bb2', 'D3', 'F3', 'D3', 'Bb2', 'D3', 'F3', 'D3',
+      'C3', 'E3', 'G3', 'E3', 'C3', 'E3', 'G3', 'Bb3',
+    ].map(n),
+    pad: [
+      ['F3', 'A3', 'C4'], null, null, null, null, null, null, null,
+      ['D3', 'F3', 'A3'], null, null, null, null, null, null, null,
+      ['Bb2', 'D3', 'F3'], null, null, null, null, null, null, null,
+      ['C3', 'E3', 'G3'], null, null, null, null, null, null, null,
+    ].map((ch) => (ch ? ch.map(n) : null)),
+  },
+
+  // Shimmering, flowing arpeggio-led melody (A Major) for streams & groves
+  stream: {
+    bpm: 116,
+    lead: [
+      'E5', '-', '-', 'C#5', 'B4', '-', 'A4', '-',
+      'B4', '-', 'C#5', '-', 'E5', '-', '-', '-',
+      'F#5', '-', 'E5', 'C#5', 'B4', '-', 'A4', 'B4',
+      'C#5', '-', 'B4', '-', 'A4', '-', '-', '-',
+    ].map(n),
+    bass: [
+      'A2', '-', '-', '-', 'E3', '-', '-', '-',
+      'E2', '-', '-', '-', 'B2', '-', '-', '-',
+      'F#2', '-', '-', '-', 'C#3', '-', '-', '-',
+      'D2', '-', '-', '-', 'A2', '-', 'E2', '-',
+    ].map(n),
+    arp: [
+      'A3', 'C#4', 'E4', 'A4', 'E4', 'C#4', 'E4', 'A4',
+      'E3', 'G#3', 'B3', 'E4', 'B3', 'G#3', 'B3', 'E4',
+      'F#3', 'A3', 'C#4', 'F#4', 'C#4', 'A3', 'C#4', 'F#4',
+      'D3', 'F#3', 'A3', 'D4', 'A3', 'F#3', 'A3', 'B3',
+    ].map(n),
+    pad: [
+      ['A3', 'C#4', 'E4'], null, null, null, null, null, null, null,
+      ['E3', 'G#3', 'B3'], null, null, null, null, null, null, null,
+      ['F#3', 'A3', 'C#4'], null, null, null, null, null, null, null,
+      ['D3', 'F#3', 'A3'], null, null, null, null, null, null, null,
+    ].map((ch) => (ch ? ch.map(n) : null)),
+  },
+
   // Mysterious atmospheric minor-key dungeon crawler (D Minor)
   ruins: {
     bpm: 96,
@@ -117,6 +205,35 @@ const THEMES = {
       ['A3', 'C#4', 'E4'], null, null, null, null, null, null, null,
     ].map((ch) => (ch ? ch.map(n) : null)),
   },
+
+  // Dramatic, heroic Dragon Sanctuary theme (E Minor) for Logic Vaults
+  vault: {
+    bpm: 132,
+    lead: [
+      'E5', '-', 'B4', 'E5', 'G5', '-', 'F#5', 'E5',
+      'C5', '-', 'E5', '-', 'G5', '-', '-', '-',
+      'D5', '-', 'A4', 'D5', 'F#5', '-', 'E5', 'D5',
+      'B4', '-', 'D#5', '-', 'F#5', '-', 'B5', '-',
+    ].map(n),
+    bass: [
+      'E2', 'E2', 'B2', '-', 'E2', 'E2', 'B2', '-',
+      'C2', 'C2', 'G2', '-', 'C2', 'C2', 'G2', '-',
+      'D2', 'D2', 'A2', '-', 'D2', 'D2', 'A2', '-',
+      'B1', 'B1', 'F#2', '-', 'B1', 'D#2', 'F#2', '-',
+    ].map(n),
+    arp: [
+      'E3', 'G3', 'B3', 'E4', 'B3', 'G3', 'B3', 'E4',
+      'C3', 'E3', 'G3', 'C4', 'G3', 'E3', 'G3', 'C4',
+      'D3', 'F#3', 'A3', 'D4', 'A3', 'F#3', 'A3', 'D4',
+      'B2', 'D#3', 'F#3', 'B3', 'F#3', 'D#3', 'F#3', 'B3',
+    ].map(n),
+    pad: [
+      ['E3', 'G3', 'B3'], null, null, null, null, null, null, null,
+      ['C3', 'E3', 'G3'], null, null, null, null, null, null, null,
+      ['D3', 'F#3', 'A3'], null, null, null, null, null, null, null,
+      ['B2', 'D#3', 'F#3'], null, null, null, null, null, null, null,
+    ].map((ch) => (ch ? ch.map(n) : null)),
+  },
 };
 
 class MusicEngine {
@@ -130,9 +247,13 @@ class MusicEngine {
     this.ctx = null;
     this.masterGain = null;
     this.duckGain = null;
+    this.transitionGain = null;
     this.noiseBuffer = null;
 
     this.timerId = null;
+    this.debounceTimerId = null;
+    this.crossfadeTimerId = null;
+    this.pendingTheme = null;
     this.nextNoteTime = 0;
     this.currentStep = 0;
     this.unlocked = false;
@@ -177,12 +298,16 @@ class MusicEngine {
       if (!AudioCtx) return null;
       this.ctx = new AudioCtx();
 
+      this.transitionGain = this.ctx.createGain();
+      this.transitionGain.gain.setValueAtTime(1.0, this.ctx.currentTime);
+
       this.duckGain = this.ctx.createGain();
       this.duckGain.gain.setValueAtTime(this.ducked ? DUCKED_MULTIPLIER : 1.0, this.ctx.currentTime);
 
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.setValueAtTime(MASTER_GAIN, this.ctx.currentTime);
 
+      this.transitionGain.connect(this.duckGain);
       this.duckGain.connect(this.masterGain);
       this.masterGain.connect(this.ctx.destination);
 
@@ -238,11 +363,75 @@ class MusicEngine {
     return this.setEnabled(!this.enabled);
   }
 
-  setTheme(themeName) {
+  cancelPendingTransition() {
+    if (this.debounceTimerId !== null) {
+      clearTimeout(this.debounceTimerId);
+      this.debounceTimerId = null;
+    }
+    if (this.crossfadeTimerId !== null) {
+      clearTimeout(this.crossfadeTimerId);
+      this.crossfadeTimerId = null;
+    }
+    this.pendingTheme = null;
+  }
+
+  setTheme(themeName, { immediate = false } = {}) {
     const resolved = THEMES[themeName] ? themeName : 'title';
-    if (this.themeName === resolved) return;
-    this.themeName = resolved;
-    this.currentStep = 0;
+
+    // If we're already on this theme and no transition is in flight, no-op
+    if (resolved === this.themeName && !this.pendingTheme) {
+      return;
+    }
+
+    this.cancelPendingTransition();
+
+    // Immediate switch for screen changes or when audio isn't actively playing
+    if (immediate || !this.ctx || !this.transitionGain || !this.enabled || this.timerId === null) {
+      this.themeName = resolved;
+      this.currentStep = 0;
+      if (this.ctx && this.transitionGain) {
+        const now = this.ctx.currentTime;
+        this.transitionGain.gain.cancelScheduledValues(now);
+        this.transitionGain.gain.setValueAtTime(1.0, now);
+      }
+      return;
+    }
+
+    // Debounce rapid region border crossings, then dip -> switch -> ramp back up
+    this.pendingTheme = resolved;
+    this.debounceTimerId = setTimeout(() => {
+      this.debounceTimerId = null;
+      const targetTheme = this.pendingTheme;
+      if (!targetTheme || targetTheme === this.themeName) {
+        this.pendingTheme = null;
+        return;
+      }
+      if (!this.ctx || !this.transitionGain || !this.enabled) {
+        this.themeName = targetTheme;
+        this.currentStep = 0;
+        this.pendingTheme = null;
+        return;
+      }
+
+      const now = this.ctx.currentTime;
+      const fadeOutSec = CROSSFADE_OUT_MS / 1000;
+      this.transitionGain.gain.cancelScheduledValues(now);
+      this.transitionGain.gain.setValueAtTime(this.transitionGain.gain.value, now);
+      this.transitionGain.gain.linearRampToValueAtTime(0.0001, now + fadeOutSec);
+
+      this.crossfadeTimerId = setTimeout(() => {
+        this.crossfadeTimerId = null;
+        this.themeName = targetTheme;
+        this.currentStep = 0;
+        this.pendingTheme = null;
+        if (this.ctx && this.transitionGain) {
+          const t = this.ctx.currentTime;
+          this.transitionGain.gain.cancelScheduledValues(t);
+          this.transitionGain.gain.setValueAtTime(0.0001, t);
+          this.transitionGain.gain.linearRampToValueAtTime(1.0, t + CROSSFADE_IN_SEC);
+        }
+      }, CROSSFADE_OUT_MS);
+    }, REGION_DEBOUNCE_MS);
   }
 
   setEra(eraKey) {
@@ -277,7 +466,7 @@ class MusicEngine {
 
   playVoice({ freq, time, duration, type, volume, cutoff = 2200, attack = 0.015, detune = 0 }) {
     const ctx = this.ctx;
-    if (!ctx || !this.duckGain || !freq) return;
+    if (!ctx || !this.transitionGain || !freq) return;
 
     const osc = ctx.createOscillator();
     const filter = ctx.createBiquadFilter();
@@ -296,7 +485,7 @@ class MusicEngine {
 
     osc.connect(filter);
     filter.connect(gain);
-    gain.connect(this.duckGain);
+    gain.connect(this.transitionGain);
 
     osc.start(time);
     osc.stop(time + duration + 0.03);
@@ -304,7 +493,7 @@ class MusicEngine {
 
   playShimmerTick(time, accent) {
     const ctx = this.ctx;
-    if (!ctx || !this.duckGain || !this.noiseBuffer) return;
+    if (!ctx || !this.transitionGain || !this.noiseBuffer) return;
 
     const src = ctx.createBufferSource();
     src.buffer = this.noiseBuffer;
@@ -321,7 +510,7 @@ class MusicEngine {
 
     src.connect(filter);
     filter.connect(gain);
-    gain.connect(this.duckGain);
+    gain.connect(this.transitionGain);
 
     src.start(time);
     src.stop(time + 0.045);
