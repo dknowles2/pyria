@@ -56,7 +56,7 @@ student_code = payload.get("code", "")
 test_code = payload.get("testCode", "")
 
 stdout_buf = io.StringIO()
-ns = {"__name__": "__main__"}
+ns = {"__name__": "__main__", "say": print, "shout": print}
 result = {
     "passed": False,
     "stdout": "",

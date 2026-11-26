@@ -29,8 +29,8 @@
         {
           "id": "trial-01-01",
           "title": "Wake the Meadow Beacon",
-          "storyPrompt": "The ancient Signal Stone in Whispering Meadow has gone dark. Pip taps it with a claw: 'Try calling print() to shout a greeting into the stone!'",
-          "objective": "Use print() to display the exact message: Hello, Pyria!",
+          "storyPrompt": "The ancient Signal Stone in Whispering Meadow has gone dark. Pip taps it with a claw: 'Try casting say() to speak a greeting into the stone!'",
+          "objective": "Use say() to display the exact message: Hello, Pyria!",
           "concepts": [
             "function_calls",
             "print_output",
@@ -39,23 +39,23 @@
           "shardReward": 20,
           "unlockId": "hat-explorer",
           "starterCode": {
-            "explorer": "# Replace the ??? inside the quotes with Hello, Pyria!\nprint(\"???\")\n",
-            "standard": "# Call print() to wake the Signal Stone with: Hello, Pyria!\n",
+            "explorer": "# Replace the ??? inside the quotes with Hello, Pyria!\nsay(\"???\")\n",
+            "standard": "# Call say() to wake the Signal Stone with: Hello, Pyria!\n",
             "challenge": "# Wake the Signal Stone by printing the exact greeting.\n"
           },
-          "referenceSolution": "print(\"Hello, Pyria!\")\n",
+          "referenceSolution": "say(\"Hello, Pyria!\")\n",
           "testCode": "assert OUTPUT.strip() == \"Hello, Pyria!\", f\"Expected 'Hello, Pyria!' but got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip whispers: 'Python uses print() to speak aloud, and text needs quotes around it!'",
-            "tier2_pattern": "Pattern: print(\"your message here\") \u2014 check capital H, the comma, capital P, and the exclamation mark!",
-            "tier3_walkthrough": "Type this exact line:\nprint(\"Hello, Pyria!\")"
+            "tier1_nudge": "Pip whispers: 'Python uses say() to speak aloud, and text needs quotes around it!'",
+            "tier2_pattern": "Pattern: say(\"your message here\") \u2014 check capital H, the comma, capital P, and the exclamation mark!",
+            "tier3_walkthrough": "Type this exact line:\nsay(\"Hello, Pyria!\")"
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-01-02",
           "title": "The Twin Echo Stones",
-          "storyPrompt": "Two moss-covered Echo Stones block the trail to Spark's glade. They only slide apart when they hear two lines of dragon-song in a row.",
+          "storyPrompt": "Two moss-covered Echo Stones block the trail to Spark's glade. They only slide apart when you use shout() to call out two lines of dragon-song in a row!",
           "objective": "Print two separate lines: first 'Wake up, Spark!' and second 'The meadow needs you!'",
           "concepts": [
             "print_output",
@@ -64,16 +64,16 @@
           "shardReward": 25,
           "unlockId": null,
           "starterCode": {
-            "explorer": "print(\"Wake up, Spark!\")\n# Now add a second print() for: The meadow needs you!\n",
+            "explorer": "shout(\"Wake up, Spark!\")\n# Now add a second shout() for: The meadow needs you!\n",
             "standard": "# Print two lines to wake the Echo Stones:\n# Line 1: Wake up, Spark!\n# Line 2: The meadow needs you!\n",
             "challenge": "# Output both dragon-song lines in order.\n"
           },
-          "referenceSolution": "print(\"Wake up, Spark!\")\nprint(\"The meadow needs you!\")\n",
+          "referenceSolution": "shout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")\n",
           "testCode": "lines = [line.strip() for line in OUTPUT.strip().splitlines()]\nassert len(lines) == 2, f\"Expected 2 lines of output, got {len(lines)}\"\nassert lines[0] == \"Wake up, Spark!\", f\"Line 1 was {lines[0]!r}\"\nassert lines[1] == \"The meadow needs you!\", f\"Line 2 was {lines[1]!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip hops between the two stones: 'You can use print() twice\u2014one on each line!'",
-            "tier2_pattern": "Write two lines:\nprint(\"First line\")\nprint(\"Second line\")",
-            "tier3_walkthrough": "Write both lines exactly like this:\nprint(\"Wake up, Spark!\")\nprint(\"The meadow needs you!\")"
+            "tier1_nudge": "Pip hops between the two stones: 'You can use shout() twice\u2014one on each line!'",
+            "tier2_pattern": "Write two lines:\nshout(\"First line\")\nshout(\"Second line\")",
+            "tier3_walkthrough": "Write both lines exactly like this:\nshout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")"
           },
           "difficultyOverride": null
         },
@@ -81,7 +81,7 @@
           "id": "trial-01-03",
           "title": "Measure the Rune Lock",
           "storyPrompt": "Spark's pixel cage is sealed with the glowing word \"SPARKLIGHT\". The lock asks how many letters are in the magic word!",
-          "objective": "Use the len() function to measure \"SPARKLIGHT\" and print the number of letters.",
+          "objective": "Use the len() function to measure \"SPARKLIGHT\" and say the number of letters.",
           "concepts": [
             "function_calls",
             "strings",
@@ -90,16 +90,16 @@
           "shardReward": 35,
           "unlockId": "stat-charisma-1",
           "starterCode": {
-            "explorer": "# Put \"SPARKLIGHT\" inside len(...) and print it!\nprint(len(\"???\"))\n",
-            "standard": "# Use len() on \"SPARKLIGHT\" and print the result.\n",
-            "challenge": "# Compute and print the length of the rune word \"SPARKLIGHT\".\n"
+            "explorer": "# Put \"SPARKLIGHT\" inside len(...) and say it!\nsay(len(\"???\"))\n",
+            "standard": "# Use len() on \"SPARKLIGHT\" and say the result.\n",
+            "challenge": "# Compute and say the length of the rune word \"SPARKLIGHT\".\n"
           },
-          "referenceSolution": "print(len(\"SPARKLIGHT\"))\n",
+          "referenceSolution": "say(len(\"SPARKLIGHT\"))\n",
           "testCode": "assert OUTPUT.strip() == \"10\", f\"Expected '10' for the length of SPARKLIGHT, got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip says: 'Python has a built-in ruler called len() that counts every letter in a string!'",
-            "tier2_pattern": "You can nest function calls like print(len(\"WORD\")) so Python counts first and prints the number.",
-            "tier3_walkthrough": "Type:\nprint(len(\"SPARKLIGHT\"))"
+            "tier2_pattern": "You can nest function calls like say(len(\"WORD\")) so Python counts first and prints the number.",
+            "tier3_walkthrough": "Type:\nsay(len(\"SPARKLIGHT\"))"
           },
           "difficultyOverride": null
         },
@@ -107,7 +107,7 @@
           "id": "trial-01-04",
           "title": "Stitch the Dragon Banner",
           "storyPrompt": "A torn cloth banner hangs over the Orchard Shrine. Combine two string pieces with + so the meadow knows your title!",
-          "objective": "Set prefix = \"Code-\" and title = \"Tamer\", combine them into banner = prefix + title, and print(banner).",
+          "objective": "Set prefix = \"Code-\" and title = \"Tamer\", combine them into banner = prefix + title, and shout(banner).",
           "concepts": [
             "strings",
             "variables",
@@ -116,16 +116,16 @@
           "shardReward": 30,
           "unlockId": null,
           "starterCode": {
-            "explorer": "prefix = \"Code-\"\ntitle = \"Tamer\"\n# Combine prefix and title with + into banner, then print(banner)\nbanner = \n",
-            "standard": "prefix = \"Code-\"\ntitle = \"Tamer\"\n# Create banner by joining prefix and title with +, then print it\n",
-            "challenge": "# Store \"Code-\" in prefix, \"Tamer\" in title, join them into banner, and print banner.\n"
+            "explorer": "prefix = \"Code-\"\ntitle = \"Tamer\"\n# Combine prefix and title with + into banner, then shout(banner)\nbanner = \n",
+            "standard": "prefix = \"Code-\"\ntitle = \"Tamer\"\n# Create banner by joining prefix and title with +, then shout it\n",
+            "challenge": "# Store \"Code-\" in prefix, \"Tamer\" in title, join them into banner, and shout banner.\n"
           },
-          "referenceSolution": "prefix = \"Code-\"\ntitle = \"Tamer\"\nbanner = prefix + title\nprint(banner)\n",
+          "referenceSolution": "prefix = \"Code-\"\ntitle = \"Tamer\"\nbanner = prefix + title\nshout(banner)\n",
           "testCode": "assert banner == \"Code-Tamer\", f'Expected banner == \"Code-Tamer\", got {banner!r}'\nassert OUTPUT.strip() == \"Code-Tamer\", f'Expected printed \"Code-Tamer\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip tugs the banner: 'You can glue two strings together in Python using the + sign!'",
-            "tier2_pattern": "banner = prefix + title\nprint(banner)",
-            "tier3_walkthrough": "Add these two lines:\nbanner = prefix + title\nprint(banner)"
+            "tier2_pattern": "banner = prefix + title\nshout(banner)",
+            "tier3_walkthrough": "Add these two lines:\nbanner = prefix + title\nshout(banner)"
           },
           "difficultyOverride": null
         },
@@ -133,7 +133,7 @@
           "id": "trial-01-05",
           "title": "Count the Firefly Lanterns",
           "storyPrompt": "Three firefly groves glow around the northern glade: 4 lanterns in the west, 7 in the east, and 5 in the north. Add them up to light the Sanctuary gate!",
-          "objective": "Create west_lanterns = 4, east_lanterns = 7, north_lanterns = 5, compute total_lanterns as their sum, and print(total_lanterns).",
+          "objective": "Create west_lanterns = 4, east_lanterns = 7, north_lanterns = 5, compute total_lanterns as their sum, and say(total_lanterns).",
           "concepts": [
             "variables",
             "basic_math",
@@ -142,16 +142,16 @@
           "shardReward": 35,
           "unlockId": null,
           "starterCode": {
-            "explorer": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\n# Add all three lantern variables into total_lanterns and print it\ntotal_lanterns = \n",
-            "standard": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\n# Sum the three counts into total_lanterns and print(total_lanterns)\n",
-            "challenge": "# Store 4, 7, and 5 in west_lanterns, east_lanterns, north_lanterns, sum into total_lanterns, and print it.\n"
+            "explorer": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\n# Add all three lantern variables into total_lanterns and say it\ntotal_lanterns = \n",
+            "standard": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\n# Sum the three counts into total_lanterns and say(total_lanterns)\n",
+            "challenge": "# Store 4, 7, and 5 in west_lanterns, east_lanterns, north_lanterns, sum into total_lanterns, and say it.\n"
           },
-          "referenceSolution": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\ntotal_lanterns = west_lanterns + east_lanterns + north_lanterns\nprint(total_lanterns)\n",
+          "referenceSolution": "west_lanterns = 4\neast_lanterns = 7\nnorth_lanterns = 5\ntotal_lanterns = west_lanterns + east_lanterns + north_lanterns\nsay(total_lanterns)\n",
           "testCode": "assert total_lanterns == 16, f'Expected total_lanterns == 16, got {total_lanterns}'\nassert OUTPUT.strip() == \"16\", f'Expected printed \"16\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip chases a firefly: 'Use + twice to add all three variables on one line!'",
-            "tier2_pattern": "total_lanterns = west_lanterns + east_lanterns + north_lanterns\nprint(total_lanterns)",
-            "tier3_walkthrough": "Write:\ntotal_lanterns = west_lanterns + east_lanterns + north_lanterns\nprint(total_lanterns)"
+            "tier2_pattern": "total_lanterns = west_lanterns + east_lanterns + north_lanterns\nsay(total_lanterns)",
+            "tier3_walkthrough": "Write:\ntotal_lanterns = west_lanterns + east_lanterns + north_lanterns\nsay(total_lanterns)"
           },
           "difficultyOverride": null
         },
@@ -159,7 +159,7 @@
           "id": "trial-01-06",
           "title": "Unseal Spark's Lightning Vault",
           "storyPrompt": "Three lightning coils hum outside Spark's inner vault with power levels 18, 42, and 29. Find the strongest coil using max() and shout the unlock signal!",
-          "objective": "Given coil_a = 18, coil_b = 42, coil_c = 29, set peak_power = max(coil_a, coil_b, coil_c) and print(\"SPARK READY!\").",
+          "objective": "Given coil_a = 18, coil_b = 42, coil_c = 29, set peak_power = max(coil_a, coil_b, coil_c) and shout(\"SPARK READY!\").",
           "concepts": [
             "function_calls",
             "variables",
@@ -168,16 +168,16 @@
           "shardReward": 45,
           "unlockId": null,
           "starterCode": {
-            "explorer": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\npeak_power = max(coil_a, coil_b, coil_c)\n# Now print \"SPARK READY!\" to open the vault\n",
-            "standard": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\n# Use max() to find peak_power, then print \"SPARK READY!\"\n",
-            "challenge": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\n# Store the highest coil value in peak_power using max() and print \"SPARK READY!\".\n"
+            "explorer": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\npeak_power = max(coil_a, coil_b, coil_c)\n# Now shout \"SPARK READY!\" to open the vault\n",
+            "standard": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\n# Use max() to find peak_power, then shout \"SPARK READY!\"\n",
+            "challenge": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\n# Store the highest coil value in peak_power using max() and shout \"SPARK READY!\".\n"
           },
-          "referenceSolution": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\npeak_power = max(coil_a, coil_b, coil_c)\nprint(\"SPARK READY!\")\n",
+          "referenceSolution": "coil_a = 18\ncoil_b = 42\ncoil_c = 29\npeak_power = max(coil_a, coil_b, coil_c)\nshout(\"SPARK READY!\")\n",
           "testCode": "assert peak_power == 42, f'Expected peak_power == 42, got {peak_power}'\nassert OUTPUT.strip() == \"SPARK READY!\", f'Expected \"SPARK READY!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip's scales crackle: 'max(a, b, c) picks the biggest number automatically!'",
-            "tier2_pattern": "peak_power = max(coil_a, coil_b, coil_c)\nprint(\"SPARK READY!\")",
-            "tier3_walkthrough": "Add:\nprint(\"SPARK READY!\")"
+            "tier2_pattern": "peak_power = max(coil_a, coil_b, coil_c)\nshout(\"SPARK READY!\")",
+            "tier3_walkthrough": "Add:\nshout(\"SPARK READY!\")"
           },
           "difficultyOverride": null
         }
@@ -255,8 +255,8 @@
         {
           "id": "trial-02-01",
           "title": "Your First Variable Box",
-          "storyPrompt": "Welcome to the Mossy Ruins! Pip pops out of your pack with a glowing label: 'A variable is like a labeled box that holds a value. Writing torches = 4 puts the number 4 inside a box labeled torches!' Put 6 inside a box called stones, then print(stones) to open the first ruin gate.",
-          "objective": "Create a variable named stones set to 6 (stones = 6), then call print(stones) to show what is inside the box.",
+          "storyPrompt": "Welcome to the Mossy Ruins! Pip pops out of your pack with a glowing label: 'A variable is like a labeled box that holds a value. Writing torches = 4 puts the number 4 inside a box labeled torches!' Put 6 inside a box called stones, then say(stones) to open the first ruin gate.",
+          "objective": "Create a variable named stones set to 6 (stones = 6), then call say(stones) to show what is inside the box.",
           "concepts": [
             "variables",
             "print_output"
@@ -264,16 +264,16 @@
           "shardReward": 30,
           "unlockId": "shield-oak",
           "starterCode": {
-            "explorer": "# A variable is a labeled box! Example: torches = 4\n# Put 6 inside a box named stones:\nstones = \n# Now show what is inside the box (no quotes around stones!):\nprint(stones)\n",
-            "standard": "# A variable is a labeled box: name = value\n# Create stones = 6, then call print(stones)\n",
-            "challenge": "# Store 6 in a variable named stones and print(stones).\n"
+            "explorer": "# A variable is a labeled box! Example: torches = 4\n# Put 6 inside a box named stones:\nstones = \n# Now show what is inside the box (no quotes around stones!):\nsay(stones)\n",
+            "standard": "# A variable is a labeled box: name = value\n# Create stones = 6, then call say(stones)\n",
+            "challenge": "# Store 6 in a variable named stones and say(stones).\n"
           },
-          "referenceSolution": "stones = 6\nprint(stones)\n",
-          "testCode": "assert stones == 6, f'Expected stones to hold 6, got {stones!r}'\nassert OUTPUT.strip() == '6', f'Expected print(stones) to output 6, got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "stones = 6\nsay(stones)\n",
+          "testCode": "assert stones == 6, f'Expected stones to hold 6, got {stones!r}'\nassert OUTPUT.strip() == '6', f'Expected say(stones) to output 6, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip points at the box label: 'Write stones = 6 on the first line\u2014no quotes around 6 because it is a number!'",
-            "tier2_pattern": "stones = 6\nprint(stones)\n(Notice: no quotes around stones inside print(), so Python prints what is INSIDE the box!)",
-            "tier3_walkthrough": "Write these exact two lines:\nstones = 6\nprint(stones)"
+            "tier2_pattern": "stones = 6\nsay(stones)\n(Notice: no quotes around stones inside say(), so Python prints what is INSIDE the box!)",
+            "tier3_walkthrough": "Write these exact two lines:\nstones = 6\nsay(stones)"
           },
           "difficultyOverride": null
         },
@@ -281,7 +281,7 @@
           "id": "trial-02-02",
           "title": "Two Boxes Together (Adding Variables)",
           "storyPrompt": "The Broken Ruin Bridge needs gems from BOTH sides! Just like before, you can make two labeled boxes\u2014one for left_gems and one for right_gems\u2014and add them together into a third box called total_gems.",
-          "objective": "Set left_gems = 8 and right_gems = 5. Add them into total_gems = left_gems + right_gems, then print(total_gems).",
+          "objective": "Set left_gems = 8 and right_gems = 5. Add them into total_gems = left_gems + right_gems, then say(total_gems).",
           "concepts": [
             "variables",
             "basic_math",
@@ -290,16 +290,16 @@
           "shardReward": 35,
           "unlockId": null,
           "starterCode": {
-            "explorer": "# Box 1 holds 8 gems, Box 2 holds 5 gems:\nleft_gems = 8\nright_gems = 5\n# Add the two boxes into a new box called total_gems:\ntotal_gems = \nprint(total_gems)\n",
-            "standard": "left_gems = 8\nright_gems = 5\n# Add left_gems and right_gems into total_gems, then print(total_gems)\n",
-            "challenge": "# Create left_gems = 8, right_gems = 5, sum them into total_gems, and print(total_gems).\n"
+            "explorer": "# Box 1 holds 8 gems, Box 2 holds 5 gems:\nleft_gems = 8\nright_gems = 5\n# Add the two boxes into a new box called total_gems:\ntotal_gems = \nsay(total_gems)\n",
+            "standard": "left_gems = 8\nright_gems = 5\n# Add left_gems and right_gems into total_gems, then say(total_gems)\n",
+            "challenge": "# Create left_gems = 8, right_gems = 5, sum them into total_gems, and say(total_gems).\n"
           },
-          "referenceSolution": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nprint(total_gems)\n",
+          "referenceSolution": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(total_gems)\n",
           "testCode": "assert left_gems == 8, 'left_gems should be 8'\nassert right_gems == 5, 'right_gems should be 5'\nassert total_gems == 13, f'Expected total_gems to be 13, got {total_gems!r}'\nassert OUTPUT.strip() == '13', f'Expected printed 13, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip holds up two boxes: 'Python looks inside left_gems (8) and right_gems (5) when you write left_gems + right_gems!'",
-            "tier2_pattern": "total_gems = left_gems + right_gems\nprint(total_gems)",
-            "tier3_walkthrough": "Complete the line with:\ntotal_gems = left_gems + right_gems\nprint(total_gems)"
+            "tier2_pattern": "total_gems = left_gems + right_gems\nsay(total_gems)",
+            "tier3_walkthrough": "Complete the line with:\ntotal_gems = left_gems + right_gems\nsay(total_gems)"
           },
           "difficultyOverride": null
         },
@@ -307,7 +307,7 @@
           "id": "trial-02-03",
           "title": "Changing What's Inside a Box",
           "storyPrompt": "Here is a superpower of variables: you can CHANGE what is inside a box! Your power box starts at 10 (power = 10). Writing power = power + 5 takes the 10 out, adds 5, and puts 15 right back into the same box!",
-          "objective": "Start with power = 10. On the next line, update it with power = power + 5 so power becomes 15, then print(power).",
+          "objective": "Start with power = 10. On the next line, update it with power = power + 5 so power becomes 15, then say(power).",
           "concepts": [
             "variables",
             "basic_math",
@@ -316,16 +316,16 @@
           "shardReward": 40,
           "unlockId": "boots-swift",
           "starterCode": {
-            "explorer": "# The power box starts at 10:\npower = 10\n# Update power by adding 5 to it (power = power + 5):\npower = \nprint(power)\n",
-            "standard": "power = 10\n# Add 5 to power and store the new value back in power, then print(power)\n",
-            "challenge": "power = 10\n# Increase power by 5 by updating the power variable, then print(power).\n"
+            "explorer": "# The power box starts at 10:\npower = 10\n# Update power by adding 5 to it (power = power + 5):\npower = \nsay(power)\n",
+            "standard": "power = 10\n# Add 5 to power and store the new value back in power, then say(power)\n",
+            "challenge": "power = 10\n# Increase power by 5 by updating the power variable, then say(power).\n"
           },
-          "referenceSolution": "power = 10\npower = power + 5\nprint(power)\n",
+          "referenceSolution": "power = 10\npower = power + 5\nsay(power)\n",
           "testCode": "assert power == 15, f'Expected power to be updated to 15, got {power!r}'\nassert OUTPUT.strip() == '15', f'Expected printed 15, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip grins: 'In Python, = means PUT INTO THE BOX. So power = power + 5 puts the old power plus 5 back into power!'",
-            "tier2_pattern": "power = 10\npower = power + 5\nprint(power)",
-            "tier3_walkthrough": "Write:\npower = 10\npower = power + 5\nprint(power)"
+            "tier2_pattern": "power = 10\npower = power + 5\nsay(power)",
+            "tier3_walkthrough": "Write:\npower = 10\npower = power + 5\nsay(power)"
           },
           "difficultyOverride": null
         },
@@ -333,7 +333,7 @@
           "id": "trial-02-04",
           "title": "Word Boxes (String Variables)",
           "storyPrompt": "Boxes don't just hold numbers\u2014they can hold words (strings) too! Numbers never wear quotes (age = 10), while words ALWAYS wear quotes (dragon = \"Pebble\"). Store Pebble's name in a word box and call out to him!",
-          "objective": "Create a string variable dragon = \"Pebble\", then print: Hello, Pebble (using print(\"Hello,\", dragon)).",
+          "objective": "Create a string variable dragon = \"Pebble\", then say: Hello, Pebble (using say(\"Hello,\", dragon)).",
           "concepts": [
             "variables",
             "strings",
@@ -342,16 +342,16 @@
           "shardReward": 40,
           "unlockId": null,
           "starterCode": {
-            "explorer": "# Words inside variables wear quotes! Example: hero = \"Rowan\"\ndragon = \"???\"\n# Print a greeting using your dragon box:\nprint(\"Hello,\", dragon)\n",
-            "standard": "# Put \"Pebble\" inside a variable named dragon, then print: Hello, Pebble\n",
-            "challenge": "# Store \"Pebble\" in dragon and print \"Hello, Pebble\" using the dragon variable.\n"
+            "explorer": "# Words inside variables wear quotes! Example: hero = \"Rowan\"\ndragon = \"???\"\n# Print a greeting using your dragon box:\nsay(\"Hello,\", dragon)\n",
+            "standard": "# Put \"Pebble\" inside a variable named dragon, then say: Hello, Pebble\n",
+            "challenge": "# Store \"Pebble\" in dragon and say \"Hello, Pebble\" using the dragon variable.\n"
           },
-          "referenceSolution": "dragon = \"Pebble\"\nprint(\"Hello,\", dragon)\n",
+          "referenceSolution": "dragon = \"Pebble\"\nsay(\"Hello,\", dragon)\n",
           "testCode": "assert dragon == \"Pebble\", f'Expected dragon == \"Pebble\", got {dragon!r}'\nassert OUTPUT.strip() == \"Hello, Pebble\", f'Expected \"Hello, Pebble\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Put quotes around \"Pebble\" when saving it in dragon, and pass dragon (no quotes!) to print().'",
-            "tier2_pattern": "dragon = \"Pebble\"\nprint(\"Hello,\", dragon)",
-            "tier3_walkthrough": "Write these two lines:\ndragon = \"Pebble\"\nprint(\"Hello,\", dragon)"
+            "tier1_nudge": "Pip chirps: 'Put quotes around \"Pebble\" when saving it in dragon, and pass dragon (no quotes!) to say().'",
+            "tier2_pattern": "dragon = \"Pebble\"\nsay(\"Hello,\", dragon)",
+            "tier3_walkthrough": "Write these two lines:\ndragon = \"Pebble\"\nsay(\"Hello,\", dragon)"
           },
           "difficultyOverride": null
         },
@@ -359,7 +359,7 @@
           "id": "trial-02-05",
           "title": "Multiply with Variables (Torchlight Formula)",
           "storyPrompt": "The Golem Bridge is dark! There are 4 rooms and 6 torches in each room. In Python, the star symbol * multiplies two boxes together: rooms * torches_per_room. Light every torch in the ruins!",
-          "objective": "Create rooms = 4 and torches_per_room = 6, multiply them into total_torches = rooms * torches_per_room, and print(total_torches).",
+          "objective": "Create rooms = 4 and torches_per_room = 6, multiply them into total_torches = rooms * torches_per_room, and say(total_torches).",
           "concepts": [
             "variables",
             "basic_math",
@@ -368,16 +368,16 @@
           "shardReward": 45,
           "unlockId": null,
           "starterCode": {
-            "explorer": "rooms = 4\ntorches_per_room = 6\n# Multiply rooms and torches_per_room using *:\ntotal_torches = \nprint(total_torches)\n",
-            "standard": "rooms = 4\ntorches_per_room = 6\n# Compute total_torches using * and print(total_torches)\n",
-            "challenge": "# Set rooms = 4, torches_per_room = 6, multiply them into total_torches, and print it.\n"
+            "explorer": "rooms = 4\ntorches_per_room = 6\n# Multiply rooms and torches_per_room using *:\ntotal_torches = \nsay(total_torches)\n",
+            "standard": "rooms = 4\ntorches_per_room = 6\n# Compute total_torches using * and say(total_torches)\n",
+            "challenge": "# Set rooms = 4, torches_per_room = 6, multiply them into total_torches, and say it.\n"
           },
-          "referenceSolution": "rooms = 4\ntorches_per_room = 6\ntotal_torches = rooms * torches_per_room\nprint(total_torches)\n",
+          "referenceSolution": "rooms = 4\ntorches_per_room = 6\ntotal_torches = rooms * torches_per_room\nsay(total_torches)\n",
           "testCode": "assert rooms == 4, 'rooms should be 4'\nassert torches_per_room == 6, 'torches_per_room should be 6'\nassert total_torches == 24, f'Expected total_torches == 24, got {total_torches!r}'\nassert OUTPUT.strip() == '24', f'Expected printed 24, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps the * key: 'In Python, * means multiply! Multiply the rooms box by the torches_per_room box.'",
-            "tier2_pattern": "total_torches = rooms * torches_per_room\nprint(total_torches)",
-            "tier3_walkthrough": "Write:\ntotal_torches = rooms * torches_per_room\nprint(total_torches)"
+            "tier2_pattern": "total_torches = rooms * torches_per_room\nsay(total_torches)",
+            "tier3_walkthrough": "Write:\ntotal_torches = rooms * torches_per_room\nsay(total_torches)"
           },
           "difficultyOverride": null
         },
@@ -385,7 +385,7 @@
           "id": "trial-02-06",
           "title": "Unlock Pebble's Sanctum (Variables Capstone)",
           "storyPrompt": "You made it to Pebble's Logic Vault! Combine everything you mastered in Mossy Ruins: one word box for the dragon's name, and one math box that adds two key stones together. Print both to open the vault!",
-          "objective": "Set guardian = \"Pebble\", key_a = 12, key_b = 8, and vault_code = key_a + key_b. Then print(guardian) on line 1 and print(vault_code) on line 2.",
+          "objective": "Set guardian = \"Pebble\", key_a = 12, key_b = 8, and vault_code = key_a + key_b. Then shout(guardian) on line 1 and shout(vault_code) on line 2.",
           "concepts": [
             "variables",
             "strings",
@@ -395,15 +395,15 @@
           "shardReward": 55,
           "unlockId": null,
           "starterCode": {
-            "explorer": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\n# Add key_a and key_b into vault_code:\nvault_code = \nprint(guardian)\nprint(vault_code)\n",
-            "standard": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\n# Compute vault_code = key_a + key_b, then print guardian and vault_code on two lines\n",
-            "challenge": "# Store \"Pebble\" in guardian, 12 in key_a, 8 in key_b, sum into vault_code, and print guardian then vault_code.\n"
+            "explorer": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\n# Add key_a and key_b into vault_code:\nvault_code = \nshout(guardian)\nshout(vault_code)\n",
+            "standard": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\n# Compute vault_code = key_a + key_b, then shout guardian and vault_code on two lines\n",
+            "challenge": "# Store \"Pebble\" in guardian, 12 in key_a, 8 in key_b, sum into vault_code, and shout guardian then vault_code.\n"
           },
-          "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nprint(guardian)\nprint(vault_code)\n",
+          "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nshout(guardian)\nshout(vault_code)\n",
           "testCode": "assert guardian == \"Pebble\", f'Expected guardian == \"Pebble\", got {guardian!r}'\nassert vault_code == 20, f'Expected vault_code == 20, got {vault_code!r}'\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Pebble\", \"20\"], f'Expected lines [\"Pebble\", \"20\"], got {lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Add key_a + key_b into vault_code, then print(guardian) and print(vault_code)!'",
-            "tier2_pattern": "vault_code = key_a + key_b\nprint(guardian)\nprint(vault_code)",
+            "tier1_nudge": "Pip cheers: 'Add key_a + key_b into vault_code, then shout(guardian) and shout(vault_code)!'",
+            "tier2_pattern": "vault_code = key_a + key_b\nshout(guardian)\nshout(vault_code)",
             "tier3_walkthrough": "Complete vault_code with:\nvault_code = key_a + key_b"
           },
           "difficultyOverride": null
@@ -484,7 +484,7 @@
           "id": "trial-03-01",
           "title": "Your First if Check (Lava Heat Alarm)",
           "storyPrompt": "Welcome to Cinder Cavern! An `if` statement lets Python make a decision: if a test is True, Python runs the indented code underneath! Remember two rules: put a colon `:` at the end of the `if` line, and indent the code inside by 4 spaces.",
-          "objective": "Start with heat = 80 and alarm = \"OFF\". Write an if statement: if heat > 50:, set alarm = \"ON\" and print(\"Shield up!\").",
+          "objective": "Start with heat = 80 and alarm = \"OFF\". Write an if statement: if heat > 50:, set alarm = \"ON\" and shout(\"Shield up!\").",
           "concepts": [
             "variables",
             "comparisons",
@@ -494,16 +494,16 @@
           "shardReward": 35,
           "unlockId": "tunic-crimson",
           "starterCode": {
-            "explorer": "heat = 80\nalarm = \"OFF\"\n# Notice the colon : at the end and 4 spaces of indent below!\nif heat > 50:\n    alarm = \"ON\"\n    # Now print \"Shield up!\" (keep the 4-space indent!)\n    \n",
-            "standard": "heat = 80\nalarm = \"OFF\"\n# If heat > 50, set alarm = \"ON\" and print(\"Shield up!\")\n",
-            "challenge": "heat = 80\nalarm = \"OFF\"\n# When heat > 50, switch alarm to \"ON\" and print \"Shield up!\".\n"
+            "explorer": "heat = 80\nalarm = \"OFF\"\n# Notice the colon : at the end and 4 spaces of indent below!\nif heat > 50:\n    alarm = \"ON\"\n    # Now shout \"Shield up!\" (keep the 4-space indent!)\n    \n",
+            "standard": "heat = 80\nalarm = \"OFF\"\n# If heat > 50, set alarm = \"ON\" and shout(\"Shield up!\")\n",
+            "challenge": "heat = 80\nalarm = \"OFF\"\n# When heat > 50, switch alarm to \"ON\" and shout \"Shield up!\".\n"
           },
-          "referenceSolution": "heat = 80\nalarm = \"OFF\"\nif heat > 50:\n    alarm = \"ON\"\n    print(\"Shield up!\")\n",
+          "referenceSolution": "heat = 80\nalarm = \"OFF\"\nif heat > 50:\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
           "testCode": "assert alarm == \"ON\", f'Expected alarm == \"ON\", got {alarm!r}'\nassert OUTPUT.strip() == \"Shield up!\", f'Expected \"Shield up!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip points at the colon: 'Every if line ends with : and every line inside the if block is indented 4 spaces!'",
-            "tier2_pattern": "if heat > 50:\n    alarm = \"ON\"\n    print(\"Shield up!\")",
-            "tier3_walkthrough": "Add this indented line inside the if block:\n    print(\"Shield up!\")"
+            "tier2_pattern": "if heat > 50:\n    alarm = \"ON\"\n    shout(\"Shield up!\")",
+            "tier3_walkthrough": "Add this indented line inside the if block:\n    shout(\"Shield up!\")"
           },
           "difficultyOverride": null
         },
@@ -511,7 +511,7 @@
           "id": "trial-03-02",
           "title": "True or False? (Your First Boolean Box)",
           "storyPrompt": "In Python, a Boolean is a special yes-or-no value: either `True` or `False` (always capital T or F, and NO quotes!). A comparison like `lava_temp > 500` automatically turns into `True` or `False`!",
-          "objective": "Set lava_temp = 850 and create a boolean variable is_too_hot = lava_temp > 500, then print(is_too_hot).",
+          "objective": "Set lava_temp = 850 and create a boolean variable is_too_hot = lava_temp > 500, then say(is_too_hot).",
           "concepts": [
             "variables",
             "booleans",
@@ -521,16 +521,16 @@
           "shardReward": 35,
           "unlockId": null,
           "starterCode": {
-            "explorer": "lava_temp = 850\n# Compare lava_temp to 500 using > to get True or False:\nis_too_hot = lava_temp > \nprint(is_too_hot)\n",
-            "standard": "lava_temp = 850\n# Set is_too_hot using a comparison with 500, then print(is_too_hot)\n",
-            "challenge": "# Store 850 in lava_temp, set is_too_hot to whether lava_temp > 500, and print(is_too_hot).\n"
+            "explorer": "lava_temp = 850\n# Compare lava_temp to 500 using > to get True or False:\nis_too_hot = lava_temp > \nsay(is_too_hot)\n",
+            "standard": "lava_temp = 850\n# Set is_too_hot using a comparison with 500, then say(is_too_hot)\n",
+            "challenge": "# Store 850 in lava_temp, set is_too_hot to whether lava_temp > 500, and say(is_too_hot).\n"
           },
-          "referenceSolution": "lava_temp = 850\nis_too_hot = lava_temp > 500\nprint(is_too_hot)\n",
+          "referenceSolution": "lava_temp = 850\nis_too_hot = lava_temp > 500\nsay(is_too_hot)\n",
           "testCode": "assert lava_temp == 850\nassert is_too_hot is True, f'Expected is_too_hot to be True, got {is_too_hot!r}'\nassert OUTPUT.strip() == 'True', f'Expected printed True, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip fans himself: 'lava_temp > 500 asks Python a yes/no question and puts True into the is_too_hot box!'",
-            "tier2_pattern": "is_too_hot = lava_temp > 500\nprint(is_too_hot)",
-            "tier3_walkthrough": "Write:\nis_too_hot = lava_temp > 500\nprint(is_too_hot)"
+            "tier2_pattern": "is_too_hot = lava_temp > 500\nsay(is_too_hot)",
+            "tier3_walkthrough": "Write:\nis_too_hot = lava_temp > 500\nsay(is_too_hot)"
           },
           "difficultyOverride": null
         },
@@ -538,7 +538,7 @@
           "id": "trial-03-03",
           "title": "Two Paths: if and else",
           "storyPrompt": "What if an `if` check is False? That's where `else:` comes in! Python runs the `if` block when the test is True, and the `else:` block as the backup plan when it is False. Check your water_level box to see if the lava bridge is COOL or HOT!",
-          "objective": "Start with water_level = 30. Write an if / else statement: if water_level >= 50, set bridge = \"COOL\"; else, set bridge = \"HOT\". Then print(bridge).",
+          "objective": "Start with water_level = 30. Write an if / else statement: if water_level >= 50, set bridge = \"COOL\"; else, set bridge = \"HOT\". Then say(bridge).",
           "concepts": [
             "variables",
             "booleans",
@@ -549,15 +549,15 @@
           "shardReward": 40,
           "unlockId": null,
           "starterCode": {
-            "explorer": "water_level = 30\nif water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    # Set bridge to \"HOT\" here (4 spaces indent!)\n    \nprint(bridge)\n",
-            "standard": "water_level = 30\n# Use if water_level >= 50 / else to set bridge to \"COOL\" or \"HOT\", then print(bridge)\n",
-            "challenge": "water_level = 30\n# Set bridge to \"COOL\" if water_level >= 50, otherwise \"HOT\", then print(bridge).\n"
+            "explorer": "water_level = 30\nif water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    # Set bridge to \"HOT\" here (4 spaces indent!)\n    \nsay(bridge)\n",
+            "standard": "water_level = 30\n# Use if water_level >= 50 / else to set bridge to \"COOL\" or \"HOT\", then say(bridge)\n",
+            "challenge": "water_level = 30\n# Set bridge to \"COOL\" if water_level >= 50, otherwise \"HOT\", then say(bridge).\n"
           },
-          "referenceSolution": "water_level = 30\nif water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    bridge = \"HOT\"\nprint(bridge)\n",
+          "referenceSolution": "water_level = 30\nif water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    bridge = \"HOT\"\nsay(bridge)\n",
           "testCode": "assert bridge == \"HOT\", f'Expected bridge == \"HOT\" for water_level 30, got {bridge!r}'\nassert OUTPUT.strip() == \"HOT\", f'Expected printed \"HOT\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip fans the steam: 'Since 30 is NOT >= 50, Python skips the if block and runs the else: block!'",
-            "tier2_pattern": "if water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    bridge = \"HOT\"\nprint(bridge)",
+            "tier2_pattern": "if water_level >= 50:\n    bridge = \"COOL\"\nelse:\n    bridge = \"HOT\"\nsay(bridge)",
             "tier3_walkthrough": "Inside the else: block, write:\n    bridge = \"HOT\""
           },
           "difficultyOverride": null
@@ -566,7 +566,7 @@
           "id": "trial-03-04",
           "title": "Checking Numbers with ==",
           "storyPrompt": "Watch out for one of Python's coolest tricks! ONE equals sign `=` puts a value into a box (`gems = 7`), while TWO equals signs `==` asks 'Are these two values equal?' Check if your gems box holds exactly 7!",
-          "objective": "Start with gems = 7 and door = \"SHUT\". Write an if statement checking if gems == 7: set door = \"OPEN\" and print(\"Click!\").",
+          "objective": "Start with gems = 7 and door = \"SHUT\". Write an if statement checking if gems == 7: set door = \"OPEN\" and shout(\"Click!\").",
           "concepts": [
             "variables",
             "comparisons",
@@ -577,15 +577,15 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "gems = 7\ndoor = \"SHUT\"\n# Use == (two equals signs!) to ask if gems equals 7:\nif gems == 7:\n    door = \"OPEN\"\n    # Print \"Click!\" here (4 spaces indent!)\n    \n",
-            "standard": "gems = 7\ndoor = \"SHUT\"\n# If gems == 7, set door = \"OPEN\" and print(\"Click!\")\n",
-            "challenge": "gems = 7\ndoor = \"SHUT\"\n# Open door and print \"Click!\" when gems equals 7.\n"
+            "standard": "gems = 7\ndoor = \"SHUT\"\n# If gems == 7, set door = \"OPEN\" and shout(\"Click!\")\n",
+            "challenge": "gems = 7\ndoor = \"SHUT\"\n# Open door and shout \"Click!\" when gems equals 7.\n"
           },
-          "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    print(\"Click!\")\n",
+          "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")\n",
           "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"Click!\", f'Expected \"Click!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps two keys: 'Use == to check equality, and indent both lines inside the if!'",
-            "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    print(\"Click!\")",
-            "tier3_walkthrough": "Add:\n    print(\"Click!\")"
+            "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")",
+            "tier3_walkthrough": "Add:\n    shout(\"Click!\")"
           },
           "difficultyOverride": null
         },
@@ -593,7 +593,7 @@
           "id": "trial-03-05",
           "title": "The Secret Word Lock (== with Strings)",
           "storyPrompt": "You can use `==` with words (strings) too! Just make sure the spelling and capital letters match inside the quotes. Check whether `password == \"EMBER\"` to crack the magma seal!",
-          "objective": "Start with password = \"EMBER\" and seal = \"INTACT\". Write an if statement checking if password == \"EMBER\": set seal = \"BROKEN\" and print(\"Seal broken!\").",
+          "objective": "Start with password = \"EMBER\" and seal = \"INTACT\". Write an if statement checking if password == \"EMBER\": set seal = \"BROKEN\" and shout(\"Seal broken!\").",
           "concepts": [
             "variables",
             "strings",
@@ -605,15 +605,15 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "password = \"EMBER\"\nseal = \"INTACT\"\n# Check if password equals \"EMBER\" using ==:\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    # Print \"Seal broken!\" here:\n    \n",
-            "standard": "password = \"EMBER\"\nseal = \"INTACT\"\n# If password == \"EMBER\", set seal = \"BROKEN\" and print(\"Seal broken!\")\n",
-            "challenge": "password = \"EMBER\"\nseal = \"INTACT\"\n# Break the seal and print \"Seal broken!\" if password matches \"EMBER\".\n"
+            "standard": "password = \"EMBER\"\nseal = \"INTACT\"\n# If password == \"EMBER\", set seal = \"BROKEN\" and shout(\"Seal broken!\")\n",
+            "challenge": "password = \"EMBER\"\nseal = \"INTACT\"\n# Break the seal and shout \"Seal broken!\" if password matches \"EMBER\".\n"
           },
-          "referenceSolution": "password = \"EMBER\"\nseal = \"INTACT\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    print(\"Seal broken!\")\n",
+          "referenceSolution": "password = \"EMBER\"\nseal = \"INTACT\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\n",
           "testCode": "assert seal == \"BROKEN\", f'Expected seal == \"BROKEN\", got {seal!r}'\nassert OUTPUT.strip() == \"Seal broken!\", f'Expected \"Seal broken!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Remember quotes around \"EMBER\" and two equals signs == to compare!'",
-            "tier2_pattern": "if password == \"EMBER\":\n    seal = \"BROKEN\"\n    print(\"Seal broken!\")",
-            "tier3_walkthrough": "Add:\n    print(\"Seal broken!\")"
+            "tier2_pattern": "if password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")",
+            "tier3_walkthrough": "Add:\n    shout(\"Seal broken!\")"
           },
           "difficultyOverride": null
         },
@@ -621,7 +621,7 @@
           "id": "trial-03-06",
           "title": "Unchain Emberwing (Conditionals Capstone)",
           "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds `ember_power = 75`, and the lock has `lock_power = 60`. Use an `if / else` check to compare the two boxes and set Emberwing free!",
-          "objective": "Given ember_power = 75 and lock_power = 60, write an if / else: if ember_power > lock_power, set gate_status = \"OPEN\" and print(\"Emberwing is free!\"); else, set gate_status = \"LOCKED\".",
+          "objective": "Given ember_power = 75 and lock_power = 60, write an if / else: if ember_power > lock_power, set gate_status = \"OPEN\" and shout(\"Emberwing is free!\"); else, set gate_status = \"LOCKED\".",
           "concepts": [
             "variables",
             "comparisons",
@@ -631,15 +631,15 @@
           "shardReward": 55,
           "unlockId": "hat-dragon-helm",
           "starterCode": {
-            "explorer": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\nelse:\n    # Set gate_status to \"LOCKED\" here:\n    \n",
-            "standard": "ember_power = 75\nlock_power = 60\n# If ember_power > lock_power, set gate_status = \"OPEN\" and print \"Emberwing is free!\"; else set gate_status = \"LOCKED\"\n",
+            "explorer": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    # Set gate_status to \"LOCKED\" here:\n    \n",
+            "standard": "ember_power = 75\nlock_power = 60\n# If ember_power > lock_power, set gate_status = \"OPEN\" and shout \"Emberwing is free!\"; else set gate_status = \"LOCKED\"\n",
             "challenge": "ember_power = 75\nlock_power = 60\n# Compare ember_power > lock_power with if/else to set gate_status (\"OPEN\" or \"LOCKED\") and announce Emberwing's freedom.\n"
           },
-          "referenceSolution": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"\n",
+          "referenceSolution": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"\n",
           "testCode": "assert gate_status == \"OPEN\", f'Expected gate_status == \"OPEN\", got {gate_status!r}'\nassert OUTPUT.strip() == \"Emberwing is free!\", f'Expected \"Emberwing is free!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip glows orange: 'Write the backup plan inside else: with 4 spaces of indent!'",
-            "tier2_pattern": "if ember_power > lock_power:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"",
+            "tier2_pattern": "if ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"",
             "tier3_walkthrough": "Finish the else block with:\n    gate_status = \"LOCKED\""
           },
           "difficultyOverride": null
@@ -717,7 +717,7 @@
         {
           "id": "trial-04-01",
           "title": "Two-Path Frost Check (if / else Review)",
-          "storyPrompt": "Brrr\u2014welcome to Frostbite Hollow! Before learning 3-way choices, let's warm up with a quick `if / else` check on the frozen trail. If `temp <= 0`, the path is `\"FROZEN\"`; otherwise it is `\"WATER\"`.",
+          "storyPrompt": "Code-Tamer Secret: `say()` and `shout()` were training spells powered by real Python's `print()`! Starting in Frostbite Hollow, let's use real `print()` like pro Python coders! Brrr\u2014welcome to Frostbite Hollow! Before learning 3-way choices, let's warm up with a quick `if / else` check on the frozen trail. If `temp <= 0`, the path is `\"FROZEN\"`; otherwise it is `\"WATER\"`.",
           "objective": "Given temp = -5, use if / else to set path = \"FROZEN\" if temp <= 0 else \"WATER\", then print(path).",
           "concepts": [
             "variables",
@@ -735,7 +735,7 @@
           "referenceSolution": "temp = -5\nif temp <= 0:\n    path = \"FROZEN\"\nelse:\n    path = \"WATER\"\nprint(path)\n",
           "testCode": "assert path == \"FROZEN\", f'Expected \"FROZEN\", got {path!r}'\nassert OUTPUT.strip() == \"FROZEN\", f'Expected printed \"FROZEN\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip shivers: 'Remember <= means less than or equal to! Put path = \"WATER\" inside else:.'",
+            "tier1_nudge": "Pip winks: 'Remember, print() works just like say() and shout()! Put path = \"WATER\" inside else: and call print(path).'",
             "tier2_pattern": "if temp <= 0:\n    path = \"FROZEN\"\nelse:\n    path = \"WATER\"\nprint(path)",
             "tier3_walkthrough": "Inside else:, write:\n    path = \"WATER\""
           },
