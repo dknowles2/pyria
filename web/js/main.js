@@ -250,25 +250,33 @@ function getSolvedTrialsSet(save) {
 function updateInteractPrompt(entity) {
   const prompt = $('#interact-prompt');
   const label = $('#interact-prompt-label');
+  const touchBtn = $('#btn-touch-interact');
+  const touchLabel = $('#touch-interact-label');
   if (!prompt || !label) return;
   if (!entity) {
     prompt.classList.add('hidden');
+    touchBtn?.classList.remove('near-target');
+    if (touchLabel) touchLabel.textContent = 'Act';
     return;
   }
   const solved = getSolvedTrialsSet(state.activeSave);
+  touchBtn?.classList.add('near-target');
   if (entity.type === 'trial' && solved.has(entity.refId)) {
     label.textContent = `✓ ${entity.label} (Completed)`;
+    if (touchLabel) touchLabel.textContent = 'Done';
     prompt.classList.remove('hidden');
     return;
   }
   let verb = 'Inspect';
-  if (entity.type === 'npc') verb = 'Talk to';
-  else if (entity.type === 'workshop') verb = 'Open';
-  else if (entity.type === 'chest') verb = 'Open';
-  else if (entity.type === 'vault') verb = 'Enter';
-  else if (entity.type === 'portal') verb = 'Step into';
-  else if (entity.type === 'trial') verb = 'Begin';
+  let shortLabel = 'Act';
+  if (entity.type === 'npc') { verb = 'Talk to'; shortLabel = 'Talk'; }
+  else if (entity.type === 'workshop') { verb = 'Open'; shortLabel = 'Shop'; }
+  else if (entity.type === 'chest') { verb = 'Open'; shortLabel = 'Open'; }
+  else if (entity.type === 'vault') { verb = 'Enter'; shortLabel = 'Vault'; }
+  else if (entity.type === 'portal') { verb = 'Step into'; shortLabel = 'Portal'; }
+  else if (entity.type === 'trial') { verb = 'Begin'; shortLabel = 'Code'; }
   label.textContent = `${verb} ${entity.label}`;
+  if (touchLabel) touchLabel.textContent = shortLabel;
   prompt.classList.remove('hidden');
 }
 
@@ -1062,49 +1070,153 @@ function wireControls() {
     await refreshSavesList();
   });
 
-  // Interact prompt + touch buttons
+  // Prevent iPadOS Safari text selection across the overworld screen (never blocking inputs/textareas)
+  $('#screen-game')?.addEventListener('selectstart', (e) => {
+    const tag = e.target?.tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+      e.preventDefault();
+    }
+  });
+
+  // Interact prompt + circular touch Interact button (multi-touch safe with passive: false)
   $('#interact-prompt').addEventListener('click', () => {
     state.world?.triggerInteract();
   });
-  $('#btn-touch-interact').addEventListener('click', () => {
-    state.world?.triggerInteract();
-  });
 
-  $('.dpad')?.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  document.querySelectorAll('.dpad-btn').forEach((btn) => {
-    const dir = btn.dataset.dir;
-    const action = btn.dataset.action;
-    btn.addEventListener('contextmenu', (e) => e.preventDefault());
-    if (action === 'interact') {
-      btn.addEventListener('pointerdown', (e) => {
+  const touchInteractBtn = $('#btn-touch-interact');
+  if (touchInteractBtn) {
+    let lastTouchInteractMs = 0;
+    touchInteractBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+    touchInteractBtn.addEventListener(
+      'touchstart',
+      (e) => {
         e.preventDefault();
+        lastTouchInteractMs = Date.now();
+        touchInteractBtn.classList.add('pressed');
         state.world?.triggerInteract();
-      });
-      return;
-    }
-    if (!dir) return;
-    const start = (e) => {
+      },
+      { passive: false }
+    );
+    const clearInteractPress = (e) => {
       e.preventDefault();
-      btn.classList.add('pressed');
-      try {
-        btn.setPointerCapture?.(e.pointerId);
-      } catch {
-        // ignore if unsupported
+      touchInteractBtn.classList.remove('pressed');
+    };
+    touchInteractBtn.addEventListener('touchend', clearInteractPress, { passive: false });
+    touchInteractBtn.addEventListener('touchcancel', clearInteractPress, { passive: false });
+    touchInteractBtn.addEventListener('click', () => {
+      if (Date.now() - lastTouchInteractMs < 400) return;
+      state.world?.triggerInteract();
+    });
+  }
+
+  // Roblox/Minecraft-style Virtual Thumbstick (multi-touch by touch.identifier + mouse drag)
+  const joystickEl = $('#touch-joystick');
+  const nubEl = $('#joystick-nub');
+  if (joystickEl && nubEl) {
+    const MAX_RADIUS = 38;
+    const DEADZONE = 12;
+    let activeTouchId = null;
+    let mouseDragging = false;
+    let centerX = 0;
+    let centerY = 0;
+
+    const refreshCenter = () => {
+      const rect = joystickEl.getBoundingClientRect();
+      centerX = rect.left + rect.width / 2;
+      centerY = rect.top + rect.height / 2;
+    };
+
+    const updateStick = (clientX, clientY) => {
+      const dx = clientX - centerX;
+      const dy = clientY - centerY;
+      const dist = Math.hypot(dx, dy);
+      const clampedDist = Math.min(MAX_RADIUS, dist);
+      const angle = Math.atan2(dy, dx);
+      const nx = dist > 0 ? Math.cos(angle) * clampedDist : 0;
+      const ny = dist > 0 ? Math.sin(angle) * clampedDist : 0;
+      nubEl.style.transform = `translate3d(${nx.toFixed(1)}px, ${ny.toFixed(1)}px, 0)`;
+
+      if (dist < DEADZONE) {
+        state.world?.setVirtualDirection(null);
+      } else if (Math.abs(dx) > Math.abs(dy)) {
+        state.world?.setVirtualDirection(dx < 0 ? 'left' : 'right');
+      } else {
+        state.world?.setVirtualDirection(dy < 0 ? 'up' : 'down');
       }
-      state.world?.setDpadDirection(dir);
     };
-    const stop = (e) => {
-      if (e) e.preventDefault();
-      btn.classList.remove('pressed');
-      state.world?.setDpadDirection(null);
+
+    const resetStick = () => {
+      activeTouchId = null;
+      mouseDragging = false;
+      joystickEl.classList.remove('active');
+      nubEl.style.transform = 'translate3d(0, 0, 0)';
+      state.world?.setVirtualDirection(null);
     };
-    btn.addEventListener('pointerdown', start);
-    btn.addEventListener('pointerup', stop);
-    btn.addEventListener('pointercancel', stop);
-    btn.addEventListener('lostpointercapture', stop);
-    btn.addEventListener('pointerleave', stop);
-  });
+
+    joystickEl.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // Strict { passive: false } touch listeners for iPadOS Safari
+    joystickEl.addEventListener(
+      'touchstart',
+      (e) => {
+        e.preventDefault();
+        if (activeTouchId !== null) return;
+        const t = e.changedTouches[0];
+        if (!t) return;
+        activeTouchId = t.identifier;
+        joystickEl.classList.add('active');
+        refreshCenter();
+        updateStick(t.clientX, t.clientY);
+      },
+      { passive: false }
+    );
+
+    joystickEl.addEventListener(
+      'touchmove',
+      (e) => {
+        e.preventDefault();
+        if (activeTouchId === null) return;
+        for (const t of e.changedTouches) {
+          if (t.identifier === activeTouchId) {
+            updateStick(t.clientX, t.clientY);
+            break;
+          }
+        }
+      },
+      { passive: false }
+    );
+
+    const endTouchStick = (e) => {
+      e.preventDefault();
+      if (activeTouchId === null) return;
+      for (const t of e.changedTouches) {
+        if (t.identifier === activeTouchId) {
+          resetStick();
+          break;
+        }
+      }
+    };
+    joystickEl.addEventListener('touchend', endTouchStick, { passive: false });
+    joystickEl.addEventListener('touchcancel', endTouchStick, { passive: false });
+
+    // Desktop mouse drag support
+    joystickEl.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      mouseDragging = true;
+      joystickEl.classList.add('active');
+      refreshCenter();
+      updateStick(e.clientX, e.clientY);
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!mouseDragging) return;
+      updateStick(e.clientX, e.clientY);
+    });
+    window.addEventListener('mouseup', () => {
+      if (mouseDragging) resetStick();
+    });
+    window.addEventListener('blur', resetStick);
+  }
 
   // Pyodide status indicators
   pyRunner.onStatusChange((status) => {

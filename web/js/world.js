@@ -113,11 +113,11 @@ export class WorldEngine {
       this.dpadDir = null;
     };
 
-    this._onCanvasClick = (e) => {
+    const handleCanvasTap = (clientX, clientY) => {
       if (this.paused || !this.map) return;
       const rect = this.canvas.getBoundingClientRect();
-      const cx = (e.clientX - rect.left) * (this.canvas.width / rect.width);
-      const cy = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+      const cx = (clientX - rect.left) * (this.canvas.width / rect.width);
+      const cy = (clientY - rect.top) * (this.canvas.height / rect.height);
 
       // Ignore clicks inside the corner minimap overlay
       if (this.minimapRect) {
@@ -157,6 +157,40 @@ export class WorldEngine {
       }
     };
 
+    this._onCanvasClick = (e) => {
+      handleCanvasTap(e.clientX, e.clientY);
+    };
+
+    let canvasTouchStart = null;
+    this._onCanvasTouchStart = (e) => {
+      e.preventDefault();
+      if (e.changedTouches.length > 0) {
+        const t = e.changedTouches[0];
+        canvasTouchStart = { id: t.identifier, x: t.clientX, y: t.clientY };
+      }
+    };
+    this._onCanvasTouchMove = (e) => {
+      e.preventDefault();
+    };
+    this._onCanvasTouchEnd = (e) => {
+      e.preventDefault();
+      if (!canvasTouchStart) return;
+      for (const t of e.changedTouches) {
+        if (t.identifier === canvasTouchStart.id) {
+          const dist = Math.hypot(t.clientX - canvasTouchStart.x, t.clientY - canvasTouchStart.y);
+          canvasTouchStart = null;
+          if (dist < 15) {
+            handleCanvasTap(t.clientX, t.clientY);
+          }
+          break;
+        }
+      }
+    };
+    this._onCanvasTouchCancel = (e) => {
+      e.preventDefault();
+      canvasTouchStart = null;
+    };
+
     this._onResize = () => this.resizeCanvas();
     this._onContextMenu = (e) => e.preventDefault();
 
@@ -165,6 +199,10 @@ export class WorldEngine {
     window.addEventListener('blur', this._onBlur);
     window.addEventListener('resize', this._onResize);
     this.canvas.addEventListener('click', this._onCanvasClick);
+    this.canvas.addEventListener('touchstart', this._onCanvasTouchStart, { passive: false });
+    this.canvas.addEventListener('touchmove', this._onCanvasTouchMove, { passive: false });
+    this.canvas.addEventListener('touchend', this._onCanvasTouchEnd, { passive: false });
+    this.canvas.addEventListener('touchcancel', this._onCanvasTouchCancel, { passive: false });
     this.canvas.addEventListener('contextmenu', this._onContextMenu);
   }
 
@@ -175,6 +213,10 @@ export class WorldEngine {
     window.removeEventListener('blur', this._onBlur);
     window.removeEventListener('resize', this._onResize);
     this.canvas.removeEventListener('click', this._onCanvasClick);
+    this.canvas.removeEventListener('touchstart', this._onCanvasTouchStart);
+    this.canvas.removeEventListener('touchmove', this._onCanvasTouchMove);
+    this.canvas.removeEventListener('touchend', this._onCanvasTouchEnd);
+    this.canvas.removeEventListener('touchcancel', this._onCanvasTouchCancel);
     this.canvas.removeEventListener('contextmenu', this._onContextMenu);
   }
 
@@ -197,8 +239,12 @@ export class WorldEngine {
     }
   }
 
+  setVirtualDirection(dir) {
+    this.dpadDir = dir || null;
+  }
+
   setDpadDirection(dir) {
-    this.dpadDir = dir;
+    this.setVirtualDirection(dir);
   }
 
   setEraKey(eraKey) {
