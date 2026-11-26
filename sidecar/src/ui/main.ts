@@ -28,10 +28,12 @@ import {
   type ImageCache,
 } from "./spriteCanvas.js";
 import {
+  computeWorldViewport,
   findNearbyEntity,
   findRegionAt,
   isTileWalkable,
   renderWorldCanvas,
+  type WorldCameraMode,
 } from "./worldCanvas.js";
 
 type MainTab = "realms" | "sprites" | "world" | "health" | "catalog";
@@ -135,6 +137,7 @@ interface UiState {
   loadingWorld: boolean;
   selectedMapId: string | null;
   worldEra: SpriteEraKey;
+  worldCameraMode: WorldCameraMode;
   worldShowGrid: boolean;
   heroX: number;
   heroY: number;
@@ -183,6 +186,7 @@ const state: UiState = {
   loadingWorld: false,
   selectedMapId: null,
   worldEra: "8bit",
+  worldCameraMode: "follow",
   worldShowGrid: false,
   heroX: 5,
   heroY: 17,
@@ -870,6 +874,7 @@ function paintActiveCanvases(): void {
         {
           map,
           era: state.worldEra,
+          cameraMode: state.worldCameraMode,
           showGrid: state.worldShowGrid,
           heroX: state.heroX,
           heroY: state.heroY,
@@ -1369,6 +1374,7 @@ function renderWorldTab(): string {
             </select>
             <button class="btn btn-sm ${state.worldEra === "8bit" ? "btn-primary" : ""}" data-world-era="8bit">8-Bit</button>
             <button class="btn btn-sm ${state.worldEra === "16bit" ? "btn-primary" : ""}" data-world-era="16bit">16-Bit</button>
+            <button class="btn btn-sm ${state.worldCameraMode === "follow" ? "btn-primary" : ""}" id="btn-world-camera">${state.worldCameraMode === "follow" ? "Follow Hero" : "Fit Whole Map"}</button>
             <button class="btn btn-sm ${state.worldShowGrid ? "btn-primary" : ""}" id="btn-world-grid">Grid</button>
             ${
               state.canUpdateContext
@@ -1892,6 +1898,12 @@ function bindEvents(): void {
     });
   });
 
+  document.getElementById("btn-world-camera")?.addEventListener("click", () => {
+    state.worldCameraMode =
+      state.worldCameraMode === "follow" ? "fit" : "follow";
+    render();
+  });
+
   document.getElementById("btn-world-grid")?.addEventListener("click", () => {
     state.worldShowGrid = !state.worldShowGrid;
     render();
@@ -1946,12 +1958,18 @@ function bindEvents(): void {
       const canvas = ev.currentTarget as HTMLCanvasElement;
       if (!map || !canvas) return;
       const rect = canvas.getBoundingClientRect();
-      const tx = Math.floor(
-        ((ev.clientX - rect.left) / rect.width) * map.width
+      const vp = computeWorldViewport(
+        map,
+        state.worldCameraMode,
+        state.heroX,
+        state.heroY
       );
-      const ty = Math.floor(
-        ((ev.clientY - rect.top) / rect.height) * map.height
-      );
+      const tx =
+        vp.startX +
+        Math.floor(((ev.clientX - rect.left) / rect.width) * vp.viewTilesW);
+      const ty =
+        vp.startY +
+        Math.floor(((ev.clientY - rect.top) / rect.height) * vp.viewTilesH);
       const clicked = map.entities.find((e) => e.x === tx && e.y === ty);
       if (clicked) {
         state.selectedEntityId = clicked.id;

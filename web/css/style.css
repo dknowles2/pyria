@@ -754,17 +754,25 @@ html, body {
   position: absolute;
   top: 14px;
   left: 50%;
-  transform: translateX(-50%);
-  padding: 6px 18px;
-  background: rgba(14, 19, 32, 0.88);
+  transform: translate(-50%, -10px);
+  padding: 7px 20px;
+  background: rgba(14, 19, 32, 0.9);
   border: 2px solid var(--accent-gold);
   border-radius: 999px;
   color: var(--accent-gold);
   font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.04em;
+  font-size: 13.5px;
+  letter-spacing: 0.05em;
   pointer-events: none;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  z-index: 6;
+}
+
+.region-banner.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .interact-prompt {
@@ -808,8 +816,8 @@ html, body {
 
 .toast-container {
   position: absolute;
-  top: 56px;
-  right: 16px;
+  top: 16px;
+  left: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;

@@ -190,32 +190,16 @@ function updateHud() {
     })
     .join('');
 
-  // Dynamic Pip objective tip
+  // Dynamic Pip objective tip (100% driven by the Realm's actual trial list)
+  const realmDragon = state.activeRealm?.dragon;
+  const nextTrial = realmTrials.find((t) => !completed.has(t.id));
   let tip = 'Explore the realm! Press E or click nearby to interact.';
-  if (save.realmId === 'realm-01-meadow') {
-    if (!completed.has('trial-01-01')) {
-      tip = 'Talk to Elder Ada or walk north to the Password Statues (Trial 1.1)!';
-    } else if (!completed.has('trial-01-02')) {
-      tip = 'Head east to the Broken Meadow Bridge (Trial 1.2) to repair the crossing!';
-    } else if (!completed.has('trial-01-03')) {
-      tip = "Cross the repaired bridge and unlock Spark's Mossy Vault Gate (Trial 1.3)!";
-    } else if (!rescued.has('dragon-spark')) {
-      tip = "Step into Spark's Logic Vault to rescue Spark and restore Bit 1!";
-    } else {
-      tip = 'Spark is free! Step into the glowing Portal north of Spark to enter Mossy Ruins!';
-    }
-  } else if (save.realmId === 'realm-02-ruins') {
-    if (!completed.has('trial-02-01')) {
-      tip = 'Inspect the Moss Stone Pillars (Trial 2.1) to open the gate into the Chasm Hall!';
-    } else if (!completed.has('trial-02-02')) {
-      tip = 'Balance the Broken Ruin Bridge (Trial 2.2) to cross into the Ancient Treasury!';
-    } else if (!completed.has('trial-02-03')) {
-      tip = "Solve Pebble's Treasure Split (Trial 2.3) to unseal Pebble's Vault Gate!";
-    } else if (!rescued.has('dragon-pebble')) {
-      tip = "Rescue Pebble inside Pebble's Logic Vault to restore Bit 2!";
-    } else {
-      tip = 'You rescued both Spark and Pebble! Visit the Portal or Bram\'s Workshop to spend your Byte Shards!';
-    }
+  if (nextTrial) {
+    tip = `Next Trial (${solvedInRealm}/${totalInRealm}): ${nextTrial.title} — follow the gold ! marker on your minimap!`;
+  } else if (realmDragon && !rescued.has(realmDragon.id)) {
+    tip = `All ${totalInRealm} Trials solved! Head to ${realmDragon.name}'s Logic Vault (red dot on minimap) to rescue ${realmDragon.name}!`;
+  } else if (realmDragon && rescued.has(realmDragon.id)) {
+    tip = `${realmDragon.name} is free! Step into the glowing Portal or visit Bram's Workshop to spend your Byte Shards!`;
   }
   $('#hud-objective').textContent = tip;
 
@@ -499,11 +483,16 @@ async function handleEntityInteract(entity) {
   if (entity.type === 'npc') {
     const npc = getNpc(entity.refId);
     if (entity.refId === 'elder-ada') {
+      const realmTrials = state.activeRealm?.trials || [];
+      const solvedCount = realmTrials.filter((t) => completed.has(t.id)).length;
+      const nextTrial = realmTrials.find((t) => !completed.has(t.id));
       let msg = state.activeRealm?.storyIntro || npc.personality;
       if (rescued.has('dragon-spark')) {
         msg = `Wonderful work, ${save.heroName}! Spark is free and Bit 1 is restored. Step through the shimmering Portal north of Spark's vault to reach Mossy Ruins and rescue Pebble!`;
-      } else if (completed.has('trial-01-01')) {
-        msg = `You woke the Signal Stone, ${save.heroName}! Now head east to the Broken Meadow Bridge and cast a two-line print() spell to cross the stream.`;
+      } else if (solvedCount > 0 && nextTrial) {
+        msg = `You've conquered ${solvedCount} of ${realmTrials.length} Trials in ${state.activeRealm?.name}, ${save.heroName}! Follow the gold ! marker on your minimap to find "${nextTrial.title}".`;
+      } else if (solvedCount >= realmTrials.length && realmTrials.length > 0) {
+        msg = `All ${realmTrials.length} Trials are solved, ${save.heroName}! Head to Spark's Logic Vault (the glowing red dot on your minimap) to rescue Spark!`;
       }
       state.modals.openNpcDialogue({ npc, spriteKey: entity.spriteKey, message: msg, eraKey });
     } else if (entity.refId === 'bram') {
@@ -820,9 +809,9 @@ async function init() {
         const banner = $('#region-banner');
         if (!banner || !region) return;
         banner.textContent = region.name;
-        banner.classList.remove('hidden');
+        banner.classList.add('visible');
         if (regionHideTimer) clearTimeout(regionHideTimer);
-        regionHideTimer = setTimeout(() => banner.classList.add('hidden'), 2600);
+        regionHideTimer = setTimeout(() => banner.classList.remove('visible'), 2600);
       },
       onNearestEntityChange: (entity) => {
         updateInteractPrompt(entity);

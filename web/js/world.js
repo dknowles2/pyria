@@ -6,6 +6,29 @@ const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
 const TILE_PX = BASE_TILE_PX * RENDER_SCALE;
 
+const MINIMAP_COLORS = {
+  grass: '#2d6a4f',
+  grass_flower: '#40916c',
+  dirt_path: '#b08968',
+  water: '#1d6fa5',
+  bridge_wood: '#d4a373',
+  bridge_broken: '#7f5539',
+  stone_floor: '#64748b',
+  stone_wall: '#334155',
+  tree: '#1b4332',
+  bush: '#2d5a27',
+  campfire: '#f97316',
+  anvil: '#94a3b8',
+  statue: '#cbd5e1',
+  mossy_gate_closed: '#9a3412',
+  mossy_gate_open: '#4d7c0f',
+  chest_closed: '#f59e0b',
+  chest_open: '#78716c',
+  vault_shrine: '#dc2626',
+  torch: '#fb923c',
+  portal: '#38bdf8',
+};
+
 export class WorldEngine {
   constructor(canvas, sprites, callbacks) {
     this.canvas = canvas;
@@ -39,8 +62,13 @@ export class WorldEngine {
     };
     this.trail = [];
 
-    // Camera top-left in world pixels
-    this.camera = { x: 0, y: 0 };
+    // Camera top-left in world pixels (smoothly lerped toward hero)
+    this.camera = { x: 0, y: 0, initialized: false };
+
+    // Cached offscreen terrain layer for the corner minimap
+    this.minimapCanvas = null;
+    this.minimapCacheKey = null;
+    this.minimapRect = null;
 
     // Input state
     this.keys = new Set();
@@ -90,8 +118,19 @@ export class WorldEngine {
       const rect = this.canvas.getBoundingClientRect();
       const cx = (e.clientX - rect.left) * (this.canvas.width / rect.width);
       const cy = (e.clientY - rect.top) * (this.canvas.height / rect.height);
-      const tileX = (cx + this.camera.x) / TILE_PX;
-      const tileY = (cy + this.camera.y) / TILE_PX;
+
+      // Ignore clicks inside the corner minimap overlay
+      if (this.minimapRect) {
+        const m = this.minimapRect;
+        if (cx >= m.x && cx <= m.x + m.w && cy >= m.y && cy <= m.y + m.h) {
+          return;
+        }
+      }
+
+      const camX = Math.round(this.camera.x);
+      const camY = Math.round(this.camera.y);
+      const tileX = (cx + camX) / TILE_PX;
+      const tileY = (cy + camY) / TILE_PX;
 
       // Check if user clicked an entity near the hero
       let clicked = null;
@@ -185,10 +224,38 @@ export class WorldEngine {
     this.pip.y = startY;
     this.trail = [];
     this.currentRegionId = null;
+    this.camera.initialized = false;
+    this.minimapCacheKey = null;
 
     this.initParticles();
     this.resizeCanvas();
+    this.snapCameraToHero();
     this.startLoop();
+  }
+
+  computeTargetCamera() {
+    const worldW = this.map.width * TILE_PX;
+    const worldH = this.map.height * TILE_PX;
+    const desiredX = this.hero.x * TILE_PX - this.canvas.width / 2;
+    const desiredY = this.hero.y * TILE_PX - this.canvas.height / 2;
+    const maxCamX = Math.max(0, worldW - this.canvas.width);
+    const maxCamY = Math.max(0, worldH - this.canvas.height);
+    return {
+      x: worldW <= this.canvas.width
+        ? -(this.canvas.width - worldW) / 2
+        : Math.max(0, Math.min(maxCamX, desiredX)),
+      y: worldH <= this.canvas.height
+        ? -(this.canvas.height - worldH) / 2
+        : Math.max(0, Math.min(maxCamY, desiredY)),
+    };
+  }
+
+  snapCameraToHero() {
+    if (!this.map) return;
+    const target = this.computeTargetCamera();
+    this.camera.x = target.x;
+    this.camera.y = target.y;
+    this.camera.initialized = true;
   }
 
   initParticles() {
@@ -387,17 +454,19 @@ export class WorldEngine {
       p.y = (p.y + p.vy * dt + worldH) % worldH;
     }
 
-    // Update camera centered on hero, clamped to map bounds
-    const desiredX = this.hero.x * TILE_PX - this.canvas.width / 2;
-    const desiredY = this.hero.y * TILE_PX - this.canvas.height / 2;
-    const maxCamX = Math.max(0, worldW - this.canvas.width);
-    const maxCamY = Math.max(0, worldH - this.canvas.height);
-    this.camera.x = worldW <= this.canvas.width
-      ? -(this.canvas.width - worldW) / 2
-      : Math.max(0, Math.min(maxCamX, desiredX));
-    this.camera.y = worldH <= this.canvas.height
-      ? -(this.canvas.height - worldH) / 2
-      : Math.max(0, Math.min(maxCamY, desiredY));
+    // Smoothly interpolate camera toward hero, clamped cleanly to map edges
+    const targetCam = this.computeTargetCamera();
+    if (!this.camera.initialized) {
+      this.camera.x = targetCam.x;
+      this.camera.y = targetCam.y;
+      this.camera.initialized = true;
+    } else {
+      const lerp = 1 - Math.exp(-10 * dt);
+      this.camera.x += (targetCam.x - this.camera.x) * lerp;
+      this.camera.y += (targetCam.y - this.camera.y) * lerp;
+      if (Math.abs(targetCam.x - this.camera.x) < 0.25) this.camera.x = targetCam.x;
+      if (Math.abs(targetCam.y - this.camera.y) < 0.25) this.camera.y = targetCam.y;
+    }
 
     // Region detection
     const htx = Math.floor(this.hero.x);
@@ -453,19 +522,22 @@ export class WorldEngine {
     const openedChests = new Set(this.save.openedChests || []);
     const rescued = new Set(this.save.rescuedDragons || []);
 
-    const startCol = Math.max(0, Math.floor(this.camera.x / TILE_PX) - 1);
-    const endCol = Math.min(this.map.width - 1, Math.ceil((this.camera.x + this.canvas.width) / TILE_PX) + 1);
-    const startRow = Math.max(0, Math.floor(this.camera.y / TILE_PX) - 1);
-    const endRow = Math.min(this.map.height - 1, Math.ceil((this.camera.y + this.canvas.height) / TILE_PX) + 1);
+    const camX = Math.round(this.camera.x);
+    const camY = Math.round(this.camera.y);
+
+    const startCol = Math.max(0, Math.floor(camX / TILE_PX) - 1);
+    const endCol = Math.min(this.map.width - 1, Math.ceil((camX + this.canvas.width) / TILE_PX) + 1);
+    const startRow = Math.max(0, Math.floor(camY / TILE_PX) - 1);
+    const endRow = Math.min(this.map.height - 1, Math.ceil((camY + this.canvas.height) / TILE_PX) + 1);
 
     const sparkRescued = rescued.has('dragon-spark');
     const pebbleRescued = rescued.has('dragon-pebble');
 
-    // 1. Ground & Decor layers
+    // 1. Ground & Decor layers (integer pixel snapped to prevent subpixel seams)
     for (let y = startRow; y <= endRow; y++) {
       for (let x = startCol; x <= endCol; x++) {
-        const sx = Math.round(x * TILE_PX - this.camera.x);
-        const sy = Math.round(y * TILE_PX - this.camera.y);
+        const sx = x * TILE_PX - camX;
+        const sy = y * TILE_PX - camY;
         const key = `${x},${y}`;
         const ov = dynamicOverrides.get(key);
 
@@ -507,7 +579,7 @@ export class WorldEngine {
     for (const ent of this.map.entities || []) {
       drawList.push({
         sortY: ent.y + 0.5,
-        draw: () => this.drawEntity(ctx, ent, completed, openedChests, rescued),
+        draw: () => this.drawEntity(ctx, ent, completed, openedChests, rescued, camX, camY),
       });
     }
 
@@ -515,10 +587,10 @@ export class WorldEngine {
     drawList.push({
       sortY: this.pip.y,
       draw: () => {
-        const px = this.pip.x * TILE_PX - this.camera.x;
-        const py = this.pip.y * TILE_PX - this.camera.y;
+        const px = Math.round(this.pip.x * TILE_PX - camX);
+        const py = Math.round(this.pip.y * TILE_PX - camY);
         const pipSize = TILE_PX * 0.85;
-        const bob = Math.sin(this.time * 6) * 2;
+        const bob = Math.round(Math.sin(this.time * 6) * 2);
         this.sprites.drawPip(
           ctx,
           this.save.appearance,
@@ -537,8 +609,8 @@ export class WorldEngine {
     drawList.push({
       sortY: this.hero.y,
       draw: () => {
-        const hx = this.hero.x * TILE_PX - this.camera.x;
-        const hy = this.hero.y * TILE_PX - this.camera.y;
+        const hx = Math.round(this.hero.x * TILE_PX - camX);
+        const hy = Math.round(this.hero.y * TILE_PX - camY);
         const heroSize = this.eraKey === '16bit' ? TILE_PX * 1.25 : TILE_PX * 1.1;
         this.sprites.drawHero(
           ctx,
@@ -562,8 +634,8 @@ export class WorldEngine {
     // 3. Bit Restored Ambiance Particles
     if (sparkRescued || pebbleRescued) {
       for (const p of this.particles) {
-        const sx = p.x - this.camera.x;
-        const sy = p.y - this.camera.y;
+        const sx = p.x - camX;
+        const sy = p.y - camY;
         if (sx < -8 || sy < -8 || sx > this.canvas.width + 8 || sy > this.canvas.height + 8) continue;
         const alpha = 0.35 + 0.45 * Math.sin(this.time * 3.5 + p.phase);
         ctx.fillStyle = this.map.realmId === 'realm-02-ruins'
@@ -572,11 +644,131 @@ export class WorldEngine {
         ctx.fillRect(Math.round(sx), Math.round(sy), 4, 4);
       }
     }
+
+    // 4. Corner Minimap Overlay
+    this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
   }
 
-  drawEntity(ctx, ent, completed, openedChests, rescued) {
-    const sx = Math.round(ent.x * TILE_PX - this.camera.x);
-    const sy = Math.round(ent.y * TILE_PX - this.camera.y);
+  ensureMinimapTerrainCache(dynamicOverrides, completed) {
+    const cacheKey = `${this.map.id}:${[...completed].sort().join(',')}`;
+    if (this.minimapCanvas && this.minimapCacheKey === cacheKey) {
+      return this.minimapCanvas;
+    }
+    const off = document.createElement('canvas');
+    off.width = this.map.width;
+    off.height = this.map.height;
+    const octx = off.getContext('2d');
+
+    for (let y = 0; y < this.map.height; y++) {
+      for (let x = 0; x < this.map.width; x++) {
+        const ov = dynamicOverrides.get(`${x},${y}`);
+        let groundTile = this.map.layers.ground[y][x];
+        if (ov && ov.layer === 'ground') groundTile = ov.tile;
+        let decorTile = this.map.layers.decor[y][x];
+        if (ov && ov.layer === 'decor') decorTile = ov.tile;
+
+        const key = decorTile && MINIMAP_COLORS[decorTile] ? decorTile : groundTile;
+        octx.fillStyle = MINIMAP_COLORS[key] || '#1e293b';
+        octx.fillRect(x, y, 1, 1);
+      }
+    }
+
+    this.minimapCanvas = off;
+    this.minimapCacheKey = cacheKey;
+    return off;
+  }
+
+  renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY) {
+    if (this.canvas.width < 420 || this.canvas.height < 280) {
+      this.minimapRect = null;
+      return;
+    }
+
+    const scale = this.map.width >= 48 ? 3 : 4;
+    const mapW = this.map.width * scale;
+    const mapH = this.map.height * scale;
+    const pad = 6;
+    const boxW = mapW + pad * 2;
+    const boxH = mapH + pad * 2;
+    const boxX = this.canvas.width - boxW - 14;
+    const boxY = 14;
+
+    this.minimapRect = { x: boxX, y: boxY, w: boxW, h: boxH };
+
+    ctx.save();
+    // Translucent dark RPG frame
+    ctx.fillStyle = 'rgba(11, 16, 32, 0.82)';
+    ctx.fillRect(boxX, boxY, boxW, boxH);
+    ctx.strokeStyle = 'rgba(75, 97, 150, 0.9)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+    const mx = boxX + pad;
+    const my = boxY + pad;
+
+    // Terrain bitmap scaled crisp
+    const terrain = this.ensureMinimapTerrainCache(dynamicOverrides, completed);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(terrain, mx, my, mapW, mapH);
+
+    // Subtle viewport rectangle
+    const viewX = Math.max(0, (camX / TILE_PX) * scale);
+    const viewY = Math.max(0, (camY / TILE_PX) * scale);
+    const viewW = Math.min(mapW - viewX, (this.canvas.width / TILE_PX) * scale);
+    const viewH = Math.min(mapH - viewY, (this.canvas.height / TILE_PX) * scale);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
+
+    // Entity markers
+    const pulse = 0.5 + 0.5 * Math.sin(this.time * 6);
+    for (const ent of this.map.entities || []) {
+      const ex = Math.round(mx + (ent.x + 0.5) * scale);
+      const ey = Math.round(my + (ent.y + 0.5) * scale);
+
+      if (ent.type === 'trial') {
+        const isDone = completed.has(ent.refId);
+        ctx.fillStyle = isDone ? '#34d399' : '#facc15';
+        ctx.beginPath();
+        ctx.arc(ex, ey, isDone ? 2.6 : 3.1, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (ent.type === 'chest' && !openedChests.has(ent.id)) {
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(ex - 2, ey - 2, 4, 4);
+      } else if (ent.type === 'vault') {
+        ctx.fillStyle = `rgba(239, 68, 68, ${(0.7 + 0.3 * pulse).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(ex, ey, 3.6 + pulse * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fecaca';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      } else if (ent.type === 'portal') {
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(ex, ey, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Hero pulsing cyan/white dot
+    const hx = Math.round(mx + this.hero.x * scale);
+    const hy = Math.round(my + this.hero.y * scale);
+    ctx.fillStyle = `rgba(56, 189, 248, ${(0.45 + 0.45 * pulse).toFixed(2)})`;
+    ctx.beginPath();
+    ctx.arc(hx, hy, 4.5 + pulse * 1.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(hx, hy, 2.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  drawEntity(ctx, ent, completed, openedChests, rescued, camX, camY) {
+    const sx = ent.x * TILE_PX - camX;
+    const sy = ent.y * TILE_PX - camY;
     const bob = Math.round(Math.sin(this.time * 3.2 + ent.x) * 2);
     const isNear = this.nearestEntity && this.nearestEntity.id === ent.id;
 
