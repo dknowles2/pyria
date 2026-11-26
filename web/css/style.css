@@ -681,6 +681,57 @@ html, body {
   color: #a7f3d0;
 }
 
+.hud-trials-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 800;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: var(--accent-sky);
+}
+
+.hud-trials-progress.all-complete {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: var(--accent-emerald);
+  color: #a7f3d0;
+}
+
+.trial-complete-card {
+  text-align: center;
+  padding: 20px 18px;
+  background: radial-gradient(circle at top, rgba(52, 211, 153, 0.2), rgba(16, 24, 43, 0.85));
+  border: 2px solid var(--accent-emerald);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.trial-complete-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  color: #052016;
+  font-size: 28px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.45);
+}
+
+.trial-complete-title {
+  margin: 0;
+  font-size: 20px;
+  color: #a7f3d0;
+}
+
 .world-stage {
   position: relative;
   flex: 1;

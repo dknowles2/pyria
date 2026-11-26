@@ -111,6 +111,38 @@ async function persistSave() {
   }
 }
 
+function getSolvedTrialsSet(save) {
+  return new Set([
+    ...(save?.solvedTrials || []),
+    ...(save?.completedTrials || []),
+  ]);
+}
+
+function updateInteractPrompt(entity) {
+  const prompt = $('#interact-prompt');
+  const label = $('#interact-prompt-label');
+  if (!prompt || !label) return;
+  if (!entity) {
+    prompt.classList.add('hidden');
+    return;
+  }
+  const solved = getSolvedTrialsSet(state.activeSave);
+  if (entity.type === 'trial' && solved.has(entity.refId)) {
+    label.textContent = `✓ ${entity.label} (Completed)`;
+    prompt.classList.remove('hidden');
+    return;
+  }
+  let verb = 'Inspect';
+  if (entity.type === 'npc') verb = 'Talk to';
+  else if (entity.type === 'workshop') verb = 'Open';
+  else if (entity.type === 'chest') verb = 'Open';
+  else if (entity.type === 'vault') verb = 'Enter';
+  else if (entity.type === 'portal') verb = 'Step into';
+  else if (entity.type === 'trial') verb = 'Begin';
+  label.textContent = `${verb} ${entity.label}`;
+  prompt.classList.remove('hidden');
+}
+
 // ==================== HUD UPDATES ====================
 function updateHud() {
   const save = state.activeSave;
@@ -123,6 +155,18 @@ function updateHud() {
   $('#hud-realm-name').textContent = state.activeRealm?.name || 'Whispering Meadow';
   $('#hud-shards').textContent = String(save.byteShards ?? 0);
   $('#btn-hud-mute').textContent = audio.isMuted() ? '🔇' : '🔊';
+
+  // Realm Trials progress indicator
+  const completed = getSolvedTrialsSet(save);
+  const realmTrials = state.activeRealm?.trials || [];
+  const solvedInRealm = realmTrials.filter((t) => completed.has(t.id)).length;
+  const totalInRealm = realmTrials.length;
+  const trialsEl = $('#hud-trials-progress');
+  if (trialsEl) {
+    const allDone = totalInRealm > 0 && solvedInRealm >= totalInRealm;
+    trialsEl.textContent = `${allDone ? '✓' : '★'} Trials: ${solvedInRealm}/${totalInRealm}`;
+    trialsEl.classList.toggle('all-complete', allDone);
+  }
 
   // Hero mini portrait
   const portraitCanvas = $('#hud-portrait');
@@ -147,7 +191,6 @@ function updateHud() {
     .join('');
 
   // Dynamic Pip objective tip
-  const completed = new Set(save.completedTrials || []);
   let tip = 'Explore the realm! Press E or click nearby to interact.';
   if (save.realmId === 'realm-01-meadow') {
     if (!completed.has('trial-01-01')) {
@@ -175,6 +218,10 @@ function updateHud() {
     }
   }
   $('#hud-objective').textContent = tip;
+
+  if (state.world?.nearestEntity) {
+    updateInteractPrompt(state.world.nearestEntity);
+  }
 }
 
 // ==================== TITLE & SAVE PICKER ====================
@@ -446,7 +493,7 @@ async function enterOverworld(save) {
 async function handleEntityInteract(entity) {
   const save = state.activeSave;
   const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
-  const completed = new Set(save.completedTrials || []);
+  const completed = getSolvedTrialsSet(save);
   const rescued = new Set(save.rescuedDragons || []);
 
   if (entity.type === 'npc') {
@@ -517,6 +564,14 @@ async function handleEntityInteract(entity) {
       return;
     }
     const alreadySolved = completed.has(trial.id);
+    const hasBridgeUnlock = (entity.dynamicTiles || []).some((d) => d.tileWhenUnlocked === 'bridge_wood');
+    const hasGateUnlock = (entity.dynamicTiles || []).some((d) => d.tileWhenUnlocked === 'mossy_gate_open');
+    const unlockNote = hasBridgeUnlock
+      ? 'The broken bridge is repaired — you can cross now!'
+      : hasGateUnlock
+        ? 'The mossy gate slid open — the path ahead is clear!'
+        : null;
+
     state.modals.openTrialModal({
       trial,
       realm,
@@ -524,17 +579,23 @@ async function handleEntityInteract(entity) {
       catalog: state.catalog,
       save,
       alreadySolved,
+      unlockNote,
       onAttempt: (attempt) => {
         logAttempt(save.id, attempt).catch((err) => console.warn('Attempt log failed:', err));
       },
       onSolved: async (solvedTrial) => {
-        if (!save.completedTrials.includes(solvedTrial.id)) {
-          save.completedTrials.push(solvedTrial.id);
+        const solvedSet = getSolvedTrialsSet(save);
+        const isFirstSolve = !solvedSet.has(solvedTrial.id);
+        if (isFirstSolve) {
+          solvedSet.add(solvedTrial.id);
+          save.solvedTrials = [...solvedSet];
+          save.completedTrials = [...solvedSet];
           save.byteShards += Number(solvedTrial.shardReward) || 0;
-          showToast(`+${solvedTrial.shardReward} Byte Shards! Path unlocked!`);
+          showToast(`✓ Trial Complete! +${solvedTrial.shardReward} Byte Shards!`);
         } else {
-          showToast(`Re-solved ${solvedTrial.title}!`);
+          showToast(`✓ Practice run passed for ${solvedTrial.title}!`);
         }
+        state.world.setSave(save);
         updateHud();
         await persistSave();
       },
@@ -764,22 +825,7 @@ async function init() {
         regionHideTimer = setTimeout(() => banner.classList.add('hidden'), 2600);
       },
       onNearestEntityChange: (entity) => {
-        const prompt = $('#interact-prompt');
-        const label = $('#interact-prompt-label');
-        if (!prompt || !label) return;
-        if (!entity) {
-          prompt.classList.add('hidden');
-          return;
-        }
-        let verb = 'Inspect';
-        if (entity.type === 'npc') verb = 'Talk to';
-        else if (entity.type === 'workshop') verb = 'Open';
-        else if (entity.type === 'chest') verb = 'Open';
-        else if (entity.type === 'vault') verb = 'Enter';
-        else if (entity.type === 'portal') verb = 'Step into';
-        else if (entity.type === 'trial') verb = 'Begin';
-        label.textContent = `${verb} ${entity.label}`;
-        prompt.classList.remove('hidden');
+        updateInteractPrompt(entity);
       },
       onInteract: (entity) => handleEntityInteract(entity),
     });
