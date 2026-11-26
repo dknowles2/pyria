@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pyria.local/content/maps/schema.json",
+  "title": "Pyria Realm Tilemap Schema",
+  "description": "Engine-agnostic 2D tilemap schema for Pyria Realms (compatible with 8-bit and 16-bit tilesets).",
+  "type": "object",
+  "required": [
+    "id",
+    "realmId",
+    "name",
+    "width",
+    "height",
+    "tileSize",
+    "tilesetId",
+    "spawn",
+    "layers",
+    "regions",
+    "entities"
+  ],
+  "$defs": {
+    "tileId": {
+      "type": "string",
+      "enum": [
+        "grass",
+        "grass_flower",
+        "dirt_path",
+        "water",
+        "bridge_wood",
+        "bridge_broken",
+        "stone_floor",
+        "stone_wall",
+        "tree",
+        "bush",
+        "campfire",
+        "anvil",
+        "statue",
+        "mossy_gate_closed",
+        "mossy_gate_open",
+        "chest_closed",
+        "chest_open",
+        "vault_shrine",
+        "torch",
+        "portal"
+      ]
+    },
+    "dynamicTile": {
+      "type": "object",
+      "required": [
+        "x",
+        "y",
+        "layer",
+        "tileWhenLocked",
+        "tileWhenUnlocked",
+        "collisionWhenLocked",
+        "collisionWhenUnlocked"
+      ],
+      "properties": {
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "layer": { "type": "string", "enum": ["ground", "decor"] },
+        "tileWhenLocked": { "$ref": "#/$defs/tileId" },
+        "tileWhenUnlocked": { "$ref": "#/$defs/tileId" },
+        "collisionWhenLocked": { "type": "integer", "enum": [0, 1] },
+        "collisionWhenUnlocked": { "type": "integer", "enum": [0, 1] }
+      },
+      "additionalProperties": false
+    },
+    "region": {
+      "type": "object",
+      "required": ["id", "name", "x", "y", "width", "height"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "width": { "type": "integer", "minimum": 1 },
+        "height": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "entity": {
+      "type": "object",
+      "required": ["id", "type", "x", "y", "label", "refId", "spriteKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["npc", "trial", "chest", "vault", "portal", "workshop"]
+        },
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 },
+        "label": { "type": "string" },
+        "refId": { "type": ["string", "null"] },
+        "spriteKey": { "type": "string" },
+        "shardReward": { "type": "integer", "minimum": 0 },
+        "requiredTrialId": { "type": ["string", "null"] },
+        "dynamicTiles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dynamicTile" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "id": { "type": "string" },
+    "realmId": { "type": "string" },
+    "name": { "type": "string" },
+    "width": { "type": "integer", "minimum": 1 },
+    "height": { "type": "integer", "minimum": 1 },
+    "tileSize": { "type": "integer", "const": 16 },
+    "tilesetId": { "type": "string", "const": "meadow_ruins" },
+    "spawn": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "integer", "minimum": 0 },
+        "y": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "layers": {
+      "type": "object",
+      "required": ["ground", "decor", "collision"],
+      "properties": {
+        "ground": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/tileId" }
+          }
+        },
+        "decor": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                { "$ref": "#/$defs/tileId" },
+                { "type": "null" }
+              ]
+            }
+          }
+        },
+        "collision": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "integer", "enum": [0, 1] }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "regions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/region" }
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entity" }
+    }
+  },
+  "additionalProperties": false
+}
