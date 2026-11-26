@@ -762,6 +762,119 @@ class PyriaDatabase:
             },
         }
 
+    def override_trial(
+        self,
+        save_id: str,
+        trial_id: str,
+        solved: bool,
+        award_shards: bool,
+        shard_reward: int,
+    ) -> tuple[dict[str, Any], int] | None:
+        now = utc_now_iso()
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                "SELECT id, hero_name, state_json, created_at, updated_at "
+                "FROM saves WHERE id = ?",
+                (save_id,),
+            ).fetchone()
+            if row is None:
+                return None
+
+            state = self._row_to_save(row)
+            hero_name = str(row["hero_name"])
+
+            # Preserve order while deduplicating solvedTrials / completedTrials
+            ordered_solved: list[str] = []
+            seen: set[str] = set()
+            for key in ("solvedTrials", "completedTrials"):
+                val = state.get(key)
+                if isinstance(val, list):
+                    for item in val:
+                        s = str(item)
+                        if s not in seen:
+                            seen.add(s)
+                            ordered_solved.append(s)
+
+            shards_delta = 0
+            if solved:
+                was_already_solved = trial_id in seen
+                if not was_already_solved:
+                    ordered_solved.append(trial_id)
+                    if award_shards and shard_reward > 0:
+                        shards_delta = int(shard_reward)
+                        state["byteShards"] = int(state.get("byteShards") or 0) + shards_delta
+                drafts = state.get("trialDrafts")
+                if isinstance(drafts, dict) and trial_id in drafts:
+                    drafts = dict(drafts)
+                    drafts.pop(trial_id, None)
+                    state["trialDrafts"] = drafts
+                summary = (
+                    f"Parent marked {trial_id} complete (+{shards_delta} Shards)"
+                    if shards_delta > 0
+                    else f"Parent marked {trial_id} complete"
+                )
+            else:
+                ordered_solved = [t for t in ordered_solved if t != trial_id]
+                summary = f"Parent reset {trial_id} to unsolved"
+
+            state["solvedTrials"] = list(ordered_solved)
+            state["completedTrials"] = list(ordered_solved)
+            state["updatedAt"] = now
+
+            conn.execute(
+                "UPDATE saves SET state_json = ?, updated_at = ? WHERE id = ?",
+                (json.dumps(state, ensure_ascii=False), now, save_id),
+            )
+
+            realm_id = str(state.get("realmId") or "") or None
+            self._insert_event(
+                conn,
+                save_id=save_id,
+                hero_name=hero_name,
+                event_type="parent_override",
+                realm_id=realm_id,
+                trial_id=trial_id,
+                summary=summary,
+                details={
+                    "trialId": trial_id,
+                    "solved": solved,
+                    "shardsDelta": shards_delta,
+                    "byteShards": state.get("byteShards", 0),
+                },
+                created_at=now,
+            )
+
+            att = conn.execute(
+                "SELECT COUNT(*) AS attempt_count, "
+                "SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS pass_count, "
+                "SUM(hints_used) AS total_hints, "
+                "MAX(created_at) AS last_attempt_at "
+                "FROM trial_attempts WHERE save_id = ?",
+                (save_id,),
+            ).fetchone()
+
+        attempt_count = int(att["attempt_count"]) if att else 0
+        pass_count = int(att["pass_count"] or 0) if att else 0
+        hints_used = int(att["total_hints"] or 0) if att else 0
+        last_attempt_at = str(att["last_attempt_at"]) if (att and att["last_attempt_at"]) else ""
+        rescued_set = _extract_string_set(state, "rescuedDragons")
+
+        enriched = {
+            "id": save_id,
+            "heroName": hero_name,
+            "state": state,
+            "stats": {
+                "attemptCount": attempt_count,
+                "passCount": pass_count,
+                "totalHintsUsed": hints_used,
+                "solvedCount": len(ordered_solved),
+                "rescuedCount": len(rescued_set),
+                "lastActive": max(now, last_attempt_at),
+            },
+            "updatedAt": now,
+        }
+        return enriched, shards_delta
+
 
 class PyriaHTTPServer(ThreadingHTTPServer):
     allow_reuse_address = True
@@ -807,6 +920,23 @@ class PyriaHTTPServer(ThreadingHTTPServer):
         if not target.is_relative_to(eras_dir) or not target.is_file():
             return None
         return target
+
+    def find_trial_shard_reward(self, trial_id: str) -> int:
+        try:
+            with self.content_lock:
+                game, _ = self.load_game_and_catalog()
+                eras = self.load_all_eras(game)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return 0
+        for era in eras:
+            for realm in era.get("realms") or []:
+                for trial in realm.get("trials") or []:
+                    if trial.get("id") == trial_id:
+                        try:
+                            return max(0, int(trial.get("shardReward") or 0))
+                        except (TypeError, ValueError):
+                            return 0
+        return 0
 
 
 class PyriaRequestHandler(BaseHTTPRequestHandler):
@@ -1095,6 +1225,59 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.OK, result)
             return
 
+        parts = [p for p in path.split("/") if p]
+        # POST /api/builder/saves/<saveId>/override-trial
+        if (
+            len(parts) == 5
+            and parts[0] == "api"
+            and parts[1] == "builder"
+            and parts[2] == "saves"
+            and parts[4] == "override-trial"
+        ):
+            if not self._check_builder_auth():
+                return
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+                return
+            trial_id = str(body.get("trialId") or "").strip()
+            if not trial_id:
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST, {"error": "trialId is required"}
+                )
+                return
+            if "solved" not in body or not isinstance(body["solved"], bool):
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST,
+                    {"error": "solved must be a boolean"},
+                )
+                return
+            solved = body["solved"]
+            award_shards = bool(body.get("awardShards", True)) if solved else False
+            shard_reward = (
+                self.server.find_trial_shard_reward(trial_id)
+                if (solved and award_shards)
+                else 0
+            )
+            override_res = self.server.db.override_trial(
+                save_id=unquote(parts[3]),
+                trial_id=trial_id,
+                solved=solved,
+                award_shards=award_shards,
+                shard_reward=shard_reward,
+            )
+            if override_res is None:
+                self._send_json(
+                    HTTPStatus.NOT_FOUND, {"error": "Save not found"}
+                )
+                return
+            enriched_save, shards_delta = override_res
+            self._send_json(
+                HTTPStatus.OK,
+                {"ok": True, "save": enriched_save, "shardsDelta": shards_delta},
+            )
+            return
+
         if path == "/api/saves":
             body, err = self._read_json_body()
             if err is not None or body is None:
@@ -1110,7 +1293,6 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.CREATED, {"save": save})
             return
 
-        parts = [p for p in path.split("/") if p]
         if (
             len(parts) == 4
             and parts[0] == "api"
