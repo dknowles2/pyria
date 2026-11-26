@@ -12,7 +12,7 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126e';
+} from './api.js?v=20261126l';
 import { audio } from './audio.js?v=20261126e';
 import { music, resolveRegionTheme } from './music.js?v=20261126e';
 import { pyRunner } from './pyRunner.js?v=20261126e';
@@ -726,7 +726,26 @@ async function runCharCreateCode() {
 }
 
 // ==================== OVERWORLD ENTRY & REALM LOADING ====================
+async function refreshLiveContent() {
+  const eraId = state.activeSave?.eraId || state.era?.id || 'era-01-8bit';
+  try {
+    const [config, era] = await Promise.all([fetchConfig(), fetchEra(eraId)]);
+    if (config?.game) state.gameConfig = config.game;
+    if (config?.catalog) state.catalog = config.catalog;
+    if (era) {
+      state.era = era;
+      if (state.activeRealm) {
+        const refreshedRealm = (era.realms || []).find((r) => r.id === state.activeRealm.id);
+        if (refreshedRealm) state.activeRealm = refreshedRealm;
+      }
+    }
+  } catch (err) {
+    console.warn('Live content refresh skipped:', err);
+  }
+}
+
 async function loadRealm(realmId, spawnOverride = null) {
+  await refreshLiveContent();
   const realm = getRealm(realmId);
   if (!realm) return;
   state.activeRealm = realm;
@@ -885,6 +904,7 @@ async function handleEntityInteract(entity) {
           showToast(`✓ Practice run passed for ${solvedTrial.title}!`);
         }
         state.world.setSave(save);
+        await refreshLiveContent();
         updateHud();
         await persistSave();
       },
@@ -914,6 +934,7 @@ async function handleEntityInteract(entity) {
           } else if (entity.refId === 'dragon-pebble') {
             showToast('✨ Bit 2 Restored! Mossy Ruins awakened!');
           }
+          await refreshLiveContent();
           updateHud();
           await persistSave();
         }
