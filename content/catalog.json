@@ -1,0 +1,211 @@
+{
+  "characterCreation": {
+    "description": "Players forge their Code-Tamer hero by writing real Python function calls.",
+    "functions": [
+      {
+        "name": "set_name",
+        "signature": "set_name(hero_name)",
+        "description": "Sets your hero's display name (2 to 16 characters)."
+      },
+      {
+        "name": "preview_skin",
+        "signature": "preview_skin(tone)",
+        "description": "Updates the hero's skin tone sprite layer."
+      },
+      {
+        "name": "preview_hair",
+        "signature": "preview_hair(style)",
+        "description": "Updates the hero's hairstyle sprite layer."
+      },
+      {
+        "name": "preview_tunic",
+        "signature": "preview_tunic(color)",
+        "description": "Updates the hero's starter tunic color."
+      },
+      {
+        "name": "confirm_hero",
+        "signature": "confirm_hero()",
+        "description": "Locks in your hero and enters Whispering Meadow."
+      }
+    ],
+    "allowedValues": {
+      "skin": [
+        "ivory",
+        "peach",
+        "olive",
+        "warm_tan",
+        "bronze",
+        "deep_brown"
+      ],
+      "hair": [
+        "spiky",
+        "windswept",
+        "curly",
+        "braided",
+        "ponytail",
+        "cropped"
+      ],
+      "tunic": [
+        "emerald",
+        "crimson",
+        "navy",
+        "amber",
+        "violet",
+        "slate"
+      ]
+    },
+    "defaults": {
+      "name": "Code-Tamer",
+      "skin": "warm_tan",
+      "hair": "spiky",
+      "tunic": "emerald"
+    },
+    "starterCode": "set_name(\"Rowan\")\npreview_skin(\"warm_tan\")\npreview_hair(\"spiky\")\npreview_tunic(\"emerald\")\nconfirm_hero()\n"
+  },
+  "unlockables": [
+    {
+      "id": "hat-explorer",
+      "functionCall": "wear_hat(\"explorer\")",
+      "category": "hat",
+      "name": "Explorer Hat",
+      "description": "A sturdy wide-brimmed meadow hat with a tiny glowing pixel feather.",
+      "shardCost": 25,
+      "unlockRealmId": "realm-01-meadow",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "headgear",
+      "spriteKey": "hat_explorer"
+    },
+    {
+      "id": "stat-charisma-1",
+      "functionCall": "add_charisma(1)",
+      "category": "stat",
+      "name": "Charisma Spark +1",
+      "description": "Boosts your Dragon Bond and unlocks playful extra dialogue with Pip and Bram.",
+      "shardCost": 35,
+      "unlockRealmId": "realm-01-meadow",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "aura",
+      "spriteKey": "aura_charisma_1"
+    },
+    {
+      "id": "shield-oak",
+      "functionCall": "equip_shield(\"oak\")",
+      "category": "shield",
+      "name": "Oak Rune Shield",
+      "description": "Carved from Whispering Meadow timber and etched with protective brackets.",
+      "shardCost": 45,
+      "unlockRealmId": "realm-02-ruins",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "offhand",
+      "spriteKey": "shield_oak"
+    },
+    {
+      "id": "boots-swift",
+      "functionCall": "equip_boots(\"swift\")",
+      "category": "boots",
+      "name": "Swift-Step Boots",
+      "description": "Increases overworld walk speed across mossy stones and dungeon tiles.",
+      "shardCost": 55,
+      "unlockRealmId": "realm-02-ruins",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "footwear",
+      "spriteKey": "boots_swift"
+    },
+    {
+      "id": "tunic-crimson",
+      "functionCall": "set_tunic_color(\"crimson\")",
+      "category": "tunic",
+      "name": "Ember-Woven Crimson Tunic",
+      "description": "Flame-resistant adventurer tunic dyed with Cinder Cavern coal-dust.",
+      "shardCost": 60,
+      "unlockRealmId": "realm-03-cavern",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "torso",
+      "spriteKey": "tunic_crimson"
+    },
+    {
+      "id": "hat-dragon-helm",
+      "functionCall": "wear_hat(\"dragon_helm\")",
+      "category": "hat",
+      "name": "Emberwing Dragon Helm",
+      "description": "A horned helm forged in honor of Emberwing, gleaming with warm pixel embers.",
+      "shardCost": 85,
+      "unlockRealmId": "realm-03-cavern",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "headgear",
+      "spriteKey": "hat_dragon_helm"
+    },
+    {
+      "id": "tunic-navy",
+      "functionCall": "set_tunic_color(\"navy\")",
+      "category": "tunic",
+      "name": "Frostguard Navy Tunic",
+      "description": "Fur-trimmed midnight blue tunic built for the winds of Frostbite Hollow.",
+      "shardCost": 70,
+      "unlockRealmId": "realm-04-hollow",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "torso",
+      "spriteKey": "tunic_navy"
+    },
+    {
+      "id": "hat-wizard-cap",
+      "functionCall": "wear_hat(\"wizard_cap\")",
+      "category": "hat",
+      "name": "Star-Loop Wizard Cap",
+      "description": "A pointed cap stitched with silver string-method runes.",
+      "shardCost": 90,
+      "unlockRealmId": "realm-05-woods",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "headgear",
+      "spriteKey": "hat_wizard_cap"
+    },
+    {
+      "id": "cloak-tide",
+      "functionCall": "equip_cloak(\"tide\")",
+      "category": "cloak",
+      "name": "Tide-Weaver Cloak",
+      "description": "Shimmering sea-green cape that ripples even in 8-bit air.",
+      "shardCost": 100,
+      "unlockRealmId": "realm-06-crypt",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "back",
+      "spriteKey": "cloak_tide"
+    },
+    {
+      "id": "stat-courage-1",
+      "functionCall": "add_courage(1)",
+      "category": "stat",
+      "name": "Courage Crest +1",
+      "description": "Steadies your hero's spirit against Lord Null's glitch storms.",
+      "shardCost": 110,
+      "unlockRealmId": "realm-07-keep",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "aura",
+      "spriteKey": "aura_courage_1"
+    },
+    {
+      "id": "pip-scarf-ember",
+      "functionCall": "equip_pip_scarf(\"ember\")",
+      "category": "companion_flair",
+      "name": "Pip's 8-Bit Hero Scarf",
+      "description": "A tiny fluttering red scarf for Pip celebrating the restoration of all 8 Bits!",
+      "shardCost": 120,
+      "unlockRealmId": "realm-08-citadel",
+      "eraId": "era-01-8bit",
+      "spriteLayer": "companion_neck",
+      "spriteKey": "pip_scarf_ember"
+    },
+    {
+      "id": "shield-coral",
+      "functionCall": "equip_shield(\"coral\")",
+      "category": "shield",
+      "name": "Tideglass Coral Buckler",
+      "description": "A shimmering 16-bit shield grown in the reefs of Coral Shallows.",
+      "shardCost": 140,
+      "unlockRealmId": "realm-16-01-shallows",
+      "eraId": "era-02-16bit",
+      "spriteLayer": "offhand",
+      "spriteKey": "shield_coral"
+    }
+  ]
+}

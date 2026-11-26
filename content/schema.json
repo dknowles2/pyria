@@ -1,0 +1,279 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pyria.local/content/schema.json",
+  "title": "Pyria Content Schema",
+  "description": "Shared JSON schema for Pyria game metadata, catalog, eras, realms, and Python trials, plus the live test harness convention.",
+  "x-test-harness": {
+    "description": "Every Trial's testCode is executable Python 3 run immediately after the student's code (or referenceSolution) in the same execution namespace.",
+    "stdoutVariable": "OUTPUT",
+    "stdoutType": "str",
+    "conventions": [
+      "Capture stdout while executing studentCode into a string variable named OUTPUT (e.g., via contextlib.redirect_stdout(io.StringIO())).",
+      "Inject OUTPUT into the execution globals dictionary before running testCode.",
+      "Execute testCode in the same globals dictionary so it can assert against variables/functions defined by studentCode as well as OUTPUT.",
+      "A Trial passes if and only if both studentCode and testCode finish with zero uncaught exceptions (such as AssertionError, NameError, SyntaxError, or TypeError).",
+      "All Trials must be verifiable in standard Python 3 / Pyodide with no external third-party packages."
+    ],
+    "pythonRunnerExample": "import io, contextlib\nns = {}\nbuf = io.StringIO()\nwith contextlib.redirect_stdout(buf):\n    exec(student_code, ns)\nns['OUTPUT'] = buf.getvalue()\nexec(test_code, ns)"
+  },
+  "$defs": {
+    "difficultyMode": {
+      "type": "string",
+      "enum": ["explorer", "standard", "challenge"]
+    },
+    "difficultyOverride": {
+      "type": ["object", "null"],
+      "properties": {
+        "mode": { "$ref": "#/$defs/difficultyMode" },
+        "showRawTracebacks": { "type": "boolean" },
+        "maxHintsAllowed": { "type": "integer", "minimum": 0, "maximum": 3 }
+      },
+      "additionalProperties": false
+    },
+    "dragon": {
+      "type": "object",
+      "required": ["id", "name", "title", "element", "rescueDialogue"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "element": { "type": "string" },
+        "rescueDialogue": { "type": "string" }
+      }
+    },
+    "trial": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "storyPrompt",
+        "objective",
+        "concepts",
+        "shardReward",
+        "unlockId",
+        "starterCode",
+        "referenceSolution",
+        "testCode",
+        "hints",
+        "difficultyOverride"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "storyPrompt": { "type": "string" },
+        "objective": { "type": "string" },
+        "concepts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "shardReward": { "type": "integer", "minimum": 0 },
+        "unlockId": { "type": ["string", "null"] },
+        "starterCode": {
+          "type": "object",
+          "required": ["explorer", "standard", "challenge"],
+          "properties": {
+            "explorer": { "type": "string" },
+            "standard": { "type": "string" },
+            "challenge": { "type": "string" }
+          }
+        },
+        "referenceSolution": { "type": "string" },
+        "testCode": { "type": "string" },
+        "hints": {
+          "type": "object",
+          "required": ["tier1_nudge", "tier2_pattern", "tier3_walkthrough"],
+          "properties": {
+            "tier1_nudge": { "type": "string" },
+            "tier2_pattern": { "type": "string" },
+            "tier3_walkthrough": { "type": "string" }
+          }
+        },
+        "difficultyOverride": { "$ref": "#/$defs/difficultyOverride" }
+      }
+    },
+    "realm": {
+      "type": "object",
+      "required": [
+        "id",
+        "number",
+        "name",
+        "dragon",
+        "miniVisualUpgrade",
+        "storyIntro",
+        "storyOutro",
+        "primaryConcepts",
+        "difficultyOverride",
+        "trials"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "number": { "type": "integer", "minimum": 1 },
+        "actId": { "type": "string" },
+        "name": { "type": "string" },
+        "dragon": { "$ref": "#/$defs/dragon" },
+        "miniVisualUpgrade": { "type": "string" },
+        "storyIntro": { "type": "string" },
+        "storyOutro": { "type": "string" },
+        "primaryConcepts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "difficultyOverride": { "$ref": "#/$defs/difficultyOverride" },
+        "trials": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/trial" }
+        }
+      }
+    },
+    "act": {
+      "type": "object",
+      "required": ["id", "number", "name", "theme", "realmNumbers"],
+      "properties": {
+        "id": { "type": "string" },
+        "number": { "type": "integer", "minimum": 1 },
+        "name": { "type": "string" },
+        "theme": { "type": "string" },
+        "realmNumbers": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "era": {
+      "type": "object",
+      "required": ["id", "name", "subtitle", "bitCount", "visualStyle", "realms"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "bitCount": { "type": "integer", "minimum": 1 },
+        "visualStyle": { "type": "string" },
+        "acts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/act" }
+        },
+        "realms": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/realm" }
+        }
+      }
+    },
+    "game": {
+      "type": "object",
+      "required": [
+        "title",
+        "version",
+        "currencyName",
+        "terminology",
+        "globalDifficultyOverride",
+        "eraOrder",
+        "npcs",
+        "conceptProgression"
+      ],
+      "properties": {
+        "title": { "type": "string" },
+        "version": { "type": "string" },
+        "currencyName": { "type": "string" },
+        "terminology": {
+          "type": "object",
+          "required": ["era", "realm", "trial"],
+          "properties": {
+            "era": { "type": "string" },
+            "realm": { "type": "string" },
+            "trial": { "type": "string" }
+          }
+        },
+        "globalDifficultyOverride": { "$ref": "#/$defs/difficultyOverride" },
+        "eraOrder": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "npcs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "role", "personality", "catchphrase"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "role": { "type": "string" },
+              "personality": { "type": "string" },
+              "catchphrase": { "type": "string" }
+            }
+          }
+        },
+        "conceptProgression": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "minEra", "maxBasicRealm"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "minEra": { "type": "string" },
+              "maxBasicRealm": { "type": "integer", "minimum": 1 },
+              "description": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "catalog": {
+      "type": "object",
+      "required": ["characterCreation", "unlockables"],
+      "properties": {
+        "characterCreation": {
+          "type": "object",
+          "required": ["functions", "allowedValues", "defaults"],
+          "properties": {
+            "description": { "type": "string" },
+            "functions": { "type": "array" },
+            "allowedValues": {
+              "type": "object",
+              "required": ["skin", "hair", "tunic"],
+              "properties": {
+                "skin": { "type": "array", "items": { "type": "string" } },
+                "hair": { "type": "array", "items": { "type": "string" } },
+                "tunic": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "defaults": { "type": "object" },
+            "starterCode": { "type": "string" }
+          }
+        },
+        "unlockables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "functionCall",
+              "category",
+              "name",
+              "description",
+              "shardCost",
+              "unlockRealmId",
+              "eraId",
+              "spriteLayer",
+              "spriteKey"
+            ],
+            "properties": {
+              "id": { "type": "string" },
+              "functionCall": { "type": "string" },
+              "category": { "type": "string" },
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "shardCost": { "type": "integer", "minimum": 0 },
+              "unlockRealmId": { "type": "string" },
+              "eraId": { "type": "string" },
+              "spriteLayer": { "type": "string" },
+              "spriteKey": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

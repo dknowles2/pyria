@@ -1,0 +1,380 @@
+{
+  "id": "era-02-16bit",
+  "name": "The 16-Bit Era",
+  "subtitle": "The Sunken Isles & Beyond",
+  "bitCount": 16,
+  "visualStyle": "16-bit SNES top-down",
+  "acts": [
+    {
+      "id": "act-01-tideglass",
+      "number": 1,
+      "name": "Tideglass Archipelago",
+      "theme": "Lists, indexing, and iterating over collections across sunlit coral islands.",
+      "realmNumbers": [1, 2, 3, 4]
+    },
+    {
+      "id": "act-02-clockwork",
+      "number": 2,
+      "name": "Clockwork Spire",
+      "theme": "While loops, counters, and steam-powered automation inside a brass tower.",
+      "realmNumbers": [5, 6, 7, 8]
+    },
+    {
+      "id": "act-03-caldera",
+      "number": 3,
+      "name": "Alchemist's Caldera",
+      "theme": "Custom Python functions (def/return) and dictionaries in volcanic crystal labs.",
+      "realmNumbers": [9, 10, 11, 12]
+    },
+    {
+      "id": "act-04-skyway",
+      "number": 4,
+      "name": "Shattered Skyway",
+      "theme": "Nested loops, combined data structures, and intro classes leading to Lord Null's 16-Bit Throne.",
+      "realmNumbers": [13, 14, 15, 16]
+    }
+  ],
+  "realms": [
+    {
+      "id": "realm-16-01-shallows",
+      "number": 1,
+      "actId": "act-01-tideglass",
+      "name": "Coral Shallows",
+      "dragon": {
+        "id": "dragon-ripple",
+        "name": "Ripple",
+        "title": "Dancer of the Lagoon",
+        "element": "Tide",
+        "rescueDialogue": "Splash-sparkle! Lists hold whole schools of treasures at once! Take Bit 9—the reef is shimmering!"
+      },
+      "miniVisualUpgrade": "Bit 9 Restored: Multi-layered 16-bit turquoise lagoon water with swaying coral fronds.",
+      "storyIntro": "Your ship lands on the sunlit beaches of Coral Shallows in crisp 16-bit detail! Sea dragon Ripple is tangled in a list of glowing reef crystals.",
+      "storyOutro": "Ripple leaps through the surf and restores Bit 9! The Tideglass Archipelago opens its sea-lanes to your crew.",
+      "primaryConcepts": [
+        "lists",
+        "list_indexing"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-16-01-01",
+          "title": "Chart the Reef Crystals",
+          "storyPrompt": "Four glowing reef crystals hum beneath the lagoon: [\"aqua\", \"pearl\", \"coral\", \"amber\"]. Ripple needs the first crystal, the last crystal, and the total count!",
+          "objective": "Given crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"], set first_crystal to the first item (index 0), last_crystal to the last item (index -1), and crystal_count to len(crystals).",
+          "concepts": [
+            "lists",
+            "list_indexing"
+          ],
+          "shardReward": 60,
+          "unlockId": "shield-coral",
+          "starterCode": {
+            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\n# Now find how many crystals are in the list using len()\ncrystal_count = \n",
+            "standard": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\n# Set first_crystal, last_crystal, and crystal_count\n",
+            "challenge": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\n# Extract the first and last crystals by index and store the list length in crystal_count.\n"
+          },
+          "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\n",
+          "testCode": "assert first_crystal == \"aqua\", f'Expected \"aqua\", got {first_crystal!r}'\nassert last_crystal == \"amber\", f'Expected \"amber\", got {last_crystal!r}'\nassert crystal_count == 4, f'Expected 4, got {crystal_count}'\n",
+          "hints": {
+            "tier1_nudge": "Pip splashes in the shallows: 'Python lists start counting at 0, and -1 grabs the very last item!'",
+            "tier2_pattern": "first_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)",
+            "tier3_walkthrough": "Complete crystal_count with:\ncrystal_count = len(crystals)"
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-16-02-market",
+      "number": 2,
+      "actId": "act-01-tideglass",
+      "name": "Driftwood Market",
+      "dragon": {
+        "id": "dragon-gullwing",
+        "name": "Gullwing",
+        "title": "Scout of the Trade Winds",
+        "element": "Wind",
+        "rescueDialogue": "Squawk-roar! Every crate accounted for! Take Bit 10—watch the market banners billow!"
+      },
+      "miniVisualUpgrade": "Bit 10 Restored: Animated cloth market awnings and bobbing wooden piers.",
+      "storyIntro": "Floating stalls bob on the tide at Driftwood Market, where sea-breeze dragon Gullwing is trapped beneath scrambled cargo lists.",
+      "storyOutro": "Gullwing soars above the masts, restoring Bit 10 as colorful pennants unfurl across the harbor.",
+      "primaryConcepts": ["lists", "list_iteration"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-03-grotto",
+      "number": 3,
+      "actId": "act-01-tideglass",
+      "name": "Pearl Grotto",
+      "dragon": {
+        "id": "dragon-nacre",
+        "name": "Nacre",
+        "title": "Keeper of Luminous Shells",
+        "element": "Light",
+        "rescueDialogue": "Shimmering work! You sorted the pearls by index and value! Take Bit 11!"
+      },
+      "miniVisualUpgrade": "Bit 11 Restored: Iridescent caustic light ripples across cavern ceilings.",
+      "storyIntro": "Inside the glowing sea-caves of Pearl Grotto, crystal-shelled dragon Nacre waits behind tide-locked pearl chests.",
+      "storyOutro": "Nacre's pearlescent glow fills the grotto and restores Bit 11.",
+      "primaryConcepts": ["lists", "list_indexing", "basic_math"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-04-lighthouse",
+      "number": 4,
+      "actId": "act-01-tideglass",
+      "name": "Maelstrom Lighthouse",
+      "dragon": {
+        "id": "dragon-tempest",
+        "name": "Tempest",
+        "title": "Warden of the Sea-Storm",
+        "element": "Storm",
+        "rescueDialogue": "Boom! The lighthouse lens is lit and Act I is yours! Onward to the Clockwork Spire!"
+      },
+      "miniVisualUpgrade": "Bit 12 Restored: Sweeping 16-bit lighthouse searchlight beam and crashing foam waves.",
+      "storyIntro": "A swirling whirlpool guards Maelstrom Lighthouse, where storm dragon Tempest needs filtered beacon lists to pierce the fog.",
+      "storyOutro": "Tempest calms the whirlpool, restores Bit 12, and clears the sea-route to the towering Clockwork Spire.",
+      "primaryConcepts": ["lists", "list_iteration", "conditionals_elif_else"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-05-courtyard",
+      "number": 5,
+      "actId": "act-02-clockwork",
+      "name": "Brass Courtyard",
+      "dragon": {
+        "id": "dragon-sprocket",
+        "name": "Sprocket",
+        "title": "Tinker of the First Gear",
+        "element": "Metal",
+        "rescueDialogue": "Clink-whirrr! Your while-loop kept the gears turning without jamming! Take Bit 13!"
+      },
+      "miniVisualUpgrade": "Bit 13 Restored: Interlocking animated brass gears and golden steam vents.",
+      "storyIntro": "Giant bronze gears groan outside the Clockwork Spire. Mechanical dragon Sprocket needs careful while-loops to wind the main spring.",
+      "storyOutro": "Sprocket clicks free from the gear-cage and restores Bit 13.",
+      "primaryConcepts": ["while_loops"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-06-pendulum",
+      "number": 6,
+      "actId": "act-02-clockwork",
+      "name": "Pendulum Halls",
+      "dragon": {
+        "id": "dragon-tock",
+        "name": "Tock",
+        "title": "Keeper of Steady Rhythm",
+        "element": "Time",
+        "rescueDialogue": "Tick-tock, right on the beat! Take Bit 14!"
+      },
+      "miniVisualUpgrade": "Bit 14 Restored: Swinging 16-bit pendulum shadows and sunlit dust motes.",
+      "storyIntro": "Swinging brass pendulums cross the narrow walkways of Pendulum Halls. Dragon Tock is frozen mid-chime until your loops time the gaps.",
+      "storyOutro": "Tock chimes a victorious chord and restores Bit 14.",
+      "primaryConcepts": ["while_loops", "conditionals_if"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-07-foundry",
+      "number": 7,
+      "actId": "act-02-clockwork",
+      "name": "Steam Foundry",
+      "dragon": {
+        "id": "dragon-piston",
+        "name": "Piston",
+        "title": "Forgemaster of Pressure",
+        "element": "Steam",
+        "rescueDialogue": "Pssshhh! Perfect valve pressure! Take Bit 15!"
+      },
+      "miniVisualUpgrade": "Bit 15 Restored: Glowing furnace embers and billowing 16-bit steam clouds.",
+      "storyIntro": "Roaring boilers power the Steam Foundry, where dragon Piston's cage is locked by pressure gauges controlled with while-loops and lists.",
+      "storyOutro": "Piston vents a celebratory plume of steam and restores Bit 15.",
+      "primaryConcepts": ["while_loops", "list_iteration"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-08-chronometer",
+      "number": 8,
+      "actId": "act-02-clockwork",
+      "name": "Grand Chronometer",
+      "dragon": {
+        "id": "dragon-aether",
+        "name": "Aether",
+        "title": "Sovereign of the Spire",
+        "element": "Aether",
+        "rescueDialogue": "The Spire chimes again! Act II is complete—the Alchemist's Caldera awaits!"
+      },
+      "miniVisualUpgrade": "Bit 16 (Act II Crest) Restored: Rotating star-chart ceiling and golden clock-hand reflections.",
+      "storyIntro": "At the summit of Clockwork Spire sits the Grand Chronometer, where dragon Aether is bound by synchronized for- and while-loops.",
+      "storyOutro": "Aether restarts the Spire's star-clock and opens the bridge to the volcanic Alchemist's Caldera.",
+      "primaryConcepts": ["while_loops", "for_loops"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-09-terrace",
+      "number": 9,
+      "actId": "act-03-caldera",
+      "name": "Sulfur Terrace",
+      "dragon": {
+        "id": "dragon-cinderel",
+        "name": "Cinderel",
+        "title": "Spark of the Ash-Springs",
+        "element": "Fire",
+        "rescueDialogue": "You brewed your first custom function spell! The Caldera warms to your code!"
+      },
+      "miniVisualUpgrade": "Act III Upgrade 1: Bubbling mineral pools with rising golden vapor.",
+      "storyIntro": "Steaming terraces ring the Alchemist's Caldera. Dragon Cinderel teaches you to package reusable spells using def.",
+      "storyOutro": "Cinderel glides across the warm thermals, lighting the path to the Crystal Alembic.",
+      "primaryConcepts": ["functions_def"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-10-alembic",
+      "number": 10,
+      "actId": "act-03-caldera",
+      "name": "Crystal Alembic",
+      "dragon": {
+        "id": "dragon-prism",
+        "name": "Prism",
+        "title": "Refractor of Pure Values",
+        "element": "Crystal",
+        "rescueDialogue": "Every function returned its exact crystal value! Shine on, Code-Tamer!"
+      },
+      "miniVisualUpgrade": "Act III Upgrade 2: Rainbow refraction beams across crystal floor tiles.",
+      "storyIntro": "Towering glass tubes fill the Crystal Alembic, where dragon Prism waits for functions that return exact potion measurements.",
+      "storyOutro": "Prism scatters a rainbow across the laboratory and unlocks the Potion Vault.",
+      "primaryConcepts": ["functions_def", "functions_return"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-11-vault",
+      "number": 11,
+      "actId": "act-03-caldera",
+      "name": "Potion Vault",
+      "dragon": {
+        "id": "dragon-elixir",
+        "name": "Elixir",
+        "title": "Archivist of Recipes",
+        "element": "Alchemy",
+        "rescueDialogue": "Keys and values in perfect harmony! My recipe book is whole again!"
+      },
+      "miniVisualUpgrade": "Act III Upgrade 3: Glowing labeled potion shelves and floating rune-tags.",
+      "storyIntro": "Hundreds of enchanted flasks line the Potion Vault. Dragon Elixir needs Python dictionaries to match every label key to its ingredient value.",
+      "storyOutro": "Elixir seals the vault's leaks and opens the magma elevator to the Caldera's core.",
+      "primaryConcepts": ["dictionaries"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-12-core",
+      "number": 12,
+      "actId": "act-03-caldera",
+      "name": "Magma Core",
+      "dragon": {
+        "id": "dragon-crucible",
+        "name": "Crucible",
+        "title": "Heart of the Caldera",
+        "element": "Magma",
+        "rescueDialogue": "Forged in functions and dictionaries! Ride the updraft to the Shattered Skyway!"
+      },
+      "miniVisualUpgrade": "Act III Crest Restored: Flowing 16-bit magma rivers and glowing obsidian bridges.",
+      "storyIntro": "In the blazing Magma Core, dragon Crucible is locked behind an alchemical engine that combines custom functions with recipe dictionaries.",
+      "storyOutro": "Crucible cools a spiral staircase of obsidian leading high into the clouds of Act IV.",
+      "primaryConcepts": ["functions_return", "dictionaries"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-13-clouddock",
+      "number": 13,
+      "actId": "act-04-skyway",
+      "name": "Cloud Dock",
+      "dragon": {
+        "id": "dragon-nimbus",
+        "name": "Nimbus",
+        "title": "Harbormaster of the Skies",
+        "element": "Cloud",
+        "rescueDialogue": "Grid cleared, airships ready! Nested loops make sky-charts a breeze!"
+      },
+      "miniVisualUpgrade": "Act IV Upgrade 1: Multi-layer parallax cloud sea beneath floating wooden docks.",
+      "storyIntro": "Skyships creak at the floating Cloud Dock. Dragon Nimbus needs nested loops to scan every row and column of the skyway grid.",
+      "storyOutro": "Nimbus launches the starlight skiff toward the Starlight Bridge.",
+      "primaryConcepts": ["nested_loops"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-14-starbridge",
+      "number": 14,
+      "actId": "act-04-skyway",
+      "name": "Starlight Bridge",
+      "dragon": {
+        "id": "dragon-comet",
+        "name": "Comet",
+        "title": "Runner of Constellations",
+        "element": "Starlight",
+        "rescueDialogue": "Blazing fast! Every star-node is mapped and shining!"
+      },
+      "miniVisualUpgrade": "Act IV Upgrade 2: Shimmering constellation bridges and shooting star streaks.",
+      "storyIntro": "Suspended between clouds, Starlight Bridge flickers in and out of existence. Dragon Comet relies on dictionaries and return functions to anchor each star tile.",
+      "storyOutro": "Comet streaks across the skyway, locking the bridge solid to Storm Bastion.",
+      "primaryConcepts": ["dictionaries", "functions_return"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-15-bastion",
+      "number": 15,
+      "actId": "act-04-skyway",
+      "name": "Storm Bastion",
+      "dragon": {
+        "id": "dragon-fulmin",
+        "name": "Fulmin",
+        "title": "Commander of Thunder",
+        "element": "Lightning",
+        "rescueDialogue": "You built a true Python class! Now nothing can stop you at Null's Throne!"
+      },
+      "miniVisualUpgrade": "Act IV Upgrade 3: Dramatic thunderhead lighting and crackling sky-spire arcs.",
+      "storyIntro": "Lightning crackles around Storm Bastion, the final fortress before Lord Null. Dragon Fulmin introduces Python classes to blueprint storm-shields.",
+      "storyOutro": "Fulmin shatters the bastion gates, revealing Lord Null's 16-Bit Throne.",
+      "primaryConcepts": ["classes_intro"],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    },
+    {
+      "id": "realm-16-16-throne",
+      "number": 16,
+      "actId": "act-04-skyway",
+      "name": "Null's 16-Bit Throne",
+      "dragon": {
+        "id": "dragon-zenith",
+        "name": "Zenith",
+        "title": "Sovereign of the Horizon",
+        "element": "Prism",
+        "rescueDialogue": "ALL SIXTEEN DRAGONS FLY FREE! Feel the horizon bend—the 3D Era of Pyria is awakening!"
+      },
+      "miniVisualUpgrade": "16-BIT ERA COMPLETE — 3D HORIZON TEASER! The skyway lifts into full 3D perspective as all 24 rescued dragons circle above Pyria.",
+      "storyIntro": "Lord Null stands atop his 16-Bit Throne with prism dragon Zenith caged in a swirling matrix of glitches. Bring every 16-Bit Python skill to the final gauntlet!",
+      "storyOutro": "Zenith breaks free in a burst of prismatic light! Lord Null vanishes into a 3D rift, and Pyria prepares for its next great leap.",
+      "primaryConcepts": [
+        "functions_return",
+        "dictionaries",
+        "classes_intro",
+        "nested_loops"
+      ],
+      "difficultyOverride": { "mode": "standard", "showRawTracebacks": true },
+      "trials": []
+    }
+  ]
+}

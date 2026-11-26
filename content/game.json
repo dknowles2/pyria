@@ -1,0 +1,205 @@
+{
+  "title": "Pyria: Return of the Bits",
+  "version": "0.1.0",
+  "currencyName": "Byte Shards",
+  "terminology": {
+    "era": "Era",
+    "realm": "Realm",
+    "trial": "Trial"
+  },
+  "globalDifficultyOverride": {
+    "mode": "standard",
+    "showRawTracebacks": false,
+    "maxHintsAllowed": 3
+  },
+  "eraOrder": [
+    "era-01-8bit",
+    "era-02-16bit"
+  ],
+  "npcs": [
+    {
+      "id": "pip",
+      "name": "Pip",
+      "role": "Dragon Sidekick & Code Guide",
+      "personality": "Playful, curious, encouraging tiny glitch-hatchling who translates scary Python errors into friendly clues and offers 3-tier hints.",
+      "catchphrase": "Chirp! One line at a time, Code-Tamer — we've got this!"
+    },
+    {
+      "id": "elder-ada",
+      "name": "Elder Ada",
+      "role": "Keeper of the Great Compiler",
+      "personality": "Wise, warm storyteller who remembers when Pyria shone in full 3D color and guides the hero from Realm to Realm.",
+      "catchphrase": "Every rescued dragon brings another Bit of our world back to life."
+    },
+    {
+      "id": "bram",
+      "name": "Bram the Tinkerer",
+      "role": "Workshop Master & Gear Smith",
+      "personality": "Boisterous, inventive dwarven engineer who only accepts Python function calls to forge gear and stat upgrades with Byte Shards.",
+      "catchphrase": "No buttons in my shop, kid! Write the call and watch the sparks fly!"
+    },
+    {
+      "id": "lord-null",
+      "name": "Lord Null",
+      "role": "The Bit-Thief Overlord",
+      "personality": "Dramatic, glitchy villain obsessed with turning Pyria into an empty void of None and syntax errors.",
+      "catchphrase": "Soon all of Pyria will return None! Mwahahaha!"
+    }
+  ],
+  "conceptProgression": [
+    {
+      "id": "function_calls",
+      "label": "Calling Functions",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 2,
+      "description": "Invoking built-in or helper functions with parentheses and arguments."
+    },
+    {
+      "id": "print_output",
+      "label": "Printing Output",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 2,
+      "description": "Displaying messages to the console using print()."
+    },
+    {
+      "id": "strings",
+      "label": "Strings & Text",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 3,
+      "description": "Creating, quoting, and combining text values."
+    },
+    {
+      "id": "variables",
+      "label": "Variables",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 4,
+      "description": "Storing and updating named values with =."
+    },
+    {
+      "id": "basic_math",
+      "label": "Basic Math",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 4,
+      "description": "Using +, -, *, //, and % with numbers and variables."
+    },
+    {
+      "id": "booleans",
+      "label": "Booleans",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 5,
+      "description": "Working with True and False values."
+    },
+    {
+      "id": "comparisons",
+      "label": "Comparisons",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 5,
+      "description": "Comparing values with ==, !=, <, <=, >, and >=."
+    },
+    {
+      "id": "conditionals_if",
+      "label": "If Statements",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 5,
+      "description": "Running indented code blocks only when a condition is True."
+    },
+    {
+      "id": "conditionals_elif_else",
+      "label": "If / Elif / Else",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 6,
+      "description": "Choosing among multiple branches with if, elif, and else."
+    },
+    {
+      "id": "boolean_logic",
+      "label": "Boolean Logic (and/or/not)",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 7,
+      "description": "Combining and negating conditions with and, or, and not."
+    },
+    {
+      "id": "string_methods",
+      "label": "String Methods",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 7,
+      "description": "Transforming text using .strip(), .upper(), .lower(), and .replace()."
+    },
+    {
+      "id": "for_loops",
+      "label": "For Loops",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 8,
+      "description": "Repeating code a set number of times using for loops."
+    },
+    {
+      "id": "range_function",
+      "label": "Using range()",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 8,
+      "description": "Generating number sequences with range(stop) and range(start, stop)."
+    },
+    {
+      "id": "lists",
+      "label": "Lists",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 4,
+      "description": "Storing ordered collections of items in square brackets."
+    },
+    {
+      "id": "list_indexing",
+      "label": "List Indexing",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 4,
+      "description": "Reading and updating list elements by zero-based index."
+    },
+    {
+      "id": "list_iteration",
+      "label": "Looping Over Lists",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 6,
+      "description": "Processing every item in a list with a for loop."
+    },
+    {
+      "id": "while_loops",
+      "label": "While Loops",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 8,
+      "description": "Repeating actions while a condition remains True."
+    },
+    {
+      "id": "functions_def",
+      "label": "Defining Functions",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 10,
+      "description": "Creating reusable spells with def and parameters."
+    },
+    {
+      "id": "functions_return",
+      "label": "Returning Values",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 10,
+      "description": "Sending computed results back from a function using return."
+    },
+    {
+      "id": "dictionaries",
+      "label": "Dictionaries",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 12,
+      "description": "Mapping keys to values with curly braces {}."
+    },
+    {
+      "id": "nested_loops",
+      "label": "Nested Loops",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 14,
+      "description": "Running a loop inside another loop for grids and combinations."
+    },
+    {
+      "id": "classes_intro",
+      "label": "Intro to Classes",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 16,
+      "description": "Modeling dragons and gear with simple Python classes and __init__."
+    }
+  ]
+}

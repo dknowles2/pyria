@@ -1,0 +1,553 @@
+{
+  "id": "era-01-8bit",
+  "name": "The 8-Bit Era",
+  "subtitle": "The Flatlands of Pixels",
+  "bitCount": 8,
+  "visualStyle": "8-bit NES top-down",
+  "realms": [
+    {
+      "id": "realm-01-meadow",
+      "number": 1,
+      "name": "Whispering Meadow",
+      "dragon": {
+        "id": "dragon-spark",
+        "name": "Spark",
+        "title": "Hatchling of the First Pulse",
+        "element": "Lightning",
+        "rescueDialogue": "Bzzzt—thank you, Code-Tamer! My pixel wings are buzzing again! Here—take the First Bit and watch the grass come alive!"
+      },
+      "miniVisualUpgrade": "Bit 1 Restored: Swaying 2-frame meadow grass and sparkling firefly pixels appear.",
+      "storyIntro": "Lord Null has drained Pyria down to flat 8-bit pixels! In Whispering Meadow, tiny lightning dragon Spark is trapped inside a silent rune cage. Pip nudges your spellbook—time to cast your first Python commands.",
+      "storyOutro": "With a joyful crackle, Spark bursts free and restores Bit 1! The meadow grass begins to sway in the breeze, and Bram waves from his Workshop.",
+      "primaryConcepts": [
+        "function_calls",
+        "print_output",
+        "strings"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-01-01",
+          "title": "Wake the Meadow Beacon",
+          "storyPrompt": "The ancient Signal Stone in Whispering Meadow has gone dark. Pip taps it with a claw: 'Try calling print() to shout a greeting into the stone!'",
+          "objective": "Use print() to display the exact message: Hello, Pyria!",
+          "concepts": [
+            "function_calls",
+            "print_output",
+            "strings"
+          ],
+          "shardReward": 20,
+          "unlockId": "hat-explorer",
+          "starterCode": {
+            "explorer": "# Replace the ??? inside the quotes with Hello, Pyria!\nprint(\"???\")\n",
+            "standard": "# Call print() to wake the Signal Stone with: Hello, Pyria!\n",
+            "challenge": "# Wake the Signal Stone by printing the exact greeting.\n"
+          },
+          "referenceSolution": "print(\"Hello, Pyria!\")\n",
+          "testCode": "assert OUTPUT.strip() == \"Hello, Pyria!\", f\"Expected 'Hello, Pyria!' but got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip whispers: 'Python uses print() to speak aloud, and text needs quotes around it!'",
+            "tier2_pattern": "Pattern: print(\"your message here\") — check capital H, the comma, capital P, and the exclamation mark!",
+            "tier3_walkthrough": "Type this exact line:\nprint(\"Hello, Pyria!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-01-02",
+          "title": "The Twin Echo Stones",
+          "storyPrompt": "Two moss-covered Echo Stones block the trail to Spark's glade. They only slide apart when they hear two lines of dragon-song in a row.",
+          "objective": "Print two separate lines: first 'Wake up, Spark!' and second 'The meadow needs you!'",
+          "concepts": [
+            "print_output",
+            "strings"
+          ],
+          "shardReward": 25,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "print(\"Wake up, Spark!\")\n# Now add a second print() for: The meadow needs you!\n",
+            "standard": "# Print two lines to wake the Echo Stones:\n# Line 1: Wake up, Spark!\n# Line 2: The meadow needs you!\n",
+            "challenge": "# Output both dragon-song lines in order.\n"
+          },
+          "referenceSolution": "print(\"Wake up, Spark!\")\nprint(\"The meadow needs you!\")\n",
+          "testCode": "lines = [line.strip() for line in OUTPUT.strip().splitlines()]\nassert len(lines) == 2, f\"Expected 2 lines of output, got {len(lines)}\"\nassert lines[0] == \"Wake up, Spark!\", f\"Line 1 was {lines[0]!r}\"\nassert lines[1] == \"The meadow needs you!\", f\"Line 2 was {lines[1]!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip hops between the two stones: 'You can use print() twice—one on each line!'",
+            "tier2_pattern": "Write two lines:\nprint(\"First line\")\nprint(\"Second line\")",
+            "tier3_walkthrough": "Write both lines exactly like this:\nprint(\"Wake up, Spark!\")\nprint(\"The meadow needs you!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-01-03",
+          "title": "Measure the Rune Lock",
+          "storyPrompt": "Spark's pixel cage is sealed with the glowing word \"SPARKLIGHT\". The lock asks how many letters are in the magic word!",
+          "objective": "Use the len() function to measure \"SPARKLIGHT\" and print the number of letters.",
+          "concepts": [
+            "function_calls",
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": "stat-charisma-1",
+          "starterCode": {
+            "explorer": "# Put \"SPARKLIGHT\" inside len(...) and print it!\nprint(len(\"???\"))\n",
+            "standard": "# Use len() on \"SPARKLIGHT\" and print the result.\n",
+            "challenge": "# Compute and print the length of the rune word \"SPARKLIGHT\".\n"
+          },
+          "referenceSolution": "print(len(\"SPARKLIGHT\"))\n",
+          "testCode": "assert OUTPUT.strip() == \"10\", f\"Expected '10' for the length of SPARKLIGHT, got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Python has a built-in ruler called len() that counts every letter in a string!'",
+            "tier2_pattern": "You can nest function calls like print(len(\"WORD\")) so Python counts first and prints the number.",
+            "tier3_walkthrough": "Type:\nprint(len(\"SPARKLIGHT\"))"
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-02-ruins",
+      "number": 2,
+      "name": "Mossy Ruins",
+      "dragon": {
+        "id": "dragon-pebble",
+        "name": "Pebble",
+        "title": "Guardian of Ancient Stone",
+        "element": "Earth",
+        "rescueDialogue": "Rumble-clack! You solved the ruins without breaking a single tile! Take Bit 2—feel the ground gain depth!"
+      },
+      "miniVisualUpgrade": "Bit 2 Restored: Shaded 8-bit cliff edges, cracked ruin bricks, and tumbling dust particles.",
+      "storyIntro": "Beyond the meadow lie the Mossy Ruins, where stone dragon Pebble sleeps under a heavy math-sealed archway. Elder Ada teaches you to store numbers in variables.",
+      "storyOutro": "Pebble stretches his stony wings and restores Bit 2! The flat walls of Pyria gain crisp shadows and mossy texture.",
+      "primaryConcepts": [
+        "variables",
+        "basic_math"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-02-01",
+          "title": "Stack the Moss Stones",
+          "storyPrompt": "Three ancient pillars each need 12 moss stones to hold up the ruin gate. Bram wants to know the total number of stones before lifting!",
+          "objective": "Create variables stones = 12 and pillars = 3, then compute total_stones = stones * pillars.",
+          "concepts": [
+            "variables",
+            "basic_math"
+          ],
+          "shardReward": 30,
+          "unlockId": "shield-oak",
+          "starterCode": {
+            "explorer": "stones = 12\npillars = 3\n# Multiply stones and pillars and store the answer in total_stones\ntotal_stones = \n",
+            "standard": "# Create stones = 12, pillars = 3, and total_stones using *\n",
+            "challenge": "# Store 12 in stones, 3 in pillars, and their product in total_stones.\n"
+          },
+          "referenceSolution": "stones = 12\npillars = 3\ntotal_stones = stones * pillars\n",
+          "testCode": "assert stones == 12, 'stones should be 12'\nassert pillars == 3, 'pillars should be 3'\nassert total_stones == 36, f'Expected total_stones to be 36, got {total_stones}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps the * key: 'In Python, the star symbol * multiplies two numbers!'",
+            "tier2_pattern": "Store each value with =, then write: total_stones = stones * pillars",
+            "tier3_walkthrough": "Write these three lines:\nstones = 12\npillars = 3\ntotal_stones = stones * pillars"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-02-02",
+          "title": "Balance the Ruin Bridge",
+          "storyPrompt": "A seesaw bridge spans the chasm! The left side holds 15 weight units, while the right side only holds 9. Calculate how much weight is missing to level the bridge.",
+          "objective": "Given left_side = 15 and right_side = 9, set missing_weight to their difference and total_weight to left_side + right_side + missing_weight.",
+          "concepts": [
+            "variables",
+            "basic_math"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "left_side = 15\nright_side = 9\nmissing_weight = left_side - right_side\n# Now compute total_weight by adding left_side, right_side, and missing_weight\ntotal_weight = \n",
+            "standard": "left_side = 15\nright_side = 9\n# Calculate missing_weight and total_weight\n",
+            "challenge": "left_side = 15\nright_side = 9\n# Balance the bridge with missing_weight and compute total_weight.\n"
+          },
+          "referenceSolution": "left_side = 15\nright_side = 9\nmissing_weight = left_side - right_side\ntotal_weight = left_side + right_side + missing_weight\n",
+          "testCode": "assert missing_weight == 6, f'Expected missing_weight to be 6, got {missing_weight}'\nassert total_weight == 30, f'Expected total_weight to be 30, got {total_weight}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the gap: 'Subtract right_side from left_side to find what is missing!'",
+            "tier2_pattern": "missing_weight = left_side - right_side\ntotal_weight = left_side + right_side + missing_weight",
+            "tier3_walkthrough": "Use:\nmissing_weight = left_side - right_side\ntotal_weight = left_side + right_side + missing_weight"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-02-03",
+          "title": "Pebble's Treasure Split",
+          "storyPrompt": "Pebble's vault door has 6 treasure slots and 45 Byte Shards in a stone bowl. Put an equal whole number of shards into each slot, and find how many are left over!",
+          "objective": "Using shards = 45 and slots = 6, set shards_per_slot using integer division (//) and leftover_shards using modulo (%).",
+          "concepts": [
+            "variables",
+            "basic_math"
+          ],
+          "shardReward": 40,
+          "unlockId": "boots-swift",
+          "starterCode": {
+            "explorer": "shards = 45\nslots = 6\n# Use // for whole division and % for the remainder\nshards_per_slot = shards // slots\nleftover_shards = \n",
+            "standard": "shards = 45\nslots = 6\n# Compute shards_per_slot (whole number) and leftover_shards (remainder)\n",
+            "challenge": "shards = 45\nslots = 6\n# Split the shards evenly with // and capture the remainder with %.\n"
+          },
+          "referenceSolution": "shards = 45\nslots = 6\nshards_per_slot = shards // slots\nleftover_shards = shards % slots\n",
+          "testCode": "assert shards_per_slot == 7, f'Expected 7 shards per slot, got {shards_per_slot}'\nassert leftover_shards == 3, f'Expected 3 leftover shards, got {leftover_shards}'\n",
+          "hints": {
+            "tier1_nudge": "Pip grins: '// divides and drops the leftovers, while % tells you ONLY the leftover amount!'",
+            "tier2_pattern": "shards_per_slot = shards // slots\nleftover_shards = shards % slots",
+            "tier3_walkthrough": "Add:\nshards_per_slot = shards // slots\nleftover_shards = shards % slots"
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-03-cavern",
+      "number": 3,
+      "name": "Cinder Cavern",
+      "dragon": {
+        "id": "dragon-emberwing",
+        "name": "Emberwing",
+        "title": "Sovereign of Living Flame",
+        "element": "Fire",
+        "rescueDialogue": "WHOOSH! You stood firm against the magma locks! Take Bit 3—let the caverns glow with warm firelight!"
+      },
+      "miniVisualUpgrade": "Bit 3 Restored: Dynamic warm torchlight palette swaps and rising glowing ember pixels.",
+      "storyIntro": "Deep beneath the ruins glows Cinder Cavern. Majestic flame dragon Emberwing is chained above a bubbling magma pool. Only True/False logic and if-statements can cool the locks.",
+      "storyOutro": "Emberwing roars skyward, bathing the cavern in golden firelight and restoring Bit 3! The lava shimmers with rich animated hues.",
+      "primaryConcepts": [
+        "booleans",
+        "comparisons",
+        "conditionals_if"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-03-01",
+          "title": "Lava Heat Sensor",
+          "storyPrompt": "Before stepping onto the basalt stepping stones, Pip checks the magma sensor. The lava is 850 degrees, and anything over 500 is too hot!",
+          "objective": "Set lava_temp = 850 and create a boolean variable is_too_hot that checks whether lava_temp > 500.",
+          "concepts": [
+            "booleans",
+            "comparisons"
+          ],
+          "shardReward": 35,
+          "unlockId": "tunic-crimson",
+          "starterCode": {
+            "explorer": "lava_temp = 850\n# Compare lava_temp to 500 using >\nis_too_hot = lava_temp > \n",
+            "standard": "lava_temp = 850\n# Set is_too_hot to True or False using a comparison with 500\n",
+            "challenge": "# Set lava_temp = 850 and test if it exceeds 500 in is_too_hot.\n"
+          },
+          "referenceSolution": "lava_temp = 850\nis_too_hot = lava_temp > 500\n",
+          "testCode": "assert lava_temp == 850\nassert is_too_hot is True, f'Expected is_too_hot to be True, got {is_too_hot!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip fans himself: 'A comparison like a > b automatically produces True or False!'",
+            "tier2_pattern": "is_too_hot = lava_temp > 500",
+            "tier3_walkthrough": "Write:\nlava_temp = 850\nis_too_hot = lava_temp > 500"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-02",
+          "title": "Raise the Ember Shield",
+          "storyPrompt": "A geyser of sparks erupts at heat level 120! Whenever heat is 100 or higher, your shield rune must activate automatically.",
+          "objective": "Start with heat = 120 and shield_up = False. Write an if statement that sets shield_up = True when heat >= 100.",
+          "concepts": [
+            "comparisons",
+            "conditionals_if"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "heat = 120\nshield_up = False\nif heat >= 100:\n    # Set shield_up to True here (keep the 4-space indent!)\n    \n",
+            "standard": "heat = 120\nshield_up = False\n# Write an if statement: if heat is at least 100, set shield_up = True\n",
+            "challenge": "heat = 120\nshield_up = False\n# Activate shield_up when heat is 100 or more.\n"
+          },
+          "referenceSolution": "heat = 120\nshield_up = False\nif heat >= 100:\n    shield_up = True\n",
+          "testCode": "assert shield_up is True, 'shield_up should be True when heat >= 100'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the colon: 'An if line ends with : and the code inside is indented 4 spaces!'",
+            "tier2_pattern": "if heat >= 100:\n    shield_up = True",
+            "tier3_walkthrough": "Write:\nif heat >= 100:\n    shield_up = True"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-03",
+          "title": "Unchain Emberwing",
+          "storyPrompt": "Emberwing's magma lock has lock_strength = 60, and your dragon-key has ember_power = 75. If your power beats the lock, open the gate and shout victory!",
+          "objective": "Given ember_power = 75, lock_strength = 60, and gate_status = \"LOCKED\", write an if statement that sets gate_status = \"OPEN\" and prints \"Emberwing is free!\" when ember_power > lock_strength.",
+          "concepts": [
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 50,
+          "unlockId": "hat-dragon-helm",
+          "starterCode": {
+            "explorer": "ember_power = 75\nlock_strength = 60\ngate_status = \"LOCKED\"\nif ember_power > lock_strength:\n    gate_status = \"OPEN\"\n    # Also print: Emberwing is free!\n",
+            "standard": "ember_power = 75\nlock_strength = 60\ngate_status = \"LOCKED\"\n# If ember_power > lock_strength, set gate_status = \"OPEN\" and print \"Emberwing is free!\"\n",
+            "challenge": "ember_power = 75\nlock_strength = 60\ngate_status = \"LOCKED\"\n# Unlock the gate and announce Emberwing's freedom if ember_power beats lock_strength.\n"
+          },
+          "referenceSolution": "ember_power = 75\nlock_strength = 60\ngate_status = \"LOCKED\"\nif ember_power > lock_strength:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")\n",
+          "testCode": "assert gate_status == \"OPEN\", f'Expected gate_status to be OPEN, got {gate_status!r}'\nassert OUTPUT.strip() == \"Emberwing is free!\", f'Expected \"Emberwing is free!\" in output, got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Both actions belong inside the if block, so indent both lines by 4 spaces!'",
+            "tier2_pattern": "if ember_power > lock_strength:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")",
+            "tier3_walkthrough": "Add:\nif ember_power > lock_strength:\n    gate_status = \"OPEN\"\n    print(\"Emberwing is free!\")"
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-04-hollow",
+      "number": 4,
+      "name": "Frostbite Hollow",
+      "dragon": {
+        "id": "dragon-glacier",
+        "name": "Glacier",
+        "title": "Keeper of Crystal Frost",
+        "element": "Ice",
+        "rescueDialogue": "Cool precision, Code-Tamer! You chose the exact right branch. Take Bit 4—let the frost crystals sparkle!"
+      },
+      "miniVisualUpgrade": "Bit 4 Restored: Falling pixel snowflakes and reflective ice-tile highlights.",
+      "storyIntro": "An icy canyon chills the northern border of the 8-Bit Flatlands. Ice dragon Glacier is sealed behind three temperature runes that respond to if, elif, and else.",
+      "storyOutro": "Glacier glides out of the crystal vault and restores Bit 4! Soft pixel snow drifts across the hollow.",
+      "primaryConcepts": [
+        "conditionals_elif_else"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-04-01",
+          "title": "Thermometer of the Ice Gate",
+          "storyPrompt": "Glacier's gate shifts depending on the temperature. Check temp = -15 and decide whether the ice is frozen, slush, or melted!",
+          "objective": "Given temp = -15, use if / elif / else to set ice_state to \"frozen\" if temp <= 0, \"slush\" if temp <= 10, or \"melted\" otherwise.",
+          "concepts": [
+            "conditionals_elif_else",
+            "comparisons"
+          ],
+          "shardReward": 45,
+          "unlockId": "tunic-navy",
+          "starterCode": {
+            "explorer": "temp = -15\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    # Set ice_state to \"melted\"\n    \n",
+            "standard": "temp = -15\n# Use if / elif / else to set ice_state to \"frozen\", \"slush\", or \"melted\"\n",
+            "challenge": "temp = -15\n# Classify temp into ice_state (\"frozen\" <= 0, \"slush\" <= 10, else \"melted\").\n"
+          },
+          "referenceSolution": "temp = -15\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\n",
+          "testCode": "assert ice_state == \"frozen\", f'Expected \"frozen\" for temp -15, got {ice_state!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip shivers: 'Use if for the first check, elif for the middle check, and else for everything else!'",
+            "tier2_pattern": "if temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"",
+            "tier3_walkthrough": "Complete the else branch with:\n    ice_state = \"melted\""
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-05-woods",
+      "number": 5,
+      "name": "Echo Woods",
+      "dragon": {
+        "id": "dragon-bramble",
+        "name": "Bramble",
+        "title": "Whisperer of the Canopy",
+        "element": "Forest",
+        "rescueDialogue": "Rustle-roar! You untangled the forest echoes cleanly! Take Bit 5—hear the woods sing again!"
+      },
+      "miniVisualUpgrade": "Bit 5 Restored: Layered canopy shadows and fluttering leaf sprites.",
+      "storyIntro": "In Echo Woods, gnarled trees scramble every password into messy spaces and lowercase letters. Forest dragon Bramble needs string methods and boolean logic to hear you clearly.",
+      "storyOutro": "Bramble leaps through the pixel treetops and restores Bit 5! Sunlight dapples the forest floor.",
+      "primaryConcepts": [
+        "boolean_logic",
+        "string_methods"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-05-01",
+          "title": "Untangle the Canopy Chant",
+          "storyPrompt": "The Echo Trees captured a messy whisper: \"  bramble wake  \". Clean off the outer spaces, shout it in ALL CAPS, and verify it with 'and'!",
+          "objective": "Clean raw_chant = \"  bramble wake  \" using .strip().upper() into chant, then set is_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5).",
+          "concepts": [
+            "string_methods",
+            "boolean_logic"
+          ],
+          "shardReward": 50,
+          "unlockId": "hat-wizard-cap",
+          "starterCode": {
+            "explorer": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\n# Check BOTH chant == \"BRAMBLE WAKE\" and len(chant) > 5\nis_valid = \n",
+            "standard": "raw_chant = \"  bramble wake  \"\n# Clean raw_chant into chant with .strip().upper(), then compute is_valid using and\n",
+            "challenge": "raw_chant = \"  bramble wake  \"\n# Normalize raw_chant into chant and verify it equals \"BRAMBLE WAKE\" and has length > 5 in is_valid.\n"
+          },
+          "referenceSolution": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\nis_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5)\n",
+          "testCode": "assert chant == \"BRAMBLE WAKE\", f'Expected \"BRAMBLE WAKE\", got {chant!r}'\nassert is_valid is True, f'Expected is_valid to be True, got {is_valid!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: '.strip() trims outer spaces, .upper() makes ALL CAPS, and \"and\" requires both sides to be True!'",
+            "tier2_pattern": "chant = raw_chant.strip().upper()\nis_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5)",
+            "tier3_walkthrough": "Write:\nchant = raw_chant.strip().upper()\nis_valid = (chant == \"BRAMBLE WAKE\") and (len(chant) > 5)"
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-06-crypt",
+      "number": 6,
+      "name": "Sunken Crypt",
+      "dragon": {
+        "id": "dragon-mire",
+        "name": "Mire",
+        "title": "Warden of the Deep Marsh",
+        "element": "Water",
+        "rescueDialogue": "Splash! Your air calculations kept us both afloat! Take Bit 6—watch the waters ripple!"
+      },
+      "miniVisualUpgrade": "Bit 6 Restored: Animated 3-frame water tiles and rising bubble pixels.",
+      "storyIntro": "Flooded halls lie beneath Echo Woods. Water dragon Mire is sealed inside an underwater bell-chamber where math and multi-branch logic control the air valves.",
+      "storyOutro": "Mire surges up in a fountain of pixel bubbles and restores Bit 6! Every pond and stream in Pyria now shimmers.",
+      "primaryConcepts": [
+        "variables",
+        "basic_math",
+        "conditionals_elif_else"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-06-01",
+          "title": "Diving Bell Air Gauge",
+          "storyPrompt": "Your diving bell starts with 60 air units and uses 12 units per minute for 3 minutes. Compute how much air remains and trigger the right alert!",
+          "objective": "Compute remaining_air = 60 - (12 * 3), then use if / elif / else to set alert to \"DANGER\" if remaining_air < 15, \"CAUTION\" if remaining_air < 30, or \"SAFE\" otherwise.",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "conditionals_elif_else"
+          ],
+          "shardReward": 55,
+          "unlockId": "cloak-tide",
+          "starterCode": {
+            "explorer": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    # Set alert to \"SAFE\"\n    \n",
+            "standard": "# Compute remaining_air = 60 - (12 * 3), then set alert to DANGER (<15), CAUTION (<30), or SAFE\n",
+            "challenge": "# Calculate remaining_air after 3 minutes (12/min from 60) and set alert (DANGER / CAUTION / SAFE).\n"
+          },
+          "referenceSolution": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    alert = \"SAFE\"\n",
+          "testCode": "assert remaining_air == 24, f'Expected remaining_air == 24, got {remaining_air}'\nassert alert == \"CAUTION\", f'Expected alert == \"CAUTION\", got {alert!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts bubbles: '60 minus 36 leaves 24—which branch does 24 fall into?'",
+            "tier2_pattern": "remaining_air = 60 - (12 * 3)\nif remaining_air < 15:\n    alert = \"DANGER\"\nelif remaining_air < 30:\n    alert = \"CAUTION\"\nelse:\n    alert = \"SAFE\"",
+            "tier3_walkthrough": "Finish the else branch with:\n    alert = \"SAFE\""
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-07-keep",
+      "number": 7,
+      "name": "Obsidian Keep",
+      "dragon": {
+        "id": "dragon-gale",
+        "name": "Gale",
+        "title": "Sovereign of the Sky-Winds",
+        "element": "Wind",
+        "rescueDialogue": "Whoooosh! Loops make you unstoppable, Code-Tamer! Take Bit 7—the skies above Pyria are clearing!"
+      },
+      "miniVisualUpgrade": "Bit 7 Restored: Parallax drifting pixel clouds and wind-streak particle trails.",
+      "storyIntro": "Atop the jagged Obsidian Keep, wind dragon Gale is bound by five spinning storm turbines. Writing the same command five times is too slow—time for Python for-loops!",
+      "storyOutro": "Gale unleashes a joyful tailwind and restores Bit 7! Real Python tracebacks now appear alongside Pip's hints so you can debug like a master.",
+      "primaryConcepts": [
+        "for_loops",
+        "range_function"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-07-01",
+          "title": "Charge the Five Wind Turbines",
+          "storyPrompt": "Obsidian Keep has 5 wind turbines numbered 1 through 5. Spin them all up in a loop, adding their power numbers into total_wind!",
+          "objective": "Set total_wind = 0, then use a for loop with range(1, 6) to add each number to total_wind and print \"Turbine ready!\" on every step.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "variables"
+          ],
+          "shardReward": 65,
+          "unlockId": "stat-courage-1",
+          "starterCode": {
+            "explorer": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    # Print \"Turbine ready!\" inside the loop\n    \n",
+            "standard": "total_wind = 0\n# Use for power in range(1, 6): to add power to total_wind and print \"Turbine ready!\"\n",
+            "challenge": "# Sum 1 through 5 into total_wind using a for loop and print \"Turbine ready!\" each iteration.\n"
+          },
+          "referenceSolution": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")\n",
+          "testCode": "assert total_wind == 15, f'Expected total_wind == 15, got {total_wind}'\nlines = [line.strip() for line in OUTPUT.strip().splitlines()]\nassert lines == [\"Turbine ready!\"] * 5, f'Expected 5 \"Turbine ready!\" lines, got {lines!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip spins in a circle: 'range(1, 6) gives you 1, 2, 3, 4, 5—remember it stops right before 6!'",
+            "tier2_pattern": "for power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")",
+            "tier3_walkthrough": "Inside the loop, indent and add:\n    print(\"Turbine ready!\")"
+          },
+          "difficultyOverride": null
+        }
+      ]
+    },
+    {
+      "id": "realm-08-citadel",
+      "number": 8,
+      "name": "Null's Pixel Citadel",
+      "dragon": {
+        "id": "dragon-nova",
+        "name": "Nova",
+        "title": "Keeper of the Eighth Bit",
+        "element": "Starlight",
+        "rescueDialogue": "ALL EIGHT BITS ARE WHOLE! Hold tight, Code-Tamer—Pyria is evolving into the 16-Bit Era!"
+      },
+      "miniVisualUpgrade": "Bit 8 Restored — ERA UPGRADE! The entire world flashes with starlight and upgrades from 8-Bit NES graphics to lush 16-Bit SNES pixel art!",
+      "storyIntro": "Lord Null waits inside his floating Pixel Citadel, holding the eighth dragon Nova hostage behind an 8-Bit Barrier. Combine variables, math, conditionals, and loops to shatter it!",
+      "storyOutro": "Nova's starlight unites all eight rescued dragons! Lord Null retreats across the sea as Pyria blooms into 16-Bit color—welcome to the Sunken Isles!",
+      "primaryConcepts": [
+        "variables",
+        "basic_math",
+        "conditionals_elif_else",
+        "for_loops",
+        "range_function"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-08-01",
+          "title": "Shatter the Null Barrier",
+          "storyPrompt": "Lord Null's barrier pulses with 8 bits (1 to 8). Only the EVEN bits (2, 4, 6, 8) charge your Dragon Prism. Loop through all 8 bits, sum the even ones, and breach the citadel!",
+          "objective": "Start with shield_charge = 0 and citadel_breached = False. Loop for bit in range(1, 9): if bit % 2 == 0, add bit to shield_charge. After the loop, if shield_charge >= 20, set citadel_breached = True and print \"8-BIT RESTORED!\".",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "basic_math",
+            "conditionals_if"
+          ],
+          "shardReward": 100,
+          "unlockId": "pip-scarf-ember",
+          "starterCode": {
+            "explorer": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n    # Print \"8-BIT RESTORED!\"\n    \n",
+            "standard": "shield_charge = 0\ncitadel_breached = False\n# Loop bits 1..8, sum even bits into shield_charge, then breach if shield_charge >= 20\n",
+            "challenge": "# Sum even numbers in 1..8 into shield_charge; if >= 20, set citadel_breached = True and print \"8-BIT RESTORED!\".\n"
+          },
+          "referenceSolution": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")\n",
+          "testCode": "assert shield_charge == 20, f'Expected shield_charge == 20, got {shield_charge}'\nassert citadel_breached is True, 'Expected citadel_breached to be True'\nassert OUTPUT.strip() == \"8-BIT RESTORED!\", f'Expected \"8-BIT RESTORED!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip glows bright gold: 'A number is even when bit % 2 == 0! Check that inside your for loop.'",
+            "tier2_pattern": "for bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\nif shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")",
+            "tier3_walkthrough": "Add print(\"8-BIT RESTORED!\") indented inside the final if block."
+          },
+          "difficultyOverride": null
+        }
+      ]
+    }
+  ]
+}
