@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyria Parent &amp; Builder Console</title>
+  <link rel="stylesheet" href="/builder/builder.css" />
+</head>
+<body>
+  <div id="builder-app">
+    <!-- ==================== TOP HEADER ==================== -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="brand-badge">PYRIA</span>
+        <div>
+          <h1 class="topbar-title">Parent &amp; Builder Console</h1>
+          <div class="topbar-sub">Real-time play monitor, difficulty tuning &amp; story editor</div>
+        </div>
+      </div>
+
+      <nav class="tab-nav" role="tablist">
+        <button class="tab-btn active" data-tab="live" role="tab" aria-selected="true">📡 Live Progress</button>
+        <button class="tab-btn" data-tab="story" role="tab" aria-selected="false">📖 Story &amp; Trials</button>
+        <button class="tab-btn" data-tab="health" role="tab" aria-selected="false">🛡️ Concept Health</button>
+        <button class="tab-btn" data-tab="assets" role="tab" aria-selected="false">🎨 Sprites &amp; World</button>
+      </nav>
+
+      <div class="topbar-right">
+        <div id="live-indicator" class="live-pill active" title="Auto-polling every 2.5 seconds">
+          <span class="live-dot"></span>
+          <span id="live-indicator-text">LIVE</span>
+        </div>
+        <button id="btn-toggle-live" class="btn btn-sm btn-ghost">⏸ Pause</button>
+        <button id="btn-refresh-now" class="btn btn-sm btn-ghost" title="Refresh now">↻</button>
+        <a href="/" class="btn btn-sm btn-primary">🎮 Play Game</a>
+      </div>
+    </header>
+
+    <!-- Optional Passcode Bar (shown only if server returns 401/403) -->
+    <div id="passcode-bar" class="passcode-bar hidden">
+      <span>🔒 Builder passcode required:</span>
+      <input id="passcode-input" type="password" class="input input-sm" placeholder="Enter passcode..." />
+      <button id="btn-passcode-submit" class="btn btn-sm btn-gold">Unlock</button>
+    </div>
+
+    <!-- ==================== TAB 1: LIVE PROGRESS (DEFAULT) ==================== -->
+    <main id="tab-live" class="tab-panel active">
+      <!-- KPI Summary Strip -->
+      <section class="kpi-strip">
+        <div class="kpi-card">
+          <span class="kpi-label">Saved Heroes</span>
+          <strong id="kpi-saves" class="kpi-value">0</strong>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Trial Attempts</span>
+          <strong id="kpi-attempts" class="kpi-value">0</strong>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Pass Rate</span>
+          <strong id="kpi-passrate" class="kpi-value">—</strong>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Pip Hints Used</span>
+          <strong id="kpi-hints" class="kpi-value">0</strong>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Dragons Rescued</span>
+          <strong id="kpi-dragons" class="kpi-value">0</strong>
+        </div>
+      </section>
+
+      <!-- Quick Parent Controls -->
+      <section class="card parent-controls-bar">
+        <div class="control-group">
+          <span class="control-label">Global Difficulty</span>
+          <div id="global-diff-segmented" class="segmented">
+            <button type="button" class="seg-btn" data-mode="explorer">Explorer</button>
+            <button type="button" class="seg-btn active" data-mode="standard">Standard</button>
+            <button type="button" class="seg-btn" data-mode="challenge">Challenge</button>
+          </div>
+        </div>
+
+        <label class="control-group checkbox-control">
+          <input id="global-raw-tracebacks" type="checkbox" />
+          <span>Show Raw Python Tracebacks</span>
+        </label>
+
+        <div class="control-group">
+          <label for="global-max-hints" class="control-label">Max Pip Hints</label>
+          <select id="global-max-hints" class="input input-sm">
+            <option value="0">0 (No hints)</option>
+            <option value="1">1 (Nudge only)</option>
+            <option value="2">2 (Nudge + Pattern)</option>
+            <option value="3" selected>3 (Full 3-Tier)</option>
+          </select>
+        </div>
+
+        <div id="parent-controls-status" class="muted-text" style="margin-left:auto; font-size:12.5px;">
+          Changes apply live on next Trial!
+        </div>
+      </section>
+
+      <!-- Main Live Grid: Hero Cards + Live Activity Stream -->
+      <div class="live-grid">
+        <section class="card panel-col">
+          <div class="panel-header">
+            <h2>🧙 Hero Progress</h2>
+            <span class="hint-sub">Click a hero to filter feed</span>
+          </div>
+          <div id="hero-cards-list" class="hero-cards-list">
+            <div class="empty-state">Loading saved heroes...</div>
+          </div>
+        </section>
+
+        <section class="card panel-col">
+          <div class="panel-header">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <h2>📡 Live Activity Stream</h2>
+              <span id="filter-chip" class="pill pill-gold hidden" style="cursor:pointer;">
+                Filtering: <strong id="filter-chip-name"></strong> ✕
+              </span>
+            </div>
+            <span id="event-count-pill" class="pill pill-muted">0 events</span>
+          </div>
+          <div id="activity-stream" class="activity-stream">
+            <div class="empty-state">Waiting for gameplay events... Play Pyria in another tab to watch live!</div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 2: STORY & TRIALS ==================== -->
+    <main id="tab-story" class="tab-panel">
+      <div class="story-grid">
+        <!-- Left Sidebar: Era & Realm Picker -->
+        <aside class="card story-sidebar">
+          <div class="panel-header">
+            <h2>Eras &amp; Realms</h2>
+          </div>
+          <div id="era-realm-tree" class="era-realm-tree">
+            <div class="empty-state">Loading content...</div>
+          </div>
+        </aside>
+
+        <!-- Right Workspace: Realm Editor + Trial Editor -->
+        <div class="story-workspace">
+          <!-- Realm Editor -->
+          <section class="card editor-section">
+            <div class="panel-header">
+              <h2 id="realm-editor-heading">Select a Realm</h2>
+              <button id="btn-save-realm" class="btn btn-sm btn-primary">💾 Save Realm</button>
+            </div>
+            <div id="realm-editor-form" class="form-grid">
+              <div class="field">
+                <label>Realm Name</label>
+                <input id="re-name" type="text" class="input" />
+              </div>
+              <div class="field">
+                <label>Primary Concepts (comma-separated)</label>
+                <input id="re-concepts" type="text" class="input" />
+              </div>
+              <div class="field field-full">
+                <label>Story Intro</label>
+                <textarea id="re-story-intro" class="input textarea-sm"></textarea>
+              </div>
+              <div class="field field-full">
+                <label>Story Outro</label>
+                <textarea id="re-story-outro" class="input textarea-sm"></textarea>
+              </div>
+              <div class="field field-full">
+                <label>Mini Visual Upgrade</label>
+                <input id="re-visual-upgrade" type="text" class="input" />
+              </div>
+              <div class="field">
+                <label>Dragon Name</label>
+                <input id="re-dragon-name" type="text" class="input" />
+              </div>
+              <div class="field">
+                <label>Dragon Element</label>
+                <input id="re-dragon-element" type="text" class="input" />
+              </div>
+              <div class="field field-full">
+                <label>Dragon Rescue Dialogue</label>
+                <textarea id="re-dragon-dialogue" class="input textarea-sm"></textarea>
+              </div>
+              <div class="field">
+                <label>Realm Difficulty Override</label>
+                <select id="re-diff-mode" class="input">
+                  <option value="">Inherit Global</option>
+                  <option value="explorer">Explorer</option>
+                  <option value="standard">Standard</option>
+                  <option value="challenge">Challenge</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Realm Raw Tracebacks</label>
+                <select id="re-diff-tracebacks" class="input">
+                  <option value="">Inherit Global</option>
+                  <option value="true">Show Raw Tracebacks</option>
+                  <option value="false">Hide Raw Tracebacks</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Trials List + Editor -->
+          <section class="card editor-section">
+            <div class="panel-header">
+              <h2>Python Trials</h2>
+              <button id="btn-add-trial" class="btn btn-sm btn-gold">+ Add New Trial</button>
+            </div>
+            <div id="trial-tabs" class="trial-tabs"></div>
+
+            <div id="trial-editor-wrap" class="trial-editor-wrap">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Trial ID</label>
+                  <input id="te-id" type="text" class="input input-mono" />
+                </div>
+                <div class="field">
+                  <label>Title</label>
+                  <input id="te-title" type="text" class="input" />
+                </div>
+                <div class="field">
+                  <label>Byte Shard Reward</label>
+                  <input id="te-shards" type="number" min="0" class="input" />
+                </div>
+                <div class="field">
+                  <label>Concepts (comma-separated)</label>
+                  <input id="te-concepts" type="text" class="input" />
+                </div>
+                <div class="field field-full">
+                  <label>Story Prompt</label>
+                  <textarea id="te-story" class="input textarea-sm"></textarea>
+                </div>
+                <div class="field field-full">
+                  <label>Objective</label>
+                  <textarea id="te-objective" class="input textarea-sm"></textarea>
+                </div>
+                <div class="field">
+                  <label>Starter Code (Explorer)</label>
+                  <textarea id="te-starter-explorer" class="input code-area" spellcheck="false"></textarea>
+                </div>
+                <div class="field">
+                  <label>Starter Code (Standard)</label>
+                  <textarea id="te-starter-standard" class="input code-area" spellcheck="false"></textarea>
+                </div>
+                <div class="field">
+                  <label>Starter Code (Challenge)</label>
+                  <textarea id="te-starter-challenge" class="input code-area" spellcheck="false"></textarea>
+                </div>
+                <div class="field">
+                  <label>Reference Solution (Python)</label>
+                  <textarea id="te-reference" class="input code-area" spellcheck="false"></textarea>
+                </div>
+                <div class="field field-full">
+                  <label>Test Code (uses <code>OUTPUT</code> variable)</label>
+                  <textarea id="te-test" class="input code-area" spellcheck="false"></textarea>
+                </div>
+                <div class="field">
+                  <label>Pip Hint — Tier 1 (Nudge)</label>
+                  <textarea id="te-hint-1" class="input textarea-sm"></textarea>
+                </div>
+                <div class="field">
+                  <label>Pip Hint — Tier 2 (Pattern)</label>
+                  <textarea id="te-hint-2" class="input textarea-sm"></textarea>
+                </div>
+                <div class="field field-full">
+                  <label>Pip Hint — Tier 3 (Walkthrough)</label>
+                  <textarea id="te-hint-3" class="input textarea-sm"></textarea>
+                </div>
+              </div>
+
+              <div class="trial-actions">
+                <button id="btn-test-solution" class="btn btn-sky">▶ Test Solution</button>
+                <button id="btn-save-trial" class="btn btn-primary">💾 Save Trial</button>
+                <button id="btn-delete-trial" class="btn btn-danger" style="margin-left:auto;">🗑️ Delete Trial</button>
+              </div>
+
+              <div id="test-result-box" class="test-result-box hidden"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 3: CONCEPT HEALTH ==================== -->
+    <main id="tab-health" class="tab-panel">
+      <div class="health-grid">
+        <section class="card editor-section">
+          <div class="panel-header">
+            <h2>🛡️ Concept Anti-Repetition Warnings</h2>
+            <span id="warnings-count-pill" class="pill pill-green">Checking...</span>
+          </div>
+          <div id="concept-warnings-list" class="warnings-list"></div>
+        </section>
+
+        <section class="card editor-section">
+          <div class="panel-header">
+            <h2>🎚️ Per-Realm Difficulty Overrides</h2>
+            <span class="hint-sub">Updates apply immediately via <code>PUT /api/builder/difficulty</code></span>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Era</th>
+                  <th>Realm</th>
+                  <th>Trials</th>
+                  <th>Difficulty Mode</th>
+                  <th>Raw Tracebacks</th>
+                </tr>
+              </thead>
+              <tbody id="realm-diff-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- ==================== TAB 4: SPRITES & WORLD ==================== -->
+    <main id="tab-assets" class="tab-panel">
+      <section class="card assets-shell">
+        <div class="assets-toolbar">
+          <div class="segmented">
+            <button type="button" class="seg-btn active" data-preview="world">🗺️ World Map Preview</button>
+            <button type="button" class="seg-btn" data-preview="sprites">🧙 Hero &amp; Pip Sprites</button>
+          </div>
+          <a id="btn-open-preview-tab" href="/assets/world/preview.html" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">
+            ↗ Open in New Tab
+          </a>
+        </div>
+        <iframe id="assets-iframe" class="assets-iframe" src="/assets/world/preview.html" title="Pyria Asset Preview"></iframe>
+      </section>
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <script type="module" src="/builder/builder.js"></script>
+</body>
+</html>
