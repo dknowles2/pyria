@@ -91,35 +91,88 @@
               </div>
             </div>
 
-            <div class="spellbook-box">
+            <div id="charcreate-spellbook-box" class="spellbook-box hidden">
               <h3>Starter Spellbook <span class="hint-sub">(click any pill to insert)</span></h3>
               <div id="charcreate-spellbook" class="spell-pills"></div>
             </div>
           </div>
 
-          <!-- Right: Real Python Editor + Pip Output -->
+          <!-- Right: Visual Hero Forge (default) OR Advanced Mode Python Editor -->
           <div class="card charcreate-editor-card">
-            <div class="editor-header">
+            <div class="forge-mode-header">
               <div>
-                <h3>Hero Forge Python Editor</h3>
-                <p class="muted-text">
-                  Edit the Python function calls below to customize your hero. Include <code>confirm_hero()</code> when you're ready to enter Whispering Meadow!
+                <h3 id="forge-panel-title" style="margin:0;">Hero Forge</h3>
+                <p id="forge-panel-subtitle" class="muted-text">
+                  Pick your hero's name and style below — Pip will write the Python preview for you!
                 </p>
+              </div>
+              <button id="btn-charcreate-advanced" type="button" class="btn btn-sm btn-ghost forge-mode-toggle" aria-pressed="false">
+                ⚡ Advanced Mode: Write Python
+              </button>
+            </div>
+
+            <!-- Visual Hero Forge Panel (Default) -->
+            <div id="charcreate-visual-panel" class="visual-forge-panel">
+              <div class="forge-field">
+                <label for="cc-name-input" class="forge-label">Hero Name <span class="hint-sub">(2–16 characters)</span></label>
+                <input
+                  id="cc-name-input"
+                  type="text"
+                  class="forge-text-input"
+                  value="Rowan"
+                  minlength="2"
+                  maxlength="16"
+                  placeholder="Enter hero name..."
+                  autocomplete="off"
+                />
+                <div id="cc-visual-error" class="forge-error hidden"></div>
+              </div>
+
+              <div class="forge-field">
+                <span class="forge-label">Skin Tone</span>
+                <div id="cc-skin-pills" class="picker-pills"></div>
+              </div>
+
+              <div class="forge-field">
+                <span class="forge-label">Hairstyle</span>
+                <div id="cc-hair-pills" class="picker-pills"></div>
+              </div>
+
+              <div class="forge-field">
+                <span class="forge-label">Tunic Color</span>
+                <div id="cc-tunic-pills" class="picker-pills"></div>
+              </div>
+
+              <div class="live-py-preview-box">
+                <div class="live-py-preview-header">
+                  <span>🐍 Live Python Preview</span>
+                  <span class="hint-sub">Updates as you customize!</span>
+                </div>
+                <pre id="cc-live-python-preview" class="live-py-code"></pre>
+              </div>
+
+              <div class="editor-actions">
+                <button id="btn-charcreate-start" type="button" class="btn btn-primary btn-lg" style="width:100%;">
+                  ✦ Start Adventure
+                </button>
               </div>
             </div>
 
-            <textarea id="charcreate-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+            <!-- Advanced Mode Python Editor Panel (Hidden by default) -->
+            <div id="charcreate-advanced-panel" class="advanced-forge-panel hidden">
+              <textarea id="charcreate-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
 
-            <div class="editor-actions">
-              <button id="btn-charcreate-run" class="btn btn-primary">▶ Run Python</button>
-              <button id="btn-charcreate-reset" class="btn btn-ghost">↺ Reset Starter Code</button>
-            </div>
+              <div class="editor-actions">
+                <button id="btn-charcreate-run" class="btn btn-primary">▶ Run Python</button>
+                <button id="btn-charcreate-reset" class="btn btn-ghost">↺ Reset Starter Code</button>
+              </div>
 
-            <div id="charcreate-output" class="pip-console">
-              <div class="pip-console-header">🐉 Pip says:</div>
-              <div class="pip-console-body">
-                Try changing the name, skin, hair, or tunic inside the quotes and press <strong>Run Python</strong>!
-                Remove or comment out <code>confirm_hero()</code> if you want to preview first.
+              <div id="charcreate-output" class="pip-console">
+                <div class="pip-console-header">🐉 Pip says:</div>
+                <div class="pip-console-body">
+                  Try changing the name, skin, hair, or tunic inside the quotes and press <strong>Run Python</strong>!
+                  Include <code>confirm_hero()</code> when you're ready to enter Whispering Meadow!
+                </div>
               </div>
             </div>
           </div>

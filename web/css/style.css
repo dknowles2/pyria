@@ -495,6 +495,132 @@ html, body {
   margin-top: 6px;
 }
 
+/* ==================== VISUAL HERO FORGE & ADVANCED TOGGLE ==================== */
+.forge-mode-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.forge-mode-toggle.active {
+  background: rgba(167, 139, 250, 0.22);
+  border-color: var(--accent-violet);
+  color: #ddd6fe;
+}
+
+.visual-forge-panel,
+.advanced-forge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.forge-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.forge-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.forge-text-input {
+  width: 100%;
+  padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-subtle);
+  background: var(--bg-code);
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.forge-text-input:focus {
+  border-color: var(--accent-sky);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+}
+
+.forge-error {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accent-rose);
+}
+
+.picker-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.picker-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--border-subtle);
+  background: var(--bg-panel-alt);
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.08s ease;
+}
+
+.picker-pill:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-1px);
+}
+
+.picker-pill.active {
+  border-color: var(--accent-emerald);
+  background: rgba(52, 211, 153, 0.2);
+  color: #a7f3d0;
+}
+
+.swatch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.live-py-preview-box {
+  background: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.live-py-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-sky);
+  margin-bottom: 6px;
+}
+
+.live-py-code {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #a7f3d0;
+  white-space: pre-wrap;
+}
+
 /* ==================== CODE EDITOR & PIP CONSOLE ==================== */
 .code-editor {
   width: 100%;
