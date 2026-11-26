@@ -3,6 +3,11 @@
 import { audio } from './audio.js';
 import { music } from './music.js';
 import { pyRunner } from './pyRunner.js';
+import {
+  attachAutocomplete,
+  buildTrialSuggestions,
+  buildWorkshopSuggestions,
+} from './autocomplete.js';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -223,6 +228,7 @@ export class ModalManager {
   openTrialModal({
     trial,
     realm,
+    era,
     gameConfig,
     catalog,
     save,
@@ -419,6 +425,10 @@ export class ModalManager {
       const draftBadge = this.content.querySelector('#trial-draft-badge');
 
       wireQuickKeysBar(this.content.querySelector('#trial-quick-keys'), codeEl);
+
+      const trialSuggestions = buildTrialSuggestions({ realm, era, trial });
+      const destroyTrialAc = attachAutocomplete(codeEl, () => trialSuggestions);
+      this.addCleanup(destroyTrialAc);
 
       if (!isPractice) {
         codeEl.addEventListener('input', () => {
@@ -628,6 +638,9 @@ export class ModalManager {
     const statsPill = this.content.querySelector('#ws-stats-pill');
 
     wireQuickKeysBar(this.content.querySelector('#ws-quick-keys'), codeEl);
+
+    const destroyWsAc = attachAutocomplete(codeEl, () => buildWorkshopSuggestions(catalog, workingSave));
+    this.addCleanup(destroyWsAc);
 
     const animInterval = setInterval(() => {
       previewFrame += 1;

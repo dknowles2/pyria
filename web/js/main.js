@@ -16,6 +16,7 @@ import {
 import { audio } from './audio.js';
 import { music, resolveRegionTheme } from './music.js';
 import { pyRunner } from './pyRunner.js';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js';
 import { SpriteManager } from './sprites.js';
 import { WorldEngine } from './world.js';
 import { ModalManager, attachCodeEditorKeys } from './modals.js';
@@ -836,6 +837,7 @@ async function handleEntityInteract(entity) {
     state.modals.openTrialModal({
       trial,
       realm,
+      era: state.era,
       gameConfig: state.gameConfig,
       catalog: state.catalog,
       save,
@@ -1022,6 +1024,7 @@ function wireControls() {
     audio.playClick();
   });
   attachCodeEditorKeys($('#charcreate-code'), runCharCreateCode);
+  attachAutocomplete($('#charcreate-code'), () => buildCharCreateSuggestions(state.catalog));
 
   // HUD
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
