@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Pyria" />
+  <meta name="theme-color" content="#0b1020" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <title>Pyria: Return of the Bits</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
@@ -222,17 +229,20 @@
         <!-- Toast Notifications -->
         <div id="toast-container" class="toast-container"></div>
 
-        <!-- On-screen Touch / Click D-Pad & Action Button -->
+        <!-- On-screen Virtual Thumbstick & Circular Interact Action Button -->
         <div class="touch-controls">
-          <div class="dpad" aria-label="Directional Pad">
-            <button class="dpad-btn dpad-up" data-dir="up" aria-label="Move Up">▲</button>
-            <button class="dpad-btn dpad-left" data-dir="left" aria-label="Move Left">◀</button>
-            <button class="dpad-btn dpad-center" data-action="interact" aria-label="Interact">●</button>
-            <button class="dpad-btn dpad-right" data-dir="right" aria-label="Move Right">▶</button>
-            <button class="dpad-btn dpad-down" data-dir="down" aria-label="Move Down">▼</button>
+          <div id="touch-joystick" class="touch-joystick" role="application" aria-label="Virtual Thumbstick">
+            <div class="joystick-base">
+              <span class="joy-tick joy-n">▲</span>
+              <span class="joy-tick joy-s">▼</span>
+              <span class="joy-tick joy-w">◀</span>
+              <span class="joy-tick joy-e">▶</span>
+              <div id="joystick-nub" class="joystick-nub"></div>
+            </div>
           </div>
-          <button id="btn-touch-interact" class="btn btn-primary touch-interact-btn">
-            Interact (E)
+          <button id="btn-touch-interact" type="button" class="touch-interact-btn" aria-label="Interact">
+            <span class="touch-interact-icon">✦</span>
+            <span id="touch-interact-label" class="touch-interact-sub">Act</span>
           </button>
         </div>
       </main>

@@ -1003,73 +1003,135 @@ textarea, input, pre, code {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==================== ON-SCREEN TOUCH CONTROLS ==================== */
+/* ==================== ON-SCREEN VIRTUAL THUMBSTICK & INTERACT ==================== */
 .touch-controls {
   position: absolute;
-  bottom: 14px;
-  left: 14px;
-  right: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  left: calc(14px + env(safe-area-inset-left, 0px));
+  right: calc(18px + env(safe-area-inset-right, 0px));
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   pointer-events: none;
-  z-index: 4;
+  z-index: 6;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
-.dpad {
-  display: grid;
-  grid-template-columns: repeat(3, 44px);
-  grid-template-rows: repeat(3, 44px);
-  gap: 5px;
+.touch-joystick {
+  width: 156px;
+  height: 156px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: auto;
-  opacity: 0.82;
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+  cursor: grab;
 }
 
-.dpad:hover {
-  opacity: 1;
+.touch-joystick.active {
+  cursor: grabbing;
 }
 
-.dpad-btn {
-  background: rgba(15, 23, 42, 0.88);
+.joystick-base {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(21, 31, 56, 0.52) 0%, rgba(11, 16, 32, 0.78) 100%);
+  border: 2px solid rgba(75, 97, 150, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 18px rgba(56, 189, 248, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.touch-joystick.active .joystick-base {
+  border-color: var(--accent-sky);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55), inset 0 0 22px rgba(56, 189, 248, 0.28);
+}
+
+.joy-tick {
+  position: absolute;
+  font-size: 11px;
+  color: rgba(158, 176, 214, 0.55);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.joy-n { top: 8px; left: 50%; transform: translateX(-50%); }
+.joy-s { bottom: 8px; left: 50%; transform: translateX(-50%); }
+.joy-w { left: 9px; top: 50%; transform: translateY(-50%); }
+.joy-e { right: 9px; top: 50%; transform: translateY(-50%); }
+
+.joystick-nub {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #7dd3fc 0%, #38bdf8 48%, #0284c7 100%);
+  border: 2px solid #e0f2fe;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.55);
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.12s ease-out;
+  pointer-events: none;
+}
+
+.touch-joystick.active .joystick-nub {
+  transition: none;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.85);
+}
+
+.touch-interact-btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
   border: 2px solid var(--border-bright);
-  border-radius: 10px;
+  background: radial-gradient(circle at 35% 30%, #24355c 0%, #111930 100%);
   color: var(--text-main);
-  font-size: 16px;
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: auto;
   touch-action: none;
+  cursor: pointer;
+  opacity: 0.85;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+  transition: transform 0.08s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  margin-bottom: 12px;
 }
 
-.dpad-btn:active,
-.dpad-btn.pressed {
-  background: var(--accent-sky);
-  color: #061b29;
+.touch-interact-btn.near-target {
+  background: radial-gradient(circle at 35% 30%, #6ee7b7 0%, #10b981 65%, #047857 100%);
+  border-color: #d1fae5;
+  color: #052016;
+  opacity: 1;
+  box-shadow: 0 0 22px rgba(52, 211, 153, 0.65), 0 8px 22px rgba(0, 0, 0, 0.45);
 }
 
-@media (pointer: coarse), (max-width: 1100px) {
-  .dpad {
-    grid-template-columns: repeat(3, 56px);
-    grid-template-rows: repeat(3, 56px);
-    gap: 6px;
-    opacity: 0.92;
-  }
+.touch-interact-btn:active,
+.touch-interact-btn.pressed {
+  transform: scale(0.93);
+}
 
-  .dpad-btn {
-    font-size: 20px;
-  }
+.touch-interact-icon {
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 900;
+}
 
-  .touch-interact-btn {
-    min-height: 52px;
-    padding: 12px 20px;
-    font-size: 15px;
-    opacity: 0.95;
-  }
+.touch-interact-sub {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 /* ==================== PYTHON QUICK-KEYS BAR (iPad Ergonomics) ==================== */

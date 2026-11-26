@@ -1,0 +1,23 @@
+{
+  "name": "Pyria: Return of the Bits",
+  "short_name": "Pyria",
+  "description": "A browser-based Python-learning RPG where you cast real Python spells to rescue dragons and upgrade the world from 8-Bit to 16-Bit!",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
