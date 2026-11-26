@@ -903,6 +903,8 @@ class PyriaHTTPServer(ThreadingHTTPServer):
         ordered_ids: list[str] = list(game.get("eraOrder") or [])
         if eras_dir.is_dir():
             for p in sorted(eras_dir.glob("*.json")):
+                if p.name.startswith("."):
+                    continue
                 if p.stem not in ordered_ids:
                     ordered_ids.append(p.stem)
         eras: list[dict[str, Any]] = []
