@@ -1,6 +1,6 @@
 // Pyria Parent & Builder Console — Live Progress Stream, Difficulty Tuning & Story Editor
 
-import { pyRunner } from '/js/pyRunner.js?v=20261127e';
+import { pyRunner } from '/js/pyRunner.js?v=20261127f';
 
 const POLL_INTERVAL_MS = 2500;
 const PASSCODE_STORAGE_KEY = 'pyria_builder_passcode';

@@ -13,15 +13,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261127e';
-import { audio } from './audio.js?v=20261127e';
-import { music, resolveRegionTheme } from './music.js?v=20261127e';
-import { pyRunner } from './pyRunner.js?v=20261127e';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127e';
-import { SpriteManager } from './sprites.js?v=20261127e';
-import { WorldEngine } from './world.js?v=20261127e';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127e';
-import { playCutscene } from './cutscene.js?v=20261127e';
+} from './api.js?v=20261127f';
+import { audio } from './audio.js?v=20261127f';
+import { music, resolveRegionTheme } from './music.js?v=20261127f';
+import { pyRunner } from './pyRunner.js?v=20261127f';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127f';
+import { SpriteManager } from './sprites.js?v=20261127f';
+import { WorldEngine } from './world.js?v=20261127f';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127f';
+import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127f';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -402,6 +402,45 @@ function renderAdminRealmJump() {
     selectEl.value = state.activeRealm.id;
   }
   selectEl.classList.remove('hidden');
+
+  const csEl = $('#hud-admin-cutscene-preview');
+  if (csEl) {
+    const opts = Object.values(STORY_CUTSCENES)
+      .map((cs) => `<option value="${escapeHtml(cs.id)}">${escapeHtml(cs.label)}</option>`)
+      .join('');
+    csEl.innerHTML = `<option value="">🎬 Preview Cutscene…</option>${opts}`;
+    csEl.classList.remove('hidden');
+  }
+}
+
+async function runStoryCutsceneById(cutsceneId, { markSeen = false } = {}) {
+  const cs = STORY_CUTSCENES[cutsceneId];
+  if (!cs) return;
+  const save = state.activeSave;
+  if (markSeen && save) {
+    const seen = new Set(save.seenCutscenes || []);
+    if (seen.has(cutsceneId)) return;
+    seen.add(cutsceneId);
+    save.seenCutscenes = [...seen];
+    await persistSave();
+  }
+  state.world?.setPaused(true);
+  music.setDucked(true);
+  if (cutsceneId.startsWith('era-transition-')) {
+    audio.playDragonRescue();
+  }
+  await playCutscene({
+    title: cs.title,
+    subtitle: cs.subtitle,
+    beats: cs.beats,
+    save,
+    sprites: state.sprites,
+    eraKey: cs.eraKey || '8bit',
+    realmId: cs.realmId || 'realm-01-meadow',
+    finalButtonLabel: cs.finalButtonLabel || 'Continue ▸',
+  });
+  music.setDucked(false);
+  state.world?.setPaused(false);
 }
 
 // ==================== HUD UPDATES ====================
@@ -1000,6 +1039,11 @@ async function enterOverworld(save) {
     console.warn(`Could not load map for ${targetRealm}, falling back to realm-01-meadow:`, err);
     await loadRealm('realm-01-meadow', null);
   }
+
+  // Play the Opening Story Cutscene once for new heroes entering Whispering Meadow
+  if (targetRealm === 'realm-01-meadow' && !(save.seenCutscenes || []).includes('opening')) {
+    await runStoryCutsceneById('opening', { markSeen: true });
+  }
 }
 
 // ==================== ENTITY INTERACTIONS ====================
@@ -1306,8 +1350,21 @@ async function handleEntityInteract(entity) {
         state.mapsCache.set(targetRealmId, mapData);
       }
       audio.playPortal();
+      const prevEraId = state.activeSave?.eraId;
       await loadRealm(targetRealmId);
       await persistSave();
+      const newEraId = state.activeSave?.eraId;
+      if (prevEraId && newEraId && prevEraId !== newEraId) {
+        const eraCsMap = {
+          'era-02-16bit': 'era-transition-16bit',
+          'era-03-32bit': 'era-transition-32bit',
+          'era-04-64bit': 'era-transition-64bit',
+        };
+        const csId = eraCsMap[newEraId];
+        if (csId && !(state.activeSave.seenCutscenes || []).includes(csId)) {
+          await runStoryCutsceneById(csId, { markSeen: true });
+        }
+      }
     } catch {
       audio.playDragonRescue();
       const nextRealmName = targetRealm?.name || 'the next Realm';
@@ -1450,6 +1507,13 @@ function wireControls() {
       audio.playError();
       showToast(`Jump failed: ${err.message}`);
     }
+  });
+  $('#hud-admin-cutscene-preview')?.addEventListener('change', async (e) => {
+    const csId = e.target.value;
+    e.target.value = '';
+    e.target.blur();
+    if (!state.me?.isAdmin || !csId) return;
+    await runStoryCutsceneById(csId, { markSeen: false });
   });
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
   $('#btn-hud-era-toggle').addEventListener('click', async () => {
