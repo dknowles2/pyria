@@ -243,6 +243,7 @@ describe('Guest Mode (Zero D1 Writes)', () => {
         parentEmail: null,
         isAdmin: false,
         googleOAuthEnabled: true,
+        magicLinkEnabled: false,
       },
     });
 
@@ -1305,5 +1306,108 @@ describe('#70 Trial Analytics, Durable Rollups & Admin Calibration Metrics', () 
     const t06 = ovMetrics.data.trials.find((t: any) => t.trialId === 'trial-01-06');
     expect(t06.parentOverrides).toBe(2);
     expect(t06.parentOverrideRate).toBe(100.0);
+  });
+});
+
+describe('Passwordless Email Magic Links (Resend)', () => {
+  it('returns 503 when RESEND_API_KEY is not configured', async () => {
+    const reqRes = await apiJson('/api/auth/magic-link/request', {
+      method: 'POST',
+      body: { email: 'parent@example.com' },
+    });
+    expect(reqRes.res.status).toBe(503);
+
+    const verRes = await SELF.fetch(`${BASE}/api/auth/magic-link/verify?token=abc`, {
+      redirect: 'manual',
+    });
+    expect(verRes.status).toBe(503);
+  });
+
+  it('sends a single-use magic link via Resend, verifies it into a parent session, and rejects replay/invalid tokens', async () => {
+    const { default: worker } = await import('../index');
+    let sentPayload: any = null;
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const target = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+      if (target === 'https://resend.test/emails') {
+        sentPayload = JSON.parse(String(init?.body || '{}'));
+        return new Response(JSON.stringify({ id: 'email_123' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return origFetch(input as any, init);
+    }) as typeof fetch;
+
+    const testEnv = {
+      ...env,
+      RESEND_API_KEY: 're_test_key_123',
+      RESEND_API_URL: 'https://resend.test/emails',
+      MAGIC_LINK_FROM_EMAIL: 'Pyria <noreply@pyria.dev>',
+    };
+
+    try {
+      // Invalid email rejected with 400
+      const badEmailRes = await worker.fetch(
+        new Request(`${BASE}/api/auth/magic-link/request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '198.51.100.42' },
+          body: JSON.stringify({ email: 'not-an-email' }),
+        }),
+        testEnv
+      );
+      expect(badEmailRes.status).toBe(400);
+
+      // Valid request sends email via Resend
+      const reqRes = await worker.fetch(
+        new Request(`${BASE}/api/auth/magic-link/request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '198.51.100.42' },
+          body: JSON.stringify({ email: 'Parent@Example.com', next: '/console' }),
+        }),
+        testEnv
+      );
+      expect(reqRes.status).toBe(200);
+      expect(sentPayload).toBeTruthy();
+      expect(sentPayload.to).toEqual(['parent@example.com']);
+      expect(sentPayload.from).toBe('Pyria <noreply@pyria.dev>');
+
+      const match = String(sentPayload.text).match(/https?:\/\/[^\s]+\/api\/auth\/magic-link\/verify\?token=([^\s]+)/);
+      expect(match).toBeTruthy();
+      const verifyUrl = match![0];
+
+      // Missing/invalid token redirects to /console?auth_error=magic_link_invalid
+      const badVerify = await worker.fetch(
+        new Request(`${BASE}/api/auth/magic-link/verify?token=invalid.token`),
+        testEnv
+      );
+      expect(badVerify.status).toBe(302);
+      expect(badVerify.headers.get('Location')).toBe('/console?auth_error=magic_link_invalid');
+
+      // First valid verification succeeds and sets parent session cookie
+      const okVerify = await worker.fetch(new Request(verifyUrl), testEnv);
+      expect(okVerify.status).toBe(302);
+      expect(okVerify.headers.get('Location')).toBe('/console');
+      const setCookie = okVerify.headers.get('Set-Cookie') || '';
+      expect(setCookie).toContain('pyria_parent_session=');
+      const parentCookie = setCookie.split(';')[0];
+
+      // Verify /api/me recognizes the parent session + magicLinkEnabled=true
+      const meRes = await worker.fetch(
+        new Request(`${BASE}/api/me`, { headers: { Cookie: parentCookie } }),
+        testEnv
+      );
+      const meData = (await meRes.json()) as any;
+      expect(meData.auth.role).toBe('parent');
+      expect(meData.auth.parentEmail).toBe('parent@example.com');
+      expect(meData.auth.magicLinkEnabled).toBe(true);
+
+      // Replay of the same magic link is rejected (single-use)
+      const replayVerify = await worker.fetch(new Request(verifyUrl), testEnv);
+      expect(replayVerify.status).toBe(302);
+      expect(replayVerify.headers.get('Location')).toBe('/console?auth_error=magic_link_invalid');
+    } finally {
+      globalThis.fetch = origFetch;
+    }
   });
 });

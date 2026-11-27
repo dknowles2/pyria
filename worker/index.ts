@@ -6,6 +6,8 @@ import {
   handleHeroCodeCreate,
   handleHeroCodeRedeem,
   handleLogout,
+  handleMagicLinkRequest,
+  handleMagicLinkVerify,
   resolveAuthContext,
 } from './auth';
 import { handleConsoleRequest } from './console';
@@ -131,6 +133,12 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   }
   if (method === 'GET' && pathname === '/api/auth/google/callback') {
     return handleGoogleCallback(request, env);
+  }
+  if (method === 'POST' && pathname === '/api/auth/magic-link/request') {
+    return handleMagicLinkRequest(request, env);
+  }
+  if (method === 'GET' && pathname === '/api/auth/magic-link/verify') {
+    return handleMagicLinkVerify(request, env);
   }
   if (method === 'POST' && pathname === '/api/auth/logout') {
     return handleLogout(request);

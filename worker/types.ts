@@ -5,7 +5,9 @@ export interface Env {
   PYRIA_ADMIN_EMAILS?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
-  // Optional overrides for quotas, rate limits, and OAuth endpoints (useful for tests/tuning)
+  RESEND_API_KEY?: string;
+  MAGIC_LINK_FROM_EMAIL?: string;
+  // Optional overrides for quotas, rate limits, and OAuth/email endpoints (useful for tests/tuning)
   PYRIA_MAX_SAVES_PER_ACCOUNT?: string;
   PYRIA_MAX_UNOWNED_SAVES?: string;
   PYRIA_MAX_DAILY_ANON_CREATES?: string;
@@ -18,8 +20,10 @@ export interface Env {
   PYRIA_RATE_LIMIT_CLAIM?: string;
   PYRIA_RATE_LIMIT_GLOBAL_FAIL?: string;
   PYRIA_RATE_LIMIT_SAVES?: string;
+  PYRIA_RATE_LIMIT_MAGIC_LINK?: string;
   GOOGLE_TOKEN_URL?: string;
   GOOGLE_USERINFO_URL?: string;
+  RESEND_API_URL?: string;
 }
 
 export type DifficultyMode = 'explorer' | 'standard' | 'challenge';
@@ -30,7 +34,7 @@ export interface SavePreferences {
   maxPipHints?: number;
 }
 
-export type TokenType = 'hero' | 'parent' | 'oauth_state';
+export type TokenType = 'hero' | 'parent' | 'oauth_state' | 'magic_link';
 
 export interface HeroSessionPayload {
   typ: 'hero';
@@ -53,6 +57,14 @@ export interface OAuthStatePayload {
   exp: number;
 }
 
+export interface MagicLinkTokenPayload {
+  typ: 'magic_link';
+  email: string;
+  jti: string;
+  next: string;
+  exp: number;
+}
+
 export type AuthRole = 'guest' | 'hero' | 'parent' | 'admin';
 
 export interface AuthContext {
@@ -63,6 +75,7 @@ export interface AuthContext {
   parentEmail: string | null;
   isAdmin: boolean;
   googleOAuthEnabled: boolean;
+  magicLinkEnabled: boolean;
 }
 
 export interface SaveDbRow {

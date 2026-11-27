@@ -52,21 +52,39 @@
         <span class="pill pill-gold">PYRIA PARENT CONSOLE</span>
         <h2>Parent &amp; Guardian Sign-In</h2>
         <p class="muted-text">
-          Sign in with your Google account to view your children's real-time Python progress,
+          Sign in to view your children's real-time Python progress,
           create or link <strong>Hero Codes</strong> for kids' devices, tune difficulty &amp; Pip hints,
           and manage Trial overrides.
         </p>
+        <p id="console-auth-error-msg" class="console-auth-status console-auth-error hidden" role="alert"></p>
+        <p id="console-auth-success-msg" class="console-auth-status console-auth-success hidden" role="status"></p>
         <div id="console-signin-actions" class="console-signin-actions">
           <a id="btn-google-signin" href="/api/auth/google/start?next=/console" class="btn btn-primary btn-lg">
             Sign in with Google
           </a>
+          <div id="console-signin-divider" class="console-signin-divider hidden">
+            <span>or sign in with email</span>
+          </div>
+          <form id="magic-link-form" class="magic-link-form hidden" novalidate>
+            <input
+              id="magic-link-email"
+              type="email"
+              class="input magic-link-input"
+              placeholder="parent@example.com"
+              autocomplete="email"
+              required
+            />
+            <button id="btn-magic-link-submit" type="submit" class="btn btn-gold btn-lg">
+              ✉️ Email Me a Sign-In Link
+            </button>
+          </form>
           <a href="/" class="btn btn-ghost">← Back to Game</a>
         </div>
         <p id="console-oauth-disabled-msg" class="muted-text hidden" style="color:var(--accent-rose);">
-          Google Sign-In is not configured on this deployment yet. Set <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> in Cloudflare Workers secrets.
+          Parent Sign-In is not configured on this deployment yet. Configure Google OAuth or <code>RESEND_API_KEY</code> in Cloudflare Workers secrets.
         </p>
         <p class="hint-sub" style="margin-top:6px;">
-          Kids never need a Google account — they play right away as guests or with a memorable Hero Code!
+          Kids never need an account — they play right away as guests or with a memorable Hero Code!
         </p>
       </section>
     </main>

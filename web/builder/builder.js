@@ -10,6 +10,7 @@ const state = {
   isParentAuthenticated: false,
   parentEmail: null,
   googleOAuthEnabled: false,
+  magicLinkEnabled: false,
   accounts: [],
   selectedAccount: 'all',
   liveEnabled: true,
@@ -2820,13 +2821,84 @@ function showCloudflareSignInScreen() {
   $('#btn-console-signout')?.classList.add('hidden');
 
   const signInBtn = $('#btn-google-signin');
+  const dividerEl = $('#console-signin-divider');
+  const magicForm = $('#magic-link-form');
   const disabledMsg = $('#console-oauth-disabled-msg');
-  if (state.googleOAuthEnabled === false) {
-    signInBtn?.classList.add('hidden');
-    disabledMsg?.classList.remove('hidden');
-  } else {
-    signInBtn?.classList.remove('hidden');
-    disabledMsg?.classList.add('hidden');
+  const errEl = $('#console-auth-error-msg');
+  const okEl = $('#console-auth-success-msg');
+
+  const showGoogle = state.googleOAuthEnabled !== false;
+  const showMagic = Boolean(state.magicLinkEnabled);
+
+  signInBtn?.classList.toggle('hidden', !showGoogle);
+  magicForm?.classList.toggle('hidden', !showMagic);
+  dividerEl?.classList.toggle('hidden', !(showGoogle && showMagic));
+  disabledMsg?.classList.toggle('hidden', showGoogle || showMagic);
+
+  // Surface expired/invalid magic link errors passed via query param
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth_error') === 'magic_link_invalid' && errEl) {
+      errEl.textContent = 'That sign-in link has expired or was already used. Please request a new one below.';
+      errEl.classList.remove('hidden');
+      okEl?.classList.add('hidden');
+    }
+  } catch {
+    // ignore URL parsing errors
+  }
+
+  if (magicForm && !magicForm.dataset.bound) {
+    magicForm.dataset.bound = '1';
+    magicForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const emailInput = $('#magic-link-email');
+      const submitBtn = $('#btn-magic-link-submit');
+      const email = (emailInput?.value || '').trim();
+      errEl?.classList.add('hidden');
+      okEl?.classList.add('hidden');
+
+      if (!email) {
+        if (errEl) {
+          errEl.textContent = 'Please enter your email address.';
+          errEl.classList.remove('hidden');
+        }
+        emailInput?.focus();
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending link...';
+      }
+      try {
+        const res = await fetch('/api/auth/magic-link/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, next: '/console' }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (errEl) {
+            errEl.textContent = data.error || 'Could not send sign-in link. Please try again.';
+            errEl.classList.remove('hidden');
+          }
+        } else if (okEl) {
+          okEl.textContent = data.message || 'Check your email for your sign-in link!';
+          okEl.classList.remove('hidden');
+          if (emailInput) emailInput.value = '';
+        }
+      } catch {
+        if (errEl) {
+          errEl.textContent = 'Network error sending sign-in link. Please try again.';
+          errEl.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✉️ Email Me a Sign-In Link';
+        }
+      }
+    });
   }
 }
 
@@ -2929,6 +3001,7 @@ async function init() {
       state.parentEmail = auth.parentEmail ?? me?.email ?? null;
       state.googleOAuthEnabled =
         typeof auth.googleOAuthEnabled === 'boolean' ? auth.googleOAuthEnabled : true;
+      state.magicLinkEnabled = Boolean(auth.magicLinkEnabled);
       const role = auth.role || (state.isAdmin ? 'admin' : state.parentEmail ? 'parent' : 'guest');
       state.isParentAuthenticated = role === 'parent' || role === 'admin';
 
