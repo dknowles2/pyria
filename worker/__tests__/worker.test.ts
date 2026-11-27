@@ -735,6 +735,51 @@ describe('#45 Input Validation, Quotas, Cascading Delete & Rate Limiting', () =>
     expect(confusedHero.data.auth.role).toBe('guest');
   });
 
+  it('blocks a failing IP even on a valid Hero Code once global failure cap is tripped, while allowing clean IPs', async () => {
+    // Create a valid hero with a known Hero Code
+    const created = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: { heroName: 'ValidKid' },
+      headers: { 'CF-Connecting-IP': '198.51.100.10' },
+    });
+    expect(created.res.status).toBe(201);
+    const validCode = created.data.heroCode;
+
+    // Seed global failure bucket at the limit (200)
+    const now = Math.floor(Date.now() / 1000);
+    await env.DB.prepare(
+      'INSERT OR REPLACE INTO rate_limits (bucket_key, count, window_start) VALUES (?, ?, ?)'
+    )
+      .bind('hero-code-fail:global', 200, now)
+      .run();
+
+    // Attacker IP misses once -> now recorded in hero-fail-ip:<ip>
+    const attackerMiss = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { heroCode: 'WRONG-GUESS-000000' },
+      headers: { 'CF-Connecting-IP': '198.51.100.99' },
+    });
+    expect(attackerMiss.res.status).toBe(429);
+
+    // Attacker IP now tries the *correct* Hero Code -> STILL blocked with 429 pre-lookup!
+    const attackerHit = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { heroCode: validCode },
+      headers: { 'CF-Connecting-IP': '198.51.100.99' },
+    });
+    expect(attackerHit.res.status).toBe(429);
+    expect(Number(attackerHit.res.headers.get('Retry-After'))).toBeGreaterThan(0);
+
+    // Clean IP (legitimate kid with 0 prior misses) entering the valid Hero Code succeeds with 200!
+    const cleanKid = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { heroCode: validCode },
+      headers: { 'CF-Connecting-IP': '198.51.100.55' },
+    });
+    expect(cleanKid.res.status).toBe(200);
+    expect(cleanKid.data.save.heroName).toBe('ValidKid');
+  });
+
   it('blanks older attempt code blobs, caps attempt rows, and prunes activity_events', async () => {
     const db = new PyriaD1({
       ...env,

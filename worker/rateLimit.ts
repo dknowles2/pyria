@@ -107,3 +107,56 @@ export function rateLimitExceededResponse(retryAfterSeconds: number): Response {
     { 'Retry-After': String(retryAfterSeconds) }
   );
 }
+
+/**
+ * Read-only check before Hero Code hash/lookup: if the global failure budget is exhausted
+ * AND this IP (/64) has already had >=1 recent failure, reject with 429 before lookup.
+ * Clean IPs entering a valid Hero Code on the first try are never blocked by griefers.
+ */
+export async function checkGlobalHeroCodeThrottle(
+  db: D1Database,
+  ip: string,
+  globalLimit: number,
+  windowSeconds: number
+): Promise<RateLimitResult> {
+  const now = Math.floor(Date.now() / 1000);
+  const cutoff = now - windowSeconds;
+
+  const [globalRow, ipFailRow] = await Promise.all([
+    db
+      .prepare('SELECT count, window_start FROM rate_limits WHERE bucket_key = ?')
+      .bind('hero-code-fail:global')
+      .first<{ count: number; window_start: number }>(),
+    db
+      .prepare('SELECT count, window_start FROM rate_limits WHERE bucket_key = ?')
+      .bind(`hero-fail-ip:${ip}`)
+      .first<{ count: number; window_start: number }>(),
+  ]);
+
+  const globalTripped =
+    globalRow !== null && globalRow.window_start > cutoff && globalRow.count >= globalLimit;
+  const ipHasRecentFail =
+    ipFailRow !== null && ipFailRow.window_start > cutoff && ipFailRow.count >= 1;
+
+  if (globalTripped && ipHasRecentFail) {
+    const retryAfter = Math.max(1, globalRow.window_start + windowSeconds - now);
+    return { allowed: false, retryAfterSeconds: retryAfter };
+  }
+  return { allowed: true, retryAfterSeconds: 0 };
+}
+
+/**
+ * Record a failed Hero Code guess against both the global failure bucket and the client IP bucket.
+ */
+export async function recordHeroCodeFailure(
+  db: D1Database,
+  ip: string,
+  globalLimit: number,
+  windowSeconds: number
+): Promise<RateLimitResult> {
+  const [globalRl] = await Promise.all([
+    checkRateLimit(db, 'hero-code-fail:global', globalLimit, windowSeconds),
+    checkRateLimit(db, `hero-fail-ip:${ip}`, 1000, windowSeconds),
+  ]);
+  return globalRl;
+}

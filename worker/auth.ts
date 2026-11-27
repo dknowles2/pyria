@@ -18,7 +18,13 @@ import {
   verifyToken,
 } from './crypto';
 import { PyriaD1, parsePreferencesJson } from './db';
-import { checkRateLimit, getClientIp, rateLimitExceededResponse } from './rateLimit';
+import {
+  checkGlobalHeroCodeThrottle,
+  checkRateLimit,
+  getClientIp,
+  rateLimitExceededResponse,
+  recordHeroCodeFailure,
+} from './rateLimit';
 import { applySecurityHeaders, jsonResponse, sanitizeNextPath } from './security';
 import type {
   AuthContext,
@@ -264,7 +270,21 @@ export async function handleHeroCodeRedeem(
   db: PyriaD1
 ): Promise<Response> {
   const limit = Number.parseInt(env.PYRIA_RATE_LIMIT_REDEEM || '', 10) || DEFAULT_REDEEM_LIMIT;
+  const globalFailLimit =
+    Number.parseInt(env.PYRIA_RATE_LIMIT_GLOBAL_FAIL || '', 10) || DEFAULT_GLOBAL_FAIL_LIMIT;
   const ip = getClientIp(request);
+
+  // Pre-lookup global failure throttle for IPs with prior recent misses
+  const globalThrottle = await checkGlobalHeroCodeThrottle(
+    env.DB,
+    ip,
+    globalFailLimit,
+    DEFAULT_GLOBAL_FAIL_WINDOW_SEC
+  );
+  if (!globalThrottle.allowed) {
+    return rateLimitExceededResponse(globalThrottle.retryAfterSeconds);
+  }
+
   const rl = await checkRateLimit(env.DB, `hero-redeem:${ip}`, limit, DEFAULT_REDEEM_WINDOW_SEC);
   if (!rl.allowed) {
     return rateLimitExceededResponse(rl.retryAfterSeconds);
@@ -290,11 +310,9 @@ export async function handleHeroCodeRedeem(
   const hash = await hashHeroCode(normalized, secret);
   const row = await db.getSaveByRecoveryHash(hash);
   if (!row) {
-    const globalFailLimit =
-      Number.parseInt(env.PYRIA_RATE_LIMIT_GLOBAL_FAIL || '', 10) || DEFAULT_GLOBAL_FAIL_LIMIT;
-    const failRl = await checkRateLimit(
+    const failRl = await recordHeroCodeFailure(
       env.DB,
-      'hero-code-fail:global',
+      ip,
       globalFailLimit,
       DEFAULT_GLOBAL_FAIL_WINDOW_SEC
     );

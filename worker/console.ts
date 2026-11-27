@@ -1,7 +1,13 @@
 import { generateUniqueHeroCodeHash, getSessionSecret } from './auth';
 import { hashHeroCode, normalizeHeroCode } from './crypto';
 import { PyriaD1 } from './db';
-import { checkRateLimit, getClientIp, rateLimitExceededResponse } from './rateLimit';
+import {
+  checkGlobalHeroCodeThrottle,
+  checkRateLimit,
+  getClientIp,
+  rateLimitExceededResponse,
+  recordHeroCodeFailure,
+} from './rateLimit';
 import { jsonResponse, safeDecodeSegment } from './security';
 import type { AuthContext, Env, SavePreferences } from './types';
 import {
@@ -211,7 +217,21 @@ export async function handleConsoleRequest(
   if (method === 'POST' && pathname === '/api/console/claim-hero') {
     const claimLimit =
       Number.parseInt(env.PYRIA_RATE_LIMIT_CLAIM || '', 10) || DEFAULT_CLAIM_LIMIT;
+    const globalFailLimit =
+      Number.parseInt(env.PYRIA_RATE_LIMIT_GLOBAL_FAIL || '', 10) || DEFAULT_GLOBAL_FAIL_LIMIT;
     const ip = getClientIp(request);
+
+    // Pre-lookup global failure throttle for IPs with prior recent misses
+    const globalThrottle = await checkGlobalHeroCodeThrottle(
+      env.DB,
+      ip,
+      globalFailLimit,
+      DEFAULT_GLOBAL_FAIL_WINDOW_SEC
+    );
+    if (!globalThrottle.allowed) {
+      return rateLimitExceededResponse(globalThrottle.retryAfterSeconds);
+    }
+
     const [ipRl, emailRl] = await Promise.all([
       checkRateLimit(env.DB, `claim-ip:${ip}`, claimLimit, DEFAULT_CLAIM_WINDOW_SEC),
       checkRateLimit(
@@ -245,11 +265,9 @@ export async function handleConsoleRequest(
     const row = await db.getSaveByRecoveryHash(hash);
 
     const recordGlobalFail = async (): Promise<Response | null> => {
-      const globalFailLimit =
-        Number.parseInt(env.PYRIA_RATE_LIMIT_GLOBAL_FAIL || '', 10) || DEFAULT_GLOBAL_FAIL_LIMIT;
-      const failRl = await checkRateLimit(
+      const failRl = await recordHeroCodeFailure(
         env.DB,
-        'hero-code-fail:global',
+        ip,
         globalFailLimit,
         DEFAULT_GLOBAL_FAIL_WINDOW_SEC
       );
