@@ -554,6 +554,38 @@
           }
         },
         {
+          "id": "trial-64-02-03b",
+          "trialType": "code",
+          "title": "Override Speed on a Subclass",
+          "storyPrompt": "One more method-override drill before `super().__init__()`! Subclass `Dragon` with `class SwiftDragon(Dragon):` overriding `speed(self)` to return `50`.",
+          "objective": "Define subclass `SwiftDragon(Dragon)` overriding `speed(self)` to return 50, then print `SwiftDragon().speed()`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Dragon:\n    def speed(self):\n        return 10\n\nclass SwiftDragon(Dragon):\n    def speed(self):\n        return ???\n\nprint(SwiftDragon().speed())\n",
+            "standard": "class Dragon:\n    def speed(self):\n        return 10\n\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Dragon:\n    def speed(self):\n        return 10\n\nclass SwiftDragon(Dragon):\n    def speed(self):\n        return 50\n\nprint(SwiftDragon().speed())\n",
+          "testCode": "assert issubclass(SwiftDragon, Dragon)\nassert SwiftDragon().speed() == 50\nassert OUTPUT.strip() == '50', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Put `(Dragon)` after `class SwiftDragon` and define `def speed(self): return 50`!'",
+            "tier2_pattern": "class SwiftDragon(Dragon):\n    def speed(self):\n        return 50\n\nprint(SwiftDragon().speed())",
+            "tier3_walkthrough": "Add:\nclass SwiftDragon(Dragon):\n    def speed(self):\n        return 50\n\nprint(SwiftDragon().speed())"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return",
+            "call:print"
+          ]
+        },
+        {
           "id": "trial-64-02-04",
           "trialType": "code",
           "title": "Use super().__init__()",
@@ -613,6 +645,38 @@
             ],
             "correctChoiceId": "d"
           }
+        },
+        {
+          "id": "trial-64-02-04b",
+          "trialType": "code",
+          "title": "Extend __init__ With super() (Practice)",
+          "storyPrompt": "One more `super().__init__()` drill! Subclass `Dragon` with `SeaDragon(Dragon)` that calls `super().__init__(name)` and also stores `self.depth = depth`.",
+          "objective": "Define `SeaDragon(Dragon)` calling `super().__init__(name)` and storing `self.depth = depth`, then print `SeaDragon('Mire', 30).depth`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SeaDragon(Dragon):\n    def __init__(self, name, depth):\n        super().__init__(???)\n        self.depth = depth\n\nprint(SeaDragon(\"Mire\", 30).depth)\n",
+            "standard": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SeaDragon(Dragon):\n    def __init__(self, name, depth):\n        super().__init__(name)\n        self.depth = depth\n\nprint(SeaDragon(\"Mire\", 30).depth)\n",
+          "testCode": "sd = SeaDragon('Mire', 30)\nassert issubclass(SeaDragon, Dragon) and sd.name == 'Mire' and sd.depth == 30\nassert OUTPUT.strip() == '30', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Call `super().__init__(name)` first, then set `self.depth = depth`!'",
+            "tier2_pattern": "class SeaDragon(Dragon):\n    def __init__(self, name, depth):\n        super().__init__(name)\n        self.depth = depth",
+            "tier3_walkthrough": "Add:\nclass SeaDragon(Dragon):\n    def __init__(self, name, depth):\n        super().__init__(name)\n        self.depth = depth\n\nprint(SeaDragon(\"Mire\", 30).depth)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "call:super",
+            "call:print"
+          ]
         },
         {
           "id": "trial-64-02-05",
@@ -936,6 +1000,35 @@
           }
         },
         {
+          "id": "trial-64-03-02b",
+          "trialType": "code",
+          "title": "Write a Simple assert Check",
+          "storyPrompt": "Practice writing an `assert` statement by itself before building `clamp()`! Assert that `3 * 4 == 12`, then print `\"OK\"`.",
+          "objective": "Write an `assert` checking that `3 * 4 == 12`, then print 'OK'.",
+          "concepts": [
+            "debugging"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "assert 3 * 4 == ???\nprint(\"OK\")\n",
+            "standard": "# Assert 3 * 4 == 12 and print \"OK\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "assert 3 * 4 == 12\nprint(\"OK\")\n",
+          "testCode": "assert OUTPUT.strip() == 'OK', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Write `assert 3 * 4 == 12` on line 1 and `print(\"OK\")` on line 2!'",
+            "tier2_pattern": "assert 3 * 4 == 12\nprint(\"OK\")",
+            "tier3_walkthrough": "Write:\nassert 3 * 4 == 12\nprint(\"OK\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "compare",
+            "call:print"
+          ]
+        },
+        {
           "id": "trial-64-03-03",
           "trialType": "code",
           "title": "Sort Dragons by Power",
@@ -1010,6 +1103,36 @@
             ],
             "correctChoiceId": "d"
           }
+        },
+        {
+          "id": "trial-64-03-03b",
+          "trialType": "code",
+          "title": "Sort Stars Ascending With lambda",
+          "storyPrompt": "One more `sorted(..., key=lambda ...)` drill! Sort `stars` from SMALLEST `z` to largest `z` (default ascending, no `reverse=True`) and print the first star's name.",
+          "objective": "Sort `stars` by `s['z']` ascending using `sorted(..., key=lambda ...)` into `near_first`, then print `near_first[0]['n']`.",
+          "concepts": [
+            "sorting_lambdas"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "stars = [{\"n\": \"Far\", \"z\": 9}, {\"n\": \"Near\", \"z\": 2}]\nnear_first = sorted(stars, key=lambda s: s[\"???\"])\nprint(near_first[0][\"n\"])\n",
+            "standard": "stars = [{\"n\": \"Far\", \"z\": 9}, {\"n\": \"Near\", \"z\": 2}]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "stars = [{\"n\": \"Far\", \"z\": 9}, {\"n\": \"Near\", \"z\": 2}]\nnear_first = sorted(stars, key=lambda s: s[\"z\"])\nprint(near_first[0][\"n\"])\n",
+          "testCode": "assert near_first[0]['n'] == 'Near'\nassert OUTPUT.strip() == 'Near', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at lambda: 'Use `key=lambda s: s[\"z\"]` inside `sorted(stars, ...)`!'",
+            "tier2_pattern": "near_first = sorted(stars, key=lambda s: s[\"z\"])\nprint(near_first[0][\"n\"])",
+            "tier3_walkthrough": "Add:\nnear_first = sorted(stars, key=lambda s: s[\"z\"])\nprint(near_first[0][\"n\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "lambda",
+            "call:sorted",
+            "call:print"
+          ]
         },
         {
           "id": "trial-64-03-04",

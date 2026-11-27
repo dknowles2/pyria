@@ -135,6 +135,36 @@
           ]
         },
         {
+          "id": "trial-01-03b",
+          "trialType": "code",
+          "title": "Send a Meadow Signal",
+          "storyPrompt": "Great job on your first `say()` spell! Repetition builds muscle memory — cast `say()` one more time with matching quotes and parentheses to send a signal across the grass: `Spark is near!`",
+          "objective": "Use say() to display the exact message: Spark is near!",
+          "concepts": [
+            "function_calls",
+            "print_output",
+            "strings"
+          ],
+          "shardReward": 25,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "say(\"???\")\n",
+            "standard": "# Type a say() spell below\n",
+            "challenge": ""
+          },
+          "referenceSolution": "say(\"Spark is near!\")\n",
+          "testCode": "assert OUTPUT.strip() == 'Spark is near!', f'Expected \"Spark is near!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Wrap Spark is near! inside quotes \"...\" and parentheses (...).'",
+            "tier2_pattern": "say(\"<your message>\")",
+            "tier3_walkthrough": "Write:\nsay(\"Spark is near!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:say"
+          ]
+        },
+        {
           "id": "trial-01-04",
           "trialType": "code",
           "title": "The Twin Echo Stones",
@@ -255,6 +285,67 @@
             ],
             "correctChoiceId": "b"
           }
+        },
+        {
+          "id": "trial-01-05b",
+          "trialType": "code",
+          "title": "Glue Words With a Space!",
+          "storyPrompt": "Remember: `+` glues two strings right next to each other with NO extra space! To keep two words separated, put a space inside one of the strings — like `\"Hello, \" + \"Spark!\"`.",
+          "objective": "Use say() with + to glue \"Hello, \" and \"Spark!\" so Python displays: Hello, Spark!",
+          "concepts": [
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 30,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "say(\"Hello, \" + \"???\")\n",
+            "standard": "# Glue \"Hello, \" and \"Spark!\" with + inside say()\n",
+            "challenge": ""
+          },
+          "referenceSolution": "say(\"Hello, \" + \"Spark!\")\n",
+          "testCode": "assert OUTPUT.strip() == 'Hello, Spark!', f'Expected \"Hello, Spark!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the space after the comma: 'Keep the space inside \"Hello, \" so the words do not squish together!'",
+            "tier2_pattern": "say(\"<first part>\" + \"<second part>\")",
+            "tier3_walkthrough": "Write:\nsay(\"Hello, \" + \"Spark!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "str_concat",
+            "call:say"
+          ]
+        },
+        {
+          "id": "trial-01-05c",
+          "trialType": "fix_bug",
+          "title": "The Squished Meadow Banner",
+          "storyPrompt": "Lord Null stole the space out of the festival banner, so it prints `PyriaRocks` instead of `Pyria Rocks`! Add a space inside one of the quoted strings so the two words separate cleanly.",
+          "objective": "Fix the glued strings so say() outputs: Pyria Rocks",
+          "concepts": [
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 30,
+          "unlockId": null,
+          "bugSummary": "The banner prints PyriaRocks with no space between the two words.",
+          "starterCode": {
+            "explorer": "# Add a space inside one of the strings!\nsay(\"Pyria\" + \"Rocks\")\n",
+            "standard": "say(\"Pyria\" + \"Rocks\")\n",
+            "challenge": "say(\"Pyria\" + \"Rocks\")\n"
+          },
+          "referenceSolution": "say(\"Pyria \" + \"Rocks\")\n",
+          "testCode": "assert OUTPUT.strip() == 'Pyria Rocks', f'Expected \"Pyria Rocks\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps between the quotes: 'Put a space right after Pyria (\"Pyria \") or right before Rocks (\" Rocks\")!'",
+            "tier2_pattern": "say(\"Pyria \" + \"Rocks\")",
+            "tier3_walkthrough": "Change the line to:\nsay(\"Pyria \" + \"Rocks\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "str_concat",
+            "call:say"
+          ]
         },
         {
           "id": "trial-01-06",
@@ -497,6 +588,162 @@
           ]
         },
         {
+          "id": "trial-02-02b",
+          "trialType": "code",
+          "title": "A String Inside a Variable Box!",
+          "storyPrompt": "Variables can hold **strings** (text in quotes) too! Watch the golden rule: put quotes around the TEXT (`\"Pip\"`), and NO quotes around the VARIABLE NAME (`hero`) when you pass it to `say(hero)`!",
+          "objective": "Create the variable `hero` storing the string 'Pip', then call say() with the variable `hero` (no quotes around `hero`).",
+          "concepts": [
+            "variables",
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "hero = \"???\"\nsay(hero)\n",
+            "standard": "# Store \"Pip\" in the variable hero, then call say(hero)\n",
+            "challenge": ""
+          },
+          "referenceSolution": "hero = \"Pip\"\nsay(hero)\n",
+          "testCode": "assert hero == 'Pip', f'Expected hero == \"Pip\", got {hero!r}'\nassert OUTPUT.strip() == 'Pip', f'Expected \"Pip\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the quotes: 'Put quotes around \"Pip\" on line 1, and NO quotes around hero inside say(hero) on line 2!'",
+            "tier2_pattern": "<variable> = \"<text>\"\nsay(<variable>)",
+            "tier3_walkthrough": "Write:\nhero = \"Pip\"\nsay(hero)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "hero": "Ada"
+              },
+              "expectOutput": "Ada",
+              "expectVars": {
+                "hero": "Ada"
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "String vs. Variable Name!",
+            "prompt": "Quotes around a word make it a **string** (literal text). NO quotes tells Python to open the **variable box** and read what's inside!",
+            "question": "If `hero = \"Pip\"`, what does `say(\"hero\")` output?",
+            "codeSnippet": "hero = \"Pip\"\nsay(\"hero\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Pip",
+                "explanation": "Careful! `say(hero)` (no quotes) opens the box and says `Pip`, but `say(\"hero\")` HAS quotes around `hero`!"
+              },
+              {
+                "id": "b",
+                "label": "hero",
+                "explanation": "Spot on! Because `\"hero\"` is inside quotes, Python treats it as a plain string and literally says `hero` — not `Pip`!"
+              },
+              {
+                "id": "c",
+                "label": "hero = Pip",
+                "explanation": "Line 1 quietly stores `\"Pip\"` in `hero`; line 2 only prints the quoted word `hero`!"
+              },
+              {
+                "id": "d",
+                "label": "Error",
+                "explanation": "It's valid Python — it just prints the literal word `hero` because of the quotes!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
+          "id": "trial-02-02c",
+          "trialType": "fix_bug",
+          "title": "The Quoted Dragon Name",
+          "storyPrompt": "Lord Null put quotes around a variable name again! Even though `pet` holds `\"Spark\"`, this spell says the word `pet` instead of `Spark`. Remove the quotes inside `say(...)` so Python opens the `pet` box!",
+          "objective": "Fix the spell so Python outputs the string stored in the variable `pet` ('Spark') instead of the word 'pet'.",
+          "concepts": [
+            "variables",
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "bugSummary": "The spell prints the word 'pet' instead of the dragon name stored inside `pet`.",
+          "starterCode": {
+            "explorer": "# Remove the quotes around pet on line 2!\npet = \"Spark\"\nsay(\"pet\")\n",
+            "standard": "pet = \"Spark\"\nsay(\"pet\")\n",
+            "challenge": "pet = \"Spark\"\nsay(\"pet\")\n"
+          },
+          "referenceSolution": "pet = \"Spark\"\nsay(pet)\n",
+          "testCode": "assert pet == 'Spark', f'Expected pet == \"Spark\", got {pet!r}'\nassert OUTPUT.strip() == 'Spark', f'Expected \"Spark\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps line 2: 'Quotes around \"pet\" make it a string! Remove the quotes so Python opens the `pet` variable box.'",
+            "tier2_pattern": "say(<variable_name>)",
+            "tier3_walkthrough": "Change line 2 to:\nsay(pet)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pet": "Pebble"
+              },
+              "expectOutput": "Pebble",
+              "expectVars": {
+                "pet": "Pebble"
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-02-02d",
+          "trialType": "code",
+          "title": "Label + Variable Side by Side!",
+          "storyPrompt": "Now feel the difference side by side! Use **quotes** when you want Python to say an exact label (`say(\"Dragon:\")`), and **NO quotes** when you want Python to open a variable box (`say(dragon)`).",
+          "objective": "On line 1, call say() with the string 'Dragon:' (with quotes). On line 2, call say() with the variable `dragon` (no quotes).",
+          "concepts": [
+            "variables",
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "dragon = \"Pebble\"\nsay(\"Dragon:\")\nsay(???)\n",
+            "standard": "dragon = \"Pebble\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "dragon = \"Pebble\"\nsay(\"Dragon:\")\nsay(dragon)\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['Dragon:', 'Pebble'], f'Expected [\"Dragon:\", \"Pebble\"], got {lines!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'First `say(\"Dragon:\")` WITH quotes, then `say(dragon)` with NO quotes!'",
+            "tier2_pattern": "say(\"Dragon:\")\nsay(dragon)",
+            "tier3_walkthrough": "Add:\nsay(\"Dragon:\")\nsay(dragon)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "dragon": "Spark"
+              },
+              "expectOutput": "Dragon:\nSpark",
+              "expectVars": {
+                "dragon": "Spark"
+              }
+            }
+          ]
+        },
+        {
           "id": "trial-02-03",
           "trialType": "code",
           "title": "Your First Variable Box",
@@ -570,76 +817,218 @@
           }
         },
         {
-          "id": "trial-02-04",
+          "id": "trial-02-03b",
           "trialType": "code",
-          "title": "Two Boxes Together (+ str())",
-          "storyPrompt": "You can add two integer (whole number) boxes together and store the answer in a THIRD box! And here is a key Python trick: you can't glue a text **string** (`str`) and an **integer** (`int`) directly with `+` — wrap the number in `str(...)` (`str` is short for string!) to turn it into text first, like `\"Gems: \" + str(total_gems)`!",
-          "objective": "Add left_gems (8) and right_gems (5) into total_gems, then use say() with str() to output: Gems: 13",
+          "title": "Add Two Variable Boxes",
+          "storyPrompt": "Before we glue numbers onto text, let's practice pure math with variables! Add `left_gems` (8) and `right_gems` (5) together, store the sum in the variable `total_gems`, and call `say(total_gems)`!",
+          "objective": "Add `left_gems` and `right_gems` and store the sum in the variable `total_gems`, then call say() with `total_gems`.",
           "concepts": [
             "variables",
             "basic_math",
-            "strings",
             "print_output"
           ],
-          "shardReward": 40,
+          "shardReward": 35,
           "unlockId": null,
           "starterCode": {
-            "explorer": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(???))\n",
+            "explorer": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + ???\nsay(total_gems)\n",
             "standard": "left_gems = 8\nright_gems = 5\n",
             "challenge": ""
           },
-          "referenceSolution": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(total_gems))\n",
-          "testCode": "assert left_gems == 8 and right_gems == 5, f\"Expected left_gems == 8 and right_gems == 5, got {left_gems!r}, {right_gems!r}\"\nassert total_gems == 13, f\"Expected total_gems == 13, got {total_gems!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call say(...).\"\nif _norm(_got) != _norm('Gems: 13'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Gems: 13')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Gems: 13', got {_got!r} (check your spelling!)\"\n",
+          "referenceSolution": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(total_gems)\n",
+          "testCode": "assert total_gems == 13, f'Expected 13, got {total_gems!r}'\nassert OUTPUT.strip() == '13', f'Expected \"13\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip holds up two boxes: 'Add left_gems + right_gems, then wrap total_gems in str(...) before gluing with +!'",
-            "tier2_pattern": "total_gems = <box1> + <box2>\nsay(\"Gems: \" + str(<total>))",
-            "tier3_walkthrough": "Complete with:\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(total_gems))"
+            "tier1_nudge": "Pip holds up both boxes: 'Use + with the two variable names (no quotes!) and store the result in total_gems.'",
+            "tier2_pattern": "total_gems = <var1> + <var2>\nsay(total_gems)",
+            "tier3_walkthrough": "Add:\ntotal_gems = left_gems + right_gems\nsay(total_gems)"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
             "assign",
             "math_op",
-            "str_call",
-            "str_concat",
             "call:say"
           ],
           "variants": [
             {
               "overrides": {
                 "left_gems": 10,
-                "right_gems": 7
+                "right_gems": 4
               },
+              "expectOutput": "14",
               "expectVars": {
-                "total_gems": 17
-              },
-              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('Gems: 17')\n"
+                "total_gems": 14
+              }
             }
           ],
           "introChoice": {
-            "title": "Adding Integers & Converting with str()",
-            "prompt": "You can add two integer (whole number) variables with `+` (`total = a + b`), AND if you want to glue an integer onto a text string, wrap the integer in `str(...)` first — like `\"Gems: \" + str(total)`!",
-            "question": "What does `say(\"Gems: \" + str(4 + 3))` display?",
-            "codeSnippet": "a = 4\nb = 3\ntotal = a + b\nsay(\"Gems: \" + str(total))",
+            "title": "Adding Two Integer Variables",
+            "prompt": "When two variables hold **integers** (whole numbers), `+` adds their numbers mathematically — no quotes needed!",
+            "question": "What does `say(total)` display below?",
+            "codeSnippet": "a = 4\nb = 3\ntotal = a + b\nsay(total)",
             "choices": [
               {
                 "id": "a",
-                "label": "TypeError — can't glue string and number",
-                "explanation": "Without `str()` it would raise a TypeError — wrapping `total` in `str(total)` makes it work cleanly!"
+                "label": "43",
+                "explanation": "Since `4` and `3` have no quotes, they are integers — `+` adds them (`4 + 3 = 7`) instead of gluing text!"
               },
               {
                 "id": "b",
-                "label": "Gems: 43",
-                "explanation": "Because `a` and `b` are numbers, `a + b` adds them mathematically to `7` before `str()` converts it!"
+                "label": "a + b",
+                "explanation": "Without quotes, Python opens the boxes `a` and `b` and adds the numbers inside!"
               },
               {
                 "id": "c",
-                "label": "Gems: total",
-                "explanation": "`str(total)` converts the VALUE inside `total` (`7`) to text, not the word `\"total\"`!"
+                "label": "7",
+                "explanation": "Nailed it! Python reads `4` from `a` and `3` from `b`, adds them to get `7`, stores `7` in `total`, and displays `7`!"
               },
               {
                 "id": "d",
-                "label": "Gems: 7",
-                "explanation": "Spot on! `a + b` is `7`, `str(7)` turns it into text `\"7\"`, and `+` glues it onto `\"Gems: \"`!"
+                "label": "total",
+                "explanation": "There are no quotes around `total`, so Python prints the number inside `total` (`7`)!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-02-04",
+          "trialType": "code",
+          "title": "Glue Two String Variables!",
+          "storyPrompt": "Just like adding two integer boxes, you can glue two **string** variable boxes together with `+` and store the combined text in a new variable! Remember: NO quotes around variable names!",
+          "objective": "Glue `part_a` and `part_b` together with + into the variable `place`, then call say() with `place`.",
+          "concepts": [
+            "variables",
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "part_a = \"Mossy \"\npart_b = \"Ruins\"\nplace = part_a + ???\nsay(place)\n",
+            "standard": "part_a = \"Mossy \"\npart_b = \"Ruins\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "part_a = \"Mossy \"\npart_b = \"Ruins\"\nplace = part_a + part_b\nsay(place)\n",
+          "testCode": "assert place == 'Mossy Ruins', f'Expected \"Mossy Ruins\", got {place!r}'\nassert OUTPUT.strip() == 'Mossy Ruins', f'Expected \"Mossy Ruins\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip holds up both boxes: 'Write `place = part_a + part_b` (no quotes around the variable names!), then `say(place)`!'",
+            "tier2_pattern": "place = <var1> + <var2>\nsay(place)",
+            "tier3_walkthrough": "Add:\nplace = part_a + part_b\nsay(place)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "str_concat",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "part_a": "Stone ",
+                "part_b": "Gate"
+              },
+              "expectOutput": "Stone Gate",
+              "expectVars": {
+                "place": "Stone Gate"
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Gluing Two String Variables With +",
+            "prompt": "When two variables hold **strings**, `+` glues their text together — and remember, NEVER put quotes around variable names when using them!",
+            "question": "What does `say(greeting)` display below?",
+            "codeSnippet": "a = \"Hi, \"\nb = \"Pip!\"\ngreeting = a + b\nsay(greeting)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "a + b",
+                "explanation": "Without quotes, Python opens `a` and `b` and glues their strings together!"
+              },
+              {
+                "id": "b",
+                "label": "Hi, Pip!",
+                "explanation": "Spot on! Python opens `a` (`\"Hi, \"`) and `b` (`\"Pip!\"`), glues them into `\"Hi, Pip!\"`, and displays `Hi, Pip!`!"
+              },
+              {
+                "id": "c",
+                "label": "greeting",
+                "explanation": "There are no quotes around `greeting`, so `say(greeting)` opens the box and says `Hi, Pip!`!"
+              },
+              {
+                "id": "d",
+                "label": "Hi,Pip!",
+                "explanation": "Notice `\"Hi, \"` already has a space at the end, so it glues cleanly into `Hi, Pip!`!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
+          "id": "trial-02-04b",
+          "trialType": "code",
+          "title": "Level Up a Variable Box",
+          "storyPrompt": "You can UPDATE what's inside a variable box using its own old value! In `power = power + 5`, Python looks up the old `power` on the right (`10`), adds `5`, and saves `15` right back into `power`.",
+          "objective": "Update the variable `power` by adding 5 to its current value, then call say() with `power`.",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "power = 10\npower = power + ???\nsay(power)\n",
+            "standard": "power = 10\n",
+            "challenge": ""
+          },
+          "referenceSolution": "power = 10\npower = power + 5\nsay(power)\n",
+          "testCode": "assert power == 15, f'Expected 15, got {power!r}'\nassert OUTPUT.strip() == '15', f'Expected \"15\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Write `power = power + 5` on line 2, then `say(power)` on line 3!'",
+            "tier2_pattern": "<var> = <var> + <amount>\nsay(<var>)",
+            "tier3_walkthrough": "Add:\npower = power + 5\nsay(power)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "power": 20
+              },
+              "expectOutput": "25",
+              "expectVars": {
+                "power": 25
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Updating a Variable With Its Own Value",
+            "prompt": "In `score = score + 5`, Python evaluates the RIGHT side first (`10 + 5 = 15`) and then stores `15` back into `score`!",
+            "question": "What does `say(score)` output?",
+            "codeSnippet": "score = 10\nscore = score + 5\nsay(score)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "10",
+                "explanation": "Line 2 updates `score` by adding `5`, replacing the old `10` with `15`!"
+              },
+              {
+                "id": "b",
+                "label": "5",
+                "explanation": "Line 2 adds `5` to the old value (`10 + 5`), rather than overwriting `score` with `5`!"
+              },
+              {
+                "id": "c",
+                "label": "Error",
+                "explanation": "`score = score + 5` is completely valid Python and super common for counters!"
+              },
+              {
+                "id": "d",
+                "label": "15",
+                "explanation": "Boom! Right side computes `10 + 5 = 15`, and `score` is updated to `15`!"
               }
             ],
             "correctChoiceId": "d"
@@ -648,84 +1037,52 @@
         {
           "id": "trial-02-05",
           "trialType": "code",
-          "title": "Changing What's Inside a Box (+ int())",
-          "storyPrompt": "Here is a variable superpower: you can UPDATE what's inside a box! Sometimes a number arrives as text in quotes (like `\"5\"`). Remember that `int` is short for **integer** (a whole number with no decimal point) — use `int(...)` to turn text like `\"5\"` into the whole number `5` so you can add it to `power`!",
-          "objective": "Convert boost_text into a whole number (integer) with int(), add it to power (storing the result back in power), and display the updated power.",
+          "title": "Update a Box by Subtracting (-)",
+          "storyPrompt": "You can also LOWER a number inside a variable box using `-`! Start with `gems = 12`, subtract `4` (`gems = gems - 4`), and display the updated `gems` with `say(gems)`.",
+          "objective": "Update the variable `gems` by subtracting 4 from its current value, then call say() with `gems`.",
           "concepts": [
             "variables",
             "basic_math",
-            "strings",
             "print_output"
           ],
           "shardReward": 45,
           "unlockId": null,
           "starterCode": {
-            "explorer": "power = 10\nboost_text = \"5\"\npower = power + int(???)\nsay(power)\n",
-            "standard": "power = 10\nboost_text = \"5\"\n",
+            "explorer": "gems = 12\ngems = gems - ???\nsay(gems)\n",
+            "standard": "gems = 12\n",
             "challenge": ""
           },
-          "referenceSolution": "power = 10\nboost_text = \"5\"\npower = power + int(boost_text)\nsay(power)\n",
-          "testCode": "assert power == 15, f'Expected 15, got {power!r}'\nassert OUTPUT.strip() == '15', f'Expected 15, got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "gems = 12\ngems = gems - 4\nsay(gems)\n",
+          "testCode": "assert gems == 8, f'Expected 8, got {gems!r}'\nassert OUTPUT.strip() == '8', f'Expected \"8\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip grins: 'int(boost_text) turns \"5\" into the number 5 so you can add it to power!'",
-            "tier2_pattern": "<var> = <var> + int(<text_var>)\nsay(<var>)",
-            "tier3_walkthrough": "Write:\npower = power + int(boost_text)\nsay(power)"
+            "tier1_nudge": "Pip points at `-`: 'Write `gems = gems - 4` on line 2, then `say(gems)` on line 3!'",
+            "tier2_pattern": "<var> = <var> - <amount>\nsay(<var>)",
+            "tier3_walkthrough": "Add:\ngems = gems - 4\nsay(gems)"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
             "assign",
             "math_op",
-            "int_call",
             "call:say"
           ],
           "variants": [
             {
               "overrides": {
-                "power": 20,
-                "boost_text": "7"
+                "gems": 20
               },
-              "expectOutput": "27",
+              "expectOutput": "16",
               "expectVars": {
-                "power": 27
+                "gems": 16
               }
             }
-          ],
-          "introChoice": {
-            "title": "Turning Text into an Integer with int()",
-            "prompt": "`int` is short for **integer** — a whole number with no decimal point (like `5` or `10`). Text in quotes like `\"5\"` is a string, not an integer! Wrapping it in `int(\"5\")` converts the text `\"5\"` into the integer `5` so you can do math with it: `power = power + int(boost_text)`.",
-            "question": "What does `say(power)` display below?",
-            "codeSnippet": "power = 10\nboost_text = \"5\"\npower = power + int(boost_text)\nsay(power)",
-            "choices": [
-              {
-                "id": "a",
-                "label": "15",
-                "explanation": "Boom! `int(\"5\")` turns `\"5\"` into the number `5`, and `10 + 5` updates `power` to `15`!"
-              },
-              {
-                "id": "b",
-                "label": "105",
-                "explanation": "Because `int(boost_text)` converts `\"5\"` into a real number, Python ADDS `10 + 5` (= `15`) instead of gluing text!"
-              },
-              {
-                "id": "c",
-                "label": "10",
-                "explanation": "Line 3 saves the new total (`15`) right back into `power`!"
-              },
-              {
-                "id": "d",
-                "label": "TypeError",
-                "explanation": "`int(\"5\")` safely turns the digit string into an integer, so adding it to `10` works with no error!"
-              }
-            ],
-            "correctChoiceId": "a"
-          }
+          ]
         },
         {
           "id": "trial-02-06",
           "trialType": "code",
           "title": "Unlock Pebble's Sanctum (Variables Capstone)",
-          "storyPrompt": "You made it to Pebble's Logic Vault! Combine everything from Mossy Ruins: store Pebble's name, add the two stone keys together, shout the guardian's name, and announce the vault code!",
-          "objective": "Store 'Pebble' in guardian, 12 in key_a, and 8 in key_b. Add the two keys into vault_code. On line 1, shout the guardian's name so it appears in ALL CAPS. On line 2, say 'Code: ' glued to the vault code.",
+          "storyPrompt": "You made it to Pebble's Logic Vault! Combine everything from Mossy Ruins: store Pebble's name in a string variable, add the two stone keys into `vault_code`, then call `shout(guardian)` on line 1 and `say(vault_code)` on line 2!",
+          "objective": "Store 'Pebble' in the variable `guardian`, 12 in `key_a`, and 8 in `key_b`. Add `key_a` and `key_b` into the variable `vault_code`. On line 1, call shout() with `guardian`. On line 2, call say() with `vault_code`.",
           "concepts": [
             "variables",
             "strings",
@@ -735,37 +1092,35 @@
           "shardReward": 55,
           "unlockId": null,
           "starterCode": {
-            "explorer": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = \nshout(guardian)\nsay(\"Code: \" + str(vault_code))\n",
+            "explorer": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = \nshout(guardian)\nsay(vault_code)\n",
             "standard": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\n",
             "challenge": ""
           },
-          "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nshout(guardian)\nsay(\"Code: \" + str(vault_code))\n",
-          "testCode": "assert isinstance(guardian, str) and guardian.strip().upper() == 'PEBBLE', f\"Expected guardian to be 'Pebble', got {guardian!r}\"\nassert vault_code == 20, f\"Expected vault_code == 20, got {vault_code!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call shout/say(...).\"\nassert len(_lines) == 2, f\"Expected 2 lines of output, got {len(_lines)}: {_lines!r}\"\nif _norm(_lines[0]) != _norm('PEBBLE'):\n    if \"\".join(_norm(_lines[0])) == \"\".join(_norm('PEBBLE')):\n        assert False, f'Almost on line 1! Some words got squished together (got {_lines[0]!r}). Check the spaces between words!'\n    assert False, f\"Line 1: expected 'PEBBLE', got {_lines[0]!r}\"\nif _norm(_lines[1]) != _norm('Code: 20'):\n    if \"\".join(_norm(_lines[1])) == \"\".join(_norm('Code: 20')):\n        assert False, f'Almost on line 2! Some words got squished together (got {_lines[1]!r}). Check the spaces between words!'\n    assert False, f\"Line 2: expected 'Code: 20', got {_lines[1]!r}\"\n",
+          "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nshout(guardian)\nsay(vault_code)\n",
+          "testCode": "assert guardian == \"Pebble\"\nassert vault_code == 20, f'Expected 20, got {vault_code!r}'\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"PEBBLE\", \"20\"], f'Expected [\"PEBBLE\", \"20\"], got {lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Add key_a + key_b into vault_code, shout(guardian), and use str(vault_code) when gluing to \"Code: \"!'",
-            "tier2_pattern": "vault_code = <key1> + <key2>\nshout(<guardian>)\nsay(\"Code: \" + str(<code_var>))",
-            "tier3_walkthrough": "Complete with:\nvault_code = key_a + key_b\nshout(guardian)\nsay(\"Code: \" + str(vault_code))"
+            "tier1_nudge": "Pip cheers: 'Add `key_a + key_b` into `vault_code`, then `shout(guardian)` and `say(vault_code)` (no quotes around variable names!)!'",
+            "tier2_pattern": "vault_code = <key1> + <key2>\nshout(<guardian>)\nsay(<code_var>)",
+            "tier3_walkthrough": "Complete with:\nvault_code = key_a + key_b\nshout(guardian)\nsay(vault_code)"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
             "assign",
             "math_op",
-            "str_call",
-            "str_concat",
             "call:shout",
             "call:say"
           ],
           "variants": [
             {
               "overrides": {
-                "guardian": "Spark",
-                "key_a": 10,
-                "key_b": 4
+                "guardian": "Pebble",
+                "key_a": 15,
+                "key_b": 10
               },
+              "expectOutput": "PEBBLE\n25",
               "expectVars": {
-                "vault_code": 14
-              },
-              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_vlines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert len(_vlines) == 2\nassert _norm(_vlines[0]) == _norm('SPARK')\nassert _norm(_vlines[1]) == _norm('Code: 14')\n"
+                "vault_code": 25
+              }
             }
           ]
         },
@@ -1049,6 +1404,123 @@
           ]
         },
         {
+          "id": "trial-03-03b",
+          "trialType": "code",
+          "title": "Flip a Boolean Switch (True / False)",
+          "storyPrompt": "Let's practice **Booleans** (`True` / `False`) AND 4-space indentation! Remember: a **Boolean** (`bool`) is a yes/no switch — always capitalized (`True` or `False`) with NO quotes. Inside the `if heat > 50:` block, indent 4 spaces to update the variable `shield_up` to `True` and shout `\"Shield ready!\"`.",
+          "objective": "Inside the existing if-statement, indent 4 spaces to update the variable `shield_up` to True and shout 'Shield ready!'.",
+          "concepts": [
+            "booleans",
+            "variables",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "heat = 80\nshield_up = False\nif heat > 50:\n    shield_up = ???\n    shout(\"Shield ready!\")\n",
+            "standard": "heat = 80\nshield_up = False\nif heat > 50:\n",
+            "challenge": ""
+          },
+          "referenceSolution": "heat = 80\nshield_up = False\nif heat > 50:\n    shield_up = True\n    shout(\"Shield ready!\")\n",
+          "testCode": "assert shield_up is True, f'Expected shield_up is True (no quotes!), got {shield_up!r}'\nassert OUTPUT.strip() == 'SHIELD READY!', f'Expected \"SHIELD READY!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the capital T: 'Boolean `True` has a capital T and NO quotes — and indent both lines 4 spaces under `if heat > 50:`!'",
+            "tier2_pattern": "if heat > 50:\n    shield_up = True\n    shout(\"<message>\")",
+            "tier3_walkthrough": "Add these two indented lines (4 spaces each):\n    shield_up = True\n    shout(\"Shield ready!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "bool",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "heat": 20
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "shield_up": false
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "What Is a Boolean (True / False)?",
+            "prompt": "In Python, a **Boolean** (`bool` for short) is a yes/no switch. There are ONLY two Boolean values: `True` and `False` — always capitalized, with NO quotes!",
+            "question": "Which line correctly stores a Boolean `True` in the variable `shield_up`?",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Option A",
+                "code": "shield_up = True",
+                "explanation": "Spot on! `True` has a capital `T` and NO quotes — a true Python Boolean!"
+              },
+              {
+                "id": "b",
+                "label": "Option B",
+                "code": "shield_up = \"True\"",
+                "explanation": "Watch out! Putting quotes around `\"True\"` turns it into a text string instead of a Boolean!"
+              },
+              {
+                "id": "c",
+                "label": "Option C",
+                "code": "shield_up = true",
+                "explanation": "Almost! Python is case-sensitive — Booleans MUST start with a capital letter (`True` or `False`)."
+              },
+              {
+                "id": "d",
+                "label": "Option D",
+                "code": "shield_up = \"yes\"",
+                "explanation": "`\"yes\"` is a string — Python Booleans are strictly `True` or `False`!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
+        },
+        {
+          "id": "trial-03-03c",
+          "trialType": "code",
+          "title": "Your First if Statement (>)",
+          "storyPrompt": "Now write your very first 2-line `if` statement from scratch! Remember the two golden rules: (1) end the `if` line with a colon `:`, and (2) indent the line inside by **4 spaces** (tap **⇥ Indent**).",
+          "objective": "If `lava` is greater than 50, shout 'Too hot!'.",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "lava = 90\nif lava > ???:\n    shout(\"Too hot!\")\n",
+            "standard": "lava = 90\n",
+            "challenge": ""
+          },
+          "referenceSolution": "lava = 90\nif lava > 50:\n    shout(\"Too hot!\")\n",
+          "testCode": "assert OUTPUT.strip() == 'TOO HOT!', f'Expected \"TOO HOT!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Write `if lava > 50:` on line 2, then press Enter and indent 4 spaces for `shout(\"Too hot!\")`!'",
+            "tier2_pattern": "if <var> > <number>:\n    shout(\"<message>\")",
+            "tier3_walkthrough": "Add:\nif lava > 50:\n    shout(\"Too hot!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "lava": 20
+              },
+              "expectOutput": ""
+            }
+          ]
+        },
+        {
           "id": "trial-03-04",
           "trialType": "fix_bug",
           "title": "The Faulty Password Gate",
@@ -1123,6 +1595,48 @@
             ],
             "correctChoiceId": "d"
           }
+        },
+        {
+          "id": "trial-03-04b",
+          "trialType": "code",
+          "title": "Write an Equality Check (==)",
+          "storyPrompt": "Now practice writing a 2-line `if` statement using `==` (equals) with a string! Don't forget: double `==`, colon `:` at the end, and 4 spaces of indentation on the next line.",
+          "objective": "If `code_word` equals 'SPARK', shout 'Access granted!'.",
+          "concepts": [
+            "variables",
+            "strings",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "code_word = \"SPARK\"\nif code_word == \"???\":\n    shout(\"Access granted!\")\n",
+            "standard": "code_word = \"SPARK\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "code_word = \"SPARK\"\nif code_word == \"SPARK\":\n    shout(\"Access granted!\")\n",
+          "testCode": "assert OUTPUT.strip() == 'ACCESS GRANTED!', f'Expected \"ACCESS GRANTED!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip reminds you: 'Use double `==` to compare, end with `:`, and indent `shout(...)` by 4 spaces!'",
+            "tier2_pattern": "if <var> == \"<word>\":\n    shout(\"<message>\")",
+            "tier3_walkthrough": "Add:\nif code_word == \"SPARK\":\n    shout(\"Access granted!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "code_word": "WRONG"
+              },
+              "expectOutput": ""
+            }
+          ]
         },
         {
           "id": "trial-03-05",
@@ -1418,6 +1932,75 @@
           "difficultyOverride": null
         },
         {
+          "id": "trial-04-01b",
+          "trialType": "code",
+          "title": "Meet <= (At Most) & >= (At Least)",
+          "storyPrompt": "In Frostbite Hollow, we also upgrade from `say()` to real Python `print()`, and add two handy comparisons: `<=` (**less than or equal to / at most**) and `>=` (**greater than or equal to / at least**). Practice a quick 2-line `if` check with `<=`!",
+          "objective": "If `temp` is at most 0 (less than or equal to 0), print 'FROZEN'.",
+          "concepts": [
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "temp = 0\nif temp <= ???:\n    print(\"FROZEN\")\n",
+            "standard": "temp = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "temp = 0\nif temp <= 0:\n    print(\"FROZEN\")\n",
+          "testCode": "assert OUTPUT.strip() == 'FROZEN', f'Expected \"FROZEN\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip shivers: 'Use `<=` (less than or equal to) so `0 <= 0` is True, end with `:`, and indent `print(\"FROZEN\")` 4 spaces!'",
+            "tier2_pattern": "if temp <= 0:\n    print(\"<word>\")",
+            "tier3_walkthrough": "Add:\nif temp <= 0:\n    print(\"FROZEN\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "temp": 10
+              },
+              "expectOutput": ""
+            }
+          ],
+          "introChoice": {
+            "title": "Understanding <= and >=",
+            "prompt": "`<` means strictly less than (`0 < 0` is `False`), while `<=` means **less than OR equal to** (`0 <= 0` is `True`). Same for `>=`: **greater than OR equal to** (`20 >= 20` is `True`)!",
+            "question": "If `temp = 0`, which check is `True`?",
+            "codeSnippet": "temp = 0",
+            "choices": [
+              {
+                "id": "a",
+                "label": "temp < 0",
+                "explanation": "Is `0` strictly less than `0`? No, they are equal, so `0 < 0` is `False`!"
+              },
+              {
+                "id": "b",
+                "label": "temp <= 0",
+                "explanation": "Spot on! `<=` means 'less than OR equal to', and since `0` equals `0`, `temp <= 0` is `True`!"
+              },
+              {
+                "id": "c",
+                "label": "temp > 0",
+                "explanation": "`0` is not greater than `0`, so `temp > 0` is `False`!"
+              },
+              {
+                "id": "d",
+                "label": "temp >= 10",
+                "explanation": "`0` is neither greater than nor equal to `10`, so that's `False`!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
           "id": "trial-04-02",
           "trialType": "fix_bug",
           "title": "The Frozen Temperature Gate",
@@ -1463,6 +2046,60 @@
                 "temp": 20
               },
               "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('melted')\nassert isinstance(ice_state, str) and ice_state.strip().upper() == 'MELTED'\n"
+            }
+          ]
+        },
+        {
+          "id": "trial-04-02b",
+          "trialType": "fix_bug",
+          "title": "The Un-Indented Snowdrift",
+          "storyPrompt": "Another indentation trap! Every line inside an `if`, `elif`, or `else` block MUST be indented 4 spaces. Spot the un-indented line under `elif` and indent it!",
+          "objective": "Fix the indentation under the elif branch so the variable `ice_state` becomes 'slush' and Python prints slush.",
+          "concepts": [
+            "conditionals_elif_else",
+            "comparisons",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "bugSummary": "Python throws an indentation error under the elif line.",
+          "starterCode": {
+            "explorer": "# Indent the line under elif by 4 spaces!\ntemp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\nice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+            "standard": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\nice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+            "challenge": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\nice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n"
+          },
+          "referenceSolution": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+          "testCode": "assert ice_state == 'slush', f'Expected \"slush\", got {ice_state!r}'\nassert OUTPUT.strip() == 'slush', f'Expected \"slush\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at `ice_state = \"slush\"`: 'Give it 4 spaces (or tap ⇥ Indent) so it sits INSIDE the `elif` block!'",
+            "tier2_pattern": "elif temp <= 10:\n    ice_state = \"slush\"",
+            "tier3_walkthrough": "Add 4 spaces before `ice_state = \"slush\"`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "elif",
+            "else",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "temp": -4
+              },
+              "expectOutput": "frozen",
+              "expectVars": {
+                "ice_state": "frozen"
+              }
+            },
+            {
+              "overrides": {
+                "temp": 20
+              },
+              "expectOutput": "melted",
+              "expectVars": {
+                "ice_state": "melted"
+              }
             }
           ]
         },
@@ -1648,6 +2285,67 @@
           ]
         },
         {
+          "id": "trial-04-05b",
+          "trialType": "code",
+          "title": "Count the Frost Crystals (*)",
+          "storyPrompt": "Before facing Glacier's vault, let's practice **multiplication** in Python! Python uses the star symbol `*` to multiply numbers (like `4 * 5` for 4 clusters of 5 crystals).",
+          "objective": "Create the variable `crystals` storing 4 * 5, then print `crystals`.",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "crystals = 4 * ???\nprint(crystals)\n",
+            "standard": "# Multiply 4 by 5, store it in crystals, and print crystals\n",
+            "challenge": ""
+          },
+          "referenceSolution": "crystals = 4 * 5\nprint(crystals)\n",
+          "testCode": "assert crystals == 20, f'Expected 20, got {crystals!r}'\nassert OUTPUT.strip() == '20', f'Expected \"20\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip holds up a star `*`: 'In Python, write `4 * 5` (using `*`, not `x`)!'",
+            "tier2_pattern": "crystals = <a_num> * <b_num>\nprint(crystals)",
+            "tier3_walkthrough": "Write:\ncrystals = 4 * 5\nprint(crystals)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:print"
+          ],
+          "introChoice": {
+            "title": "Multiplying Numbers With *",
+            "prompt": "In Python, the star symbol `*` multiplies two numbers (since `x` is just a letter!). For example, `3 * 4` equals `12`.",
+            "question": "What does `print(4 * 5)` display?",
+            "codeSnippet": "crystals = 4 * 5\nprint(crystals)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "9",
+                "explanation": "`4 + 5` is `9`, whereas `*` multiplies `4` times `5`!"
+              },
+              {
+                "id": "b",
+                "label": "4 * 5",
+                "explanation": "Without quotes, Python calculates `4 * 5` and prints the result (`20`)!"
+              },
+              {
+                "id": "c",
+                "label": "20",
+                "explanation": "Boom! `4 * 5` multiplies 4 times 5 to get `20`!"
+              },
+              {
+                "id": "d",
+                "label": "45",
+                "explanation": "`4` and `5` are integers, so `*` multiplies them (`20`)!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
           "id": "trial-04-06",
           "trialType": "code",
           "title": "Free Glacier (Multi-Branch Capstone)",
@@ -1703,39 +2401,7 @@
                 "vault_open": false
               }
             }
-          ],
-          "introChoice": {
-            "title": "Multiplying (*) & Booleans (True/False)",
-            "prompt": "In Python, `*` multiplies numbers (`4 * 5` is `20`), and `True` / `False` (capital first letter, NO quotes!) are special Boolean yes/no values.",
-            "question": "Which line correctly stores a Boolean `True`?",
-            "choices": [
-              {
-                "id": "a",
-                "label": "Option A",
-                "code": "vault_open == True",
-                "explanation": "Careful! `==` compares values — use single `=` to store `True` in `vault_open`!"
-              },
-              {
-                "id": "b",
-                "label": "Option B",
-                "code": "vault_open = true",
-                "explanation": "Almost! Python is case-sensitive — Booleans MUST start with a capital letter: `True` or `False`."
-              },
-              {
-                "id": "c",
-                "label": "Option C",
-                "code": "vault_open = \"True\"",
-                "explanation": "Watch out! Putting quotes around `\"True\"` turns it into a text string instead of a Boolean!"
-              },
-              {
-                "id": "d",
-                "label": "Option D",
-                "code": "vault_open = True",
-                "explanation": "Spot on! Booleans are capitalized (`True` or `False`) with NO quotes around them!"
-              }
-            ],
-            "correctChoiceId": "d"
-          }
+          ]
         },
         {
           "id": "trial-04-bonus",
@@ -1980,6 +2646,77 @@
           }
         },
         {
+          "id": "trial-05-02b",
+          "trialType": "code",
+          "title": "Shout It With .upper()",
+          "storyPrompt": "Just as `.lower()` turns text into lowercase, `.upper()` turns every letter into ALL CAPS! Practice `.upper()` by itself before combining it with `and`.",
+          "objective": "Create the variable `key` with the uppercase version of `raw_key` using .upper(), then print `key`.",
+          "concepts": [
+            "string_methods",
+            "variables",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw_key = \"gold\"\nkey = raw_key.???()\nprint(key)\n",
+            "standard": "raw_key = \"gold\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "raw_key = \"gold\"\nkey = raw_key.upper()\nprint(key)\n",
+          "testCode": "assert key == 'GOLD', f'Expected \"GOLD\", got {key!r}'\nassert OUTPUT.strip() == 'GOLD', f'Expected \"GOLD\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Call `raw_key.upper()` (with parentheses!) and store it in `key`.'",
+            "tier2_pattern": "key = raw_key.upper()\nprint(key)",
+            "tier3_walkthrough": "Add:\nkey = raw_key.upper()\nprint(key)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw_key": "moss"
+              },
+              "expectOutput": "MOSS",
+              "expectVars": {
+                "key": "MOSS"
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Turning Text to ALL CAPS With .upper()",
+            "prompt": "Calling `.upper()` on a string returns a new string with every letter capitalized — don't forget the parentheses `()`!",
+            "question": "What does `\"echo\".upper()` return?",
+            "codeSnippet": "word = \"echo\".upper()\nprint(word)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Echo",
+                "explanation": "`.upper()` capitalizes EVERY letter (`ECHO`), not just the first one!"
+              },
+              {
+                "id": "b",
+                "label": "ECHO",
+                "explanation": "Spot on! `.upper()` turns every letter into uppercase: `ECHO`!"
+              },
+              {
+                "id": "c",
+                "label": "echo",
+                "explanation": "`.lower()` keeps it lowercase; `.upper()` turns it into `ECHO`!"
+              },
+              {
+                "id": "d",
+                "label": "4",
+                "explanation": "`len()` counts letters; `.upper()` returns the capitalized string `ECHO`!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
           "id": "trial-05-03",
           "trialType": "code",
           "title": "Both Must Be True: and + .upper()",
@@ -2034,6 +2771,78 @@
               }
             }
           ]
+        },
+        {
+          "id": "trial-05-03b",
+          "trialType": "code",
+          "title": "Measure Word Length With len()",
+          "storyPrompt": "Python's built-in `len(text)` function counts how many characters are inside a string! Practice measuring a word's length before combining `len()` with `or`.",
+          "objective": "Create the variable `size` holding the length of `word` using len(), then print `size`.",
+          "concepts": [
+            "string_methods",
+            "variables",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "word = \"pyria\"\nsize = len(???)\nprint(size)\n",
+            "standard": "word = \"pyria\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "word = \"pyria\"\nsize = len(word)\nprint(size)\n",
+          "testCode": "assert size == 5, f'Expected 5, got {size!r}'\nassert OUTPUT.strip() == '5', f'Expected \"5\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts P-Y-R-I-A: 'Pass `word` (no quotes!) into `len(word)` and store it in `size`!'",
+            "tier2_pattern": "size = len(<var>)\nprint(size)",
+            "tier3_walkthrough": "Add:\nsize = len(word)\nprint(size)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:len",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "word": "oak"
+              },
+              "expectOutput": "3",
+              "expectVars": {
+                "size": 3
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Counting Characters With len()",
+            "prompt": "`len(text)` returns an **integer** equal to the number of characters in a string (including spaces!).",
+            "question": "What does `len(\"oak\")` return?",
+            "codeSnippet": "print(len(\"oak\"))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "3",
+                "explanation": "Nailed it! O-A-K has 3 letters, so `len(\"oak\")` returns `3`!"
+              },
+              {
+                "id": "b",
+                "label": "1",
+                "explanation": "`len()` counts every character (3), not the number of words!"
+              },
+              {
+                "id": "c",
+                "label": "OAK",
+                "explanation": "`.upper()` capitalizes text; `len()` counts its characters (`3`)!"
+              },
+              {
+                "id": "d",
+                "label": "2",
+                "explanation": "Count each letter: `o` (1), `a` (2), `k` (3)!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-05-04",
@@ -2191,6 +3000,50 @@
           }
         },
         {
+          "id": "trial-05-05b",
+          "trialType": "fix_bug",
+          "title": "The Tangled Vine Check",
+          "storyPrompt": "Another quick indentation check! Lord Null un-indented the two lines inside `if not is_locked:`. Indent both lines 4 spaces so the Echo Woods path clears!",
+          "objective": "Fix the indentation inside `if not is_locked:` so `path` becomes 'CLEAR' and Python prints CLEAR.",
+          "concepts": [
+            "boolean_logic",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "bugSummary": "Python throws an indentation error under the `if not is_locked:` line.",
+          "starterCode": {
+            "explorer": "# Indent both lines under if not is_locked: by 4 spaces!\nis_locked = False\npath = \"BLOCKED\"\nif not is_locked:\npath = \"CLEAR\"\nprint(path)\n",
+            "standard": "is_locked = False\npath = \"BLOCKED\"\nif not is_locked:\npath = \"CLEAR\"\nprint(path)\n",
+            "challenge": "is_locked = False\npath = \"BLOCKED\"\nif not is_locked:\npath = \"CLEAR\"\nprint(path)\n"
+          },
+          "referenceSolution": "is_locked = False\npath = \"BLOCKED\"\nif not is_locked:\n    path = \"CLEAR\"\n    print(path)\n",
+          "testCode": "assert path == 'CLEAR', f'Expected \"CLEAR\", got {path!r}'\nassert OUTPUT.strip() == 'CLEAR', f'Expected \"CLEAR\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps ⇥ Indent: 'Indent both `path = \"CLEAR\"` and `print(path)` by 4 spaces!'",
+            "tier2_pattern": "if not is_locked:\n    path = \"CLEAR\"\n    print(path)",
+            "tier3_walkthrough": "Add 4 spaces before both lines under `if not is_locked:`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "bool_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "is_locked": true
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "path": "BLOCKED"
+              }
+            }
+          ]
+        },
+        {
           "id": "trial-05-06",
           "trialType": "code",
           "title": "Awaken Bramble (Logic & Strings Capstone)",
@@ -2235,36 +3088,7 @@
                 "gate_open": false
               }
             }
-          ],
-          "introChoice": {
-            "title": ".upper() and len()",
-            "prompt": "Two handy string tools: `.upper()` turns all letters into CAPITALS, and `len(text)` counts how many characters are in a string!",
-            "question": "What does this snippet print?",
-            "codeSnippet": "word = \"pyria\".upper()\nprint(word, len(word))",
-            "choices": [
-              {
-                "id": "a",
-                "label": "PYRIA 5",
-                "explanation": "Boom! `.upper()` turns `\"pyria\"` into `\"PYRIA\"`, and `len(\"PYRIA\")` counts its 5 letters!"
-              },
-              {
-                "id": "b",
-                "label": "pyria 5",
-                "explanation": "Close on the length, but `.upper()` capitalizes every letter to `PYRIA`!"
-              },
-              {
-                "id": "c",
-                "label": "PYRIA 4",
-                "explanation": "Count the letters in P-Y-R-I-A: that's 5 characters!"
-              },
-              {
-                "id": "d",
-                "label": "PYRIA 1",
-                "explanation": "`len()` counts every character in the string, not the number of words!"
-              }
-            ],
-            "correctChoiceId": "a"
-          }
+          ]
         },
         {
           "id": "trial-05-bonus",
@@ -2483,6 +3307,50 @@
           ]
         },
         {
+          "id": "trial-06-02b",
+          "trialType": "code",
+          "title": "Diving Bell Air Check (-)",
+          "storyPrompt": "Before combining math with `if / elif / else`, practice subtracting two variables! Subtract `used_air` (25) from `start_air` (60), store the result in `air_left`, and print it.",
+          "objective": "Subtract `used_air` from `start_air`, store the result in the variable `air_left`, and print `air_left`.",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "start_air = 60\nused_air = 25\nair_left = start_air - ???\nprint(air_left)\n",
+            "standard": "start_air = 60\nused_air = 25\n",
+            "challenge": ""
+          },
+          "referenceSolution": "start_air = 60\nused_air = 25\nair_left = start_air - used_air\nprint(air_left)\n",
+          "testCode": "assert air_left == 35, f'Expected 35, got {air_left!r}'\nassert OUTPUT.strip() == '35', f'Expected \"35\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps the minus sign `-`: 'Write `air_left = start_air - used_air` and then `print(air_left)`!'",
+            "tier2_pattern": "air_left = start_air - used_air\nprint(air_left)",
+            "tier3_walkthrough": "Add:\nair_left = start_air - used_air\nprint(air_left)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "start_air": 50,
+                "used_air": 10
+              },
+              "expectOutput": "40",
+              "expectVars": {
+                "air_left": 40
+              }
+            }
+          ]
+        },
+        {
           "id": "trial-06-03",
           "trialType": "code",
           "title": "Twin Pressure Valves (and + Comparisons)",
@@ -2524,6 +3392,53 @@
               },
               "expectOutput": "",
               "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(seal, str) and seal.strip().upper() == 'UNBALANCED'\n"
+            }
+          ]
+        },
+        {
+          "id": "trial-06-03b",
+          "trialType": "code",
+          "title": "Either Hatch Sensor (or)",
+          "storyPrompt": "Practice `or` with two number comparisons before adding math! If `left_depth` is greater than 20 OR `right_depth` is greater than 20, update the variable `alert` to `'ON'` and print `alert`.",
+          "objective": "If `left_depth` is greater than 20 or `right_depth` is greater than 20, update the variable `alert` to 'ON' and print `alert`.",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "boolean_logic",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "left_depth = 10\nright_depth = 25\nalert = \"OFF\"\nif (left_depth > 20) or (right_depth > ???):\n    alert = \"ON\"\n    print(alert)\n",
+            "standard": "left_depth = 10\nright_depth = 25\nalert = \"OFF\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "left_depth = 10\nright_depth = 25\nalert = \"OFF\"\nif (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)\n",
+          "testCode": "assert alert == 'ON', f'Expected \"ON\", got {alert!r}'\nassert OUTPUT.strip() == 'ON', f'Expected \"ON\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip blinks: 'With `or`, only ONE side needs to be True — check `(left_depth > 20) or (right_depth > 20)`!'",
+            "tier2_pattern": "if (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)",
+            "tier3_walkthrough": "Add:\nif (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "bool_op",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "left_depth": 5,
+                "right_depth": 10
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "alert": "OFF"
+              }
             }
           ]
         },
@@ -2582,6 +3497,50 @@
                 "pump_on": true
               },
               "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('Pumps active!')\n"
+            }
+          ]
+        },
+        {
+          "id": "trial-06-04b",
+          "trialType": "code",
+          "title": "Weigh the Sunken Chests (*)",
+          "storyPrompt": "Quick warm-up before the ferry check: multiply `chests` (4) by `weight_each` (12), store the result in the variable `total_weight`, and print `total_weight`!",
+          "objective": "Multiply `chests` by `weight_each`, store the result in the variable `total_weight`, and print `total_weight`.",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "chests = 4\nweight_each = 12\ntotal_weight = chests * ???\nprint(total_weight)\n",
+            "standard": "chests = 4\nweight_each = 12\n",
+            "challenge": ""
+          },
+          "referenceSolution": "chests = 4\nweight_each = 12\ntotal_weight = chests * weight_each\nprint(total_weight)\n",
+          "testCode": "assert total_weight == 48, f'Expected 48, got {total_weight!r}'\nassert OUTPUT.strip() == '48', f'Expected \"48\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at `*`: 'Multiply the two variables: `total_weight = chests * weight_each`!'",
+            "tier2_pattern": "total_weight = chests * weight_each\nprint(total_weight)",
+            "tier3_walkthrough": "Add:\ntotal_weight = chests * weight_each\nprint(total_weight)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "chests": 3,
+                "weight_each": 10
+              },
+              "expectOutput": "30",
+              "expectVars": {
+                "total_weight": 30
+              }
             }
           ]
         },
@@ -2892,6 +3851,39 @@
           ]
         },
         {
+          "id": "trial-07-02b",
+          "trialType": "fix_bug",
+          "title": "The Un-Indented Gale Loop",
+          "storyPrompt": "Just like `if` statements, every line inside a `for` loop MUST be indented 4 spaces! Fix the indentation so `Wind!` prints 3 times.",
+          "objective": "Indent the line inside the for-loop by 4 spaces so Python prints Wind! 3 times.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "bugSummary": "Python throws an indentation error right after the for line.",
+          "starterCode": {
+            "explorer": "# Indent print(\"Wind!\") by 4 spaces!\nfor i in range(3):\nprint(\"Wind!\")\n",
+            "standard": "for i in range(3):\nprint(\"Wind!\")\n",
+            "challenge": "for i in range(3):\nprint(\"Wind!\")\n"
+          },
+          "referenceSolution": "for i in range(3):\n    print(\"Wind!\")\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['Wind!', 'Wind!', 'Wind!'], f'Expected 3 lines of Wind!, got {lines!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip hops 4 spaces right: 'Put 4 spaces before `print(\"Wind!\")` so it runs inside the `for` loop!'",
+            "tier2_pattern": "for i in range(3):\n    print(\"Wind!\")",
+            "tier3_walkthrough": "Indent line 2 by 4 spaces:\n    print(\"Wind!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "call:print"
+          ]
+        },
+        {
           "id": "trial-07-03",
           "trialType": "code",
           "title": "Sound the Four Gale Horns",
@@ -2922,6 +3914,67 @@
             "call:range",
             "call:print"
           ]
+        },
+        {
+          "id": "trial-07-03b",
+          "trialType": "code",
+          "title": "Peek at the Loop Variable (i)",
+          "storyPrompt": "What is actually inside `i` during `for i in range(3):`? On turn 1 it's `0`, on turn 2 it's `1`, and on turn 3 it's `2`! Print `i` inside the loop to see it count.",
+          "objective": "Write a for loop with range(3) that prints the loop variable `i` on each turn (0, 1, 2).",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "for i in range(3):\n    print(???)\n",
+            "standard": "for i in range(3):\n",
+            "challenge": ""
+          },
+          "referenceSolution": "for i in range(3):\n    print(i)\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['0', '1', '2'], f'Expected [\"0\", \"1\", \"2\"], got {lines!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Indent 4 spaces and write `print(i)` — no quotes around `i`!'",
+            "tier2_pattern": "for i in range(3):\n    print(i)",
+            "tier3_walkthrough": "Add the indented line:\n    print(i)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "call:print"
+          ],
+          "introChoice": {
+            "title": "What Numbers Does range(3) Produce?",
+            "prompt": "When you give `range(3)` ONE number, Python starts counting at **0** and stops right before `3` — producing `0, 1, 2` (3 numbers total)!",
+            "question": "What does `for i in range(3): print(i)` display?",
+            "codeSnippet": "for i in range(3):\n    print(i)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "1, 2, 3",
+                "explanation": "Close! Python's `range(3)` starts at `0` (not `1`) and stops before `3`!"
+              },
+              {
+                "id": "b",
+                "label": "0, 1, 2, 3",
+                "explanation": "`range(3)` stops RIGHT BEFORE `3`, so it produces 3 numbers: `0, 1, 2`!"
+              },
+              {
+                "id": "c",
+                "label": "i, i, i",
+                "explanation": "Because `i` has NO quotes around it, Python prints the number inside `i` each turn!"
+              },
+              {
+                "id": "d",
+                "label": "0, 1, 2",
+                "explanation": "Spot on! `range(3)` counts `0`, `1`, `2` — 3 turns starting from 0!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-07-04",
@@ -2983,6 +4036,40 @@
             ],
             "correctChoiceId": "b"
           }
+        },
+        {
+          "id": "trial-07-04b",
+          "trialType": "code",
+          "title": "Charge Up With += in a Loop",
+          "storyPrompt": "Before summing a changing loop variable, practice adding a fixed amount (`5`) on every turn of a loop! Start `charge = 0`, loop 4 times adding `5` with `charge += 5`, then print `charge` ONCE after the loop (0 spaces indent!).",
+          "objective": "Start the variable `charge` at 0, loop 4 times adding 5 to `charge` each turn, then print `charge` once after the loop.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "variables",
+            "basic_math",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "charge = 0\nfor i in range(4):\n    charge += ???\nprint(charge)\n",
+            "standard": "charge = 0\nfor i in range(4):\n",
+            "challenge": ""
+          },
+          "referenceSolution": "charge = 0\nfor i in range(4):\n    charge += 5\nprint(charge)\n",
+          "testCode": "assert charge == 20, f'Expected 20, got {charge!r}'\nassert OUTPUT.strip() == '20', f'Expected \"20\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the indent: 'Indent `charge += 5` 4 spaces INSIDE the loop, and put `print(charge)` at 0 spaces AFTER the loop!'",
+            "tier2_pattern": "charge = 0\nfor i in range(4):\n    charge += 5\nprint(charge)",
+            "tier3_walkthrough": "Complete with:\n    charge += 5\nprint(charge)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "call:print"
+          ]
         },
         {
           "id": "trial-07-05",
@@ -3255,6 +4342,76 @@
           "difficultyOverride": null
         },
         {
+          "id": "trial-08-01b",
+          "trialType": "code",
+          "title": "Spot Even Numbers With %",
+          "storyPrompt": "The modulo operator `%` gives the **remainder** after division! If `num % 2 == 0`, there is no remainder when dividing by 2 — which means `num` is **even**!",
+          "objective": "If `num % 2` equals 0, print 'EVEN'.",
+          "concepts": [
+            "basic_math",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "num = 6\nif num % 2 == ???:\n    print(\"EVEN\")\n",
+            "standard": "num = 6\n",
+            "challenge": ""
+          },
+          "referenceSolution": "num = 6\nif num % 2 == 0:\n    print(\"EVEN\")\n",
+          "testCode": "assert OUTPUT.strip() == 'EVEN', f'Expected \"EVEN\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Check `if num % 2 == 0:` and indent `print(\"EVEN\")` 4 spaces!'",
+            "tier2_pattern": "if num % 2 == 0:\n    print(\"EVEN\")",
+            "tier3_walkthrough": "Add:\nif num % 2 == 0:\n    print(\"EVEN\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "num": 5
+              },
+              "expectOutput": ""
+            }
+          ],
+          "introChoice": {
+            "title": "Finding Remainders With % (Modulo)",
+            "prompt": "The `%` operator gives the **remainder** left over after dividing! For example, `7 % 2` is `1` (odd), while `6 % 2` is `0` (even — divides cleanly with nothing left over!).",
+            "question": "What does `8 % 2` equal?",
+            "codeSnippet": "print(8 % 2)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "4",
+                "explanation": "`8 / 2` is `4`, whereas `%` gives the REMAINDER left over after dividing!"
+              },
+              {
+                "id": "b",
+                "label": "0",
+                "explanation": "Spot on! 2 divides into 8 cleanly (4 times) with `0` left over, so `8 % 2` is `0`!"
+              },
+              {
+                "id": "c",
+                "label": "1",
+                "explanation": "Odd numbers (like `7 % 2` or `9 % 2`) have remainder `1`; `8` is even!"
+              },
+              {
+                "id": "d",
+                "label": "2",
+                "explanation": "The remainder of dividing by 2 is always `0` (even) or `1` (odd)!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
           "id": "trial-08-02",
           "trialType": "fix_bug",
           "title": "The Citadel Counter Trap",
@@ -3288,6 +4445,74 @@
             "compare",
             "call:print"
           ]
+        },
+        {
+          "id": "trial-08-02b",
+          "trialType": "code",
+          "title": "Check Inside Text With in",
+          "storyPrompt": "Python's `in` keyword checks whether one string appears INSIDE another string — returning `True` or `False`! Practice `in` by itself before combining it with `.strip().upper()`.",
+          "objective": "If 'NOVA' is inside the variable `code`, print 'MATCH'.",
+          "concepts": [
+            "strings",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "code = \"NOVA-8\"\nif \"NOVA\" in ???:\n    print(\"MATCH\")\n",
+            "standard": "code = \"NOVA-8\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "code = \"NOVA-8\"\nif \"NOVA\" in code:\n    print(\"MATCH\")\n",
+          "testCode": "assert OUTPUT.strip() == 'MATCH', f'Expected \"MATCH\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points: 'Write `if \"NOVA\" in code:` and indent `print(\"MATCH\")` 4 spaces!'",
+            "tier2_pattern": "if \"<part>\" in <var>:\n    print(\"<word>\")",
+            "tier3_walkthrough": "Add:\nif \"NOVA\" in code:\n    print(\"MATCH\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "code": "NULL-0"
+              },
+              "expectOutput": ""
+            }
+          ],
+          "introChoice": {
+            "title": "Searching Inside Strings With in",
+            "prompt": "Writing `\"BIT\" in \"8-BIT\"` asks Python: 'Does `\"BIT\"` appear anywhere inside `\"8-BIT\"`?' — and returns `True` or `False`!",
+            "question": "What does `\"NOVA\" in \"NOVA-8\"` evaluate to?",
+            "codeSnippet": "print(\"NOVA\" in \"NOVA-8\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "False",
+                "explanation": "Look at `\"NOVA-8\"` — the letters `NOVA` appear right at the start!"
+              },
+              {
+                "id": "b",
+                "label": "NOVA",
+                "explanation": "`in` returns a Boolean (`True` or `False`), not the matched word!"
+              },
+              {
+                "id": "c",
+                "label": "True",
+                "explanation": "Nailed it! `\"NOVA\"` is inside `\"NOVA-8\"`, so `in` returns `True`!"
+              },
+              {
+                "id": "d",
+                "label": "4",
+                "explanation": "`in` checks membership and returns `True` or `False`, not a length!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-08-03",
@@ -3386,6 +4611,41 @@
               "expectOutput": "",
               "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(door, str) and door.strip().upper() == 'LOCKED'\n"
             }
+          ]
+        },
+        {
+          "id": "trial-08-04b",
+          "trialType": "code",
+          "title": "Count High Signals in a Loop",
+          "storyPrompt": "Before putting `if / else` inside a `for` loop, practice putting a simple `if` inside a `for` loop! Remember: the `if` line is indented 4 spaces, and the line inside `if` is indented **8 spaces**!",
+          "objective": "Start the variable `high` at 0. Loop through numbers 1 to 6: if the number is at least 4, add 1 to `high`. Print `high` once after the loop.",
+          "concepts": [
+            "for_loops",
+            "conditionals_if",
+            "variables",
+            "print_output"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "high = 0\nfor n in range(1, 7):\n    if n >= 4:\n        high += ???\nprint(high)\n",
+            "standard": "high = 0\nfor n in range(1, 7):\n",
+            "challenge": ""
+          },
+          "referenceSolution": "high = 0\nfor n in range(1, 7):\n    if n >= 4:\n        high += 1\nprint(high)\n",
+          "testCode": "assert high == 3, f'Expected 3, got {high!r}'\nassert OUTPUT.strip() == '3', f'Expected \"3\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts spaces: '4 spaces before `if n >= 4:`, 8 spaces before `high += 1`, and 0 spaces before `print(high)`!'",
+            "tier2_pattern": "for n in range(1, 7):\n    if n >= 4:\n        high += 1\nprint(high)",
+            "tier3_walkthrough": "Complete with:\n    if n >= 4:\n        high += 1\nprint(high)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "if",
+            "compare",
+            "call:print"
           ]
         },
         {

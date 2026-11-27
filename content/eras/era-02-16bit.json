@@ -165,6 +165,52 @@
           ]
         },
         {
+          "id": "trial-16-01-02b",
+          "trialType": "code",
+          "title": "Grab the First Crystal ([0])",
+          "storyPrompt": "Let's practice zero-based list indexing by itself first! Remember: the first item in a list is always at index `0` (`crystals[0]`).",
+          "objective": "Create the variable `first` holding the first item of `crystals` (index 0), then print `first`.",
+          "concepts": [
+            "lists",
+            "list_indexing"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\"]\nfirst = crystals[???]\nprint(first)\n",
+            "standard": "crystals = [\"aqua\", \"pearl\", \"coral\"]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\"]\nfirst = crystals[0]\nprint(first)\n",
+          "testCode": "assert first == 'aqua', f'Expected \"aqua\", got {first!r}'\nassert OUTPUT.strip() == 'aqua', f'Expected \"aqua\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps 0: 'Python starts counting list positions at 0, so `crystals[0]` is the first item!'",
+            "tier2_pattern": "first = crystals[0]\nprint(first)",
+            "tier3_walkthrough": "Add:\nfirst = crystals[0]\nprint(first)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "subscript",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "crystals": [
+                  "ruby",
+                  "opal",
+                  "jade"
+                ]
+              },
+              "expectOutput": "ruby",
+              "expectVars": {
+                "first": "ruby"
+              }
+            }
+          ]
+        },
+        {
           "id": "trial-16-01-03",
           "trialType": "code",
           "title": "Grab First & Last Crystal (and Rune Letter!)",
@@ -1092,6 +1138,55 @@
           }
         },
         {
+          "id": "trial-16-03-02b",
+          "trialType": "code",
+          "title": "Slice the First Two Gems ([:2])",
+          "storyPrompt": "Practice list slicing by itself before slicing strings! `gems[:2]` grabs index `0` and index `1`, stopping right before index `2`.",
+          "objective": "Create the variable `top_two` holding the first 2 items of `gems` using [:2], then print `top_two`.",
+          "concepts": [
+            "lists",
+            "list_indexing"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:???]\nprint(top_two)\n",
+            "standard": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\nprint(top_two)\n",
+          "testCode": "assert top_two == ['opal', 'jade'], f'Expected [\"opal\", \"jade\"], got {top_two!r}'\nassert OUTPUT.strip() == \"['opal', 'jade']\", f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Use `gems[:2]` to grab the first 2 items!'",
+            "tier2_pattern": "top_two = gems[:2]\nprint(top_two)",
+            "tier3_walkthrough": "Add:\ntop_two = gems[:2]\nprint(top_two)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "slice",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "gems": [
+                  "a",
+                  "b",
+                  "c"
+                ]
+              },
+              "expectOutput": "['a', 'b']",
+              "expectVars": {
+                "top_two": [
+                  "a",
+                  "b"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "id": "trial-16-03-03",
           "trialType": "code",
           "title": "Slice Pearls & Shell Codes",
@@ -1169,6 +1264,54 @@
             ],
             "correctChoiceId": "c"
           }
+        },
+        {
+          "id": "trial-16-03-03b",
+          "trialType": "code",
+          "title": "Sum and Smallest Together (sum & min)",
+          "storyPrompt": "Before adding `float()` decimals, practice Python's built-in `sum()` and `min()` functions on a list of numbers!",
+          "objective": "Create the variable `total` using sum(`scores`) and the variable `low` using min(`scores`), then print `total` and `low`.",
+          "concepts": [
+            "lists",
+            "basic_math"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "scores = [15, 40, 25]\ntotal = sum(???)\nlow = min(???)\nprint(total, low)\n",
+            "standard": "scores = [15, 40, 25]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "scores = [15, 40, 25]\ntotal = sum(scores)\nlow = min(scores)\nprint(total, low)\n",
+          "testCode": "assert total == 80 and low == 15\nassert OUTPUT.strip() == '80 15', f'Expected \"80 15\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Pass `scores` into `sum(scores)` and `min(scores)`!'",
+            "tier2_pattern": "total = sum(scores)\nlow = min(scores)\nprint(total, low)",
+            "tier3_walkthrough": "Add:\ntotal = sum(scores)\nlow = min(scores)\nprint(total, low)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:sum",
+            "call:min",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "scores": [
+                  5,
+                  10,
+                  20
+                ]
+              },
+              "expectOutput": "35 5",
+              "expectVars": {
+                "total": 35,
+                "low": 5
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-03-04",
@@ -1715,6 +1858,47 @@
           ]
         },
         {
+          "id": "trial-16-04-04b",
+          "trialType": "code",
+          "title": "Swap Characters With .replace()",
+          "storyPrompt": "Practice `.replace(old, new)` by itself before combining it with `.split()`! Replace every underscore `\"_\"` with a dash `\"-\"`.",
+          "objective": "Create the variable `clean` by replacing '_' with '-' in `raw` using .replace(), then print `clean`.",
+          "concepts": [
+            "string_methods",
+            "variables"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = \"STORM_CLEAR\"\nclean = raw.replace(\"_\", \"???\")\nprint(clean)\n",
+            "standard": "raw = \"STORM_CLEAR\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "raw = \"STORM_CLEAR\"\nclean = raw.replace(\"_\", \"-\")\nprint(clean)\n",
+          "testCode": "assert clean == 'STORM-CLEAR'\nassert OUTPUT.strip() == 'STORM-CLEAR', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Call `raw.replace(\"_\", \"-\")` and save it in `clean`!'",
+            "tier2_pattern": "clean = raw.replace(\"_\", \"-\")\nprint(clean)",
+            "tier3_walkthrough": "Add:\nclean = raw.replace(\"_\", \"-\")\nprint(clean)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": "A_B_C"
+              },
+              "expectOutput": "A-B-C",
+              "expectVars": {
+                "clean": "A-B-C"
+              }
+            }
+          ]
+        },
+        {
           "id": "trial-16-04-05",
           "trialType": "code",
           "title": "Decode & Clean the Beacon Signal",
@@ -2074,6 +2258,36 @@
           "requiredConstructs": [
             "while",
             "aug_assign"
+          ]
+        },
+        {
+          "id": "trial-16-05-03b",
+          "trialType": "code",
+          "title": "Count Up Four Gears (while)",
+          "storyPrompt": "One more count-up `while` loop to lock in the pattern before counting down! Start `gears = 0`, loop `while gears < 4:` adding `1` each turn, then print `gears` after the loop.",
+          "objective": "Using a while loop, increment `gears` by 1 while `gears` is less than 4, then print `gears`.",
+          "concepts": [
+            "while_loops"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "gears = 0\nwhile gears < 4:\n    gears += ???\nprint(gears)\n",
+            "standard": "gears = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "gears = 0\nwhile gears < 4:\n    gears += 1\nprint(gears)\n",
+          "testCode": "assert gears == 4\nassert OUTPUT.strip() == '4', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts: 'Write `while gears < 4:`, indent `gears += 1`, and put `print(gears)` at 0 spaces!'",
+            "tier2_pattern": "while gears < 4:\n    gears += 1\nprint(gears)",
+            "tier3_walkthrough": "Add:\nwhile gears < 4:\n    gears += 1\nprint(gears)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while",
+            "compare",
+            "call:print"
           ]
         },
         {
@@ -2505,6 +2719,86 @@
           }
         },
         {
+          "id": "trial-16-06-04b",
+          "trialType": "code",
+          "title": "Skip Rusty Parts With continue",
+          "storyPrompt": "One more `continue` drill! Loop through `parts`, skip any `\"rust\"` item using `continue`, and count the good parts in `good`.",
+          "objective": "Loop over `parts`: if an item equals 'rust', skip it with `continue`; otherwise add 1 to `good`. Print `good` after the loop.",
+          "concepts": [
+            "for_loops",
+            "while_loops",
+            "conditionals_if"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "parts = [\"gold\", \"rust\", \"brass\", \"rust\"]\ngood = 0\nfor p in parts:\n    if p == \"rust\":\n        ???\n    good += 1\nprint(good)\n",
+            "standard": "parts = [\"gold\", \"rust\", \"brass\", \"rust\"]\ngood = 0\nfor p in parts:\n",
+            "challenge": ""
+          },
+          "referenceSolution": "parts = [\"gold\", \"rust\", \"brass\", \"rust\"]\ngood = 0\nfor p in parts:\n    if p == \"rust\":\n        continue\n    good += 1\nprint(good)\n",
+          "testCode": "assert good == 2\nassert OUTPUT.strip() == '2', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'When `p == \"rust\"`, write `continue` so `good += 1` is skipped!'",
+            "tier2_pattern": "    if p == \"rust\":\n        continue\n    good += 1\nprint(good)",
+            "tier3_walkthrough": "Complete with:\n    if p == \"rust\":\n        continue\n    good += 1\nprint(good)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "continue",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "parts": [
+                  "rust",
+                  "gold",
+                  "gold",
+                  "gold"
+                ]
+              },
+              "expectOutput": "3",
+              "expectVars": {
+                "good": 3
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-16-06-04c",
+          "trialType": "code",
+          "title": "Read a Command With input()",
+          "storyPrompt": "Before putting `input()` inside a `while True:` loop, practice calling `input()` once by itself! `input(\"Command: \")` reads the next command string and returns it so you can save it in a variable.",
+          "objective": "Call input('Command: '), store the returned string in the variable `cmd`, and print `cmd`.",
+          "concepts": [
+            "while_loops",
+            "conditionals_if"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "commands = [\"WIND\"]\ninput = lambda p=\"\": commands.pop(0)\ncmd = input(\"???\")\nprint(cmd)\n",
+            "standard": "commands = [\"WIND\"]\ninput = lambda p=\"\": commands.pop(0)\n",
+            "challenge": ""
+          },
+          "referenceSolution": "commands = [\"WIND\"]\ninput = lambda p=\"\": commands.pop(0)\ncmd = input(\"Command: \")\nprint(cmd)\n",
+          "testCode": "assert cmd == 'WIND'\nassert OUTPUT.strip() == 'WIND', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Store `input(\"Command: \")` in `cmd`, then call `print(cmd)`!'",
+            "tier2_pattern": "cmd = input(\"Command: \")\nprint(cmd)",
+            "tier3_walkthrough": "Add:\ncmd = input(\"Command: \")\nprint(cmd)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:input",
+            "call:print"
+          ]
+        },
+        {
           "id": "trial-16-06-05",
           "trialType": "code",
           "title": "Listen for Commands with while True & input()",
@@ -2867,6 +3161,35 @@
           ]
         },
         {
+          "id": "trial-16-07-04b",
+          "trialType": "code",
+          "title": "Greet Any Dragon (Parameter Practice)",
+          "storyPrompt": "Let's practice writing one more function with a parameter before learning `return`! Define `def greet(name):` that prints `\"Hi, \" + name`, then call `greet(\"Piston\")`.",
+          "objective": "Define a function `greet(name)` that prints 'Hi, ' glued to `name`, then call greet('Piston').",
+          "concepts": [
+            "functions_def"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def greet(name):\n    print(\"Hi, \" + ???)\n\ngreet(\"Piston\")\n",
+            "standard": "# Define greet(name) and call greet(\"Piston\")\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def greet(name):\n    print(\"Hi, \" + name)\n\ngreet(\"Piston\")\n",
+          "testCode": "assert OUTPUT.strip() == 'Hi, Piston', f'Expected \"Hi, Piston\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Put `name` in the parentheses of `def greet(name):`, indent `print(\"Hi, \" + name)`, then call `greet(\"Piston\")`!'",
+            "tier2_pattern": "def greet(name):\n    print(\"Hi, \" + name)\n\ngreet(\"Piston\")",
+            "tier3_walkthrough": "Write:\ndef greet(name):\n    print(\"Hi, \" + name)\n\ngreet(\"Piston\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "call:print"
+          ]
+        },
+        {
           "id": "trial-16-07-05",
           "trialType": "code",
           "title": "Send Back an Answer with return",
@@ -2924,6 +3247,37 @@
             ],
             "correctChoiceId": "b"
           }
+        },
+        {
+          "id": "trial-16-07-05b",
+          "trialType": "code",
+          "title": "Return an Added Score (return Practice)",
+          "storyPrompt": "One more `return` drill before the Foundry Boss! Define `def add_five(n):` that returns `n + 5`, store `add_five(10)` in `ans`, and print `ans`.",
+          "objective": "Define a function `add_five(n)` that returns `n + 5`. Store `add_five(10)` in the variable `ans`, then print `ans`.",
+          "concepts": [
+            "functions_def",
+            "functions_return"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def add_five(n):\n    return n + ???\n\nans = add_five(10)\nprint(ans)\n",
+            "standard": "# Define add_five(n), store add_five(10) in ans, and print ans\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def add_five(n):\n    return n + 5\n\nans = add_five(10)\nprint(ans)\n",
+          "testCode": "assert add_five(3) == 8\nassert ans == 15\nassert OUTPUT.strip() == '15', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Use `return n + 5` inside `def add_five(n):`!'",
+            "tier2_pattern": "def add_five(n):\n    return n + 5\n\nans = add_five(10)\nprint(ans)",
+            "tier3_walkthrough": "Write:\ndef add_five(n):\n    return n + 5\n\nans = add_five(10)\nprint(ans)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "call:print"
+          ]
         },
         {
           "id": "trial-16-07-06",
@@ -3157,6 +3511,37 @@
           ]
         },
         {
+          "id": "trial-16-08-02b",
+          "trialType": "code",
+          "title": "Write a Default Parameter!",
+          "storyPrompt": "Now practice writing a **default parameter** yourself before the boss! Give `def boost(n, mult=2):` a default `mult=2`, return `n * mult`, and call `print(boost(5))` without passing `mult`.",
+          "objective": "Define `boost(n, mult=2)` returning `n * mult`, then print the result of calling `boost(5)`.",
+          "concepts": [
+            "functions_def",
+            "functions_return"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def boost(n, mult=2):\n    return n * ???\n\nprint(boost(5))\n",
+            "standard": "def boost(n, mult=2):\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def boost(n, mult=2):\n    return n * mult\n\nprint(boost(5))\n",
+          "testCode": "assert boost(5) == 10 and boost(5, 3) == 15\nassert OUTPUT.strip() == '10', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Return `n * mult` inside `boost`, then call `print(boost(5))`!'",
+            "tier2_pattern": "def boost(n, mult=2):\n    return n * mult\n\nprint(boost(5))",
+            "tier3_walkthrough": "Complete with:\n    return n * mult\n\nprint(boost(5))"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "call:print"
+          ]
+        },
+        {
           "id": "trial-16-08-03",
           "trialType": "code",
           "title": "Function Calling a Function",
@@ -3210,6 +3595,77 @@
                 "id": "d",
                 "label": "Error — you can't nest function calls",
                 "explanation": "Nesting function calls is totally valid in Python — it evaluates from the inside out!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-16-08-03b",
+          "trialType": "code",
+          "title": "Meet None & is None",
+          "storyPrompt": "In Python, `None` (capital N, no quotes!) is a special value meaning **nothing / no value yet** — and we check for it using `is None`!",
+          "objective": "If the variable `slot` is `None`, print 'EMPTY'.",
+          "concepts": [
+            "functions_return",
+            "conditionals_if"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "slot = None\nif slot is ???:\n    print(\"EMPTY\")\n",
+            "standard": "slot = None\n",
+            "challenge": ""
+          },
+          "referenceSolution": "slot = None\nif slot is None:\n    print(\"EMPTY\")\n",
+          "testCode": "assert OUTPUT.strip() == 'EMPTY', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip whispers: 'Write `if slot is None:` (capital N, no quotes!) and indent `print(\"EMPTY\")` 4 spaces!'",
+            "tier2_pattern": "if slot is None:\n    print(\"EMPTY\")",
+            "tier3_walkthrough": "Add:\nif slot is None:\n    print(\"EMPTY\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "none",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "slot": 42
+              },
+              "expectOutput": ""
+            }
+          ],
+          "introChoice": {
+            "title": "What Is None in Python?",
+            "prompt": "`None` (capital `N`, NO quotes) is Python's special value for **nothing / empty**. To check whether a variable holds `None`, write `if x is None:`!",
+            "question": "Which line correctly checks if `result` is `None`?",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Option A",
+                "code": "if result is \"None\":",
+                "explanation": "Watch out! Putting quotes around `\"None\"` turns it into a text string instead of the special `None` value!"
+              },
+              {
+                "id": "b",
+                "label": "Option B",
+                "code": "if result is none:",
+                "explanation": "Almost! Just like `True` and `False`, `None` MUST start with a capital `N`!"
+              },
+              {
+                "id": "c",
+                "label": "Option C",
+                "code": "if result is None:",
+                "explanation": "Spot on! Capital `N`, no quotes, and `is None` is the clean Python way to check for `None`!"
+              },
+              {
+                "id": "d",
+                "label": "Option D",
+                "code": "if result = None:",
+                "explanation": "Single `=` stores a value — use `is None` to check!"
               }
             ],
             "correctChoiceId": "c"
@@ -3545,6 +4001,36 @@
               },
               "expectOutput": "25"
             }
+          ]
+        },
+        {
+          "id": "trial-16-09-02b",
+          "trialType": "code",
+          "title": "Create & Look Up a Dictionary",
+          "storyPrompt": "Before adding or updating keys, practice building a tiny 1-key dictionary and reading its value with square brackets `potion[\"fire\"]`!",
+          "objective": "Create the dictionary variable `potion` with key 'fire' mapped to 10, then print `potion['fire']`.",
+          "concepts": [
+            "dictionaries"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "potion = {\"fire\": ???}\nprint(potion[\"fire\"])\n",
+            "standard": "# Create potion = {\"fire\": 10} and print potion[\"fire\"]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "potion = {\"fire\": 10}\nprint(potion[\"fire\"])\n",
+          "testCode": "assert potion == {'fire': 10}\nassert OUTPUT.strip() == '10', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at `{}`: 'Use curly braces `{\"fire\": 10}` with a colon `:` between key and value!'",
+            "tier2_pattern": "potion = {\"fire\": 10}\nprint(potion[\"fire\"])",
+            "tier3_walkthrough": "Write:\npotion = {\"fire\": 10}\nprint(potion[\"fire\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict",
+            "subscript",
+            "call:print"
           ]
         },
         {
@@ -4025,6 +4511,48 @@
               "expectOutput": "Opal Lv.9",
               "expectVars": {
                 "label": "Opal Lv.9"
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-16-10-03b",
+          "trialType": "code",
+          "title": "Format a Hero Status (f-String Practice)",
+          "storyPrompt": "One more f-string drill before combining f-strings with dictionaries! Remember: put `f` right before the opening quote, and wrap variables inside `{...}`.",
+          "objective": "Using `hero` and `hp`, create the variable `status` formatted as 'Pip: 50' with an f-string, then print `status`.",
+          "concepts": [
+            "f_strings"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "hero = \"Pip\"\nhp = 50\nstatus = f\"{hero}: {???}\"\nprint(status)\n",
+            "standard": "hero = \"Pip\"\nhp = 50\n",
+            "challenge": ""
+          },
+          "referenceSolution": "hero = \"Pip\"\nhp = 50\nstatus = f\"{hero}: {hp}\"\nprint(status)\n",
+          "testCode": "assert status == 'Pip: 50'\nassert OUTPUT.strip() == 'Pip: 50', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Write `status = f\"{hero}: {hp}\"` and then `print(status)`!'",
+            "tier2_pattern": "status = f\"{hero}: {hp}\"\nprint(status)",
+            "tier3_walkthrough": "Add:\nstatus = f\"{hero}: {hp}\"\nprint(status)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "fstring",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "hero": "Spark",
+                "hp": 80
+              },
+              "expectOutput": "Spark: 80",
+              "expectVars": {
+                "status": "Spark: 80"
               }
             }
           ]
@@ -5203,6 +5731,36 @@
           ]
         },
         {
+          "id": "trial-16-13-02b",
+          "trialType": "code",
+          "title": "Count a 2x3 Grid With Nested range()",
+          "storyPrompt": "Before looping over a 2D list of lists, practice writing a simple nested `for` loop with `range()`! Outer loop `range(2)` (2 rows), inner loop `range(3)` (3 columns), adding `1` to `cells` each time.",
+          "objective": "Start `cells` at 0. Write a nested for-loop (`range(2)` outer, `range(3)` inner) that adds 1 to `cells` each turn, then print `cells`.",
+          "concepts": [
+            "nested_loops"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "cells = 0\nfor r in range(2):\n    for c in range(3):\n        cells += ???\nprint(cells)\n",
+            "standard": "cells = 0\nfor r in range(2):\n",
+            "challenge": ""
+          },
+          "referenceSolution": "cells = 0\nfor r in range(2):\n    for c in range(3):\n        cells += 1\nprint(cells)\n",
+          "testCode": "assert cells == 6\nassert OUTPUT.strip() == '6', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts: '4 spaces before `for c in range(3):`, 8 spaces before `cells += 1`, and 0 spaces before `print(cells)`!'",
+            "tier2_pattern": "for r in range(2):\n    for c in range(3):\n        cells += 1\nprint(cells)",
+            "tier3_walkthrough": "Complete with:\n    for c in range(3):\n        cells += 1\nprint(cells)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "call:print"
+          ]
+        },
+        {
           "id": "trial-16-13-03",
           "trialType": "code",
           "title": "Sum a 2D Cloud Grid",
@@ -5637,6 +6195,36 @@
             "class",
             "self_attr",
             "def"
+          ]
+        },
+        {
+          "id": "trial-16-14-03b",
+          "trialType": "code",
+          "title": "Create a Gem Class (__init__ Practice)",
+          "storyPrompt": "One more `class` + `__init__` drill before adding custom methods! Define `class Gem:` with `def __init__(self, color):` saving `self.color = color`, create `g = Gem(\"blue\")`, and print `g.color`.",
+          "objective": "Define `class Gem:` with `__init__(self, color)` storing `self.color = color`. Create `g = Gem('blue')` and print `g.color`.",
+          "concepts": [
+            "classes_intro"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Gem:\n    def __init__(self, color):\n        self.color = ???\n\ng = Gem(\"blue\")\nprint(g.color)\n",
+            "standard": "class Gem:\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Gem:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)\n",
+          "testCode": "assert g.color == 'blue'\nassert Gem('gold').color == 'gold'\nassert OUTPUT.strip() == 'blue', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Don't forget `self` as the first parameter of `def __init__(self, color):`!'",
+            "tier2_pattern": "class Gem:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)",
+            "tier3_walkthrough": "Complete with:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "call:print"
           ]
         },
         {
