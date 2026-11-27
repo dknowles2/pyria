@@ -97,7 +97,29 @@ Visually, the hero uses **modular layered sprites** (Base Body + Hair + Tunic + 
 * **Act III — The Alchemist's Caldera (Realms 9–12, Dragons 9–12)**
   * *Focus*: **Dictionaries**, nested data (lists of dicts for crafting potions, dragon stats, and quest logs), string formatting (`f"..."`), and reading real Python tracebacks.
 * **Act IV — The Shattered Skyway (Realms 13–16, Dragons 13–16)**
-  * *Focus*: Intro to **Classes & Objects** (customizing dragon companions & mounts), multi-step algorithmic dungeon puzzles, and the 16-Bit Finale → **Unlocks Era 3 (3D)!**
+  * *Focus*: Intro to **Classes & Objects** (customizing dragon companions & mounts), multi-step algorithmic dungeon puzzles, and the 16-Bit Finale → **Unlocks Era 3 (32-Bit Isometric 2.5D)!**
+
+---
+
+## 6B. Complete 7-Era Visual & Curriculum Roadmap (8-Bit NES → Modern 4K)
+
+Pyria's world evolves across **7 historically-aligned video game eras**, with **64-Bit** explicitly modeled on **Nintendo 64** (*Super Mario 64* / *Ocarina of Time* / *Banjo-Kazooie* chunky Gouraud-shaded free-roam 3D):
+
+| Era | Console Vibe | Visual Style | Python Milestone | Concept Art |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. 8-Bit** | NES | Retro 2D top-down pixel tiles | `say()` / `shout()`, strings, variables, `if`/`elif`/`else`, `for` loops, lists, `def` | [era-01-8bit-nes.jpg](../assets/concept-art/eras/era-01-8bit-nes.jpg) |
+| **2. 16-Bit** | SNES | Lush 2D pixel art & lighting | Loops, lists, functions, dictionaries, classes & objects | [era-02-16bit-snes.jpg](../assets/concept-art/eras/era-02-16bit-snes.jpg) |
+| **3. 32-Bit** | PS1 / GBA | Isometric 2.5D diorama introducing `(x, y, z)` elevation | 3D coords `(x, y, z)`, nested loops, dictionaries, pathfinding | [era-03-32bit-ps1-isometric.jpg](../assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg) |
+| **4. 64-Bit** | **Nintendo 64** | Free-roam chunky Gouraud-shaded 3D | Classes & objects, debugging, 3D world scripting | [era-04-64bit-n64.jpg](../assets/concept-art/eras/era-04-64bit-n64.jpg) |
+| **5. 128-Bit** | GameCube / PS2 | Smooth cel-shaded stylized 3D (*Wind Waker* / *Kingdom Hearts*) | Multi-module scripts, AI behaviors, custom spells | [era-05-128bit-gamecube-ps2.jpg](../assets/concept-art/eras/era-05-128bit-gamecube-ps2.jpg) |
+| **6. HD Era** | PS3 / Xbox 360 / Wii U | Dynamic lighting, shaders & physics | Event-driven mini-games & physics rules | [era-06-hd-era.jpg](../assets/concept-art/eras/era-06-hd-era.jpg) |
+| **7. Modern / 4K** | Switch / PS5 / PC | Volumetric open-world Creator Sandbox (*BotW* × *HTTYD*) | Full `/builder` world & game creation | [era-07-modern-4k-sandbox.jpg](../assets/concept-art/eras/era-07-modern-4k-sandbox.jpg) |
+
+### Early-3D Biome Concepts (32-Bit → 64-Bit)
+- **Blockstone Highlands**: [32bit-blockstone-highlands.jpg](../assets/concept-art/biomes/32bit-blockstone-highlands.jpg)
+- **Sky-Forge Foundry**: [32bit-skyforge-foundry.jpg](../assets/concept-art/biomes/32bit-skyforge-foundry.jpg)
+- **Prism Caverns**: [32bit-prism-caverns.jpg](../assets/concept-art/biomes/32bit-prism-caverns.jpg)
+- **Null's Polygon Citadel**: [32bit-polygon-citadel.jpg](../assets/concept-art/biomes/32bit-polygon-citadel.jpg)
 
 ---
 
