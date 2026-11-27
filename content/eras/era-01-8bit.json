@@ -30,7 +30,7 @@
           "id": "trial-01-01",
           "trialType": "multiple_choice",
           "title": "Spot the Valid say() Spell!",
-          "storyPrompt": "Welcome to Whispering Meadow! To cast a Python speech spell, wrap your message inside quotes `\"...\"` and parentheses `(...)`—like `say(\"Hello, Pyria!\")`. Tap the ONE valid spell below to wake the Signal Stone!",
+          "storyPrompt": "Welcome to Whispering Meadow! In Python, text wrapped in quotes like `\"Hello, Pyria!\"` is called a **string** (`str` for short). To cast a speech spell, put your string inside parentheses `(...)`—like `say(\"Hello, Pyria!\")`. Tap the ONE valid spell below to wake the Signal Stone!",
           "objective": "Choose the valid `say()` spell that has matching quotes AND parentheses.",
           "concepts": [
             "function_calls",
@@ -415,7 +415,7 @@
           "id": "trial-02-01",
           "trialType": "multiple_choice",
           "title": "What's Inside the Variable Box?",
-          "storyPrompt": "Welcome to Mossy Ruins! A **variable** is like a labeled box that holds a value. Writing `stones = 6` puts `6` inside a box called `stones`. Notice the difference: `say(stones)` opens the box (NO quotes!), while `say(\"stones\")` literally says the word stones! What will the code below output?",
+          "storyPrompt": "Welcome to Mossy Ruins! A **variable** is like a labeled box that holds a value. Whole numbers with no decimal point (like `0`, `6`, or `10`) are called **integers** (`int` for short), and they never wear quotes. Writing `stones = 6` puts the integer `6` inside a box called `stones`. Notice the difference: `say(stones)` opens the box (NO quotes!), while `say(\"stones\")` literally says the word stones! What will the code below output?",
           "objective": "Predict what `say(stones)` outputs when `stones = 6`.",
           "concepts": [
             "variables",
@@ -535,13 +535,45 @@
                 "gems": 25
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "What Is an Integer (int)?",
+            "prompt": "In Python, a **whole number** with NO decimal point (like `0`, `6`, `10`, or `-3`) is called an **integer** (`int` for short). Unlike text **strings** (which wear quotes like `\"10\"`), integers never wear quotes!",
+            "question": "Which line stores an **integer** (a whole number, not a string or decimal) in `gems`?",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Option A",
+                "code": "gems = \"10\"",
+                "explanation": "Watch out! Putting quotes around `\"10\"` turns it into a text **string**, not an integer!"
+              },
+              {
+                "id": "b",
+                "label": "Option B",
+                "code": "gems = 10.5",
+                "explanation": "Close! `10.5` has a decimal point — an **integer** must be a whole number with NO decimal point!"
+              },
+              {
+                "id": "c",
+                "label": "Option C",
+                "code": "gems = 10",
+                "explanation": "Spot on! `10` is a whole number with no decimal point and no quotes — a true Python **integer**!"
+              },
+              {
+                "id": "d",
+                "label": "Option D",
+                "code": "gems = \"ten\"",
+                "explanation": "`\"ten\"` is a word in quotes (a string), not an integer!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-02-04",
           "trialType": "code",
           "title": "Two Boxes Together (+ str())",
-          "storyPrompt": "You can add two variable boxes together and store the answer in a THIRD box! And here is a key Python trick: you can't glue text and a number directly with `+` — wrap the number in `str(...)` first (like `\"Gems: \" + str(total_gems)`) to turn it into text!",
+          "storyPrompt": "You can add two integer (whole number) boxes together and store the answer in a THIRD box! And here is a key Python trick: you can't glue a text **string** (`str`) and an **integer** (`int`) directly with `+` — wrap the number in `str(...)` (`str` is short for string!) to turn it into text first, like `\"Gems: \" + str(total_gems)`!",
           "objective": "Add left_gems (8) and right_gems (5) into total_gems, then use say() with str() to output: Gems: 13",
           "concepts": [
             "variables",
@@ -584,8 +616,8 @@
             }
           ],
           "introChoice": {
-            "title": "Adding Variables & Converting with str()",
-            "prompt": "You can add two number variables with `+` (`total = a + b`), AND if you want to glue a number onto a string, wrap the number in `str(...)` first — like `\"Gems: \" + str(total)`!",
+            "title": "Adding Integers & Converting with str()",
+            "prompt": "You can add two integer (whole number) variables with `+` (`total = a + b`), AND if you want to glue an integer onto a text string, wrap the integer in `str(...)` first — like `\"Gems: \" + str(total)`!",
             "question": "What does `say(\"Gems: \" + str(4 + 3))` display?",
             "codeSnippet": "a = 4\nb = 3\ntotal = a + b\nsay(\"Gems: \" + str(total))",
             "choices": [
@@ -617,8 +649,8 @@
           "id": "trial-02-05",
           "trialType": "code",
           "title": "Changing What's Inside a Box (+ int())",
-          "storyPrompt": "Here is a variable superpower: you can UPDATE what's inside a box! Sometimes a number arrives as text in quotes (like `\"5\"`). Use `int(...)` to turn text into a whole number so you can add it to `power`!",
-          "objective": "Convert boost_text to an integer with int(), add it to power (storing the result back in power), and display the updated power.",
+          "storyPrompt": "Here is a variable superpower: you can UPDATE what's inside a box! Sometimes a number arrives as text in quotes (like `\"5\"`). Remember that `int` is short for **integer** (a whole number with no decimal point) — use `int(...)` to turn text like `\"5\"` into the whole number `5` so you can add it to `power`!",
+          "objective": "Convert boost_text into a whole number (integer) with int(), add it to power (storing the result back in power), and display the updated power.",
           "concepts": [
             "variables",
             "basic_math",
@@ -659,8 +691,8 @@
             }
           ],
           "introChoice": {
-            "title": "Updating Variables & Converting with int()",
-            "prompt": "Text like `\"5\"` (in quotes) is a string, not a number! Wrapping it in `int(\"5\")` converts it into the integer `5` so you can add it onto a variable: `power = power + int(boost_text)`.",
+            "title": "Turning Text into an Integer with int()",
+            "prompt": "`int` is short for **integer** — a whole number with no decimal point (like `5` or `10`). Text in quotes like `\"5\"` is a string, not an integer! Wrapping it in `int(\"5\")` converts the text `\"5\"` into the integer `5` so you can do math with it: `power = power + int(boost_text)`.",
             "question": "What does `say(power)` display below?",
             "codeSnippet": "power = 10\nboost_text = \"5\"\npower = power + int(boost_text)\nsay(power)",
             "choices": [
@@ -854,7 +886,7 @@
           "id": "trial-03-01",
           "trialType": "multiple_choice",
           "title": "Spot the Right if Spell!",
-          "storyPrompt": "Welcome to Cinder Cavern! In Python, a **Boolean** is a value that is either `True` or `False` (always capitalized, no quotes!). An `if` statement checks whether a condition is `True` and runs the indented code underneath. Two golden rules: (1) put a colon `:` at the end of the `if` line, and (2) indent lines inside by 4 spaces. Tap the ONE valid Python `if` spell below!",
+          "storyPrompt": "Welcome to Cinder Cavern! In Python, a **Boolean** (`bool` for short) is a yes/no truth value—it can ONLY be `True` or `False` (always capitalized, no quotes!). An `if` statement checks whether a condition is `True` and runs the indented code underneath. Two golden rules: (1) put a colon `:` at the end of the `if` line, and (2) indent lines inside by 4 spaces. Tap the ONE valid Python `if` spell below!",
           "objective": "Choose the valid Python `if` statement that has both a colon `:` and 4-space indentation.",
           "concepts": [
             "variables",
