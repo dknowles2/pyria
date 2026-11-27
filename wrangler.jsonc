@@ -37,5 +37,19 @@
       "database_id": "87992442-0ecc-4ae7-8c5c-ab6e466efdcf",
       "migrations_dir": "migrations"
     }
-  ]
+  ],
+  "triggers": {
+    // Weekly Parent Console progress digest: Sundays at 23:00 UTC
+    "crons": ["0 23 * * SUN"]
+  },
+  "vars": {
+    // Public base URL used in weekly digest emails
+    "PYRIA_BASE_URL": "https://play.pyria.dev",
+    // Sender address for weekly progress digest emails (must match SPF/DKIM/DMARC domain)
+    "EMAIL_FROM": "Pyria <updates@pyria.dev>"
+    // Optional email transport configuration (set via Cloudflare Dashboard / `wrangler secret put`):
+    // - EMAIL_API_KEY (secret: API key for HTTP email provider such as Resend)
+    // - EMAIL_API_URL (var: optional override, defaults to https://api.resend.com/emails)
+    // - SEND_EMAIL (send_email binding for Cloudflare Email Sending)
+  }
 }

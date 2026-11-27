@@ -12,8 +12,15 @@ import {
   handleMagicLinkVerify,
   resolveAuthContext,
 } from './auth';
-import { handleConsoleRequest } from './console';
+import {
+  handleAdminDigestPreview,
+  handleConsolePreferencesPage,
+  handleConsoleRequest,
+  handleUnsubscribeRequest,
+  serveConsoleDigestPrefsScript,
+} from './console';
 import { PyriaD1 } from './db';
+import { runWeeklyDigestJob } from './digest';
 import { checkRateLimit, getClientIp, rateLimitExceededResponse } from './rateLimit';
 import {
   applySecurityHeaders,
@@ -104,6 +111,12 @@ async function handleApiConfig(
 async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
   const method = request.method.toUpperCase();
   const pathname = url.pathname;
+  const db = new PyriaD1(env);
+
+  // Stateless RFC 8058 One-Click Unsubscribe (GET & cross-origin POST authenticated by HMAC token, no cookies)
+  if ((method === 'GET' || method === 'POST') && pathname === '/api/email/unsubscribe') {
+    return handleUnsubscribeRequest(request, env, db, url);
+  }
 
   if (MUTATING_METHODS.has(method)) {
     const csrfError = checkSameOrigin(request);
@@ -120,8 +133,6 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
       403
     );
   }
-
-  const db = new PyriaD1(env);
 
   // Auth endpoints that don't require pre-resolved session
   if (method === 'POST' && pathname === '/api/auth/hero-code/create') {
@@ -182,6 +193,11 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   // Parent & Admin Console API (/api/console/*)
   if (pathname.startsWith('/api/console/')) {
     return handleConsoleRequest(request, env, db, auth, url);
+  }
+
+  // Admin Digest Preview API (POST /api/admin/digest/preview)
+  if (method === 'POST' && pathname === '/api/admin/digest/preview') {
+    return handleAdminDigestPreview(request, env, db, auth, url);
   }
 
   // /api/saves
@@ -430,6 +446,20 @@ async function serveStaticWithHeaders(
     });
   }
 
+  // Parent Console email preferences page & toggle script
+  if (
+    (lowerPath === '/console/preferences' || lowerPath === '/console/email-preferences') &&
+    (method === 'GET' || method === 'HEAD' || method === 'POST')
+  ) {
+    const db = new PyriaD1(env);
+    const auth = await resolveAuthContext(request, env, db);
+    return handleConsolePreferencesPage(request, db, auth);
+  }
+
+  if (lowerPath === '/console/digest-prefs.js' && (method === 'GET' || method === 'HEAD')) {
+    return serveConsoleDigestPrefsScript();
+  }
+
   // Route /console, /console/*, /admin, /admin/*, /builder, /builder/* cleanly to console/builder assets
   let assetReq = request;
   if (
@@ -441,19 +471,39 @@ async function serveStaticWithHeaders(
     lowerPath === '/builder/'
   ) {
     // Prefer /console/index.html if frontend added one, otherwise serve /builder/index.html
+    let baseHtmlRes: Response | null = null;
     if (lowerPath.startsWith('/console')) {
       const consoleTry = await env.ASSETS.fetch(
-        new Request(new URL('/console/index.html', request.url).toString(), { method })
+        new Request(new URL('/console/index.html', request.url).toString(), { method: 'GET' })
       );
       if (consoleTry.ok) {
-        const headers = new Headers(consoleTry.headers);
-        headers.set('Cache-Control', 'no-cache');
-        applySecurityHeaders(headers);
-        return new Response(method === 'HEAD' ? null : consoleTry.body, {
-          status: consoleTry.status,
-          headers,
-        });
+        baseHtmlRes = consoleTry;
       }
+    }
+    if (!baseHtmlRes && (lowerPath === '/console' || lowerPath === '/console/')) {
+      const fallbackTry = await env.ASSETS.fetch(
+        new Request(new URL('/builder/index.html', request.url).toString(), { method: 'GET' })
+      );
+      if (fallbackTry.ok) {
+        baseHtmlRes = fallbackTry;
+      }
+    }
+    if (baseHtmlRes) {
+      const htmlText = await baseHtmlRes.text();
+      const injected = htmlText.includes('digest-prefs.js')
+        ? htmlText
+        : htmlText.replace(
+            /<\/body>/i,
+            '  <script src="/console/digest-prefs.js" defer></script>\n</body>'
+          );
+      const headers = new Headers(baseHtmlRes.headers);
+      headers.set('Content-Type', 'text/html; charset=utf-8');
+      headers.set('Cache-Control', 'no-cache');
+      applySecurityHeaders(headers);
+      return new Response(method === 'HEAD' ? null : injected, {
+        status: baseHtmlRes.status,
+        headers,
+      });
     }
     assetReq = new Request(new URL('/builder/index.html', request.url).toString(), { method });
   } else if (lowerPath.startsWith('/console/') || lowerPath.startsWith('/admin/')) {
@@ -499,5 +549,17 @@ export default {
       console.error('Unhandled worker error:', err);
       return jsonResponse({ error: 'Internal server error' }, 500);
     }
+  },
+
+  async scheduled(
+    controller: ScheduledController,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<void> {
+    ctx.waitUntil(
+      runWeeklyDigestJob(env, {
+        scheduledTime: controller.scheduledTime,
+      })
+    );
   },
 };
