@@ -74,26 +74,26 @@
         {
           "id": "trial-32-01-02",
           "trialType": "fix_bug",
-          "title": "Fix the Tuple Unpack!",
-          "storyPrompt": "Lord Null tried to unpack 3 coordinates into only 2 variables (`ValueError`)! Add `, z` so all 3 unpack cleanly.",
-          "objective": "Unpack `pos` into `x, y, z = pos` and print `z`.",
+          "title": "The Coordinate Unpack Crashes!",
+          "storyPrompt": "Terracrest's elevation reader crashes with a `ValueError` when trying to unpack the 3D coordinate tuple `pos`.",
+          "objective": "Fix the unpacking line so it prints the z-coordinate `3`.",
           "concepts": [
             "tuples",
             "coords_3d"
           ],
           "shardReward": 120,
           "unlockId": null,
-          "bugSummary": "Unpack `pos` into `x, y, z = pos` and print `z`.",
+          "bugSummary": "Unpacking `pos` raises a `ValueError` instead of printing `3`.",
           "starterCode": {
             "explorer": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
             "standard": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
-            "challenge": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\npos = (10, 5, 3)\nx, y = pos\nprint(z)\n"
           },
           "referenceSolution": "pos = (10, 5, 3)\nx, y, z = pos\nprint(z)\n",
           "testCode": "assert (x, y, z) == (10, 5, 3) and OUTPUT.strip() == \"3\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "pos = (10, 5, 3)\nx, y, z = pos\nprint(z)",
+            "tier2_pattern": "pos = ___\nx, y, z = ___\nprint(___)",
             "tier3_walkthrough": "Update to:\npos = (10, 5, 3)\nx, y, z = pos\nprint(z)"
           },
           "difficultyOverride": null
@@ -113,13 +113,13 @@
           "starterCode": {
             "explorer": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)\n",
           "testCode": "assert higher == (3, 4, 3) and OUTPUT.strip() == \"(3, 4, 3)\"",
           "hints": {
             "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)",
+            "tier2_pattern": "pos = ___\nx, y, z = ___\nhigher = ___\nprint(___)",
             "tier3_walkthrough": "Write:\npos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)"
           },
           "difficultyOverride": null
@@ -156,7 +156,7 @@
           "trialType": "code",
           "title": "Find the Highest Peak",
           "storyPrompt": "You're right outside Terracrest's vault! Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.",
-          "objective": "Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.",
+          "objective": "Loop through `peaks` by unpacking each `(x, y, z)` tuple to find the largest `z` value in `max_z`, then print `max_z`.",
           "concepts": [
             "tuples",
             "coords_3d",
@@ -167,13 +167,13 @@
           "starterCode": {
             "explorer": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)\n",
           "testCode": "assert max_z == 9 and OUTPUT.strip() == \"9\"",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)",
+            "tier2_pattern": "peaks = ___\nmax_z = ___\nfor ___ in ___:\n    if ___:\n        max_z = ___\nprint(___)",
             "tier3_walkthrough": "Write:\npeaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)"
           },
           "difficultyOverride": null
@@ -376,26 +376,26 @@
         {
           "id": "trial-32-02-02",
           "trialType": "fix_bug",
-          "title": "Fix the Foundry Comprehension!",
-          "storyPrompt": "Lord Null missed the `in` keyword inside the list comprehension! Put `in` between `x` and `ores`.",
-          "objective": "Fix `[x * 10 for x ores]` to `[x * 10 for x in ores]`.",
+          "title": "The Foundry Comprehension Won't Parse!",
+          "storyPrompt": "Anvilwing's list comprehension throws a `SyntaxError` instead of scaling every ore by 10.",
+          "objective": "Find and fix the comprehension syntax so it prints `[10, 20, 30]`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
           ],
           "shardReward": 130,
           "unlockId": null,
-          "bugSummary": "Fix `[x * 10 for x ores]` to `[x * 10 for x in ores]`.",
+          "bugSummary": "Python rejects the list comprehension with a `SyntaxError`.",
           "starterCode": {
             "explorer": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
             "standard": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
-            "challenge": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n"
           },
           "referenceSolution": "ores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)\n",
           "testCode": "assert power == [10, 20, 30] and OUTPUT.strip() == \"[10, 20, 30]\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "ores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)",
+            "tier2_pattern": "ores = ___\npower = ___\nprint(___)",
             "tier3_walkthrough": "Update to:\nores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)"
           },
           "difficultyOverride": null
@@ -415,13 +415,13 @@
           "starterCode": {
             "explorer": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)\n",
           "testCode": "assert hot == [12, 20] and OUTPUT.strip() == \"[12, 20]\"",
           "hints": {
             "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)",
+            "tier2_pattern": "temps = ___\nhot = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntemps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)"
           },
           "difficultyOverride": null
@@ -441,13 +441,13 @@
           "starterCode": {
             "explorer": "coords = [(x, y) for x in range(2) for y in range(2)]\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))\n",
           "testCode": "assert coords == [(0, 0), (0, 1), (1, 0), (1, 1)] and OUTPUT.strip() == \"4\"",
           "hints": {
             "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))",
+            "tier2_pattern": "coords = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncoords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))"
           },
           "difficultyOverride": null
@@ -457,7 +457,7 @@
           "trialType": "code",
           "title": "Uppercase Rune Tags",
           "storyPrompt": "You're right outside Anvilwing's vault! Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.",
-          "objective": "Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.",
+          "objective": "Use a list comprehension to build `loud` containing every word from `tags` converted to uppercase, then print `loud`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -467,13 +467,13 @@
           "starterCode": {
             "explorer": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)\n",
           "testCode": "assert loud == [\"IRON\", \"GOLD\"] and OUTPUT.strip() == \"['IRON', 'GOLD']\"",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)",
+            "tier2_pattern": "tags = ___\nloud = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)"
           },
           "difficultyOverride": null
@@ -483,7 +483,7 @@
           "trialType": "code",
           "title": "Ignite Anvilwing's Sky-Forge (Boss)",
           "storyPrompt": "Final lock before Anvilwing! Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.",
-          "objective": "Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.",
+          "objective": "Ignite Anvilwing's Sky-Forge! Build a list `forged` using a list comprehension that doubles every bar in `bars` that is at least 20. If the sum of `forged` equals 130, announce `ANVILWING FREE!`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -493,13 +493,13 @@
           "starterCode": {
             "explorer": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")\n",
           "testCode": "assert forged == [50, 80] and OUTPUT.strip() == \"ANVILWING FREE!\"",
           "hints": {
             "tier1_nudge": "One last spell to free Anvilwing!",
-            "tier2_pattern": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")",
+            "tier2_pattern": "bars = ___\nforged = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\nbars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")"
           },
           "difficultyOverride": null
@@ -675,26 +675,26 @@
         {
           "id": "trial-32-03-02",
           "trialType": "fix_bug",
-          "title": "Fix the Nested Dict Lookup!",
-          "storyPrompt": "Lord Null misspelled `\"north\"` as `\"norht\"` in the cavern map lookup! Fix the key.",
-          "objective": "Change `\"norht\"` to `\"north\"` so `print(cavern[\"gate\"][\"north\"])` outputs `\"OPEN\"`.",
+          "title": "The Cavern Map Raises KeyError!",
+          "storyPrompt": "Lumina's nested room map crashes with a `KeyError` when checking the northern gate.",
+          "objective": "Fix the nested dictionary lookup so it prints `OPEN`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
           ],
           "shardReward": 140,
           "unlockId": null,
-          "bugSummary": "Change `\"norht\"` to `\"north\"` so `print(cavern[\"gate\"][\"north\"])` outputs `\"OPEN\"`.",
+          "bugSummary": "Looking up the northern gate raises a `KeyError`.",
           "starterCode": {
             "explorer": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
             "standard": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
-            "challenge": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n"
           },
           "referenceSolution": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])\n",
           "testCode": "assert OUTPUT.strip() == \"OPEN\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])",
+            "tier2_pattern": "cavern = ___\nprint(___)",
             "tier3_walkthrough": "Update to:\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])"
           },
           "difficultyOverride": null
@@ -714,13 +714,13 @@
           "starterCode": {
             "explorer": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)\n",
           "testCode": "assert unique_count == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
             "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)",
+            "tier2_pattern": "found = ___\nunique_count = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nfound = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)"
           },
           "difficultyOverride": null
@@ -729,7 +729,7 @@
           "id": "trial-32-03-04",
           "trialType": "code",
           "title": "Set Intersection (&)",
-          "storyPrompt": "Push deeper into Prism Caverns! Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.",
+          "storyPrompt": "Sets support fast math operators: `&` finds the **intersection** (items in BOTH sets), while `|` finds the **union** (items in EITHER set).",
           "objective": "Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.",
           "concepts": [
             "dictionaries_nested",
@@ -740,13 +740,13 @@
           "starterCode": {
             "explorer": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))\n",
           "testCode": "assert common == {\"gold\", \"ruby\"} and OUTPUT.strip() == \"2\"",
           "hints": {
             "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))",
+            "tier2_pattern": "a = ___\nb = ___\ncommon = ___\nprint(___)",
             "tier3_walkthrough": "Write:\na = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))"
           },
           "difficultyOverride": null
@@ -756,7 +756,7 @@
           "trialType": "code",
           "title": "Read a Nested Room Map",
           "storyPrompt": "You're right outside Lumina's vault! Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.",
-          "objective": "Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.",
+          "objective": "Read the destination room stored under `\"hall\"` -> `\"next\"` inside the nested `rooms` dictionary into `dest` and print `dest`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -766,13 +766,13 @@
           "starterCode": {
             "explorer": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)\n",
           "testCode": "assert dest == \"vault\" and OUTPUT.strip() == \"vault\"",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)",
+            "tier2_pattern": "rooms = ___\ndest = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nrooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)"
           },
           "difficultyOverride": null
@@ -782,7 +782,7 @@
           "trialType": "code",
           "title": "Align Lumina's Crystal Graph (Boss)",
           "storyPrompt": "Final lock before Lumina! Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.",
-          "objective": "Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.",
+          "objective": "Align Lumina's Crystal Graph! Compute the total power across all nested node dictionaries in `nodes` into `beam`, and when `beam` equals 100, announce `LUMINA FREE!`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -792,13 +792,13 @@
           "starterCode": {
             "explorer": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
           "testCode": "assert beam == 100 and OUTPUT.strip() == \"LUMINA FREE!\"",
           "hints": {
             "tier1_nudge": "One last spell to free Lumina!",
-            "tier2_pattern": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")",
+            "tier2_pattern": "beam = sum([n[___] for n in nodes.___()])\nif beam == 100:\n    print(___)",
             "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")"
           },
           "difficultyOverride": null
@@ -1019,13 +1019,13 @@
           "starterCode": {
             "explorer": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))\n",
           "testCode": "assert safe_int(\"42\") == 42 and safe_int(\"oops\") == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
             "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))",
+            "tier2_pattern": "def safe_int(___):\n    try:\n        return ___\n    except ___:\n        return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))"
           },
           "difficultyOverride": null
@@ -1048,13 +1048,13 @@
           "starterCode": {
             "explorer": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))\n",
           "testCode": "assert safe_div(20, 4) == 5 and safe_div(20, 0) == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
             "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))",
+            "tier2_pattern": "def safe_div(___):\n    try:\n        return ___\n    except ___:\n        return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))"
           },
           "difficultyOverride": null
@@ -1064,7 +1064,7 @@
           "trialType": "code",
           "title": "3D Distance Squared",
           "storyPrompt": "You're right outside Vortex's vault! Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.",
-          "objective": "Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.",
+          "objective": "Using the two 3D point tuples `p1` and `p2`, compute their squared 3D distance in `d2` and print `d2`.",
           "concepts": [
             "error_handling",
             "tuples",
@@ -1075,13 +1075,13 @@
           "starterCode": {
             "explorer": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)\n",
           "testCode": "assert d2 == 25 and OUTPUT.strip() == \"25\"",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)",
+            "tier2_pattern": "p1 = ___\np2 = ___\nd2 = ___\nprint(___)",
             "tier3_walkthrough": "Write:\np1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)"
           },
           "difficultyOverride": null

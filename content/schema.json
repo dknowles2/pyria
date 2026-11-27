@@ -221,7 +221,7 @@
         },
         "bugSummary": {
           "type": "string",
-          "description": "Short 1-line hint banner describing Lord Null's sabotage in fix_bug trials."
+          "description": "Short 1-line symptom banner describing Lord Null's sabotage in fix_bug trials."
         }
       }
     },
