@@ -293,3 +293,59 @@ test('attachAutocomplete handles ident/arg/method modes, keyboard nav, Ctrl+Ente
     else delete globalThis.window;
   }
 });
+
+test('buildTrialSuggestions does not turn variables followed by prose parentheticals into function calls', () => {
+  const suggestions = buildTrialSuggestions({
+    era: { id: 'era-01-8bit' },
+    realm: { number: 2 },
+    trial: {
+      objective:
+        'Add left_gems (8) and right_gems (5) into total_gems, then use say() with str() to output: Gems: 13',
+      starterCode: {
+        explorer: 'left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay("Gems: " + str(???))\n',
+        standard: 'left_gems = 8\nright_gems = 5\n',
+        challenge: '',
+      },
+    },
+  });
+
+  const leftGems = suggestions.find((s) => s.matchText === 'left_gems');
+  assert.ok(leftGems, 'left_gems should be suggested');
+  assert.equal(leftGems.label, 'left_gems');
+  assert.equal(leftGems.snippet, 'left_gems');
+  assert.equal(leftGems.category, 'keyword');
+
+  const rightGems = suggestions.find((s) => s.matchText === 'right_gems');
+  assert.ok(rightGems, 'right_gems should be suggested');
+  assert.equal(rightGems.label, 'right_gems');
+  assert.equal(rightGems.snippet, 'right_gems');
+  assert.equal(rightGems.category, 'keyword');
+
+  const totalGems = suggestions.find((s) => s.matchText === 'total_gems');
+  assert.ok(totalGems, 'total_gems should be suggested');
+  assert.equal(totalGems.snippet, 'total_gems');
+});
+
+test('buildTrialSuggestions ignores prose parentheticals, dot-methods, and placeholder underscores as standalone functions', () => {
+  const suggestions = buildTrialSuggestions({
+    era: { id: 'era-02-16bit' },
+    realm: { number: 5 },
+    trial: {
+      objective:
+        'Call activate_beacon() on raw_word.strip().upper(), flap twice (10, then 15), and sort descending (reverse=True).',
+      starterCode: {
+        explorer: 'raw_word = "  ok  "\nresult = raw_word.___()\n',
+        standard: '',
+        challenge: '',
+      },
+    },
+  });
+
+  const fnNames = suggestions.filter((s) => s.category === 'fn').map((s) => s.matchText);
+  assert.ok(fnNames.includes('activate_beacon'), 'real function call should be extracted');
+  assert.equal(fnNames.includes('strip'), false, 'dot-method should not be suggested as standalone fn');
+  assert.equal(fnNames.includes('upper'), false, 'dot-method should not be suggested as standalone fn');
+  assert.equal(fnNames.includes('twice'), false, 'prose word before parenthetical should not be a fn');
+  assert.equal(fnNames.includes('descending'), false, 'prose word before parenthetical should not be a fn');
+  assert.equal(fnNames.includes('___'), false, 'underscore placeholder should not be a fn');
+});
