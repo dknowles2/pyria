@@ -1,7 +1,7 @@
 // Crisp HTML5 Canvas Overworld Engine for Pyria (8-Bit, 16-Bit, 32-Bit Isometric 2.5D, 64-Bit N64 3D)
 
-import { audio } from './audio.js?v=20261127d';
-import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127d';
+import { audio } from './audio.js?v=20261127e';
+import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127e';
 
 const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
@@ -28,6 +28,21 @@ const MINIMAP_COLORS = {
   vault_shrine: '#dc2626',
   torch: '#fb923c',
   portal: '#38bdf8',
+  lava: '#ef4444',
+  ice_floor: '#bae6fd',
+  ice_wall: '#38bdf8',
+  sand: '#fde68a',
+  coral: '#fb7185',
+  obsidian_floor: '#312e4a',
+  obsidian_wall: '#6d28d9',
+  brass_floor: '#d97706',
+  gear_prop: '#f59e0b',
+  cloud_floor: '#e0f2fe',
+  star_tile: '#1e1b4b',
+  crystal_pillar: '#e879f9',
+  pine_tree: '#15803d',
+  column: '#e2e8f0',
+  flower_bed: '#f43f5e',
 };
 
 export class WorldEngine {
@@ -632,12 +647,24 @@ export class WorldEngine {
         }
         this.sprites.drawTile(ctx, groundTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
 
-        // Animated water shimmer
+        // Animated water, lava & starfield shimmer
         if (groundTile === 'water') {
           const shimmer = Math.sin(this.time * 3 + x * 0.9 + y * 0.7);
           if (shimmer > 0.55) {
             ctx.fillStyle = 'rgba(186, 230, 253, 0.28)';
             ctx.fillRect(sx + 8, sy + 14 + Math.round(shimmer * 4), 16, 4);
+          }
+        } else if (groundTile === 'lava') {
+          const pulse = Math.sin(this.time * 4 + x * 1.1 + y * 0.8);
+          if (pulse > 0.4) {
+            ctx.fillStyle = 'rgba(253, 224, 71, 0.42)';
+            ctx.fillRect(sx + 10, sy + 16, 14, 5);
+          }
+        } else if (groundTile === 'star_tile') {
+          const twinkle = Math.sin(this.time * 5 + x * 2.3 + y * 1.7);
+          if (twinkle > 0.65) {
+            ctx.fillStyle = 'rgba(254, 240, 138, 0.75)';
+            ctx.fillRect(sx + ((x * 13) % 34) + 4, sy + ((y * 17) % 34) + 4, 4, 4);
           }
         }
 

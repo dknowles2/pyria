@@ -21,6 +21,21 @@ const TILE_PALETTE = {
   vault_shrine: { top: '#f43f5e', left: '#be123c', right: '#881337' },
   torch: { top: '#fde047', left: '#f97316', right: '#c2410c' },
   portal: { top: '#38bdf8', left: '#6366f1', right: '#4338ca' },
+  lava: { top: '#f97316', left: '#dc2626', right: '#991b1b' },
+  ice_floor: { top: '#e0f2fe', left: '#7dd3fc', right: '#38bdf8' },
+  ice_wall: { top: '#f0f9ff', left: '#38bdf8', right: '#0284c7' },
+  sand: { top: '#fde68a', left: '#f59e0b', right: '#b45309' },
+  coral: { top: '#fb7185', left: '#2dd4bf', right: '#0f766e' },
+  obsidian_floor: { top: '#312e4a', left: '#1e1b2e', right: '#0f0d1a' },
+  obsidian_wall: { top: '#6d28d9', left: '#3b0764', right: '#1e1b4b' },
+  brass_floor: { top: '#d97706', left: '#92400e', right: '#78350f' },
+  gear_prop: { top: '#fde047', left: '#d97706', right: '#78350f' },
+  cloud_floor: { top: '#f0f9ff', left: '#bae6fd', right: '#7dd3fc' },
+  star_tile: { top: '#1e1b4b', left: '#0f172a', right: '#020617' },
+  crystal_pillar: { top: '#e879f9', left: '#38bdf8', right: '#6d28d9' },
+  pine_tree: { top: '#22c55e', left: '#15803d', right: '#14532d' },
+  column: { top: '#f8fafc', left: '#cbd5e1', right: '#64748b' },
+  flower_bed: { top: '#66bb6a', left: '#2e7d32', right: '#1b5e20' },
 };
 
 function getTileElevation(map, x, y, groundTile) {
@@ -148,14 +163,22 @@ export function renderIsometric32Bit(engine, ctx, dynamicOverrides, completed, o
           }
 
           // Extruded 2.5D decor structures
-          if (decorTile === 'stone_wall' || decorTile === 'mossy_gate_closed') {
+          if (
+            decorTile === 'stone_wall' ||
+            decorTile === 'mossy_gate_closed' ||
+            decorTile === 'ice_wall' ||
+            decorTile === 'obsidian_wall'
+          ) {
             const dpal = TILE_PALETTE[decorTile] || TILE_PALETTE.stone_wall;
             drawIsoBox(ctx, p.x, p.y - 18, HW * 0.88, HH * 0.88, 22, dpal);
-          } else if (decorTile === 'tree') {
+          } else if (decorTile === 'crystal_pillar' || decorTile === 'column') {
+            const dpal = TILE_PALETTE[decorTile];
+            drawIsoBox(ctx, p.x, p.y - 26, HW * 0.52, HH * 0.52, 28, dpal);
+          } else if (decorTile === 'tree' || decorTile === 'pine_tree') {
             // Chunky trunk + layered isometric emerald crown
             ctx.fillStyle = '#6d4c41';
             ctx.fillRect(Math.round(p.x - 4), Math.round(p.y - 14), 8, 14);
-            drawIsoBox(ctx, p.x, p.y - 26, HW * 0.72, HH * 0.72, 14, TILE_PALETTE.tree);
+            drawIsoBox(ctx, p.x, p.y - 26, HW * 0.72, HH * 0.72, 14, TILE_PALETTE[decorTile]);
           } else if (decorTile === 'portal') {
             const pulse = 0.7 + 0.3 * Math.sin(time * 5);
             ctx.strokeStyle = `rgba(56, 189, 248, ${pulse.toFixed(2)})`;
@@ -174,7 +197,14 @@ export function renderIsometric32Bit(engine, ctx, dynamicOverrides, completed, o
             ctx.fill();
           } else if (decorTile === 'chest_closed' || decorTile === 'chest_open') {
             drawIsoBox(ctx, p.x, p.y - 8, HW * 0.5, HH * 0.5, 10, TILE_PALETTE[decorTile]);
-          } else if (decorTile === 'anvil' || decorTile === 'campfire' || decorTile === 'statue' || decorTile === 'bush') {
+          } else if (
+            decorTile === 'anvil' ||
+            decorTile === 'campfire' ||
+            decorTile === 'statue' ||
+            decorTile === 'bush' ||
+            decorTile === 'coral' ||
+            decorTile === 'gear_prop'
+          ) {
             drawIsoBox(ctx, p.x, p.y - 10, HW * 0.55, HH * 0.55, 12, TILE_PALETTE[decorTile]);
           }
         },
@@ -398,21 +428,52 @@ export function renderN643D(engine, ctx, dynamicOverrides, completed, openedChes
             depth: pc.depth - 0.05,
             draw: () => {
               const s = pc.scale;
-              if (decorTile === 'tree') {
+              if (decorTile === 'tree' || decorTile === 'pine_tree') {
                 // Chunky N64 brown trunk + 2-tier Gouraud emerald pyramid canopy
                 ctx.fillStyle = '#78350f';
                 ctx.fillRect(pc.sx - s * 0.14, pc.sy - s * 0.6, s * 0.28, s * 0.6);
                 const g1 = ctx.createLinearGradient(pc.sx - s * 0.5, pc.sy - s * 1.6, pc.sx + s * 0.5, pc.sy - s * 0.4);
-                g1.addColorStop(0, '#4ade80');
+                g1.addColorStop(0, decorTile === 'pine_tree' ? '#34d399' : '#4ade80');
                 g1.addColorStop(1, '#14532d');
                 ctx.fillStyle = g1;
                 ctx.beginPath();
-                ctx.moveTo(pc.sx, pc.sy - s * 1.75);
+                ctx.moveTo(pc.sx, pc.sy - s * 1.85);
                 ctx.lineTo(pc.sx - s * 0.52, pc.sy - s * 0.45);
                 ctx.lineTo(pc.sx + s * 0.52, pc.sy - s * 0.45);
                 ctx.closePath();
                 ctx.fill();
-              } else if (decorTile === 'stone_wall' || decorTile === 'mossy_gate_closed' || decorTile === 'vault_shrine') {
+              } else if (decorTile === 'crystal_pillar') {
+                // Glowing low-poly 3D diamond prism
+                const cg = ctx.createLinearGradient(pc.sx - s * 0.3, pc.sy - s * 1.6, pc.sx + s * 0.3, pc.sy);
+                cg.addColorStop(0, '#f0abfc');
+                cg.addColorStop(0.5, '#38bdf8');
+                cg.addColorStop(1, '#4c1d95');
+                ctx.fillStyle = cg;
+                ctx.beginPath();
+                ctx.moveTo(pc.sx, pc.sy - s * 1.65);
+                ctx.lineTo(pc.sx + s * 0.34, pc.sy - s * 0.6);
+                ctx.lineTo(pc.sx, pc.sy);
+                ctx.lineTo(pc.sx - s * 0.34, pc.sy - s * 0.6);
+                ctx.closePath();
+                ctx.fill();
+              } else if (decorTile === 'column') {
+                const cw = s * 0.46;
+                const ch = s * 1.45;
+                const cg = ctx.createLinearGradient(pc.sx - cw / 2, pc.sy - ch, pc.sx + cw / 2, pc.sy);
+                cg.addColorStop(0, '#f8fafc');
+                cg.addColorStop(1, '#64748b');
+                ctx.fillStyle = cg;
+                ctx.fillRect(pc.sx - cw / 2, pc.sy - ch, cw, ch);
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(pc.sx - cw * 0.68, pc.sy - ch, cw * 1.36, s * 0.18);
+                ctx.fillRect(pc.sx - cw * 0.68, pc.sy - s * 0.16, cw * 1.36, s * 0.16);
+              } else if (
+                decorTile === 'stone_wall' ||
+                decorTile === 'mossy_gate_closed' ||
+                decorTile === 'vault_shrine' ||
+                decorTile === 'ice_wall' ||
+                decorTile === 'obsidian_wall'
+              ) {
                 const dpal = TILE_PALETTE[decorTile] || TILE_PALETTE.stone_wall;
                 const bh = decorTile === 'vault_shrine' ? s * 1.4 : s * 1.05;
                 const bw = s * 0.92;
@@ -423,6 +484,14 @@ export function renderN643D(engine, ctx, dynamicOverrides, completed, openedChes
                 ctx.fillRect(pc.sx - bw / 2, pc.sy - bh, bw, bh);
                 ctx.strokeStyle = 'rgba(15, 23, 42, 0.4)';
                 ctx.lineWidth = 1.2;
+                ctx.strokeRect(pc.sx - bw / 2, pc.sy - bh, bw, bh);
+              } else if (decorTile === 'coral' || decorTile === 'gear_prop' || decorTile === 'statue' || decorTile === 'bush') {
+                const dpal = TILE_PALETTE[decorTile];
+                const bw = s * 0.62;
+                const bh = s * 0.68;
+                ctx.fillStyle = dpal.top;
+                ctx.fillRect(pc.sx - bw / 2, pc.sy - bh, bw, bh);
+                ctx.strokeStyle = dpal.right;
                 ctx.strokeRect(pc.sx - bw / 2, pc.sy - bh, bw, bh);
               } else if (decorTile === 'portal') {
                 const pulse = 0.7 + 0.3 * Math.sin(time * 5);

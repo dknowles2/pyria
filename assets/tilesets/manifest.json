@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "tilesetId": "meadow_ruins",
   "tileSize": 16,
   "tileIds": [
@@ -22,7 +22,22 @@
     "chest_open",
     "vault_shrine",
     "torch",
-    "portal"
+    "portal",
+    "lava",
+    "ice_floor",
+    "ice_wall",
+    "sand",
+    "coral",
+    "obsidian_floor",
+    "obsidian_wall",
+    "brass_floor",
+    "gear_prop",
+    "cloud_floor",
+    "star_tile",
+    "crystal_pillar",
+    "pine_tree",
+    "column",
+    "flower_bed"
   ],
   "npcKeys": [
     "elder_ada",
@@ -40,7 +55,7 @@
       "tilesetImage": "8bit/meadow_ruins.png",
       "tilesetSize": {
         "width": 80,
-        "height": 64
+        "height": 112
       },
       "npcsImage": "8bit/npcs_and_dragons.png",
       "npcsSize": {
@@ -207,6 +222,126 @@
           "y": 48,
           "width": 16,
           "height": 16
+        },
+        "lava": {
+          "col": 0,
+          "row": 4,
+          "x": 0,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "ice_floor": {
+          "col": 1,
+          "row": 4,
+          "x": 16,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "ice_wall": {
+          "col": 2,
+          "row": 4,
+          "x": 32,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "sand": {
+          "col": 3,
+          "row": 4,
+          "x": 48,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "coral": {
+          "col": 4,
+          "row": 4,
+          "x": 64,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "obsidian_floor": {
+          "col": 0,
+          "row": 5,
+          "x": 0,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "obsidian_wall": {
+          "col": 1,
+          "row": 5,
+          "x": 16,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "brass_floor": {
+          "col": 2,
+          "row": 5,
+          "x": 32,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "gear_prop": {
+          "col": 3,
+          "row": 5,
+          "x": 48,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "cloud_floor": {
+          "col": 4,
+          "row": 5,
+          "x": 64,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "star_tile": {
+          "col": 0,
+          "row": 6,
+          "x": 0,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "crystal_pillar": {
+          "col": 1,
+          "row": 6,
+          "x": 16,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "pine_tree": {
+          "col": 2,
+          "row": 6,
+          "x": 32,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "column": {
+          "col": 3,
+          "row": 6,
+          "x": 48,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "flower_bed": {
+          "col": 4,
+          "row": 6,
+          "x": 64,
+          "y": 96,
+          "width": 16,
+          "height": 16
         }
       },
       "npcs": {
@@ -288,7 +423,7 @@
       "tilesetImage": "16bit/meadow_ruins.png",
       "tilesetSize": {
         "width": 80,
-        "height": 64
+        "height": 112
       },
       "npcsImage": "16bit/npcs_and_dragons.png",
       "npcsSize": {
@@ -453,6 +588,126 @@
           "row": 3,
           "x": 64,
           "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        "lava": {
+          "col": 0,
+          "row": 4,
+          "x": 0,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "ice_floor": {
+          "col": 1,
+          "row": 4,
+          "x": 16,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "ice_wall": {
+          "col": 2,
+          "row": 4,
+          "x": 32,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "sand": {
+          "col": 3,
+          "row": 4,
+          "x": 48,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "coral": {
+          "col": 4,
+          "row": 4,
+          "x": 64,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        "obsidian_floor": {
+          "col": 0,
+          "row": 5,
+          "x": 0,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "obsidian_wall": {
+          "col": 1,
+          "row": 5,
+          "x": 16,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "brass_floor": {
+          "col": 2,
+          "row": 5,
+          "x": 32,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "gear_prop": {
+          "col": 3,
+          "row": 5,
+          "x": 48,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "cloud_floor": {
+          "col": 4,
+          "row": 5,
+          "x": 64,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        "star_tile": {
+          "col": 0,
+          "row": 6,
+          "x": 0,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "crystal_pillar": {
+          "col": 1,
+          "row": 6,
+          "x": 16,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "pine_tree": {
+          "col": 2,
+          "row": 6,
+          "x": 32,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "column": {
+          "col": 3,
+          "row": 6,
+          "x": 48,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        "flower_bed": {
+          "col": 4,
+          "row": 6,
+          "x": 64,
+          "y": 96,
           "width": 16,
           "height": 16
         }

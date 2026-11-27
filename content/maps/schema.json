@@ -40,7 +40,22 @@
         "chest_open",
         "vault_shrine",
         "torch",
-        "portal"
+        "portal",
+        "lava",
+        "ice_floor",
+        "ice_wall",
+        "sand",
+        "coral",
+        "obsidian_floor",
+        "obsidian_wall",
+        "brass_floor",
+        "gear_prop",
+        "cloud_floor",
+        "star_tile",
+        "crystal_pillar",
+        "pine_tree",
+        "column",
+        "flower_bed"
       ]
     },
     "dynamicTile": {
