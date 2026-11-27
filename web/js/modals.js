@@ -743,8 +743,9 @@ export class ModalManager {
       const isFixBug = trial.trialType === 'fix_bug';
       const hasHashComment = (code) => /^\s*#/m.test(code || '');
       const showCommentTip = (Number(realm?.number) || 1) <= 3 && hasHashComment(initialCode);
-      const blockConcepts = new Set(['conditionals_if', 'conditionals_elif_else', 'loops', 'functions']);
-      const showIndentTip = (trial.concepts || []).some((c) => blockConcepts.has(c));
+      const showIndentTip = (trial.concepts || []).some((c) =>
+        /^(conditionals|for_loops|while_loops|nested_loops|functions|classes|class_|error_handling)/.test(c)
+      );
       const ensureTrailingEditableLine = (code) => {
         if (!code) return '';
         const lines = code.split('\n');
