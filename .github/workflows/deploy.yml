@@ -61,7 +61,7 @@ jobs:
       - name: Build static assets
         run: npm run build:assets
 
-      - name: Apply D1 migrations and deploy Worker
+      - name: Apply D1 migrations and deploy Workers
         run: |
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
             echo "CLOUDFLARE_API_TOKEN secret is not configured; skipping deploy."
@@ -69,3 +69,4 @@ jobs:
           fi
           npx wrangler d1 migrations apply pyria-db --remote
           npx wrangler deploy
+          npx wrangler deploy -c wrangler.site.jsonc
