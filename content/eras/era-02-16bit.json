@@ -1265,7 +1265,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\n",
-            "standard": "",
+            "standard": "shells = [5, 18, 9, 24]\nbig_shells = []\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)\n",
@@ -1631,7 +1631,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\n",
-            "standard": "",
+            "standard": "signals = [3, 5, 7]\nboosted = []\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)\n",
@@ -1680,7 +1680,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\n",
-            "standard": "",
+            "standard": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)\n",
@@ -2155,7 +2155,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\n",
-            "standard": "",
+            "standard": "charge = 10\nsteps = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)\n",
@@ -2424,7 +2424,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\n",
-            "standard": "",
+            "standard": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)\n",
@@ -2457,7 +2457,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\n",
-            "standard": "",
+            "standard": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)\n",
@@ -3170,7 +3170,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n",
-            "standard": "",
+            "standard": "def add_one(x):\n    return x + 1\n\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))\n",
@@ -4002,7 +4002,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\n",
-            "standard": "",
+            "standard": "gem = \"Ruby\"\nrank = 5\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)\n",
@@ -4406,7 +4406,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\n",
-            "standard": "",
+            "standard": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)\n",
@@ -4453,7 +4453,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\n",
-            "standard": "",
+            "standard": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)\n",
@@ -4503,7 +4503,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\ndef count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[\"rare\"]:\n            total += 1\n    return ___\n\nrares = count_rare(shelf)\nprint(rares)\n",
-            "standard": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\n# Define count_rare(shelf), store count_rare(shelf) in rares, and print rares\n",
+            "standard": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\n\ndef count_rare(shelf):\n    total = 0\n",
             "challenge": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\n"
           },
           "referenceSolution": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\ndef count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[\"rare\"]:\n            total += 1\n    return total\n\nrares = count_rare(shelf)\nprint(rares)\n",
@@ -4840,7 +4840,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\n",
-            "standard": "",
+            "standard": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])\n",
@@ -4912,7 +4912,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\n",
-            "standard": "",
+            "standard": "a = {\"x\": 1}\nb = {\"y\": 2}\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c.keys()))\n",
@@ -5215,7 +5215,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\n",
-            "standard": "",
+            "standard": "grid = [[1, 2], [3, 4]]\ntotal = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)\n",
@@ -5293,7 +5293,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\n",
-            "standard": "",
+            "standard": "sums = []\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)\n",
@@ -5325,7 +5325,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "sky = [[4, 9], [12, 3]]\ndef find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if n > best:\n                best = ___\n    return ___\n\nhighest = find_highest(sky)\nprint(highest)\n",
-            "standard": "sky = [[4, 9], [12, 3]]\n# Define find_highest(grid) using nested loops, then print highest\n",
+            "standard": "sky = [[4, 9], [12, 3]]\n\ndef find_highest(grid):\n    best = 0\n",
             "challenge": "sky = [[4, 9], [12, 3]]\n"
           },
           "referenceSolution": "sky = [[4, 9], [12, 3]]\ndef find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if n > best:\n                best = n\n    return best\n\nhighest = find_highest(sky)\nprint(highest)\n",
@@ -5653,7 +5653,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\n",
-            "standard": "",
+            "standard": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())\n",
@@ -5714,7 +5714,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\n",
-            "standard": "",
+            "standard": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power += amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)\n",
@@ -6007,7 +6007,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\n",
-            "standard": "",
+            "standard": "class Dragon:\n    def __init__(self, p):\n        self.p = p\n\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)\n",
@@ -6039,7 +6039,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\n",
-            "standard": "",
+            "standard": "class Coil:\n    def __init__(self, power):\n        self.power = power\n\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)\n",
@@ -6393,7 +6393,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\n",
-            "standard": "",
+            "standard": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)\n",

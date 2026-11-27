@@ -151,7 +151,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\n",
-            "standard": "",
+            "standard": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))\n",
@@ -213,7 +213,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\nclass Camera:\n    def __init__(self, target, offset=5):\n        self.target = target\n        self.offset = offset\n    def view_z(self):\n        return self.target.___ + self.___\n\nhero = Entity(10)\ncam = Camera(hero)\nprint(cam.view_z())\n",
-            "standard": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\n# Define Camera(target, offset=5) with view_z() returning target.z + offset\n",
+            "standard": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\nclass Camera:\n    def __init__(self, target, offset=5):\n        self.target = target\n        self.offset = offset\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\nclass Camera:\n    def __init__(self, target, offset=5):\n        self.target = target\n        self.offset = offset\n    def view_z(self):\n        return self.target.z + self.offset\n\nhero = Entity(10)\ncam = Camera(hero)\nprint(cam.view_z())\n",
@@ -507,7 +507,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\n",
-            "standard": "",
+            "standard": "class Dragon:\n    def power(self):\n        return 20\n\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())\n",
@@ -567,7 +567,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\n",
-            "standard": "",
+            "standard": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)\n",
@@ -628,7 +628,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\n",
-            "standard": "",
+            "standard": "class Torch:\n    def tick(self):\n        return \"flicker\"\n\nclass Fountain:\n    def tick(self):\n        return \"splash\"\n\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)\n",
@@ -1471,7 +1471,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\n",
-            "standard": "",
+            "standard": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power += int(s)\n    except ValueError:\n        pass\nprint(crown_power)\n",
