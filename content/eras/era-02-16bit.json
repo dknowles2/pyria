@@ -83,7 +83,7 @@
           "id": "trial-16-01-01",
           "trialType": "multiple_choice",
           "title": "Peek Inside a List!",
-          "storyPrompt": "Welcome to the 16-Bit Era! A Python **list** holds many values in square brackets `[...]`, and Python starts counting positions (indexes) at **0**! What will `print(crystals[0])` display?",
+          "storyPrompt": "Welcome to the 16-Bit Era! A Python **list** is an ordered, changeable collection of values inside square brackets `[...]` (like `[\"aqua\", \"pearl\", \"coral\"]`), and Python starts counting positions (indexes) at **0**! What will `print(crystals[0])` display?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "lists",
@@ -1174,7 +1174,7 @@
           "id": "trial-16-03-04",
           "trialType": "code",
           "title": "Weigh Pearls with float(), max(), and min()",
-          "storyPrompt": "When a decimal number arrives as text like `\"2.5\"`, `float()` turns it into a decimal number you can add! You can also find the biggest and smallest values in a list with `max()` and `min()`.",
+          "storyPrompt": "In Python, a number WITH a decimal point (like `2.5` or `0.5`) is called a **float** (short for floating-point number)—unlike an **integer** (`int`), which is a whole number with no decimal point. When a decimal arrives as text in quotes like `\"2.5\"`, `float(...)` converts it into a real decimal number you can add! You can also find the biggest and smallest values in a list with `max()` and `min()`.",
           "objective": "Convert `bonus_text` with `float()`, add it to the sum of `scores` in `total`, find `best` and `low` from `scores`, and print `total`, `best`, and `low`.",
           "concepts": [
             "lists"
@@ -1221,7 +1221,7 @@
           ],
           "introChoice": {
             "title": "Decimals with float(), Plus sum() & min()",
-            "prompt": "`float(\"2.5\")` converts decimal text into a real decimal number (a float), while `sum()`, `max()`, and `min()` compute the total, largest, and smallest values of a list!",
+            "prompt": "Remember: an **integer** (`int`) is a whole number with no decimal point (like `10`), while a **float** is a number WITH a decimal point (like `2.5`)! `float(\"2.5\")` converts decimal text into a float, and `sum()`, `max()`, and `min()` compute the total, largest, and smallest values of a list.",
             "question": "What does `sum([10, 20]) + float(\"2.5\")` equal?",
             "codeSnippet": "scores = [10, 20]\nprint(sum(scores) + float(\"2.5\"))",
             "choices": [
@@ -3469,7 +3469,7 @@
           "id": "trial-16-09-01",
           "trialType": "multiple_choice",
           "title": "Meet Python Dictionaries {}!",
-          "storyPrompt": "Welcome to Act III: Alchemist's Caldera! A **dictionary** pairs keys with values inside curly braces `{\"name\": \"Cinderel\"}`. What will `print(potion[\"power\"])` output?",
+          "storyPrompt": "Welcome to Act III: Alchemist's Caldera! A **dictionary** (`dict` for short) is a collection of labeled `key: value` pairs inside curly braces `{\"name\": \"Cinderel\", \"power\": 50}`—like a lookup table where you grab a value by its label (key) instead of a position number! What will `print(potion[\"power\"])` output?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "dictionaries"
