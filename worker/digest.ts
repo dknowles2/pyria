@@ -557,11 +557,13 @@ export function renderWeeklyDigestEmail(
               overallProgressText
             )}</strong></p>`;
 
-      const dragonBadge =
+      const dragonBadgeHtml =
         hero.dragonsRescuedThisWeek > 0
-          ? ` &bull; ${hero.dragonsRescuedThisWeek} ${
-              hero.dragonsRescuedThisWeek === 1 ? 'dragon' : 'dragons'
-            } rescued`
+          ? ` &bull; ${escapeHtml(
+              `${hero.dragonsRescuedThisWeek} ${
+                hero.dragonsRescuedThisWeek === 1 ? 'dragon' : 'dragons'
+              } rescued`
+            )}`
           : '';
 
       const coachingHtml = hero.coachingTip
@@ -576,7 +578,7 @@ export function renderWeeklyDigestEmail(
           ${escapeHtml(hero.realmName)} &bull; ${escapeHtml(hero.eraName)} &bull; ${hero.byteShards} Byte Shards
         </div>
         <div style="margin-top:10px;font-size:15px;font-weight:600;color:#1e293b;">
-          ${escapeHtml(trialsSummary)}${escapeHtml(dragonBadge)}
+          ${escapeHtml(trialsSummary)}${dragonBadgeHtml}
         </div>
         <div style="margin-top:4px;font-size:13px;color:#475569;">
           Active ${hero.activeDaysThisWeek} ${hero.activeDaysThisWeek === 1 ? 'day' : 'days'} this week
