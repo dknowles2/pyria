@@ -1128,8 +1128,8 @@
           "id": "trial-03-05",
           "trialType": "code",
           "title": "The Secret Word Lock (if / else)",
-          "storyPrompt": "New superpower: adding `else:` gives Python a backup plan that runs whenever the `if` check is `False`! Check whether `password` matches `\"EMBER\"` — if it does, break the seal and shout `\"Seal broken!\"`; otherwise (`else:`), keep `seal` as `\"INTACT\"`.",
-          "objective": "Check if password equals 'EMBER'. If so, set seal to 'BROKEN' and shout 'Seal broken!'; otherwise set seal to 'INTACT'.",
+          "storyPrompt": "New superpower: adding `else:` gives Python a backup plan that runs whenever the `if` check is `False`! The `if` check for `\"EMBER\"` is already written for you — add an `else:` block underneath so that if the password is wrong, `seal` is set to `\"INTACT\"`.",
+          "objective": "Add an else: branch under the existing if-statement that sets seal to 'INTACT'.",
           "concepts": [
             "variables",
             "strings",
@@ -1141,15 +1141,15 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "password = \"EMBER\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    \n",
-            "standard": "password = \"EMBER\"\n",
+            "standard": "password = \"EMBER\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\n",
             "challenge": ""
           },
           "referenceSolution": "password = \"EMBER\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    seal = \"INTACT\"\n",
           "testCode": "assert isinstance(seal, str) and seal.strip().upper() == 'BROKEN', f\"Expected seal to be 'BROKEN', got {seal!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call shout(...).\"\nif _norm(_got) != _norm('SEAL BROKEN!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('SEAL BROKEN!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'SEAL BROKEN!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Use == to check \"EMBER\", and put the backup line indented 4 spaces under else:!'",
-            "tier2_pattern": "if <var> == \"<word>\":\n    <if actions>\nelse:\n    <backup action>",
-            "tier3_walkthrough": "Write:\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    seal = \"INTACT\""
+            "tier1_nudge": "Pip points below the if block: 'Start a new line with 0 spaces for `else:`, then indent 4 spaces on the next line to set `seal`!'",
+            "tier2_pattern": "else:\n    seal = \"<value>\"",
+            "tier3_walkthrough": "Add these two lines at the bottom:\nelse:\n    seal = \"INTACT\""
           },
           "difficultyOverride": null,
           "requiredConstructs": [
@@ -1470,8 +1470,8 @@
           "id": "trial-04-03",
           "trialType": "code",
           "title": "Snowstorm Wind Gauge",
-          "storyPrompt": "Icy winds howl across the canyon! Let's practice `if / elif / else` again, this time checking from highest to lowest using `>=`.",
-          "objective": "Given wind = 45, set weather to \"BLIZZARD\" if wind >= 60, \"GUSTY\" if wind >= 30, or \"CALM\" otherwise. Then print(weather).",
+          "storyPrompt": "Time to try `elif` yourself! The snowstorm gauge already handles `BLIZZARD` (`wind >= 60`) and `CALM` (`else:`). Add an `elif` branch in the middle so that when `wind >= 30`, `weather` is set to `\"GUSTY\"`!",
+          "objective": "Add an elif branch checking wind >= 30 that sets weather = 'GUSTY' between the existing if and else blocks.",
           "concepts": [
             "conditionals_elif_else",
             "comparisons",
@@ -1481,15 +1481,15 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    \nprint(weather)\n",
-            "standard": "wind = 45\n",
+            "standard": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\n# Add your elif branch for wind >= 30 here:\n\nelse:\n    weather = \"CALM\"\nprint(weather)\n",
             "challenge": ""
           },
           "referenceSolution": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)\n",
           "testCode": "assert isinstance(weather, str) and weather.strip().upper() == 'GUSTY', f\"Expected weather to be 'GUSTY', got {weather!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('GUSTY'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('GUSTY')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'GUSTY', got {_got!r} (check your spelling!)\"\n",
           "hints": {
-            "tier1_nudge": "Pip holds onto his ears: 'Check >= 60 first, then elif >= 30, then else for everything smaller!'",
-            "tier2_pattern": "if wind >= 60:\n    weather = \"<high>\"\nelif wind >= 30:\n    weather = \"<mid>\"\nelse:\n    weather = \"<low>\"\nprint(weather)",
-            "tier3_walkthrough": "Write:\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)"
+            "tier1_nudge": "Pip points between `if` and `else:`: 'Add `elif wind >= 30:` with 0 spaces, then indent `weather = \"GUSTY\"` 4 spaces underneath!'",
+            "tier2_pattern": "elif wind >= 30:\n    weather = \"<label>\"",
+            "tier3_walkthrough": "Insert these two lines between `if` and `else:`:\nelif wind >= 30:\n    weather = \"GUSTY\""
           },
           "difficultyOverride": null,
           "requiredConstructs": [
@@ -1518,8 +1518,8 @@
           "id": "trial-04-04",
           "trialType": "code",
           "title": "Four-Tier Explorer Badge",
-          "storyPrompt": "You can stack MORE than one `elif`! You collected 11 pouches with 5 Byte Shards each — in Python, the star symbol `*` multiplies numbers (`11 * 5`). Compute `shards`, then award GOLD (`>= 80`), SILVER (`>= 40`), BRONZE (`>= 10`), or STARTER!",
-          "objective": "Set shards to 11 * 5, then use if / elif / elif / else to set badge to 'GOLD' (>=80), 'SILVER' (>=40), 'BRONZE' (>=10), or 'STARTER', and print badge.",
+          "storyPrompt": "You can chain MORE than one `elif`! The Explorer Badge already checks `GOLD` (`>= 80`), `SILVER` (`>= 40`), and `STARTER` (`else:`). Add a second `elif` for `BRONZE` (`shards >= 10`) right before `else:`!",
+          "objective": "Add a second elif branch checking shards >= 10 that sets badge = 'BRONZE' right before the existing else: block.",
           "concepts": [
             "conditionals_elif_else",
             "comparisons",
@@ -1529,7 +1529,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    \nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
-            "standard": "shards = 11 * 5\n",
+            "standard": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\n# Add your elif branch for shards >= 10 here:\n\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
             "challenge": ""
           },
           "referenceSolution": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    badge = \"BRONZE\"\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
@@ -1602,8 +1602,8 @@
           "id": "trial-04-05",
           "trialType": "code",
           "title": "Matching Rune Words with elif",
-          "storyPrompt": "Just like numbers, `elif` works great with string `==` checks! The Crystal Obelisk reacts differently to `\"FIRE\"`, `\"ICE\"`, or any other word.",
-          "objective": "Given rune = 'ICE', use a three-way branch so 'FIRE' sets action to 'MELT', 'ICE' sets action to 'GLOW', and anything else sets action to 'WAIT', then print action.",
+          "storyPrompt": "You can also match rune words with `elif` and `==`! The `\"FIRE\"` check and `else:` fallback are already in place — add an `elif` branch for `rune == \"ICE\"` that sets `action = \"GLOW\"`!",
+          "objective": "Add an elif branch checking rune == 'ICE' that sets action = 'GLOW' between the existing if and else blocks.",
           "concepts": [
             "conditionals_elif_else",
             "strings",
@@ -1614,7 +1614,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\nelif rune == \"ICE\":\n    \nelse:\n    action = \"WAIT\"\nprint(action)\n",
-            "standard": "rune = \"ICE\"\n",
+            "standard": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\n# Add your elif branch for rune == \"ICE\" here:\n\nelse:\n    action = \"WAIT\"\nprint(action)\n",
             "challenge": ""
           },
           "referenceSolution": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\nelif rune == \"ICE\":\n    action = \"GLOW\"\nelse:\n    action = \"WAIT\"\nprint(action)\n",
@@ -2602,7 +2602,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    \nprint(boat)\n",
-            "standard": "chests = 3\nweight_each = 15\n",
+            "standard": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\n",
             "challenge": ""
           },
           "referenceSolution": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    boat = \"TOO HEAVY\"\nprint(boat)\n",
