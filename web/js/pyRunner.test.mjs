@@ -418,3 +418,20 @@ print("STREAMING_BUFFER_OK")
   const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });
   assert.ok(out.includes('STREAMING_BUFFER_OK'));
 });
+
+test('#89: shout() uppercases string arguments and preserves non-strings', () => {
+  const { guard, trial } = extractSandboxPythonConstants();
+  const pyTestScript = `
+${guard}
+${trial}
+
+r = json.loads(_pyria_run_trial(json.dumps({
+    "studentCode": 'shout("hello", "pyria", 42)\\nsay("quiet")',
+    "testCode": 'assert OUTPUT.strip() == "HELLO PYRIA 42\\\\nquiet"',
+})))
+assert r["passed"], r
+print("SHOUT_UPPERCASE_OK")
+`;
+  const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });
+  assert.ok(out.includes('SHOUT_UPPERCASE_OK'));
+});

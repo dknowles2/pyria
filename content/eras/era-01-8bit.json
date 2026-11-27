@@ -132,8 +132,8 @@
           "id": "trial-01-04",
           "trialType": "code",
           "title": "The Twin Echo Stones",
-          "storyPrompt": "Two moss-covered Echo Stones block the Orchard Gate! They only slide apart when you cast `shout()` on TWO separate lines in a row.",
-          "objective": "Use shout() on two separate lines: first 'Wake up, Spark!' and second 'The meadow needs you!'",
+          "storyPrompt": "Two moss-covered Echo Stones block the Orchard Gate! Meet a louder training spell: `shout(...)` automatically turns your text into ALL CAPS (UPPERCASE)! Cast `shout()` on TWO separate lines — like `shout(\"...\")` — to wake Spark.",
+          "objective": "Call shout() on two separate lines: first with 'Wake up, Spark!' and second with 'The meadow needs you!' (shout() automatically uppercases your text).",
           "concepts": [
             "function_calls",
             "print_output",
@@ -147,7 +147,7 @@
             "challenge": ""
           },
           "referenceSolution": "shout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")\n",
-          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert len(lines) == 2, f'Expected 2 lines, got {len(lines)}'\nassert lines[0] == \"Wake up, Spark!\", f'Line 1 was {lines[0]!r}'\nassert lines[1] == \"The meadow needs you!\", f'Line 2 was {lines[1]!r}'\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert len(lines) == 2, f'Expected 2 lines, got {len(lines)}'\nassert lines[0] == \"WAKE UP, SPARK!\", f'Line 1 was {lines[0]!r}'\nassert lines[1] == \"THE MEADOW NEEDS YOU!\", f'Line 2 was {lines[1]!r}'\n",
           "hints": {
             "tier1_nudge": "Pip hops between the stones: 'Put one shout() on line 1 and a second shout() on line 2!'",
             "tier2_pattern": "shout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")",
@@ -501,7 +501,7 @@
             "challenge": ""
           },
           "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nshout(guardian)\nshout(vault_code)\n",
-          "testCode": "assert guardian == \"Pebble\"\nassert vault_code == 20, f'Expected 20, got {vault_code!r}'\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Pebble\", \"20\"], f'Expected [\"Pebble\", \"20\"], got {lines!r}'\n",
+          "testCode": "assert guardian == \"Pebble\"\nassert vault_code == 20, f'Expected 20, got {vault_code!r}'\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"PEBBLE\", \"20\"], f'Expected [\"PEBBLE\", \"20\"], got {lines!r}'\n",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Add `key_a + key_b` into `vault_code`, then shout both boxes!'",
             "tier2_pattern": "vault_code = key_a + key_b\nshout(guardian)\nshout(vault_code)",
@@ -686,7 +686,7 @@
             "challenge": "heat = 80\nalarm = \"OFF\"\nif heat > 50\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n"
           },
           "referenceSolution": "heat = 80\nalarm = \"OFF\"\nif heat > 50:\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
-          "testCode": "assert alarm == \"ON\", f'Expected alarm == \"ON\", got {alarm!r}'\nassert OUTPUT.strip() == \"Shield up!\", f'Expected \"Shield up!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert alarm == \"ON\", f'Expected alarm == \"ON\", got {alarm!r}'\nassert OUTPUT.strip() == \"SHIELD UP!\", f'Expected \"SHIELD UP!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps line 3: 'Every `if` line in Python MUST end with a colon `:`!'",
             "tier2_pattern": "Change `if heat > 50` to `if heat > 50:`",
@@ -715,7 +715,7 @@
             "challenge": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n"
           },
           "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")\n",
-          "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"Click!\", f'Expected \"Click!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"CLICK!\", f'Expected \"CLICK!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip hops 4 steps to the right: 'Put your cursor before `door = \"OPEN\"` and tap ⇥ Indent (or 4 spaces), then do the same for `shout(\"Click!\")`!'",
             "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")",
@@ -745,7 +745,7 @@
             "challenge": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n"
           },
           "referenceSolution": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password == \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
-          "testCode": "assert gate == \"OPEN\", f'Expected gate == \"OPEN\", got {gate!r}'\nassert OUTPUT.strip() == \"Gate open!\", f'Expected \"Gate open!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert gate == \"OPEN\", f'Expected gate == \"OPEN\", got {gate!r}'\nassert OUTPUT.strip() == \"GATE OPEN!\", f'Expected \"GATE OPEN!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip grins: 'Use TWO equals signs `==` whenever you ask if two values match inside an `if`!'",
             "tier2_pattern": "Change `if password = \"EMBER\":` to `if password == \"EMBER\":`",
@@ -774,7 +774,7 @@
             "challenge": "password = \"EMBER\"\nseal = \"INTACT\"\n"
           },
           "referenceSolution": "password = \"EMBER\"\nseal = \"INTACT\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\n",
-          "testCode": "assert seal == \"BROKEN\", f'Expected seal == \"BROKEN\", got {seal!r}'\nassert OUTPUT.strip() == \"Seal broken!\", f'Expected \"Seal broken!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert seal == \"BROKEN\", f'Expected seal == \"BROKEN\", got {seal!r}'\nassert OUTPUT.strip() == \"SEAL BROKEN!\", f'Expected \"SEAL BROKEN!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Remember quotes around \"EMBER\" and two equals signs == to compare!'",
             "tier2_pattern": "if password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")",
@@ -802,7 +802,7 @@
             "challenge": "ember_power = 75\nlock_power = 60\n"
           },
           "referenceSolution": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"\n",
-          "testCode": "assert gate_status == \"OPEN\", f'Expected gate_status == \"OPEN\", got {gate_status!r}'\nassert OUTPUT.strip() == \"Emberwing is free!\", f'Expected \"Emberwing is free!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert gate_status == \"OPEN\", f'Expected gate_status == \"OPEN\", got {gate_status!r}'\nassert OUTPUT.strip() == \"EMBERWING IS FREE!\", f'Expected \"EMBERWING IS FREE!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip glows orange: 'Write the backup plan inside else: with 4 spaces of indent!'",
             "tier2_pattern": "if ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"",
@@ -895,6 +895,13 @@
             "side": "left",
             "vfx": "celebrate",
             "text": "Emberwing is flying free! Bit 3 is ours, {heroName}—grab your warm tunic for Frostbite Hollow!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Code-Tamer Secret, {heroName}: `say()` and `shout()` were training spells powered by real Python's `print()`! You've mastered three Realms — starting in Frostbite Hollow, you're ready to cast real `print()` like a pro!"
           }
         ]
       }
@@ -911,7 +918,7 @@
         "rescueDialogue": "Cool precision, Code-Tamer! You chose the exact right branch. Take Bit 4—let the frost crystals sparkle!"
       },
       "miniVisualUpgrade": "Bit 4 Restored: Falling pixel snowflakes and reflective ice-tile highlights.",
-      "storyIntro": "An icy canyon chills the northern border of the 8-Bit Flatlands. Ice dragon Glacier is sealed behind three temperature runes that respond to if, elif, and else.",
+      "storyIntro": "An icy canyon chills the northern border of the 8-Bit Flatlands. Now that you've graduated from training spells to real Python's print(), ice dragon Glacier needs you to master if, elif, and else!",
       "storyOutro": "Glacier glides out of the crystal vault and restores Bit 4! Soft pixel snow drifts across the hollow.",
       "primaryConcepts": [
         "conditionals_elif_else"
@@ -922,7 +929,7 @@
           "id": "trial-04-01",
           "trialType": "multiple_choice",
           "title": "Predict the if / elif / else Path!",
-          "storyPrompt": "Code-Tamer Secret: `say()` and `shout()` were training spells powered by real Python's `print()`! Starting in Frostbite Hollow, let's use real `print()` like pro Python coders! When you have THREE choices, Python uses `if`, `elif` (short for 'else if'), and `else`—and stops at the FIRST True branch. Read the code below: what will Python `print()`?",
+          "storyPrompt": "Welcome to Frostbite Hollow! When you have THREE or more choices, Python uses `if`, `elif` (short for 'else if'), and `else` — checking top-to-bottom and stopping at the FIRST True branch. Read the code below: what will Python `print()`?",
           "objective": "Trace the `if / elif / else` code with `temp = 20` and choose what Python will `print()`.",
           "concepts": [
             "conditionals_elif_else",

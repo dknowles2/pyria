@@ -150,6 +150,9 @@ import json
 import contextlib
 import traceback
 
+def _pyria_shout(*args, **kwargs):
+    print(*(a.upper() if isinstance(a, str) else a for a in args), **kwargs)
+
 def _pyria_run_trial(payload_json, emit_stdout=None):
     payload = json.loads(payload_json)
     student_code = payload.get("studentCode", "")
@@ -157,7 +160,7 @@ def _pyria_run_trial(payload_json, emit_stdout=None):
 
     ns = {
         "say": print,
-        "shout": print,
+        "shout": _pyria_shout,
     }
     buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
