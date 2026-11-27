@@ -697,6 +697,35 @@
         {
           "id": "trial-03-03",
           "trialType": "fix_bug",
+          "title": "Fix the Indentation!",
+          "storyPrompt": "Look closely after the colon `:`! Python uses **indentation** (4 spaces pushed in from the left edge) to know which lines belong INSIDE an `if` block. Lord Null squished lines 4 and 5 back against the left edge! Tap **⇥ Indent** (or type 4 spaces) at the start of both lines under `if gems == 7:`!",
+          "objective": "Indent both lines inside `if gems == 7:` by 4 spaces so `door` becomes \"OPEN\" and Python shouts \"Click!\".",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "bugSummary": "Lord Null removed the 4-space indentation under `if gems == 7:`! Push both lines inside the `if` over by 4 spaces (tap ⇥ Indent).",
+          "starterCode": {
+            "explorer": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n# Push the next two lines over by 4 spaces so they are INSIDE the if!\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
+            "standard": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
+            "challenge": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n"
+          },
+          "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")\n",
+          "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"Click!\", f'Expected \"Click!\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip hops 4 steps to the right: 'Put your cursor before `door = \"OPEN\"` and tap ⇥ Indent (or 4 spaces), then do the same for `shout(\"Click!\")`!'",
+            "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")",
+            "tier3_walkthrough": "Make sure BOTH lines under `if gems == 7:` start with 4 spaces:\n    door = \"OPEN\"\n    shout(\"Click!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-04",
+          "trialType": "fix_bug",
           "title": "Fix = vs ==!",
           "storyPrompt": "Another sabotage from Lord Null! Remember: ONE equals sign `=` puts a value into a variable box (`password = \"EMBER\"`), while TWO equals signs `==` asks 'Are these two values equal?' Fix Lord Null's `if` check!",
           "objective": "Fix `=` to `==` in the `if` line so the gate opens and shouts \"Gate open!\".",
@@ -721,33 +750,6 @@
             "tier1_nudge": "Pip grins: 'Use TWO equals signs `==` whenever you ask if two values match inside an `if`!'",
             "tier2_pattern": "Change `if password = \"EMBER\":` to `if password == \"EMBER\":`",
             "tier3_walkthrough": "Add a second `=` so the line reads:\nif password == \"EMBER\":"
-          },
-          "difficultyOverride": null
-        },
-        {
-          "id": "trial-03-04",
-          "title": "Checking Numbers with ==",
-          "storyPrompt": "Watch out for one of Python's coolest tricks! ONE equals sign `=` puts a value into a box (`gems = 7`), while TWO equals signs `==` asks 'Are these two values equal?' Check if your gems box holds exactly 7!",
-          "objective": "Start with gems = 7 and door = \"SHUT\". Write an if statement checking if gems == 7: set door = \"OPEN\" and shout(\"Click!\").",
-          "concepts": [
-            "variables",
-            "comparisons",
-            "conditionals_if",
-            "print_output"
-          ],
-          "shardReward": 40,
-          "unlockId": null,
-          "starterCode": {
-            "explorer": "gems = 7\ndoor = \"SHUT\"\n# Use == (two equals signs!) to ask if gems equals 7:\nif gems == 7:\n    door = \"OPEN\"\n    # Print \"Click!\" here (4 spaces indent!)\n    \n",
-            "standard": "gems = 7\ndoor = \"SHUT\"\n# If gems == 7, set door = \"OPEN\" and shout(\"Click!\")\n",
-            "challenge": "gems = 7\ndoor = \"SHUT\"\n# Open door and shout \"Click!\" when gems equals 7.\n"
-          },
-          "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")\n",
-          "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"Click!\", f'Expected \"Click!\", got {OUTPUT.strip()!r}'\n",
-          "hints": {
-            "tier1_nudge": "Pip taps two keys: 'Use == to check equality, and indent both lines inside the if!'",
-            "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")",
-            "tier3_walkthrough": "Add:\n    shout(\"Click!\")"
           },
           "difficultyOverride": null
         },
