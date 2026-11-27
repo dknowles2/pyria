@@ -1763,7 +1763,7 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         elif decoded.startswith("/assets/"):
             base_dir = self.server.assets_dir
             rel = decoded[len("/assets/") :]
-        elif decoded == "/builder" or decoded == "/builder/":
+        elif decoded in ("/builder", "/builder/", "/console", "/console/"):
             if not self._check_builder_auth(html=True):
                 return
             base_dir = self.server.web_dir
@@ -1942,9 +1942,19 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                 accounts = self.server.db.list_accounts(extra_email=email)
             else:
                 accounts = [email] if email else []
+            role = "admin" if is_admin else ("parent" if email else "guest")
             self._send_json(
                 HTTPStatus.OK,
                 {
+                    "mode": "local",
+                    "auth": {
+                        "role": role,
+                        "heroSaveId": None,
+                        "heroName": None,
+                        "parentEmail": email,
+                        "isAdmin": is_admin,
+                        "googleOAuthEnabled": False,
+                    },
                     "authenticated": bool(email),
                     "email": email,
                     "isAdmin": is_admin,

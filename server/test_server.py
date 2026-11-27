@@ -1437,6 +1437,40 @@ class PyriaServerTestCase(unittest.TestCase):
                 srv.server_close()
                 t.join(timeout=3)
 
+    def test_api_me_local_mode_and_console_route_alias(self) -> None:
+        # In dev_mode with no PYRIA_ADMIN_EMAILS, /api/me returns mode="local" and admin role
+        status, headers, raw = self._request("GET", "/api/me")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers.get("cache-control"), "no-store")
+        me = json.loads(raw)
+        self.assertEqual(me["mode"], "local")
+        self.assertTrue(me["isAdmin"])
+        self.assertEqual(me["auth"]["role"], "admin")
+        self.assertTrue(me["auth"]["isAdmin"])
+        self.assertFalse(me["auth"]["googleOAuthEnabled"])
+        self.assertIsNone(me["auth"]["heroSaveId"])
+
+        # /console and /console/ serve the builder/console HTML page for admins
+        for route in ("/console", "/console/"):
+            st, hdrs, body = self._request("GET", route)
+            self.assertEqual(st, 200, f"Expected 200 for {route}")
+            self.assertIn("text/html", hdrs.get("content-type", ""))
+            self.assertIn(b"builder-app", body)
+
+        # Non-admin user is denied /console with 403 and gets role="parent" in /api/me
+        os.environ["PYRIA_ADMIN_EMAILS"] = "admin@example.com"
+        kid_hdr = {"Cf-Access-Authenticated-User-Email": "player@example.com"}
+        st, _, raw = self._request("GET", "/api/me", extra_headers=kid_hdr)
+        self.assertEqual(st, 200)
+        me_player = json.loads(raw)
+        self.assertEqual(me_player["mode"], "local")
+        self.assertFalse(me_player["isAdmin"])
+        self.assertEqual(me_player["auth"]["role"], "parent")
+        self.assertEqual(me_player["auth"]["parentEmail"], "player@example.com")
+
+        st, _, _ = self._request("GET", "/console", extra_headers=kid_hdr)
+        self.assertEqual(st, 403)
+
 
 if __name__ == "__main__":
     unittest.main()

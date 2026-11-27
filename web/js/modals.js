@@ -167,18 +167,39 @@ export function attachCodeGutter(textarea, gutterEl, highlightsEl) {
   };
 }
 
-export function resolveDifficulty(gameConfig, realm, trial) {
+export function resolveDifficulty(gameConfig, realm, trial, save = null) {
   const base = {
     mode: 'standard',
     showRawTracebacks: false,
     maxHintsAllowed: 3,
   };
-  return {
+  const merged = {
     ...base,
     ...(gameConfig?.globalDifficultyOverride || {}),
     ...(realm?.difficultyOverride || {}),
     ...(trial?.difficultyOverride || {}),
   };
+  const prefs =
+    (save?.preferences && typeof save.preferences === 'object' ? save.preferences : null) ||
+    (gameConfig?.heroPreferences && typeof gameConfig.heroPreferences === 'object'
+      ? gameConfig.heroPreferences
+      : null);
+  if (prefs) {
+    if (prefs.difficulty === 'explorer' || prefs.difficulty === 'standard' || prefs.difficulty === 'challenge') {
+      merged.mode = prefs.difficulty;
+    }
+    if (typeof prefs.showRawTracebacks === 'boolean') {
+      merged.showRawTracebacks = prefs.showRawTracebacks;
+    }
+    if (
+      prefs.maxPipHints !== null &&
+      prefs.maxPipHints !== undefined &&
+      Number.isFinite(Number(prefs.maxPipHints))
+    ) {
+      merged.maxHintsAllowed = Math.max(0, Math.min(3, Number(prefs.maxPipHints)));
+    }
+  }
+  return merged;
 }
 
 export class ModalManager {
@@ -372,7 +393,7 @@ export class ModalManager {
   }) {
     audio.playClick();
     music.setDucked(true);
-    const diff = resolveDifficulty(gameConfig, realm, trial);
+    const diff = resolveDifficulty(gameConfig, realm, trial, save);
     let currentMode = diff.mode || 'standard';
     let hintsUsed = 0;
     const baseMaxHints = diff.maxHintsAllowed ?? 3;
@@ -1446,5 +1467,166 @@ export class ModalManager {
     this.content.querySelectorAll('[data-close]').forEach((btn) => {
       btn.addEventListener('click', done);
     });
+  }
+
+  // ==================== HERO CODE DISPLAY MODAL ====================
+  openHeroCodeDisplayModal({ heroName, heroCode, title, subtitle }) {
+    audio.playSuccess();
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>${escapeHtml(title || '🔑 Your Hero Code is Ready!')}</h2>
+          <div class="modal-badges">
+            <span class="pill pill-gold">🧙 ${escapeHtml(heroName || 'Hero')}</span>
+            <span class="pill pill-green">☁️ Cloud Save Active</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" data-close>✕</button>
+      </div>
+
+      <p class="dialogue-text">
+        ${escapeHtml(
+          subtitle ||
+            'Write this Hero Code down or share it with a parent! You can type it on any tablet or computer to keep playing your hero.'
+        )}
+      </p>
+
+      <div class="hero-code-box">
+        <div id="hero-code-value" class="hero-code-display"></div>
+        <button id="btn-copy-hero-code" type="button" class="btn btn-gold">📋 Copy Hero Code</button>
+      </div>
+
+      <p class="muted-text" style="margin-top:4px;">
+        <strong>Keep it safe:</strong> This code is shown only once. A parent can also link it in the Parent Console or rotate it anytime.
+      </p>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close>Done — Keep Playing!</button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    const codeEl = this.content.querySelector('#hero-code-value');
+    if (codeEl) codeEl.textContent = String(heroCode || '');
+
+    const copyBtn = this.content.querySelector('#btn-copy-hero-code');
+    copyBtn?.addEventListener('click', async () => {
+      audio.playClick();
+      const text = String(heroCode || '');
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = '✓ Copied!';
+      } catch {
+        // Fallback selection copy
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          copyBtn.textContent = '✓ Copied!';
+        } catch {
+          copyBtn.textContent = 'Select & Copy Above';
+        }
+        ta.remove();
+      }
+    });
+
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
+  }
+
+  // ==================== ENTER HERO CODE MODAL ====================
+  openEnterHeroCodeModal({ onRedeem }) {
+    audio.playClick();
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>🔑 Enter Hero Code</h2>
+          <div class="modal-badges">
+            <span class="pill pill-blue">Load Your Hero</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" data-close>✕</button>
+      </div>
+
+      <p class="dialogue-text">
+        Type your secret Hero Code below to continue your adventure on this device!
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <input
+          id="input-hero-code"
+          type="text"
+          class="hero-code-input"
+          placeholder="EMBER-DRAGON-4821"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          maxlength="40"
+        />
+        <div id="hero-code-error" class="forge-error hidden"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button id="btn-submit-hero-code" type="button" class="btn btn-primary">✦ Load Hero</button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    const inputEl = this.content.querySelector('#input-hero-code');
+    const errEl = this.content.querySelector('#hero-code-error');
+    const submitBtn = this.content.querySelector('#btn-submit-hero-code');
+
+    const submit = async () => {
+      const code = String(inputEl?.value || '').trim().toUpperCase();
+      if (!code) {
+        if (errEl) {
+          errEl.textContent = 'Please enter your Hero Code first!';
+          errEl.classList.remove('hidden');
+        }
+        audio.playError();
+        return;
+      }
+      if (errEl) errEl.classList.add('hidden');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Loading Hero...';
+      }
+      try {
+        await onRedeem(code);
+        this.close();
+      } catch (err) {
+        audio.playError();
+        if (errEl) {
+          errEl.textContent = err?.detail || err?.message || 'Could not redeem Hero Code. Check spelling and try again.';
+          errEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✦ Load Hero';
+        }
+      }
+    };
+
+    submitBtn?.addEventListener('click', submit);
+    inputEl?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submit();
+      }
+    });
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
+    setTimeout(() => inputEl?.focus(), 30);
   }
 }

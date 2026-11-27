@@ -105,7 +105,7 @@ Pyria's long-term visual ladder spans 7 eras of video game history (see [docs/ga
 - **Bram's Tinkerer Workshop**: Earn **Byte Shards** from Trials and chests, then forge gear by writing Python (`wear_hat("explorer")`, `set_tunic_color("crimson")`, `equip_boots("swift")`, `add_charisma(1)`). Features a **live shard budget bar** and inline over-budget line highlighting right inside the editor.
 - **Pip's 3-Tier (+ Secret Tier 4) Help System**: Every Trial includes progressive hints plus warm, plain-English Python error translations.
 - **iPad & Touch Ready**: Installable Home Screen PWA with a 360° analog virtual thumbstick and touch-friendly action buttons.
-- **Multi-Account Auth & Native `/builder` Admin Console**: Backed by Cloudflare Access per-user email isolation, admin Account Switcher, an admin-only **Era/Realm Warp** dropdown in the HUD, and the `/builder` console for Live Progress tracking, Story/Trial authoring, and client-side Pyodide solution testing.
+- **Instant Guest Play, Kid-Friendly Hero Codes & Dual-Mode Parent Console**: Players can start playing immediately in guest mode (`localStorage`) with zero sign-up. Kids can upgrade to cloud saves with a memorable **Hero Code** (e.g. `EMBER-DRAGON-4821`)—never needing a parent Google login on their device—while parents sign in with Google at `/console` to monitor real-time progress, tune per-hero difficulty/hints, override trials, and rotate codes. Locally, `/builder` retains full Story/Trial authoring and client-side Pyodide solution testing.
 
 ![Pyria Parent & Builder Console](assets/screenshots/builder-console.png)
 
@@ -136,31 +136,52 @@ pyria/
 
 ---
 
-## Quick Start
+## Quick Start: Local Authoring vs. Public Production
 
-### 1. Run Locally (Dev Mode)
-Start the zero-dependency Python 3 + SQLite server from the repository root (`--dev` enables local admin access to `/builder` and the HUD Realm Warp):
+Pyria uses a clean split between **local lesson/world authoring** (Python + SQLite) and **public production hosting** (Cloudflare Workers + Static Assets + D1):
+
+### 1. Local Dev & Content Authoring (`server/app.py` + `/builder`)
+Run the zero-dependency Python 3 + SQLite server from the repository root (`--dev` enables local admin access to `/builder` and the HUD Realm Warp):
 
 ```bash
 python3 server/app.py --host 127.0.0.1 --port 8080 --dev
 ```
 
 - **Play the Game**: [http://127.0.0.1:8080](http://127.0.0.1:8080)
-- **Parent & Builder Console**: [http://127.0.0.1:8080/builder](http://127.0.0.1:8080/builder)
+- **Local Authoring & Builder Console**: [http://127.0.0.1:8080/builder](http://127.0.0.1:8080/builder) *(also accessible at `/console`)*
 
-### 2. Run Tests
+Edits made in `/builder` (Story & Trials, Concept Health, difficulty overrides) write directly to `content/*.json` in your git working tree. Commit and push to `main` to deploy updated curriculum to production without affecting live D1 player saves.
+
+### 2. Public Production Deployment (Cloudflare Workers + D1)
+In production, Pyria runs on **Cloudflare Workers + Static Assets + D1 (SQLite)** at **$0/mo** on Cloudflare's Free Tier:
+
+- **Gameplay (`/`)**: Unauthenticated visitors play immediately in **Guest Mode** (`localStorage` key `pyria_guest_saves`) with zero D1 writes. Kids can click **Get Hero Code** to upgrade to a D1 cloud save, or **Enter Hero Code** to resume on another device (no Google login ever required on a child's device).
+- **Parent & Admin Console (`/console`)**: Parents sign in with Google (`/api/auth/google/start?next=/console`) to view real-time progress, add child heroes, link or rotate Hero Codes, tune per-hero difficulty/hints, and override trials. Local-only `/builder` write tabs are automatically hidden in production.
+
+#### Required Cloudflare Workers Secrets & Variables
+Configure these in your Cloudflare Workers project (via `wrangler secret put` or the Cloudflare Dashboard):
+
+| Secret / Variable | Purpose |
+| :--- | :--- |
+| `PYRIA_SESSION_SECRET` | Random 32+ byte secret used to HMAC-sign `pyria_hero_session` and `pyria_parent_session` cookies |
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Web Client ID (authorized redirect URI: `https://<your-domain>/api/auth/google/callback`) |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 Web Client Secret |
+| `PYRIA_ADMIN_EMAILS` | Comma-separated list of admin email addresses (grants All Accounts view & `assign-owner` in `/console`) |
+
+#### D1 Migrations & Deploy
 ```bash
-python3 -m unittest server/test_server.py -v
+npm install
+npx wrangler d1 migrations apply pyria-db --remote
+npm run deploy
 ```
 
-### 3. Deploy to `elzar`
-Production deployment helpers live under `server/` (`server/pyria.service` + `server/deploy_elzar.sh`):
+Pushing to `main` automatically runs tests, bundles static assets, and deploys via GitHub Actions.
 
+### 3. Run Tests
 ```bash
-./server/deploy_elzar.sh --restart
+python3 -m unittest discover -s server -v
+node --test web/js/pyRunner.test.mjs
 ```
-
-See [server/README.md](server/README.md) for Cloudflare Tunnel & Access setup details.
 
 ---
 

@@ -6,7 +6,12 @@ const POLL_INTERVAL_MS = 2500;
 const PASSCODE_STORAGE_KEY = 'pyria_builder_passcode';
 
 const state = {
+  mode: 'local', // 'local' | 'cloudflare'
   me: null,
+  isAdmin: false,
+  isParentAuthenticated: false,
+  parentEmail: null,
+  googleOAuthEnabled: false,
   accounts: [],
   selectedAccount: 'all',
   liveEnabled: true,
@@ -101,17 +106,23 @@ function formatClockTime(iso) {
 
 // ==================== API CLIENT ====================
 async function apiFetch(url, options = {}) {
-  const passcode = sessionStorage.getItem(PASSCODE_STORAGE_KEY) || '';
+  const isLocal = state.mode !== 'cloudflare';
+  const passcode = isLocal ? sessionStorage.getItem(PASSCODE_STORAGE_KEY) || '' : '';
   const headers = {
     'Content-Type': 'application/json',
     ...(passcode ? { 'X-Builder-Passcode': passcode } : {}),
     ...(options.headers || {}),
   };
 
-  const res = await fetch(url, { ...options, headers });
-  if (res.status === 401 || res.status === 403) {
+  const res = await fetch(url, { cache: 'no-store', ...options, headers });
+  if (isLocal && (res.status === 401 || res.status === 403)) {
     $('#passcode-bar')?.classList.remove('hidden');
     throw new Error('Builder passcode required');
+  }
+  if (!isLocal && res.status === 401) {
+    setLivePolling(false);
+    showCloudflareSignInScreen();
+    throw new Error('Parent sign-in required');
   }
   if (!res.ok) {
     let detail = `${res.status} ${res.statusText}`;
@@ -123,8 +134,306 @@ async function apiFetch(url, options = {}) {
     }
     throw new Error(detail);
   }
-  $('#passcode-bar')?.classList.add('hidden');
+  if (isLocal) {
+    $('#passcode-bar')?.classList.add('hidden');
+  }
   return res.json();
+}
+
+function getProgressEndpoint() {
+  if (state.mode !== 'cloudflare') {
+    return '/api/builder/progress';
+  }
+  if (state.isAdmin && state.selectedAccount && state.selectedAccount !== 'all') {
+    return `/api/console/progress?owner=${encodeURIComponent(state.selectedAccount)}`;
+  }
+  return '/api/console/progress';
+}
+
+function getActivityEndpoint(sinceId) {
+  if (state.mode !== 'cloudflare') {
+    return `/api/builder/activity?since=${sinceId}&limit=50`;
+  }
+  const ownerQs =
+    state.isAdmin && state.selectedAccount && state.selectedAccount !== 'all'
+      ? `&owner=${encodeURIComponent(state.selectedAccount)}`
+      : '';
+  return `/api/console/activity?since=${sinceId}&limit=50${ownerQs}`;
+}
+
+function getOverrideEndpoint(saveId) {
+  if (state.mode === 'cloudflare') {
+    return `/api/console/saves/${encodeURIComponent(saveId)}/override-trial`;
+  }
+  return `/api/builder/saves/${encodeURIComponent(saveId)}/override-trial`;
+}
+
+// ==================== CONSOLE MODAL HELPERS ====================
+function closeConsoleModal() {
+  const backdrop = $('#console-modal-backdrop');
+  const content = $('#console-modal-content');
+  backdrop?.classList.add('hidden');
+  if (content) content.innerHTML = '';
+}
+
+function openConsoleModal(html) {
+  const backdrop = $('#console-modal-backdrop');
+  const content = $('#console-modal-content');
+  if (!backdrop || !content) return;
+  content.innerHTML = html;
+  backdrop.classList.remove('hidden');
+  content.querySelectorAll('[data-close-modal]').forEach((btn) => {
+    btn.addEventListener('click', closeConsoleModal);
+  });
+}
+
+function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>${escapeHtml(title || '🔑 Hero Code Created')}</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      Hero: <strong style="color:var(--text-main);">${escapeHtml(heroName || 'Hero')}</strong>
+    </p>
+    <div class="console-code-box">
+      <div id="console-onetime-code" class="console-code-display"></div>
+      <button id="btn-console-copy-code" type="button" class="btn btn-sm btn-gold">📋 Copy Hero Code</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      ${escapeHtml(
+        note ||
+          'Give this one-time Hero Code to your child. On their tablet or computer, click "Enter Hero Code" on the title screen to play!'
+      )}
+    </p>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-primary" data-close-modal>Done</button>
+    </div>
+  `);
+
+  const codeEl = $('#console-onetime-code');
+  if (codeEl) codeEl.textContent = String(heroCode || '');
+
+  const copyBtn = $('#btn-console-copy-code');
+  copyBtn?.addEventListener('click', async () => {
+    const text = String(heroCode || '');
+    try {
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = '✓ Copied!';
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        copyBtn.textContent = '✓ Copied!';
+      } catch {
+        copyBtn.textContent = 'Select & Copy Above';
+      }
+      ta.remove();
+    }
+  });
+}
+
+function openAddChildHeroModal() {
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>✨ Add Child Hero</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <div class="field">
+      <label for="add-hero-name">Hero Name (2–24 characters)</label>
+      <input id="add-hero-name" type="text" class="input" maxlength="24" placeholder="e.g. Rowan" autocomplete="off" />
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label for="add-hero-diff">Difficulty</label>
+        <select id="add-hero-diff" class="input">
+          <option value="explorer">Explorer</option>
+          <option value="standard" selected>Standard</option>
+          <option value="challenge">Challenge</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="add-hero-hints">Max Pip Hints</label>
+        <select id="add-hero-hints" class="input">
+          <option value="0">0 (No hints)</option>
+          <option value="1">1 (Nudge)</option>
+          <option value="2">2 (Pattern)</option>
+          <option value="3" selected>3 (Full)</option>
+        </select>
+      </div>
+    </div>
+    <label class="control-group checkbox-control">
+      <input id="add-hero-tracebacks" type="checkbox" />
+      <span>Show Raw Python Tracebacks</span>
+    </label>
+    <div id="add-hero-error" class="console-error-msg hidden"></div>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+      <button id="btn-submit-add-hero" type="button" class="btn btn-primary">Create Hero &amp; Code</button>
+    </div>
+  `);
+
+  const nameEl = $('#add-hero-name');
+  const errEl = $('#add-hero-error');
+  const submitBtn = $('#btn-submit-add-hero');
+  setTimeout(() => nameEl?.focus(), 30);
+
+  submitBtn?.addEventListener('click', async () => {
+    const heroName = String(nameEl?.value || '').trim();
+    if (heroName.length < 2 || heroName.length > 24) {
+      if (errEl) {
+        errEl.textContent = 'Hero name must be between 2 and 24 characters.';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+    if (errEl) errEl.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating...';
+    try {
+      const res = await apiFetch('/api/console/heroes', {
+        method: 'POST',
+        body: JSON.stringify({
+          heroName,
+          preferences: {
+            difficulty: $('#add-hero-diff')?.value || 'standard',
+            maxPipHints: Number($('#add-hero-hints')?.value ?? 3),
+            showRawTracebacks: Boolean($('#add-hero-tracebacks')?.checked),
+          },
+        }),
+      });
+      await loadProgressFull();
+      openOneTimeHeroCodeModal({
+        heroName: res.save?.heroName || heroName,
+        heroCode: res.heroCode,
+        title: '🔑 Child Hero Created!',
+      });
+    } catch (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'Could not create hero.';
+        errEl.classList.remove('hidden');
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Hero & Code';
+    }
+  });
+}
+
+function openClaimHeroModal() {
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>🔗 Link Existing Hero Code</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      Enter the Hero Code from your child's device to link their hero to your Parent Console.
+    </p>
+    <div class="field">
+      <label for="claim-hero-code">Hero Code</label>
+      <input id="claim-hero-code" type="text" class="input input-mono" maxlength="40" placeholder="EMBER-DRAGON-4821" autocomplete="off" />
+    </div>
+    <div id="claim-hero-error" class="console-error-msg hidden"></div>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+      <button id="btn-submit-claim-hero" type="button" class="btn btn-sky">Link Hero</button>
+    </div>
+  `);
+
+  const codeEl = $('#claim-hero-code');
+  const errEl = $('#claim-hero-error');
+  const submitBtn = $('#btn-submit-claim-hero');
+  setTimeout(() => codeEl?.focus(), 30);
+
+  submitBtn?.addEventListener('click', async () => {
+    const heroCode = String(codeEl?.value || '').trim().toUpperCase();
+    if (!heroCode) {
+      if (errEl) {
+        errEl.textContent = 'Please enter a Hero Code.';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+    if (errEl) errEl.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Linking...';
+    try {
+      const res = await apiFetch('/api/console/claim-hero', {
+        method: 'POST',
+        body: JSON.stringify({ heroCode }),
+      });
+      closeConsoleModal();
+      showToast(`Linked hero "${res.save?.heroName || 'Hero'}" to your console!`);
+      await loadProgressFull();
+    } catch (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'Could not link Hero Code.';
+        errEl.classList.remove('hidden');
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Link Hero';
+    }
+  });
+}
+
+function openAssignOwnerModal(save) {
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>👤 Assign Owner (Admin)</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      Reassign <strong style="color:var(--text-main);">${escapeHtml(save.heroName || 'Hero')}</strong> to a parent account email:
+    </p>
+    <div class="field">
+      <label for="assign-owner-email">Owner Email</label>
+      <input id="assign-owner-email" type="email" class="input" value="${escapeHtml(save.ownerEmail || '')}" placeholder="parent@example.com" autocomplete="off" />
+    </div>
+    <div id="assign-owner-error" class="console-error-msg hidden"></div>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+      <button id="btn-submit-assign-owner" type="button" class="btn btn-gold">Save Owner</button>
+    </div>
+  `);
+
+  const emailEl = $('#assign-owner-email');
+  const errEl = $('#assign-owner-error');
+  const submitBtn = $('#btn-submit-assign-owner');
+  setTimeout(() => emailEl?.focus(), 30);
+
+  submitBtn?.addEventListener('click', async () => {
+    const ownerEmail = String(emailEl?.value || '').trim().toLowerCase();
+    if (!ownerEmail) {
+      if (errEl) {
+        errEl.textContent = 'Please enter a valid owner email.';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+    if (errEl) errEl.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    try {
+      await apiFetch(`/api/console/saves/${encodeURIComponent(save.id)}/assign-owner`, {
+        method: 'POST',
+        body: JSON.stringify({ ownerEmail }),
+      });
+      closeConsoleModal();
+      showToast(`Assigned "${save.heroName}" to ${ownerEmail}`);
+      await loadProgressFull();
+    } catch (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'Could not assign owner.';
+        errEl.classList.remove('hidden');
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Owner';
+    }
+  });
 }
 
 // ==================== LOOKUP HELPERS ====================
@@ -201,7 +510,9 @@ function renderHeroCards() {
   const visibleSaves = getVisibleSaves();
   if (!visibleSaves.length) {
     listEl.innerHTML =
-      '<div class="empty-state">No saved heroes yet for this account. Launch <a href="/" style="color:var(--accent-sky);">Pyria</a> and forge a hero to see live progress here!</div>';
+      state.mode === 'cloudflare'
+        ? '<div class="empty-state">No heroes linked yet. Click <strong>+ Add Child Hero</strong> to create a Hero Code, or <strong>🔗 Link Hero Code</strong> to claim a child\'s existing hero!</div>'
+        : '<div class="empty-state">No saved heroes yet for this account. Launch <a href="/" style="color:var(--accent-sky);">Pyria</a> and forge a hero to see live progress here!</div>';
     return;
   }
 
@@ -209,6 +520,10 @@ function renderHeroCards() {
     .map((save) => {
       const st = save.state && typeof save.state === 'object' ? save.state : save;
       const stats = save.stats || {};
+      const prefs = save.preferences && typeof save.preferences === 'object' ? save.preferences : {};
+      const prefDiff = prefs.difficulty || 'standard';
+      const prefHints = Number.isFinite(Number(prefs.maxPipHints)) ? Number(prefs.maxPipHints) : 3;
+      const prefTracebacks = Boolean(prefs.showRawTracebacks);
       const realmId = st.realmId || 'realm-01-meadow';
       const { era, realm } = getRealmMeta(realmId);
       const totalRealmTrials = realm?.trials?.length || 6;
@@ -227,6 +542,46 @@ function renderHeroCards() {
       const hintsUsed = Number(stats.totalHintsUsed) || 0;
       const lastActive = stats.lastActive || save.updatedAt;
       const isSelected = state.selectedHeroId === save.id;
+
+      const consoleControlsHtml =
+        state.mode === 'cloudflare'
+          ? `
+            <div class="hero-card-console-controls" data-stop-card-click>
+              <div class="hero-prefs-row">
+                <label>
+                  Difficulty
+                  <select class="input input-sm hero-pref-diff" data-save-id="${escapeHtml(save.id)}">
+                    <option value="explorer" ${prefDiff === 'explorer' ? 'selected' : ''}>Explorer</option>
+                    <option value="standard" ${prefDiff === 'standard' ? 'selected' : ''}>Standard</option>
+                    <option value="challenge" ${prefDiff === 'challenge' ? 'selected' : ''}>Challenge</option>
+                  </select>
+                </label>
+                <label>
+                  Hints
+                  <select class="input input-sm hero-pref-hints" data-save-id="${escapeHtml(save.id)}">
+                    <option value="0" ${prefHints === 0 ? 'selected' : ''}>0</option>
+                    <option value="1" ${prefHints === 1 ? 'selected' : ''}>1</option>
+                    <option value="2" ${prefHints === 2 ? 'selected' : ''}>2</option>
+                    <option value="3" ${prefHints === 3 ? 'selected' : ''}>3</option>
+                  </select>
+                </label>
+                <label>
+                  <input type="checkbox" class="hero-pref-tracebacks" data-save-id="${escapeHtml(save.id)}" ${prefTracebacks ? 'checked' : ''} />
+                  Tracebacks
+                </label>
+                <button type="button" class="btn btn-sm btn-primary btn-save-hero-prefs" data-save-id="${escapeHtml(save.id)}">Save Settings</button>
+              </div>
+              <div class="hero-console-actions-row">
+                <button type="button" class="btn btn-sm btn-gold btn-rotate-hero-code" data-save-id="${escapeHtml(save.id)}">🔄 Rotate / Revoke Code</button>
+                ${
+                  state.isAdmin
+                    ? `<button type="button" class="btn btn-sm btn-ghost btn-assign-hero-owner" data-save-id="${escapeHtml(save.id)}">👤 Assign Owner</button>`
+                    : ''
+                }
+              </div>
+            </div>
+          `
+          : '';
 
       return `
         <div class="hero-card ${isSelected ? 'selected' : ''}" data-save-id="${escapeHtml(save.id)}">
@@ -255,10 +610,81 @@ function renderHeroCards() {
             <span class="pill pill-blue">Pass: ${passPct} (${passCount}/${attemptCount})</span>
             <span class="pill pill-violet">💡 Hints: ${hintsUsed}</span>
           </div>
+          ${consoleControlsHtml}
         </div>
       `;
     })
     .join('');
+
+  listEl.querySelectorAll('[data-stop-card-click]').forEach((el) => {
+    el.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  listEl.querySelectorAll('.btn-save-hero-prefs').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const saveId = btn.dataset.saveId;
+      const card = btn.closest('.hero-card');
+      const difficulty = card?.querySelector('.hero-pref-diff')?.value || 'standard';
+      const maxPipHints = Number(card?.querySelector('.hero-pref-hints')?.value ?? 3);
+      const showRawTracebacks = Boolean(card?.querySelector('.hero-pref-tracebacks')?.checked);
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        await apiFetch(`/api/console/saves/${encodeURIComponent(saveId)}/preferences`, {
+          method: 'PUT',
+          body: JSON.stringify({ difficulty, maxPipHints, showRawTracebacks }),
+        });
+        showToast('Saved hero learning settings!');
+        await loadProgressFull();
+      } catch (err) {
+        showToast(`Failed to save settings: ${err.message}`, true);
+        btn.disabled = false;
+        btn.textContent = 'Save Settings';
+      }
+    });
+  });
+
+  listEl.querySelectorAll('.btn-rotate-hero-code').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const saveId = btn.dataset.saveId;
+      const save = state.saves.find((s) => s.id === saveId);
+      if (!save) return;
+      if (
+        !confirm(
+          `Rotate Hero Code for "${save.heroName}"? This will immediately sign out any child device using the old code.`
+        )
+      ) {
+        return;
+      }
+      btn.disabled = true;
+      try {
+        const res = await apiFetch(`/api/console/saves/${encodeURIComponent(saveId)}/rotate-code`, {
+          method: 'POST',
+          body: JSON.stringify({}),
+        });
+        openOneTimeHeroCodeModal({
+          heroName: save.heroName,
+          heroCode: res.heroCode,
+          title: '🔄 New Hero Code Generated',
+          note: 'Old child-device sessions have been revoked. Share this new one-time code to sign back in.',
+        });
+      } catch (err) {
+        showToast(`Could not rotate code: ${err.message}`, true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+
+  listEl.querySelectorAll('.btn-assign-hero-owner').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const save = state.saves.find((s) => s.id === btn.dataset.saveId);
+      if (save) openAssignOwnerModal(save);
+    });
+  });
 
   listEl.querySelectorAll('.hero-card').forEach((card) => {
     card.addEventListener('click', () => {
@@ -384,7 +810,7 @@ function renderActivityStream(newlyArrivedIds = new Set()) {
 
 // ==================== LIVE POLLING ====================
 async function loadProgressFull() {
-  const data = await apiFetch('/api/builder/progress');
+  const data = await apiFetch(getProgressEndpoint());
   state.saves = Array.isArray(data.saves) ? data.saves : [];
   state.accounts = Array.isArray(data.accounts) ? data.accounts : [];
   state.summary = data.summary || null;
@@ -407,8 +833,8 @@ async function loadProgressFull() {
 async function pollLiveUpdates() {
   try {
     const [actData, progData] = await Promise.all([
-      apiFetch(`/api/builder/activity?since=${state.latestEventId}&limit=50`),
-      apiFetch('/api/builder/progress'),
+      apiFetch(getActivityEndpoint(state.latestEventId)),
+      apiFetch(getProgressEndpoint()),
     ]);
 
     state.saves = Array.isArray(progData.saves) ? progData.saves : [];
@@ -493,8 +919,42 @@ async function pushGlobalDifficulty(patch) {
   }
 }
 
+async function loadConsoleCurriculum() {
+  try {
+    const cfgRes = await fetch('/api/config', { cache: 'no-store' });
+    if (!cfgRes.ok) return;
+    const cfg = await cfgRes.json();
+    const eraOrder = cfg?.game?.eraOrder || ['era-01-8bit', 'era-02-16bit', 'era-03-32bit', 'era-04-64bit'];
+    const loadedEras = await Promise.all(
+      eraOrder.map(async (eraId) => {
+        try {
+          const r = await fetch(`/content/eras/${encodeURIComponent(eraId)}.json`);
+          return r.ok ? await r.json() : null;
+        } catch {
+          return null;
+        }
+      })
+    );
+    state.overview = {
+      game: cfg.game || {},
+      catalog: cfg.catalog || {},
+      eras: loadedEras.filter(Boolean),
+      conceptWarnings: [],
+    };
+    populateTrackerRealmSelect();
+    renderHeroCards();
+    refreshRealmTracker();
+  } catch (err) {
+    console.warn('Could not load curriculum metadata:', err);
+  }
+}
+
 // ==================== STORY, TRIALS & CONCEPT HEALTH ====================
 async function loadOverview() {
+  if (state.mode === 'cloudflare') {
+    await loadConsoleCurriculum();
+    return;
+  }
   const data = await apiFetch('/api/builder/overview');
   state.overview = data;
 
@@ -1187,7 +1647,7 @@ function renderTrackerChecklist(mapData, realmMeta, save, items) {
       btn.disabled = true;
       try {
         const res = await apiFetch(
-          `/api/builder/saves/${encodeURIComponent(save.id)}/override-trial`,
+          getOverrideEndpoint(save.id),
           {
             method: 'POST',
             body: JSON.stringify({ trialId, solved, awardShards: solved }),
@@ -1579,9 +2039,38 @@ function wireEvents() {
     state.selectedHeroId = null;
     state.trackerManualRealm = false;
     state.trackerPinnedEntityId = null;
-    renderHeroCards();
-    renderActivityStream();
-    refreshRealmTracker();
+    if (state.mode === 'cloudflare') {
+      loadProgressFull().catch((err) => showToast(err.message, true));
+    } else {
+      renderHeroCards();
+      renderActivityStream();
+      refreshRealmTracker();
+    }
+  });
+
+  // Console hero actions & sign-out
+  $('#btn-console-add-hero')?.addEventListener('click', openAddChildHeroModal);
+  $('#btn-console-claim-hero')?.addEventListener('click', openClaimHeroModal);
+  $('#btn-console-signout')?.addEventListener('click', async () => {
+    try {
+      await apiFetch('/api/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({ scope: 'parent' }),
+      });
+    } catch {
+      // ignore
+    }
+    window.location.href = '/console';
+  });
+
+  // Console modal backdrop & Escape key
+  $('#console-modal-backdrop')?.addEventListener('click', (e) => {
+    if (e.target === $('#console-modal-backdrop')) closeConsoleModal();
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !$('#console-modal-backdrop')?.classList.contains('hidden')) {
+      closeConsoleModal();
+    }
   });
 
   // Quick parent difficulty controls
@@ -1618,23 +2107,109 @@ function wireEvents() {
   });
 }
 
+function showCloudflareSignInScreen() {
+  $('#console-signin-panel')?.classList.remove('hidden');
+  $('#tab-live')?.classList.remove('active');
+  $('#tab-live')?.classList.add('hidden');
+  $('#live-indicator')?.classList.add('hidden');
+  $('#btn-toggle-live')?.classList.add('hidden');
+  $('#btn-refresh-now')?.classList.add('hidden');
+  $('#btn-console-signout')?.classList.add('hidden');
+
+  const signInBtn = $('#btn-google-signin');
+  const disabledMsg = $('#console-oauth-disabled-msg');
+  if (state.googleOAuthEnabled === false) {
+    signInBtn?.classList.add('hidden');
+    disabledMsg?.classList.remove('hidden');
+  } else {
+    signInBtn?.classList.remove('hidden');
+    disabledMsg?.classList.add('hidden');
+  }
+}
+
+function configureConsoleMode() {
+  const isCloudflare = state.mode === 'cloudflare';
+  if (!isCloudflare) {
+    $('#console-signin-panel')?.classList.add('hidden');
+    $('#console-hero-actions')?.classList.add('hidden');
+    $('#local-global-diff-controls')?.classList.remove('hidden');
+    $('#account-filter-group')?.classList.remove('hidden');
+    $('#builder-tab-nav')?.classList.remove('hidden');
+    $('#btn-console-signout')?.classList.add('hidden');
+    return;
+  }
+
+  // Cloudflare Production Mode: Parent / Admin Console only (hide local authoring tabs)
+  const titleEl = $('#topbar-title');
+  const subEl = $('#topbar-sub');
+  if (titleEl) {
+    titleEl.textContent = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Parent Console';
+  }
+  if (subEl) {
+    subEl.textContent = state.isAdmin
+      ? 'Global hero progress, account management & Hero Codes'
+      : 'Real-time child progress, Hero Codes & learning settings';
+  }
+  document.title = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Parent Console';
+
+  $('#builder-tab-nav')?.classList.add('hidden');
+  $('#passcode-bar')?.classList.add('hidden');
+  $('#tab-story')?.classList.add('hidden');
+  $('#tab-health')?.classList.add('hidden');
+  $('#tab-assets')?.classList.add('hidden');
+  $('#local-global-diff-controls')?.classList.add('hidden');
+  $('#parent-controls-status')?.classList.add('hidden');
+
+  if (!state.isParentAuthenticated) {
+    showCloudflareSignInScreen();
+    return;
+  }
+
+  $('#console-signin-panel')?.classList.add('hidden');
+  $('#tab-live')?.classList.remove('hidden');
+  $('#tab-live')?.classList.add('active');
+  $('#console-hero-actions')?.classList.remove('hidden');
+  $('#btn-console-signout')?.classList.remove('hidden');
+  $('#account-filter-group')?.classList.toggle('hidden', !state.isAdmin);
+}
+
 // ==================== BOOTSTRAP ====================
 async function init() {
   wireEvents();
   wireTrackerEvents();
   try {
-    const meRes = await fetch(`/api/me?_ts=${Date.now()}`, { cache: 'no-store' });
+    const meRes = await fetch('/api/me', { cache: 'no-store' });
     if (meRes.ok) {
-      state.me = await meRes.json();
+      const me = await meRes.json();
+      state.me = me;
+      state.mode = me?.mode === 'cloudflare' ? 'cloudflare' : 'local';
+      const auth = me?.auth && typeof me.auth === 'object' ? me.auth : {};
+      state.isAdmin = Boolean(auth.isAdmin ?? me?.isAdmin);
+      state.parentEmail = auth.parentEmail ?? me?.email ?? null;
+      state.googleOAuthEnabled =
+        typeof auth.googleOAuthEnabled === 'boolean' ? auth.googleOAuthEnabled : true;
+      const role = auth.role || (state.isAdmin ? 'admin' : state.parentEmail ? 'parent' : 'guest');
+      state.isParentAuthenticated = role === 'parent' || role === 'admin';
+
       const adminPill = $('#builder-admin-pill');
-      if (adminPill && state.me?.email) {
-        adminPill.textContent = `🛡️ ${state.me.email}`;
+      if (adminPill && state.parentEmail) {
+        adminPill.textContent = state.isAdmin
+          ? `🛡️ ${state.parentEmail}`
+          : `👤 ${state.parentEmail}`;
+        adminPill.className = `pill ${state.isAdmin ? 'pill-gold' : 'pill-blue'}`;
         adminPill.classList.remove('hidden');
       }
     }
   } catch {
     // ignore if /api/me unavailable
   }
+
+  configureConsoleMode();
+
+  if (state.mode === 'cloudflare' && !state.isParentAuthenticated) {
+    return;
+  }
+
   try {
     await Promise.all([loadOverview(), loadProgressFull()]);
   } catch (err) {
