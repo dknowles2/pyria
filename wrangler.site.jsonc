@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pyria-site",
+  "compatibility_date": "2026-11-27",
+  "assets": {
+    "directory": "./site"
+  },
+  "routes": [
+    {
+      "pattern": "pyria.dev",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.pyria.dev",
+      "custom_domain": true
+    }
+  ]
+}
