@@ -1137,6 +1137,52 @@ html, body {
   color: var(--accent-emerald);
 }
 
+.console-link-banner {
+  background: rgba(56, 189, 248, 0.14);
+  border: 1.5px solid rgba(56, 189, 248, 0.5);
+  color: #bae6fd;
+  text-align: center;
+}
+
+.console-qr-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.console-qr-card svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 480px) {
+  .console-signin-panel {
+    padding: 20px 12px;
+  }
+
+  .console-signin-card {
+    padding: 20px 16px;
+  }
+
+  .console-modal-card {
+    padding: 18px 16px;
+  }
+
+  .console-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .console-modal-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 .btn-lg {
   padding: 12px 20px;
   font-size: 15px;

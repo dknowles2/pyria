@@ -2191,6 +2191,76 @@ textarea, input, pre, code {
   color: var(--accent-violet);
 }
 
+.save-cloud-pill {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: var(--accent-sky);
+}
+
+.save-linked-pill {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: var(--accent-emerald);
+}
+
+.hero-code-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hero-code-zone-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.parent-link-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(56, 189, 248, 0.08);
+  border: 1.5px solid rgba(56, 189, 248, 0.38);
+  text-align: center;
+}
+
+.parent-link-zone.linked {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.55);
+}
+
+.parent-link-zone h3 {
+  margin: 0;
+  font-size: 15.5px;
+  color: var(--text-main);
+}
+
+.parent-same-device-link {
+  font-size: 12.5px;
+  color: var(--accent-sky);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.parent-same-device-link:hover {
+  text-decoration: underline;
+}
+
 .hero-code-box {
   display: flex;
   flex-direction: column;

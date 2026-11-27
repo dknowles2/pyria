@@ -8,6 +8,7 @@ import {
   buildTrialSuggestions,
   buildWorkshopSuggestions,
 } from './autocomplete.js?v=20261127i';
+import { renderQrSvg } from './qr.js?v=20261127n';
 
 function sanitizeAttemptErrorType(raw) {
   if (typeof raw !== 'string') return null;
@@ -221,15 +222,16 @@ export class ModalManager {
     this.sprites = sprites;
     this.onPauseChange = onPauseChange;
     this.cleanupFns = [];
+    this.allowBackdropClose = true;
 
     this.backdrop.addEventListener('click', (e) => {
-      if (e.target === this.backdrop) {
+      if (e.target === this.backdrop && this.allowBackdropClose) {
         this.close();
       }
     });
 
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !this.backdrop.classList.contains('hidden')) {
+      if (e.key === 'Escape' && !this.backdrop.classList.contains('hidden') && this.allowBackdropClose) {
         e.preventDefault();
         this.close();
       }
@@ -240,8 +242,9 @@ export class ModalManager {
     return !this.backdrop.classList.contains('hidden');
   }
 
-  open(html, sizeClass = '') {
+  open(html, sizeClass = '', { allowBackdropClose = true } = {}) {
     this.runCleanups();
+    this.allowBackdropClose = allowBackdropClose;
     this.content.className = `modal-card ${sizeClass}`.trim();
     this.content.innerHTML = html;
     this.backdrop.classList.remove('hidden');
@@ -250,6 +253,7 @@ export class ModalManager {
 
   close() {
     this.runCleanups();
+    this.allowBackdropClose = true;
     this.backdrop.classList.add('hidden');
     this.content.innerHTML = '';
     music.setDucked(false);
@@ -1536,42 +1540,79 @@ export class ModalManager {
   }
 
   // ==================== HERO CODE DISPLAY MODAL ====================
-  openHeroCodeDisplayModal({ heroName, heroCode, title, subtitle }) {
+  openHeroCodeDisplayModal({ heroName, heroCode, parentLinkToken = '', title, subtitle, onPollLinked }) {
     audio.playSuccess();
+    const linkUrl = parentLinkToken
+      ? `${window.location.origin}/console?link=${encodeURIComponent(parentLinkToken)}`
+      : '';
+    let qrSvg = '';
+    if (linkUrl) {
+      try {
+        qrSvg = renderQrSvg(linkUrl, {
+          size: 168,
+          quietZone: 4,
+          label: `Scan to link ${heroName || 'Hero'} to Parent Console`,
+        });
+      } catch {
+        qrSvg = '';
+      }
+    }
+
     this.open(
       `
       <div class="modal-header">
         <div>
-          <h2>${escapeHtml(title || '🔑 Your Hero Code is Ready!')}</h2>
+          <h2>${escapeHtml(title || '☁️ Saved to Cloud!')}</h2>
           <div class="modal-badges">
             <span class="pill pill-gold">🧙 ${escapeHtml(heroName || 'Hero')}</span>
             <span class="pill pill-green">☁️ Cloud Save Active</span>
           </div>
         </div>
-        <button class="btn btn-sm btn-ghost" data-close>✕</button>
+        <button class="btn btn-sm btn-ghost" data-close aria-label="Close">✕</button>
       </div>
 
-      <p class="dialogue-text">
-        ${escapeHtml(
-          subtitle ||
-            'Write this Hero Code down or share it with a parent! You can type it on any tablet or computer to keep playing your hero.'
-        )}
-      </p>
+      <div class="hero-code-zones">
+        <div class="hero-code-box">
+          <div class="hero-code-zone-label">🔑 For You — Secret Hero Code</div>
+          <div id="hero-code-value" class="hero-code-display"></div>
+          <button id="btn-copy-hero-code" type="button" class="btn btn-gold">📋 Copy Hero Code</button>
+          <p class="muted-text" style="margin:0; font-size:12.5px;">
+            ${escapeHtml(
+              subtitle ||
+                'Your secret key to play on any tablet or computer! Shown only once — write it down or copy it.'
+            )}
+          </p>
+        </div>
 
-      <div class="hero-code-box">
-        <div id="hero-code-value" class="hero-code-display"></div>
-        <button id="btn-copy-hero-code" type="button" class="btn btn-gold">📋 Copy Hero Code</button>
+        ${
+          linkUrl
+            ? `
+            <div id="hero-code-parent-zone" class="parent-link-zone">
+              <div class="hero-code-zone-label">🛡️ For a Parent — Instant Link</div>
+              <h3>Have a Parent Scan to Link</h3>
+              <p class="muted-text" style="margin:0; font-size:12.5px;">
+                Track live Python progress, adjust difficulty &amp; Pip hints, and back up this hero.
+              </p>
+              ${qrSvg ? `<div class="qr-card">${qrSvg}</div>` : ''}
+              <a href="${escapeHtml(linkUrl)}" class="parent-same-device-link">
+                Parent on this device? Open Parent Console →
+              </a>
+            </div>
+            `
+            : ''
+        }
       </div>
 
-      <p class="muted-text" style="margin-top:4px;">
-        <strong>Keep it safe:</strong> This code is shown only once. A parent can also link it in the Parent Console or rotate it anytime.
+      <p class="muted-text" style="margin-top:6px; font-size:12.5px;">
+        <strong>No parent nearby right now?</strong> No problem — you can tap <strong>🔗 Link Parent</strong> on the title screen anytime later.
       </p>
 
       <div class="modal-footer">
-        <button class="btn btn-primary" data-close>Done — Keep Playing!</button>
+        <button class="btn btn-primary" data-close>I Saved My Code — Keep Playing!</button>
       </div>
       `,
-      'modal-compact'
+      'modal-compact',
+      { allowBackdropClose: false }
     );
 
     const codeEl = this.content.querySelector('#hero-code-value');
@@ -1585,7 +1626,6 @@ export class ModalManager {
         await navigator.clipboard.writeText(text);
         copyBtn.textContent = '✓ Copied!';
       } catch {
-        // Fallback selection copy
         const ta = document.createElement('textarea');
         ta.value = text;
         ta.style.position = 'fixed';
@@ -1601,6 +1641,133 @@ export class ModalManager {
         ta.remove();
       }
     });
+
+    if (linkUrl && typeof onPollLinked === 'function') {
+      const iv = setInterval(async () => {
+        try {
+          const linked = await onPollLinked();
+          if (linked) {
+            clearInterval(iv);
+            audio.playSuccess();
+            const zone = this.content.querySelector('#hero-code-parent-zone');
+            if (zone) {
+              zone.classList.add('linked');
+              zone.innerHTML = `
+                <div class="pill pill-green">✓ Linked to Parent!</div>
+                <h3>${escapeHtml(heroName || 'Your hero')} is connected to a Parent Console</h3>
+                <p class="muted-text" style="margin:0; font-size:12.5px;">
+                  Your parent can now see your progress and generate a fresh Hero Code if you ever forget it.
+                </p>
+              `;
+            }
+          }
+        } catch {
+          // ignore transient poll errors
+        }
+      }, 3000);
+      this.addCleanup(() => clearInterval(iv));
+    }
+
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
+  }
+
+  // ==================== LINK TO PARENT LATER MODAL ====================
+  openLinkToParentModal({ heroName, parentLinkToken, expiresInSeconds = 900, onPollLinked }) {
+    audio.playClick();
+    const linkUrl = `${window.location.origin}/console?link=${encodeURIComponent(parentLinkToken || '')}`;
+    let qrSvg = '';
+    try {
+      qrSvg = renderQrSvg(linkUrl, {
+        size: 184,
+        quietZone: 4,
+        label: `Scan to link ${heroName || 'Hero'} to Parent Console`,
+      });
+    } catch {
+      qrSvg = '';
+    }
+    const mins = Math.max(1, Math.round((Number(expiresInSeconds) || 900) / 60));
+
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>🔗 Link ${escapeHtml(heroName || 'Hero')} to a Parent</h2>
+          <div class="modal-badges">
+            <span class="pill pill-blue">Valid for ${mins} minutes</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" data-close aria-label="Close">✕</button>
+      </div>
+
+      <div id="link-parent-zone" class="parent-link-zone">
+        <h3>Scan with a Parent's Phone</h3>
+        <p class="muted-text" style="margin:0; font-size:13px;">
+          Have a parent scan this QR code to view live progress, tune hints, and back up your hero. You can create a fresh link anytime.
+        </p>
+        ${qrSvg ? `<div class="qr-card">${qrSvg}</div>` : ''}
+        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
+          <button id="btn-copy-parent-link" type="button" class="btn btn-sm btn-gold">🔗 Copy Parent Link</button>
+          <a href="${escapeHtml(linkUrl)}" class="btn btn-sm btn-ghost">Open on This Device →</a>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close>Done</button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    const copyBtn = this.content.querySelector('#btn-copy-parent-link');
+    copyBtn?.addEventListener('click', async () => {
+      audio.playClick();
+      try {
+        await navigator.clipboard.writeText(linkUrl);
+        copyBtn.textContent = '✓ Link Copied!';
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = linkUrl;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          copyBtn.textContent = '✓ Link Copied!';
+        } catch {
+          copyBtn.textContent = 'Copy Failed';
+        }
+        ta.remove();
+      }
+    });
+
+    if (typeof onPollLinked === 'function') {
+      const iv = setInterval(async () => {
+        try {
+          const linked = await onPollLinked();
+          if (linked) {
+            clearInterval(iv);
+            audio.playSuccess();
+            const zone = this.content.querySelector('#link-parent-zone');
+            if (zone) {
+              zone.classList.add('linked');
+              zone.innerHTML = `
+                <div class="pill pill-green" style="font-size:13px;">✓ Linked to Parent!</div>
+                <h3>${escapeHtml(heroName || 'Your hero')} is now connected!</h3>
+                <p class="muted-text" style="margin:0; font-size:13px;">
+                  Your parent can now track your progress and help recover your hero anytime.
+                </p>
+              `;
+            }
+          }
+        } catch {
+          // ignore transient poll errors
+        }
+      }, 3000);
+      this.addCleanup(() => clearInterval(iv));
+    }
 
     this.content.querySelectorAll('[data-close]').forEach((btn) => {
       btn.addEventListener('click', () => this.close());

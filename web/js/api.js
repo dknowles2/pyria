@@ -36,6 +36,7 @@ export function normalizeMe(raw) {
   const parentEmail = auth.parentEmail ?? raw?.email ?? null;
   const heroSaveId = auth.heroSaveId || null;
   const heroName = auth.heroName || null;
+  const linkedToParent = Boolean(auth.linkedToParent);
   const role =
     auth.role ||
     (isAdmin ? 'admin' : parentEmail ? 'parent' : heroSaveId ? 'hero' : 'guest');
@@ -48,6 +49,7 @@ export function normalizeMe(raw) {
       role,
       heroSaveId,
       heroName,
+      linkedToParent,
       parentEmail,
       isAdmin,
       googleOAuthEnabled,
@@ -153,6 +155,7 @@ export function normalizeSave(raw) {
     ownedUnlockIds: Array.isArray(merged.ownedUnlockIds) ? [...merged.ownedUnlockIds] : [],
     position: merged.position || null,
     ownerEmail: merged.ownerEmail || merged.owner_email || null,
+    linkedToParent: Boolean(merged.linkedToParent ?? (merged.ownerEmail || merged.owner_email)),
     createdAt: merged.createdAt || merged.created_at || null,
     updatedAt: merged.updatedAt || merged.updated_at || null,
     preferences: prefs,
@@ -412,6 +415,20 @@ export async function createHeroCode(heroName, saveState = null) {
   return {
     save: data.save ? { ...normalizeSave(data.save), isGuest: false } : null,
     heroCode: data.heroCode || '',
+    parentLinkToken: data.parentLinkToken || '',
+    parentLinkExpiresInSeconds: Number(data.parentLinkExpiresInSeconds) || 900,
+  };
+}
+
+export async function createHeroLinkToken() {
+  const data = await requestJson('/api/auth/hero-link-token', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return {
+    parentLinkToken: data.parentLinkToken || '',
+    heroName: data.heroName || '',
+    expiresInSeconds: Number(data.expiresInSeconds) || 900,
   };
 }
 

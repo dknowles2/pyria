@@ -2843,6 +2843,163 @@ function wireEvents() {
   });
 }
 
+const PENDING_PARENT_LINK_KEY = 'pyria_pending_parent_link';
+
+function capturePendingParentLinkToken() {
+  let token = '';
+  try {
+    const url = new URL(window.location.href);
+    const param = (url.searchParams.get('link') || '').trim();
+    if (param) {
+      token = param;
+      sessionStorage.setItem(PENDING_PARENT_LINK_KEY, token);
+      url.searchParams.delete('link');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    } else {
+      token = (sessionStorage.getItem(PENDING_PARENT_LINK_KEY) || '').trim();
+    }
+  } catch {
+    // ignore storage/URL errors
+  }
+  return token;
+}
+
+function clearPendingParentLinkToken() {
+  try {
+    sessionStorage.removeItem(PENDING_PARENT_LINK_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+async function handlePendingParentLinkToken(linkToken) {
+  if (!linkToken) return;
+  clearPendingParentLinkToken();
+
+  let preview;
+  try {
+    preview = await apiFetch('/api/console/link-preview', {
+      method: 'POST',
+      body: JSON.stringify({ linkToken }),
+    });
+  } catch (err) {
+    openConsoleModal(`
+      <div class="console-modal-header">
+        <h2>🔗 Link Expired or Unavailable</h2>
+        <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+      </div>
+      <p class="muted-text" style="margin:0;">
+        ${escapeHtml(err.message || 'This parent link has expired or is no longer available.')}
+      </p>
+      <p class="muted-text" style="margin:0;">
+        Ask your child to tap <strong>🔗 Link Parent</strong> on their screen to generate a fresh QR code, or type their Hero Code manually.
+      </p>
+      <div class="console-modal-footer">
+        <button type="button" class="btn btn-ghost" data-close-modal>Close</button>
+        <button id="btn-fallback-claim-code" type="button" class="btn btn-sky">Enter Hero Code Instead</button>
+      </div>
+    `);
+    $('#btn-fallback-claim-code')?.addEventListener('click', () => {
+      openClaimHeroModal();
+    });
+    return;
+  }
+
+  const heroName = preview.heroName || 'Hero';
+  const parentLabel = state.parentEmail || 'your Parent Console';
+
+  if (preview.alreadyOwnedBySelf) {
+    openConsoleModal(`
+      <div class="console-modal-header">
+        <h2>✓ Already Linked!</h2>
+        <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+      </div>
+      <p class="muted-text" style="margin:0;">
+        <strong style="color:var(--text-main);">${escapeHtml(heroName)}</strong> is already linked to <strong style="color:var(--text-main);">${escapeHtml(parentLabel)}</strong>.
+      </p>
+      <div class="console-modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal>Great!</button>
+      </div>
+    `);
+    return;
+  }
+
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>🔗 Link Hero to Your Console?</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      Link <strong style="color:var(--text-main);">${escapeHtml(heroName)}</strong> to <strong style="color:var(--text-main);">${escapeHtml(parentLabel)}</strong>?
+    </p>
+    <p class="muted-text" style="margin:0;">
+      You'll be able to see their live Python progress, customize difficulty &amp; Pip hints, and generate a new Hero Code anytime.
+    </p>
+    <div id="confirm-link-error" class="console-error-msg hidden"></div>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+      <button id="btn-confirm-link-hero" type="button" class="btn btn-primary">✓ Link Hero</button>
+    </div>
+  `);
+
+  const confirmBtn = $('#btn-confirm-link-hero');
+  const errEl = $('#confirm-link-error');
+  confirmBtn?.addEventListener('click', async () => {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Linking...';
+    if (errEl) errEl.classList.add('hidden');
+    try {
+      const res = await apiFetch('/api/console/claim-hero', {
+        method: 'POST',
+        body: JSON.stringify({ linkToken }),
+      });
+      await loadProgressFull();
+      const linkedName = res.save?.heroName || heroName;
+      const sameDeviceHero = Boolean(state.me?.auth?.heroSaveId);
+      if (sameDeviceHero) {
+        openConsoleModal(`
+          <div class="console-modal-header">
+            <h2>✓ ${escapeHtml(linkedName)} Linked!</h2>
+            <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+          </div>
+          <p class="muted-text" style="margin:0;">
+            <strong style="color:var(--text-main);">${escapeHtml(linkedName)}</strong> is now linked to <strong style="color:var(--text-main);">${escapeHtml(parentLabel)}</strong>.
+          </p>
+          <p class="muted-text" style="margin:0;">
+            Since you linked on your child's device, tap below to sign out of the Parent Console while keeping ${escapeHtml(linkedName)} signed in to play!
+          </p>
+          <div class="console-modal-footer">
+            <button type="button" class="btn btn-ghost" data-close-modal>Stay in Console</button>
+            <button id="btn-hand-back-to-kid" type="button" class="btn btn-primary">🎮 Hand Device Back to Kid</button>
+          </div>
+        `);
+        $('#btn-hand-back-to-kid')?.addEventListener('click', async () => {
+          try {
+            await fetch('/api/auth/logout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ scope: 'parent' }),
+            });
+          } catch {
+            // ignore
+          }
+          window.location.href = '/';
+        });
+      } else {
+        closeConsoleModal();
+        showToast(`✓ Linked "${linkedName}" to your Parent Console!`);
+      }
+    } catch (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'Could not link hero.';
+        errEl.classList.remove('hidden');
+      }
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = '✓ Link Hero';
+    }
+  });
+}
+
 function showCloudflareSignInScreen() {
   closeConsoleModal();
   $('#console-signin-panel')?.classList.remove('hidden');
@@ -2861,6 +3018,7 @@ function showCloudflareSignInScreen() {
   const dividerEl = $('#console-signin-divider');
   const magicForm = $('#magic-link-form');
   const disabledMsg = $('#console-oauth-disabled-msg');
+  const linkBannerEl = $('#console-pending-link-banner');
   const errEl = $('#console-auth-error-msg');
   const okEl = $('#console-auth-success-msg');
 
@@ -2871,6 +3029,22 @@ function showCloudflareSignInScreen() {
   magicForm?.classList.toggle('hidden', !showMagic);
   dividerEl?.classList.toggle('hidden', !(showGoogle && showMagic));
   disabledMsg?.classList.toggle('hidden', showGoogle || showMagic);
+
+  const pendingLink = state.pendingParentLinkToken || '';
+  const postLoginNext = pendingLink
+    ? `/console?link=${encodeURIComponent(pendingLink)}`
+    : '/console';
+  if (signInBtn) {
+    signInBtn.href = `/api/auth/google/start?next=${encodeURIComponent(postLoginNext)}`;
+  }
+  if (linkBannerEl) {
+    if (pendingLink) {
+      linkBannerEl.textContent = '🔗 Ready to link a Hero to your Parent Console — sign in below to finish!';
+      linkBannerEl.classList.remove('hidden');
+    } else {
+      linkBannerEl.classList.add('hidden');
+    }
+  }
 
   // Surface expired/invalid magic link errors passed via query param
   try {
@@ -2908,10 +3082,13 @@ function showCloudflareSignInScreen() {
         submitBtn.textContent = 'Sending link...';
       }
       try {
+        const magicNext = state.pendingParentLinkToken
+          ? `/console?link=${encodeURIComponent(state.pendingParentLinkToken)}`
+          : '/console';
         const res = await fetch('/api/auth/magic-link/request', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, next: '/console' }),
+          body: JSON.stringify({ email, next: magicNext }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
@@ -3019,6 +3196,7 @@ function configureConsoleMode() {
 
 // ==================== BOOTSTRAP ====================
 async function init() {
+  state.pendingParentLinkToken = capturePendingParentLinkToken();
   const isConsolePath = /^\/(console|admin)(\/|$)/i.test(window.location.pathname);
   if (isConsolePath) {
     state.mode = 'cloudflare';
@@ -3083,6 +3261,11 @@ async function init() {
     console.warn('Initial builder load error:', err.message);
   }
   setLivePolling(true);
+  if (state.mode === 'cloudflare' && state.isParentAuthenticated && state.pendingParentLinkToken) {
+    const token = state.pendingParentLinkToken;
+    state.pendingParentLinkToken = '';
+    await handlePendingParentLinkToken(token);
+  }
 }
 
 init();
