@@ -218,9 +218,14 @@ export class ModalManager {
 
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !this.backdrop.classList.contains('hidden')) {
+        e.preventDefault();
         this.close();
       }
     });
+  }
+
+  isOpen() {
+    return !this.backdrop.classList.contains('hidden');
   }
 
   open(html, sizeClass = '') {
@@ -1666,6 +1671,152 @@ export class ModalManager {
     });
     this.content.querySelectorAll('[data-close]').forEach((btn) => {
       btn.addEventListener('click', () => this.close());
+    });
+  }
+
+  // ==================== PAUSE / GAME MENU MODAL ====================
+  openGameMenuModal({
+    save,
+    realm,
+    eraLabel,
+    isGuestCloudflare = false,
+    musicEnabled = true,
+    muted = false,
+    onOpenWorkshop,
+    onSaveNow,
+    onReturnToTitle,
+    onToggleMusic,
+    onToggleMute,
+    onCycleEra,
+    onGetHeroCode,
+  }) {
+    const heroName = save?.heroName || 'Code-Tamer';
+    const realmName = realm?.name || save?.realmId || 'Whispering Meadow';
+    const shards = Number(save?.byteShards) || 0;
+    const dragons = Array.isArray(save?.rescuedDragons) ? save.rescuedDragons.length : 0;
+
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>☰ Game Menu</h2>
+          <div class="modal-badges">
+            <span class="pill pill-blue">${escapeHtml(eraLabel || '8-Bit NES')}</span>
+            <span class="pill pill-muted">${escapeHtml(realmName)}</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" data-close aria-label="Close Menu">✕</button>
+      </div>
+
+      <div class="game-menu-summary">
+        <div class="game-menu-hero-name">${escapeHtml(heroName)}</div>
+        <div class="game-menu-stats">
+          <span>✦ ${shards} Shards</span>
+          <span>·</span>
+          <span>🐉 ${dragons} Dragons</span>
+        </div>
+      </div>
+
+      <div class="game-menu-actions">
+        <button id="btn-menu-resume" type="button" class="btn btn-primary btn-lg" data-close>
+          ▶ Resume Adventure
+        </button>
+        <button id="btn-menu-workshop" type="button" class="btn btn-gold">
+          ⚒ Open Bram's Workshop
+        </button>
+        ${
+          isGuestCloudflare
+            ? '<button id="btn-menu-hero-code" type="button" class="btn btn-sky">🔑 Get Hero Code (Save to Cloud)</button>'
+            : ''
+        }
+        <button id="btn-menu-save" type="button" class="btn btn-ghost">
+          💾 Save Progress Now
+        </button>
+        <button id="btn-menu-title" type="button" class="btn btn-ghost game-menu-title-btn">
+          ← Save &amp; Return to Main Title
+        </button>
+      </div>
+
+      <div class="game-menu-settings">
+        <button id="btn-menu-music" type="button" class="btn btn-sm btn-ghost">
+          ${musicEnabled ? '🎵 Music: On' : '🎵 Music: Off'}
+        </button>
+        <button id="btn-menu-mute" type="button" class="btn btn-sm btn-ghost">
+          ${muted ? '🔇 SFX: Off' : '🔊 SFX: On'}
+        </button>
+        <button id="btn-menu-era" type="button" class="btn btn-sm btn-ghost">
+          🎨 Style: ${escapeHtml(eraLabel || '8-Bit NES')}
+        </button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    this.content.querySelector('#btn-menu-workshop')?.addEventListener('click', () => {
+      audio.playClick();
+      this.close();
+      if (onOpenWorkshop) onOpenWorkshop();
+    });
+
+    this.content.querySelector('#btn-menu-hero-code')?.addEventListener('click', () => {
+      audio.playClick();
+      this.close();
+      if (onGetHeroCode) onGetHeroCode();
+    });
+
+    this.content.querySelector('#btn-menu-save')?.addEventListener('click', async () => {
+      audio.playClick();
+      const btn = this.content.querySelector('#btn-menu-save');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '💾 Saving...';
+      }
+      try {
+        if (onSaveNow) await onSaveNow();
+      } finally {
+        if (btn && btn.isConnected) {
+          btn.disabled = false;
+          btn.textContent = '✓ Progress Saved';
+        }
+      }
+    });
+
+    this.content.querySelector('#btn-menu-title')?.addEventListener('click', async () => {
+      audio.playClick();
+      const btn = this.content.querySelector('#btn-menu-title');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+      }
+      this.close();
+      if (onReturnToTitle) await onReturnToTitle();
+    });
+
+    this.content.querySelector('#btn-menu-music')?.addEventListener('click', () => {
+      const nextOn = onToggleMusic ? onToggleMusic() : music.isEnabled();
+      const btn = this.content.querySelector('#btn-menu-music');
+      if (btn) btn.textContent = nextOn ? '🎵 Music: On' : '🎵 Music: Off';
+    });
+
+    this.content.querySelector('#btn-menu-mute')?.addEventListener('click', () => {
+      const nextMuted = onToggleMute ? onToggleMute() : audio.isMuted();
+      const btn = this.content.querySelector('#btn-menu-mute');
+      if (btn) btn.textContent = nextMuted ? '🔇 SFX: Off' : '🔊 SFX: On';
+    });
+
+    this.content.querySelector('#btn-menu-era')?.addEventListener('click', async () => {
+      const nextLabel = onCycleEra ? await onCycleEra() : eraLabel;
+      const btn = this.content.querySelector('#btn-menu-era');
+      if (btn && nextLabel) btn.textContent = `🎨 Style: ${nextLabel}`;
+      const eraBadge = this.content.querySelector('.modal-badges .pill-blue');
+      if (eraBadge && nextLabel) eraBadge.textContent = nextLabel;
+    });
+
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        audio.playClick();
+        this.close();
+      });
     });
   }
 }
