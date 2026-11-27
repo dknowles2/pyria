@@ -1565,8 +1565,787 @@
       }
     },
     {
-      "id": "realm-32-04-citadel",
+      "id": "realm-32-05-archives",
       "number": 4,
+      "name": "The Crystal Archives",
+      "dragon": {
+        "id": "dragon-chronis",
+        "name": "Chronis",
+        "title": "Keeper of Nested Maps",
+        "element": "Crystal",
+        "rescueDialogue": "Shimmer-chime! Every nested chamber in the Crystal Archives is mapped again! Take this 32-Bit Prism and step toward Shieldwall Bastion!"
+      },
+      "miniVisualUpgrade": "32-Bit Upgrade: Glowing crystal archive shelves and crisp isometric room reflections appear.",
+      "storyIntro": "Deep beneath Prism Caverns lie the Crystal Archives, where dragon Chronis guards Pyria's nested room maps! Master nested dictionaries — dictionaries inside dictionaries — to unlock the archive doors.",
+      "storyOutro": "Chronis rises above the archive spires, illuminating the path to Shieldwall Bastion!",
+      "primaryConcepts": [
+        "dictionaries_nested"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-32-05-01",
+          "trialType": "multiple_choice",
+          "title": "Navigate a Nested Room Map!",
+          "storyPrompt": "Welcome to the Crystal Archives! A **nested dictionary** stores a dictionary inside another dictionary. Chain two bracket lookups — outer key first, then inner key — like `rooms[\"hall\"][\"gems\"]`!",
+          "objective": "Predict what `print(rooms[\"hall\"][\"gems\"])` displays.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "codeSnippet": "rooms = {\n    \"hall\": {\"gems\": 12, \"lit\": True},\n    \"vault\": {\"gems\": 40, \"lit\": False}\n}\nprint(rooms[\"hall\"][\"gems\"])",
+          "choices": [
+            {
+              "id": "a",
+              "label": "40",
+              "explanation": "`40` is inside `\"vault\"`, not `\"hall\"`!"
+            },
+            {
+              "id": "b",
+              "label": "12",
+              "explanation": "Spot on! `rooms[\"hall\"]` gets the hall dict, and `[\"gems\"]` grabs `12`!"
+            },
+            {
+              "id": "c",
+              "label": "True",
+              "explanation": "`True` is stored under `\"lit\"`, while `\"gems\"` holds `12`!"
+            },
+            {
+              "id": "d",
+              "label": "{\"gems\": 12, \"lit\": True}",
+              "explanation": "That's `rooms[\"hall\"]` — adding `[\"gems\"]` steps one level deeper to `12`!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip points: 'First look up `\"hall\"`, then look up `\"gems\"` inside it!'",
+            "tier2_pattern": "rooms[\"hall\"][\"gems\"] -> 12",
+            "tier3_walkthrough": "Tap Option B (`12`)!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-05-02",
+          "trialType": "fix_bug",
+          "title": "The Archive KeyError!",
+          "storyPrompt": "Lord Null scrambled a key name in the archive lookup, causing a `KeyError`! Fix the misspelled inner key so Python prints `\"OPEN\"`.",
+          "objective": "Fix the inner dictionary key so `print(archive[\"north\"][\"door\"])` outputs OPEN.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "bugSummary": "The nested lookup raises KeyError because the inner key is misspelled.",
+          "starterCode": {
+            "explorer": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"dor\"])\n",
+            "standard": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"dor\"])\n",
+            "challenge": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"dor\"])\n"
+          },
+          "referenceSolution": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"door\"])\n",
+          "testCode": "assert OUTPUT.strip() == 'OPEN', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip squints: 'Check the spelling of `\"dor\"` vs `\"door\"`!'",
+            "tier2_pattern": "print(archive[\"north\"][\"door\"])",
+            "tier3_walkthrough": "Change `\"dor\"` to `\"door\"`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-03",
+          "trialType": "code",
+          "title": "Read a Nested Boss Name",
+          "storyPrompt": "Look up who guards the north wing inside the nested `atlas` dictionary!",
+          "objective": "Create the variable `guardian` by reading `atlas['north']['boss']`, then print `guardian`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"???\"]\nprint(guardian)\n",
+            "standard": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)\n",
+          "testCode": "assert guardian == 'Chronis'\nassert OUTPUT.strip() == 'Chronis', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Chain `atlas[\"north\"][\"boss\"]` and print `guardian`!'",
+            "tier2_pattern": "guardian = atlas[\"north\"][\"boss\"]\nprint(guardian)",
+            "tier3_walkthrough": "Add:\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-04",
+          "trialType": "code",
+          "title": "Update a Value Inside a Nested Dict",
+          "storyPrompt": "You can also UPDATE a value inside a nested dictionary with `+=`! Add `10` gold to the west vault: `vault[\"west\"][\"gold\"] += 10`.",
+          "objective": "Increase `vault['west']['gold']` by 10, then print `vault['west']['gold']`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += ???\nprint(vault[\"west\"][\"gold\"])\n",
+            "standard": "vault = {\"west\": {\"gold\": 25}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])\n",
+          "testCode": "assert vault['west']['gold'] == 35\nassert OUTPUT.strip() == '35', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Use `vault[\"west\"][\"gold\"] += 10` and print it!'",
+            "tier2_pattern": "vault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])",
+            "tier3_walkthrough": "Add:\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "subscript",
+            "call:print"
+          ],
+          "introChoice": {
+            "title": "Updating Inside a Nested Dictionary",
+            "prompt": "Just like updating a regular dict value, chaining two keys with `+=` updates the inner value directly: `vault[\"west\"][\"gold\"] += 10`!",
+            "question": "What does `print(vault[\"west\"][\"gold\"])` display after `+= 10`?",
+            "codeSnippet": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "25",
+                "explanation": "`+= 10` updates the inner value from `25` to `35`!"
+              },
+              {
+                "id": "b",
+                "label": "10",
+                "explanation": "`+= 10` ADDS 10 to `25`, rather than replacing it with `10`!"
+              },
+              {
+                "id": "c",
+                "label": "35",
+                "explanation": "Boom! `25 + 10` updates `vault[\"west\"][\"gold\"]` to `35`!"
+              },
+              {
+                "id": "d",
+                "label": "KeyError",
+                "explanation": "Both keys (`\"west\"` and `\"gold\"`) exist, so it updates cleanly!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-32-05-05",
+          "trialType": "code",
+          "title": "Add an Inner Key to a Nested Dict",
+          "storyPrompt": "Add a brand-new key `\"lit\": True` inside `rooms[\"east\"]` so the east corridor lights up!",
+          "objective": "Store True at `rooms['east']['lit']`, then print `rooms['east']['lit']`.",
+          "concepts": [
+            "dictionaries_nested",
+            "booleans"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"east\": {\"gems\": 5}}\nrooms[\"east\"][\"lit\"] = ???\nprint(rooms[\"east\"][\"lit\"])\n",
+            "standard": "rooms = {\"east\": {\"gems\": 5}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"east\": {\"gems\": 5}}\nrooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])\n",
+          "testCode": "assert rooms['east']['lit'] is True\nassert OUTPUT.strip() == 'True', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Assign `rooms[\"east\"][\"lit\"] = True` (capital T, no quotes!) and print it!'",
+            "tier2_pattern": "rooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])",
+            "tier3_walkthrough": "Add:\nrooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "subscript",
+            "bool",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-06",
+          "trialType": "code",
+          "title": "Sum All Rooms in a Nested Dict",
+          "storyPrompt": "Loop over `rooms.values()` — each value is an inner room dictionary! Add `r[\"gems\"]` from every room into `total`.",
+          "objective": "Loop over `rooms.values()` summing each room's `gems` into the variable `total`, then print `total`.",
+          "concepts": [
+            "dictionaries_nested",
+            "for_loops"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\nfor r in rooms.values():\n    total += r[\"???\"]\nprint(total)\n",
+            "standard": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\nfor r in rooms.values():\n    total += r[\"gems\"]\nprint(total)\n",
+          "testCode": "assert total == 35\nassert OUTPUT.strip() == '35', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Loop `for r in rooms.values():` and add `r[\"gems\"]` to `total`!'",
+            "tier2_pattern": "for r in rooms.values():\n    total += r[\"gems\"]\nprint(total)",
+            "tier3_walkthrough": "Add:\nfor r in rooms.values():\n    total += r[\"gems\"]\nprint(total)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-07",
+          "trialType": "code",
+          "title": "Unlock Chronis's Crystal Archive (Boss)",
+          "storyPrompt": "Chronis's vault requires summing `gems` ONLY for rooms where `r[\"open\"]` is `True`! When `total` reaches `50`, announce `\"CHRONIS FREE!\"`.",
+          "objective": "Loop over `rooms.values()` summing `r['gems']` into `total` only when `r['open']` is True. If `total` equals 50, print 'CHRONIS FREE!'.",
+          "concepts": [
+            "dictionaries_nested",
+            "for_loops",
+            "conditionals_if"
+          ],
+          "shardReward": 85,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")\n",
+            "standard": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")\n",
+          "testCode": "assert total == 50\nassert OUTPUT.strip() == 'CHRONIS FREE!', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points: 'Check `if r[\"open\"]:` inside `for r in rooms.values():` before adding `r[\"gems\"]`!'",
+            "tier2_pattern": "total = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")",
+            "tier3_walkthrough": "Add:\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Chronis's Nested Key Riddle!",
+          "storyPrompt": "A shimmering archive rune glows! Predict what `len(atlas[\"east\"])` returns.",
+          "objective": "Predict the length of the inner dictionary `atlas[\"east\"]`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "codeSnippet": "atlas = {\"east\": {\"a\": 1, \"b\": 2, \"c\": 3}}\nprint(len(atlas[\"east\"]))",
+          "choices": [
+            {
+              "id": "a",
+              "label": "1",
+              "explanation": "`len(atlas)` is `1`, but `len(atlas[\"east\"])` counts keys inside the inner dict!"
+            },
+            {
+              "id": "b",
+              "label": "3",
+              "explanation": "Spot on! The inner dict `{\"a\": 1, \"b\": 2, \"c\": 3}` has 3 keys!"
+            },
+            {
+              "id": "c",
+              "label": "6",
+              "explanation": "`len()` counts keys (3), not the sum of values!"
+            },
+            {
+              "id": "d",
+              "label": "4",
+              "explanation": "Only count the keys inside `atlas[\"east\"]`: `a`, `b`, `c` (3)!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip counts: 'Count the keys inside `{\"a\": 1, \"b\": 2, \"c\": 3}`!'",
+            "tier2_pattern": "len({\"a\": 1, \"b\": 2, \"c\": 3}) -> 3",
+            "tier3_walkthrough": "Tap Option B (`3`)!"
+          },
+          "difficultyOverride": null
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-05-07",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Stop right there, {heroName}! You will NEVER unlock Chronis's Logic Vault in The Crystal Archives!"
+          },
+          {
+            "speaker": "Chronis",
+            "spriteKey": "mire",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "You've practiced every piece, {heroName}! Put it all together and break Lord Null's seal!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! We've got this, {heroName} — let's rescue Chronis!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Nooo! My The Crystal Archives lock shattered?! Returning None... OUT!"
+          },
+          {
+            "speaker": "Chronis",
+            "spriteKey": "mire",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "Thank you, {heroName}! My scales shine again! The portal to Shieldwall Bastion is open!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Chronis is free! Onward to Shieldwall Bastion!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-32-06-bastion",
+      "number": 5,
+      "name": "Shieldwall Bastion",
+      "dragon": {
+        "id": "dragon-aegis",
+        "name": "Aegis",
+        "title": "Warden of Safe Spells",
+        "element": "Prism",
+        "rescueDialogue": "Clang-shimmer! Your try/except shields held firm against every glitch! Take this Prism Shield into Null's Polygon Citadel!"
+      },
+      "miniVisualUpgrade": "32-Bit Upgrade: Shimmering prism forcefields guard the bastion battlements.",
+      "storyIntro": "Before storming Null's Polygon Citadel, train at Shieldwall Bastion with guardian dragon Aegis! Master `try / except` so bad data, zero division, and missing keys can never crash your spells.",
+      "storyOutro": "Aegis unfurls his prism wings and opens the grand gate to Null's Polygon Citadel!",
+      "primaryConcepts": [
+        "error_handling"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-32-06-01",
+          "trialType": "multiple_choice",
+          "title": "How try / except Shields Your Code!",
+          "storyPrompt": "Welcome to Shieldwall Bastion! Wrapping risky code in `try:` and adding `except ValueError:` catches crashes cleanly instead of halting your program.",
+          "objective": "Predict what this `try / except` block prints.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "codeSnippet": "try:\n    n = int(\"boom\")\n    print(n)\nexcept ValueError:\n    print(\"BLOCKED\")",
+          "choices": [
+            {
+              "id": "a",
+              "label": "BLOCKED",
+              "explanation": "Spot on! `int(\"boom\")` raises `ValueError`, jumping straight to `except ValueError:` and printing `BLOCKED`!"
+            },
+            {
+              "id": "b",
+              "label": "boom",
+              "explanation": "`int(\"boom\")` fails immediately before `print(n)` can run!"
+            },
+            {
+              "id": "c",
+              "label": "0",
+              "explanation": "`int()` raises `ValueError` instead of returning `0`!"
+            },
+            {
+              "id": "d",
+              "label": "Crash with ValueError",
+              "explanation": "`except ValueError:` catches the error so nothing crashes!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip points: '`int(\"boom\")` triggers `except ValueError:`!'",
+            "tier2_pattern": "except ValueError: runs -> BLOCKED",
+            "tier3_walkthrough": "Tap Option A (`BLOCKED`)!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-06-02",
+          "trialType": "fix_bug",
+          "title": "The Broken Shield Colon!",
+          "storyPrompt": "Just like `if` and `for`, both `try:` and `except ...:` MUST end with a colon `:`! Fix the missing colon so Python prints `SHIELDED`.",
+          "objective": "Fix the syntax error on the `try` line so Python prints SHIELDED.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "bugSummary": "Missing colon after `try` causes a SyntaxError.",
+          "starterCode": {
+            "explorer": "try\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n",
+            "standard": "try\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n",
+            "challenge": "try\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n"
+          },
+          "referenceSolution": "try:\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n",
+          "testCode": "assert OUTPUT.strip() == 'SHIELDED', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps line 1: 'Add `:` right after `try`!'",
+            "tier2_pattern": "try:\n    ...",
+            "tier3_walkthrough": "Change `try` to `try:`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-06-03",
+          "trialType": "code",
+          "title": "Catch a Bad Integer (ValueError)",
+          "storyPrompt": "Practice catching `ValueError`! Try converting `raw = \"bad\"` with `int(raw)` into `val`; in `except ValueError:`, set `val = 0`. Print `val` afterward.",
+          "objective": "Using `try` / `except ValueError`, try setting `val` to `int(raw)` or fall back to `val = 0`, then print `val`.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = \"bad\"\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = ???\nprint(val)\n",
+            "standard": "raw = \"bad\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "raw = \"bad\"\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)\n",
+          "testCode": "assert val == 0\nassert OUTPUT.strip() == '0', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Wrap `val = int(raw)` in `try:` and put `val = 0` inside `except ValueError:`!'",
+            "tier2_pattern": "try:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)",
+            "tier3_walkthrough": "Add:\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "int_call",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": "42"
+              },
+              "expectOutput": "42",
+              "expectVars": {
+                "val": 42
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-32-06-04",
+          "trialType": "code",
+          "title": "Catch Divide-by-Zero (ZeroDivisionError)",
+          "storyPrompt": "Dividing by `0` raises `ZeroDivisionError`! Try computing `ans = a // b`; if `b` is `0`, catch `ZeroDivisionError` and set `ans = 0`.",
+          "objective": "Using `try` / `except ZeroDivisionError`, set `ans` to `a // b` or fall back to `0`, then print `ans`.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "a = 20\nb = 0\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = ???\nprint(ans)\n",
+            "standard": "a = 20\nb = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "a = 20\nb = 0\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)\n",
+          "testCode": "assert ans == 0\nassert OUTPUT.strip() == '0', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Catch `ZeroDivisionError` and set `ans = 0`!'",
+            "tier2_pattern": "try:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)",
+            "tier3_walkthrough": "Add:\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "math_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "a": 20,
+                "b": 4
+              },
+              "expectOutput": "5",
+              "expectVars": {
+                "ans": 5
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-32-06-05",
+          "trialType": "code",
+          "title": "Catch a Missing Key (KeyError)",
+          "storyPrompt": "Looking up a missing dictionary key raises `KeyError`! Catch `KeyError` so `rooms[name]` safely falls back to `\"MISSING\"`.",
+          "objective": "Using `try` / `except KeyError`, store `rooms[name]` in `status` or fall back to 'MISSING', then print `status`.",
+          "concepts": [
+            "error_handling",
+            "dictionaries"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"???\"\nprint(status)\n",
+            "standard": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)\n",
+          "testCode": "assert status == 'MISSING'\nassert OUTPUT.strip() == 'MISSING', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points: 'Catch `KeyError` and set `status = \"MISSING\"`!'",
+            "tier2_pattern": "try:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)",
+            "tier3_walkthrough": "Add:\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "subscript",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "name": "north"
+              },
+              "expectOutput": "OPEN",
+              "expectVars": {
+                "status": "OPEN"
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Catching KeyError",
+            "prompt": "Accessing a missing key like `d[\"missing\"]` raises a `KeyError`! You can catch it with `except KeyError:`.",
+            "question": "Which exception does `{\"a\": 1}[\"b\"]` raise?",
+            "codeSnippet": "d = {\"a\": 1}\nprint(d[\"b\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "ValueError",
+                "explanation": "`ValueError` is for bad values like `int(\"abc\")` — missing dict keys raise `KeyError`!"
+              },
+              {
+                "id": "b",
+                "label": "ZeroDivisionError",
+                "explanation": "`ZeroDivisionError` only happens when dividing by `0`!"
+              },
+              {
+                "id": "c",
+                "label": "KeyError",
+                "explanation": "Spot on! Missing dictionary keys raise `KeyError`!"
+              },
+              {
+                "id": "d",
+                "label": "IndexError",
+                "explanation": "`IndexError` is for lists; dictionaries raise `KeyError`!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-32-06-06",
+          "trialType": "code",
+          "title": "Skip Bad Entries in a Loop",
+          "storyPrompt": "Loop over `items = [\"5\", \"oops\", \"15\"]`, adding valid integers into `total` and skipping invalid ones with `except ValueError: continue`!",
+          "objective": "Loop over `items`, adding valid `int(x)` values to `total` while skipping bad strings with `try` / `except ValueError: continue`, then print `total`.",
+          "concepts": [
+            "error_handling",
+            "for_loops"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
+            "standard": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
+          "testCode": "assert total == 20\nassert OUTPUT.strip() == '20', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Put `try: total += int(x)` and `except ValueError: continue` inside the `for` loop!'",
+            "tier2_pattern": "for x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)",
+            "tier3_walkthrough": "Add:\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "try",
+            "except",
+            "int_call",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-06-07",
+          "trialType": "code",
+          "title": "Raise Aegis's Error-Proof Shield (Boss)",
+          "storyPrompt": "Combine functions and `try / except`! Write `def safe_parse(text):` returning `int(text)` or `0` on `ValueError`, sum `safe_parse(s)` for `[\"10\", \"null\", \"30\"]` into `power`, and if `power == 40`, print `\"AEGIS FREE!\"`!",
+          "objective": "Define `safe_parse(text)` returning `int(text)` or `0` on `ValueError`. Sum `safe_parse(s)` over `raw` into `power`, and if `power` equals 40, print 'AEGIS FREE!'.",
+          "concepts": [
+            "error_handling",
+            "functions_def",
+            "functions_return",
+            "for_loops"
+          ],
+          "shardReward": 85,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = [\"10\", \"null\", \"30\"]\ndef safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\npower = sum(safe_parse(s) for s in raw)\nif power == 40:\n    print(\"AEGIS FREE!\")\n",
+            "standard": "raw = [\"10\", \"null\", \"30\"]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "raw = [\"10\", \"null\", \"30\"]\ndef safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\npower = 0\nfor s in raw:\n    power += safe_parse(s)\nif power == 40:\n    print(\"AEGIS FREE!\")\n",
+          "testCode": "assert safe_parse('7') == 7 and safe_parse('bad') == 0\nassert power == 40\nassert OUTPUT.strip() == 'AEGIS FREE!', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Define `safe_parse(text)` with `try/except ValueError`, loop over `raw` summing into `power`, then print `\"AEGIS FREE!\"`!'",
+            "tier2_pattern": "def safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0",
+            "tier3_walkthrough": "Write `safe_parse(text)`, sum `safe_parse(s)` over `raw` into `power`, and if `power == 40: print(\"AEGIS FREE!\")`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "try",
+            "except",
+            "return",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-06-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Aegis's Exception Riddle!",
+          "storyPrompt": "A glowing prism rune asks: when does the `except` block run?",
+          "objective": "Choose when Python executes an `except` block.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "choices": [
+            {
+              "id": "a",
+              "label": "Always, right after try finishes",
+              "explanation": "If `try` succeeds with no error, Python skips the `except` block!"
+            },
+            {
+              "id": "b",
+              "label": "Only when code inside try raises a matching error",
+              "explanation": "Spot on! `except` is a safety net that only runs when a matching exception occurs!"
+            },
+            {
+              "id": "c",
+              "label": "Before the try block runs",
+              "explanation": "Python always tries the `try` block first!"
+            },
+            {
+              "id": "d",
+              "label": "Never — it is a comment",
+              "explanation": "`except` is real executable Python code that catches runtime errors!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Think of `except` like a safety net — it only catches you if something fails!'",
+            "tier2_pattern": "Runs only on a matching error inside try",
+            "tier3_walkthrough": "Tap Option B!"
+          },
+          "difficultyOverride": null
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-06-07",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Stop right there, {heroName}! You will NEVER unlock Aegis's Logic Vault in Shieldwall Bastion!"
+          },
+          {
+            "speaker": "Aegis",
+            "spriteKey": "gale",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "You've practiced every piece, {heroName}! Put it all together and break Lord Null's seal!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! We've got this, {heroName} — let's rescue Aegis!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Nooo! My Shieldwall Bastion lock shattered?! Returning None... OUT!"
+          },
+          {
+            "speaker": "Aegis",
+            "spriteKey": "gale",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "Thank you, {heroName}! My scales shine again! The portal to Null's Polygon Citadel is open!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Aegis is free! Onward to Null's Polygon Citadel!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-32-04-citadel",
+      "number": 6,
       "name": "Null's Polygon Citadel",
       "dragon": {
         "id": "dragon-vortex",

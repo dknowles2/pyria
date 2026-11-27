@@ -1,6 +1,6 @@
 # Pyria: Return of the Bits
 
-**Pyria** is a browser-based Python-learning RPG designed for a 10-year-old adventurer. Lord Null has drained the magical world of Pyria down to flat 8-bit pixels and caged its guardian dragons inside **Logic Vaults**. As the young **Code-Tamer**—joined by **Pip**, a tiny glitch-hatchling dragon sidekick—you write real Python 3 (running safely in-browser via **Pyodide** WebAssembly) to solve dungeon trials, rescue **32 Dragon Guardians**, earn **Byte Shards**, uncover hidden bonus rounds and Easter eggs, and watch the entire game evolve across video game history:
+**Pyria** is a browser-based Python-learning RPG designed for a 10-year-old adventurer. Lord Null has drained the magical world of Pyria down to flat 8-bit pixels and caged its guardian dragons inside **Logic Vaults**. As the young **Code-Tamer**—joined by **Pip**, a tiny glitch-hatchling dragon sidekick—you write real Python 3 (running safely in-browser via **Pyodide** WebAssembly) to solve dungeon trials, rescue **36 Dragon Guardians**, earn **Byte Shards**, uncover hidden bonus rounds and Easter eggs, and watch the entire game evolve across video game history:
 
 **8-Bit NES → 16-Bit SNES → 32-Bit PS1/GBA Isometric 2.5D → 64-Bit Nintendo 64 3D** *(with concept roadmap through 128-Bit, HD, and Modern 4K Sandbox!)*
 
@@ -16,7 +16,7 @@
 
 ---
 
-## The 4 Playable Eras & 32 Realms (`275 Trials`)
+## The 4 Playable Eras & 36 Realms (`307 Trials`)
 
 Every single Realm follows a **slow-growth scaffolded cadence** so new concepts never feel like a cliff:
 1. **Multiple Choice (`Predict & Choose`)** — Read real Python and predict the output or spot valid syntax first.
@@ -56,7 +56,7 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 
 ---
 
-### Era 3: The 32-Bit Era — *The Isometric Frontier* (PS1 / GBA 2.5D · 4 Realms · 28 Trials)
+### Era 3: The 32-Bit Era — *The Isometric Frontier* (PS1 / GBA 2.5D · 6 Realms · 50 Trials)
 *Pyria tilts into an **Isometric 2.5D Diorama** with elevated terrain terraces (`elevation` heightmaps), extruded 3D stone blocks, and crystalline 32-bit synth music:*
 
 | # | Realm | Dragon Guardian | Python Focus |
@@ -72,7 +72,7 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 
 ---
 
-### Era 4: The 64-Bit Era — *The Nintendo 64 Realm of Polygons* (N64 3D · 4 Realms · 28 Trials)
+### Era 4: The 64-Bit Era — *The Nintendo 64 Realm of Polygons* (N64 3D · 6 Realms · 48 Trials)
 *Pyria bursts into chunky **Nintendo 64 Gouraud-shaded perspective 3D** with a 3rd-person follow camera, cobalt skies, distant low-poly mountains, distance fog, and N64 orchestral synth music:*
 
 | # | Realm | Dragon Guardian | Python Focus |
@@ -122,8 +122,8 @@ pyria/
 │   ├── game.json              # Metadata, NPCs, 4-era eraOrder & 33-concept progression
 │   ├── catalog.json           # Python character creation & Byte Shard unlockables
 │   ├── schema.json            # JSON Schema + Python OUTPUT test harness convention
-│   ├── eras/                  # era-01-8bit (8R), era-02-16bit (16R), era-03-32bit (4R), era-04-64bit (4R)
-│   └── maps/                  # 32 playable 64x48 Realm tilemaps (with 3D elevation layers for 32/64-Bit)
+│   ├── eras/                  # era-01-8bit (8R), era-02-16bit (16R), era-03-32bit (6R), era-04-64bit (6R)
+│   └── maps/                  # 36 playable 64x48 Realm tilemaps (with 3D elevation layers for 32/64-Bit)
 ├── assets/            # Visual art, screenshots, pixel-art generators & previewers
 │   ├── screenshots/           # Live 8-Bit, 16-Bit, 32-Bit, 64-Bit & /builder screenshots
 │   ├── concept-art/           # 7-Era progression renders, 32-Bit biomes & sprite dimension specs
@@ -181,7 +181,7 @@ Pushing to `main` automatically runs tests, bundles static assets, and deploys v
 Pyria tracks privacy-safe per-trial telemetry (`difficultyMode`, `isPractice`, normalized `errorType`, and elapsed `durationMs`) and rolls up daily aggregates into `trial_stats_daily` so calibration history survives attempt pruning.
 
 - **Trial Calibration Dashboard** (`/builder` locally, and Admin `/console` in Cloudflare production; strictly hidden for non-admin parents):
-  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 275 trials.
+  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 307 trials.
   - Filter by **Era**, **Realm**, **Trial Type**, **Difficulty** (`explorer` / `standard` / `challenge`), **Time Window** (`7d` / `30d` / `90d` / `all`), optional **Since** date (`YYYY-MM-DD`), **Flag status**, and **Include Practice Replays**, or click **Export CSV** (`format=csv`).
   - Click any trial row to open the **Drill-Down Modal** showing hint-tier breakdown (`tier0`–`tier3`), top failure error types / wrong multiple-choice options, daily trend with a **Before vs. After** cutoff date check, and (in local `/builder`) a direct **Edit Trial** jump into **Story & Trials**.
 - **CLI Calibration Report** (`scripts/calibration_report.py`):
