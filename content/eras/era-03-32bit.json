@@ -96,7 +96,22 @@
             "tier2_pattern": "pos = ___\nx, y, z = ___\nprint(___)",
             "tier3_walkthrough": "Update to:\npos = (10, 5, 3)\nx, y, z = pos\nprint(z)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pos": [
+                  1,
+                  2,
+                  9
+                ]
+              },
+              "expectOutput": "9"
+            }
+          ]
         },
         {
           "id": "trial-32-01-03",
@@ -122,7 +137,23 @@
             "tier2_pattern": "pos = ___\nx, y, z = ___\nhigher = ___\nprint(___)",
             "tier3_walkthrough": "Write:\npos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pos": [
+                  1,
+                  2,
+                  5
+                ]
+              },
+              "expectOutput": "(1, 2, 7)",
+              "testCode": "assert higher == (1, 2, 7)"
+            }
+          ]
         },
         {
           "id": "trial-32-01-04",
@@ -149,7 +180,29 @@
             "tier2_pattern": "for idx, h in enumerate(___):\n    if h > best_h:\n        best_h = ___\n        best_idx = ___",
             "tier3_walkthrough": "Loop `for idx, h in enumerate(heights):`, and whenever `h > best_h`, update `best_h = h` and `best_idx = idx`, then `print(best_idx)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "tuple",
+            "call:enumerate"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "heights": [
+                  2,
+                  3,
+                  12,
+                  5
+                ]
+              },
+              "expectOutput": "2",
+              "expectVars": {
+                "best_idx": 2
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-01-05",
@@ -176,7 +229,34 @@
             "tier2_pattern": "peaks = ___\nmax_z = ___\nfor ___ in ___:\n    if ___:\n        max_z = ___\nprint(___)",
             "tier3_walkthrough": "Write:\npeaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "peaks": [
+                  [
+                    0,
+                    0,
+                    15
+                  ],
+                  [
+                    1,
+                    1,
+                    3
+                  ]
+                ]
+              },
+              "expectOutput": "15",
+              "expectVars": {
+                "max_z": 15
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-01-06",
@@ -203,7 +283,50 @@
             "tier2_pattern": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")",
             "tier3_walkthrough": "Write:\npillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "aug_assign",
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pillars": [
+                  [
+                    0,
+                    0,
+                    4
+                  ],
+                  [
+                    1,
+                    0,
+                    6
+                  ]
+                ]
+              },
+              "expectOutput": "TERRACREST FREE!",
+              "expectVars": {
+                "total_h": 10
+              }
+            },
+            {
+              "overrides": {
+                "pillars": [
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "total_h": 1
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-01-bonus",
@@ -398,7 +521,27 @@
             "tier2_pattern": "ores = ___\npower = ___\nprint(___)",
             "tier3_walkthrough": "Update to:\nores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "ores": [
+                  2,
+                  5
+                ]
+              },
+              "expectOutput": "[20, 50]",
+              "expectVars": {
+                "power": [
+                  20,
+                  50
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-02-03",
@@ -424,7 +567,28 @@
             "tier2_pattern": "temps = ___\nhot = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntemps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "temps": [
+                  15,
+                  2,
+                  30
+                ]
+              },
+              "expectOutput": "[15, 30]",
+              "expectVars": {
+                "hot": [
+                  15,
+                  30
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-02-04",
@@ -450,7 +614,12 @@
             "tier2_pattern": "coords = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncoords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "tuple",
+            "call:len"
+          ]
         },
         {
           "id": "trial-32-02-05",
@@ -476,7 +645,28 @@
             "tier2_pattern": "tags = ___\nloud = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "method_call:upper"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "tags": [
+                  "fire",
+                  "ice"
+                ]
+              },
+              "expectOutput": "['FIRE', 'ICE']",
+              "expectVars": {
+                "loud": [
+                  "FIRE",
+                  "ICE"
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-02-06",
@@ -502,7 +692,41 @@
             "tier2_pattern": "bars = ___\nforged = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\nbars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "call:sum"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "bars": [
+                  30,
+                  35,
+                  5
+                ]
+              },
+              "expectOutput": "ANVILWING FREE!",
+              "expectVars": {
+                "forged": [
+                  60,
+                  70
+                ]
+              }
+            },
+            {
+              "overrides": {
+                "bars": [
+                  5,
+                  10
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "forged": []
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-02-bonus",
@@ -697,7 +921,22 @@
             "tier2_pattern": "cavern = ___\nprint(___)",
             "tier3_walkthrough": "Update to:\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "cavern": {
+                  "gate": {
+                    "north": "LOCKED"
+                  }
+                }
+              },
+              "expectOutput": "LOCKED"
+            }
+          ]
         },
         {
           "id": "trial-32-03-03",
@@ -723,7 +962,26 @@
             "tier2_pattern": "found = ___\nunique_count = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nfound = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:set",
+            "call:len"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "found": [
+                  "a",
+                  "a",
+                  "b"
+                ]
+              },
+              "expectOutput": "2",
+              "expectVars": {
+                "unique_count": 2
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-03-04",
@@ -749,7 +1007,11 @@
             "tier2_pattern": "a = ___\nb = ___\ncommon = ___\nprint(___)",
             "tier3_walkthrough": "Write:\na = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "set",
+            "call:len"
+          ]
         },
         {
           "id": "trial-32-03-05",
@@ -775,7 +1037,26 @@
             "tier2_pattern": "rooms = ___\ndest = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nrooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "rooms": {
+                  "hall": {
+                    "next": "spire",
+                    "gems": 3
+                  }
+                }
+              },
+              "expectOutput": "spire",
+              "expectVars": {
+                "dest": "spire"
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-03-06",
@@ -794,14 +1075,51 @@
             "standard": "",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
+          "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum([n[\"power\"] for n in nodes.values()])\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
           "testCode": "assert beam == 100 and OUTPUT.strip() == \"LUMINA FREE!\"",
           "hints": {
             "tier1_nudge": "One last spell to free Lumina!",
             "tier2_pattern": "beam = sum([n[___] for n in nodes.___()])\nif beam == 100:\n    print(___)",
             "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "dict",
+            "call:sum",
+            "method_call:values"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "nodes": {
+                  "A": {
+                    "power": 60
+                  },
+                  "B": {
+                    "power": 40
+                  }
+                }
+              },
+              "expectOutput": "LUMINA FREE!",
+              "expectVars": {
+                "beam": 100
+              }
+            },
+            {
+              "overrides": {
+                "nodes": {
+                  "A": {
+                    "power": 10
+                  }
+                }
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "beam": 10
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-03-bonus",
@@ -999,7 +1317,29 @@
             "tier2_pattern": "try:\n    total += int(s)\nexcept ValueError___\n    pass",
             "tier3_walkthrough": "Add a colon `:` at the end of `except ValueError:` so `pass` safely skips `\"null\"` and prints `10`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "for",
+            "aug_assign",
+            "int_call"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": [
+                  "5",
+                  "bad",
+                  "7"
+                ]
+              },
+              "expectOutput": "12",
+              "expectVars": {
+                "total": 12
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-04-03",
@@ -1028,7 +1368,14 @@
             "tier2_pattern": "def safe_int(___):\n    try:\n        return ___\n    except ___:\n        return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "try",
+            "except",
+            "int_call"
+          ]
         },
         {
           "id": "trial-32-04-04",
@@ -1057,7 +1404,13 @@
             "tier2_pattern": "def safe_div(___):\n    try:\n        return ___\n    except ___:\n        return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "try",
+            "except"
+          ]
         },
         {
           "id": "trial-32-04-05",
@@ -1084,7 +1437,30 @@
             "tier2_pattern": "p1 = ___\np2 = ___\nd2 = ___\nprint(___)",
             "tier3_walkthrough": "Write:\np1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "p1": [
+                  0,
+                  0,
+                  0
+                ],
+                "p2": [
+                  1,
+                  2,
+                  2
+                ]
+              },
+              "expectOutput": "9",
+              "expectVars": {
+                "d2": 9
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-04-06",
@@ -1110,7 +1486,42 @@
             "tier2_pattern": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")",
             "tier3_walkthrough": "Write:\nraw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "for",
+            "if",
+            "aug_assign",
+            "int_call"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": [
+                  "12",
+                  "oops",
+                  "20"
+                ]
+              },
+              "expectOutput": "64-BIT UNLOCKED!",
+              "expectVars": {
+                "bits": 32
+              }
+            },
+            {
+              "overrides": {
+                "raw": [
+                  "5",
+                  "oops"
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "bits": 5
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-04-bonus",

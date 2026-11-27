@@ -4,7 +4,7 @@
 
 const EXECUTION_TIMEOUT_MS = 3000;
 const BOOT_TIMEOUT_MS = 20000;
-const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127l';
+const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127m';
 const MAX_PARTIAL_STDOUT_BYTES = 16384;
 const MAX_PARTIAL_STDOUT_LINES = 200;
 const STDOUT_TRUNCATED_NOTICE = '\n... (output truncated)';
@@ -489,8 +489,15 @@ export class PyRunner {
     });
   }
 
-  async runTrial(studentCode, testCode, showRawTracebacks = false) {
-    const result = await this.execute('trial', { studentCode, testCode });
+  async runTrial(studentCode, testCode, showRawTracebacks = false, options = {}) {
+    const payload = { studentCode, testCode };
+    if (options && Array.isArray(options.requiredConstructs) && options.requiredConstructs.length > 0) {
+      payload.requiredConstructs = options.requiredConstructs;
+    }
+    if (options && Array.isArray(options.variants) && options.variants.length > 0) {
+      payload.variants = options.variants;
+    }
+    const result = await this.execute('trial', payload);
     const pip = translateErrorForPip(result, showRawTracebacks);
     return { ...result, ...pip };
   }

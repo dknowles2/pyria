@@ -91,13 +91,18 @@
             "challenge": "# Challenge: find and fix the bug with no hints\nclass Player:\n    def __init__(self, x):\n        self.x = x\n    def move(dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)\n"
           },
           "referenceSolution": "class Player:\n    def __init__(self, x):\n        self.x = x\n    def move(self, dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)\n",
-          "testCode": "assert p.x == 5 and OUTPUT.strip() == \"5\"",
+          "testCode": "assert p.x == 5 and OUTPUT.strip() == \"5\"\n_p2 = Player(10)\n_p2.move(4, 0)\nassert _p2.x == 14",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted line!",
             "tier2_pattern": "class Player:\n    def __init__(___):\n        self.x = ___\n    def move(___):\n        self.x = ___\np = ___\n___",
             "tier3_walkthrough": "Update to:\nclass Player:\n    def __init__(self, x):\n        self.x = x\n    def move(self, dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def"
+          ]
         },
         {
           "id": "trial-64-01-03",
@@ -118,13 +123,19 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())\n",
-          "testCode": "assert Gem3D(2, 4, 6, 10).coords() == (2, 4, 6) and OUTPUT.strip() == \"(2, 4, 6)\"",
+          "testCode": "assert Gem3D(2, 4, 6, 10).coords() == (2, 4, 6) and Gem3D(4, 5, 6, 10).coords() == (4, 5, 6) and OUTPUT.strip() == \"(2, 4, 6)\"",
           "hints": {
             "tier1_nudge": "Pip cheers you on!",
             "tier2_pattern": "class Gem3D:\n    def __init__(___):\n        self.x, self.y, self.z, self.value = ___\n    def coords(___):\n        return ___\nprint(___)",
             "tier3_walkthrough": "Write:\nclass Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-64-01-04",
@@ -144,13 +155,20 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))\n",
-          "testCode": "assert str(Dragon(\"Polywing\", \"Sky\")) == \"Polywing (Sky)\" and OUTPUT.strip() == \"Polywing (Sky)\"",
+          "testCode": "assert str(Dragon(\"Polywing\", \"Sky\")) == \"Polywing (Sky)\" and str(Dragon(\"Pip\", \"Fire\")) == \"Pip (Fire)\" and OUTPUT.strip() == \"Polywing (Sky)\"",
           "hints": {
             "tier1_nudge": "Pip double-checks your logic!",
             "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.name = ___\n        self.elem = ___\n    def __str__(___):\n        return ___\nprint(___)",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return",
+            "fstring"
+          ]
         },
         {
           "id": "trial-64-01-05",
@@ -176,7 +194,13 @@
             "tier2_pattern": "class Camera:\n    def __init__(self, target, offset=5):\n        self.target = ___\n        self.offset = ___\n    def view_z(self):\n        return self.target.z + ___",
             "tier3_walkthrough": "Define `Entity(z)` and `Camera(target, offset=5)` with `view_z(self)` returning `self.target.z + self.offset`, then create `hero = Entity(10)`, `cam = Camera(hero)`, and `print(cam.view_z())`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-64-01-06",
@@ -202,7 +226,14 @@
             "tier2_pattern": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += ___\n# flap(10), flap(15), check if f.alt >= 25",
             "tier3_walkthrough": "Define `class Flyer:` with `__init__` setting `self.alt = 0` and `flap(self, lift)` doing `self.alt += lift`. Create `f = Flyer()`, call `f.flap(10)` and `f.flap(15)`, and `if f.alt >= 25: print(\"POLYWING FREE!\")`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "if",
+            "aug_assign"
+          ]
         },
         {
           "id": "trial-64-01-bonus",
@@ -391,13 +422,18 @@
             "challenge": "# Challenge: find and fix the bug with no hints\nclass Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon:\n    pass\n\nprint(IceDragon().roar())\n"
           },
           "referenceSolution": "class Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon(Dragon):\n    pass\n\nprint(IceDragon().roar())\n",
-          "testCode": "assert OUTPUT.strip() == \"ROAR!\"",
+          "testCode": "assert issubclass(IceDragon, Dragon) and IceDragon().roar() == \"ROAR!\" and OUTPUT.strip() == \"ROAR!\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted line!",
             "tier2_pattern": "class Dragon:\n    def roar(___):\n        return ___\nclass IceDragon(Dragon):\n    ___\nprint(___)",
             "tier3_walkthrough": "Update to:\nclass Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon(Dragon):\n    pass\n\nprint(IceDragon().roar())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-64-02-03",
@@ -417,13 +453,18 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())\n",
-          "testCode": "assert Dragon().power() == 20 and BossDragon().power() == 100 and OUTPUT.strip() == \"100\"",
+          "testCode": "assert issubclass(BossDragon, Dragon) and Dragon().power() == 20 and BossDragon().power() == 100 and OUTPUT.strip() == \"100\"",
           "hints": {
             "tier1_nudge": "Pip cheers you on!",
             "tier2_pattern": "class Dragon:\n    def power(___):\n        return ___\nclass BossDragon(Dragon):\n    def power(___):\n        return ___\nprint(___)",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-64-02-04",
@@ -443,13 +484,19 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)\n",
-          "testCode": "assert SkyDragon(\"Gale\", 50).name == \"Gale\" and OUTPUT.strip() == \"50\"",
+          "testCode": "assert issubclass(SkyDragon, Dragon) and SkyDragon(\"Gale\", 50).altitude == 50 and SkyDragon(\"Pip\", 10).name == \"Pip\" and OUTPUT.strip() == \"50\"",
           "hints": {
             "tier1_nudge": "Pip double-checks your logic!",
             "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.name = ___\nclass SkyDragon(Dragon):\n    def __init__(___):\n        ___\n        self.altitude = ___",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "call:super"
+          ]
         },
         {
           "id": "trial-64-02-05",
@@ -469,13 +516,19 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)\n",
-          "testCode": "assert out == [\"flicker\", \"splash\"] and OUTPUT.strip() == \"['flicker', 'splash']\"",
+          "testCode": "assert Torch().tick() == \"flicker\" and Fountain().tick() == \"splash\" and out == [\"flicker\", \"splash\"] and OUTPUT.strip() == \"['flicker', 'splash']\"",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",
             "tier2_pattern": "class Torch:\n    def tick(___):\n        return ___\nclass Fountain:\n    def tick(___):\n        return ___\nobjs = ___",
             "tier3_walkthrough": "Write:\nclass Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return",
+            "list_comp"
+          ]
         },
         {
           "id": "trial-64-02-06",
@@ -495,13 +548,20 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    print(\"VERTEX FREE!\")\n",
-          "testCode": "assert CastleMesh(32).double_verts() == 64 and OUTPUT.strip() == \"VERTEX FREE!\"",
+          "testCode": "assert issubclass(CastleMesh, Mesh) and CastleMesh(32).double_verts() == 64 and CastleMesh(12).double_verts() == 24 and OUTPUT.strip() == \"VERTEX FREE!\"",
           "hints": {
             "tier1_nudge": "One last spell to free Vertex!",
             "tier2_pattern": "class Mesh:\n    def __init__(___):\n        self.verts = ___\nclass CastleMesh(Mesh):\n    def double_verts(___):\n        return ___\nif ___:",
             "tier3_walkthrough": "Write:\nclass Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    print(\"VERTEX FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return",
+            "if"
+          ]
         },
         {
           "id": "trial-64-02-bonus",
@@ -696,7 +756,10 @@
             "tier2_pattern": "total = ___\nassert ___\nprint(___)",
             "tier3_walkthrough": "Update to:\ntotal = sum(range(1, 6))\nassert total == 15\nprint(total)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:sum"
+          ]
         },
         {
           "id": "trial-64-03-03",
@@ -722,7 +785,28 @@
             "tier2_pattern": "dragons = ___\nranked = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "lambda",
+            "call:sorted"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "dragons": [
+                  [
+                    "A",
+                    5
+                  ],
+                  [
+                    "B",
+                    99
+                  ]
+                ]
+              },
+              "expectOutput": "B"
+            }
+          ]
         },
         {
           "id": "trial-64-03-04",
@@ -742,13 +826,17 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))\n",
-          "testCode": "assert clamp(-5, 0, 10) == 0 and clamp(15, 0, 10) == 10 and OUTPUT.strip() == \"10\"",
+          "testCode": "assert clamp(15, 0, 10) == 10 and clamp(-5, 0, 10) == 0 and clamp(5, 0, 10) == 5 and OUTPUT.strip() == \"10\"",
           "hints": {
             "tier1_nudge": "Pip double-checks your logic!",
             "tier2_pattern": "def clamp(___):\n    return ___\nassert ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-64-03-05",
@@ -774,7 +862,29 @@
             "tier2_pattern": "polys = ___\ndraw_order = ___\nprint(___)",
             "tier3_walkthrough": "Write:\npolys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "lambda",
+            "dict",
+            "call:sorted"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "polys": [
+                  {
+                    "id": "a",
+                    "z": 5
+                  },
+                  {
+                    "id": "b",
+                    "z": 90
+                  }
+                ]
+              },
+              "expectOutput": "b"
+            }
+          ]
         },
         {
           "id": "trial-64-03-06",
@@ -800,7 +910,29 @@
             "tier2_pattern": "stars = ___\norder = ___\nassert ___\nprint(___)",
             "tier3_walkthrough": "Write:\nstars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]\norder = sorted(stars, key=lambda s: s[\"z\"], reverse=True)\nassert order[0][\"name\"] == \"Alpha\"\nprint(\"QUASAR FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "lambda",
+            "dict",
+            "call:sorted"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "stars": [
+                  {
+                    "name": "Alpha",
+                    "z": 50
+                  },
+                  {
+                    "name": "Beta",
+                    "z": 1
+                  }
+                ]
+              },
+              "expectOutput": "QUASAR FREE!"
+            }
+          ]
         },
         {
           "id": "trial-64-03-bonus",
@@ -996,13 +1128,19 @@
             "challenge": "# Challenge: find and fix the bug with no hints\nclass SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return bits == 64\n\nprint(SanctumCore(64).is_complete())\n"
           },
           "referenceSolution": "class SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return self.bits == 64\n\nprint(SanctumCore(64).is_complete())\n",
-          "testCode": "assert SanctumCore(64).is_complete() is True and OUTPUT.strip() == \"True\"",
+          "testCode": "assert SanctumCore(64).is_complete() is True and SanctumCore(32).is_complete() is False and OUTPUT.strip() == \"True\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted line!",
             "tier2_pattern": "class SanctumCore:\n    def __init__(___):\n        self.bits = ___\n    def is_complete(___):\n        return ___\nprint(___)",
             "tier3_walkthrough": "Update to:\nclass SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return self.bits == 64\n\nprint(SanctumCore(64).is_complete())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-64-04-03",
@@ -1024,13 +1162,18 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)\n",
-          "testCode": "assert s.pos == (3, 4, 5) and OUTPUT.strip() == \"(3, 4, 5)\"",
+          "testCode": "assert s.pos == (3, 4, 5) and OUTPUT.strip() == \"(3, 4, 5)\"\n_s2 = Spell3D((5, 5, 5))\n_s2.step(1, -1, 2)\nassert _s2.pos == (6, 4, 7)",
           "hints": {
             "tier1_nudge": "Pip cheers you on!",
             "tier2_pattern": "class Spell3D:\n    def __init__(___):\n        self.pos = ___\n    def step(___):\n        x, y, z = ___\n        self.pos = ___\ns = ___",
             "tier3_walkthrough": "Write:\nclass Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def"
+          ]
         },
         {
           "id": "trial-64-04-04",
@@ -1058,7 +1201,29 @@
             "tier2_pattern": "council = ___\nleaders = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncouncil = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "lambda",
+            "dict",
+            "call:sorted"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "council": [
+                  {
+                    "n": "Pip",
+                    "p": 10
+                  },
+                  {
+                    "n": "Nova",
+                    "p": 99
+                  }
+                ]
+              },
+              "expectOutput": "Nova"
+            }
+          ]
         },
         {
           "id": "trial-64-04-05",
@@ -1084,7 +1249,29 @@
             "tier2_pattern": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)",
             "tier3_walkthrough": "Write:\nshards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "for",
+            "aug_assign",
+            "int_call"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "shards": [
+                  "10",
+                  "bad",
+                  "25"
+                ]
+              },
+              "expectOutput": "35",
+              "expectVars": {
+                "crown_power": 35
+              }
+            }
+          ]
         },
         {
           "id": "trial-64-04-06",
@@ -1112,7 +1299,14 @@
             "tier2_pattern": "class PyriaCrown:\n    def __init__(___):\n        self.era_bits = ___\n    def total(___):\n        return ___\nc = ___\nassert ___",
             "tier3_walkthrough": "Write:\nclass PyriaCrown:\n    def __init__(self):\n        self.era_bits = [8, 16, 32, 8]\n    def total(self):\n        return sum(self.era_bits)\n\nc = PyriaCrown()\nassert c.total() == 64\nprint(\"64-BIT PYRIA RESTORED!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return",
+            "call:sum"
+          ]
         },
         {
           "id": "trial-64-04-bonus",

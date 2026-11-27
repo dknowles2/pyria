@@ -99,7 +99,10 @@
             "tier2_pattern": "Every opening quote needs a matching closing quote before `)`: say(\"<message>\")",
             "tier3_walkthrough": "Type:\nsay(\"Wake up, Spark!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:say"
+          ]
         },
         {
           "id": "trial-01-03",
@@ -126,7 +129,10 @@
             "tier2_pattern": "Pattern: say(\"<your message>\") — check capital letters, comma, and exclamation mark!",
             "tier3_walkthrough": "Type this exact line:\nsay(\"Hello, Pyria!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:say"
+          ]
         },
         {
           "id": "trial-01-04",
@@ -153,7 +159,10 @@
             "tier2_pattern": "shout(\"<first message>\")\nshout(\"<second message>\")",
             "tier3_walkthrough": "Write both lines:\nshout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:shout"
+          ]
         },
         {
           "id": "trial-01-05",
@@ -179,7 +188,11 @@
             "tier2_pattern": "say(\"<first part>\" + \"<second part>\")",
             "tier3_walkthrough": "Type:\nsay(\"Code-\" + \"Tamer\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:say",
+            "str_concat"
+          ]
         },
         {
           "id": "trial-01-06",
@@ -199,14 +212,19 @@
             "standard": "# Line 1: shout the ready signal\n# Line 2: glue two strings with say()\n",
             "challenge": ""
           },
-          "referenceSolution": "shout(\"SPARK READY!\")\nsay(\"Open\" + \" the vault!\")\n",
+          "referenceSolution": "shout(\"Spark ready!\")\nsay(\"Open\" + \" the vault!\")\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"SPARK READY!\", \"Open the vault!\"], f'Expected [\"SPARK READY!\", \"Open the vault!\"], got {lines!r}'\n",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement: 'Check the space before `the` in \" the vault!\" so the words don't squish together!'",
             "tier2_pattern": "shout(\"<ready signal>\")\nsay(\"<first part>\" + \"<second part>\")",
             "tier3_walkthrough": "Write both lines:\nshout(\"Spark ready!\")\nsay(\"Open\" + \" the vault!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:shout",
+            "call:say",
+            "str_concat"
+          ]
         },
         {
           "id": "trial-01-bonus",
@@ -399,7 +417,22 @@
             "tier2_pattern": "Pass the variable name without quotes: say(<variable>)",
             "tier3_walkthrough": "Line 2 should read:\nsay(stones)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "stones": 11
+              },
+              "expectOutput": "11",
+              "expectVars": {
+                "stones": 11
+              }
+            }
+          ]
         },
         {
           "id": "trial-02-03",
@@ -425,7 +458,22 @@
             "tier2_pattern": "<variable> = <number>\nsay(<variable>)",
             "tier3_walkthrough": "Write:\ngems = 10\nsay(gems)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "gems": 25
+              },
+              "expectOutput": "25",
+              "expectVars": {
+                "gems": 25
+              }
+            }
+          ]
         },
         {
           "id": "trial-02-04",
@@ -453,7 +501,26 @@
             "tier2_pattern": "total_gems = <box1> + <box2>\nsay(\"Gems: \" + str(<total>))",
             "tier3_walkthrough": "Complete with:\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(total_gems))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "str_call",
+            "str_concat",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "left_gems": 10,
+                "right_gems": 7
+              },
+              "expectOutput": "Gems: 17",
+              "expectVars": {
+                "total_gems": 17
+              }
+            }
+          ]
         },
         {
           "id": "trial-02-05",
@@ -481,7 +548,25 @@
             "tier2_pattern": "<var> = <var> + int(<text_var>)\nsay(<var>)",
             "tier3_walkthrough": "Write:\npower = power + int(boost_text)\nsay(power)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "int_call",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "power": 20,
+                "boost_text": "7"
+              },
+              "expectOutput": "27",
+              "expectVars": {
+                "power": 27
+              }
+            }
+          ]
         },
         {
           "id": "trial-02-06",
@@ -509,7 +594,28 @@
             "tier2_pattern": "vault_code = <key1> + <key2>\nshout(<guardian>)\nsay(\"Code: \" + str(<code_var>))",
             "tier3_walkthrough": "Complete with:\nvault_code = key_a + key_b\nshout(guardian)\nsay(\"Code: \" + str(vault_code))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "str_call",
+            "str_concat",
+            "call:shout",
+            "call:say"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "guardian": "Spark",
+                "key_a": 10,
+                "key_b": 4
+              },
+              "expectOutput": "SPARK\nCode: 14",
+              "expectVars": {
+                "vault_code": 14
+              }
+            }
+          ]
         },
         {
           "id": "trial-02-bonus",
@@ -545,7 +651,12 @@
             "tier2_pattern": "<variable> = <value1> + <value2>",
             "tier3_walkthrough": "Line 1 should read:\ngold = 20 + 30"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:say"
+          ]
         }
       ],
       "cutscenes": {
@@ -694,7 +805,24 @@
             "tier2_pattern": "if <condition>:\n    <indented action>",
             "tier3_walkthrough": "Add `:` right after `50` so the line reads:\nif heat > 50:"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "bool",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "heat": 30
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "alarm_on": false
+              }
+            }
+          ]
         },
         {
           "id": "trial-03-03",
@@ -723,7 +851,23 @@
             "tier2_pattern": "if <condition>:\n    <line 1 indented 4 spaces>\n    <line 2 indented 4 spaces>",
             "tier3_walkthrough": "Make sure BOTH lines under `if gems == 7:` start with 4 spaces:\n    door = \"OPEN\"\n    shout(\"Click!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "gems": 2
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "door": "SHUT"
+              }
+            }
+          ]
         },
         {
           "id": "trial-03-04",
@@ -753,7 +897,23 @@
             "tier2_pattern": "if <var> == \"<word>\":\n    <action>",
             "tier3_walkthrough": "Add a second `=` so the line reads:\nif password == \"EMBER\":"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "password": "WRONG"
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "gate": "LOCKED"
+              }
+            }
+          ]
         },
         {
           "id": "trial-03-05",
@@ -782,7 +942,24 @@
             "tier2_pattern": "if <var> == \"<word>\":\n    <if actions>\nelse:\n    <backup action>",
             "tier3_walkthrough": "Write:\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    seal = \"INTACT\""
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "else",
+            "compare",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "password": "ASH"
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "seal": "INTACT"
+              }
+            }
+          ]
         },
         {
           "id": "trial-03-06",
@@ -810,7 +987,25 @@
             "tier2_pattern": "if <power> > <lock>:\n    gate_status = \"OPEN\"\n    shout(\"<message>\")\nelse:\n    gate_status = \"LOCKED\"",
             "tier3_walkthrough": "Complete with:\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\""
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "else",
+            "compare",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "ember_power": 40,
+                "lock_power": 60
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "gate_status": "LOCKED"
+              }
+            }
+          ]
         },
         {
           "id": "trial-03-bonus",
@@ -848,7 +1043,24 @@
             "tier2_pattern": "if <var> > 50:\n    <actions>",
             "tier3_walkthrough": "Replace `<` with `>` on the if line:\nif spark_level > 50:"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "compare",
+            "bool",
+            "call:shout"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "spark_level": 20
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "spark_ready": false
+              }
+            }
+          ]
         }
       ],
       "cutscenes": {
@@ -997,7 +1209,34 @@
             "tier2_pattern": "elif <condition>:\n    <indented action>",
             "tier3_walkthrough": "Add `:` at the end of the elif line:\nelif temp <= 10:"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "elif",
+            "else",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "temp": -5
+              },
+              "expectOutput": "frozen",
+              "expectVars": {
+                "ice_state": "frozen"
+              }
+            },
+            {
+              "overrides": {
+                "temp": 20
+              },
+              "expectOutput": "melted",
+              "expectVars": {
+                "ice_state": "melted"
+              }
+            }
+          ]
         },
         {
           "id": "trial-04-03",
@@ -1024,7 +1263,34 @@
             "tier2_pattern": "if wind >= 60:\n    weather = \"<high>\"\nelif wind >= 30:\n    weather = \"<mid>\"\nelse:\n    weather = \"<low>\"\nprint(weather)",
             "tier3_walkthrough": "Write:\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "elif",
+            "else",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "wind": 70
+              },
+              "expectOutput": "BLIZZARD",
+              "expectVars": {
+                "weather": "BLIZZARD"
+              }
+            },
+            {
+              "overrides": {
+                "wind": 10
+              },
+              "expectOutput": "CALM",
+              "expectVars": {
+                "weather": "CALM"
+              }
+            }
+          ]
         },
         {
           "id": "trial-04-04",
@@ -1051,7 +1317,44 @@
             "tier2_pattern": "if shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    ...\nelif shards >= 10:\n    ...\nelse:\n    ...",
             "tier3_walkthrough": "Complete the branches:\nelif shards >= 10:\n    badge = \"BRONZE\""
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "elif",
+            "else",
+            "compare",
+            "math_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "shards": 90
+              },
+              "expectOutput": "GOLD",
+              "expectVars": {
+                "badge": "GOLD"
+              }
+            },
+            {
+              "overrides": {
+                "shards": 20
+              },
+              "expectOutput": "BRONZE",
+              "expectVars": {
+                "badge": "BRONZE"
+              }
+            },
+            {
+              "overrides": {
+                "shards": 5
+              },
+              "expectOutput": "STARTER",
+              "expectVars": {
+                "badge": "STARTER"
+              }
+            }
+          ]
         },
         {
           "id": "trial-04-05",
@@ -1079,7 +1382,34 @@
             "tier2_pattern": "if rune == \"<word1>\":\n    action = \"...\"\nelif rune == \"<word2>\":\n    action = \"...\"\nelse:\n    action = \"...\"\nprint(action)",
             "tier3_walkthrough": "Inside the elif block, write:\n    action = \"GLOW\""
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "elif",
+            "else",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "rune": "FIRE"
+              },
+              "expectOutput": "MELT",
+              "expectVars": {
+                "action": "MELT"
+              }
+            },
+            {
+              "overrides": {
+                "rune": "WIND"
+              },
+              "expectOutput": "WAIT",
+              "expectVars": {
+                "action": "WAIT"
+              }
+            }
+          ]
         },
         {
           "id": "trial-04-06",
@@ -1108,7 +1438,36 @@
             "tier2_pattern": "if crystals >= 20:\n    vault_open = True\n    print(\"<message>\")\nelif crystals >= 10:\n    ...\nelse:\n    ...",
             "tier3_walkthrough": "Add:\n    print(\"Glacier is free!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "elif",
+            "else",
+            "compare",
+            "math_op",
+            "bool",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "crystals": 12
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "vault_open": false
+              }
+            },
+            {
+              "overrides": {
+                "crystals": 5
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "vault_open": false
+              }
+            }
+          ]
         },
         {
           "id": "trial-04-bonus",
@@ -1305,7 +1664,23 @@
             "tier2_pattern": "clean = raw.strip().<method>()",
             "tier3_walkthrough": "Add `()` at the end of line 2:\nclean = raw.strip().lower()"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "method_call:strip",
+            "method_call:lower",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": "  BRAMBLE  "
+              },
+              "expectOutput": "bramble",
+              "expectVars": {
+                "clean": "bramble"
+              }
+            }
+          ]
         },
         {
           "id": "trial-05-03",
@@ -1333,7 +1708,35 @@
             "tier2_pattern": "key = raw_key.upper()\ncan_enter = (key == \"...\") and <bool_var>\nif can_enter:\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nkey = raw_key.upper()\ncan_enter = (key == \"GOLD\") and has_torch\nif can_enter:\n    print(\"Enter!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "method_call:upper",
+            "bool_op",
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw_key": "gold",
+                "has_torch": false
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "can_enter": false
+              }
+            },
+            {
+              "overrides": {
+                "raw_key": "silver",
+                "has_torch": true
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "can_enter": false
+              }
+            }
+          ]
         },
         {
           "id": "trial-05-04",
@@ -1361,7 +1764,35 @@
             "tier2_pattern": "can_cross = (len(<word>) > 4) or <bool_var>\nif can_cross:\n    print(\"...\")",
             "tier3_walkthrough": "Write:\ncan_cross = (len(bridge_word) > 4) or has_wings\nif can_cross:\n    print(\"Crossed!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:len",
+            "bool_op",
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "bridge_word": "oak",
+                "has_wings": false
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "can_cross": false
+              }
+            },
+            {
+              "overrides": {
+                "bridge_word": "canopy",
+                "has_wings": false
+              },
+              "expectOutput": "Crossed!",
+              "expectVars": {
+                "can_cross": true
+              }
+            }
+          ]
         },
         {
           "id": "trial-05-05",
@@ -1389,7 +1820,22 @@
             "tier2_pattern": "if not <flag>:\n    status = \"...\"\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nif not is_asleep:\n    status = \"AWAKE\"\n    print(\"Bramble hears you!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "is_asleep": true
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "status": "QUIET"
+              }
+            }
+          ]
         },
         {
           "id": "trial-05-06",
@@ -1417,7 +1863,26 @@
             "tier2_pattern": "chant = raw_chant.strip().upper()\nif (chant == \"...\") and (len(chant) > 5):\n    gate_open = True\n    print(\"...\")",
             "tier3_walkthrough": "Complete with:\nchant = raw_chant.strip().upper()\nif (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    print(\"Bramble is free!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "method_call:strip",
+            "method_call:upper",
+            "call:len",
+            "bool_op",
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw_chant": "  wrong  "
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "gate_open": false
+              }
+            }
+          ]
         },
         {
           "id": "trial-05-bonus",
@@ -1455,7 +1920,24 @@
             "tier2_pattern": "can_fly = <option1> or <option2>",
             "tier3_walkthrough": "Replace `and` with `or` on line 3:\ncan_fly = has_rope or has_wings"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "bool_op",
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "has_rope": false,
+                "has_wings": false
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "can_fly": false
+              }
+            }
+          ]
         }
       ],
       "cutscenes": {
@@ -1600,7 +2082,26 @@
             "tier2_pattern": "rune = raw_rune.<trim_spaces>().lower()",
             "tier3_walkthrough": "Line 2 should read:\nrune = raw_rune.strip().lower()"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "method_call:strip",
+            "method_call:lower",
+            "if",
+            "elif",
+            "else",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw_rune": "  STONE  "
+              },
+              "expectOutput": "SHUT",
+              "expectVars": {
+                "valve": "SHUT"
+              }
+            }
+          ]
         },
         {
           "id": "trial-06-03",
@@ -1629,7 +2130,25 @@
             "tier2_pattern": "if (<left_check>) and (<right_check>):\n    seal = \"...\"\n    print(seal)",
             "tier3_walkthrough": "Write:\nif (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    print(seal)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "bool_op",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "left_psi": 20,
+                "right_psi": 40
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "seal": "UNBALANCED"
+              }
+            }
+          ]
         },
         {
           "id": "trial-06-04",
@@ -1658,7 +2177,36 @@
             "tier2_pattern": "if (<depth_check>) or <flag>:\n    pump_on = True\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nif (depth > 20) or leak:\n    pump_on = True\n    print(\"Pumps active!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "bool_op",
+            "compare",
+            "math_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "depth": 10,
+                "leak": false
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "pump_on": false
+              }
+            },
+            {
+              "overrides": {
+                "depth": 10,
+                "leak": true
+              },
+              "expectOutput": "Pumps active!",
+              "expectVars": {
+                "pump_on": true
+              }
+            }
+          ]
         },
         {
           "id": "trial-06-05",
@@ -1687,7 +2235,27 @@
             "tier2_pattern": "total_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"...\"\nelse:\n    boat = \"...\"\nprint(boat)",
             "tier3_walkthrough": "Write:\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    boat = \"TOO HEAVY\"\nprint(boat)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "math_op",
+            "if",
+            "else",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "chests": 4,
+                "weight_each": 15
+              },
+              "expectOutput": "TOO HEAVY",
+              "expectVars": {
+                "total_weight": 60,
+                "boat": "TOO HEAVY"
+              }
+            }
+          ]
         },
         {
           "id": "trial-06-06",
@@ -1717,7 +2285,26 @@
             "tier2_pattern": "if (<bubbles_check>) and (<call_check>):\n    mire_free = True\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nif (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "math_op",
+            "method_call:strip",
+            "method_call:upper",
+            "bool_op",
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "bubbles": 10
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "mire_free": false
+              }
+            }
+          ]
         },
         {
           "id": "trial-06-bonus",
@@ -1756,7 +2343,26 @@
             "tier2_pattern": "cipher = raw_word.strip().upper()\npearls = 3 * 4\nif <checks>:\n    print(\"...\")",
             "tier3_walkthrough": "Complete with:\nif cipher == \"TIDE\" and pearls == 12:\n    print(\"TIDE WAVE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "method_call:strip",
+            "method_call:upper",
+            "math_op",
+            "bool_op",
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw_word": "  mud  "
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "cipher": "MUD"
+              }
+            }
+          ]
         }
       ],
       "cutscenes": {
@@ -1902,7 +2508,12 @@
             "tier2_pattern": "for <var> in range(<count>):\n    <indented action>",
             "tier3_walkthrough": "Add `:` right after `range(3)` so it reads `for step in range(3):`"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "call:print"
+          ]
         },
         {
           "id": "trial-07-03",
@@ -1929,7 +2540,12 @@
             "tier2_pattern": "for i in range(<count>):\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nfor i in range(4):\n    print(\"GALE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "call:print"
+          ]
         },
         {
           "id": "trial-07-04",
@@ -1956,7 +2572,12 @@
             "tier2_pattern": "for <num> in range(1, 6):\n    print(<num>)",
             "tier3_walkthrough": "Write:\nfor num in range(1, 6):\n    print(num)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "call:print"
+          ]
         },
         {
           "id": "trial-07-05",
@@ -1984,7 +2605,13 @@
             "tier2_pattern": "total = 0\nfor <item> in range(1, 6):\n    total += <item>\nprint(total)",
             "tier3_walkthrough": "Write:\ntotal = 0\nfor crystal in range(1, 6):\n    total += crystal\nprint(total)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "aug_assign",
+            "call:print"
+          ]
         },
         {
           "id": "trial-07-06",
@@ -2012,7 +2639,13 @@
             "tier2_pattern": "total_wind = 0\nfor <p> in range(1, 6):\n    total_wind += <p>\n    print(\"...\")",
             "tier3_walkthrough": "Write:\ntotal_wind = 0\nfor power in range(1, 6):\n    total_wind += power\n    print(\"Turbine ready!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "aug_assign",
+            "call:print"
+          ]
         },
         {
           "id": "trial-07-bonus",
@@ -2213,7 +2846,14 @@
             "tier2_pattern": "for n in range(1, 7):\n    if n > 3:\n        <indented 8 spaces>",
             "tier3_walkthrough": "Put 8 spaces before `count = count + 1`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "if",
+            "compare",
+            "call:print"
+          ]
         },
         {
           "id": "trial-08-03",
@@ -2242,7 +2882,26 @@
             "tier2_pattern": "clean = raw.strip().upper()\nif \"<word>\" in clean:\n    valid = True\n    print(clean)",
             "tier3_walkthrough": "Write:\nclean = raw.strip().upper()\nif \"NOVA\" in clean:\n    valid = True\n    print(clean)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "method_call:strip",
+            "method_call:upper",
+            "in_op",
+            "if",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": "  null-8  "
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "clean": "NULL-8",
+                "valid": false
+              }
+            }
+          ]
         },
         {
           "id": "trial-08-04",
@@ -2269,7 +2928,35 @@
             "tier2_pattern": "if <check1> and <check2>:\n    door = \"OPEN\"\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nif bits_ready == 7 and has_key:\n    door = \"OPEN\"\n    print(\"ACCESS GRANTED\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "bool_op",
+            "compare",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "bits_ready": 5,
+                "has_key": true
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "door": "LOCKED"
+              }
+            },
+            {
+              "overrides": {
+                "bits_ready": 7,
+                "has_key": false
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "door": "LOCKED"
+              }
+            }
+          ]
         },
         {
           "id": "trial-08-05",
@@ -2296,7 +2983,15 @@
             "tier2_pattern": "for c in range(1, 7):\n    if <condition>:\n        energy += 10\n    else:\n        energy += 5\nprint(energy)",
             "tier3_walkthrough": "Write:\nfor c in range(1, 7):\n    if c >= 4:\n        energy += 10\n    else:\n        energy += 5\nprint(energy)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "if",
+            "else",
+            "aug_assign",
+            "call:print"
+          ]
         },
         {
           "id": "trial-08-06",
@@ -2324,7 +3019,16 @@
             "tier2_pattern": "for bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge += bit\nif shield_charge >= 20:\n    ...\n    print(\"...\")",
             "tier3_walkthrough": "Add indented:\n    print(\"8-BIT RESTORED!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "if",
+            "math_op",
+            "aug_assign",
+            "compare",
+            "call:print"
+          ]
         },
         {
           "id": "trial-08-bonus",
@@ -2359,7 +3063,13 @@
             "unlockId": "bonus-nova-crown",
             "equipLayer": "tunic",
             "equipKey": "violet"
-          }
+          },
+          "requiredConstructs": [
+            "for",
+            "call:range",
+            "math_op",
+            "call:print"
+          ]
         }
       ],
       "cutscenes": {

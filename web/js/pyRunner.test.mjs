@@ -517,3 +517,96 @@ print("SHOUT_UPPERCASE_OK")
   const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });
   assert.ok(out.includes('SHOUT_UPPERCASE_OK'));
 });
+
+test('#85: runTrial forwards requiredConstructs and variants in sandbox payload', async () => {
+  const runner = new PyRunner({ executionTimeoutMs: 200, bootTimeoutMs: 200 });
+  await flushMicrotasks();
+
+  const iframe = iframes.at(-1);
+  const port = iframe.receivedPorts[0];
+  port.postMessage({ type: 'ready' });
+  await flushMicrotasks();
+
+  let capturedPayload = null;
+  port.onmessage = (ev) => {
+    capturedPayload = ev.data.payload;
+    port.postMessage({
+      type: 'result',
+      id: ev.data.id,
+      result: { passed: true, stdout: '15\n', stderr: '' },
+    });
+  };
+
+  const res = await runner.runTrial('a = 3\nb = 4\ntotal = a + b\nprint(total)', 'assert total == 7', false, {
+    requiredConstructs: ['math_op'],
+    variants: [{ overrides: { a: 10, b: 5 }, expectOutput: '15', expectVars: { total: 15 } }],
+  });
+  assert.equal(res.passed, true);
+  assert.deepEqual(capturedPayload.requiredConstructs, ['math_op']);
+  assert.deepEqual(capturedPayload.variants, [
+    { overrides: { a: 10, b: 5 }, expectOutput: '15', expectVars: { total: 15 } },
+  ]);
+
+  runner._teardownSandbox();
+});
+
+test('#85: embedded Python harness enforces requiredConstructs and variants', () => {
+  const { guard, trial } = extractSandboxPythonConstants();
+  const pyTestScript = `
+${guard}
+${trial}
+
+# requiredConstructs catches missing construct and passes when present
+r_miss = json.loads(_pyria_run_trial(json.dumps({
+    "studentCode": 'msg = "hello world"\\nprint(msg)',
+    "testCode": 'assert OUTPUT.strip() == "hello world"',
+    "requiredConstructs": ["str_concat"],
+})))
+assert not r_miss["passed"] and r_miss["stage"] == "constructs" and "+" in r_miss["errorMessage"], r_miss
+
+r_hit = json.loads(_pyria_run_trial(json.dumps({
+    "studentCode": 'msg = "hello" + " " + "world"\\nprint(msg)',
+    "testCode": 'assert OUTPUT.strip() == "hello world"',
+    "requiredConstructs": ["str_concat", "call:print"],
+})))
+assert r_hit["passed"], r_hit
+
+# OR syntax and AST construct tokens
+r_multi = json.loads(_pyria_run_trial(json.dumps({
+    "studentCode": '''
+def check(items, target):
+    val = None
+    count = 0
+    if target in items:
+        count += 1
+        val = items[0:1]
+    elif len(items) == 0:
+        return "empty"
+    else:
+        return f"no {target.upper()}"
+    return str(count)
+''',
+    "testCode": 'assert check(["a"], "a") == "1"',
+    "requiredConstructs": ["def", "return", "none", "aug_assign", "if", "elif", "else", "in_op", "slice", "call:len", "str_call", "fstring|str_concat", "method_call:upper"],
+})))
+assert r_multi["passed"], r_multi
+
+# variants rejects hard-coded answer and accepts real computation
+r_cheat = json.loads(_pyria_run_trial(json.dumps({
+    "studentCode": "a = 3\\nb = 4\\ntotal = 7\\nprint(total)",
+    "testCode": "assert total == 7 and OUTPUT.strip() == '7'",
+    "variants": [{"overrides": {"a": 10, "b": 5}, "expectOutput": "15", "expectVars": {"total": 15}}],
+})))
+assert not r_cheat["passed"] and r_cheat["stage"] == "variants", r_cheat
+
+r_real = json.loads(_pyria_run_trial(json.dumps({
+    "studentCode": "a = 3\\nb = 4\\ntotal = a + b\\nprint(total)",
+    "testCode": "assert total == 7 and OUTPUT.strip() == '7'",
+    "variants": [{"overrides": {"a": 10, "b": 5}, "expectOutput": "15", "expectVars": {"total": 15}}],
+})))
+assert r_real["passed"], r_real
+print("ANTI_CHEAT_OK")
+`;
+  const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });
+  assert.ok(out.includes('ANTI_CHEAT_OK'));
+});

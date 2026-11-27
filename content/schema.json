@@ -222,6 +222,45 @@
         "bugSummary": {
           "type": "string",
           "description": "Short 1-line symptom banner describing Lord Null's sabotage in fix_bug trials."
+        },
+        "requiredConstructs": {
+          "type": "array",
+          "description": "AST construct tokens that must appear in the student's code (supports 'tokenA|tokenB' OR syntax). Checked by the Python sandbox harness.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "variants": {
+          "type": "array",
+          "description": "Alternate input test cases re-executed with top-level starter variables rebound to override values to prevent hard-coded solutions.",
+          "items": {
+            "type": "object",
+            "required": [
+              "overrides"
+            ],
+            "properties": {
+              "overrides": {
+                "type": "object",
+                "description": "Map of variable names to alternate literal values."
+              },
+              "expectOutput": {
+                "type": "string",
+                "description": "Expected trimmed stdout when run with overrides."
+              },
+              "expectVars": {
+                "type": "object",
+                "description": "Map of variable names to expected values in the execution namespace."
+              },
+              "testCode": {
+                "type": "string",
+                "description": "Optional Python assertion snippet executed after the variant run with OUTPUT set."
+              },
+              "message": {
+                "type": "string",
+                "description": "Optional custom Pip feedback message if this variant fails."
+              }
+            }
+          }
         }
       }
     },
