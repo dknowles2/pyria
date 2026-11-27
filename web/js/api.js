@@ -133,11 +133,11 @@ export async function fetchMap(realmId) {
 }
 
 export async function fetchSpriteManifest() {
-  return requestJson('/assets/sprites/manifest.json');
+  return requestJson('/assets/sprites/manifest.json?v=20261127h', { cache: 'no-store' });
 }
 
 export async function fetchTilesetManifest() {
-  return requestJson('/assets/tilesets/manifest.json');
+  return requestJson('/assets/tilesets/manifest.json?v=20261127h', { cache: 'no-store' });
 }
 
 export async function listSaves(ownerFilter = null) {
