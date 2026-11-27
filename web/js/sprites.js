@@ -32,7 +32,7 @@ export class SpriteManager {
 
   getSpriteImage(relPath) {
     if (!relPath) return null;
-    const entry = this.loadImage(`/assets/sprites/${relPath}`);
+    const entry = this.loadImage(`/assets/sprites/${relPath}?v=20261127i`);
     return entry.loaded ? entry.img : null;
   }
 
@@ -43,14 +43,14 @@ export class SpriteManager {
   getTilesetImage(eraKey = '8bit') {
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
-    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261127h`);
+    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261127i`);
     return entry.loaded ? entry.img : null;
   }
 
   getNpcsImage(eraKey = '8bit') {
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
-    const entry = this.loadImage(`/assets/tilesets/${era.npcsImage}?v=20261127h`);
+    const entry = this.loadImage(`/assets/tilesets/${era.npcsImage}?v=20261127i`);
     return entry.loaded ? entry.img : null;
   }
 
@@ -149,7 +149,8 @@ export class SpriteManager {
    * Draws animated Pip + optional companion_neck scarf.
    */
   drawPip(ctx, appearance, eraKey, direction, frameIndex, dx, dy, dw, dh) {
-    const spec = this.getEraSpec(eraKey);
+    const key = this.normalizeEra(eraKey);
+    const spec = this.getEraSpec(key);
     const row = DIRECTION_ROWS[direction] ?? 0;
     const col = ((frameIndex % spec.pipFramesPerDirection) + spec.pipFramesPerDirection) % spec.pipFramesPerDirection;
     const sx = col * spec.pipFrameSize.width;
@@ -158,14 +159,14 @@ export class SpriteManager {
     const sh = spec.pipFrameSize.height;
 
     ctx.imageSmoothingEnabled = false;
-    const basePath = this.spriteManifest.layers.companion?.pip_base?.[eraKey];
+    const basePath = this.spriteManifest.layers.companion?.pip_base?.[key];
     const baseImg = this.getSpriteImage(basePath);
     if (baseImg) {
       ctx.drawImage(baseImg, sx, sy, sw, sh, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
     }
 
     if (appearance && appearance.pipScarf) {
-      const scarfPath = this.spriteManifest.layers.companion_neck?.[appearance.pipScarf]?.[eraKey];
+      const scarfPath = this.spriteManifest.layers.companion_neck?.[appearance.pipScarf]?.[key];
       const scarfImg = this.getSpriteImage(scarfPath);
       if (scarfImg) {
         ctx.drawImage(scarfImg, sx, sy, sw, sh, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
@@ -178,10 +179,11 @@ export class SpriteManager {
    */
   drawTile(ctx, tileId, eraKey, dx, dy, dw, dh) {
     if (!tileId) return false;
-    const era = this.tilesetManifest.eras[eraKey] || this.tilesetManifest.eras['8bit'];
+    const key = this.normalizeEra(eraKey);
+    const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
     const rect = era.tiles[tileId];
     if (!rect) return false;
-    const img = this.getTilesetImage(eraKey);
+    const img = this.getTilesetImage(key);
     if (!img) return false;
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, rect.x, rect.y, rect.width, rect.height, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
@@ -193,10 +195,11 @@ export class SpriteManager {
    */
   drawNpc(ctx, npcKey, eraKey, dx, dy, dw, dh) {
     if (!npcKey) return false;
-    const era = this.tilesetManifest.eras[eraKey] || this.tilesetManifest.eras['8bit'];
+    const key = this.normalizeEra(eraKey);
+    const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
     const rect = era.npcs[npcKey];
     if (!rect) return false;
-    const img = this.getNpcsImage(eraKey);
+    const img = this.getNpcsImage(key);
     if (!img) return false;
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, rect.x, rect.y, rect.width, rect.height, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
@@ -204,7 +207,8 @@ export class SpriteManager {
   }
 
   hasNpcKey(npcKey, eraKey = '8bit') {
-    const era = this.tilesetManifest.eras[eraKey] || this.tilesetManifest.eras['8bit'];
+    const key = this.normalizeEra(eraKey);
+    const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
     return Boolean(era.npcs && era.npcs[npcKey]);
   }
 

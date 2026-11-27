@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261127h';
-import { music } from './music.js?v=20261127h';
-import { pyRunner } from './pyRunner.js?v=20261127h';
+import { audio } from './audio.js?v=20261127i';
+import { music } from './music.js?v=20261127i';
+import { pyRunner } from './pyRunner.js?v=20261127i';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261127h';
+} from './autocomplete.js?v=20261127i';
 
 function escapeHtml(str) {
   return String(str ?? '')

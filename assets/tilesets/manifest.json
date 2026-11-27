@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "tilesetId": "meadow_ruins",
   "tileSize": 16,
   "tileIds": [
@@ -422,13 +422,13 @@
     "16bit": {
       "tilesetImage": "16bit/meadow_ruins.png",
       "tilesetSize": {
-        "width": 80,
-        "height": 112
+        "width": 160,
+        "height": 224
       },
       "npcsImage": "16bit/npcs_and_dragons.png",
       "npcsSize": {
-        "width": 144,
-        "height": 16
+        "width": 288,
+        "height": 32
       },
       "tiles": {
         "grass": {
@@ -436,280 +436,280 @@
           "row": 0,
           "x": 0,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "grass_flower": {
           "col": 1,
           "row": 0,
-          "x": 16,
+          "x": 32,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "dirt_path": {
           "col": 2,
           "row": 0,
-          "x": 32,
+          "x": 64,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "water": {
           "col": 3,
           "row": 0,
-          "x": 48,
+          "x": 96,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "bridge_wood": {
           "col": 4,
           "row": 0,
-          "x": 64,
+          "x": 128,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "bridge_broken": {
           "col": 0,
           "row": 1,
           "x": 0,
-          "y": 16,
-          "width": 16,
-          "height": 16
+          "y": 32,
+          "width": 32,
+          "height": 32
         },
         "stone_floor": {
           "col": 1,
           "row": 1,
-          "x": 16,
-          "y": 16,
-          "width": 16,
-          "height": 16
+          "x": 32,
+          "y": 32,
+          "width": 32,
+          "height": 32
         },
         "stone_wall": {
           "col": 2,
           "row": 1,
-          "x": 32,
-          "y": 16,
-          "width": 16,
-          "height": 16
+          "x": 64,
+          "y": 32,
+          "width": 32,
+          "height": 32
         },
         "tree": {
           "col": 3,
           "row": 1,
-          "x": 48,
-          "y": 16,
-          "width": 16,
-          "height": 16
+          "x": 96,
+          "y": 32,
+          "width": 32,
+          "height": 32
         },
         "bush": {
           "col": 4,
           "row": 1,
-          "x": 64,
-          "y": 16,
-          "width": 16,
-          "height": 16
+          "x": 128,
+          "y": 32,
+          "width": 32,
+          "height": 32
         },
         "campfire": {
           "col": 0,
           "row": 2,
           "x": 0,
-          "y": 32,
-          "width": 16,
-          "height": 16
+          "y": 64,
+          "width": 32,
+          "height": 32
         },
         "anvil": {
           "col": 1,
           "row": 2,
-          "x": 16,
-          "y": 32,
-          "width": 16,
-          "height": 16
+          "x": 32,
+          "y": 64,
+          "width": 32,
+          "height": 32
         },
         "statue": {
           "col": 2,
           "row": 2,
-          "x": 32,
-          "y": 32,
-          "width": 16,
-          "height": 16
+          "x": 64,
+          "y": 64,
+          "width": 32,
+          "height": 32
         },
         "mossy_gate_closed": {
           "col": 3,
           "row": 2,
-          "x": 48,
-          "y": 32,
-          "width": 16,
-          "height": 16
+          "x": 96,
+          "y": 64,
+          "width": 32,
+          "height": 32
         },
         "mossy_gate_open": {
           "col": 4,
           "row": 2,
-          "x": 64,
-          "y": 32,
-          "width": 16,
-          "height": 16
+          "x": 128,
+          "y": 64,
+          "width": 32,
+          "height": 32
         },
         "chest_closed": {
           "col": 0,
           "row": 3,
           "x": 0,
-          "y": 48,
-          "width": 16,
-          "height": 16
+          "y": 96,
+          "width": 32,
+          "height": 32
         },
         "chest_open": {
           "col": 1,
           "row": 3,
-          "x": 16,
-          "y": 48,
-          "width": 16,
-          "height": 16
+          "x": 32,
+          "y": 96,
+          "width": 32,
+          "height": 32
         },
         "vault_shrine": {
           "col": 2,
           "row": 3,
-          "x": 32,
-          "y": 48,
-          "width": 16,
-          "height": 16
+          "x": 64,
+          "y": 96,
+          "width": 32,
+          "height": 32
         },
         "torch": {
           "col": 3,
           "row": 3,
-          "x": 48,
-          "y": 48,
-          "width": 16,
-          "height": 16
+          "x": 96,
+          "y": 96,
+          "width": 32,
+          "height": 32
         },
         "portal": {
           "col": 4,
           "row": 3,
-          "x": 64,
-          "y": 48,
-          "width": 16,
-          "height": 16
+          "x": 128,
+          "y": 96,
+          "width": 32,
+          "height": 32
         },
         "lava": {
           "col": 0,
           "row": 4,
           "x": 0,
-          "y": 64,
-          "width": 16,
-          "height": 16
+          "y": 128,
+          "width": 32,
+          "height": 32
         },
         "ice_floor": {
           "col": 1,
           "row": 4,
-          "x": 16,
-          "y": 64,
-          "width": 16,
-          "height": 16
+          "x": 32,
+          "y": 128,
+          "width": 32,
+          "height": 32
         },
         "ice_wall": {
           "col": 2,
           "row": 4,
-          "x": 32,
-          "y": 64,
-          "width": 16,
-          "height": 16
+          "x": 64,
+          "y": 128,
+          "width": 32,
+          "height": 32
         },
         "sand": {
           "col": 3,
           "row": 4,
-          "x": 48,
-          "y": 64,
-          "width": 16,
-          "height": 16
+          "x": 96,
+          "y": 128,
+          "width": 32,
+          "height": 32
         },
         "coral": {
           "col": 4,
           "row": 4,
-          "x": 64,
-          "y": 64,
-          "width": 16,
-          "height": 16
+          "x": 128,
+          "y": 128,
+          "width": 32,
+          "height": 32
         },
         "obsidian_floor": {
           "col": 0,
           "row": 5,
           "x": 0,
-          "y": 80,
-          "width": 16,
-          "height": 16
+          "y": 160,
+          "width": 32,
+          "height": 32
         },
         "obsidian_wall": {
           "col": 1,
           "row": 5,
-          "x": 16,
-          "y": 80,
-          "width": 16,
-          "height": 16
+          "x": 32,
+          "y": 160,
+          "width": 32,
+          "height": 32
         },
         "brass_floor": {
           "col": 2,
           "row": 5,
-          "x": 32,
-          "y": 80,
-          "width": 16,
-          "height": 16
+          "x": 64,
+          "y": 160,
+          "width": 32,
+          "height": 32
         },
         "gear_prop": {
           "col": 3,
           "row": 5,
-          "x": 48,
-          "y": 80,
-          "width": 16,
-          "height": 16
+          "x": 96,
+          "y": 160,
+          "width": 32,
+          "height": 32
         },
         "cloud_floor": {
           "col": 4,
           "row": 5,
-          "x": 64,
-          "y": 80,
-          "width": 16,
-          "height": 16
+          "x": 128,
+          "y": 160,
+          "width": 32,
+          "height": 32
         },
         "star_tile": {
           "col": 0,
           "row": 6,
           "x": 0,
-          "y": 96,
-          "width": 16,
-          "height": 16
+          "y": 192,
+          "width": 32,
+          "height": 32
         },
         "crystal_pillar": {
           "col": 1,
           "row": 6,
-          "x": 16,
-          "y": 96,
-          "width": 16,
-          "height": 16
+          "x": 32,
+          "y": 192,
+          "width": 32,
+          "height": 32
         },
         "pine_tree": {
           "col": 2,
           "row": 6,
-          "x": 32,
-          "y": 96,
-          "width": 16,
-          "height": 16
+          "x": 64,
+          "y": 192,
+          "width": 32,
+          "height": 32
         },
         "column": {
           "col": 3,
           "row": 6,
-          "x": 48,
-          "y": 96,
-          "width": 16,
-          "height": 16
+          "x": 96,
+          "y": 192,
+          "width": 32,
+          "height": 32
         },
         "flower_bed": {
           "col": 4,
           "row": 6,
-          "x": 64,
-          "y": 96,
-          "width": 16,
-          "height": 16
+          "x": 128,
+          "y": 192,
+          "width": 32,
+          "height": 32
         }
       },
       "npcs": {
@@ -718,72 +718,72 @@
           "row": 0,
           "x": 0,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "bram": {
           "col": 1,
           "row": 0,
-          "x": 16,
+          "x": 32,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "spark": {
           "col": 2,
           "row": 0,
-          "x": 32,
+          "x": 64,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "pebble": {
           "col": 3,
           "row": 0,
-          "x": 48,
+          "x": 96,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "lord_null": {
           "col": 4,
           "row": 0,
-          "x": 64,
+          "x": 128,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "emberwing": {
           "col": 5,
           "row": 0,
-          "x": 80,
+          "x": 160,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "glacier": {
           "col": 6,
           "row": 0,
-          "x": 96,
+          "x": 192,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "bramble": {
           "col": 7,
           "row": 0,
-          "x": 112,
+          "x": 224,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         },
         "mire": {
           "col": 8,
           "row": 0,
-          "x": 128,
+          "x": 256,
           "y": 0,
-          "width": 16,
-          "height": 16
+          "width": 32,
+          "height": 32
         }
       }
     }

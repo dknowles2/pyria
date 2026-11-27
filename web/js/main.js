@@ -13,15 +13,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261127h';
-import { audio } from './audio.js?v=20261127h';
-import { music, resolveRegionTheme } from './music.js?v=20261127h';
-import { pyRunner } from './pyRunner.js?v=20261127h';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127h';
-import { SpriteManager } from './sprites.js?v=20261127h';
-import { WorldEngine } from './world.js?v=20261127h';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127h';
-import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127h';
+} from './api.js?v=20261127i';
+import { audio } from './audio.js?v=20261127i';
+import { music, resolveRegionTheme } from './music.js?v=20261127i';
+import { pyRunner } from './pyRunner.js?v=20261127i';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
+import { SpriteManager } from './sprites.js?v=20261127i';
+import { WorldEngine } from './world.js?v=20261127i';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127i';
+import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 
 function escapeHtml(str) {
   return String(str ?? '')

@@ -2252,6 +2252,104 @@ def extract_frame(sheet: Canvas, fw: int, fh: int, dir_idx: int, frame_idx: int)
 # ---------------------------------------------------------------------------
 # Main Build + Manifest + Visual Showcase
 # ---------------------------------------------------------------------------
+def upscale_pip_frame_snes32(src: Canvas, add_shadow: bool = False) -> Canvas:
+    """Upgrades a 16x16 Pip or scarf frame into crisp 32x32 SNES 16-Bit pixel art."""
+    out = Canvas(32, 32, TRANSPARENT)
+
+    def clamp(v: int) -> int:
+        return max(0, min(255, v))
+
+    def shift_rgb(c: RGBA, dr: int, dg: int, db: int) -> RGBA:
+        if c[3] == 0:
+            return TRANSPARENT
+        return (clamp(c[0] + dr), clamp(c[1] + dg), clamp(c[2] + db), c[3])
+
+    def luma(c: RGBA) -> float:
+        return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+
+    if add_shadow:
+        for y in range(25, 30):
+            for x in range(8, 24):
+                dx = (x - 15.5) / 7.5
+                dy = (y - 27.0) / 2.2
+                if dx * dx + dy * dy <= 1.0:
+                    out.set(x, y, (10, 14, 28, 85))
+
+    for sy in range(16):
+        for sx in range(16):
+            c = src.get(sx, sy)
+            if c[3] == 0:
+                continue
+            up = src.get(sx, sy - 1)
+            dn = src.get(sx, sy + 1)
+            lt = src.get(sx - 1, sy)
+            rt = src.get(sx + 1, sy)
+
+            is_outline = (c[0] < 38 and c[1] < 38 and c[2] < 48)
+            if is_outline:
+                nbrs = [n for n in (up, dn, lt, rt) if n[3] > 0 and not (n[0] < 38 and n[1] < 38 and n[2] < 48)]
+                if nbrs:
+                    ar = sum(n[0] for n in nbrs) // len(nbrs)
+                    ag = sum(n[1] for n in nbrs) // len(nbrs)
+                    ab = sum(n[2] for n in nbrs) // len(nbrs)
+                    c = (clamp(ar // 4 + 10), clamp(ag // 4 + 12), clamp(ab // 4 + 22), c[3])
+
+            for oy in (0, 1):
+                for ox in (0, 1):
+                    px = sx * 2 + ox
+                    py = sy * 2 + oy
+                    col = c
+                    if not is_outline:
+                        if oy == 0 and (up[3] == 0 or luma(up) + 25 < luma(c)):
+                            col = shift_rgb(col, 24, 22, 16)
+                        elif oy == 1 and (dn[3] == 0 or luma(dn) + 25 < luma(c)):
+                            col = shift_rgb(col, -20, -16, -8)
+                        if ox == 0 and (lt[3] == 0 or luma(lt) + 25 < luma(c)):
+                            col = shift_rgb(col, 14, 14, 10)
+                        elif ox == 1 and (rt[3] == 0 or luma(rt) + 25 < luma(c)):
+                            col = shift_rgb(col, -16, -12, -6)
+                        if luma(c) > 205 and ox == 0 and oy == 0:
+                            col = shift_rgb(col, 24, 24, 20)
+                    else:
+                        if ox == 0 and oy == 0 and up[3] == 0 and lt[3] == 0:
+                            continue
+                        if ox == 1 and oy == 0 and up[3] == 0 and rt[3] == 0:
+                            continue
+                        if ox == 0 and oy == 1 and dn[3] == 0 and lt[3] == 0:
+                            continue
+                        if ox == 1 and oy == 1 and dn[3] == 0 and rt[3] == 0:
+                            continue
+                    out.set(px, py, col)
+    return out
+
+
+def polish_snes_hero_sheet(sheet: Canvas) -> Canvas:
+    """Gives 16-Bit 32x32 hero layers authentic SNES colored outlines and richer fabric depth."""
+    out = sheet.copy()
+
+    def clamp(v: int) -> int:
+        return max(0, min(255, v))
+
+    for y in range(sheet.h):
+        for x in range(sheet.w):
+            c = sheet.get(x, y)
+            if c[3] != 255:
+                continue
+            # Tint harsh NES outline pixels toward adjacent fill colors (SNES colored-outline look)
+            if c == OUTLINE:
+                nbrs = []
+                for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+                    n = sheet.get(x + dx, y + dy)
+                    if n[3] == 255 and n != OUTLINE and n != EYE_DARK:
+                        nbrs.append(n)
+                if nbrs:
+                    ar = sum(n[0] for n in nbrs) // len(nbrs)
+                    ag = sum(n[1] for n in nbrs) // len(nbrs)
+                    ab = sum(n[2] for n in nbrs) // len(nbrs)
+                    out.set(x, y, (clamp(ar // 4 + 14), clamp(ag // 4 + 12), clamp(ab // 4 + 24), 255))
+    return out
+
+
 def main() -> None:
     era_8_dir = BASE_DIR / "8bit"
     era_16_dir = BASE_DIR / "16bit"
@@ -2262,6 +2360,8 @@ def main() -> None:
     sheets: Dict[str, Dict[str, Canvas]] = {"8bit": {}, "16bit": {}}
 
     def save_sheet(era: str, name: str, canvas: Canvas) -> str:
+        if era == "16bit" and name not in ("shadow", "pip_base", "pip_scarf_ember") and not name.startswith("aura_"):
+            canvas = polish_snes_hero_sheet(canvas)
         rel = f"{era}/{name}.png"
         canvas.save(BASE_DIR / rel)
         sheets[era][name] = canvas
@@ -2318,19 +2418,27 @@ def main() -> None:
         save_sheet("8bit", aura_key, build_8bit_aura(aura_key))
         save_sheet("16bit", aura_key, build_16bit_aura(aura_key))
 
-    # 10. Pip companion + ember scarf
+    # 10. Pip companion + ember scarf (16x16 in 8-bit, true 32x32 SNES in 16-bit!)
     pip8, scarf8 = build_pip_sprites(frames=2)
     save_sheet("8bit", "pip_base", pip8)
     save_sheet("8bit", "pip_scarf_ember", scarf8)
-    pip16, scarf16 = build_pip_sprites(frames=4)
-    save_sheet("16bit", "pip_base", pip16)
-    save_sheet("16bit", "pip_scarf_ember", scarf16)
+    pip16_raw, scarf16_raw = build_pip_sprites(frames=4)
+    pip16_frames = {
+        d: [upscale_pip_frame_snes32(extract_frame(pip16_raw, 16, 16, r, f), add_shadow=True) for f in range(4)]
+        for r, d in enumerate(DIRECTIONS)
+    }
+    scarf16_frames = {
+        d: [upscale_pip_frame_snes32(extract_frame(scarf16_raw, 16, 16, r, f), add_shadow=False) for f in range(4)]
+        for r, d in enumerate(DIRECTIONS)
+    }
+    save_sheet("16bit", "pip_base", assemble_sheet(pip16_frames))
+    save_sheet("16bit", "pip_scarf_ember", assemble_sheet(scarf16_frames))
 
     # -----------------------------------------------------------------------
     # Build manifest.json (100% keyed to content/catalog.json)
     # -----------------------------------------------------------------------
     manifest = {
-        "version": "1.0.0",
+        "version": "1.1.0",
         "catalogContract": "../../content/catalog.json",
         "directions": DIRECTIONS,
         "sheetLayout": {
@@ -2355,9 +2463,9 @@ def main() -> None:
                 "heroFrameSize": {"width": 32, "height": 32},
                 "heroFramesPerDirection": 4,
                 "heroSheetSize": {"width": 128, "height": 128},
-                "pipFrameSize": {"width": 16, "height": 16},
+                "pipFrameSize": {"width": 32, "height": 32},
                 "pipFramesPerDirection": 4,
-                "pipSheetSize": {"width": 64, "height": 64},
+                "pipSheetSize": {"width": 128, "height": 128},
                 "recommendedFps": 8
             }
         },
@@ -2500,9 +2608,10 @@ def main() -> None:
 
     def composite_pip(era: str, scarf: bool, direction: str = "down", frame: int = 0) -> Canvas:
         dir_idx = DIRECTIONS.index(direction)
-        out = extract_frame(sheets[era]["pip_base"], 16, 16, dir_idx, frame)
+        pw = 16 if era == "8bit" else 32
+        out = extract_frame(sheets[era]["pip_base"], pw, pw, dir_idx, frame)
         if scarf:
-            out.blit(extract_frame(sheets[era]["pip_scarf_ember"], 16, 16, dir_idx, frame))
+            out.blit(extract_frame(sheets[era]["pip_scarf_ember"], pw, pw, dir_idx, frame))
         return out
 
     builds = [
@@ -2586,7 +2695,7 @@ def main() -> None:
         sc.blit_scaled(h8, p8x + 16, p8y + 38, scale=6)
         sc.blit_scaled(p8, p8x + 120, p8y + 58, scale=4)
 
-        # Right sub-panel: 16-Bit (32x32 @ 4x = 128x128) + Pip (16x16 @ 4x = 64x64)
+        # Right sub-panel: 16-Bit (32x32 @ 4x = 128x128) + Pip (32x32 @ 2x = 64x64)
         p16x, p16y = cx + 230, cy + 52
         sc.rect(p16x, p16y, 200, 156, panel_16)
         sc.rect(p16x, p16y, 200, 2, accent_cyan)
@@ -2594,7 +2703,7 @@ def main() -> None:
         h16 = composite_hero("16bit", b["cfg"], "down", 0)
         p16 = composite_pip("16bit", b["pip_scarf"], "down", 0)
         sc.blit_scaled(h16, p16x + 6, p16y + 24, scale=4)
-        sc.blit_scaled(p16, p16x + 130, p16y + 56, scale=4)
+        sc.blit_scaled(p16, p16x + 130, p16y + 56, scale=2)
 
     sc.save(BASE_DIR / "hero_showcase.png")
     total_pngs = len(list(era_8_dir.glob("*.png"))) + len(list(era_16_dir.glob("*.png")))

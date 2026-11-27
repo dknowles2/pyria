@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "catalogContract": "../../content/catalog.json",
   "directions": [
     "down",
@@ -48,13 +48,13 @@
         "height": 128
       },
       "pipFrameSize": {
-        "width": 16,
-        "height": 16
+        "width": 32,
+        "height": 32
       },
       "pipFramesPerDirection": 4,
       "pipSheetSize": {
-        "width": 64,
-        "height": 64
+        "width": 128,
+        "height": 128
       },
       "recommendedFps": 8
     }
