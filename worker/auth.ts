@@ -1,8 +1,10 @@
 import {
+  HERO_PLAY_TTL_SECONDS,
   HERO_SESSION_COOKIE,
   HERO_SESSION_TTL_SECONDS,
   OAUTH_STATE_COOKIE,
   OAUTH_STATE_TTL_SECONDS,
+  PARENT_LINK_TTL_SECONDS,
   PARENT_SESSION_COOKIE,
   PARENT_SESSION_TTL_SECONDS,
   clearCookie,
@@ -29,9 +31,11 @@ import { applySecurityHeaders, jsonResponse, sanitizeNextPath } from './security
 import type {
   AuthContext,
   Env,
+  HeroPlayTokenPayload,
   HeroSessionPayload,
   MagicLinkTokenPayload,
   OAuthStatePayload,
+  ParentLinkTokenPayload,
   ParentSessionPayload,
 } from './types';
 import {
@@ -96,6 +100,7 @@ export async function resolveAuthContext(
       role: 'guest',
       heroSaveId: null,
       heroName: null,
+      heroLinkedToParent: false,
       heroPreferences: null,
       parentEmail: null,
       isAdmin: false,
@@ -125,6 +130,7 @@ export async function resolveAuthContext(
 
   let heroSaveId: string | null = null;
   let heroName: string | null = null;
+  let heroLinkedToParent = false;
   let heroPreferences = null;
   if (cookies[HERO_SESSION_COOKIE]) {
     const heroPayload = await verifyToken<HeroSessionPayload>(
@@ -141,6 +147,7 @@ export async function resolveAuthContext(
       if (row && Number(row.session_version) === heroPayload.sessionVersion) {
         heroSaveId = row.id;
         heroName = row.hero_name;
+        heroLinkedToParent = Boolean(row.owner_email && row.owner_email.trim());
         heroPreferences = parsePreferencesJson(row.preferences_json);
       }
     }
@@ -152,12 +159,30 @@ export async function resolveAuthContext(
     role,
     heroSaveId,
     heroName,
+    heroLinkedToParent,
     heroPreferences,
     parentEmail,
     isAdmin,
     googleOAuthEnabled,
     magicLinkEnabled,
   };
+}
+
+export async function signParentLinkToken(saveId: string, secret: string): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + PARENT_LINK_TTL_SECONDS;
+  return signToken({ typ: 'parent_link', saveId, exp } satisfies ParentLinkTokenPayload, secret);
+}
+
+export async function signHeroPlayToken(
+  saveId: string,
+  sessionVersion: number,
+  secret: string
+): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + HERO_PLAY_TTL_SECONDS;
+  return signToken(
+    { typ: 'hero_play', saveId, sessionVersion, exp } satisfies HeroPlayTokenPayload,
+    secret
+  );
 }
 
 export async function generateUniqueHeroCodeHash(
@@ -182,6 +207,7 @@ export async function handleGetMe(auth: AuthContext): Promise<Response> {
       role: auth.role,
       heroSaveId: auth.heroSaveId,
       heroName: auth.heroName,
+      linkedToParent: auth.heroLinkedToParent,
       parentEmail: auth.parentEmail,
       isAdmin: auth.isAdmin,
       googleOAuthEnabled: auth.googleOAuthEnabled,
@@ -258,10 +284,13 @@ export async function handleHeroCodeCreate(
     });
 
     const exp = Math.floor(Date.now() / 1000) + HERO_SESSION_TTL_SECONDS;
-    const token = await signToken(
-      { typ: 'hero', saveId: save.id, sessionVersion: 1, exp } satisfies HeroSessionPayload,
-      secret
-    );
+    const [token, parentLinkToken] = await Promise.all([
+      signToken(
+        { typ: 'hero', saveId: save.id, sessionVersion: 1, exp } satisfies HeroSessionPayload,
+        secret
+      ),
+      signParentLinkToken(save.id, secret),
+    ]);
     const cookie = serializeCookie(HERO_SESSION_COOKIE, token, {
       maxAge: HERO_SESSION_TTL_SECONDS,
       path: '/',
@@ -270,7 +299,16 @@ export async function handleHeroCodeCreate(
       secure: isHttpsRequest(request),
     });
 
-    return jsonResponse({ save, heroCode }, 201, { 'Set-Cookie': cookie });
+    return jsonResponse(
+      {
+        save,
+        heroCode,
+        parentLinkToken,
+        parentLinkExpiresInSeconds: PARENT_LINK_TTL_SECONDS,
+      },
+      201,
+      { 'Set-Cookie': cookie }
+    );
   } catch (err) {
     if (err instanceof ValidationError || err instanceof QuotaError) {
       return jsonResponse({ error: err.message }, err.status);
@@ -315,26 +353,55 @@ export async function handleHeroCodeRedeem(
     return jsonResponse({ error: 'Invalid request body' }, 400);
   }
 
-  const rawCode = typeof body.heroCode === 'string' ? body.heroCode : '';
-  const normalized = normalizeHeroCode(rawCode);
-  if (!normalized || normalized.length < 5 || normalized.length > 64) {
-    return jsonResponse({ error: 'Invalid Hero Code' }, 400);
-  }
-
   const secret = getSessionSecret(env);
-  const hash = await hashHeroCode(normalized, secret);
-  const row = await db.getSaveByRecoveryHash(hash);
-  if (!row) {
-    const failRl = await recordHeroCodeFailure(
-      env.DB,
-      ip,
-      globalFailLimit,
-      DEFAULT_GLOBAL_FAIL_WINDOW_SEC
-    );
-    if (!failRl.allowed) {
-      return rateLimitExceededResponse(failRl.retryAfterSeconds);
+  const rawPlayToken = typeof body.playToken === 'string' ? body.playToken.trim() : '';
+  let row = null;
+
+  if (rawPlayToken) {
+    const playPayload = await verifyToken<HeroPlayTokenPayload>(rawPlayToken, secret, 'hero_play');
+    if (
+      playPayload &&
+      typeof playPayload.saveId === 'string' &&
+      typeof playPayload.sessionVersion === 'number'
+    ) {
+      const candidate = await db.getSaveRow(playPayload.saveId);
+      if (candidate && Number(candidate.session_version ?? 1) === playPayload.sessionVersion) {
+        row = candidate;
+      }
     }
-    return jsonResponse({ error: 'Invalid Hero Code' }, 401);
+    if (!row) {
+      const failRl = await recordHeroCodeFailure(
+        env.DB,
+        ip,
+        globalFailLimit,
+        DEFAULT_GLOBAL_FAIL_WINDOW_SEC
+      );
+      if (!failRl.allowed) {
+        return rateLimitExceededResponse(failRl.retryAfterSeconds);
+      }
+      return jsonResponse({ error: 'This play link has expired or is no longer valid' }, 401);
+    }
+  } else {
+    const rawCode = typeof body.heroCode === 'string' ? body.heroCode : '';
+    const normalized = normalizeHeroCode(rawCode);
+    if (!normalized || normalized.length < 5 || normalized.length > 64) {
+      return jsonResponse({ error: 'Invalid Hero Code' }, 400);
+    }
+
+    const hash = await hashHeroCode(normalized, secret);
+    row = await db.getSaveByRecoveryHash(hash);
+    if (!row) {
+      const failRl = await recordHeroCodeFailure(
+        env.DB,
+        ip,
+        globalFailLimit,
+        DEFAULT_GLOBAL_FAIL_WINDOW_SEC
+      );
+      if (!failRl.allowed) {
+        return rateLimitExceededResponse(failRl.retryAfterSeconds);
+      }
+      return jsonResponse({ error: 'Invalid Hero Code' }, 401);
+    }
   }
 
   const exp = Math.floor(Date.now() / 1000) + HERO_SESSION_TTL_SECONDS;
@@ -357,6 +424,91 @@ export async function handleHeroCodeRedeem(
   });
 
   return jsonResponse({ save: PyriaD1.rowToSave(row) }, 200, { 'Set-Cookie': cookie });
+}
+
+export async function handleCreateHeroLinkToken(
+  request: Request,
+  env: Env,
+  db: PyriaD1,
+  auth: AuthContext
+): Promise<Response> {
+  if (!auth.heroSaveId) {
+    return jsonResponse({ error: 'Active hero session required' }, 401);
+  }
+
+  const ip = getClientIp(request);
+  const rl = await checkRateLimit(env.DB, `hero-link-token:${ip}`, 20, DEFAULT_CREATE_WINDOW_SEC);
+  if (!rl.allowed) {
+    return rateLimitExceededResponse(rl.retryAfterSeconds);
+  }
+
+  const row = await db.getSaveRow(auth.heroSaveId);
+  if (!row) {
+    return jsonResponse({ error: 'Hero save not found' }, 404);
+  }
+  if (row.owner_email && row.owner_email.trim()) {
+    return jsonResponse(
+      { error: 'This hero is already linked to a parent account', alreadyLinked: true },
+      409
+    );
+  }
+
+  const secret = getSessionSecret(env);
+  const parentLinkToken = await signParentLinkToken(row.id, secret);
+  return jsonResponse({
+    parentLinkToken,
+    heroName: row.hero_name,
+    expiresInSeconds: PARENT_LINK_TTL_SECONDS,
+  });
+}
+
+export async function handleHeroPlayPreview(
+  request: Request,
+  env: Env,
+  db: PyriaD1
+): Promise<Response> {
+  const limit = Number.parseInt(env.PYRIA_RATE_LIMIT_REDEEM || '', 10) || DEFAULT_REDEEM_LIMIT;
+  const ip = getClientIp(request);
+  const rl = await checkRateLimit(env.DB, `hero-play-preview:${ip}`, limit * 2, DEFAULT_REDEEM_WINDOW_SEC);
+  if (!rl.allowed) {
+    return rateLimitExceededResponse(rl.retryAfterSeconds);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJsonBody(request, 8192);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return jsonResponse({ error: err.message }, err.status);
+    }
+    return jsonResponse({ error: 'Invalid request body' }, 400);
+  }
+
+  const rawPlayToken = typeof body.playToken === 'string' ? body.playToken.trim() : '';
+  if (!rawPlayToken) {
+    return jsonResponse({ error: 'playToken is required' }, 400);
+  }
+
+  const secret = getSessionSecret(env);
+  const payload = await verifyToken<HeroPlayTokenPayload>(rawPlayToken, secret, 'hero_play');
+  if (
+    !payload ||
+    typeof payload.saveId !== 'string' ||
+    typeof payload.sessionVersion !== 'number'
+  ) {
+    return jsonResponse({ error: 'This play link has expired or is no longer valid' }, 401);
+  }
+
+  const row = await db.getSaveRow(payload.saveId);
+  if (!row || Number(row.session_version ?? 1) !== payload.sessionVersion) {
+    return jsonResponse({ error: 'This play link has expired or is no longer valid' }, 401);
+  }
+
+  return jsonResponse({
+    valid: true,
+    saveId: row.id,
+    heroName: row.hero_name,
+  });
 }
 
 export async function handleGoogleStart(request: Request, env: Env): Promise<Response> {

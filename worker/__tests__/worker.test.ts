@@ -240,6 +240,7 @@ describe('Guest Mode (Zero D1 Writes)', () => {
         role: 'guest',
         heroSaveId: null,
         heroName: null,
+        linkedToParent: false,
         parentEmail: null,
         isAdmin: false,
         googleOAuthEnabled: true,
@@ -1409,5 +1410,187 @@ describe('Passwordless Email Magic Links (Resend)', () => {
     } finally {
       globalThis.fetch = origFetch;
     }
+  });
+});
+
+describe('QR Link Tokens, Link-Later & Dashless Hero Codes', () => {
+  it('supports kid-to-parent parentLinkToken preview, claim, linkedToParent flag, and Link Later endpoint', async () => {
+    const parentA = await makeParentCookie('parent-a@example.com');
+    const parentB = await makeParentCookie('parent-b@example.com');
+
+    // Kid creates a hero code -> gets parentLinkToken too
+    const created = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: { heroName: 'Lyra' },
+    });
+    expect(created.res.status).toBe(201);
+    expect(typeof created.data.parentLinkToken).toBe('string');
+    expect(created.data.parentLinkToken.length).toBeGreaterThan(20);
+    expect(created.data.save.linkedToParent).toBe(false);
+
+    const heroCookie = extractCookie(created.res, 'pyria_hero_session');
+    expect(heroCookie).toBeTruthy();
+
+    // /api/me reports linkedToParent: false before linking
+    const meBefore = await apiJson('/api/me', { cookie: heroCookie });
+    expect(meBefore.data.auth.role).toBe('hero');
+    expect(meBefore.data.auth.linkedToParent).toBe(false);
+
+    // Guest cannot mint a hero-link-token
+    const guestLinkAttempt = await apiJson('/api/auth/hero-link-token', {
+      method: 'POST',
+      body: {},
+    });
+    expect(guestLinkAttempt.res.status).toBe(401);
+
+    // Unlinked hero can mint a fresh "Link Later" parentLinkToken
+    const linkLater = await apiJson('/api/auth/hero-link-token', {
+      method: 'POST',
+      cookie: heroCookie,
+      body: {},
+    });
+    expect(linkLater.res.status).toBe(200);
+    expect(linkLater.data.heroName).toBe('Lyra');
+    expect(typeof linkLater.data.parentLinkToken).toBe('string');
+
+    // Parent A previews the link token before confirming
+    const preview = await apiJson('/api/console/link-preview', {
+      method: 'POST',
+      cookie: parentA,
+      body: { linkToken: linkLater.data.parentLinkToken },
+    });
+    expect(preview.res.status).toBe(200);
+    expect(preview.data).toEqual({
+      saveId: created.data.save.id,
+      heroName: 'Lyra',
+      alreadyOwnedBySelf: false,
+    });
+
+    // Parent A claims via linkToken
+    const claimed = await apiJson('/api/console/claim-hero', {
+      method: 'POST',
+      cookie: parentA,
+      body: { linkToken: linkLater.data.parentLinkToken },
+    });
+    expect(claimed.res.status).toBe(200);
+    expect(claimed.data.save.id).toBe(created.data.save.id);
+    expect(claimed.data.save.linkedToParent).toBe(true);
+
+    // /api/me now reports linkedToParent: true (without leaking parentEmail to hero)
+    const meAfter = await apiJson('/api/me', { cookie: heroCookie });
+    expect(meAfter.data.auth.linkedToParent).toBe(true);
+    expect(meAfter.data.auth.parentEmail).toBeNull();
+
+    // Already-linked hero gets 409 when trying to mint another link token
+    const linkAfter = await apiJson('/api/auth/hero-link-token', {
+      method: 'POST',
+      cookie: heroCookie,
+      body: {},
+    });
+    expect(linkAfter.res.status).toBe(409);
+    expect(linkAfter.data.alreadyLinked).toBe(true);
+
+    // Parent B cannot preview or claim an already-owned hero with the old linkToken
+    const previewB = await apiJson('/api/console/link-preview', {
+      method: 'POST',
+      cookie: parentB,
+      body: { linkToken: created.data.parentLinkToken },
+    });
+    expect(previewB.res.status).toBe(404);
+
+    const claimB = await apiJson('/api/console/claim-hero', {
+      method: 'POST',
+      cookie: parentB,
+      body: { linkToken: created.data.parentLinkToken },
+    });
+    expect(claimB.res.status).toBe(404);
+
+    // Token type separation: parentLinkToken cannot be used as a hero_play token
+    const crossUse = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { playToken: created.data.parentLinkToken },
+    });
+    expect(crossUse.res.status).toBe(401);
+  });
+
+  it('supports parent-to-kid playToken preview, redeem, rotation invalidation, and dashless Hero Codes', async () => {
+    const parentA = await makeParentCookie('parent-play@example.com');
+
+    // Parent creates child hero -> gets heroCode and playToken
+    const created = await apiJson('/api/console/heroes', {
+      method: 'POST',
+      cookie: parentA,
+      body: { heroName: 'Bramwell' },
+    });
+    expect(created.res.status).toBe(201);
+    expect(typeof created.data.playToken).toBe('string');
+    const oldPlayToken = created.data.playToken;
+
+    // Preview playToken without setting a cookie
+    const preview = await apiJson('/api/auth/play-preview', {
+      method: 'POST',
+      body: { playToken: oldPlayToken },
+    });
+    expect(preview.res.status).toBe(200);
+    expect(preview.data).toEqual({
+      valid: true,
+      saveId: created.data.save.id,
+      heroName: 'Bramwell',
+    });
+    expect(extractCookie(preview.res, 'pyria_hero_session')).toBeNull();
+
+    // Redeem via playToken sets hero session cookie
+    const redeemed = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { playToken: oldPlayToken },
+    });
+    expect(redeemed.res.status).toBe(200);
+    expect(redeemed.data.save.id).toBe(created.data.save.id);
+    expect(extractCookie(redeemed.res, 'pyria_hero_session')).toBeTruthy();
+
+    // Token type separation: playToken cannot be used as a parent_link token
+    const crossClaim = await apiJson('/api/console/claim-hero', {
+      method: 'POST',
+      cookie: parentA,
+      body: { linkToken: oldPlayToken },
+    });
+    expect(crossClaim.res.status).toBe(404);
+
+    // Dashless Hero Code normalization works on redeem
+    const dashless = String(created.data.heroCode).replace(/-/g, '').toLowerCase();
+    const dashlessRedeem = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { heroCode: dashless },
+    });
+    expect(dashlessRedeem.res.status).toBe(200);
+    expect(dashlessRedeem.data.save.id).toBe(created.data.save.id);
+
+    // Rotating Hero Code mints a new playToken and invalidates the old playToken
+    const rotated = await apiJson(`/api/console/saves/${created.data.save.id}/rotate-code`, {
+      method: 'POST',
+      cookie: parentA,
+      body: {},
+    });
+    expect(rotated.res.status).toBe(200);
+    expect(typeof rotated.data.playToken).toBe('string');
+
+    const oldPreview = await apiJson('/api/auth/play-preview', {
+      method: 'POST',
+      body: { playToken: oldPlayToken },
+    });
+    expect(oldPreview.res.status).toBe(401);
+
+    const oldRedeem = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { playToken: oldPlayToken },
+    });
+    expect(oldRedeem.res.status).toBe(401);
+
+    const newRedeem = await apiJson('/api/auth/hero-code/redeem', {
+      method: 'POST',
+      body: { playToken: rotated.data.playToken },
+    });
+    expect(newRedeem.res.status).toBe(200);
+    expect(newRedeem.data.save.id).toBe(created.data.save.id);
   });
 });

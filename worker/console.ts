@@ -1,5 +1,5 @@
-import { generateUniqueHeroCodeHash, getSessionSecret } from './auth';
-import { hashHeroCode, normalizeHeroCode } from './crypto';
+import { generateUniqueHeroCodeHash, getSessionSecret, signHeroPlayToken } from './auth';
+import { HERO_PLAY_TTL_SECONDS, hashHeroCode, normalizeHeroCode, verifyToken } from './crypto';
 import { PyriaD1 } from './db';
 import {
   checkGlobalHeroCodeThrottle,
@@ -9,7 +9,7 @@ import {
   recordHeroCodeFailure,
 } from './rateLimit';
 import { jsonResponse, safeDecodeSegment } from './security';
-import type { AuthContext, Env, SavePreferences } from './types';
+import type { AuthContext, Env, ParentLinkTokenPayload, SavePreferences } from './types';
 import {
   MAX_SAVE_BODY_BYTES,
   MAX_TRIAL_ID_LEN,
@@ -204,13 +204,62 @@ export async function handleConsoleRequest(
         recoveryCodeHash: hash,
         preferences,
       });
-      return jsonResponse({ save, heroCode }, 201);
+      const playToken = await signHeroPlayToken(save.id, 1, secret);
+      return jsonResponse(
+        {
+          save,
+          heroCode,
+          playToken,
+          playTokenExpiresInSeconds: HERO_PLAY_TTL_SECONDS,
+        },
+        201
+      );
     } catch (err) {
       if (err instanceof ValidationError || err instanceof QuotaError) {
         return jsonResponse({ error: err.message }, err.status);
       }
       throw err;
     }
+  }
+
+  // POST /api/console/link-preview
+  if (method === 'POST' && pathname === '/api/console/link-preview') {
+    let body: Record<string, unknown>;
+    try {
+      body = await readJsonBody(request, 8192);
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        return jsonResponse({ error: err.message }, err.status);
+      }
+      return jsonResponse({ error: 'Invalid request body' }, 400);
+    }
+
+    const rawLinkToken = typeof body.linkToken === 'string' ? body.linkToken.trim() : '';
+    if (!rawLinkToken) {
+      return jsonResponse({ error: 'linkToken is required' }, 400);
+    }
+
+    const secret = getSessionSecret(env);
+    const payload = await verifyToken<ParentLinkTokenPayload>(rawLinkToken, secret, 'parent_link');
+    if (!payload || typeof payload.saveId !== 'string') {
+      return jsonResponse({ error: 'This parent link has expired or is invalid' }, 404);
+    }
+
+    const row = await db.getSaveRow(payload.saveId);
+    if (!row) {
+      return jsonResponse({ error: 'This parent link has expired or is invalid' }, 404);
+    }
+
+    const existingOwner = normalizeEmail(row.owner_email);
+    if (existingOwner && existingOwner !== auth.parentEmail) {
+      return jsonResponse({ error: 'This hero is already linked to another parent account' }, 404);
+    }
+
+    return jsonResponse({
+      saveId: row.id,
+      heroName: row.hero_name,
+      alreadyOwnedBySelf: existingOwner === auth.parentEmail,
+    });
   }
 
   // POST /api/console/claim-hero
@@ -254,15 +303,24 @@ export async function handleConsoleRequest(
       return jsonResponse({ error: 'Invalid request body' }, 400);
     }
 
-    const rawCode = typeof body.heroCode === 'string' ? body.heroCode : '';
-    const normalized = normalizeHeroCode(rawCode);
-    if (!normalized || normalized.length < 5 || normalized.length > 64) {
-      return jsonResponse({ error: 'Invalid Hero Code' }, 400);
-    }
-
     const secret = getSessionSecret(env);
-    const hash = await hashHeroCode(normalized, secret);
-    const row = await db.getSaveByRecoveryHash(hash);
+    const rawLinkToken = typeof body.linkToken === 'string' ? body.linkToken.trim() : '';
+    let row = null;
+
+    if (rawLinkToken) {
+      const payload = await verifyToken<ParentLinkTokenPayload>(rawLinkToken, secret, 'parent_link');
+      if (payload && typeof payload.saveId === 'string') {
+        row = await db.getSaveRow(payload.saveId);
+      }
+    } else {
+      const rawCode = typeof body.heroCode === 'string' ? body.heroCode : '';
+      const normalized = normalizeHeroCode(rawCode);
+      if (!normalized || normalized.length < 5 || normalized.length > 64) {
+        return jsonResponse({ error: 'Invalid Hero Code' }, 400);
+      }
+      const hash = await hashHeroCode(normalized, secret);
+      row = await db.getSaveByRecoveryHash(hash);
+    }
 
     const recordGlobalFail = async (): Promise<Response | null> => {
       const failRl = await recordHeroCodeFailure(
@@ -275,7 +333,9 @@ export async function handleConsoleRequest(
     };
 
     // Return identical error for not-found and already-owned-by-other to prevent code enumeration
-    const unavailableMsg = 'Hero Code not found or unavailable';
+    const unavailableMsg = rawLinkToken
+      ? 'This parent link has expired or is no longer available'
+      : 'Hero Code not found or unavailable';
     if (!row) {
       const globalErr = await recordGlobalFail();
       if (globalErr) return globalErr;
@@ -317,10 +377,13 @@ export async function handleConsoleRequest(
       if (!rotated) {
         return jsonResponse({ error: 'Save not found' }, 404);
       }
+      const playToken = await signHeroPlayToken(rotated.saveId, rotated.sessionVersion, secret);
       return jsonResponse({
         saveId: rotated.saveId,
         heroCode,
         sessionVersion: rotated.sessionVersion,
+        playToken,
+        playTokenExpiresInSeconds: HERO_PLAY_TTL_SECONDS,
       });
     }
 
