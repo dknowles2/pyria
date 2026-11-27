@@ -65,7 +65,7 @@
         "name": "Ripple",
         "title": "Dancer of the Lagoon",
         "element": "Tide",
-        "rescueDialogue": "Splash-sparkle! Lists hold whole schools of treasures at once! Take Bit 9\u2014the reef is shimmering!"
+        "rescueDialogue": "Splash-sparkle! Lists hold whole schools of treasures at once! Take Bit 9—the reef is shimmering!"
       },
       "miniVisualUpgrade": "Bit 9 Restored: Multi-layered 16-bit turquoise lagoon water with swaying coral fronds.",
       "storyIntro": "Your ship lands on the sunlit beaches of Coral Shallows in crisp 16-bit detail! Sea dragon Ripple is tangled in a list of glowing reef crystals.",
@@ -136,7 +136,7 @@
           "unlockId": null,
           "bugSummary": "Add `]` at the end of the `crystals` list so `print(len(crystals))` outputs `3`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ncrystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n",
+            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n",
             "standard": "crystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n",
             "challenge": "crystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n"
           },
@@ -162,9 +162,9 @@
           "shardReward": 70,
           "unlockId": null,
           "starterCode": {
-            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst = crystals[0]\nlast = crystals[-1]\n# Print first and last\n",
-            "standard": "# Given `crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]`, set `first = crystals[0]` and `last = crystals[-1]`, then `print(first, last)`.\n\n",
-            "challenge": "# Grab First & Last Crystal\n\n"
+            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst = crystals[0]\nlast = crystals[-1]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst = crystals[0]\nlast = crystals[-1]\nprint(first, last)\n",
           "testCode": "assert first == \"aqua\" and last == \"amber\" and OUTPUT.strip() == \"aqua amber\"",
@@ -188,9 +188,9 @@
           "shardReward": 75,
           "unlockId": null,
           "starterCode": {
-            "explorer": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\n# Print len(bag)\n",
-            "standard": "# Start with `bag = [\"shell\", \"coral\"]`. Use `bag.append(\"pearl\")` to add `\"pearl\"` to the end, then `print(len(bag))`.\n\n",
-            "challenge": "# Add a Pearl with .append()\n\n"
+            "explorer": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))\n",
           "testCode": "assert bag == [\"shell\", \"coral\", \"pearl\"] and OUTPUT.strip() == \"3\"",
@@ -214,9 +214,9 @@
           "shardReward": 80,
           "unlockId": null,
           "starterCode": {
-            "explorer": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\n# Print tiles[1]\n",
-            "standard": "# You can replace an item in a list by index! Given `tiles = [\"sand\", \"broken\", \"sand\"]`, set `tiles[1] = \"coral\"` and `print(tiles[1])`.\n\n",
-            "challenge": "# Swap a Broken Reef Tile\n\n"
+            "explorer": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\nprint(tiles[1])\n",
           "testCode": "assert tiles[1] == \"coral\" and OUTPUT.strip() == \"coral\"",
@@ -240,9 +240,9 @@
           "shardReward": 90,
           "unlockId": null,
           "starterCode": {
-            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\n# Print crystal_count\n",
-            "standard": "# Given `crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]`, set `first_crystal = crystals[0]`, `last_crystal = crystals[-1]`, and `crystal_count = len(crystals)`. Print `crystal_count`.\n\n",
-            "challenge": "# Chart the Reef Crystals (Ripple Boss)\n\n"
+            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\nprint(crystal_count)\n",
           "testCode": "assert first_crystal == \"aqua\" and last_crystal == \"amber\" and crystal_count == 4 and OUTPUT.strip() == \"4\"",
@@ -343,7 +343,7 @@
             "spriteKey": "mire",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "Splash-sparkle! Lists hold whole schools of treasures at once! Take Bit 9\u2014the reef is shimmering!"
+            "text": "Splash-sparkle! Lists hold whole schools of treasures at once! Take Bit 9—the reef is shimmering!"
           },
           {
             "speaker": "Pip",
@@ -365,7 +365,7 @@
         "name": "Gullwing",
         "title": "Scout of the Trade Winds",
         "element": "Wind",
-        "rescueDialogue": "Squawk-roar! Every crate accounted for! Take Bit 10\u2014watch the market banners billow!"
+        "rescueDialogue": "Squawk-roar! Every crate accounted for! Take Bit 10—watch the market banners billow!"
       },
       "miniVisualUpgrade": "Bit 10 Restored: Animated cloth market awnings and bobbing wooden piers.",
       "storyIntro": "Floating stalls bob on the tide at Driftwood Market, where sea-breeze dragon Gullwing is trapped beneath scrambled cargo lists.",
@@ -436,7 +436,7 @@
           "unlockId": null,
           "bugSummary": "Add `:` to the end of `for item in crates` so all 3 crates print.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ncrates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n",
+            "explorer": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n",
             "standard": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n",
             "challenge": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n"
           },
@@ -462,9 +462,9 @@
           "shardReward": 75,
           "unlockId": null,
           "starterCode": {
-            "explorer": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total = total + w\n# Print total\n",
-            "standard": "# Loop over `weights = [4, 6, 5]` and add each weight to `total` (starting at `0`), then `print(total)`.\n\n",
-            "challenge": "# Count Cargo Weight\n\n"
+            "explorer": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total = total + w\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total = total + w\nprint(total)\n",
           "testCode": "assert total == 15 and OUTPUT.strip() == \"15\"",
@@ -488,9 +488,9 @@
           "shardReward": 80,
           "unlockId": null,
           "starterCode": {
-            "explorer": "crates = [3, 12, 8, 15]\nheavy = 0\nfor c in crates:\n    if c >= 10:\n        heavy = heavy + 1\n# Print heavy\n",
-            "standard": "# Loop over `crates = [3, 12, 8, 15]` and count how many are `>= 10` into `heavy` (starting at `0`), then `print(heavy)`.\n\n",
-            "challenge": "# Count Heavy Crates\n\n"
+            "explorer": "crates = [3, 12, 8, 15]\nheavy = 0\nfor c in crates:\n    if c >= 10:\n        heavy = heavy + 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "crates = [3, 12, 8, 15]\nheavy = 0\nfor c in crates:\n    if c >= 10:\n        heavy = heavy + 1\nprint(heavy)\n",
           "testCode": "assert heavy == 2 and OUTPUT.strip() == \"2\"",
@@ -514,9 +514,9 @@
           "shardReward": 85,
           "unlockId": null,
           "starterCode": {
-            "explorer": "flags = [\"red\", \"gold\"]\nfor f in flags:\n    # Print f.upper()\n    \n",
-            "standard": "# Loop over `flags = [\"red\", \"gold\"]` and print each flag in ALL CAPS using `.upper()`.\n\n",
-            "challenge": "# Shout Every Banner\n\n"
+            "explorer": "flags = [\"red\", \"gold\"]\nfor f in flags:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "flags = [\"red\", \"gold\"]\nfor f in flags:\n    print(f.upper())\n",
           "testCode": "assert OUTPUT.strip().splitlines() == [\"RED\", \"GOLD\"]",
@@ -540,9 +540,9 @@
           "shardReward": 95,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    # Print \"GULLWING FREE!\"\n    \n",
-            "standard": "# Loop over `gold_bags = [10, 25, 15, 30]`, sum them into `harbor_gold`, and if `harbor_gold >= 80`, print `\"GULLWING FREE!\"`.\n\n",
-            "challenge": "# Unpack Gullwing's Pier (Boss)\n\n"
+            "explorer": "gold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "gold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    print(\"GULLWING FREE!\")\n",
           "testCode": "assert harbor_gold == 80 and OUTPUT.strip() == \"GULLWING FREE!\"",
@@ -643,7 +643,7 @@
             "spriteKey": "spark",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "Squawk-roar! Every crate accounted for! Take Bit 10\u2014watch the market banners billow!"
+            "text": "Squawk-roar! Every crate accounted for! Take Bit 10—watch the market banners billow!"
           },
           {
             "speaker": "Pip",
@@ -739,7 +739,7 @@
           "unlockId": null,
           "bugSummary": "Fix `sortd(pearls)` to `sorted(pearls)` and print `ordered`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\npearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n",
+            "explorer": "pearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n",
             "standard": "pearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n",
             "challenge": "pearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n"
           },
@@ -766,9 +766,9 @@
           "shardReward": 80,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\n# Print top_two\n",
-            "standard": "# List slicing `items[:2]` grabs the first 2 items! Given `gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]`, set `top_two = gems[:2]` and `print(top_two)`.\n\n",
-            "challenge": "# Slice the Top Two Pearls\n\n"
+            "explorer": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\nprint(top_two)\n",
           "testCode": "assert top_two == [\"opal\", \"jade\"] and OUTPUT.strip() == \"['opal', 'jade']\"",
@@ -793,9 +793,9 @@
           "shardReward": 85,
           "unlockId": null,
           "starterCode": {
-            "explorer": "scores = [15, 40, 25]\ntotal = sum(scores)\nbest = max(scores)\n# Print total and best\n",
-            "standard": "# Given `scores = [15, 40, 25]`, set `total = sum(scores)` and `best = max(scores)`, then `print(total, best)`.\n\n",
-            "challenge": "# Sum and Max Together\n\n"
+            "explorer": "scores = [15, 40, 25]\ntotal = sum(scores)\nbest = max(scores)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "scores = [15, 40, 25]\ntotal = sum(scores)\nbest = max(scores)\nprint(total, best)\n",
           "testCode": "assert total == 80 and best == 40 and OUTPUT.strip() == \"80 40\"",
@@ -820,9 +820,9 @@
           "shardReward": 90,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\n# Print big_shells\n",
-            "standard": "# Loop over `shells = [5, 18, 9, 24]` and `.append()` every shell `>= 15` into `big_shells`, then `print(big_shells)`.\n\n",
-            "challenge": "# Build a Filtered List\n\n"
+            "explorer": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)\n",
           "testCode": "assert big_shells == [18, 24] and OUTPUT.strip() == \"[18, 24]\"",
@@ -847,9 +847,9 @@
           "shardReward": 100,
           "unlockId": null,
           "starterCode": {
-            "explorer": "lumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    # Print \"NACRE FREE!\"\n    \n",
-            "standard": "# Given `lumens = [14, 32, 9, 25]`, compute `peak = max(lumens)` and `total = sum(lumens)`. If `total >= 80`, print `\"NACRE FREE!\"`.\n\n",
-            "challenge": "# Unlock Nacre's Shell Vault (Boss)\n\n"
+            "explorer": "lumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "lumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    print(\"NACRE FREE!\")\n",
           "testCode": "assert peak == 32 and total == 80 and OUTPUT.strip() == \"NACRE FREE!\"",
@@ -1047,7 +1047,7 @@
           "unlockId": null,
           "bugSummary": "Change `.add(b)` to `.append(b)` so `strong` becomes `[60, 80]`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nbeacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n",
+            "explorer": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n",
             "standard": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n",
             "challenge": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n"
           },
@@ -1074,9 +1074,9 @@
           "shardReward": 85,
           "unlockId": null,
           "starterCode": {
-            "explorer": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\n# Print boosted\n",
-            "standard": "# Loop over `signals = [3, 5, 7]` and append `s * 2` to `boosted`, then `print(boosted)`.\n\n",
-            "challenge": "# Double Every Signal\n\n"
+            "explorer": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)\n",
           "testCode": "assert boosted == [6, 10, 14] and OUTPUT.strip() == \"[6, 10, 14]\"",
@@ -1101,9 +1101,9 @@
           "shardReward": 90,
           "unlockId": null,
           "starterCode": {
-            "explorer": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\n# Print rough and calm\n",
-            "standard": "# Loop over `waves = [2, 8, 5]`. Count how many are `>= 5` into `rough` and `< 5` into `calm`, then `print(rough, calm)`.\n\n",
-            "challenge": "# Classify Waves\n\n"
+            "explorer": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)\n",
           "testCode": "assert rough == 2 and calm == 1 and OUTPUT.strip() == \"2 1\"",
@@ -1128,9 +1128,9 @@
           "shardReward": 95,
           "unlockId": null,
           "starterCode": {
-            "explorer": "parts = [\"STORM\", \"CLEAR\"]\nmsg = \"-\".join(parts)\n# Print msg\n",
-            "standard": "# `\" - \".join([\"NORTH\", \"LIT\"])` glues a list of strings with `\" - \"`! Set `msg = \"-\".join([\"STORM\", \"CLEAR\"])` and `print(msg)`.\n\n",
-            "challenge": "# Join Beacon Words\n\n"
+            "explorer": "parts = [\"STORM\", \"CLEAR\"]\nmsg = \"-\".join(parts)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "parts = [\"STORM\", \"CLEAR\"]\nmsg = \"-\".join(parts)\nprint(msg)\n",
           "testCode": "assert msg == \"STORM-CLEAR\" and OUTPUT.strip() == \"STORM-CLEAR\"",
@@ -1155,9 +1155,9 @@
           "shardReward": 105,
           "unlockId": null,
           "starterCode": {
-            "explorer": "lamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    # Print \"TEMPEST FREE!\"\n    \n",
-            "standard": "# Given `lamps = [10, 35, 50, 20]`, build `active = []` with lamps `>= 30`, then if `sum(active) >= 80`, print `\"TEMPEST FREE!\"`.\n\n",
-            "challenge": "# Light the Maelstrom Lens (Tempest Boss)\n\n"
+            "explorer": "lamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "lamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    print(\"TEMPEST FREE!\")\n",
           "testCode": "assert active == [35, 50] and OUTPUT.strip() == \"TEMPEST FREE!\"",
@@ -1349,7 +1349,7 @@
           "unlockId": null,
           "bugSummary": "Add `:` to `while turns < 3` so `turns` reaches 3 and prints `3`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nturns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n",
+            "explorer": "turns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n",
             "standard": "turns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n",
             "challenge": "turns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n"
           },
@@ -1374,9 +1374,9 @@
           "shardReward": 90,
           "unlockId": null,
           "starterCode": {
-            "explorer": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\n# Print tension\n",
-            "standard": "# Start with `tension = 0`. Use `while tension < 20:` to add `5` to `tension` each turn, then `print(tension)`.\n\n",
-            "challenge": "# Wind the Brass Spring\n\n"
+            "explorer": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\nprint(tension)\n",
           "testCode": "assert tension == 20 and OUTPUT.strip() == \"20\"",
@@ -1399,9 +1399,9 @@
           "shardReward": 95,
           "unlockId": null,
           "starterCode": {
-            "explorer": "sec = 3\nwhile sec > 0:\n    # Print sec here:\n    \n    sec = sec - 1\n",
-            "standard": "# Start with `sec = 3`. Use `while sec > 0:` to `print(sec)` and subtract 1 (`sec = sec - 1`).\n\n",
-            "challenge": "# Countdown Timer\n\n"
+            "explorer": "sec = 3\nwhile sec > 0:\n    \n    sec = sec - 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "sec = 3\nwhile sec > 0:\n    print(sec)\n    sec = sec - 1\n",
           "testCode": "assert OUTPUT.strip().splitlines() == [\"3\", \"2\", \"1\"]",
@@ -1424,9 +1424,9 @@
           "shardReward": 100,
           "unlockId": null,
           "starterCode": {
-            "explorer": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\n# Print steps\n",
-            "standard": "# Start with `charge = 10` and `steps = 0`. While `charge < 50:`, add 10 to `charge` and 1 to `steps`. Print `steps`.\n\n",
-            "challenge": "# Count Steps to 50\n\n"
+            "explorer": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)\n",
           "testCode": "assert steps == 4 and OUTPUT.strip() == \"4\"",
@@ -1449,9 +1449,9 @@
           "shardReward": 110,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    # Print \"SPROCKET FREE!\"\n    \n",
-            "standard": "# Start with `gears = 0` and `power = 0`. While `gears < 4:`, add 1 to `gears` and 15 to `power`. After the loop, if `power == 60`, print `\"SPROCKET FREE!\"`.\n\n",
-            "challenge": "# Wind Sprocket's Mainspring (Boss)\n\n"
+            "explorer": "gears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "gears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    print(\"SPROCKET FREE!\")\n",
           "testCode": "assert gears == 4 and power == 60 and OUTPUT.strip() == \"SPROCKET FREE!\"",
@@ -1644,7 +1644,7 @@
           "unlockId": null,
           "bugSummary": "Move `print(ticks)` to 0 spaces indent so it prints only `4`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n",
+            "explorer": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n",
             "standard": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n",
             "challenge": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n"
           },
@@ -1670,9 +1670,9 @@
           "shardReward": 95,
           "unlockId": null,
           "starterCode": {
-            "explorer": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\n# Print found\n",
-            "standard": "# Loop `for p in [\"brass\", \"iron\", \"gold\", \"lead\"]:`. If `p == \"gold\"`, set `found = True` and `break`. Print `found`.\n\n",
-            "challenge": "# Stop at the Golden Pendulum\n\n"
+            "explorer": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)\n",
           "testCode": "assert found is True and OUTPUT.strip() == \"True\"",
@@ -1696,9 +1696,9 @@
           "shardReward": 100,
           "unlockId": null,
           "starterCode": {
-            "explorer": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\n# Print total\n",
-            "standard": "# `continue` skips the rest of the current turn! Sum all positive numbers in `[5, -2, 10, -1, 5]` (skipping `< 0` with `continue`) into `total` and `print(total)`.\n\n",
-            "challenge": "# Skip Jammed Cogs with continue\n\n"
+            "explorer": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)\n",
           "testCode": "assert total == 20 and OUTPUT.strip() == \"20\"",
@@ -1722,9 +1722,9 @@
           "shardReward": 105,
           "unlockId": null,
           "starterCode": {
-            "explorer": "queue = [\"a\", \"b\", \"c\"]\ndone = 0\nwhile len(queue) > 0:\n    queue.pop()\n    done = done + 1\n# Print done\n",
-            "standard": "# Start with `queue = [\"a\", \"b\", \"c\"]` and `done = 0`. While `len(queue) > 0:`, call `queue.pop()` and add 1 to `done`. Print `done`.\n\n",
-            "challenge": "# Pop From a Queue\n\n"
+            "explorer": "queue = [\"a\", \"b\", \"c\"]\ndone = 0\nwhile len(queue) > 0:\n    queue.pop()\n    done = done + 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "queue = [\"a\", \"b\", \"c\"]\ndone = 0\nwhile len(queue) > 0:\n    queue.pop()\n    done = done + 1\nprint(done)\n",
           "testCode": "assert done == 3 and len(queue) == 0 and OUTPUT.strip() == \"3\"",
@@ -1748,9 +1748,9 @@
           "shardReward": 115,
           "unlockId": null,
           "starterCode": {
-            "explorer": "beats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    # Print \"TOCK FREE!\"\n    \n",
-            "standard": "# Start with `beats = 0` and `chime = 0`. While `beats < 6:`, add 1 to `beats` and add `beats` to `chime`. If `chime == 21`, print `\"TOCK FREE!\"`.\n\n",
-            "challenge": "# Sync Tock's Pendulum (Boss)\n\n"
+            "explorer": "beats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "beats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    print(\"TOCK FREE!\")\n",
           "testCode": "assert chime == 21 and OUTPUT.strip() == \"TOCK FREE!\"",
@@ -1944,7 +1944,7 @@
           "unlockId": null,
           "bugSummary": "Add `:` to `def vent_steam()` so calling `vent_steam()` prints `HISS!`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ndef vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n",
+            "explorer": "def vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n",
             "standard": "def vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n",
             "challenge": "def vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n"
           },
@@ -1970,9 +1970,9 @@
           "shardReward": 100,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def blast():\n    print(\"STEAM ON!\")\n\n# Call blast() twice below:\n",
-            "standard": "# Define `def blast():` that prints `\"STEAM ON!\"`, then call `blast()` twice.\n\n",
-            "challenge": "# Define a Shout Spell\n\n"
+            "explorer": "def blast():\n    print(\"STEAM ON!\")\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()\n",
           "testCode": "assert OUTPUT.strip().splitlines() == [\"STEAM ON!\", \"STEAM ON!\"]",
@@ -1996,9 +1996,9 @@
           "shardReward": 105,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def heat_up(level):\n    print(level * 2)\n\n# Call heat_up(15)\n",
-            "standard": "# Define `def heat_up(level):` that prints `level * 2`. Call `heat_up(15)`.\n\n",
-            "challenge": "# Function with a Parameter\n\n"
+            "explorer": "def heat_up(level):\n    print(level * 2)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def heat_up(level):\n    print(level * 2)\n\nheat_up(15)\n",
           "testCode": "assert OUTPUT.strip() == \"30\"",
@@ -2022,9 +2022,9 @@
           "shardReward": 110,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def double(n):\n    return n * 2\n\nans = double(12)\n# Print ans\n",
-            "standard": "# `return` sends a result BACK to whoever called the function! Define `def double(n): return n * 2`, set `ans = double(12)`, and `print(ans)`.\n\n",
-            "challenge": "# Return a Value!\n\n"
+            "explorer": "def double(n):\n    return n * 2\n\nans = double(12)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def double(n):\n    return n * 2\n\nans = double(12)\nprint(ans)\n",
           "testCode": "assert ans == 24 and OUTPUT.strip() == \"24\"",
@@ -2048,9 +2048,9 @@
           "shardReward": 120,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    # Print \"PISTON FREE!\"\n    \n",
-            "standard": "# Define `def calc_pressure(a, b): return a + b`. Set `total = calc_pressure(35, 45)`. If `total >= 80`, print `\"PISTON FREE!\"`.\n\n",
-            "challenge": "# Release Piston's Pressure Valve (Boss)\n\n"
+            "explorer": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")\n",
           "testCode": "assert total == 80 and OUTPUT.strip() == \"PISTON FREE!\"",
@@ -2173,7 +2173,7 @@
         "name": "Aether",
         "title": "Sovereign of the Spire",
         "element": "Aether",
-        "rescueDialogue": "The Spire chimes again! Act II is complete\u2014the Alchemist's Caldera awaits!"
+        "rescueDialogue": "The Spire chimes again! Act II is complete—the Alchemist's Caldera awaits!"
       },
       "miniVisualUpgrade": "Bit 16 (Act II Crest) Restored: Rotating star-chart ceiling and golden clock-hand reflections.",
       "storyIntro": "At the summit of Clockwork Spire sits the Grand Chronometer, where dragon Aether is bound by synchronized for- and while-loops.",
@@ -2244,7 +2244,7 @@
           "unlockId": null,
           "bugSummary": "Add `return` inside `triple(n)` so `print(triple(7))` outputs `21`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ndef triple(n):\n    n * 3\n\nprint(triple(7))\n",
+            "explorer": "def triple(n):\n    n * 3\n\nprint(triple(7))\n",
             "standard": "def triple(n):\n    n * 3\n\nprint(triple(7))\n",
             "challenge": "def triple(n):\n    n * 3\n\nprint(triple(7))\n"
           },
@@ -2270,9 +2270,9 @@
           "shardReward": 105,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\n# Print add_two(8)\n",
-            "standard": "# Given `def add_one(x): return x + 1`, write `def add_two(x): return add_one(add_one(x))` and `print(add_two(8))`.\n\n",
-            "challenge": "# Function Calling a Function\n\n"
+            "explorer": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))\n",
           "testCode": "assert add_two(8) == 10 and OUTPUT.strip() == \"10\"",
@@ -2296,9 +2296,9 @@
           "shardReward": 110,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def total_gears(lst):\n    return sum(lst)\n\n# Print total_gears([4, 6, 10])\n",
-            "standard": "# Write `def total_gears(lst): return sum(lst)` and print `total_gears([4, 6, 10])`.\n\n",
-            "challenge": "# Function Over a List\n\n"
+            "explorer": "def total_gears(lst):\n    return sum(lst)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def total_gears(lst):\n    return sum(lst)\n\nprint(total_gears([4, 6, 10]))\n",
           "testCode": "assert total_gears([4, 6, 10]) == 20 and OUTPUT.strip() == \"20\"",
@@ -2322,9 +2322,9 @@
           "shardReward": 115,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def is_even(n):\n    return n % 2 == 0\n\n# Print is_even(8)\n",
-            "standard": "# Define `def is_even(n): return n % 2 == 0`, then `print(is_even(8))`.\n\n",
-            "challenge": "# Is It Even? Function\n\n"
+            "explorer": "def is_even(n):\n    return n % 2 == 0\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))\n",
           "testCode": "assert is_even(8) is True and is_even(7) is False and OUTPUT.strip() == \"True\"",
@@ -2348,9 +2348,9 @@
           "shardReward": 125,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    # Print \"AETHER FREE!\"\n    \n",
-            "standard": "# Define `def sync_clock(h, m=30): return h * 60 + m`. Set `mins = sync_clock(2)`. If `mins == 150`, print `\"AETHER FREE!\"`.\n\n",
-            "challenge": "# Unlock the Grand Chronometer (Aether Boss)\n\n"
+            "explorer": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")\n",
           "testCode": "assert mins == 150 and OUTPUT.strip() == \"AETHER FREE!\"",
@@ -2451,7 +2451,7 @@
             "spriteKey": "spark",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "The Spire chimes again! Act II is complete\u2014the Alchemist's Caldera awaits!"
+            "text": "The Spire chimes again! Act II is complete—the Alchemist's Caldera awaits!"
           },
           {
             "speaker": "Pip",
@@ -2541,7 +2541,7 @@
           "unlockId": null,
           "bugSummary": "Change `=` to `:` inside `herbs` so `print(herbs[\"fire\"])` outputs `10`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nherbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n",
+            "explorer": "herbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n",
             "standard": "herbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n",
             "challenge": "herbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n"
           },
@@ -2566,9 +2566,9 @@
           "shardReward": 110,
           "unlockId": null,
           "starterCode": {
-            "explorer": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\n# Print vial[\"glow\"]\n",
-            "standard": "# Given `vial = {\"heat\": 20}`, add a new key `vial[\"glow\"] = 15` and `print(vial[\"glow\"])`.\n\n",
-            "challenge": "# Add a New Key to a Dict\n\n"
+            "explorer": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])\n",
           "testCode": "assert vial[\"glow\"] == 15 and OUTPUT.strip() == \"15\"",
@@ -2591,9 +2591,9 @@
           "shardReward": 115,
           "unlockId": null,
           "starterCode": {
-            "explorer": "stock = {\"sulfur\": 4}\nstock[\"sulfur\"] = stock[\"sulfur\"] + 6\n# Print stock[\"sulfur\"]\n",
-            "standard": "# Given `stock = {\"sulfur\": 4}`, increase `stock[\"sulfur\"]` by 6 and `print(stock[\"sulfur\"])`.\n\n",
-            "challenge": "# Update a Dict Value\n\n"
+            "explorer": "stock = {\"sulfur\": 4}\nstock[\"sulfur\"] = stock[\"sulfur\"] + 6\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "stock = {\"sulfur\": 4}\nstock[\"sulfur\"] = stock[\"sulfur\"] + 6\nprint(stock[\"sulfur\"])\n",
           "testCode": "assert stock[\"sulfur\"] == 10 and OUTPUT.strip() == \"10\"",
@@ -2616,9 +2616,9 @@
           "shardReward": 120,
           "unlockId": null,
           "starterCode": {
-            "explorer": "bag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\n# Print val\n",
-            "standard": "# `.get(\"ice\", 0)` safely returns `0` if `\"ice\"` is missing! Set `val = {\"fire\": 9}.get(\"ice\", 0)` and `print(val)`.\n\n",
-            "challenge": "# Safe Lookup with .get()\n\n"
+            "explorer": "bag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "bag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\nprint(val)\n",
           "testCode": "assert val == 0 and OUTPUT.strip() == \"0\"",
@@ -2641,9 +2641,9 @@
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "tonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    # Print \"CINDEREL FREE!\"\n    \n",
-            "standard": "# Create `tonic = {\"ember\": 30, \"ash\": 20}`. Set `total = tonic[\"ember\"] + tonic[\"ash\"]`. If `total == 50`, print `\"CINDEREL FREE!\"`.\n\n",
-            "challenge": "# Brew Cinderel's Tonic (Boss)\n\n"
+            "explorer": "tonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "tonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    print(\"CINDEREL FREE!\")\n",
           "testCode": "assert total == 50 and OUTPUT.strip() == \"CINDEREL FREE!\"",
@@ -2836,7 +2836,7 @@
           "unlockId": null,
           "bugSummary": "Add `f` before `\"Crystal power: {power}\"` so it prints `Crystal power: 42`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\npower = 42\nprint(\"Crystal power: {power}\")\n",
+            "explorer": "power = 42\nprint(\"Crystal power: {power}\")\n",
             "standard": "power = 42\nprint(\"Crystal power: {power}\")\n",
             "challenge": "power = 42\nprint(\"Crystal power: {power}\")\n"
           },
@@ -2862,9 +2862,9 @@
           "shardReward": 115,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\n# Print label\n",
-            "standard": "# Given `gem = \"Ruby\"` and `rank = 5`, set `label = f\"{gem} Lv.{rank}\"` and `print(label)`.\n\n",
-            "challenge": "# Label a Crystal\n\n"
+            "explorer": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)\n",
           "testCode": "assert label == \"Ruby Lv.5\" and OUTPUT.strip() == \"Ruby Lv.5\"",
@@ -2888,9 +2888,9 @@
           "shardReward": 120,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = 0\nfor k, v in gems.items():\n    total = total + v\n# Print total\n",
-            "standard": "# Use `for k, v in gems.items():` to sum all values of `gems = {\"ruby\": 4, \"opal\": 6}` into `total` and `print(total)`.\n\n",
-            "challenge": "# Loop Over Dict Keys & Values\n\n"
+            "explorer": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = 0\nfor k, v in gems.items():\n    total = total + v\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = 0\nfor k, v in gems.items():\n    total = total + v\nprint(total)\n",
           "testCode": "assert total == 10 and OUTPUT.strip() == \"10\"",
@@ -2914,9 +2914,9 @@
           "shardReward": 125,
           "unlockId": null,
           "starterCode": {
-            "explorer": "item = {\"name\": \"Dew\", \"qty\": 3}\n# Print f\"{item['name']}: {item['qty']}\"\n",
-            "standard": "# Given `item = {\"name\": \"Dew\", \"qty\": 3}`, print `f\"{item['name']}: {item['qty']}\"`.\n\n",
-            "challenge": "# Format a Recipe Line\n\n"
+            "explorer": "item = {\"name\": \"Dew\", \"qty\": 3}\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "item = {\"name\": \"Dew\", \"qty\": 3}\nprint(f\"{item['name']}: {item['qty']}\")\n",
           "testCode": "assert OUTPUT.strip() == \"Dew: 3\"",
@@ -2940,9 +2940,9 @@
           "shardReward": 135,
           "unlockId": null,
           "starterCode": {
-            "explorer": "colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\n# Print f\"PRISM {light}!\"\n",
-            "standard": "# Given `colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}`, sum all values with `.values()` into `light`, and print `f\"PRISM {light}!\"`.\n\n",
-            "challenge": "# Focus Prism's Alembic (Boss)\n\n"
+            "explorer": "colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\nprint(f\"PRISM {light}!\")\n",
           "testCode": "assert light == 100 and OUTPUT.strip() == \"PRISM 100!\"",
@@ -3133,7 +3133,7 @@
           "unlockId": null,
           "bugSummary": "Change `potions[2][\"hp\"]` to `potions[1][\"hp\"]` so it prints `25`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\npotions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n",
+            "explorer": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n",
             "standard": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n",
             "challenge": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n"
           },
@@ -3158,9 +3158,9 @@
           "shardReward": 120,
           "unlockId": null,
           "starterCode": {
-            "explorer": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\n# Print total_hp\n",
-            "standard": "# Loop over `potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]` summing `p[\"hp\"]` into `total_hp` and `print(total_hp)`.\n\n",
-            "challenge": "# Sum All Potion HP\n\n"
+            "explorer": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)\n",
           "testCode": "assert total_hp == 45 and OUTPUT.strip() == \"45\"",
@@ -3183,9 +3183,9 @@
           "shardReward": 125,
           "unlockId": null,
           "starterCode": {
-            "explorer": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\n# Print best\n",
-            "standard": "# Find the max `hp` among `brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]` into `best` and `print(best)`.\n\n",
-            "challenge": "# Find the Strongest Brew\n\n"
+            "explorer": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)\n",
           "testCode": "assert best == 35 and OUTPUT.strip() == \"35\"",
@@ -3208,9 +3208,9 @@
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\nrares = 0\nfor item in shelf:\n    if item[\"rare\"]:\n        rares = rares + 1\n# Print rares\n",
-            "standard": "# Count how many items in `shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]` have `item[\"rare\"]` True into `rares` and `print(rares)`.\n\n",
-            "challenge": "# Count Rare Elixirs\n\n"
+            "explorer": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\nrares = 0\nfor item in shelf:\n    if item[\"rare\"]:\n        rares = rares + 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\nrares = 0\nfor item in shelf:\n    if item[\"rare\"]:\n        rares = rares + 1\nprint(rares)\n",
           "testCode": "assert rares == 2 and OUTPUT.strip() == \"2\"",
@@ -3233,9 +3233,9 @@
           "shardReward": 140,
           "unlockId": null,
           "starterCode": {
-            "explorer": "vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    # Print \"ELIXIR FREE!\"\n    \n",
-            "standard": "# Given `vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]`, sum `v[\"ml\"]` into `total_ml`. If `total_ml == 60`, print `\"ELIXIR FREE!\"`.\n\n",
-            "challenge": "# Open Elixir's Potion Vault (Boss)\n\n"
+            "explorer": "vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    print(\"ELIXIR FREE!\")\n",
           "testCode": "assert total_ml == 60 and OUTPUT.strip() == \"ELIXIR FREE!\"",
@@ -3428,7 +3428,7 @@
           "unlockId": null,
           "bugSummary": "Change `\"heat\"` to `\"temp\"` so it prints `900`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ncore = {\"temp\": 900}\nprint(core[\"heat\"])\n",
+            "explorer": "core = {\"temp\": 900}\nprint(core[\"heat\"])\n",
             "standard": "core = {\"temp\": 900}\nprint(core[\"heat\"])\n",
             "challenge": "core = {\"temp\": 900}\nprint(core[\"heat\"])\n"
           },
@@ -3454,9 +3454,9 @@
           "shardReward": 125,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def brew_power(r):\n    return r[\"fire\"] * 2\n# Print brew_power({\"fire\": 25})\n",
-            "standard": "# Write `def brew_power(r): return r[\"fire\"] * 2` and print `brew_power({\"fire\": 25})`.\n\n",
-            "challenge": "# Build a Recipe Function\n\n"
+            "explorer": "def brew_power(r):\n    return r[\"fire\"] * 2\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))\n",
           "testCode": "assert brew_power({\"fire\": 25}) == 50 and OUTPUT.strip() == \"50\"",
@@ -3480,9 +3480,9 @@
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\n# Print counts[\"gold\"]\n",
-            "standard": "# Loop over `ore = [\"gold\", \"iron\", \"gold\"]` and count occurrences into `counts` (`counts[x] = counts.get(x, 0) + 1`), then `print(counts[\"gold\"])`.\n\n",
-            "challenge": "# Count Frequencies in a Dict\n\n"
+            "explorer": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])\n",
           "testCode": "assert counts[\"gold\"] == 2 and counts[\"iron\"] == 1 and OUTPUT.strip() == \"2\"",
@@ -3506,9 +3506,9 @@
           "shardReward": 135,
           "unlockId": null,
           "starterCode": {
-            "explorer": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\n# Print len(c)\n",
-            "standard": "# Given `a = {\"x\": 1}` and `b = {\"y\": 2}`, copy `a` into `c = dict(a)`, call `c.update(b)`, and `print(len(c))`.\n\n",
-            "challenge": "# Merge Two Dicts\n\n"
+            "explorer": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c))\n",
           "testCode": "assert c == {\"x\": 1, \"y\": 2} and OUTPUT.strip() == \"2\"",
@@ -3532,9 +3532,9 @@
           "shardReward": 145,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\n# Print core_status({\"temp\": 300})\n",
-            "standard": "# Write `def core_status(d): return \"SAFE\" if d[\"temp\"] < 500 else \"HOT\"`. Print `core_status({\"temp\": 300})`.\n\n",
-            "challenge": "# Cool Crucible's Magma Core (Act III Boss)\n\n"
+            "explorer": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))\n",
           "testCode": "assert core_status({\"temp\": 300}) == \"SAFE\" and OUTPUT.strip() == \"SAFE\"",
@@ -3674,7 +3674,7 @@
           "id": "trial-16-13-01",
           "trialType": "multiple_choice",
           "title": "Nested Loops (A Loop Inside a Loop)!",
-          "storyPrompt": "Welcome to Act IV: Shattered Skyway! A **nested loop** runs an inner loop for every step of an outer loop \u2014 perfect for 2D grids! How many stars will print?",
+          "storyPrompt": "Welcome to Act IV: Shattered Skyway! A **nested loop** runs an inner loop for every step of an outer loop — perfect for 2D grids! How many stars will print?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "nested_loops"
@@ -3686,12 +3686,12 @@
             {
               "id": "a",
               "label": "5",
-              "explanation": "Multiply, don't add! 2 rows \u00d7 3 columns = 6!"
+              "explanation": "Multiply, don't add! 2 rows × 3 columns = 6!"
             },
             {
               "id": "b",
               "label": "6",
-              "explanation": "Sky-high! 2 outer turns \u00d7 3 inner turns = 6 stars!"
+              "explanation": "Sky-high! 2 outer turns × 3 inner turns = 6 stars!"
             },
             {
               "id": "c",
@@ -3725,7 +3725,7 @@
           "unlockId": null,
           "bugSummary": "Indent `total = total + 1` by 8 spaces so `total` equals `6`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ntotal = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n",
+            "explorer": "total = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n",
             "standard": "total = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n",
             "challenge": "total = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n"
           },
@@ -3750,9 +3750,9 @@
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\n# Print total\n",
-            "standard": "# Given `grid = [[1, 2], [3, 4]]`, use nested `for` loops to sum all numbers into `total` and `print(total)`.\n\n",
-            "challenge": "# Sum a 2D Cloud Grid\n\n"
+            "explorer": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)\n",
           "testCode": "assert total == 10 and OUTPUT.strip() == \"10\"",
@@ -3775,9 +3775,9 @@
           "shardReward": 135,
           "unlockId": null,
           "starterCode": {
-            "explorer": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\n# Print sums\n",
-            "standard": "# Loop `for a in [1, 2]:` and `for b in [10, 20]:` appending `a + b` to `sums`, then `print(sums)`.\n\n",
-            "challenge": "# Count Dock Pairs\n\n"
+            "explorer": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)\n",
           "testCode": "assert sums == [11, 21, 12, 22] and OUTPUT.strip() == \"[11, 21, 12, 22]\"",
@@ -3800,9 +3800,9 @@
           "shardReward": 140,
           "unlockId": null,
           "starterCode": {
-            "explorer": "sky = [[4, 9], [12, 3]]\nhighest = 0\nfor row in sky:\n    for n in row:\n        if n > highest:\n            highest = n\n# Print highest\n",
-            "standard": "# Find the largest number in `sky = [[4, 9], [12, 3]]` into `highest` and `print(highest)`.\n\n",
-            "challenge": "# Find Max in a 2D Grid\n\n"
+            "explorer": "sky = [[4, 9], [12, 3]]\nhighest = 0\nfor row in sky:\n    for n in row:\n        if n > highest:\n            highest = n\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "sky = [[4, 9], [12, 3]]\nhighest = 0\nfor row in sky:\n    for n in row:\n        if n > highest:\n            highest = n\nprint(highest)\n",
           "testCode": "assert highest == 12 and OUTPUT.strip() == \"12\"",
@@ -3825,9 +3825,9 @@
           "shardReward": 150,
           "unlockId": null,
           "starterCode": {
-            "explorer": "deck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    # Print \"NIMBUS FREE!\"\n    \n",
-            "standard": "# Count how many cells in `deck = [[1, 0, 1], [1, 1, 0]]` equal `1` into `lit`. If `lit == 4`, print `\"NIMBUS FREE!\"`.\n\n",
-            "challenge": "# Launch Nimbus from Cloud Dock (Boss)\n\n"
+            "explorer": "deck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "deck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    print(\"NIMBUS FREE!\")\n",
           "testCode": "assert lit == 4 and OUTPUT.strip() == \"NIMBUS FREE!\"",
@@ -4020,7 +4020,7 @@
           "unlockId": null,
           "bugSummary": "Add `self` as the first parameter of `__init__(self, name)` so it prints `Comet`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nclass Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n",
+            "explorer": "class Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n",
             "standard": "class Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n",
             "challenge": "class Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n"
           },
@@ -4046,9 +4046,9 @@
           "shardReward": 135,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\n# Print s.brightness\n",
-            "standard": "# Define `class Star:` with `__init__(self, brightness)` saving `self.brightness = brightness`. Create `s = Star(99)` and `print(s.brightness)`.\n\n",
-            "challenge": "# Create a Star Object\n\n"
+            "explorer": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)\n",
           "testCode": "assert s.brightness == 99 and OUTPUT.strip() == \"99\"",
@@ -4072,9 +4072,9 @@
           "shardReward": 140,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\n# Print d.roar()\n",
-            "standard": "# Add `def roar(self): return f\"{self.name} ROARS!\"` to `Dragon`, create `d = Dragon(\"Comet\")`, and `print(d.roar())`.\n\n",
-            "challenge": "# Add a Method to a Class\n\n"
+            "explorer": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())\n",
           "testCode": "assert d.roar() == \"Comet ROARS!\" and OUTPUT.strip() == \"Comet ROARS!\"",
@@ -4098,9 +4098,9 @@
           "shardReward": 145,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\n# Print d.power\n",
-            "standard": "# Give `Dragon` a `power` attribute and a `boost(self, amt)` method that adds `amt` to `self.power`. Create `d = Dragon(10)`, call `d.boost(15)`, and `print(d.power)`.\n\n",
-            "challenge": "# Update an Object Attribute\n\n"
+            "explorer": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)\n",
           "testCode": "assert d.power == 25 and OUTPUT.strip() == \"25\"",
@@ -4124,9 +4124,9 @@
           "shardReward": 155,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    # Print \"COMET FREE!\"\n    \n",
-            "standard": "# Define `class Bridge:` with `__init__(self, spans)` and `is_ready(self)` returning `self.spans >= 5`. Create `b = Bridge(6)`; if `b.is_ready()`, print `\"COMET FREE!\"`.\n\n",
-            "challenge": "# Cross Starlight Bridge (Comet Boss)\n\n"
+            "explorer": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")\n",
           "testCode": "assert b.is_ready() is True and OUTPUT.strip() == \"COMET FREE!\"",
@@ -4154,7 +4154,7 @@
             {
               "id": "a",
               "label": "Yes! Each object has its own attributes",
-              "explanation": "Shooting star! A class is a blueprint \u2014 you can stamp out as many objects as you want!"
+              "explanation": "Shooting star! A class is a blueprint — you can stamp out as many objects as you want!"
             },
             {
               "id": "b",
@@ -4266,7 +4266,7 @@
           "id": "trial-16-15-01",
           "trialType": "multiple_choice",
           "title": "List of Dragon Objects!",
-          "storyPrompt": "In Storm Bastion, you command a **squad** \u2014 a list of `Dragon` objects! What will the code below print?",
+          "storyPrompt": "In Storm Bastion, you command a **squad** — a list of `Dragon` objects! What will the code below print?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "classes_intro"
@@ -4317,7 +4317,7 @@
           "unlockId": null,
           "bugSummary": "Change `volts = volts + 10` to `self.volts = self.volts + 10` so `print(t.volts)` outputs `30`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nclass Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
+            "explorer": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
             "standard": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
             "challenge": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n"
           },
@@ -4342,9 +4342,9 @@
           "shardReward": 140,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\n# Print total\n",
-            "standard": "# Loop over `squad = [Dragon(15), Dragon(20), Dragon(25)]` summing `d.p` into `total` and `print(total)`.\n\n",
-            "challenge": "# Sum Squad Power\n\n"
+            "explorer": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)\n",
           "testCode": "assert total == 60 and OUTPUT.strip() == \"60\"",
@@ -4367,9 +4367,9 @@
           "shardReward": 145,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\n# Print ready\n",
-            "standard": "# Count how many coils in `[Coil(40), Coil(80), Coil(90)]` have `c.power >= 50` into `ready` and `print(ready)`.\n\n",
-            "challenge": "# Filter Charged Coils\n\n"
+            "explorer": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)\n",
           "testCode": "assert ready == 2 and OUTPUT.strip() == \"2\"",
@@ -4392,9 +4392,9 @@
           "shardReward": 150,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\n# Print Shield(\"Storm\", 50).info()\n",
-            "standard": "# Define `class Shield:` with `__init__(self, name, hp)` and `info(self)` returning `f\"{self.name}:{self.hp}\"`. Print `Shield(\"Storm\", 50).info()`.\n\n",
-            "challenge": "# String Representation Helper\n\n"
+            "explorer": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())\n",
           "testCode": "assert OUTPUT.strip() == \"Storm:50\"",
@@ -4417,9 +4417,9 @@
           "shardReward": 160,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    # Print \"FULMIN FREE!\"\n    \n",
-            "standard": "# Create `class Bolt:` with `power`. Given `bolts = [Bolt(30), Bolt(40), Bolt(30)]`, sum `b.power` into `surge`; if `surge >= 100`, print `\"FULMIN FREE!\"`.\n\n",
-            "challenge": "# Breach Storm Bastion (Fulmin Boss)\n\n"
+            "explorer": "class Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    print(\"FULMIN FREE!\")\n",
           "testCode": "assert surge == 100 and OUTPUT.strip() == \"FULMIN FREE!\"",
@@ -4541,9 +4541,9 @@
         "name": "Zenith",
         "title": "Sovereign of the Horizon",
         "element": "Prism",
-        "rescueDialogue": "ALL SIXTEEN DRAGONS FLY FREE! Feel the horizon bend\u2014the 3D Era of Pyria is awakening!"
+        "rescueDialogue": "ALL SIXTEEN DRAGONS FLY FREE! Feel the horizon bend—the 3D Era of Pyria is awakening!"
       },
-      "miniVisualUpgrade": "16-BIT ERA COMPLETE \u2014 3D HORIZON TEASER! The skyway lifts into full 3D perspective as all 24 rescued dragons circle above Pyria.",
+      "miniVisualUpgrade": "16-BIT ERA COMPLETE — 3D HORIZON TEASER! The skyway lifts into full 3D perspective as all 24 rescued dragons circle above Pyria.",
       "storyIntro": "Lord Null stands atop his 16-Bit Throne with prism dragon Zenith caged in a swirling matrix of glitches. Bring every 16-Bit Python skill to the final gauntlet!",
       "storyOutro": "Zenith breaks free in a burst of prismatic light! Lord Null vanishes into a 3D rift, and Pyria prepares for its next great leap.",
       "primaryConcepts": [
@@ -4561,7 +4561,7 @@
           "id": "trial-16-16-01",
           "trialType": "multiple_choice",
           "title": "16-Bit Finale Warm-Up!",
-          "storyPrompt": "You reached Lord Null's 16-Bit Throne! Combine a list, a dictionary, and a loop \u2014 what will the code below print?",
+          "storyPrompt": "You reached Lord Null's 16-Bit Throne! Combine a list, a dictionary, and a loop — what will the code below print?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "functions_return",
@@ -4618,7 +4618,7 @@
           "unlockId": null,
           "bugSummary": "Add `return` before `self.bits >= 16` so `print(lock.is_open())` outputs `True`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nclass ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
+            "explorer": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
             "standard": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
             "challenge": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n"
           },
@@ -4646,9 +4646,9 @@
           "shardReward": 145,
           "unlockId": null,
           "starterCode": {
-            "explorer": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\n# Print total_dragons\n",
-            "standard": "# Given `acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}`, set `total_dragons = sum(acts.values())` and `print(total_dragons)`.\n\n",
-            "challenge": "# Rally the Four Acts\n\n"
+            "explorer": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)\n",
           "testCode": "assert total_dragons == 16 and OUTPUT.strip() == \"16\"",
@@ -4674,9 +4674,9 @@
           "shardReward": 150,
           "unlockId": null,
           "starterCode": {
-            "explorer": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\n# Print even_sum\n",
-            "standard": "# Sum all even numbers in `matrix = [[2, 3], [4, 5], [6, 7]]` into `even_sum` and `print(even_sum)`.\n\n",
-            "challenge": "# Decode Null's Matrix\n\n"
+            "explorer": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)\n",
           "testCode": "assert even_sum == 12 and OUTPUT.strip() == \"12\"",
@@ -4702,9 +4702,9 @@
           "shardReward": 155,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\n# Print p.power\n",
-            "standard": "# Define `class Prism:` with `__init__(self, power)` and `upgrade(self)` doubling `self.power`. Create `p = Prism(8)`, call `p.upgrade()`, and `print(p.power)`.\n\n",
-            "challenge": "# Forge the 16-Bit Prism Class\n\n"
+            "explorer": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)\n",
           "testCode": "assert p.power == 16 and OUTPUT.strip() == \"16\"",
@@ -4730,9 +4730,9 @@
           "shardReward": 165,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\n# Print EraCore(16).restore()\n",
-            "standard": "# Define `class EraCore:` with `bits` and `restore(self)` returning `\"32-BIT UNLOCKED!\"` if `self.bits >= 16` else `\"LOCKED\"`. Print `EraCore(16).restore()`.\n\n",
-            "challenge": "# Shatter the 16-Bit Throne (Era 2 Boss)\n\n"
+            "explorer": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())\n",
           "testCode": "assert EraCore(16).restore() == \"32-BIT UNLOCKED!\" and OUTPUT.strip() == \"32-BIT UNLOCKED!\"",
@@ -4772,7 +4772,7 @@
             {
               "id": "c",
               "label": "32",
-              "explanation": "That's `2 ** 5` \u2014 the NEXT Era!"
+              "explanation": "That's `2 ** 5` — the NEXT Era!"
             },
             {
               "id": "d",
@@ -4828,14 +4828,14 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "shatter",
-            "text": "IMPOSSIBLE!! My 16-Bit Throne\u2014shattered?! Retreating to the 32-Bit Isometric Frontier!"
+            "text": "IMPOSSIBLE!! My 16-Bit Throne—shattered?! Retreating to the 32-Bit Isometric Frontier!"
           },
           {
             "speaker": "Zenith",
             "spriteKey": "emberwing",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "ALL SIXTEEN DRAGONS FLY FREE! Feel the horizon bend\u2014the 3D Era of Pyria is awakening!"
+            "text": "ALL SIXTEEN DRAGONS FLY FREE! Feel the horizon bend—the 3D Era of Pyria is awakening!"
           },
           {
             "speaker": "Pip",

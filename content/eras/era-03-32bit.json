@@ -14,10 +14,10 @@
         "name": "Terracrest",
         "title": "Sculptor of Elevated Stone",
         "element": "Earth",
-        "rescueDialogue": "RUMBLE-CRUNCH! You mastered (x, y, z) coordinates! Take Bit 17\u2014watch the isometric terraces rise!"
+        "rescueDialogue": "RUMBLE-CRUNCH! You mastered (x, y, z) coordinates! Take Bit 17—watch the isometric terraces rise!"
       },
-      "miniVisualUpgrade": "Bit 17\u201320 Restored: Raised isometric highland cliffs and cascading 2.5D waterfalls.",
-      "storyIntro": "Pyria tilts into a lush 32-Bit Isometric 2.5D diorama! Now every tile has height `z` in addition to `(x, y)` \u2014 welcome to Blockstone Highlands!",
+      "miniVisualUpgrade": "Bit 17–20 Restored: Raised isometric highland cliffs and cascading 2.5D waterfalls.",
+      "storyIntro": "Pyria tilts into a lush 32-Bit Isometric 2.5D diorama! Now every tile has height `z` in addition to `(x, y)` — welcome to Blockstone Highlands!",
       "storyOutro": "Terracrest lifts the highland drawbridge, opening the skyway to Sky-Forge Foundry!",
       "primaryConcepts": [
         "tuples",
@@ -85,7 +85,7 @@
           "unlockId": null,
           "bugSummary": "Unpack `pos` into `x, y, z = pos` and print `z`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\npos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
+            "explorer": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
             "standard": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
             "challenge": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n"
           },
@@ -111,9 +111,9 @@
           "shardReward": 125,
           "unlockId": null,
           "starterCode": {
-            "explorer": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\n# Print higher\n",
-            "standard": "# Given `pos = (3, 4, 1)`, unpack `x, y, z = pos`, create `higher = (x, y, z + 2)`, and `print(higher)`.\n\n",
-            "challenge": "# Climb One Terrace Higher\n\n"
+            "explorer": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)\n",
           "testCode": "assert higher == (3, 4, 3) and OUTPUT.strip() == \"(3, 4, 3)\"",
@@ -137,9 +137,9 @@
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\n# Print drop\n",
-            "standard": "# Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.\n\n",
-            "challenge": "# Measure Elevation Drop\n\n"
+            "explorer": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)\n",
           "testCode": "assert drop == 6 and OUTPUT.strip() == \"6\"",
@@ -163,9 +163,9 @@
           "shardReward": 135,
           "unlockId": null,
           "starterCode": {
-            "explorer": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\n# Print max_z\n",
-            "standard": "# Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.\n\n",
-            "challenge": "# Find the Highest Peak\n\n"
+            "explorer": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)\n",
           "testCode": "assert max_z == 9 and OUTPUT.strip() == \"9\"",
@@ -189,9 +189,9 @@
           "shardReward": 150,
           "unlockId": null,
           "starterCode": {
-            "explorer": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    # Print \"TERRACREST FREE!\"\n    \n",
-            "standard": "# Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.\n\n",
-            "challenge": "# Raise Terracrest's Bridge (Boss)\n\n"
+            "explorer": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
           "testCode": "assert total_h == 10 and OUTPUT.strip() == \"TERRACREST FREE!\"",
@@ -313,9 +313,9 @@
         "name": "Anvilwing",
         "title": "Smith of Floating Forges",
         "element": "Fire",
-        "rescueDialogue": "CLANG-BOOM! List comprehensions forge entire arrays in one line! Take Bits 21\u201324!"
+        "rescueDialogue": "CLANG-BOOM! List comprehensions forge entire arrays in one line! Take Bits 21–24!"
       },
-      "miniVisualUpgrade": "Bits 21\u201324 Restored: Floating anvil platforms and glowing molten-gold forge channels.",
+      "miniVisualUpgrade": "Bits 21–24 Restored: Floating anvil platforms and glowing molten-gold forge channels.",
       "storyIntro": "High above the clouds, floating stone islands house Sky-Forge Foundry, where iron dragon Anvilwing awaits clean grid loops and list comprehensions.",
       "storyOutro": "Anvilwing hammers open the crystal chute down to Prism Caverns!",
       "primaryConcepts": [
@@ -384,7 +384,7 @@
           "unlockId": null,
           "bugSummary": "Fix `[x * 10 for x ores]` to `[x * 10 for x in ores]`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\nores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
+            "explorer": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
             "standard": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
             "challenge": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n"
           },
@@ -410,9 +410,9 @@
           "shardReward": 135,
           "unlockId": null,
           "starterCode": {
-            "explorer": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\n# Print hot\n",
-            "standard": "# Use `[n for n in [5, 12, 8, 20] if n >= 10]` to build `hot` and `print(hot)`.\n\n",
-            "challenge": "# Filter with a Comprehension\n\n"
+            "explorer": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)\n",
           "testCode": "assert hot == [12, 20] and OUTPUT.strip() == \"[12, 20]\"",
@@ -436,9 +436,9 @@
           "shardReward": 140,
           "unlockId": null,
           "starterCode": {
-            "explorer": "coords = [(x, y) for x in range(2) for y in range(2)]\n# Print len(coords)\n",
-            "standard": "# Build `coords = [(x, y) for x in range(2) for y in range(2)]` and `print(len(coords))`.\n\n",
-            "challenge": "# Generate 2D Isometric Coords\n\n"
+            "explorer": "coords = [(x, y) for x in range(2) for y in range(2)]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))\n",
           "testCode": "assert coords == [(0, 0), (0, 1), (1, 0), (1, 1)] and OUTPUT.strip() == \"4\"",
@@ -462,9 +462,9 @@
           "shardReward": 145,
           "unlockId": null,
           "starterCode": {
-            "explorer": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\n# Print loud\n",
-            "standard": "# Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.\n\n",
-            "challenge": "# Uppercase Rune Tags\n\n"
+            "explorer": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)\n",
           "testCode": "assert loud == [\"IRON\", \"GOLD\"] and OUTPUT.strip() == \"['IRON', 'GOLD']\"",
@@ -488,9 +488,9 @@
           "shardReward": 160,
           "unlockId": null,
           "starterCode": {
-            "explorer": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    # Print \"ANVILWING FREE!\"\n    \n",
-            "standard": "# Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.\n\n",
-            "challenge": "# Ignite Anvilwing's Sky-Forge (Boss)\n\n"
+            "explorer": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")\n",
           "testCode": "assert forged == [50, 80] and OUTPUT.strip() == \"ANVILWING FREE!\"",
@@ -518,7 +518,7 @@
             {
               "id": "a",
               "label": "[1, 4, 9]",
-              "explanation": "Forged in fire! 1\u00d71=1, 2\u00d72=4, 3\u00d73=9!"
+              "explanation": "Forged in fire! 1×1=1, 2×2=4, 3×3=9!"
             },
             {
               "id": "b",
@@ -612,9 +612,9 @@
         "name": "Lumina",
         "title": "Weaver of Crystal Light",
         "element": "Light",
-        "rescueDialogue": "SHIMMER! Sets and nested dicts light every crystal tunnel! Take Bits 25\u201328!"
+        "rescueDialogue": "SHIMMER! Sets and nested dicts light every crystal tunnel! Take Bits 25–28!"
       },
-      "miniVisualUpgrade": "Bits 25\u201328 Restored: Refracting crystal spires and glowing prism bridges.",
+      "miniVisualUpgrade": "Bits 25–28 Restored: Refracting crystal spires and glowing prism bridges.",
       "storyIntro": "Beneath the foundry sparkle the Prism Caverns! Here **sets** remove duplicates automatically and **nested dictionaries** map glowing crystal caves.",
       "storyOutro": "Lumina focuses a prism beam straight toward Null's Polygon Citadel!",
       "primaryConcepts": [
@@ -630,7 +630,7 @@
           "id": "trial-32-03-01",
           "trialType": "multiple_choice",
           "title": "Meet Python Sets!",
-          "storyPrompt": "A **set** (`set(...)` or `{1, 2, 3}`) keeps ONLY unique items \u2014 duplicates vanish automatically! What does `len(set([\"red\", \"blue\", \"red\"]))` equal?",
+          "storyPrompt": "A **set** (`set(...)` or `{1, 2, 3}`) keeps ONLY unique items — duplicates vanish automatically! What does `len(set([\"red\", \"blue\", \"red\"]))` equal?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "dictionaries_nested",
@@ -683,7 +683,7 @@
           "unlockId": null,
           "bugSummary": "Change `\"norht\"` to `\"north\"` so `print(cavern[\"gate\"][\"north\"])` outputs `\"OPEN\"`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
+            "explorer": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
             "standard": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
             "challenge": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n"
           },
@@ -709,9 +709,9 @@
           "shardReward": 145,
           "unlockId": null,
           "starterCode": {
-            "explorer": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\n# Print unique_count\n",
-            "standard": "# Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.\n\n",
-            "challenge": "# Deduplicate Crystal Shards\n\n"
+            "explorer": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)\n",
           "testCode": "assert unique_count == 3 and OUTPUT.strip() == \"3\"",
@@ -735,9 +735,9 @@
           "shardReward": 150,
           "unlockId": null,
           "starterCode": {
-            "explorer": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\n# Print len(common)\n",
-            "standard": "# Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.\n\n",
-            "challenge": "# Set Intersection (&)\n\n"
+            "explorer": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))\n",
           "testCode": "assert common == {\"gold\", \"ruby\"} and OUTPUT.strip() == \"2\"",
@@ -761,9 +761,9 @@
           "shardReward": 155,
           "unlockId": null,
           "starterCode": {
-            "explorer": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\n# Print dest\n",
-            "standard": "# Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.\n\n",
-            "challenge": "# Read a Nested Room Map\n\n"
+            "explorer": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)\n",
           "testCode": "assert dest == \"vault\" and OUTPUT.strip() == \"vault\"",
@@ -787,9 +787,9 @@
           "shardReward": 170,
           "unlockId": null,
           "starterCode": {
-            "explorer": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    # Print \"LUMINA FREE!\"\n    \n",
-            "standard": "# Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.\n\n",
-            "challenge": "# Align Lumina's Crystal Graph (Boss)\n\n"
+            "explorer": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
           "testCode": "assert beam == 100 and OUTPUT.strip() == \"LUMINA FREE!\"",
@@ -911,11 +911,11 @@
         "name": "Vortex",
         "title": "Guardian of the 32nd Bit",
         "element": "Gravity",
-        "rescueDialogue": "WHOA-BOOM! All 32 Bits restored! Brace yourself\u2014Pyria is warping into full 64-Bit Nintendo 64 3D!"
+        "rescueDialogue": "WHOA-BOOM! All 32 Bits restored! Brace yourself—Pyria is warping into full 64-Bit Nintendo 64 3D!"
       },
-      "miniVisualUpgrade": "Bit 32 Restored \u2014 64-BIT ERA UPGRADE! The flat isometric tiles burst into free-roam chunky Gouraud-shaded 3D!",
+      "miniVisualUpgrade": "Bit 32 Restored — 64-BIT ERA UPGRADE! The flat isometric tiles burst into free-roam chunky Gouraud-shaded 3D!",
       "storyIntro": "Lord Null's Polygon Citadel floats in isometric wireframe space! Master `try / except` error shields and combine your 32-Bit skills to rescue Vortex!",
-      "storyOutro": "Vortex spins open a swirling 3D polygon portal \u2014 welcome to the 64-Bit Nintendo 64 Era!",
+      "storyOutro": "Vortex spins open a swirling 3D polygon portal — welcome to the 64-Bit Nintendo 64 Era!",
       "primaryConcepts": [
         "error_handling",
         "tuples",
@@ -985,7 +985,7 @@
           "unlockId": null,
           "bugSummary": "Add `:` after `except ValueError` so it prints `SAFE`.",
           "starterCode": {
-            "explorer": "# Fix the bug below:\ntry:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
+            "explorer": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
             "standard": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
             "challenge": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n"
           },
@@ -1012,9 +1012,9 @@
           "shardReward": 165,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\n# Print safe_int(\"oops\")\n",
-            "standard": "# Write `def safe_int(text):` using `try: return int(text)` and `except ValueError: return 0`. Print `safe_int(\"oops\")`.\n\n",
-            "challenge": "# Safe Number Parser\n\n"
+            "explorer": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))\n",
           "testCode": "assert safe_int(\"42\") == 42 and safe_int(\"oops\") == 0 and OUTPUT.strip() == \"0\"",
@@ -1039,9 +1039,9 @@
           "shardReward": 170,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\n# Print safe_div(20, 0)\n",
-            "standard": "# Write `def safe_div(a, b):` returning `a // b` or `0` on `ZeroDivisionError`. Print `safe_div(20, 0)`.\n\n",
-            "challenge": "# Safe Division Spell\n\n"
+            "explorer": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))\n",
           "testCode": "assert safe_div(20, 4) == 5 and safe_div(20, 0) == 0 and OUTPUT.strip() == \"0\"",
@@ -1066,9 +1066,9 @@
           "shardReward": 175,
           "unlockId": null,
           "starterCode": {
-            "explorer": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\n# Print d2\n",
-            "standard": "# Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.\n\n",
-            "challenge": "# 3D Distance Squared\n\n"
+            "explorer": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)\n",
           "testCode": "assert d2 == 25 and OUTPUT.strip() == \"25\"",
@@ -1093,9 +1093,9 @@
           "shardReward": 190,
           "unlockId": null,
           "starterCode": {
-            "explorer": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    # Print \"64-BIT UNLOCKED!\"\n    \n",
-            "standard": "# Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.\n\n",
-            "challenge": "# Collapse Null's Polygon Core (Era 3 Boss)\n\n"
+            "explorer": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    \n",
+            "standard": "",
+            "challenge": ""
           },
           "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
           "testCode": "assert bits == 32 and OUTPUT.strip() == \"64-BIT UNLOCKED!\"",
@@ -1129,7 +1129,7 @@
             {
               "id": "b",
               "label": "64",
-              "explanation": "That's `2 ** 6` \u2014 the Nintendo 64 Era awaits!"
+              "explanation": "That's `2 ** 6` — the Nintendo 64 Era awaits!"
             },
             {
               "id": "c",
