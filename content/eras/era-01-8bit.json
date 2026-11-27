@@ -39,7 +39,6 @@
           ],
           "shardReward": 20,
           "unlockId": "hat-explorer",
-          "codeSnippet": "# Which spell below is valid Python?",
           "choices": [
             {
               "id": "a",
@@ -89,7 +88,7 @@
           "unlockId": null,
           "bugSummary": "Lord Null stole the closing quote (\") before `)`! Add `\"` right after `!` and run the spell.",
           "starterCode": {
-            "explorer": "# Add the missing closing quote \" right after the ! mark:\nsay(\"Wake up, Spark!)\n",
+            "explorer": "say(\"Wake up, Spark!)\n",
             "standard": "say(\"Wake up, Spark!)\n",
             "challenge": "say(\"Wake up, Spark!)\n"
           },
@@ -106,7 +105,7 @@
           "id": "trial-01-03",
           "trialType": "code",
           "title": "Your First say() Spell",
-          "storyPrompt": "Now it's your turn to cast a spell from scratch! Call `say()` with quotes and parentheses to greet the whole world of Pyria!",
+          "storyPrompt": "Now it's your turn to type a Python spell from scratch! Tip: lines starting with `#` in the coding box are comments (notes that Python ignores). Click the coding box below on a new line without `#`, type `say(\"Hello, Pyria!\")`, and press Run!",
           "objective": "Use say() to display the exact message: Hello, Pyria!",
           "concepts": [
             "function_calls",
@@ -116,9 +115,9 @@
           "shardReward": 30,
           "unlockId": "stat-charisma-1",
           "starterCode": {
-            "explorer": "# Replace ??? inside the quotes with Hello, Pyria!\nsay(\"???\")\n",
-            "standard": "# Call say() to greet Pyria with: Hello, Pyria!\n",
-            "challenge": "# Cast say() to output: Hello, Pyria!\n"
+            "explorer": "# This # line is a comment (Python ignores it!). Replace ??? below:\nsay(\"???\")\n",
+            "standard": "# Comment (Python ignores # lines): Call say() to greet Pyria with: Hello, Pyria!\n\n",
+            "challenge": "# Cast say() to output: Hello, Pyria!\n\n"
           },
           "referenceSolution": "say(\"Hello, Pyria!\")\n",
           "testCode": "assert OUTPUT.strip() == \"Hello, Pyria!\", f'Expected \"Hello, Pyria!\", got {OUTPUT.strip()!r}'\n",

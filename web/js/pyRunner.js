@@ -135,7 +135,7 @@ class PyRunner {
     }
     this.ready = false;
     this.initError = null;
-    this.worker = new Worker('/js/pyWorker.js?v=20261126u');
+    this.worker = new Worker('/js/pyWorker.js?v=20261126v');
     this.worker.onmessage = (event) => this.handleMessage(event.data);
     this.worker.onerror = (err) => {
       this.initError = err.message || 'Worker failed';

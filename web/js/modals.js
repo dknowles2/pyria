@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261126u';
-import { music } from './music.js?v=20261126u';
-import { pyRunner } from './pyRunner.js?v=20261126u';
+import { audio } from './audio.js?v=20261126v';
+import { music } from './music.js?v=20261126v';
+import { pyRunner } from './pyRunner.js?v=20261126v';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126u';
+} from './autocomplete.js?v=20261126v';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -599,6 +599,16 @@ export class ModalManager {
       const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
       const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
       const isFixBug = trial.trialType === 'fix_bug';
+      const hasHashComment = (code) => /^\s*#/m.test(code || '');
+      const showCommentTip = (Number(realm?.number) || 1) <= 3 && hasHashComment(initialCode);
+      const ensureTrailingEditableLine = (code) => {
+        if (!code) return '';
+        const lines = code.split('\n');
+        const last = lines[lines.length - 1];
+        if (/^\s*#/.test(last)) return `${code}\n`;
+        return code;
+      };
+      const editableInitialCode = ensureTrailingEditableLine(initialCode);
 
       this.open(
         `
@@ -640,8 +650,13 @@ export class ModalManager {
             : ''
         }
 
+        <div id="trial-comment-tip" class="comment-tip-banner ${showCommentTip ? '' : 'hidden'}">
+          <strong>💬 What are <code>#</code> lines?</strong>
+          Lines starting with <code>#</code> are <strong>comments</strong> — helpful notes that Python completely ignores. Type your real Python code on a <strong>new line without <code>#</code></strong>!
+        </div>
+
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <span class="muted-text">Write real Python 3 below (Tab indents 4 spaces, Ctrl/Cmd+Enter runs):</span>
+          <span class="muted-text">Tab indents 4 spaces · Ctrl/Cmd+Enter runs:</span>
           <div style="display:flex; gap:6px; align-items:center;">
             <span class="muted-text" style="font-size:12px;">Starter:</span>
             <button class="btn btn-sm btn-ghost" data-mode="explorer">Explorer</button>
@@ -652,7 +667,13 @@ export class ModalManager {
 
         ${renderQuickKeysHtml('trial-quick-keys', trialQuickKeys)}
 
-        <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text">${escapeHtml(initialCode)}</textarea>
+        <div class="code-editor-shell">
+          <div class="code-editor-bar">
+            <span class="code-editor-cta">${isFixBug ? '🐛 EDIT &amp; FIX YOUR PYTHON CODE BELOW' : '⌨️ TYPE YOUR PYTHON CODE BELOW'}</span>
+            <span class="code-editor-sub">Click or tap inside the box to type</span>
+          </div>
+          <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click or tap here and type your Python spell...">${escapeHtml(editableInitialCode)}</textarea>
+        </div>
 
         <div class="editor-actions">
           <button id="btn-trial-run" class="btn btn-primary">▶ Run Python Spell</button>
@@ -680,6 +701,22 @@ export class ModalManager {
       const outputEl = this.content.querySelector('#trial-output');
       const diffBadge = this.content.querySelector('#trial-diff-badge');
       const draftBadge = this.content.querySelector('#trial-draft-badge');
+      const commentTipEl = this.content.querySelector('#trial-comment-tip');
+
+      const syncCommentTip = (code) => {
+        if (!commentTipEl) return;
+        const shouldShow = (Number(realm?.number) || 1) <= 3 && hasHashComment(code);
+        commentTipEl.classList.toggle('hidden', !shouldShow);
+      };
+
+      // On desktop, auto-focus the coding box with cursor at the end so the blinking caret is obvious.
+      if (codeEl && !window.matchMedia?.('(pointer: coarse)')?.matches) {
+        requestAnimationFrame(() => {
+          codeEl.focus();
+          const endPos = codeEl.value.length;
+          codeEl.selectionStart = codeEl.selectionEnd = endPos;
+        });
+      }
 
       wireQuickKeysBar(this.content.querySelector('#trial-quick-keys'), codeEl, trialQuickKeys);
 
@@ -710,7 +747,8 @@ export class ModalManager {
       this.content.querySelectorAll('[data-mode]').forEach((btn) => {
         btn.addEventListener('click', () => {
           currentMode = btn.dataset.mode;
-          codeEl.value = trial.starterCode[currentMode] || '';
+          codeEl.value = ensureTrailingEditableLine(trial.starterCode[currentMode] || '');
+          syncCommentTip(codeEl.value);
           draftBadge?.classList.add('hidden');
           if (!isPractice && onDraftClear) onDraftClear();
           updateModeButtons();
@@ -719,7 +757,8 @@ export class ModalManager {
       });
 
       resetBtn.addEventListener('click', () => {
-        codeEl.value = trial.starterCode[currentMode] || '';
+        codeEl.value = ensureTrailingEditableLine(trial.starterCode[currentMode] || '');
+        syncCommentTip(codeEl.value);
         draftBadge?.classList.add('hidden');
         if (!isPractice && onDraftClear) onDraftClear();
         audio.playClick();
@@ -752,6 +791,25 @@ export class ModalManager {
 
       const runSpell = async () => {
         const code = codeEl.value;
+        const nonEmptyLines = code.split('\n').map((l) => l.trim()).filter(Boolean);
+        if (nonEmptyLines.length === 0 || nonEmptyLines.every((l) => l.startsWith('#'))) {
+          audio.playError();
+          outputEl.className = 'pip-console error';
+          outputEl.innerHTML =
+            nonEmptyLines.length === 0
+              ? `
+                <div class="pip-console-header">🐉 Pip points at the coding box:</div>
+                <div class="pip-console-body">Your coding box is empty! Click or tap inside the <strong>TYPE YOUR PYTHON CODE BELOW</strong> box, type your Python spell, and press <strong>▶ Run Python Spell</strong>!</div>
+              `
+              : `
+                <div class="pip-console-header">🐉 Pip spots a comment-only spell!</div>
+                <div class="pip-console-body">Every line in the coding box starts with <code>#</code> — those are <strong>comments</strong> (notes that Python ignores)! Click inside the coding box, start a new line <strong>without <code>#</code></strong>, type your Python spell, and press <strong>▶ Run Python Spell</strong>!</div>
+              `;
+          codeEl.focus();
+          const endPos = codeEl.value.length;
+          codeEl.selectionStart = codeEl.selectionEnd = endPos;
+          return;
+        }
         runBtn.disabled = true;
         runBtn.textContent = 'Running...';
         audio.playCodeRun();
