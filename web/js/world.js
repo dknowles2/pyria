@@ -1,7 +1,7 @@
 // Crisp HTML5 Canvas Overworld Engine for Pyria (8-Bit, 16-Bit, 32-Bit Isometric 2.5D, 64-Bit N64 3D)
 
-import { audio } from './audio.js?v=20261127c';
-import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127c';
+import { audio } from './audio.js?v=20261127d';
+import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127d';
 
 const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
