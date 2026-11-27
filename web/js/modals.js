@@ -1,20 +1,21 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js';
-import { music } from './music.js';
-import { pyRunner } from './pyRunner.js';
+import { audio } from './audio.js?v=20261126u';
+import { music } from './music.js?v=20261126u';
+import { pyRunner } from './pyRunner.js?v=20261126u';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126s';
+} from './autocomplete.js?v=20261126u';
 
 function escapeHtml(str) {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 const BASE_QUICK_KEYS = [
@@ -221,9 +222,9 @@ export class ModalManager {
       </div>
       <div class="dragon-rescue-banner">
         <p class="dialogue-text">
-          You found <strong style="color: var(--accent-gold);">+${shardReward} Byte Shards</strong>!
+          You found <strong style="color: var(--accent-gold);">+${Number(shardReward) || 0} Byte Shards</strong>!
         </p>
-        <p class="muted-text">You now have <strong>${totalShards} Byte Shards</strong> to spend at Bram's Workshop.</p>
+        <p class="muted-text">You now have <strong>${Number(totalShards) || 0} Byte Shards</strong> to spend at Bram's Workshop.</p>
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" data-close>Awesome!</button>
@@ -848,8 +849,8 @@ export class ModalManager {
         <div>
           <h2>⚒ Bram's Tinkerer Workshop</h2>
           <div class="modal-badges">
-            <span class="pill pill-gold" id="ws-shards-pill">💎 ${workingSave.byteShards} Byte Shards</span>
-            <span class="pill pill-blue" id="ws-stats-pill">Charisma: ${workingSave.stats.charisma} · Courage: ${workingSave.stats.courage}</span>
+            <span class="pill pill-gold" id="ws-shards-pill">💎 ${Number(workingSave.byteShards) || 0} Byte Shards</span>
+            <span class="pill pill-blue" id="ws-stats-pill">Charisma: ${Number(workingSave.stats?.charisma) || 0} · Courage: ${Number(workingSave.stats?.courage) || 0}</span>
           </div>
         </div>
         <button class="btn btn-sm btn-ghost" data-close>✕</button>
@@ -868,7 +869,7 @@ export class ModalManager {
             </div>
           </div>
           <div id="ws-balance-banner" class="ws-balance-banner">
-            💎 Your Byte Shards: <strong id="ws-balance-value">${workingSave.byteShards}</strong>
+            💎 Your Byte Shards: <strong id="ws-balance-value">${Number(workingSave.byteShards) || 0}</strong>
           </div>
           <div id="ws-catalog" class="catalog-list">
             ${renderCatalogHtml()}

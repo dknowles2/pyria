@@ -8,17 +8,14 @@ third-party dependencies.
 from __future__ import annotations
 
 import argparse
-import base64
 from contextlib import contextmanager
+import hmac
 import json
+import math
 import mimetypes
 import os
-import re
 import sqlite3
-import subprocess
-import sys
 import threading
-import time
 import uuid
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -43,78 +40,57 @@ MIME_TYPES: dict[str, str] = {
     ".txt": "text/plain; charset=utf-8",
 }
 
-MAX_BODY_BYTES = 2 * 1024 * 1024  # 2 MiB
+MAX_JSON_BODY_BYTES = 512 * 1024  # 512 KiB
 
-PYTHON_TRIAL_HARNESS = r"""
-import io
-import json
-import sys
-import traceback
-from contextlib import redirect_stdout
+PYODIDE_CDN_ORIGIN_PATH = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
 
-payload = json.loads(sys.stdin.read())
-student_code = payload.get("code", "")
-test_code = payload.get("testCode", "")
+CSP_DEFAULT = (
+    "default-src 'self'; "
+    f"script-src 'self' {PYODIDE_CDN_ORIGIN_PATH} 'wasm-unsafe-eval'; "
+    "style-src 'self' 'unsafe-inline'; "
+    f"worker-src 'self' blob: {PYODIDE_CDN_ORIGIN_PATH}; "
+    f"connect-src 'self' {PYODIDE_CDN_ORIGIN_PATH}; "
+    "img-src 'self' data: blob:; "
+    "font-src 'self' data:; "
+    "object-src 'none'; "
+    "base-uri 'self'; "
+    "frame-ancestors 'self'"
+)
 
-stdout_buf = io.StringIO()
-ns = {"__name__": "__main__", "say": print, "shout": print}
-result = {
-    "passed": False,
-    "stdout": "",
-    "stderr": "",
-    "errorType": None,
-    "errorMessage": None,
-    "phase": "student",
-}
-
-try:
-    with redirect_stdout(stdout_buf):
-        exec(compile(student_code, "<hero_spell>", "exec"), ns)
-    captured = stdout_buf.getvalue()
-    ns["OUTPUT"] = captured
-    result["stdout"] = captured
-    result["phase"] = "test"
-    if test_code.strip():
-        test_stdout = io.StringIO()
-        with redirect_stdout(test_stdout):
-            exec(compile(test_code, "<trial_test>", "exec"), ns)
-        extra = test_stdout.getvalue()
-        if extra:
-            result["stdout"] = captured + extra
-    result["passed"] = True
-except BaseException as exc:
-    result["stdout"] = stdout_buf.getvalue()
-    result["errorType"] = type(exc).__name__
-    result["errorMessage"] = str(exc)
-    result["stderr"] = traceback.format_exc()
-
-sys.stdout.write(json.dumps(result))
-"""
+CSP_ASSET_PREVIEW = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline'; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data: blob:; "
+    "font-src 'self' data:; "
+    "object-src 'none'; "
+    "base-uri 'self'; "
+    "frame-ancestors 'self'"
+)
 
 
-def extract_email_from_cf_jwt(token: str) -> str | None:
-    """Safely base64url-decode a Cloudflare Access JWT payload and extract email."""
-    parts = token.strip().split(".")
-    if len(parts) < 2 or not parts[1]:
-        return None
-    seg = parts[1]
-    padded = seg + "=" * (-len(seg) % 4)
-    try:
-        raw = base64.urlsafe_b64decode(padded.encode("ascii"))
-        payload = json.loads(raw.decode("utf-8"))
-    except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
-        return None
-    if not isinstance(payload, dict):
-        return None
-    email = payload.get("email")
-    if isinstance(email, str) and email.strip():
-        return email.strip().lower()
-    return None
+def _reject_json_constant(value: str) -> Any:
+    raise ValueError(f"Disallowed JSON constant: {value}")
+
+
+def _parse_finite_float(value: str) -> float:
+    num = float(value)
+    if not math.isfinite(num):
+        raise ValueError(f"Non-finite JSON number: {value}")
+    return num
 
 
 def get_admin_emails() -> set[str]:
     raw = os.environ.get("PYRIA_ADMIN_EMAILS", "")
     return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
+
+def is_env_dev_mode() -> bool:
+    return os.environ.get("PYRIA_DEV_MODE", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+    )
 
 
 def normalize_email(value: Any) -> str | None:
@@ -131,117 +107,20 @@ def utc_now_iso() -> str:
 def write_json_atomic(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp_path = path.with_name(f"{path.name}.tmp.{os.getpid()}.{uuid.uuid4().hex[:8]}")
-    tmp_path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    tmp_path.write_text(
+        json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
     os.replace(tmp_path, path)
 
 
-def build_pip_hint(
-    passed: bool,
-    error_type: str | None,
-    error_message: str | None,
-    phase: str,
-    timed_out: bool,
-) -> str:
-    if passed:
-        return "Pip chirps happily! Your Python spell passed every single test rune!"
-    if timed_out:
-        return "Whoa, Pip got dizzy! Your spell took longer than 3 seconds — check if a loop is running forever."
-
-    msg = error_message or ""
-    if error_type == "SyntaxError":
-        return f"Pip spotted a typo in your spell syntax ({msg or 'check quotes, colons, and parentheses'})."
-    if error_type in ("IndentationError", "TabError"):
-        return "Pip noticed uneven spacing! In Python, lines inside an `if`, `for`, or `def` block need the exact same indentation (4 spaces)."
-    if error_type == "NameError":
-        m = re.search(r"name '([^']+)' is not defined", msg)
-        name = m.group(1) if m else "that name"
-        return f"Pip scratched his head — Python doesn't know '{name}' yet. Check the spelling or define it before using it!"
-    if error_type == "TypeError":
-        return f"Pip saw two mismatched types bumping into each other ({msg}). Remember you can't mix strings and numbers without converting them!"
-    if error_type == "ValueError":
-        return f"Pip says the right kind of value was passed, but its contents didn't work ({msg})."
-    if error_type == "ZeroDivisionError":
-        return "Pip ducked! Dividing by zero makes the magic runes explode — check your divisor."
-    if error_type == "IndexError":
-        return "Pip peeked past the end of your list! Remember Python lists start counting at 0."
-    if error_type == "KeyError":
-        return f"Pip couldn't find that key in the dictionary ({msg}). Check the spelling and quotes!"
-    if error_type == "AssertionError":
-        if msg:
-            return f"Almost there! Pip checked the Trial runes and found: {msg}"
-        return "Almost there! Your code ran without crashing, but the output or variable value didn't quite match what the Trial expects."
-    if phase == "test":
-        return f"Pip saw your spell run, but a test check failed ({error_type or 'Error'}: {msg or 'check expected values'})."
-    return f"Pip bumped into a {error_type or 'Python error'}: {msg or 'check your spell carefully and try again!'}"
-
-
-def run_sandboxed_trial_test(
-    code: str, test_code: str, timeout_sec: float = 3.0
-) -> dict[str, Any]:
-    start = time.monotonic()
-    payload = json.dumps({"code": code, "testCode": test_code})
-    env = {
-        "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
-        "PYTHONIOENCODING": "utf-8",
-    }
-    try:
-        proc = subprocess.run(
-            [sys.executable, "-I", "-c", PYTHON_TRIAL_HARNESS],
-            input=payload,
-            capture_output=True,
-            text=True,
-            timeout=timeout_sec,
-            env=env,
-        )
-    except subprocess.TimeoutExpired:
-        duration_ms = int((time.monotonic() - start) * 1000)
-        return {
-            "passed": False,
-            "stdout": "",
-            "stderr": f"Execution timed out after {int(timeout_sec * 1000)}ms",
-            "timedOut": True,
-            "pipFriendlyHint": build_pip_hint(False, "TimeoutError", None, "student", True),
-            "durationMs": duration_ms,
-        }
-    except OSError as exc:
-        duration_ms = int((time.monotonic() - start) * 1000)
-        return {
-            "passed": False,
-            "stdout": "",
-            "stderr": f"Failed to launch python3: {exc}",
-            "timedOut": False,
-            "pipFriendlyHint": "Pip couldn't wake up the Python engine.",
-            "durationMs": duration_ms,
-        }
-
-    duration_ms = int((time.monotonic() - start) * 1000)
-    try:
-        parsed = json.loads(proc.stdout)
-        passed = bool(parsed.get("passed", False))
-        return {
-            "passed": passed,
-            "stdout": str(parsed.get("stdout", "")),
-            "stderr": str(parsed.get("stderr", "") or proc.stderr),
-            "timedOut": False,
-            "pipFriendlyHint": build_pip_hint(
-                passed,
-                parsed.get("errorType"),
-                parsed.get("errorMessage"),
-                str(parsed.get("phase", "student")),
-                False,
-            ),
-            "durationMs": duration_ms,
-        }
-    except json.JSONDecodeError:
-        err_line = proc.stderr.strip().splitlines()[-1] if proc.stderr.strip() else None
-        return {
-            "passed": False,
-            "stdout": proc.stdout,
-            "stderr": proc.stderr or "Unexpected runner output",
-            "timedOut": False,
-            "pipFriendlyHint": build_pip_hint(False, "RuntimeError", err_line, "student", False),
-            "durationMs": duration_ms,
-        }
+def _normalize_host(netloc: str, scheme: str | None = None) -> str:
+    host = netloc.strip().lower()
+    if scheme == "http" and host.endswith(":80"):
+        return host[:-3]
+    if scheme == "https" and host.endswith(":443"):
+        return host[:-4]
+    return host
 
 
 def compute_concept_warnings(
@@ -469,7 +348,7 @@ class PyriaDatabase:
                 realm_id,
                 trial_id,
                 summary,
-                json.dumps(details, ensure_ascii=False),
+                json.dumps(details, ensure_ascii=False, allow_nan=False),
                 ts,
             ),
         )
@@ -546,7 +425,12 @@ class PyriaDatabase:
             "createdAt": now,
             "updatedAt": now,
         }
-        state_json = json.dumps(state, ensure_ascii=False)
+        if "byteShards" in state:
+            try:
+                state["byteShards"] = max(0, int(state["byteShards"]))
+            except (TypeError, ValueError, OverflowError):
+                state["byteShards"] = 0
+        state_json = json.dumps(state, ensure_ascii=False, allow_nan=False)
         realm_id = str(state.get("realmId") or "realm-01-meadow")
         with self._lock, self._connect() as conn:
             conn.execute(
@@ -584,7 +468,12 @@ class PyriaDatabase:
             state["updatedAt"] = now
             conn.execute(
                 "UPDATE saves SET owner_email = ?, state_json = ?, updated_at = ? WHERE id = ?",
-                (norm_owner, json.dumps(state, ensure_ascii=False), now, save_id),
+                (
+                    norm_owner,
+                    json.dumps(state, ensure_ascii=False, allow_nan=False),
+                    now,
+                    save_id,
+                ),
             )
             return state
 
@@ -621,7 +510,12 @@ class PyriaDatabase:
                 "createdAt": existing["created_at"],
                 "updatedAt": now,
             }
-            state_json = json.dumps(state, ensure_ascii=False)
+            if "byteShards" in state:
+                try:
+                    state["byteShards"] = max(0, int(state["byteShards"]))
+                except (TypeError, ValueError, OverflowError):
+                    state["byteShards"] = int(prev_state.get("byteShards") or 0)
+            state_json = json.dumps(state, ensure_ascii=False, allow_nan=False)
             conn.execute(
                 "UPDATE saves SET hero_name = ?, state_json = ?, updated_at = ? "
                 "WHERE id = ?",
@@ -974,7 +868,11 @@ class PyriaDatabase:
 
             conn.execute(
                 "UPDATE saves SET state_json = ?, updated_at = ? WHERE id = ?",
-                (json.dumps(state, ensure_ascii=False), now, save_id),
+                (
+                    json.dumps(state, ensure_ascii=False, allow_nan=False),
+                    now,
+                    save_id,
+                ),
             )
 
             realm_id = str(state.get("realmId") or "") or None
@@ -1036,12 +934,14 @@ class PyriaHTTPServer(ThreadingHTTPServer):
         server_address: tuple[str, int],
         root_dir: Path,
         db: PyriaDatabase,
+        dev_mode: bool = False,
     ) -> None:
         self.root_dir = root_dir.resolve()
         self.web_dir = (self.root_dir / "web").resolve()
         self.content_dir = (self.root_dir / "content").resolve()
         self.assets_dir = (self.root_dir / "assets").resolve()
         self.db = db
+        self.dev_mode = dev_mode
         self.content_lock = threading.Lock()
         super().__init__(server_address, PyriaRequestHandler)
 
@@ -1101,52 +1001,133 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return
         super().log_message(format, *args)
 
+    def _send_security_headers(self, allow_inline_script: bool = False) -> None:
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
+        self.send_header("Referrer-Policy", "same-origin")
+        self.send_header(
+            "Permissions-Policy", "camera=(), microphone=(), geolocation=()"
+        )
+        self.send_header(
+            "Content-Security-Policy",
+            CSP_ASSET_PREVIEW if allow_inline_script else CSP_DEFAULT,
+        )
+        self._sec_headers_sent = True
+
+    def end_headers(self) -> None:
+        if not getattr(self, "_sec_headers_sent", False):
+            self._send_security_headers()
+        self._sec_headers_sent = False
+        super().end_headers()
+
     def _send_json(
         self, status: int, data: dict[str, Any], no_store: bool = True
     ) -> None:
-        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        body = json.dumps(data, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        self._sec_headers_sent = False
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         if no_store:
             self.send_header("Cache-Control", "no-store")
+        self._send_security_headers()
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(body)
 
-    def _read_json_body(self) -> tuple[dict[str, Any] | None, str | None]:
+    def _check_same_origin(self) -> bool:
+        """Reject cross-site / cross-origin state-mutating requests (CSRF defense)."""
+        sec_fetch_site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+        if sec_fetch_site == "cross-site":
+            self._send_json(
+                HTTPStatus.FORBIDDEN, {"error": "Cross-site request blocked"}
+            )
+            return False
+
+        origin = self.headers.get("Origin")
+        if origin is not None:
+            origin_clean = origin.strip()
+            if not origin_clean or origin_clean.lower() == "null":
+                self._send_json(
+                    HTTPStatus.FORBIDDEN, {"error": "Invalid Origin header"}
+                )
+                return False
+            parsed = urlsplit(origin_clean)
+            if parsed.scheme not in ("http", "https") or not parsed.netloc:
+                self._send_json(
+                    HTTPStatus.FORBIDDEN, {"error": "Invalid Origin header"}
+                )
+                return False
+            origin_host = _normalize_host(parsed.netloc, parsed.scheme)
+            fwd_host = (
+                (self.headers.get("X-Forwarded-Host") or "")
+                .split(",")[0]
+                .strip()
+            )
+            host_hdr = (self.headers.get("Host") or "").strip()
+            expected_raw = fwd_host or host_hdr
+            expected_host = _normalize_host(expected_raw, parsed.scheme)
+            if not expected_host or origin_host != expected_host:
+                self._send_json(
+                    HTTPStatus.FORBIDDEN, {"error": "Cross-origin request blocked"}
+                )
+                return False
+        return True
+
+    def _read_json_body(
+        self,
+    ) -> tuple[dict[str, Any] | None, str | None, HTTPStatus]:
+        content_type = (
+            (self.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+        )
+        if content_type != "application/json":
+            return (
+                None,
+                "Content-Type must be application/json",
+                HTTPStatus.UNSUPPORTED_MEDIA_TYPE,
+            )
         raw_len = self.headers.get("Content-Length")
         if raw_len is None:
-            return None, "Missing Content-Length header"
+            return None, "Missing Content-Length header", HTTPStatus.BAD_REQUEST
         try:
             length = int(raw_len)
         except ValueError:
-            return None, "Invalid Content-Length header"
-        if length < 0 or length > MAX_BODY_BYTES:
-            return None, f"Request body exceeds limit ({MAX_BODY_BYTES} bytes)"
+            return None, "Invalid Content-Length header", HTTPStatus.BAD_REQUEST
+        if length < 0:
+            return None, "Invalid Content-Length header", HTTPStatus.BAD_REQUEST
+        if length > MAX_JSON_BODY_BYTES:
+            return (
+                None,
+                f"Request body exceeds limit ({MAX_JSON_BODY_BYTES} bytes)",
+                HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            )
         raw = self.rfile.read(length)
         if not raw:
-            return {}, None
+            return {}, None, HTTPStatus.OK
         try:
-            parsed = json.loads(raw.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            return None, f"Invalid JSON body: {exc}"
+            parsed = json.loads(
+                raw.decode("utf-8"),
+                parse_constant=_reject_json_constant,
+                parse_float=_parse_finite_float,
+            )
+        except (UnicodeDecodeError, ValueError, json.JSONDecodeError) as exc:
+            return None, f"Invalid JSON body: {exc}", HTTPStatus.BAD_REQUEST
         if not isinstance(parsed, dict):
-            return None, "JSON body must be an object"
-        return parsed, None
+            return None, "JSON body must be an object", HTTPStatus.BAD_REQUEST
+        return parsed, None, HTTPStatus.OK
+
+    def _is_dev_mode(self) -> bool:
+        return bool(getattr(self.server, "dev_mode", False)) or is_env_dev_mode()
 
     def _get_identity(self) -> tuple[str | None, bool, set[str]]:
         email = normalize_email(
             self.headers.get("Cf-Access-Authenticated-User-Email")
         )
-        if email is None:
-            jwt_hdr = self.headers.get("Cf-Access-Jwt-Assertion")
-            if jwt_hdr:
-                email = extract_email_from_cf_jwt(jwt_hdr)
         admin_emails = get_admin_emails()
+        dev_mode = self._is_dev_mode()
         is_admin = bool(
             (email and email in admin_emails)
-            or (not admin_emails and email is None)
+            or (dev_mode and not admin_emails and email is None)
         )
         return email, is_admin, admin_emails
 
@@ -1166,17 +1147,19 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
 
     def _send_html(self, status: int, html: str) -> None:
         body = html.encode("utf-8")
+        self._sec_headers_sent = False
         self.send_response(status)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
+        self._send_security_headers()
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(body)
 
     def _check_builder_auth(self, html: bool = False) -> bool:
-        _, is_admin, admin_emails = self._get_identity()
-        if admin_emails and not is_admin:
+        _, is_admin, _ = self._get_identity()
+        if not is_admin:
             if html:
                 self._send_html(
                     HTTPStatus.FORBIDDEN,
@@ -1200,7 +1183,7 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         if not passcode:
             return True
         provided = self.headers.get("X-Builder-Passcode", "")
-        if provided != passcode:
+        if not hmac.compare_digest(provided, passcode):
             self._send_json(
                 HTTPStatus.UNAUTHORIZED,
                 {"error": "Invalid or missing X-Builder-Passcode header"},
@@ -1258,6 +1241,13 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.FORBIDDEN, {"error": "Forbidden path"})
             return
 
+        # Defense-in-depth: gate any resolved path inside web/builder/ (prevents /%2fbuilder/, /./builder/, /BUILDER/ bypasses)
+        if base_dir == self.server.web_dir:
+            rel_parts = target.relative_to(self.server.web_dir).parts
+            if rel_parts and rel_parts[0].lower() == "builder":
+                if not self._check_builder_auth(html=True):
+                    return
+
         if not target.exists() or not target.is_file():
             self._send_json(HTTPStatus.NOT_FOUND, {"error": "File not found"})
             return
@@ -1268,6 +1258,7 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             mime = guessed or "application/octet-stream"
 
         data = target.read_bytes()
+        self._sec_headers_sent = False
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", mime)
         self.send_header("Content-Length", str(len(data)))
@@ -1276,6 +1267,10 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             "Cache-Control",
             "no-store, no-cache, must-revalidate, max-age=0" if (no_store or is_app_code) else "no-cache",
         )
+        is_asset_preview = (
+            decoded.startswith("/assets/") and target.name == "preview.html"
+        )
+        self._send_security_headers(allow_inline_script=is_asset_preview)
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(data)
@@ -1355,14 +1350,12 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/health":
-            self._send_json(
-                HTTPStatus.OK,
-                {
-                    "ok": True,
-                    "dbPath": str(self.server.db.db_path),
-                    "saveCount": self.server.db.count_saves(),
-                },
-            )
+            _, is_admin, _ = self._get_identity()
+            payload: dict[str, Any] = {"ok": True}
+            if is_admin:
+                payload["dbPath"] = str(self.server.db.db_path)
+                payload["saveCount"] = self.server.db.count_saves()
+            self._send_json(HTTPStatus.OK, payload)
             return
 
         if path == "/api/config":
@@ -1466,21 +1459,10 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             self._serve_static(parsed.path)
 
     def do_POST(self) -> None:
+        if not self._check_same_origin():
+            return
         parsed = urlsplit(self.path)
         path = parsed.path
-
-        if path == "/api/builder/test-trial":
-            if not self._check_builder_auth():
-                return
-            body, err = self._read_json_body()
-            if err is not None or body is None:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
-                return
-            code = str(body.get("code", ""))
-            test_code = str(body.get("testCode", ""))
-            result = run_sandboxed_trial_test(code, test_code, timeout_sec=3.0)
-            self._send_json(HTTPStatus.OK, result)
-            return
 
         parts = [p for p in path.split("/") if p]
         # POST /api/builder/saves/<saveId>/override-trial
@@ -1493,9 +1475,9 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         ):
             if not self._check_builder_auth():
                 return
-            body, err = self._read_json_body()
+            body, err, err_status = self._read_json_body()
             if err is not None or body is None:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+                self._send_json(err_status, {"error": err})
                 return
             trial_id = str(body.get("trialId") or "").strip()
             if not trial_id:
@@ -1545,9 +1527,9 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         ):
             if not self._check_builder_auth():
                 return
-            body, err = self._read_json_body()
+            body, err, err_status = self._read_json_body()
             if err is not None or body is None:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+                self._send_json(err_status, {"error": err})
                 return
             if "ownerEmail" not in body:
                 self._send_json(
@@ -1571,9 +1553,16 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/saves":
-            body, err = self._read_json_body()
+            email, is_admin, admin_emails = self._get_identity()
+            if email is None and (admin_emails or not self._is_dev_mode()):
+                self._send_json(
+                    HTTPStatus.UNAUTHORIZED,
+                    {"error": "Authentication required"},
+                )
+                return
+            body, err, err_status = self._read_json_body()
             if err is not None or body is None:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+                self._send_json(err_status, {"error": err})
                 return
             if (
                 "save" in body
@@ -1581,7 +1570,6 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                 and isinstance(body["save"], dict)
             ):
                 body = body["save"]
-            email, is_admin, _ = self._get_identity()
             requested_owner = normalize_email(body.get("ownerEmail"))
             owner_email = requested_owner if (is_admin and requested_owner) else email
             save = self.server.db.create_save(body, owner_email=owner_email)
@@ -1596,9 +1584,9 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         ):
             if not self._require_save_access(parts[2]):
                 return
-            body, err = self._read_json_body()
+            body, err, err_status = self._read_json_body()
             if err is not None or body is None:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+                self._send_json(err_status, {"error": err})
                 return
             trial_id = str(
                 body.get("trialId") or body.get("trial_id") or ""
@@ -1642,9 +1630,9 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
     def _handle_builder_put(self, parts: list[str]) -> None:
         if not self._check_builder_auth():
             return
-        body, err = self._read_json_body()
+        body, err, err_status = self._read_json_body()
         if err is not None or body is None:
-            self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+            self._send_json(err_status, {"error": err})
             return
 
         # PUT /api/builder/difficulty
@@ -1812,6 +1800,8 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         self._send_json(HTTPStatus.NOT_FOUND, {"error": "Unknown builder API endpoint"})
 
     def do_PUT(self) -> None:
+        if not self._check_same_origin():
+            return
         parsed = urlsplit(self.path)
         parts = [p for p in parsed.path.split("/") if p]
         if len(parts) >= 2 and parts[0] == "api" and parts[1] == "builder":
@@ -1821,9 +1811,9 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         if len(parts) == 3 and parts[0] == "api" and parts[1] == "saves":
             if not self._require_save_access(parts[2]):
                 return
-            body, err = self._read_json_body()
+            body, err, err_status = self._read_json_body()
             if err is not None or body is None:
-                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+                self._send_json(err_status, {"error": err})
                 return
             if (
                 "save" in body
@@ -1843,6 +1833,8 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         self._send_json(HTTPStatus.NOT_FOUND, {"error": "Unknown API endpoint"})
 
     def do_DELETE(self) -> None:
+        if not self._check_same_origin():
+            return
         parsed = urlsplit(self.path)
         parts = [p for p in parsed.path.split("/") if p]
 
@@ -1898,10 +1890,15 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
 
 
 def create_server(
-    host: str, port: int, root_dir: Path, db_path: Path, quiet: bool = False
+    host: str,
+    port: int,
+    root_dir: Path,
+    db_path: Path,
+    quiet: bool = False,
+    dev_mode: bool = False,
 ) -> PyriaHTTPServer:
     db = PyriaDatabase(db_path)
-    srv = PyriaHTTPServer((host, port), root_dir, db)
+    srv = PyriaHTTPServer((host, port), root_dir, db, dev_mode=dev_mode)
     setattr(srv, "quiet", quiet)
     return srv
 
@@ -1923,6 +1920,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="SQLite database path (default: <root>/data/pyria.sqlite3)",
     )
+    parser.add_argument(
+        "--dev",
+        action="store_true",
+        help="Enable local unauthenticated dev admin mode when PYRIA_ADMIN_EMAILS is unset",
+    )
     return parser.parse_args(argv)
 
 
@@ -1930,7 +1932,7 @@ def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     root_dir = args.root.resolve()
     db_path = args.db.resolve() if args.db else (root_dir / "data" / "pyria.sqlite3")
-    srv = create_server(args.host, args.port, root_dir, db_path)
+    srv = create_server(args.host, args.port, root_dir, db_path, dev_mode=args.dev)
     actual_host, actual_port = srv.server_address[:2]
     print(
         f"Pyria server listening on http://{actual_host}:{actual_port} "
