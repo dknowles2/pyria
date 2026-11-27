@@ -976,28 +976,29 @@
         {
           "id": "trial-32-04-02",
           "trialType": "fix_bug",
-          "title": "Fix the try / except Colon!",
-          "storyPrompt": "Lord Null removed the colon `:` from `except ValueError`! Put `:` back so bad input is caught safely.",
-          "objective": "Add `:` after `except ValueError` so it prints `SAFE`.",
+          "title": "The Glitch Shield Won't Run! (and `pass`)",
+          "storyPrompt": "When you want an `except` block to safely ignore a bad value and do nothing, Python provides the `pass` keyword as a 'do nothing' placeholder! Right now Vortex's shield loop stops with a syntax error before it can skip the bad entry and print `10`.",
+          "objective": "Fix the broken `try / except` block so it skips invalid entries with `pass` and prints `10`.",
           "concepts": [
             "error_handling",
             "tuples",
-            "dictionaries_nested"
+            "dictionaries_nested",
+            "for_loops"
           ],
           "shardReward": 160,
           "unlockId": null,
-          "bugSummary": "Add `:` after `except ValueError` so it prints `SAFE`.",
+          "bugSummary": "Python stops with a syntax error before skipping the bad entry and printing `10`.",
           "starterCode": {
-            "explorer": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
-            "standard": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
-            "challenge": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n"
+            "explorer": "raw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError\n        pass\nprint(total)\n",
+            "standard": "raw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError\n        pass\nprint(total)\n",
+            "challenge": "# Challenge: find and fix the bug with no hints\nraw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError\n        pass\nprint(total)\n"
           },
-          "referenceSolution": "try:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")\n",
-          "testCode": "assert OUTPUT.strip() == \"SAFE\"",
+          "referenceSolution": "raw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError:\n        pass\nprint(total)\n",
+          "testCode": "assert total == sum(int(x) for x in raw if x.isdigit()) and OUTPUT.strip() == str(total)",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "try:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")",
-            "tier3_walkthrough": "Update to:\ntry:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")"
+            "tier1_nudge": "Check the punctuation at the end of every block header (`for`, `try`, `except`).",
+            "tier2_pattern": "try:\n    total += int(s)\nexcept ValueError___\n    pass",
+            "tier3_walkthrough": "Add a colon `:` at the end of `except ValueError:` so `pass` safely skips `\"null\"` and prints `10`."
           },
           "difficultyOverride": null
         },

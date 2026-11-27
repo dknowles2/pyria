@@ -2876,26 +2876,25 @@
         {
           "id": "trial-16-10-04",
           "trialType": "code",
-          "title": "Loop Over Dict Keys & Values",
-          "storyPrompt": "Keep pushing deeper into Crystal Alembic! Use `for k, v in gems.items():` to sum all values of `gems = {\"ruby\": 4, \"opal\": 6}` into `total` and `print(total)`.",
-          "objective": "Use `for k, v in gems.items():` to sum all values of `gems = {\"ruby\": 4, \"opal\": 6}` into `total` and `print(total)`.",
+          "title": "Sum Dict Values with .values()",
+          "storyPrompt": "A dictionary's `.values()` gives you all its numbers at once — perfect for `sum(...)` or looping! Let's sum every gem's energy in the alembic.",
+          "objective": "Use `.values()` on `gems` to sum all crystal values into `total`, then print `total`.",
           "concepts": [
-            "dictionaries",
-            "for_loops"
+            "dictionaries"
           ],
           "shardReward": 120,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = 0\nfor k, v in gems.items():\n    total = total + v\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = sum(gems.___())\nprint(total)\n",
+            "standard": "gems = {\"ruby\": 4, \"opal\": 6}\n# Sum all values in gems using .values()\n",
+            "challenge": "gems = {\"ruby\": 4, \"opal\": 6}\n"
           },
-          "referenceSolution": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = 0\nfor k, v in gems.items():\n    total = total + v\nprint(total)\n",
-          "testCode": "assert total == 10 and OUTPUT.strip() == \"10\"",
+          "referenceSolution": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = sum(gems.values())\nprint(total)\n",
+          "testCode": "assert total == sum(gems.values()) and OUTPUT.strip() == str(sum(gems.values()))",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "gems = {\"ruby\": 4, \"opal\": 6}\ntotal = 0\nfor k, v in gems.items():\n    total = total + v\nprint(total)",
-            "tier3_walkthrough": "Write:\ngems = {\"ruby\": 4, \"opal\": 6}\ntotal = 0\nfor k, v in gems.items():\n    total = total + v\nprint(total)"
+            "tier1_nudge": "Calling `gems.values()` gives the numbers in the dictionary so `sum(...)` can add them.",
+            "tier2_pattern": "total = sum(___.values())\nprint(total)",
+            "tier3_walkthrough": "Write `total = sum(gems.values())` and then `print(total)`."
           },
           "difficultyOverride": null
         },
@@ -3507,7 +3506,7 @@
             "standard": "",
             "challenge": ""
           },
-          "referenceSolution": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c))\n",
+          "referenceSolution": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c.keys()))\n",
           "testCode": "assert c == {\"x\": 1, \"y\": 2} and OUTPUT.strip() == \"2\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",

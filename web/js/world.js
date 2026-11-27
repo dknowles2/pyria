@@ -320,6 +320,28 @@ export class WorldEngine {
     }
   }
 
+  getCompletedSet() {
+    return new Set([
+      ...(this.save?.solvedTrials || []),
+      ...(this.save?.completedTrials || []),
+    ]);
+  }
+
+  /**
+   * Returns true if a secret bonus rune is still sealed (core realm trials / boss not yet cleared).
+   */
+  isBonusTrialLocked(ent, completed = null) {
+    if (!ent || ent.type !== 'bonus_trial') return false;
+    const solved = completed || this.getCompletedSet();
+    if (ent.refId && solved.has(ent.refId)) return false;
+    if (ent.requiredTrialId && !solved.has(ent.requiredTrialId)) return true;
+    const coreTrials = (this.map?.entities || []).filter((e) => e.type === 'trial' && e.refId);
+    if (coreTrials.length > 0 && coreTrials.some((e) => !solved.has(e.refId))) {
+      return true;
+    }
+    return false;
+  }
+
   setVirtualVector(dx, dy) {
     const mag = Math.hypot(dx || 0, dy || 0);
     if (mag < 0.01) {
@@ -1540,6 +1562,21 @@ export class WorldEngine {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('✓', cx, cy + 1);
+        ctx.textBaseline = 'alphabetic';
+      } else if (ent.type === 'bonus_trial' && this.isBonusTrialLocked(ent, completed)) {
+        // Sealed secret bonus rune (unlocked after defeating the realm boss / core trials)
+        ctx.fillStyle = 'rgba(100, 116, 139, 0.34)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🔒', cx, cy + 0.5);
         ctx.textBaseline = 'alphabetic';
       } else {
         // Subtle mysterious violet/gold sparkle rewarding sharp-eyed explorers

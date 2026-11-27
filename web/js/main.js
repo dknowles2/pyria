@@ -461,6 +461,38 @@ function getSecretsStats(save) {
   };
 }
 
+function getBonusLockInfo(entity, save, realm) {
+  if (!entity || entity.type !== 'bonus_trial') {
+    return { locked: false, reason: null };
+  }
+  const completed = getSolvedTrialsSet(save);
+  if (entity.refId && completed.has(entity.refId)) {
+    return { locked: false, reason: null };
+  }
+  if (entity.requiredTrialId && !completed.has(entity.requiredTrialId)) {
+    return {
+      locked: true,
+      reason: 'Complete the earlier Realm Trials first to unseal this secret rune!',
+    };
+  }
+  const activeRealm = realm || state.activeRealm;
+  const coreTrials = (activeRealm?.trials || []).filter((t) => !t.isBonus);
+  const bossTrialId = activeRealm?.cutscenes?.bossTrialId || coreTrials[coreTrials.length - 1]?.id;
+  const bossTrial = coreTrials.find((t) => t.id === bossTrialId);
+  const unsolvedCore = coreTrials.filter((t) => !completed.has(t.id));
+
+  if ((bossTrialId && !completed.has(bossTrialId)) || unsolvedCore.length > 0) {
+    const bossLabel = bossTrial ? `"${bossTrial.title}"` : 'the Realm Boss';
+    const remaining = unsolvedCore.length;
+    const reason =
+      remaining > 1
+        ? `Defeat ${bossLabel} (${remaining} Realm Trials left) to unseal this secret rune!`
+        : `Defeat ${bossLabel} first to unseal this secret rune!`;
+    return { locked: true, reason };
+  }
+  return { locked: false, reason: null };
+}
+
 function updateInteractPrompt(entity) {
   const prompt = $('#interact-prompt');
   const label = $('#interact-prompt-label');
@@ -480,6 +512,15 @@ function updateInteractPrompt(entity) {
     if (touchLabel) touchLabel.textContent = 'Done';
     prompt.classList.remove('hidden');
     return;
+  }
+  if (entity.type === 'bonus_trial') {
+    const lockInfo = getBonusLockInfo(entity, state.activeSave, state.activeRealm);
+    if (lockInfo.locked) {
+      label.textContent = `🔒 ${entity.label} (Beat Realm Boss to unlock)`;
+      if (touchLabel) touchLabel.textContent = 'Locked';
+      prompt.classList.remove('hidden');
+      return;
+    }
   }
   let verb = 'Inspect';
   let shortLabel = 'Act';
@@ -1601,6 +1642,14 @@ async function handleEntityInteractInner(entity) {
   }
 
   if (entity.type === 'trial' || entity.type === 'bonus_trial') {
+    if (entity.type === 'bonus_trial') {
+      const lockInfo = getBonusLockInfo(entity, save, state.activeRealm);
+      if (lockInfo.locked) {
+        audio.playError();
+        showToast(`🔒 Pip: ${lockInfo.reason}`);
+        return;
+      }
+    }
     if (entity.requiredTrialId && !completed.has(entity.requiredTrialId)) {
       audio.playError();
       showToast('Solve the earlier Trial first to unlock this path!');
