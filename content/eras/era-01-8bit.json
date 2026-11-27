@@ -974,7 +974,36 @@
                 "alarm_on": false
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Comparison Operators (>, <, ==)",
+            "prompt": "Inside an `if` statement, Python compares two values using a **comparison operator** and gets back a Boolean (`True` or `False`): `>` means **greater than**, `<` means **less than**, and `==` means **equals**!",
+            "question": "If `heat = 80`, which comparison is `True`?",
+            "codeSnippet": "heat = 80",
+            "choices": [
+              {
+                "id": "a",
+                "label": "heat < 50",
+                "explanation": "`<` means **less than** — is `80` less than `50`? No, that's `False`!"
+              },
+              {
+                "id": "b",
+                "label": "heat == 50",
+                "explanation": "`==` means **equals** — does `80` equal `50`? No, that's `False`!"
+              },
+              {
+                "id": "c",
+                "label": "heat > 50",
+                "explanation": "Spot on! `>` means **greater than**, and since `80` is greater than `50`, `heat > 50` is `True`!"
+              },
+              {
+                "id": "d",
+                "label": "heat < 80",
+                "explanation": "`80` is equal to `80`, NOT strictly less than `80` (`<`), so `heat < 80` is `False`!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-03-03",
@@ -1137,7 +1166,36 @@
               "expectOutput": "",
               "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(seal, str) and seal.strip().upper() == 'INTACT'\n"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Adding an else: Backup Path",
+            "prompt": "What if an `if` condition is `False`? Adding `else:` gives Python a backup block that runs ONLY when the `if` condition was `False`!",
+            "question": "What does Python shout when `power = 40`?",
+            "codeSnippet": "power = 40\nif power > 50:\n    shout(\"OPEN\")\nelse:\n    shout(\"LOCKED\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "OPEN",
+                "explanation": "Check the condition: is `40 > 50`? No, that's `False`, so Python skips the `if` block!"
+              },
+              {
+                "id": "b",
+                "label": "LOCKED",
+                "explanation": "Yes! Because `40 > 50` is `False`, Python jumps straight to the `else:` block and shouts `LOCKED`!"
+              },
+              {
+                "id": "c",
+                "label": "Both OPEN and LOCKED",
+                "explanation": "In an `if / else`, Python ALWAYS picks just ONE branch — never both!"
+              },
+              {
+                "id": "d",
+                "label": "Nothing",
+                "explanation": "Because there's an `else:` backup path, it runs whenever the `if` is `False`!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-03-06",
@@ -1181,36 +1239,7 @@
               "expectOutput": "",
               "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(gate_status, str) and gate_status.strip().upper() == 'LOCKED'\n"
             }
-          ],
-          "introChoice": {
-            "title": "Adding an else: Backup Path",
-            "prompt": "What if an `if` condition is `False`? Adding `else:` gives Python a backup block that runs ONLY when the `if` condition was `False`!",
-            "question": "What does Python print when `power = 40`?",
-            "codeSnippet": "power = 40\nif power > 50:\n    shout(\"OPEN\")\nelse:\n    shout(\"LOCKED\")",
-            "choices": [
-              {
-                "id": "a",
-                "label": "LOCKED",
-                "explanation": "Yes! Because `40 > 50` is `False`, Python jumps straight to the `else:` block and shouts `LOCKED`!"
-              },
-              {
-                "id": "b",
-                "label": "OPEN",
-                "explanation": "Check the condition: is `40 > 50`? No, that's `False`, so Python skips the `if` block!"
-              },
-              {
-                "id": "c",
-                "label": "Both OPEN and LOCKED",
-                "explanation": "In an `if / else`, Python ALWAYS picks just ONE branch — never both!"
-              },
-              {
-                "id": "d",
-                "label": "Nothing",
-                "explanation": "Because there's an `else:` backup path, it runs whenever the `if` is `False`!"
-              }
-            ],
-            "correctChoiceId": "a"
-          }
+          ]
         },
         {
           "id": "trial-03-bonus",
