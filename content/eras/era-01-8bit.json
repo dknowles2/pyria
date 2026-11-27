@@ -782,7 +782,7 @@
         {
           "id": "trial-03-06",
           "title": "Unchain Emberwing (Conditionals Capstone)",
-          "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds `ember_power = 75`, and the lock has `lock_power = 60`. Use an `if / else` check to compare the two boxes and set Emberwing free!",
+          "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds `ember_power = 75`, and the lock has `lock_power = 60`. New superpower: adding `else:` gives Python a backup plan that runs whenever the `if` check is False! Use `if / else` to compare the two boxes and set Emberwing free!",
           "objective": "Given ember_power = 75 and lock_power = 60, write an if / else: if ember_power > lock_power, set gate_status = \"OPEN\" and shout(\"Emberwing is free!\"); else, set gate_status = \"LOCKED\".",
           "concepts": [
             "variables",
