@@ -31,7 +31,7 @@
     {
       "binding": "DB",
       "database_name": "pyria-db",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "87992442-0ecc-4ae7-8c5c-ab6e466efdcf",
       "migrations_dir": "migrations"
     }
   ],
