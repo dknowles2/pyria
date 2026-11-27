@@ -499,7 +499,7 @@ def _pyria_run_workshop(payload_json):
       `
 let pyodide = null;
 let initPromise = null;
-let harnessesLoaded = false;
+let harnessesPromise = null;
 
 async function ensurePyodide() {
   if (pyodide) return pyodide;
@@ -523,12 +523,18 @@ async function ensurePyodide() {
 }
 
 async function loadHarnesses(py) {
-  if (harnessesLoaded) return;
-  await py.runPythonAsync(SANDBOX_GUARD_PY);
-  await py.runPythonAsync(TRIAL_HARNESS_PY);
-  await py.runPythonAsync(CHARCREATE_HARNESS_PY);
-  await py.runPythonAsync(WORKSHOP_HARNESS_PY);
-  harnessesLoaded = true;
+  if (!harnessesPromise) {
+    harnessesPromise = (async () => {
+      await py.runPythonAsync(SANDBOX_GUARD_PY);
+      await py.runPythonAsync(TRIAL_HARNESS_PY);
+      await py.runPythonAsync(CHARCREATE_HARNESS_PY);
+      await py.runPythonAsync(WORKSHOP_HARNESS_PY);
+    })().catch((err) => {
+      harnessesPromise = null;
+      throw err;
+    });
+  }
+  return harnessesPromise;
 }
 
 ensurePyodide().catch(() => {});
@@ -606,85 +612,15 @@ self.onmessage = async (event) => {
     }
   }
 
-  // Fallback in case a restricted WebView disallows blob: Workers inside sandboxed iframes.
-  let directPyodide = null;
-  let directInitPromise = null;
-  let directHarnessesLoaded = false;
-
-  async function ensureDirectPyodide() {
-    if (directPyodide) return directPyodide;
-    if (!directInitPromise) {
-      directInitPromise = (async () => {
-        if (typeof window.loadPyodide !== 'function') {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = PYODIDE_URL;
-            s.onload = () => resolve();
-            s.onerror = () => reject(new Error('Failed to load Pyodide script'));
-            document.head.appendChild(s);
-          });
-        }
-        const instance = await window.loadPyodide({ indexURL: PYODIDE_INDEX });
-        directPyodide = instance;
-        sendToParent({ type: 'ready' });
-        return instance;
-      })().catch((err) => {
-        directInitPromise = null;
-        sendToParent({
-          type: 'init_error',
-          error: err && err.message ? err.message : String(err),
-        });
-        throw err;
-      });
-    }
-    return directInitPromise;
-  }
-
-  async function runDirectly(msg) {
-    try {
-      const py = await ensureDirectPyodide();
-      if (!directHarnessesLoaded) {
-        await py.runPythonAsync(SANDBOX_GUARD_PY);
-        await py.runPythonAsync(TRIAL_HARNESS_PY);
-        await py.runPythonAsync(CHARCREATE_HARNESS_PY);
-        await py.runPythonAsync(WORKSHOP_HARNESS_PY);
-        directHarnessesLoaded = true;
-      }
-      const payloadJson = JSON.stringify(msg.payload || {});
-      py.globals.set('_pyria_payload_json', payloadJson);
-
-      let fnName = '_pyria_run_trial';
-      if (msg.mode === 'charcreate') fnName = '_pyria_run_charcreate';
-      else if (msg.mode === 'workshop') fnName = '_pyria_run_workshop';
-
-      let resultJson;
-      py.runPython('_pyria_enter_sandbox()');
+  function terminateWorker() {
+    revokeBlobUrl();
+    if (worker) {
       try {
-        resultJson = py.runPython(fnName + '(_pyria_payload_json)');
-      } finally {
-        py.runPython('_pyria_exit_sandbox()');
-        py.globals.delete('_pyria_payload_json');
+        worker.terminate();
+      } catch {
+        // ignore
       }
-
-      sendToParent({
-        type: 'result',
-        id: msg.id,
-        result: JSON.parse(resultJson),
-      });
-    } catch (err) {
-      sendToParent({
-        type: 'result',
-        id: msg.id,
-        result: {
-          passed: false,
-          stdout: '',
-          stderr: '',
-          errorType: 'RuntimeError',
-          errorMessage: err && err.message ? err.message : String(err),
-          errorLine: null,
-          rawTraceback: String(err),
-        },
-      });
+      worker = null;
     }
   }
 
@@ -702,20 +638,25 @@ self.onmessage = async (event) => {
         }
       };
       w.onerror = (err) => {
-        revokeBlobUrl();
+        terminateWorker();
         sendToParent({
           type: 'init_error',
           error: (err && err.message) || 'Sandbox worker failed',
         });
       };
       worker = w;
-    } catch {
-      revokeBlobUrl();
-      worker = null;
-      ensureDirectPyodide().catch(() => {});
+    } catch (err) {
+      // Fail closed: never run untrusted Python on the iframe's window thread,
+      // where an infinite loop could freeze the parent page's event loop.
+      terminateWorker();
+      sendToParent({
+        type: 'init_error',
+        error: (err && err.message) || 'Sandbox Web Worker is unavailable in this browser',
+      });
     }
   }
 
+  window.addEventListener('pagehide', terminateWorker);
   startRuntime();
 
   function onInitMessage(event) {
@@ -729,16 +670,33 @@ self.onmessage = async (event) => {
 
     port.onmessage = (portEvent) => {
       const msg = portEvent.data;
-      if (!msg || msg.type !== 'run' || typeof msg.id !== 'number') return;
-      if (worker) {
-        worker.postMessage({
-          id: msg.id,
-          mode: msg.mode,
-          payload: msg.payload,
-        });
-      } else {
-        runDirectly(msg);
+      if (!msg || typeof msg !== 'object') return;
+      if (msg.type === 'terminate') {
+        terminateWorker();
+        return;
       }
+      if (msg.type !== 'run' || typeof msg.id !== 'number') return;
+      if (!worker) {
+        sendToParent({
+          type: 'result',
+          id: msg.id,
+          result: {
+            passed: false,
+            stdout: '',
+            stderr: '',
+            errorType: 'SandboxError',
+            errorMessage: 'Sandbox Web Worker is unavailable',
+            errorLine: null,
+            rawTraceback: null,
+          },
+        });
+        return;
+      }
+      worker.postMessage({
+        id: msg.id,
+        mode: msg.mode,
+        payload: msg.payload,
+      });
     };
 
     while (pendingOutbox.length > 0) {

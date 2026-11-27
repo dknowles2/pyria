@@ -1307,10 +1307,13 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         is_asset_preview = (
             decoded.startswith("/assets/") and target.name == "preview.html"
         )
-        is_py_sandbox = (
-            base_dir == self.server.web_dir
-            and target.relative_to(self.server.web_dir).parts == ("py-sandbox.html",)
-        )
+        is_py_sandbox = False
+        if base_dir == self.server.web_dir:
+            web_rel_parts = target.relative_to(self.server.web_dir).parts
+            is_py_sandbox = (
+                len(web_rel_parts) == 1
+                and web_rel_parts[0].lower() == "py-sandbox.html"
+            )
         csp_override = build_py_sandbox_csp(data) if is_py_sandbox else None
         self._send_security_headers(
             allow_inline_script=is_asset_preview,

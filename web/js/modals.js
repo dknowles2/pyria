@@ -2,7 +2,7 @@
 
 import { audio } from './audio.js?v=20261127i';
 import { music } from './music.js?v=20261127i';
-import { pyRunner } from './pyRunner.js?v=20261127i';
+import { pyRunner } from './pyRunner.js?v=20261127j';
 import {
   attachAutocomplete,
   buildTrialSuggestions,

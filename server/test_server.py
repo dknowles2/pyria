@@ -879,8 +879,14 @@ class PyriaServerTestCase(unittest.TestCase):
             "/py-sandbox.html?v=test",
             "/./py-sandbox.html",
             "//py-sandbox.html",
+            "/PY-SANDBOX.HTML",
+            "/Py-Sandbox.html",
         ):
             status, headers, raw = self._request("GET", sandbox_path)
+            if status == 404 and sandbox_path in ("/PY-SANDBOX.HTML", "/Py-Sandbox.html"):
+                # On case-sensitive filesystems (Linux), uppercase paths 404 cleanly;
+                # on case-insensitive filesystems (macOS APFS), they must still get sandbox CSP.
+                continue
             self.assertEqual(status, 200, f"Expected 200 for {sandbox_path}")
             self.assertIn("text/html", headers.get("content-type", ""))
             self.assertEqual(headers.get("x-frame-options"), "SAMEORIGIN")
