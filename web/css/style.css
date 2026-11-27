@@ -697,6 +697,7 @@ textarea, input, pre, code {
 .code-editor-shell {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   border: 2px solid var(--accent-sky);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -1564,6 +1565,10 @@ textarea, input, pre, code {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.modal-card > * {
+  flex-shrink: 0;
 }
 
 .modal-card.modal-wide {
