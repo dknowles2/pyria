@@ -1,3 +1,4 @@
+import { handleAdminTrialMetrics } from './analytics';
 import {
   handleGetMe,
   handleGoogleCallback,
@@ -154,6 +155,11 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   // GET /api/config
   if ((method === 'GET' || method === 'HEAD') && pathname === '/api/config') {
     return handleApiConfig(request, env, auth);
+  }
+
+  // Admin-only Trial Calibration Metrics API
+  if ((method === 'GET' || method === 'HEAD') && pathname === '/api/admin/trial-metrics') {
+    return handleAdminTrialMetrics(request, env, auth, url);
   }
 
   // Parent & Admin Console API (/api/console/*)

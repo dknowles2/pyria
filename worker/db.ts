@@ -1,6 +1,7 @@
 import type {
   ActivityEventRecord,
   AttemptRecord,
+  DifficultyMode,
   EnrichedSaveRecord,
   Env,
   SaveDbRow,
@@ -592,6 +593,10 @@ export class PyriaD1 {
     passed: boolean;
     hintsUsed: number;
     code: string;
+    difficultyMode?: DifficultyMode;
+    isPractice?: boolean;
+    errorType?: string | null;
+    durationMs?: number | null;
   }): Promise<number | null> {
     const row = await this.db
       .prepare('SELECT hero_name, state_json FROM saves WHERE id = ?')
@@ -600,13 +605,37 @@ export class PyriaD1 {
     if (!row) return null;
 
     const now = utcNowIso();
+    const day = now.slice(0, 10);
     const st = safeParseObject(row.state_json);
     const realmId = typeof st.realmId === 'string' && st.realmId ? st.realmId : null;
+    const difficultyMode: DifficultyMode = params.difficultyMode ?? 'standard';
+    const isPractice = Boolean(params.isPractice);
+    const errorType = params.passed ? null : (params.errorType ?? null);
+    const durationMs = params.durationMs ?? null;
+
+    let firstTryInc = 0;
+    let uniqueSolverInc = 0;
+    if (!isPractice && params.passed) {
+      const prior = await this.db
+        .prepare(
+          `SELECT COUNT(*) AS prior_attempts,
+                  SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS prior_passes
+           FROM trial_attempts
+           WHERE save_id = ? AND trial_id = ? AND COALESCE(is_practice, 0) = 0`
+        )
+        .bind(params.saveId, params.trialId)
+        .first<{ prior_attempts: number; prior_passes: number | null }>();
+      const priorAttempts = Number(prior?.prior_attempts ?? 0);
+      const priorPasses = Number(prior?.prior_passes ?? 0);
+      if (priorAttempts === 0) firstTryInc = 1;
+      if (priorPasses === 0) uniqueSolverInc = 1;
+    }
 
     const insertRes = await this.db
       .prepare(
-        `INSERT INTO trial_attempts (save_id, trial_id, passed, hints_used, code, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
+        `INSERT INTO trial_attempts
+         (save_id, trial_id, passed, hints_used, code, difficulty_mode, is_practice, error_type, duration_ms, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         params.saveId,
@@ -614,15 +643,49 @@ export class PyriaD1 {
         params.passed ? 1 : 0,
         params.hintsUsed,
         params.code,
+        difficultyMode,
+        isPractice ? 1 : 0,
+        errorType,
+        durationMs,
         now
       )
       .run();
 
     const attemptId = Number(insertRes.meta.last_row_id ?? 0);
 
+    // Durable daily rollup for non-practice attempts (survives trial_attempts pruning)
+    const batchStmts: D1PreparedStatement[] = [];
+    if (!isPractice) {
+      batchStmts.push(
+        this.db
+          .prepare(
+            `INSERT INTO trial_stats_daily
+             (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_solvers, total_hints, tier3_hints, parent_overrides)
+             VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, 0)
+             ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET
+               attempts = attempts + excluded.attempts,
+               passes = passes + excluded.passes,
+               first_try_passes = first_try_passes + excluded.first_try_passes,
+               unique_solvers = unique_solvers + excluded.unique_solvers,
+               total_hints = total_hints + excluded.total_hints,
+               tier3_hints = tier3_hints + excluded.tier3_hints`
+          )
+          .bind(
+            day,
+            params.trialId,
+            difficultyMode,
+            params.passed ? 1 : 0,
+            firstTryInc,
+            uniqueSolverInc,
+            params.hintsUsed,
+            params.hintsUsed >= 3 ? 1 : 0
+          )
+      );
+    }
+
     // Blank code blobs past maxAttemptCodeRows while preserving aggregate stats,
     // and enforce hard row cap maxAttemptsPerSave.
-    await this.db.batch([
+    batchStmts.push(
       this.db
         .prepare(
           `UPDATE trial_attempts SET code = ''
@@ -638,8 +701,10 @@ export class PyriaD1 {
              SELECT id FROM trial_attempts WHERE save_id = ? ORDER BY id DESC LIMIT ?
            )`
         )
-        .bind(params.saveId, params.saveId, this.maxAttemptsPerSave),
-    ]);
+        .bind(params.saveId, params.saveId, this.maxAttemptsPerSave)
+    );
+
+    await this.db.batch(batchStmts);
 
     await this.insertEvent({
       saveId: params.saveId,
@@ -655,6 +720,10 @@ export class PyriaD1 {
         passed: params.passed,
         hintsUsed: params.hintsUsed,
         code: params.code,
+        difficultyMode,
+        isPractice,
+        errorType,
+        durationMs,
         attemptId,
       },
       createdAt: now,
@@ -672,7 +741,10 @@ export class PyriaD1 {
 
     const { results } = await this.db
       .prepare(
-        `SELECT id, save_id, trial_id, passed, hints_used, code, created_at
+        `SELECT id, save_id, trial_id, passed, hints_used, code,
+                COALESCE(difficulty_mode, 'standard') AS difficulty_mode,
+                COALESCE(is_practice, 0) AS is_practice,
+                error_type, duration_ms, created_at
          FROM trial_attempts WHERE save_id = ?
          ORDER BY created_at DESC, id DESC`
       )
@@ -684,6 +756,10 @@ export class PyriaD1 {
         passed: number;
         hints_used: number;
         code: string;
+        difficulty_mode: string;
+        is_practice: number;
+        error_type: string | null;
+        duration_ms: number | null;
         created_at: string;
       }>();
 
@@ -694,6 +770,13 @@ export class PyriaD1 {
       passed: Boolean(r.passed),
       hintsUsed: Number(r.hints_used),
       code: r.code,
+      difficultyMode:
+        r.difficulty_mode === 'explorer' || r.difficulty_mode === 'challenge'
+          ? r.difficulty_mode
+          : 'standard',
+      isPractice: Boolean(r.is_practice),
+      errorType: r.error_type ?? null,
+      durationMs: r.duration_ms !== null && r.duration_ms !== undefined ? Number(r.duration_ms) : null,
       createdAt: r.created_at,
     }));
   }
@@ -929,9 +1012,10 @@ export class PyriaD1 {
 
     let shardsDelta = 0;
     let summary: string;
+    const wasAlreadySolved = seen.has(params.trialId);
 
     if (params.solved) {
-      if (!seen.has(params.trialId)) {
+      if (!wasAlreadySolved) {
         orderedSolved.push(params.trialId);
         if (params.awardShards && params.shardReward > 0) {
           shardsDelta = Math.trunc(params.shardReward);
@@ -967,6 +1051,23 @@ export class PyriaD1 {
       .prepare('UPDATE saves SET state_json = ?, updated_at = ? WHERE id = ?')
       .bind(JSON.stringify(stateToStore), now, params.saveId)
       .run();
+
+    // Increment durable parent_overrides rollup when marking a previously unsolved trial solved
+    if (params.solved && !wasAlreadySolved) {
+      const prefs = parsePreferencesJson(row.preferences_json);
+      const overrideDifficulty: DifficultyMode = prefs.difficulty ?? 'standard';
+      const day = now.slice(0, 10);
+      await this.db
+        .prepare(
+          `INSERT INTO trial_stats_daily
+           (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_solvers, total_hints, tier3_hints, parent_overrides)
+           VALUES (?, ?, ?, 0, 0, 0, 0, 0, 0, 1)
+           ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET
+             parent_overrides = parent_overrides + 1`
+        )
+        .bind(day, params.trialId, overrideDifficulty)
+        .run();
+    }
 
     const realmId = typeof state.realmId === 'string' && state.realmId ? state.realmId : null;
     await this.insertEvent({

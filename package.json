@@ -9,6 +9,7 @@
     "deploy": "npm run build:assets && wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "calibration-report": "python3 scripts/calibration_report.py",
     "db:migrate:local": "wrangler d1 migrations apply pyria-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply pyria-db --remote"
   },
