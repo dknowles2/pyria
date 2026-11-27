@@ -65,8 +65,8 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
         pipMessage = `Oops${linePart}! It looks like a quote mark (" or ') was opened but never closed. Wrap your text in matching quotes!`;
       } else if (msg.includes('was never closed') || msg.includes('EOF')) {
         pipMessage = `Almost there${linePart}! Check if you left an opening parenthesis '(' without its matching ')'!`;
-      } else if (msg.includes('expected \':\'')) {
-        pipMessage = `Chirp${linePart}! Remember that 'if', 'elif', 'else', and 'for' lines need a colon ':' at the very end!`;
+      } else if (msg.includes("expected ':'")) {
+        pipMessage = `Chirp${linePart}! Remember that 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', and 'with' lines need a colon ':' at the very end!`;
       } else {
         pipMessage = `Python got a tiny bit confused by the spelling or punctuation${linePart}. Double-check quotes, parentheses (), and colons ':'! (${msg})`;
       }
@@ -75,18 +75,20 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
     case 'IndentationError':
     case 'TabError':
       if (msg.includes('expected an indented block')) {
-        pipMessage = `Watch your spacing${linePart}! After a colon ':', the lines inside MUST be pushed over by 4 spaces — put your cursor at the start of that line and tap '⇥ Indent' (or 4 spaces)!`;
+        pipMessage = `Watch your spacing${linePart}! After a colon ':' (like 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', or 'with'), the lines inside MUST be pushed over by 4 spaces — put your cursor at the start of that line and tap '⇥ Indent' (or 4 spaces)!`;
       } else if (msg.includes('unexpected indent')) {
-        pipMessage = `Extra spaces spotted${linePart}! Normal lines (not inside an 'if' or 'for') need to start all the way at the left edge with 0 spaces.`;
+        pipMessage = `Extra spaces spotted${linePart}! Normal lines (not inside an 'if', 'for', 'while', 'def', 'class', 'try', or 'with' block) need to start all the way at the left edge with 0 spaces.`;
       } else {
-        pipMessage = `Watch your spacing${linePart}! Code inside an 'if', 'elif', 'else', or 'for' block needs to be indented 4 spaces (tap '⇥ Indent'), and normal lines start at the left edge.`;
+        pipMessage = `Watch your spacing${linePart}! Code inside an 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', or 'with' block needs to be indented 4 spaces (tap '⇥ Indent'), and normal lines start at the left edge.`;
       }
       break;
 
     case 'NameError': {
       const match = msg.match(/name '([^']+)' is not defined/);
       const varName = match ? match[1] : null;
-      if (varName) {
+      if (varName === 'self') {
+        pipMessage = `Hmm${linePart}, Python doesn't know 'self' here! Remember: 'self' only exists inside a class method, and it must be the first parameter in 'def method(self, ...):'.`;
+      } else if (varName) {
         pipMessage = `Hmm${linePart}, Python doesn't know what '${varName}' is yet! Did you spell it the same way, or forget quotes around text like "${varName}"?`;
       } else {
         pipMessage = `Python couldn't find one of your variable or function names${linePart}. Check your spelling and capitalization!`;
@@ -94,8 +96,29 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
       break;
     }
 
+    case 'AttributeError': {
+      const attrMatch = msg.match(/'([^']+)' object has no attribute '([^']+)'/);
+      if (attrMatch) {
+        const [, objType, attrName] = attrMatch;
+        if (objType === 'NoneType') {
+          pipMessage = `Oops${linePart}! That value is None (empty), so it doesn't have '.${attrName}'. Make sure your variable or function actually returned a value before calling '.${attrName}'!`;
+        } else {
+          pipMessage = `Pip checked your ${objType}${linePart}, and it doesn't have '.${attrName}'! Double-check the method or attribute spelling — and in a class, make sure you set 'self.${attrName}' inside '__init__' or spelled the method name right!`;
+        }
+      } else {
+        pipMessage = `Pip couldn't find that attribute or method${linePart}! Check your spelling after the dot '.' (and make sure class attributes use 'self.'). Detail: ${msg}`;
+      }
+      break;
+    }
+
     case 'TypeError':
-      pipMessage = `Mix-and-match alert${linePart}! You tried to combine two different kinds of things (like adding text and a number, or passing the wrong kind of argument). Detail: ${msg}`;
+      if (/missing \d+ required positional argument/.test(msg)) {
+        pipMessage = `Almost there${linePart}! You called a function without enough inputs inside '()'. Check how many parameters it expects! (${msg})`;
+      } else if (/takes .* positional argument/.test(msg)) {
+        pipMessage = `Whoa${linePart}! You passed a different number of inputs than the function expects inside '()' (if this is a class method, remember 'self' counts as the first parameter!). Detail: ${msg}`;
+      } else {
+        pipMessage = `Mix-and-match alert${linePart}! You tried to combine two different kinds of things (like adding text and a number, or passing the wrong kind of argument). Detail: ${msg}`;
+      }
       break;
 
     case 'ValueError':
