@@ -2528,6 +2528,15 @@ async function exportTrialCalibrationCsv() {
     const passcode = isLocal ? sessionStorage.getItem(PASSCODE_STORAGE_KEY) || '' : '';
     const headers = passcode ? { 'X-Builder-Passcode': passcode } : {};
     const res = await fetch(getCalibrationEndpoint('csv'), { cache: 'no-store', headers });
+    if (isLocal && (res.status === 401 || res.status === 403)) {
+      $('#passcode-bar')?.classList.remove('hidden');
+      throw new Error('Builder passcode required');
+    }
+    if (!isLocal && (res.status === 401 || res.status === 403)) {
+      setLivePolling(false);
+      showCloudflareSignInScreen();
+      throw new Error('Parent sign-in required');
+    }
     if (!res.ok) {
       let detail = `${res.status} ${res.statusText}`;
       try {
@@ -2652,10 +2661,12 @@ function wireEvents() {
     if (tab === 'calibration' && state.bootstrapped && canAccessCalibration() && !state.calLoading && !state.calLoadedOnce) {
       loadTrialCalibration();
     }
-    try {
-      localStorage.setItem('pyria_builder_tab', tab);
-    } catch {
-      // ignore storage errors
+    if (state.bootstrapped) {
+      try {
+        localStorage.setItem('pyria_builder_tab', tab);
+      } catch {
+        // ignore storage errors
+      }
     }
     if (updateUrl && window.location.hash !== `#${tab}`) {
       history.replaceState(null, '', `#${tab}`);
@@ -2709,7 +2720,11 @@ function wireEvents() {
     const val = $('#passcode-input').value.trim();
     sessionStorage.setItem(PASSCODE_STORAGE_KEY, val);
     try {
-      await Promise.all([loadProgressFull(), loadOverview()]);
+      const reloads = [loadProgressFull(), loadOverview()];
+      if ($('#tab-calibration')?.classList.contains('active') && canAccessCalibration()) {
+        reloads.push(loadTrialCalibration());
+      }
+      await Promise.all(reloads);
       showToast('Builder Console unlocked!');
     } catch (err) {
       showToast(err.message, true);

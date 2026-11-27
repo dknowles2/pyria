@@ -949,8 +949,9 @@ export class ModalManager {
         }
       });
 
+      let solvedInView = false;
       const runSpell = async () => {
-        if (runBtn.disabled) return;
+        if (runBtn.disabled || solvedInView) return;
         const code = codeEl.value;
         const nonEmptyLines = code.split('\n').map((l) => l.trim()).filter(Boolean);
         if (nonEmptyLines.length === 0 || nonEmptyLines.every((l) => l.startsWith('#'))) {
@@ -976,8 +977,12 @@ export class ModalManager {
         audio.playCodeRun();
 
         const result = await pyRunner.runTrial(code, trial.testCode, diff.showRawTracebacks);
-        runBtn.disabled = false;
-        runBtn.textContent = '▶ Run Python Spell';
+        if (!result.passed) {
+          runBtn.disabled = false;
+          runBtn.textContent = '▶ Run Python Spell';
+        } else {
+          solvedInView = true;
+        }
 
         const attemptIsPractice = Boolean(isPractice || alreadySolved || isTrialSolvedInSave());
         const difficultyMode = VALID_DIFFICULTY_MODES.has(currentMode) ? currentMode : 'standard';

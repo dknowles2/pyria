@@ -371,7 +371,8 @@ export async function logAttempt(
   const safeDifficulty = ALLOWED_DIFFICULTY_MODES.has(difficultyMode) ? difficultyMode : 'standard';
   const safeErrorType = normalizeAttemptErrorType(errorType, passedBool);
   const hasDuration =
-    durationMs !== null && durationMs !== undefined && Number.isFinite(Number(durationMs));
+    (typeof durationMs === 'number' && Number.isFinite(durationMs)) ||
+    (typeof durationMs === 'string' && durationMs.trim() !== '' && Number.isFinite(Number(durationMs)));
   const safeDurationMs = hasDuration
     ? Math.max(0, Math.min(MAX_DURATION_MS, Math.round(Number(durationMs))))
     : null;
