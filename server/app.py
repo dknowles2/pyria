@@ -52,12 +52,15 @@ HERO_NAME_MAX_LEN = 24
 MAX_TRIAL_ID_LEN = 128
 MAX_SAVE_STRING_LEN = 128
 MAX_SAVE_LIST_ITEMS = 1000
-MAX_TRIAL_DRAFTS = 200
+MAX_TRIAL_DRAFTS = 512
 MAX_APPEARANCE_KEYS = 32
+MAX_BYTE_SHARDS = 1_000_000_000
+MAX_DIFF_EVENTS_PER_UPDATE = 100
 
 DEFAULT_MAX_SAVES_PER_ACCOUNT = 10
 DEFAULT_MAX_TOTAL_SAVES = 100
-DEFAULT_MAX_ATTEMPTS_PER_SAVE = 500
+DEFAULT_MAX_ATTEMPT_CODE_ROWS = 500
+DEFAULT_MAX_ATTEMPTS_PER_SAVE = 5000
 DEFAULT_MAX_EVENTS_PER_SAVE = 500
 
 ALLOWED_SAVE_KEYS: frozenset[str] = frozenset(
@@ -319,17 +322,46 @@ def _env_positive_int(env_name: str, default: int) -> int:
 
 
 def _has_control_chars(value: str) -> bool:
-    return any(
-        ord(ch) < 0x20
-        or 0x7F <= ord(ch) <= 0x9F
-        or unicodedata.category(ch) in ("Cc", "Cf", "Cs")
-        for ch in value
-    )
+    for ch in value:
+        if ch == "\u200d":  # Allow ZWJ for multi-codepoint emoji sequences
+            continue
+        code = ord(ch)
+        if (
+            code < 0x20
+            or 0x7F <= code <= 0x9F
+            or unicodedata.category(ch) in ("Cc", "Cf", "Cs", "Zl", "Zp")
+        ):
+            return True
+    return False
 
 
-def validate_hero_name(raw: Any) -> str:
+def _has_surrogates_or_nul(value: str) -> bool:
+    return any(ch == "\x00" or 0xD800 <= ord(ch) <= 0xDFFF for ch in value)
+
+
+def _coerce_byte_shards(raw: Any, fallback: int = 0) -> int:
+    if isinstance(raw, bool):
+        return max(0, min(fallback, MAX_BYTE_SHARDS))
+    try:
+        return max(0, min(int(raw), MAX_BYTE_SHARDS))
+    except (TypeError, ValueError, OverflowError):
+        return max(0, min(fallback, MAX_BYTE_SHARDS))
+
+
+def _truncate_utf8_bytes(text: str, max_bytes: int) -> str:
+    raw = text.encode("utf-8")
+    if len(raw) <= max_bytes:
+        return text
+    return raw[:max_bytes].decode("utf-8", errors="ignore")
+
+
+def validate_hero_name(
+    raw: Any, *, allowed_legacy_name: str | None = None
+) -> str:
     if not isinstance(raw, str):
         raise SaveValidationError("heroName must be a string")
+    if allowed_legacy_name is not None and raw == allowed_legacy_name:
+        return raw
     if _has_control_chars(raw):
         raise SaveValidationError("heroName must not contain control characters")
     cleaned = raw.strip()
@@ -341,7 +373,11 @@ def validate_hero_name(raw: Any) -> str:
 
 
 def validate_save_payload(
-    payload: dict[str, Any], *, require_hero_name: bool
+    payload: dict[str, Any],
+    *,
+    require_hero_name: bool,
+    allowed_legacy_hero_name: str | None = None,
+    sanitize_drafts: bool = False,
 ) -> tuple[dict[str, Any], str | None]:
     unknown_keys = sorted(k for k in payload.keys() if k not in ALLOWED_SAVE_KEYS)
     if unknown_keys:
@@ -352,9 +388,13 @@ def validate_save_payload(
 
     hero_name: str | None = None
     if "heroName" in payload:
-        hero_name = validate_hero_name(payload["heroName"])
+        hero_name = validate_hero_name(
+            payload["heroName"], allowed_legacy_name=allowed_legacy_hero_name
+        )
     elif "hero_name" in payload:
-        hero_name = validate_hero_name(payload["hero_name"])
+        hero_name = validate_hero_name(
+            payload["hero_name"], allowed_legacy_name=allowed_legacy_hero_name
+        )
     elif require_hero_name:
         raise SaveValidationError("heroName is required")
 
@@ -420,6 +460,10 @@ def validate_save_payload(
                     if av is not None and not isinstance(av, (str, bool, int, float)):
                         raise SaveValidationError(
                             f"appearance.{ak} must be a scalar value or null"
+                        )
+                    if isinstance(av, float) and not math.isfinite(av):
+                        raise SaveValidationError(
+                            f"appearance.{ak} must be a finite number"
                         )
                     if isinstance(av, str) and (
                         len(av) > MAX_SAVE_STRING_LEN or _has_control_chars(av)
@@ -492,11 +536,15 @@ def validate_save_payload(
         if key == "trialDrafts":
             if val is not None:
                 if not isinstance(val, dict):
+                    if sanitize_drafts:
+                        sanitized[key] = {}
+                        continue
                     raise SaveValidationError("trialDrafts must be an object")
-                if len(val) > MAX_TRIAL_DRAFTS:
+                if not sanitize_drafts and len(val) > MAX_TRIAL_DRAFTS:
                     raise SaveValidationError(
                         f"trialDrafts exceeds maximum entry count ({MAX_TRIAL_DRAFTS})"
                     )
+                cleaned_drafts: dict[str, str] = {}
                 for dk, dv in val.items():
                     if (
                         not isinstance(dk, str)
@@ -504,17 +552,35 @@ def validate_save_payload(
                         or len(dk) > MAX_TRIAL_ID_LEN
                         or _has_control_chars(dk)
                     ):
+                        if sanitize_drafts:
+                            continue
                         raise SaveValidationError("Invalid trialDrafts key")
                     if not isinstance(dv, str):
+                        if sanitize_drafts:
+                            continue
                         raise SaveValidationError(
                             f"trialDrafts.{dk} must be a string"
                         )
-                    if len(dv.encode("utf-8")) > MAX_ATTEMPT_CODE_BYTES:
+                    if _has_surrogates_or_nul(dv):
                         raise SaveValidationError(
-                            f"trialDrafts.{dk} exceeds maximum length ({MAX_ATTEMPT_CODE_BYTES} bytes)",
-                            status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                            f"trialDrafts.{dk} must not contain NUL bytes or lone Unicode surrogates"
                         )
-            sanitized[key] = val
+                    if len(dv.encode("utf-8")) > MAX_ATTEMPT_CODE_BYTES:
+                        if sanitize_drafts:
+                            dv = _truncate_utf8_bytes(dv, MAX_ATTEMPT_CODE_BYTES)
+                        else:
+                            raise SaveValidationError(
+                                f"trialDrafts.{dk} exceeds maximum length ({MAX_ATTEMPT_CODE_BYTES} bytes)",
+                                status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                            )
+                    cleaned_drafts[dk] = dv
+                if sanitize_drafts and len(cleaned_drafts) > MAX_TRIAL_DRAFTS:
+                    # Keep the most recently inserted entries up to MAX_TRIAL_DRAFTS
+                    kept_keys = list(cleaned_drafts.keys())[-MAX_TRIAL_DRAFTS:]
+                    cleaned_drafts = {k: cleaned_drafts[k] for k in kept_keys}
+                sanitized[key] = cleaned_drafts
+            else:
+                sanitized[key] = val
             continue
 
         # byteShards is coerced safely in create_save/update_save
@@ -543,6 +609,7 @@ class PyriaDatabase:
         *,
         max_saves_per_account: int | None = None,
         max_total_saves: int | None = None,
+        max_attempt_code_rows: int | None = None,
         max_attempts_per_save: int | None = None,
         max_events_per_save: int | None = None,
     ) -> None:
@@ -561,6 +628,14 @@ class PyriaDatabase:
             max_total_saves
             if max_total_saves is not None
             else _env_positive_int("PYRIA_MAX_TOTAL_SAVES", DEFAULT_MAX_TOTAL_SAVES),
+        )
+        self.max_attempt_code_rows = max(
+            1,
+            max_attempt_code_rows
+            if max_attempt_code_rows is not None
+            else _env_positive_int(
+                "PYRIA_MAX_ATTEMPT_CODE_ROWS", DEFAULT_MAX_ATTEMPT_CODE_ROWS
+            ),
         )
         self.max_attempts_per_save = max(
             1,
@@ -687,6 +762,15 @@ class PyriaDatabase:
             "createdAt": row["created_at"],
         }
 
+    def _prune_events(self, conn: sqlite3.Connection, save_id: str) -> None:
+        conn.execute(
+            "DELETE FROM activity_events "
+            "WHERE save_id = ? AND id NOT IN ("
+            "SELECT id FROM activity_events WHERE save_id = ? ORDER BY id DESC LIMIT ?"
+            ")",
+            (save_id, save_id, self.max_events_per_save),
+        )
+
     def _insert_event(
         self,
         conn: sqlite3.Connection,
@@ -698,6 +782,7 @@ class PyriaDatabase:
         realm_id: str | None = None,
         trial_id: str | None = None,
         created_at: str | None = None,
+        prune: bool = True,
     ) -> int:
         ts = created_at or utc_now_iso()
         cur = conn.execute(
@@ -716,13 +801,8 @@ class PyriaDatabase:
             ),
         )
         event_id = int(cur.lastrowid)
-        conn.execute(
-            "DELETE FROM activity_events "
-            "WHERE save_id = ? AND id NOT IN ("
-            "SELECT id FROM activity_events WHERE save_id = ? ORDER BY id DESC LIMIT ?"
-            ")",
-            (save_id, save_id, self.max_events_per_save),
-        )
+        if prune:
+            self._prune_events(conn, save_id)
         return event_id
 
     def count_saves(self) -> int:
@@ -799,10 +879,7 @@ class PyriaDatabase:
             "updatedAt": now,
         }
         if "byteShards" in state:
-            try:
-                state["byteShards"] = max(0, int(state["byteShards"]))
-            except (TypeError, ValueError, OverflowError):
-                state["byteShards"] = 0
+            state["byteShards"] = _coerce_byte_shards(state["byteShards"], 0)
         state_json = json.dumps(state, ensure_ascii=False, allow_nan=False)
         if len(state_json.encode("utf-8")) > MAX_SAVE_STATE_BYTES:
             raise SaveValidationError(
@@ -881,9 +958,6 @@ class PyriaDatabase:
     def update_save(
         self, save_id: str, payload: dict[str, Any]
     ) -> dict[str, Any] | None:
-        sanitized, validated_name = validate_save_payload(
-            payload, require_hero_name=False
-        )
         with self._lock, self._connect() as conn:
             existing = conn.execute(
                 "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
@@ -892,6 +966,14 @@ class PyriaDatabase:
             ).fetchone()
             if existing is None:
                 return None
+
+            existing_hero_name = str(existing["hero_name"])
+            sanitized, validated_name = validate_save_payload(
+                payload,
+                require_hero_name=False,
+                allowed_legacy_hero_name=existing_hero_name,
+                sanitize_drafts=True,
+            )
 
             try:
                 prev_state = json.loads(existing["state_json"])
@@ -903,7 +985,7 @@ class PyriaDatabase:
             hero_name = (
                 validated_name
                 if validated_name is not None
-                else str(existing["hero_name"])
+                else existing_hero_name
             )
             now = utc_now_iso()
             state = {
@@ -915,10 +997,10 @@ class PyriaDatabase:
                 "updatedAt": now,
             }
             if "byteShards" in state:
-                try:
-                    state["byteShards"] = max(0, int(state["byteShards"]))
-                except (TypeError, ValueError, OverflowError):
-                    state["byteShards"] = int(prev_state.get("byteShards") or 0)
+                prev_shards = _coerce_byte_shards(prev_state.get("byteShards"), 0)
+                state["byteShards"] = _coerce_byte_shards(
+                    state["byteShards"], prev_shards
+                )
             state_json = json.dumps(state, ensure_ascii=False, allow_nan=False)
             if len(state_json.encode("utf-8")) > MAX_SAVE_STATE_BYTES:
                 raise SaveValidationError(
@@ -931,22 +1013,38 @@ class PyriaDatabase:
                 (hero_name, state_json, now, save_id),
             )
 
-            # Diff previous vs new state to emit live activity events
+            # Diff previous vs new state to emit live activity events (bounded per PUT, pruned once)
             cur_realm = str(state.get("realmId") or prev_state.get("realmId") or "") or None
             prev_realm = str(prev_state.get("realmId") or "") or None
+            max_diff_events = min(MAX_DIFF_EVENTS_PER_UPDATE, self.max_events_per_save)
+            emitted_events = 0
 
-            prev_chests = _extract_string_set(prev_state, "openedChests")
-            new_chests = _extract_string_set(state, "openedChests")
-            for chest_id in sorted(new_chests - prev_chests):
+            def emit_diff_event(
+                event_type: str, summary: str, details: dict[str, Any]
+            ) -> None:
+                nonlocal emitted_events
+                if emitted_events >= max_diff_events:
+                    return
                 self._insert_event(
                     conn,
                     save_id=save_id,
                     hero_name=hero_name,
-                    event_type="chest_opened",
+                    event_type=event_type,
                     realm_id=cur_realm,
-                    summary=f"Opened treasure chest {chest_id}",
-                    details={"chestId": chest_id, "byteShards": state.get("byteShards")},
+                    summary=summary,
+                    details=details,
                     created_at=now,
+                    prune=False,
+                )
+                emitted_events += 1
+
+            prev_chests = _extract_string_set(prev_state, "openedChests")
+            new_chests = _extract_string_set(state, "openedChests")
+            for chest_id in sorted(new_chests - prev_chests):
+                emit_diff_event(
+                    "chest_opened",
+                    f"Opened treasure chest {chest_id}",
+                    {"chestId": chest_id, "byteShards": state.get("byteShards")},
                 )
 
             prev_unlocks = _extract_string_set(
@@ -956,63 +1054,51 @@ class PyriaDatabase:
                 state, "ownedUnlockIds", "unlockedItems", "unlockedIds"
             )
             for unlock_id in sorted(new_unlocks - prev_unlocks):
-                self._insert_event(
-                    conn,
-                    save_id=save_id,
-                    hero_name=hero_name,
-                    event_type="workshop_purchase",
-                    realm_id=cur_realm,
-                    summary=f"Unlocked {unlock_id} in Bram's Workshop",
-                    details={"unlockId": unlock_id, "byteShards": state.get("byteShards")},
-                    created_at=now,
+                emit_diff_event(
+                    "workshop_purchase",
+                    f"Unlocked {unlock_id} in Bram's Workshop",
+                    {"unlockId": unlock_id, "byteShards": state.get("byteShards")},
                 )
 
             prev_dragons = _extract_string_set(prev_state, "rescuedDragons")
             new_dragons = _extract_string_set(state, "rescuedDragons")
             for dragon_id in sorted(new_dragons - prev_dragons):
-                self._insert_event(
-                    conn,
-                    save_id=save_id,
-                    hero_name=hero_name,
-                    event_type="dragon_rescued",
-                    realm_id=cur_realm,
-                    summary=f"Rescued dragon {dragon_id}!",
-                    details={"dragonId": dragon_id},
-                    created_at=now,
+                emit_diff_event(
+                    "dragon_rescued",
+                    f"Rescued dragon {dragon_id}!",
+                    {"dragonId": dragon_id},
                 )
 
             prev_eggs = _extract_string_set(prev_state, "foundEasterEggs")
             new_eggs = _extract_string_set(state, "foundEasterEggs")
             for egg_id in sorted(new_eggs - prev_eggs):
-                self._insert_event(
-                    conn,
-                    save_id=save_id,
-                    hero_name=hero_name,
-                    event_type="easter_egg_found",
-                    realm_id=cur_realm,
-                    summary=f"Found hidden Easter Egg: {egg_id}",
-                    details={"eggId": egg_id, "byteShards": state.get("byteShards")},
-                    created_at=now,
+                emit_diff_event(
+                    "easter_egg_found",
+                    f"Found hidden Easter Egg: {egg_id}",
+                    {"eggId": egg_id, "byteShards": state.get("byteShards")},
                 )
 
             if prev_realm and cur_realm and prev_realm != cur_realm:
-                self._insert_event(
-                    conn,
-                    save_id=save_id,
-                    hero_name=hero_name,
-                    event_type="realm_entered",
-                    realm_id=cur_realm,
-                    summary=f"Entered {cur_realm}",
-                    details={"fromRealmId": prev_realm, "toRealmId": cur_realm},
-                    created_at=now,
+                emit_diff_event(
+                    "realm_entered",
+                    f"Entered {cur_realm}",
+                    {"fromRealmId": prev_realm, "toRealmId": cur_realm},
                 )
+
+            if emitted_events > 0:
+                self._prune_events(conn, save_id)
 
             return state
 
     def delete_save(self, save_id: str) -> bool:
         with self._lock, self._connect() as conn:
             cur = conn.execute("DELETE FROM saves WHERE id = ?", (save_id,))
-            return cur.rowcount > 0
+            if cur.rowcount > 0:
+                conn.execute(
+                    "DELETE FROM activity_events WHERE save_id = ?", (save_id,)
+                )
+                return True
+            return False
 
     def log_attempt(
         self,
@@ -1044,6 +1130,15 @@ class PyriaDatabase:
                 (save_id, trial_id, 1 if passed else 0, hints_used, code, now),
             )
             attempt_id = int(cur.lastrowid)
+            # Blank code blobs on older attempts while preserving aggregate stats
+            conn.execute(
+                "UPDATE trial_attempts SET code = '' "
+                "WHERE save_id = ? AND code != '' AND id NOT IN ("
+                "SELECT id FROM trial_attempts WHERE save_id = ? ORDER BY id DESC LIMIT ?"
+                ")",
+                (save_id, save_id, self.max_attempt_code_rows),
+            )
+            # Hard row cap for abuse protection
             conn.execute(
                 "DELETE FROM trial_attempts "
                 "WHERE save_id = ? AND id NOT IN ("
@@ -2057,6 +2152,14 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                     HTTPStatus.BAD_REQUEST, {"error": "code must be a string"}
                 )
                 return
+            if _has_surrogates_or_nul(code):
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST,
+                    {
+                        "error": "code must not contain NUL bytes or lone Unicode surrogates"
+                    },
+                )
+                return
             if len(code.encode("utf-8")) > MAX_ATTEMPT_CODE_BYTES:
                 self._send_json(
                     HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
@@ -2362,6 +2465,7 @@ def create_server(
     *,
     max_saves_per_account: int | None = None,
     max_total_saves: int | None = None,
+    max_attempt_code_rows: int | None = None,
     max_attempts_per_save: int | None = None,
     max_events_per_save: int | None = None,
 ) -> PyriaHTTPServer:
@@ -2369,6 +2473,7 @@ def create_server(
         db_path,
         max_saves_per_account=max_saves_per_account,
         max_total_saves=max_total_saves,
+        max_attempt_code_rows=max_attempt_code_rows,
         max_attempts_per_save=max_attempts_per_save,
         max_events_per_save=max_events_per_save,
     )
