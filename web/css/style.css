@@ -1579,6 +1579,43 @@ textarea, input, pre, code {
   color: var(--accent-gold);
 }
 
+.ws-cart-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(16, 24, 43, 0.92);
+  border: 1.5px solid var(--border-subtle);
+  font-size: 13px;
+  color: #dbeafe;
+}
+
+.ws-cart-bar.ok {
+  border-color: var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.12);
+  color: #d1fae5;
+}
+
+.ws-cart-bar.over {
+  border-color: var(--accent-rose);
+  background: rgba(251, 113, 133, 0.14);
+  color: #ffe4e6;
+}
+
+.catalog-item.queued {
+  border-color: var(--accent-sky);
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.pill-sky {
+  background: rgba(56, 189, 248, 0.2);
+  color: #bae6fd;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+}
+
 .catalog-item {
   display: flex;
   align-items: center;
