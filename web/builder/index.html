@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pyria Parent &amp; Builder Console</title>
-  <link rel="stylesheet" href="/builder/builder.css?v=20261127k" />
+  <link rel="stylesheet" href="/builder/builder.css?v=20261127m" />
 </head>
 <body>
   <div id="builder-app">
@@ -20,6 +20,7 @@
 
       <nav id="builder-tab-nav" class="tab-nav" role="tablist">
         <button class="tab-btn active" data-tab="live" role="tab" aria-selected="true">📡 Live Progress</button>
+        <button id="tab-btn-calibration" class="tab-btn" data-tab="calibration" role="tab" aria-selected="false">📊 Trial Calibration</button>
         <button class="tab-btn" data-tab="story" role="tab" aria-selected="false">📖 Story &amp; Trials</button>
         <button class="tab-btn" data-tab="health" role="tab" aria-selected="false">🛡️ Concept Health</button>
         <button class="tab-btn" data-tab="assets" role="tab" aria-selected="false">🎨 Sprites &amp; World</button>
@@ -222,7 +223,140 @@
       </section>
     </main>
 
-    <!-- ==================== TAB 2: STORY & TRIALS ==================== -->
+    <!-- ==================== TAB 2: TRIAL CALIBRATION (ADMIN / LOCAL BUILDER ONLY) ==================== -->
+    <main id="tab-calibration" class="tab-panel">
+      <!-- Calibration KPI Strip -->
+      <section class="kpi-strip cal-kpi-strip">
+        <div class="kpi-card">
+          <span class="kpi-label">Trials with Data</span>
+          <strong id="cal-kpi-with-data" class="kpi-value">0 / 0</strong>
+        </div>
+        <div class="kpi-card cal-kpi-hard">
+          <span class="kpi-label">🔴 Flagged Too Hard</span>
+          <strong id="cal-kpi-too-hard" class="kpi-value">0</strong>
+        </div>
+        <div class="kpi-card cal-kpi-easy">
+          <span class="kpi-label">🟡 Flagged Too Easy</span>
+          <strong id="cal-kpi-too-easy" class="kpi-value">0</strong>
+        </div>
+        <div class="kpi-card cal-kpi-bug">
+          <span class="kpi-label">🟣 Possible Bug</span>
+          <strong id="cal-kpi-possible-bug" class="kpi-value">0</strong>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Overall Median Attempts</span>
+          <strong id="cal-kpi-median" class="kpi-value">—</strong>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Total Overrides</span>
+          <strong id="cal-kpi-overrides" class="kpi-value">0</strong>
+        </div>
+      </section>
+
+      <!-- Calibration Filters & Export -->
+      <section class="card cal-filters-bar">
+        <div class="cal-filters-grid">
+          <div class="cal-filter-field">
+            <label for="cal-filter-era" class="control-label">Era</label>
+            <select id="cal-filter-era" class="input input-sm">
+              <option value="">All Eras</option>
+            </select>
+          </div>
+          <div class="cal-filter-field">
+            <label for="cal-filter-realm" class="control-label">Realm</label>
+            <select id="cal-filter-realm" class="input input-sm">
+              <option value="">All Realms</option>
+            </select>
+          </div>
+          <div class="cal-filter-field">
+            <label for="cal-filter-type" class="control-label">Trial Type</label>
+            <select id="cal-filter-type" class="input input-sm">
+              <option value="">All Types</option>
+              <option value="code">Coding</option>
+              <option value="fix_bug">Fix the Bug</option>
+              <option value="multiple_choice">Multiple Choice</option>
+            </select>
+          </div>
+          <div class="cal-filter-field">
+            <label for="cal-filter-difficulty" class="control-label">Difficulty</label>
+            <select id="cal-filter-difficulty" class="input input-sm">
+              <option value="all" selected>All Difficulties</option>
+              <option value="explorer">Explorer</option>
+              <option value="standard">Standard</option>
+              <option value="challenge">Challenge</option>
+            </select>
+          </div>
+          <div class="cal-filter-field">
+            <label for="cal-filter-days" class="control-label">Time Window</label>
+            <select id="cal-filter-days" class="input input-sm">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="all">All time</option>
+            </select>
+          </div>
+          <div class="cal-filter-field">
+            <label for="cal-filter-since" class="control-label">Since (Optional)</label>
+            <input id="cal-filter-since" type="date" class="input input-sm" title="Filter attempts on or after YYYY-MM-DD" />
+          </div>
+          <div class="cal-filter-field">
+            <label for="cal-filter-flag" class="control-label">Flag Status</label>
+            <select id="cal-filter-flag" class="input input-sm">
+              <option value="all" selected>All Flags</option>
+              <option value="flagged">Any Flagged (🔴🟡🟣)</option>
+              <option value="too_hard">🔴 Too Hard</option>
+              <option value="too_easy">🟡 Too Easy</option>
+              <option value="possible_bug">🟣 Possible Bug</option>
+              <option value="low_data">⚪ Low Data</option>
+              <option value="ok">🟢 OK</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cal-filters-actions">
+          <label class="control-group checkbox-control">
+            <input id="cal-filter-practice" type="checkbox" />
+            <span>Include Practice Replays</span>
+          </label>
+          <div style="display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap;">
+            <button id="btn-cal-refresh" type="button" class="btn btn-sm btn-ghost">↻ Refresh</button>
+            <button id="btn-cal-export-csv" type="button" class="btn btn-sm btn-gold" title="Exports all flag statuses matching the current Era, Realm, Type, Difficulty, and Time Window filters">⬇ Export CSV</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sortable Trial Calibration Table -->
+      <section class="card editor-section">
+        <div class="panel-header">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <h2>📊 Trial Calibration Overview</h2>
+            <span id="cal-table-count-pill" class="pill pill-muted">0 trials</span>
+          </div>
+          <span class="hint-sub">Click any row to inspect hint tiers, top errors, daily trend &amp; calibration tools</span>
+        </div>
+        <div class="table-wrap">
+          <table id="cal-metrics-table" class="data-table cal-table">
+            <thead>
+              <tr>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="title">Trial <span class="cal-sort-arrow"></span></button></th>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="uniqueHeroes">Heroes <span class="cal-sort-arrow"></span></button></th>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="completionRate">Completion % <span class="cal-sort-arrow"></span></button></th>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="firstTryPassRate">First-Try % <span class="cal-sort-arrow"></span></button></th>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="medianAttemptsToSolve">Median Attempts <span class="cal-sort-arrow"></span></button></th>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="hintUsageRate">Hint % <span class="cal-sort-arrow"></span></button></th>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="parentOverrides">Overrides <span class="cal-sort-arrow"></span></button></th>
+                <th><button type="button" class="cal-sort-btn" data-cal-sort="flag">Flag <span class="cal-sort-arrow"></span></button></th>
+              </tr>
+            </thead>
+            <tbody id="cal-metrics-tbody">
+              <tr><td colspan="8"><div class="empty-state">Open this tab to load Trial Calibration metrics...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- ==================== TAB 3: STORY & TRIALS ==================== -->
     <main id="tab-story" class="tab-panel">
       <div class="story-grid">
         <!-- Left Sidebar: Era & Realm Picker -->
@@ -436,6 +570,6 @@
     <div id="toast-container" class="toast-container"></div>
   </div>
 
-  <script type="module" src="/builder/builder.js?v=20261127k"></script>
+  <script type="module" src="/builder/builder.js?v=20261127m"></script>
 </body>
 </html>

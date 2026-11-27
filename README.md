@@ -177,7 +177,26 @@ npm run deploy
 
 Pushing to `main` automatically runs tests, bundles static assets, and deploys via GitHub Actions.
 
-### 3. Run Tests
+### 3. Trial Calibration & Periodic Difficulty Review
+Pyria tracks privacy-safe per-trial telemetry (`difficultyMode`, `isPractice`, normalized `errorType`, and elapsed `durationMs`) and rolls up daily aggregates into `trial_stats_daily` so calibration history survives attempt pruning.
+
+- **Trial Calibration Dashboard** (`/builder` locally, and Admin `/console` in Cloudflare production; strictly hidden for non-admin parents):
+  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 224 trials.
+  - Filter by **Era**, **Realm**, **Trial Type**, **Difficulty** (`explorer` / `standard` / `challenge`), **Time Window** (`7d` / `30d` / `90d` / `all`), optional **Since** date (`YYYY-MM-DD`), **Flag status**, and **Include Practice Replays**, or click **Export CSV** (`format=csv`).
+  - Click any trial row to open the **Drill-Down Modal** showing hint-tier breakdown (`tier0`–`tier3`), top failure error types / wrong multiple-choice options, daily trend with a **Before vs. After** cutoff date check, and (in local `/builder`) a direct **Edit Trial** jump into **Story & Trials**.
+- **CLI Calibration Report** (`scripts/calibration_report.py`):
+  ```bash
+  npm run calibration-report
+  # Or invoke directly with filters / output options:
+  python3 scripts/calibration_report.py --days 30
+  ```
+  Generates a concise Markdown/CSV summary of the hardest trials, easiest trials, parent overrides / error spikes, and before/after calibration comparisons from local SQLite or production D1 / Admin API.
+- **Recommended Review Cadence**:
+  - Run a calibration review **monthly** or **after each content push or new player cohort**.
+  - Prioritize 🟣 **Possible Bug** and 🔴 **Too Hard** trials (high Tier-3 hint usage, elevated parent overrides, or `AssertionError` spikes), then check 🟡 **Too Easy** trials.
+  - Adjust prompts, starter code, hints, or tests in local `/builder`, commit & push to `main`, and compare before vs. after using the drill-down **Cutoff Date** (with **Since** cleared and a wide enough Time Window) 2–4 weeks later.
+
+### 4. Run Tests
 ```bash
 python3 -m unittest discover -s server -v
 node --test web/js/pyRunner.test.mjs

@@ -9,6 +9,18 @@ import {
   buildWorkshopSuggestions,
 } from './autocomplete.js?v=20261127i';
 
+function sanitizeAttemptErrorType(raw) {
+  if (typeof raw !== 'string') return null;
+  const cleaned = raw
+    .trim()
+    .replace(/[^A-Za-z0-9_.:-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 64);
+  return cleaned || null;
+}
+
+const VALID_DIFFICULTY_MODES = new Set(['explorer', 'standard', 'challenge']);
+
 function escapeHtml(str) {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
@@ -399,10 +411,20 @@ export class ModalManager {
     audio.playClick();
     music.setDucked(true);
     const diff = resolveDifficulty(gameConfig, realm, trial, save);
-    let currentMode = diff.mode || 'standard';
+    let currentMode = VALID_DIFFICULTY_MODES.has(diff.mode) ? diff.mode : 'standard';
     let hintsUsed = 0;
+    let trialOpenedAt = Date.now();
     const baseMaxHints = diff.maxHintsAllowed ?? 3;
     const maxHints = Math.min(4, baseMaxHints + (bonusHints > 0 ? bonusHints : 0));
+
+    const isTrialSolvedInSave = () =>
+      Boolean(
+        (Array.isArray(save?.solvedTrials) && save.solvedTrials.includes(trial.id)) ||
+          (Array.isArray(save?.completedTrials) && save.completedTrials.includes(trial.id))
+      );
+
+    const computeDurationMs = () =>
+      Math.max(0, Math.min(86400000, Math.round(Date.now() - trialOpenedAt)));
 
     const buildTier4SecretHint = () => {
       if (trial.trialType === 'multiple_choice') {
@@ -473,6 +495,7 @@ export class ModalManager {
       });
       this.content.querySelector('#btn-trial-practice')?.addEventListener('click', () => {
         audio.playClick();
+        trialOpenedAt = Date.now();
         if (trial.trialType === 'multiple_choice') {
           renderMultipleChoiceView(true);
         } else {
@@ -643,12 +666,22 @@ export class ModalManager {
         }
       });
 
+      let solvedInView = false;
       this.content.querySelectorAll('.mc-choice-card').forEach((card) => {
         card.addEventListener('click', async () => {
+          if (solvedInView || card.classList.contains('wrong')) return;
           const choiceId = card.dataset.choiceId;
           const choice = choices.find((c) => c.id === choiceId);
           if (!choice) return;
           const isCorrect = choice.id === trial.correctChoiceId;
+          const attemptIsPractice = Boolean(isPractice || alreadySolved || isTrialSolvedInSave());
+          const difficultyMode = VALID_DIFFICULTY_MODES.has(currentMode) ? currentMode : 'standard';
+          const errorType = isCorrect ? null : sanitizeAttemptErrorType(`choice:${choice.id}`);
+          const durationMs = computeDurationMs();
+
+          if (isCorrect) {
+            solvedInView = true;
+          }
 
           if (onAttempt) {
             onAttempt({
@@ -656,6 +689,10 @@ export class ModalManager {
               passed: isCorrect,
               hintsUsed,
               code: `choice:${choice.id} (${choice.label})`,
+              difficultyMode,
+              isPractice: attemptIsPractice,
+              errorType,
+              durationMs,
             });
           }
 
@@ -917,7 +954,9 @@ export class ModalManager {
         }
       });
 
+      let solvedInView = false;
       const runSpell = async () => {
+        if (runBtn.disabled || solvedInView) return;
         const code = codeEl.value;
         const nonEmptyLines = code.split('\n').map((l) => l.trim()).filter(Boolean);
         if (nonEmptyLines.length === 0 || nonEmptyLines.every((l) => l.startsWith('#'))) {
@@ -943,11 +982,33 @@ export class ModalManager {
         audio.playCodeRun();
 
         const result = await pyRunner.runTrial(code, trial.testCode, diff.showRawTracebacks);
-        runBtn.disabled = false;
-        runBtn.textContent = '▶ Run Python Spell';
+        if (!result.passed) {
+          runBtn.disabled = false;
+          runBtn.textContent = '▶ Run Python Spell';
+        } else {
+          solvedInView = true;
+        }
+
+        const attemptIsPractice = Boolean(isPractice || alreadySolved || isTrialSolvedInSave());
+        const difficultyMode = VALID_DIFFICULTY_MODES.has(currentMode) ? currentMode : 'standard';
+        const errorType = result.passed
+          ? null
+          : result.timedOut
+            ? 'TimeoutError'
+            : sanitizeAttemptErrorType(result.errorType || 'Error');
+        const durationMs = computeDurationMs();
 
         if (onAttempt) {
-          onAttempt({ trialId: trial.id, passed: result.passed, hintsUsed, code });
+          onAttempt({
+            trialId: trial.id,
+            passed: result.passed,
+            hintsUsed,
+            code,
+            difficultyMode,
+            isPractice: attemptIsPractice,
+            errorType,
+            durationMs,
+          });
         }
 
         if (result.passed) {

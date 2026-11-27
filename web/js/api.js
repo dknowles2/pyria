@@ -350,15 +350,45 @@ export async function updateSave(id, saveData, { keepalive = false } = {}) {
   return { ...normalizeSave(data.save || data), isGuest: false };
 }
 
-export async function logAttempt(saveId, { trialId, passed, hintsUsed, code }) {
+const ALLOWED_DIFFICULTY_MODES = new Set(['explorer', 'standard', 'challenge']);
+const MAX_DURATION_MS = 86400000;
+
+export function normalizeAttemptErrorType(raw, passed = false) {
+  if (passed || typeof raw !== 'string') return null;
+  const cleaned = raw
+    .trim()
+    .replace(/[^A-Za-z0-9_.:-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 64);
+  return cleaned || null;
+}
+
+export async function logAttempt(
+  saveId,
+  { trialId, passed, hintsUsed, code, difficultyMode, isPractice, errorType, durationMs }
+) {
   if (!saveId || String(saveId).startsWith('guest-')) return { ok: false, skipped: true };
+  const passedBool = Boolean(passed);
+  const safeDifficulty = ALLOWED_DIFFICULTY_MODES.has(difficultyMode) ? difficultyMode : 'standard';
+  const safeErrorType = normalizeAttemptErrorType(errorType, passedBool);
+  const hasDuration =
+    (typeof durationMs === 'number' && Number.isFinite(durationMs)) ||
+    (typeof durationMs === 'string' && durationMs.trim() !== '' && Number.isFinite(Number(durationMs)));
+  const safeDurationMs = hasDuration
+    ? Math.max(0, Math.min(MAX_DURATION_MS, Math.round(Number(durationMs))))
+    : null;
+
   return requestJson(`/api/saves/${encodeURIComponent(saveId)}/attempts`, {
     method: 'POST',
     body: JSON.stringify({
       trialId,
-      passed: Boolean(passed),
+      passed: passedBool,
       hintsUsed: Number(hintsUsed) || 0,
       code: String(code || ''),
+      difficultyMode: safeDifficulty,
+      isPractice: Boolean(isPractice),
+      errorType: safeErrorType,
+      durationMs: safeDurationMs,
     }),
   });
 }
