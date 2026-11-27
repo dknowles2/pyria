@@ -1,7 +1,7 @@
 // Crisp HTML5 Canvas Overworld Engine for Pyria (8-Bit, 16-Bit, 32-Bit Isometric 2.5D, 64-Bit N64 3D)
 
-import { audio } from './audio.js?v=20261127f';
-import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127f';
+import { audio } from './audio.js?v=20261127g';
+import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127g';
 
 const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
@@ -616,11 +616,13 @@ export class WorldEngine {
     // 32-Bit Isometric 2.5D & 64-Bit Nintendo 64 3D Era renderers
     if (this.eraKey === '32bit') {
       renderIsometric32Bit(this, ctx, dynamicOverrides, completed, openedChests, rescued);
+      this.renderWayfinder(ctx, completed, rescued);
       this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
       return;
     }
     if (this.eraKey === '64bit') {
       renderN643D(this, ctx, dynamicOverrides, completed, openedChests, rescued);
+      this.renderWayfinder(ctx, completed, rescued);
       this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
       return;
     }
@@ -769,8 +771,80 @@ export class WorldEngine {
       }
     }
 
-    // 4. Corner Minimap Overlay
+    // 4. Next-Objective Wayfinder Arrow + Corner Minimap Overlay
+    this.renderWayfinder(ctx, completed, rescued);
     this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
+  }
+
+  getNextObjectiveEntity(completed, rescued) {
+    const ents = this.map?.entities || [];
+    // 1. First unsolved main Trial whose prerequisite is met
+    for (const ent of ents) {
+      if (ent.type === 'trial' && !completed.has(ent.refId)) {
+        if (!ent.requiredTrialId || completed.has(ent.requiredTrialId)) {
+          return { entity: ent, kind: 'trial', text: ent.label || 'Next Trial' };
+        }
+      }
+    }
+    // 2. Dragon Vault if not yet rescued
+    const vault = ents.find((e) => e.type === 'vault' && !rescued.has(e.refId));
+    if (vault) {
+      return { entity: vault, kind: 'vault', text: vault.label || 'Dragon Vault' };
+    }
+    // 3. Forward portal to the next Realm
+    const portal = ents.find(
+      (e) => e.type === 'portal' && !String(e.id || '').startsWith('portal-back-')
+    );
+    if (portal) {
+      return { entity: portal, kind: 'portal', text: portal.label || 'Next Realm Portal' };
+    }
+    return null;
+  }
+
+  renderWayfinder(ctx, completed, rescued) {
+    const next = this.getNextObjectiveEntity(completed, rescued);
+    if (!next) return;
+    const dx = next.entity.x + 0.5 - this.hero.x;
+    const dy = next.entity.y + 0.5 - this.hero.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 4.5) return; // Already right next to it!
+
+    const angle = Math.atan2(dy, dx);
+    // 8-way compass arrow
+    const dirs = ['→', '↘', '↓', '↙', '←', '↖', '↑', '↗'];
+    const dirIdx = ((Math.round(angle / (Math.PI / 4)) % 8) + 8) % 8;
+    const arrow = dirs[dirIdx];
+    const steps = Math.round(dist);
+    const shortName = next.text.length > 26 ? `${next.text.slice(0, 24)}…` : next.text;
+    const label = `${arrow} ${shortName} (${steps}m)`;
+
+    ctx.save();
+    ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
+    const textW = ctx.measureText(label).width;
+    const pillW = textW + 22;
+    const pillH = 26;
+    const px = 14;
+    const py = 14;
+
+    const pulse = 0.78 + 0.22 * Math.sin(this.time * 5);
+    ctx.fillStyle = 'rgba(11, 16, 32, 0.86)';
+    ctx.beginPath();
+    ctx.roundRect(px, py, pillW, pillH, 999);
+    ctx.fill();
+    ctx.strokeStyle =
+      next.kind === 'portal'
+        ? `rgba(56, 189, 248, ${pulse.toFixed(2)})`
+        : next.kind === 'vault'
+          ? `rgba(251, 113, 133, ${pulse.toFixed(2)})`
+          : `rgba(250, 204, 21, ${pulse.toFixed(2)})`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = next.kind === 'portal' ? '#bae6fd' : next.kind === 'vault' ? '#fecdd3' : '#fef08a';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, px + 11, py + pillH / 2 + 0.5);
+    ctx.restore();
   }
 
   ensureMinimapTerrainCache(dynamicOverrides, completed) {
