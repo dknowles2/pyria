@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261127b';
-import { music } from './music.js?v=20261127b';
-import { pyRunner } from './pyRunner.js?v=20261127b';
+import { audio } from './audio.js?v=20261127c';
+import { music } from './music.js?v=20261127c';
+import { pyRunner } from './pyRunner.js?v=20261127c';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261127b';
+} from './autocomplete.js?v=20261127c';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -405,7 +405,7 @@ export class ModalManager {
     });
 
     const renderCompletedSummary = () => {
-      const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
+      const useTrainingSpells = era?.id === 'era-01-8bit' && (Number(realm?.number) || 1) <= 3;
       const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
 
       this.open(
@@ -671,7 +671,7 @@ export class ModalManager {
       const initialCode = hasRestoredDraft ? savedDraft : starterText;
       let skipFlushOnClose = false;
 
-      const useTrainingSpells = era?.id !== 'era-02-16bit' && (Number(realm?.number) || 1) <= 3;
+      const useTrainingSpells = era?.id === 'era-01-8bit' && (Number(realm?.number) || 1) <= 3;
       const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
       const isFixBug = trial.trialType === 'fix_bug';
       const hasHashComment = (code) => /^\s*#/m.test(code || '');

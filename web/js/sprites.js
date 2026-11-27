@@ -36,34 +36,42 @@ export class SpriteManager {
     return entry.loaded ? entry.img : null;
   }
 
+  normalizeEra(eraKey = '8bit') {
+    return eraKey === '8bit' ? '8bit' : '16bit';
+  }
+
   getTilesetImage(eraKey = '8bit') {
-    const era = this.tilesetManifest.eras[eraKey] || this.tilesetManifest.eras['8bit'];
+    const key = this.normalizeEra(eraKey);
+    const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
     const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}`);
     return entry.loaded ? entry.img : null;
   }
 
   getNpcsImage(eraKey = '8bit') {
-    const era = this.tilesetManifest.eras[eraKey] || this.tilesetManifest.eras['8bit'];
+    const key = this.normalizeEra(eraKey);
+    const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
     const entry = this.loadImage(`/assets/tilesets/${era.npcsImage}`);
     return entry.loaded ? entry.img : null;
   }
 
   preloadCore(eraKey = '8bit') {
-    this.getTilesetImage(eraKey);
-    this.getNpcsImage(eraKey);
+    const key = this.normalizeEra(eraKey);
+    this.getTilesetImage(key);
+    this.getNpcsImage(key);
     const layers = this.spriteManifest.layers;
-    if (layers.shadow?.default?.[eraKey]) this.getSpriteImage(layers.shadow.default[eraKey]);
-    if (layers.companion?.pip_base?.[eraKey]) this.getSpriteImage(layers.companion.pip_base[eraKey]);
+    if (layers.shadow?.default?.[key]) this.getSpriteImage(layers.shadow.default[key]);
+    if (layers.companion?.pip_base?.[key]) this.getSpriteImage(layers.companion.pip_base[key]);
   }
 
   getEraSpec(eraKey = '8bit') {
-    if (eraKey === '16bit') {
+    if (this.normalizeEra(eraKey) === '16bit') {
       return this.spriteManifest.eras['era-02-16bit'];
     }
     return this.spriteManifest.eras['era-01-8bit'];
   }
 
   resolveHeroLayerPath(slot, appearance, eraKey) {
+    eraKey = this.normalizeEra(eraKey);
     const layers = this.spriteManifest.layers;
     const hatKey = appearance.hat || null;
     const fullCoverage = this.spriteManifest.fullCoverageHeadgear || [];

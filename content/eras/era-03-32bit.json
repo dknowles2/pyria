@@ -1,0 +1,1213 @@
+{
+  "id": "era-03-32bit",
+  "name": "The 32-Bit Era",
+  "subtitle": "The Isometric Frontier (PS1 / GBA 2.5D)",
+  "bitCount": 32,
+  "visualStyle": "32-bit PS1/GBA Isometric 2.5D",
+  "realms": [
+    {
+      "id": "realm-32-01-highlands",
+      "number": 1,
+      "name": "Blockstone Highlands",
+      "dragon": {
+        "id": "dragon-terracrest",
+        "name": "Terracrest",
+        "title": "Sculptor of Elevated Stone",
+        "element": "Earth",
+        "rescueDialogue": "RUMBLE-CRUNCH! You mastered (x, y, z) coordinates! Take Bit 17\u2014watch the isometric terraces rise!"
+      },
+      "miniVisualUpgrade": "Bit 17\u201320 Restored: Raised isometric highland cliffs and cascading 2.5D waterfalls.",
+      "storyIntro": "Pyria tilts into a lush 32-Bit Isometric 2.5D diorama! Now every tile has height `z` in addition to `(x, y)` \u2014 welcome to Blockstone Highlands!",
+      "storyOutro": "Terracrest lifts the highland drawbridge, opening the skyway to Sky-Forge Foundry!",
+      "primaryConcepts": [
+        "tuples",
+        "coords_3d"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-32-01-01",
+          "trialType": "multiple_choice",
+          "title": "Meet 3D Coordinate Tuples (x, y, z)!",
+          "storyPrompt": "Welcome to the 32-Bit Isometric Frontier! A **tuple** like `pos = (4, 7, 2)` holds locked `(x, y, z)` coordinates in parentheses. What does `x, y, z = pos; print(z)` output?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "tuples",
+            "coords_3d"
+          ],
+          "shardReward": 110,
+          "unlockId": null,
+          "codeSnippet": "pos = (4, 7, 2)\nx, y, z = pos\nprint(z)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "2",
+              "explanation": "Elevated! Unpacking `(4, 7, 2)` sets `x=4`, `y=7`, and height `z=2`!"
+            },
+            {
+              "id": "b",
+              "label": "4",
+              "explanation": "4 is `x`!"
+            },
+            {
+              "id": "c",
+              "label": "7",
+              "explanation": "7 is `y`!"
+            },
+            {
+              "id": "d",
+              "label": "(4, 7, 2)",
+              "explanation": "`z` is the third value!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-01-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Tuple Unpack!",
+          "storyPrompt": "Lord Null tried to unpack 3 coordinates into only 2 variables (`ValueError`)! Add `, z` so all 3 unpack cleanly.",
+          "objective": "Unpack `pos` into `x, y, z = pos` and print `z`.",
+          "concepts": [
+            "tuples",
+            "coords_3d"
+          ],
+          "shardReward": 120,
+          "unlockId": null,
+          "bugSummary": "Unpack `pos` into `x, y, z = pos` and print `z`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\npos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
+            "standard": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
+            "challenge": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n"
+          },
+          "referenceSolution": "pos = (10, 5, 3)\nx, y, z = pos\nprint(z)\n",
+          "testCode": "assert (x, y, z) == (10, 5, 3) and OUTPUT.strip() == \"3\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "pos = (10, 5, 3)\nx, y, z = pos\nprint(z)",
+            "tier3_walkthrough": "Update to:\npos = (10, 5, 3)\nx, y, z = pos\nprint(z)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-01-03",
+          "trialType": "code",
+          "title": "Climb One Terrace Higher",
+          "storyPrompt": "In Blockstone Highlands, try this new power! Given `pos = (3, 4, 1)`, unpack `x, y, z = pos`, create `higher = (x, y, z + 2)`, and `print(higher)`.",
+          "objective": "Given `pos = (3, 4, 1)`, unpack `x, y, z = pos`, create `higher = (x, y, z + 2)`, and `print(higher)`.",
+          "concepts": [
+            "tuples",
+            "coords_3d"
+          ],
+          "shardReward": 125,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\n# Print higher\n",
+            "standard": "# Given `pos = (3, 4, 1)`, unpack `x, y, z = pos`, create `higher = (x, y, z + 2)`, and `print(higher)`.\n\n",
+            "challenge": "# Climb One Terrace Higher\n\n"
+          },
+          "referenceSolution": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)\n",
+          "testCode": "assert higher == (3, 4, 3) and OUTPUT.strip() == \"(3, 4, 3)\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)",
+            "tier3_walkthrough": "Write:\npos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-01-04",
+          "trialType": "code",
+          "title": "Measure Elevation Drop",
+          "storyPrompt": "Push deeper into Blockstone Highlands! Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.",
+          "objective": "Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.",
+          "concepts": [
+            "tuples",
+            "coords_3d"
+          ],
+          "shardReward": 130,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\n# Print drop\n",
+            "standard": "# Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.\n\n",
+            "challenge": "# Measure Elevation Drop\n\n"
+          },
+          "referenceSolution": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)\n",
+          "testCode": "assert drop == 6 and OUTPUT.strip() == \"6\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)",
+            "tier3_walkthrough": "Write:\ntop = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-01-05",
+          "trialType": "code",
+          "title": "Find the Highest Peak",
+          "storyPrompt": "You're right outside Terracrest's vault! Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.",
+          "objective": "Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.",
+          "concepts": [
+            "tuples",
+            "coords_3d"
+          ],
+          "shardReward": 135,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\n# Print max_z\n",
+            "standard": "# Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.\n\n",
+            "challenge": "# Find the Highest Peak\n\n"
+          },
+          "referenceSolution": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)\n",
+          "testCode": "assert max_z == 9 and OUTPUT.strip() == \"9\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)",
+            "tier3_walkthrough": "Write:\npeaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-01-06",
+          "trialType": "code",
+          "title": "Raise Terracrest's Bridge (Boss)",
+          "storyPrompt": "Final lock before Terracrest! Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.",
+          "objective": "Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.",
+          "concepts": [
+            "tuples",
+            "coords_3d"
+          ],
+          "shardReward": 150,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    # Print \"TERRACREST FREE!\"\n    \n",
+            "standard": "# Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.\n\n",
+            "challenge": "# Raise Terracrest's Bridge (Boss)\n\n"
+          },
+          "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
+          "testCode": "assert total_h == 10 and OUTPUT.strip() == \"TERRACREST FREE!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Terracrest!",
+            "tier2_pattern": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")",
+            "tier3_walkthrough": "Write:\npillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-01-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Terracrest's Tuple Riddle!",
+          "storyPrompt": "Hidden Rune in Blockstone Highlands! How are tuples `()` different from lists `[]`?",
+          "objective": "How are tuples `()` different from lists `[]`?",
+          "concepts": [
+            "tuples",
+            "coords_3d"
+          ],
+          "shardReward": 130,
+          "unlockId": null,
+          "codeSnippet": "point = (4, 8, 2)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "Tuples cannot be modified in place (immutable)",
+              "explanation": "Rock solid! Tuples lock coordinates safely so they don't accidentally change!"
+            },
+            {
+              "id": "b",
+              "label": "Tuples can only hold strings",
+              "explanation": "Tuples can hold numbers, strings, anything!"
+            },
+            {
+              "id": "c",
+              "label": "Tuples cannot be indexed",
+              "explanation": "`point[0]` works just like a list!"
+            },
+            {
+              "id": "d",
+              "label": "No difference",
+              "explanation": "Lists are mutable, tuples are immutable!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Terracrest's Blockstone Crest (+1 Hint)",
+            "description": "Hidden treasure from Blockstone Highlands!",
+            "unlockId": "bonus-trial-32-01",
+            "equipLayer": "tunic",
+            "equipKey": "violet"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-01-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Blockstone Highlands, {heroName}! My dimensional vault will keep Terracrest sealed forever!"
+          },
+          {
+            "speaker": "Terracrest",
+            "spriteKey": "pebble",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Blockstone Highlands to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Terracrest!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Gah! Outcoded in Blockstone Highlands?! Wait until you face Sky-Forge Foundry, {heroName}!"
+          },
+          {
+            "speaker": "Terracrest",
+            "spriteKey": "pebble",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Terracrest is free! Head through the portal to Sky-Forge Foundry!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-32-02-foundry",
+      "number": 2,
+      "name": "Sky-Forge Foundry",
+      "dragon": {
+        "id": "dragon-anvilwing",
+        "name": "Anvilwing",
+        "title": "Smith of Floating Forges",
+        "element": "Fire",
+        "rescueDialogue": "CLANG-BOOM! List comprehensions forge entire arrays in one line! Take Bits 21\u201324!"
+      },
+      "miniVisualUpgrade": "Bits 21\u201324 Restored: Floating anvil platforms and glowing molten-gold forge channels.",
+      "storyIntro": "High above the clouds, floating stone islands house Sky-Forge Foundry, where iron dragon Anvilwing awaits clean grid loops and list comprehensions.",
+      "storyOutro": "Anvilwing hammers open the crystal chute down to Prism Caverns!",
+      "primaryConcepts": [
+        "nested_loops",
+        "list_comprehensions"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-32-02-01",
+          "trialType": "multiple_choice",
+          "title": "One-Line List Comprehensions!",
+          "storyPrompt": "Python lets you build a transformed list in ONE clean line: `[n * 2 for n in [1, 2, 3]]`! What does the code below print?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "nested_loops",
+            "list_comprehensions"
+          ],
+          "shardReward": 120,
+          "unlockId": null,
+          "codeSnippet": "nums = [2, 4, 6]\ndoubled = [n * 2 for n in nums]\nprint(doubled)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "[4, 8, 12]",
+              "explanation": "CLANG! Each number in `[2, 4, 6]` is multiplied by 2!"
+            },
+            {
+              "id": "b",
+              "label": "[2, 4, 6]",
+              "explanation": "It multiplies each `n` by 2!"
+            },
+            {
+              "id": "c",
+              "label": "12",
+              "explanation": "It returns a whole new list!"
+            },
+            {
+              "id": "d",
+              "label": "Error",
+              "explanation": "List comprehensions are pure Python magic!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-02-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Foundry Comprehension!",
+          "storyPrompt": "Lord Null missed the `in` keyword inside the list comprehension! Put `in` between `x` and `ores`.",
+          "objective": "Fix `[x * 10 for x ores]` to `[x * 10 for x in ores]`.",
+          "concepts": [
+            "nested_loops",
+            "list_comprehensions"
+          ],
+          "shardReward": 130,
+          "unlockId": null,
+          "bugSummary": "Fix `[x * 10 for x ores]` to `[x * 10 for x in ores]`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\nores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
+            "standard": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
+            "challenge": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n"
+          },
+          "referenceSolution": "ores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)\n",
+          "testCode": "assert power == [10, 20, 30] and OUTPUT.strip() == \"[10, 20, 30]\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "ores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)",
+            "tier3_walkthrough": "Update to:\nores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-02-03",
+          "trialType": "code",
+          "title": "Filter with a Comprehension",
+          "storyPrompt": "In Sky-Forge Foundry, try this new power! Use `[n for n in [5, 12, 8, 20] if n >= 10]` to build `hot` and `print(hot)`.",
+          "objective": "Use `[n for n in [5, 12, 8, 20] if n >= 10]` to build `hot` and `print(hot)`.",
+          "concepts": [
+            "nested_loops",
+            "list_comprehensions"
+          ],
+          "shardReward": 135,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\n# Print hot\n",
+            "standard": "# Use `[n for n in [5, 12, 8, 20] if n >= 10]` to build `hot` and `print(hot)`.\n\n",
+            "challenge": "# Filter with a Comprehension\n\n"
+          },
+          "referenceSolution": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)\n",
+          "testCode": "assert hot == [12, 20] and OUTPUT.strip() == \"[12, 20]\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)",
+            "tier3_walkthrough": "Write:\ntemps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-02-04",
+          "trialType": "code",
+          "title": "Generate 2D Isometric Coords",
+          "storyPrompt": "Push deeper into Sky-Forge Foundry! Build `coords = [(x, y) for x in range(2) for y in range(2)]` and `print(len(coords))`.",
+          "objective": "Build `coords = [(x, y) for x in range(2) for y in range(2)]` and `print(len(coords))`.",
+          "concepts": [
+            "nested_loops",
+            "list_comprehensions"
+          ],
+          "shardReward": 140,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "coords = [(x, y) for x in range(2) for y in range(2)]\n# Print len(coords)\n",
+            "standard": "# Build `coords = [(x, y) for x in range(2) for y in range(2)]` and `print(len(coords))`.\n\n",
+            "challenge": "# Generate 2D Isometric Coords\n\n"
+          },
+          "referenceSolution": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))\n",
+          "testCode": "assert coords == [(0, 0), (0, 1), (1, 0), (1, 1)] and OUTPUT.strip() == \"4\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))",
+            "tier3_walkthrough": "Write:\ncoords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-02-05",
+          "trialType": "code",
+          "title": "Uppercase Rune Tags",
+          "storyPrompt": "You're right outside Anvilwing's vault! Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.",
+          "objective": "Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.",
+          "concepts": [
+            "nested_loops",
+            "list_comprehensions"
+          ],
+          "shardReward": 145,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\n# Print loud\n",
+            "standard": "# Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.\n\n",
+            "challenge": "# Uppercase Rune Tags\n\n"
+          },
+          "referenceSolution": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)\n",
+          "testCode": "assert loud == [\"IRON\", \"GOLD\"] and OUTPUT.strip() == \"['IRON', 'GOLD']\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)",
+            "tier3_walkthrough": "Write:\ntags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-02-06",
+          "trialType": "code",
+          "title": "Ignite Anvilwing's Sky-Forge (Boss)",
+          "storyPrompt": "Final lock before Anvilwing! Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.",
+          "objective": "Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.",
+          "concepts": [
+            "nested_loops",
+            "list_comprehensions"
+          ],
+          "shardReward": 160,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    # Print \"ANVILWING FREE!\"\n    \n",
+            "standard": "# Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.\n\n",
+            "challenge": "# Ignite Anvilwing's Sky-Forge (Boss)\n\n"
+          },
+          "referenceSolution": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")\n",
+          "testCode": "assert forged == [50, 80] and OUTPUT.strip() == \"ANVILWING FREE!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Anvilwing!",
+            "tier2_pattern": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")",
+            "tier3_walkthrough": "Write:\nbars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-02-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Anvilwing's Square Riddle!",
+          "storyPrompt": "Hidden Rune in Sky-Forge Foundry! What does `[n * n for n in range(1, 4)]` produce?",
+          "objective": "What does `[n * n for n in range(1, 4)]` produce?",
+          "concepts": [
+            "nested_loops",
+            "list_comprehensions"
+          ],
+          "shardReward": 140,
+          "unlockId": null,
+          "codeSnippet": "print([n * n for n in range(1, 4)])",
+          "choices": [
+            {
+              "id": "a",
+              "label": "[1, 4, 9]",
+              "explanation": "Forged in fire! 1\u00d71=1, 2\u00d72=4, 3\u00d73=9!"
+            },
+            {
+              "id": "b",
+              "label": "[1, 2, 3]",
+              "explanation": "It squares each `n`!"
+            },
+            {
+              "id": "c",
+              "label": "[2, 4, 6]",
+              "explanation": "That's `n * 2`, not `n * n`!"
+            },
+            {
+              "id": "d",
+              "label": "[1, 4, 9, 16]",
+              "explanation": "`range(1, 4)` stops at 3!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Anvilwing's Sky Hammer (+1 Hint)",
+            "description": "Hidden treasure from Sky-Forge Foundry!",
+            "unlockId": "bonus-trial-32-02",
+            "equipLayer": "tunic",
+            "equipKey": "amber"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-02-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Sky-Forge Foundry, {heroName}! My dimensional vault will keep Anvilwing sealed forever!"
+          },
+          {
+            "speaker": "Anvilwing",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Sky-Forge Foundry to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Anvilwing!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Gah! Outcoded in Sky-Forge Foundry?! Wait until you face Prism Caverns, {heroName}!"
+          },
+          {
+            "speaker": "Anvilwing",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Anvilwing is free! Head through the portal to Prism Caverns!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-32-03-caverns",
+      "number": 3,
+      "name": "Prism Caverns",
+      "dragon": {
+        "id": "dragon-lumina",
+        "name": "Lumina",
+        "title": "Weaver of Crystal Light",
+        "element": "Light",
+        "rescueDialogue": "SHIMMER! Sets and nested dicts light every crystal tunnel! Take Bits 25\u201328!"
+      },
+      "miniVisualUpgrade": "Bits 25\u201328 Restored: Refracting crystal spires and glowing prism bridges.",
+      "storyIntro": "Beneath the foundry sparkle the Prism Caverns! Here **sets** remove duplicates automatically and **nested dictionaries** map glowing crystal caves.",
+      "storyOutro": "Lumina focuses a prism beam straight toward Null's Polygon Citadel!",
+      "primaryConcepts": [
+        "dictionaries_nested",
+        "sets"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-32-03-01",
+          "trialType": "multiple_choice",
+          "title": "Meet Python Sets!",
+          "storyPrompt": "A **set** (`set(...)` or `{1, 2, 3}`) keeps ONLY unique items \u2014 duplicates vanish automatically! What does `len(set([\"red\", \"blue\", \"red\"]))` equal?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "dictionaries_nested",
+            "sets"
+          ],
+          "shardReward": 130,
+          "unlockId": null,
+          "codeSnippet": "gems = [\"red\", \"blue\", \"red\"]\nunique = set(gems)\nprint(len(unique))",
+          "choices": [
+            {
+              "id": "a",
+              "label": "2",
+              "explanation": "Crystal clear! The duplicate `\"red\"` is removed, leaving `{\"red\", \"blue\"}` (2 items)!"
+            },
+            {
+              "id": "b",
+              "label": "3",
+              "explanation": "Sets remove duplicate items!"
+            },
+            {
+              "id": "c",
+              "label": "1",
+              "explanation": "`\"red\"` and `\"blue\"` are 2 distinct colors!"
+            },
+            {
+              "id": "d",
+              "label": "Error",
+              "explanation": "Converting a list with `set()` is built-in!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-03-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Nested Dict Lookup!",
+          "storyPrompt": "Lord Null misspelled `\"north\"` as `\"norht\"` in the cavern map lookup! Fix the key.",
+          "objective": "Change `\"norht\"` to `\"north\"` so `print(cavern[\"gate\"][\"north\"])` outputs `\"OPEN\"`.",
+          "concepts": [
+            "dictionaries_nested",
+            "sets"
+          ],
+          "shardReward": 140,
+          "unlockId": null,
+          "bugSummary": "Change `\"norht\"` to `\"north\"` so `print(cavern[\"gate\"][\"north\"])` outputs `\"OPEN\"`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
+            "standard": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
+            "challenge": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n"
+          },
+          "referenceSolution": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])\n",
+          "testCode": "assert OUTPUT.strip() == \"OPEN\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])",
+            "tier3_walkthrough": "Update to:\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-03-03",
+          "trialType": "code",
+          "title": "Deduplicate Crystal Shards",
+          "storyPrompt": "In Prism Caverns, try this new power! Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.",
+          "objective": "Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.",
+          "concepts": [
+            "dictionaries_nested",
+            "sets"
+          ],
+          "shardReward": 145,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\n# Print unique_count\n",
+            "standard": "# Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.\n\n",
+            "challenge": "# Deduplicate Crystal Shards\n\n"
+          },
+          "referenceSolution": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)\n",
+          "testCode": "assert unique_count == 3 and OUTPUT.strip() == \"3\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)",
+            "tier3_walkthrough": "Write:\nfound = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-03-04",
+          "trialType": "code",
+          "title": "Set Intersection (&)",
+          "storyPrompt": "Push deeper into Prism Caverns! Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.",
+          "objective": "Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.",
+          "concepts": [
+            "dictionaries_nested",
+            "sets"
+          ],
+          "shardReward": 150,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\n# Print len(common)\n",
+            "standard": "# Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.\n\n",
+            "challenge": "# Set Intersection (&)\n\n"
+          },
+          "referenceSolution": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))\n",
+          "testCode": "assert common == {\"gold\", \"ruby\"} and OUTPUT.strip() == \"2\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))",
+            "tier3_walkthrough": "Write:\na = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-03-05",
+          "trialType": "code",
+          "title": "Read a Nested Room Map",
+          "storyPrompt": "You're right outside Lumina's vault! Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.",
+          "objective": "Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.",
+          "concepts": [
+            "dictionaries_nested",
+            "sets"
+          ],
+          "shardReward": 155,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\n# Print dest\n",
+            "standard": "# Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.\n\n",
+            "challenge": "# Read a Nested Room Map\n\n"
+          },
+          "referenceSolution": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)\n",
+          "testCode": "assert dest == \"vault\" and OUTPUT.strip() == \"vault\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)",
+            "tier3_walkthrough": "Write:\nrooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-03-06",
+          "trialType": "code",
+          "title": "Align Lumina's Crystal Graph (Boss)",
+          "storyPrompt": "Final lock before Lumina! Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.",
+          "objective": "Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.",
+          "concepts": [
+            "dictionaries_nested",
+            "sets"
+          ],
+          "shardReward": 170,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    # Print \"LUMINA FREE!\"\n    \n",
+            "standard": "# Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.\n\n",
+            "challenge": "# Align Lumina's Crystal Graph (Boss)\n\n"
+          },
+          "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
+          "testCode": "assert beam == 100 and OUTPUT.strip() == \"LUMINA FREE!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Lumina!",
+            "tier2_pattern": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")",
+            "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-03-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Lumina's Set Union!",
+          "storyPrompt": "Hidden Rune in Prism Caverns! What does `{1, 2} | {2, 3}` produce?",
+          "objective": "What does `{1, 2} | {2, 3}` produce?",
+          "concepts": [
+            "dictionaries_nested",
+            "sets"
+          ],
+          "shardReward": 150,
+          "unlockId": null,
+          "codeSnippet": "print(len({1, 2} | {2, 3}))",
+          "choices": [
+            {
+              "id": "a",
+              "label": "3",
+              "explanation": "Radiant! Union `|` combines both sets without duplicates: `{1, 2, 3}`!"
+            },
+            {
+              "id": "b",
+              "label": "4",
+              "explanation": "Duplicate `2` only appears once!"
+            },
+            {
+              "id": "c",
+              "label": "1",
+              "explanation": "That's intersection `&`!"
+            },
+            {
+              "id": "d",
+              "label": "Error",
+              "explanation": "`|` is set union!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Lumina's Prism Tiara (+1 Hint)",
+            "description": "Hidden treasure from Prism Caverns!",
+            "unlockId": "bonus-trial-32-03",
+            "equipLayer": "tunic",
+            "equipKey": "navy"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-03-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Prism Caverns, {heroName}! My dimensional vault will keep Lumina sealed forever!"
+          },
+          {
+            "speaker": "Lumina",
+            "spriteKey": "glacier",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Prism Caverns to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Lumina!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Gah! Outcoded in Prism Caverns?! Wait until you face Null's Polygon Citadel, {heroName}!"
+          },
+          {
+            "speaker": "Lumina",
+            "spriteKey": "glacier",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Lumina is free! Head through the portal to Null's Polygon Citadel!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-32-04-citadel",
+      "number": 4,
+      "name": "Null's Polygon Citadel",
+      "dragon": {
+        "id": "dragon-vortex",
+        "name": "Vortex",
+        "title": "Guardian of the 32nd Bit",
+        "element": "Gravity",
+        "rescueDialogue": "WHOA-BOOM! All 32 Bits restored! Brace yourself\u2014Pyria is warping into full 64-Bit Nintendo 64 3D!"
+      },
+      "miniVisualUpgrade": "Bit 32 Restored \u2014 64-BIT ERA UPGRADE! The flat isometric tiles burst into free-roam chunky Gouraud-shaded 3D!",
+      "storyIntro": "Lord Null's Polygon Citadel floats in isometric wireframe space! Master `try / except` error shields and combine your 32-Bit skills to rescue Vortex!",
+      "storyOutro": "Vortex spins open a swirling 3D polygon portal \u2014 welcome to the 64-Bit Nintendo 64 Era!",
+      "primaryConcepts": [
+        "error_handling",
+        "tuples",
+        "dictionaries_nested"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-32-04-01",
+          "trialType": "multiple_choice",
+          "title": "Catching Errors with try / except!",
+          "storyPrompt": "Lord Null loves planting crash traps like dividing by zero! `try / except` catches an error safely so your spell keeps running! What will the code below print?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "error_handling",
+            "tuples",
+            "dictionaries_nested"
+          ],
+          "shardReward": 150,
+          "unlockId": null,
+          "codeSnippet": "try:\n    x = 10 / 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED!\")",
+          "choices": [
+            {
+              "id": "a",
+              "label": "SHIELDED!",
+              "explanation": "Gravity-defying! `except ZeroDivisionError:` catches the crash and prints `SHIELDED!`!"
+            },
+            {
+              "id": "b",
+              "label": "10",
+              "explanation": "10 / 0 triggers `ZeroDivisionError`!"
+            },
+            {
+              "id": "c",
+              "label": "Crash",
+              "explanation": "`try / except` prevents the crash!"
+            },
+            {
+              "id": "d",
+              "label": "Nothing",
+              "explanation": "The `except` block runs!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-04-02",
+          "trialType": "fix_bug",
+          "title": "Fix the try / except Colon!",
+          "storyPrompt": "Lord Null removed the colon `:` from `except ValueError`! Put `:` back so bad input is caught safely.",
+          "objective": "Add `:` after `except ValueError` so it prints `SAFE`.",
+          "concepts": [
+            "error_handling",
+            "tuples",
+            "dictionaries_nested"
+          ],
+          "shardReward": 160,
+          "unlockId": null,
+          "bugSummary": "Add `:` after `except ValueError` so it prints `SAFE`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\ntry:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
+            "standard": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
+            "challenge": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n"
+          },
+          "referenceSolution": "try:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")\n",
+          "testCode": "assert OUTPUT.strip() == \"SAFE\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "try:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")",
+            "tier3_walkthrough": "Update to:\ntry:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-04-03",
+          "trialType": "code",
+          "title": "Safe Number Parser",
+          "storyPrompt": "In Null's Polygon Citadel, try this new power! Write `def safe_int(text):` using `try: return int(text)` and `except ValueError: return 0`. Print `safe_int(\"oops\")`.",
+          "objective": "Write `def safe_int(text):` using `try: return int(text)` and `except ValueError: return 0`. Print `safe_int(\"oops\")`.",
+          "concepts": [
+            "error_handling",
+            "tuples",
+            "dictionaries_nested"
+          ],
+          "shardReward": 165,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\n# Print safe_int(\"oops\")\n",
+            "standard": "# Write `def safe_int(text):` using `try: return int(text)` and `except ValueError: return 0`. Print `safe_int(\"oops\")`.\n\n",
+            "challenge": "# Safe Number Parser\n\n"
+          },
+          "referenceSolution": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))\n",
+          "testCode": "assert safe_int(\"42\") == 42 and safe_int(\"oops\") == 0 and OUTPUT.strip() == \"0\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))",
+            "tier3_walkthrough": "Write:\ndef safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-04-04",
+          "trialType": "code",
+          "title": "Safe Division Spell",
+          "storyPrompt": "Push deeper into Null's Polygon Citadel! Write `def safe_div(a, b):` returning `a // b` or `0` on `ZeroDivisionError`. Print `safe_div(20, 0)`.",
+          "objective": "Write `def safe_div(a, b):` returning `a // b` or `0` on `ZeroDivisionError`. Print `safe_div(20, 0)`.",
+          "concepts": [
+            "error_handling",
+            "tuples",
+            "dictionaries_nested"
+          ],
+          "shardReward": 170,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\n# Print safe_div(20, 0)\n",
+            "standard": "# Write `def safe_div(a, b):` returning `a // b` or `0` on `ZeroDivisionError`. Print `safe_div(20, 0)`.\n\n",
+            "challenge": "# Safe Division Spell\n\n"
+          },
+          "referenceSolution": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))\n",
+          "testCode": "assert safe_div(20, 4) == 5 and safe_div(20, 0) == 0 and OUTPUT.strip() == \"0\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))",
+            "tier3_walkthrough": "Write:\ndef safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-04-05",
+          "trialType": "code",
+          "title": "3D Distance Squared",
+          "storyPrompt": "You're right outside Vortex's vault! Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.",
+          "objective": "Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.",
+          "concepts": [
+            "error_handling",
+            "tuples",
+            "dictionaries_nested"
+          ],
+          "shardReward": 175,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\n# Print d2\n",
+            "standard": "# Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.\n\n",
+            "challenge": "# 3D Distance Squared\n\n"
+          },
+          "referenceSolution": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)\n",
+          "testCode": "assert d2 == 25 and OUTPUT.strip() == \"25\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)",
+            "tier3_walkthrough": "Write:\np1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-04-06",
+          "trialType": "code",
+          "title": "Collapse Null's Polygon Core (Era 3 Boss)",
+          "storyPrompt": "Final lock before Vortex! Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.",
+          "objective": "Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.",
+          "concepts": [
+            "error_handling",
+            "tuples",
+            "dictionaries_nested"
+          ],
+          "shardReward": 190,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    # Print \"64-BIT UNLOCKED!\"\n    \n",
+            "standard": "# Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.\n\n",
+            "challenge": "# Collapse Null's Polygon Core (Era 3 Boss)\n\n"
+          },
+          "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
+          "testCode": "assert bits == 32 and OUTPUT.strip() == \"64-BIT UNLOCKED!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Vortex!",
+            "tier2_pattern": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")",
+            "tier3_walkthrough": "Write:\nraw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-04-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Vortex's 32-Bit Crown Riddle!",
+          "storyPrompt": "Hidden Rune in Null's Polygon Citadel! What does `2 ** 5` equal?",
+          "objective": "What does `2 ** 5` equal?",
+          "concepts": [
+            "error_handling",
+            "tuples",
+            "dictionaries_nested"
+          ],
+          "shardReward": 170,
+          "unlockId": null,
+          "codeSnippet": "print(2 ** 5)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "32",
+              "explanation": "32-Bit Legend! `2 * 2 * 2 * 2 * 2 = 32`!"
+            },
+            {
+              "id": "b",
+              "label": "64",
+              "explanation": "That's `2 ** 6` \u2014 the Nintendo 64 Era awaits!"
+            },
+            {
+              "id": "c",
+              "label": "10",
+              "explanation": "`**` is exponent!"
+            },
+            {
+              "id": "d",
+              "label": "16",
+              "explanation": "That's `2 ** 4`!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Vortex's Gravity Prism (+1 Hint)",
+            "description": "Hidden treasure from Null's Polygon Citadel!",
+            "unlockId": "bonus-trial-32-04",
+            "equipLayer": "tunic",
+            "equipKey": "emerald"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-04-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Null's Polygon Citadel, {heroName}! My dimensional vault will keep Vortex sealed forever!"
+          },
+          {
+            "speaker": "Vortex",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Null's Polygon Citadel to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Vortex!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "IMPOSSIBLE!! You broke through Null's Polygon Citadel?! Retreating to Polygon Valley (64-Bit N64 Era!)!"
+          },
+          {
+            "speaker": "Vortex",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO!! ERA COMPLETE! Step through the portal into Polygon Valley (64-Bit N64 Era!)!"
+          }
+        ]
+      }
+    }
+  ]
+}
