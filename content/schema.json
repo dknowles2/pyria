@@ -76,6 +76,7 @@
       "type": "object",
       "required": [
         "id",
+        "trialType",
         "title",
         "storyPrompt",
         "objective",

@@ -6,6 +6,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -95,6 +96,7 @@ function main() {
   const seenRealmIds = new Set();
   const seenDragonIds = new Set();
   const seenTrialIds = new Set();
+  const codingTrials = [];
   let totalRealms = 0;
   let totalTrials = 0;
 
@@ -162,8 +164,11 @@ function main() {
           check(validConcepts.has(conceptId), `Trial "${trial.id}" references unknown concept "${conceptId}"`);
         }
 
-        const trialType = trial.trialType ?? 'code';
-        check(VALID_TRIAL_TYPES.has(trialType), `Trial "${trial.id}" has invalid trialType "${trialType}"`);
+        const trialType = trial.trialType;
+        check(
+          typeof trialType === 'string' && VALID_TRIAL_TYPES.has(trialType),
+          `Trial "${trial.id}" missing or invalid trialType "${trialType}"`
+        );
         if (trialType === 'multiple_choice') {
           const choices = Array.isArray(trial.choices) ? trial.choices : null;
           check(choices !== null && choices.length >= 2, `Multiple-choice trial "${trial.id}" needs >= 2 choices`);
@@ -198,6 +203,19 @@ function main() {
             typeof trial.testCode === 'string' && trial.testCode.trim().length > 0,
             `Trial "${trial.id}" missing testCode`
           );
+          if (
+            typeof trial.referenceSolution === 'string' &&
+            trial.referenceSolution.trim().length > 0 &&
+            typeof trial.testCode === 'string' &&
+            trial.testCode.trim().length > 0
+          ) {
+            codingTrials.push({
+              eraId,
+              id: trial.id,
+              referenceSolution: trial.referenceSolution,
+              testCode: trial.testCode,
+            });
+          }
         }
       }
     }
@@ -295,9 +313,45 @@ function main() {
     }
   }
 
+  // 6. Execute coding trial referenceSolutions against testCode in python3
+  let passedCoding = 0;
+  if (codingTrials.length > 0) {
+    const pyScript = `
+import contextlib, io, json, sys
+trials = json.loads(sys.stdin.read())
+errs = []
+passed = 0
+for t in trials:
+    tid = f"{t['eraId']}/{t['id']}"
+    try:
+        ns = {"say": print, "shout": print}
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            exec(compile(t["referenceSolution"], "<student>", "exec"), ns)
+        ns["OUTPUT"] = buf.getvalue()
+        exec(compile(t["testCode"], "<test>", "exec"), ns)
+        passed += 1
+    except Exception as e:
+        errs.append(f"Trial {tid} referenceSolution failed: {type(e).__name__}: {e}")
+print(json.dumps({"passed": passed, "errors": errs}))
+`;
+    const pyRes = spawnSync('python3', ['-c', pyScript], {
+      input: JSON.stringify(codingTrials),
+      encoding: 'utf-8',
+      maxBuffer: 20 * 1024 * 1024,
+    });
+    if (pyRes.status !== 0) {
+      errors.push(`Python referenceSolution runner failed: ${pyRes.stderr || pyRes.stdout || pyRes.error?.message}`);
+    } else {
+      const pyOut = JSON.parse(pyRes.stdout);
+      passedCoding = pyOut.passed;
+      for (const e of pyOut.errors) errors.push(e);
+    }
+  }
+
   if (errors.length === 0) {
     console.log(
-      `Content validation passed: ${(eraOrder || []).length} eras, ${totalRealms} realms, ${totalTrials} trials, ${mapFiles.length} maps, ${unlockIds.size} unlockables.`
+      `Content validation passed: ${(eraOrder || []).length} eras, ${totalRealms} realms, ${totalTrials} trials (${passedCoding}/${codingTrials.length} referenceSolutions passed), ${mapFiles.length} maps, ${unlockIds.size} unlockables.`
     );
   }
   reportAndExit();
