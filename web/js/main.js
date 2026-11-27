@@ -13,15 +13,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261127c';
-import { audio } from './audio.js?v=20261127c';
-import { music, resolveRegionTheme } from './music.js?v=20261127c';
-import { pyRunner } from './pyRunner.js?v=20261127c';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127c';
-import { SpriteManager } from './sprites.js?v=20261127c';
-import { WorldEngine } from './world.js?v=20261127c';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127c';
-import { playCutscene } from './cutscene.js?v=20261127c';
+} from './api.js?v=20261127d';
+import { audio } from './audio.js?v=20261127d';
+import { music, resolveRegionTheme } from './music.js?v=20261127d';
+import { pyRunner } from './pyRunner.js?v=20261127d';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127d';
+import { SpriteManager } from './sprites.js?v=20261127d';
+import { WorldEngine } from './world.js?v=20261127d';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127d';
+import { playCutscene } from './cutscene.js?v=20261127d';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -378,6 +378,32 @@ function updateInteractPrompt(entity) {
   prompt.classList.remove('hidden');
 }
 
+function renderAdminRealmJump() {
+  const selectEl = $('#hud-admin-realm-jump');
+  if (!selectEl) return;
+  if (!state.me?.isAdmin) {
+    selectEl.classList.add('hidden');
+    selectEl.innerHTML = '';
+    return;
+  }
+  const eras = getAllLoadedEras();
+  selectEl.innerHTML = eras
+    .map((era) => {
+      const opts = (era.realms || [])
+        .map(
+          (r) =>
+            `<option value="${escapeHtml(r.id)}">R${Number(r.number) || 0}: ${escapeHtml(r.name)}</option>`
+        )
+        .join('');
+      return `<optgroup label="${escapeHtml(era.name)}">${opts}</optgroup>`;
+    })
+    .join('');
+  if (state.activeRealm?.id) {
+    selectEl.value = state.activeRealm.id;
+  }
+  selectEl.classList.remove('hidden');
+}
+
 // ==================== HUD UPDATES ====================
 function updateHud() {
   const save = state.activeSave;
@@ -388,6 +414,10 @@ function updateHud() {
   $('#hud-era-badge').textContent = VISUAL_ERA_LABELS[eraKey] || '8-Bit NES';
   $('#btn-hud-era-toggle').textContent = VISUAL_ERA_SHORT[eraKey] || '8-Bit';
   $('#hud-realm-name').textContent = state.activeRealm?.name || 'Whispering Meadow';
+  const adminJumpEl = $('#hud-admin-realm-jump');
+  if (adminJumpEl && state.me?.isAdmin && state.activeRealm?.id) {
+    adminJumpEl.value = state.activeRealm.id;
+  }
   $('#hud-shards').textContent = String(save.byteShards ?? 0);
   $('#btn-hud-mute').textContent = audio.isMuted() ? '🔇' : '🔊';
 
@@ -1407,6 +1437,20 @@ function wireControls() {
   attachAutocomplete(ccCodeEl, () => buildCharCreateSuggestions(state.catalog));
 
   // HUD
+  $('#hud-admin-realm-jump')?.addEventListener('change', async (e) => {
+    const targetRealmId = e.target.value;
+    e.target.blur();
+    if (!state.me?.isAdmin || !state.activeSave || !targetRealmId) return;
+    if (targetRealmId === state.activeRealm?.id) return;
+    try {
+      audio.playPortal();
+      await loadRealm(targetRealmId, null);
+      await persistSave();
+    } catch (err) {
+      audio.playError();
+      showToast(`Jump failed: ${err.message}`);
+    }
+  });
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
   $('#btn-hud-era-toggle').addEventListener('click', async () => {
     if (!state.activeSave) return;
@@ -1644,6 +1688,7 @@ async function init() {
     state.sprites.preloadCore('8bit');
     state.sprites.preloadCore('16bit');
     renderAccountIdentityBar();
+    renderAdminRealmJump();
 
     state.modals = new ModalManager($('#modal-backdrop'), $('#modal-content'), {
       sprites: state.sprites,

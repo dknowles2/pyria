@@ -2089,3 +2089,22 @@ textarea, input, pre, code {
   margin-bottom: 3px;
   font-size: 14.5px;
 }
+
+/* ==================== ADMIN ERA/REALM JUMP SELECTOR ==================== */
+.hud-admin-jump {
+  max-width: 195px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--accent-violet);
+  background: rgba(167, 139, 250, 0.14);
+  color: #ede9fe;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hud-admin-jump optgroup,
+.hud-admin-jump option {
+  background: #0f172a;
+  color: #e2e8f0;
+}
