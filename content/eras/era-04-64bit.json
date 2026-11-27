@@ -875,8 +875,718 @@
       }
     },
     {
-      "id": "realm-64-03-observatory",
+      "id": "realm-64-05-workshop",
       "number": 3,
+      "name": "Poly-Forge Arena",
+      "dragon": {
+        "id": "dragon-vector",
+        "name": "Vector",
+        "title": "Architect of 3D Forms",
+        "element": "Light",
+        "rescueDialogue": "Polygons aligned! Your composed scenes and polymorphic 3D objects brought the arena to life! Onward to the Clockwork Testing Lab!"
+      },
+      "miniVisualUpgrade": "64-Bit Upgrade: Dynamic 3D light beams and articulated polygon sculptures animate in the arena.",
+      "storyIntro": "In Poly-Forge Arena, 3D architect dragon Vector teaches how real 3D game engines compose objects inside scenes and tick different object types together with polymorphism!",
+      "storyOutro": "Vector illuminates the bridge toward the Clockwork Testing Lab!",
+      "primaryConcepts": [
+        "classes_intro",
+        "class_inheritance",
+        "world_scripting_3d"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-64-05-01",
+          "trialType": "multiple_choice",
+          "title": "Polymorphic 3D Shapes!",
+          "storyPrompt": "Welcome to Poly-Forge Arena! Different 3D classes can share the same method name (like `.draw()`), so one loop can draw every shape in a scene!",
+          "objective": "Predict what `[s.draw() for s in shapes]` prints.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "codeSnippet": "class Cube:\n    def draw(self): return \"BOX\"\nclass Cone:\n    def draw(self): return \"TIP\"\n\nshapes = [Cube(), Cone()]\nprint([s.draw() for s in shapes])",
+          "choices": [
+            {
+              "id": "a",
+              "label": "['BOX', 'BOX']",
+              "explanation": "Each shape runs its OWN `.draw()` method — `Cone` returns `'TIP'`!"
+            },
+            {
+              "id": "b",
+              "label": "['BOX', 'TIP']",
+              "explanation": "Spot on! `Cube().draw()` returns `'BOX'` and `Cone().draw()` returns `'TIP'`!"
+            },
+            {
+              "id": "c",
+              "label": "['Cube', 'Cone']",
+              "explanation": "`.draw()` returns the strings `'BOX'` and `'TIP'`, not the class names!"
+            },
+            {
+              "id": "d",
+              "label": "TypeError",
+              "explanation": "Lists can hold instances of different classes cleanly!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Call `.draw()` on `Cube()` then `Cone()`!'",
+            "tier2_pattern": "['BOX', 'TIP']",
+            "tier3_walkthrough": "Tap Option B (`['BOX', 'TIP']`)!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-05-02",
+          "trialType": "fix_bug",
+          "title": "The Broken Composed Light!",
+          "storyPrompt": "Inside `Scene.total_light(self)`, Lord Null forgot `self.` before `lights`, causing a `NameError`! Fix it so Python prints `30`.",
+          "objective": "Fix `Scene.total_light(self)` to use `self.lights` so it prints 30.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "bugSummary": "Missing `self.` before `lights` causes a NameError.",
+          "starterCode": {
+            "explorer": "class Scene:\n    def __init__(self, lights):\n        self.lights = lights\n    def total_light(self):\n        return sum(lights)\n\nprint(Scene([10, 20]).total_light())\n",
+            "standard": "class Scene:\n    def __init__(self, lights):\n        self.lights = lights\n    def total_light(self):\n        return sum(lights)\n\nprint(Scene([10, 20]).total_light())\n",
+            "challenge": "class Scene:\n    def __init__(self, lights):\n        self.lights = lights\n    def total_light(self):\n        return sum(lights)\n\nprint(Scene([10, 20]).total_light())\n"
+          },
+          "referenceSolution": "class Scene:\n    def __init__(self, lights):\n        self.lights = lights\n    def total_light(self):\n        return sum(self.lights)\n\nprint(Scene([10, 20]).total_light())\n",
+          "testCode": "assert OUTPUT.strip() == '30', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps line 5: 'Inside a method, read object attributes with `self.lights`!'",
+            "tier2_pattern": "return sum(self.lights)",
+            "tier3_walkthrough": "Change `sum(lights)` to `sum(self.lights)`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "self_attr",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-05-03",
+          "trialType": "code",
+          "title": "Compute 3D Box Volume",
+          "storyPrompt": "Add a `volume(self)` method to `Box3D` that returns `self.w * self.h * self.d`, then print `Box3D(2, 3, 4).volume()`!",
+          "objective": "Add `volume(self)` to `Box3D` returning `self.w * self.h * self.d`, then print `Box3D(2, 3, 4).volume()`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Box3D:\n    def __init__(self, w, h, d):\n        self.w, self.h, self.d = w, h, d\n    def volume(self):\n        return self.w * self.h * ???\n\nprint(Box3D(2, 3, 4).volume())\n",
+            "standard": "class Box3D:\n    def __init__(self, w, h, d):\n        self.w, self.h, self.d = w, h, d\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Box3D:\n    def __init__(self, w, h, d):\n        self.w, self.h, self.d = w, h, d\n    def volume(self):\n        return self.w * self.h * self.d\n\nprint(Box3D(2, 3, 4).volume())\n",
+          "testCode": "assert Box3D(2, 3, 4).volume() == 24 and Box3D(1, 5, 2).volume() == 10\nassert OUTPUT.strip() == '24', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Define `def volume(self):` returning `self.w * self.h * self.d`!'",
+            "tier2_pattern": "    def volume(self):\n        return self.w * self.h * self.d",
+            "tier3_walkthrough": "Add `volume(self)` and `print(Box3D(2, 3, 4).volume())`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return",
+            "self_attr",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-05-04",
+          "trialType": "code",
+          "title": "Compose a Scene of Entities",
+          "storyPrompt": "A `Scene` object can hold a list of `Entity` objects inside `self.items`! Add `count(self)` returning `len(self.items)` and print the count for 2 entities.",
+          "objective": "Add `count(self)` to `Scene` returning `len(self.items)`. Create `s = Scene([Entity('A'), Entity('B')])` and print `s.count()`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Entity:\n    def __init__(self, name): self.name = name\n\nclass Scene:\n    def __init__(self, items):\n        self.items = items\n    def count(self):\n        return len(self.???)\n\ns = Scene([Entity(\"A\"), Entity(\"B\")])\nprint(s.count())\n",
+            "standard": "class Entity:\n    def __init__(self, name):\n        self.name = name\n\nclass Scene:\n    def __init__(self, items):\n        self.items = items\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Entity:\n    def __init__(self, name):\n        self.name = name\n\nclass Scene:\n    def __init__(self, items):\n        self.items = items\n    def count(self):\n        return len(self.items)\n\ns = Scene([Entity(\"A\"), Entity(\"B\")])\nprint(s.count())\n",
+          "testCode": "assert s.count() == 2\nassert OUTPUT.strip() == '2', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Return `len(self.items)` inside `count(self)`!'",
+            "tier2_pattern": "    def count(self):\n        return len(self.items)",
+            "tier3_walkthrough": "Add `count(self)`, create `s = Scene([Entity(\"A\"), Entity(\"B\")])`, and `print(s.count())`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return",
+            "call:len",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-05-05",
+          "trialType": "code",
+          "title": "Polymorphic Update Loop",
+          "storyPrompt": "Loop over `props = [Lamp(), Door()]` calling `.update()` on each object, collecting results into `events`, and printing `events`!",
+          "objective": "Create `props = [Lamp(), Door()]`, build `events` by calling `p.update()` on each item, and print `events`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d",
+            "list_comprehensions"
+          ],
+          "shardReward": 75,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Lamp:\n    def update(self): return \"glow\"\nclass Door:\n    def update(self): return \"creak\"\n\nprops = [Lamp(), Door()]\nevents = [p.update() for p in ???]\nprint(events)\n",
+            "standard": "class Lamp:\n    def update(self):\n        return \"glow\"\n\nclass Door:\n    def update(self):\n        return \"creak\"\n\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Lamp:\n    def update(self):\n        return \"glow\"\n\nclass Door:\n    def update(self):\n        return \"creak\"\n\nprops = [Lamp(), Door()]\nevents = [p.update() for p in props]\nprint(events)\n",
+          "testCode": "assert events == ['glow', 'creak']\nassert OUTPUT.strip() == \"['glow', 'creak']\", f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Put `[Lamp(), Door()]` in `props`, then `[p.update() for p in props]`!'",
+            "tier2_pattern": "props = [Lamp(), Door()]\nevents = [p.update() for p in props]\nprint(events)",
+            "tier3_walkthrough": "Add:\nprops = [Lamp(), Door()]\nevents = [p.update() for p in props]\nprint(events)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "list_comp",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-05-06",
+          "trialType": "code",
+          "title": "Subclass a 3D Prop",
+          "storyPrompt": "Subclass `Prop` with `class MovingProp(Prop):` overriding `describe(self)` to return `\"MOVING\"`, then print `MovingProp().describe()`!",
+          "objective": "Define subclass `MovingProp(Prop)` overriding `describe(self)` to return 'MOVING', then print `MovingProp().describe()`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 75,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Prop:\n    def describe(self): return \"STATIC\"\n\nclass MovingProp(Prop):\n    def describe(self):\n        return \"???\"\n\nprint(MovingProp().describe())\n",
+            "standard": "class Prop:\n    def describe(self):\n        return \"STATIC\"\n\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Prop:\n    def describe(self):\n        return \"STATIC\"\n\nclass MovingProp(Prop):\n    def describe(self):\n        return \"MOVING\"\n\nprint(MovingProp().describe())\n",
+          "testCode": "assert issubclass(MovingProp, Prop) and MovingProp().describe() == 'MOVING'\nassert OUTPUT.strip() == 'MOVING', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Write `class MovingProp(Prop):` and override `describe(self)` to return `\"MOVING\"`!'",
+            "tier2_pattern": "class MovingProp(Prop):\n    def describe(self):\n        return \"MOVING\"",
+            "tier3_walkthrough": "Add `MovingProp(Prop)` and `print(MovingProp().describe())`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-05-07",
+          "trialType": "code",
+          "title": "Power Vector's Poly-Forge Engine (Boss)",
+          "storyPrompt": "Compose a 3D `Engine` holding `parts = [Gear(20), Gear(44)]`! Sum `p.power` across `self.parts` in `total_power(self)`; when it equals `64`, print `\"VECTOR FREE!\"`!",
+          "objective": "Define `Engine` storing `self.parts` with `total_power(self)` returning the sum of `p.power` across `self.parts`. If `Engine([Gear(20), Gear(44)]).total_power()` equals 64, print 'VECTOR FREE!'.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 95,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Gear:\n    def __init__(self, power): self.power = power\n\nclass Engine:\n    def __init__(self, parts): self.parts = parts\n    def total_power(self):\n        return sum(p.power for p in self.parts)\n\nif Engine([Gear(20), Gear(44)]).total_power() == 64:\n    print(\"VECTOR FREE!\")\n",
+            "standard": "class Gear:\n    def __init__(self, power):\n        self.power = power\n\n",
+            "challenge": ""
+          },
+          "referenceSolution": "class Gear:\n    def __init__(self, power):\n        self.power = power\n\nclass Engine:\n    def __init__(self, parts):\n        self.parts = parts\n    def total_power(self):\n        return sum(p.power for p in self.parts)\n\nif Engine([Gear(20), Gear(44)]).total_power() == 64:\n    print(\"VECTOR FREE!\")\n",
+          "testCode": "assert Engine([Gear(10), Gear(5)]).total_power() == 15\nassert OUTPUT.strip() == 'VECTOR FREE!', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Define `Engine` with `self.parts = parts` and `total_power(self)` summing `p.power`!'",
+            "tier2_pattern": "class Engine:\n    def __init__(self, parts):\n        self.parts = parts\n    def total_power(self):\n        return sum(p.power for p in self.parts)",
+            "tier3_walkthrough": "Define `Engine`, then check `if Engine([Gear(20), Gear(44)]).total_power() == 64: print(\"VECTOR FREE!\")`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "def",
+            "return",
+            "if",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-05-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Vector's Polymorphism Riddle!",
+          "storyPrompt": "A glowing light-beam rune asks: why is polymorphism useful in a 3D game engine?",
+          "objective": "Choose the main benefit of polymorphism.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "choices": [
+            {
+              "id": "a",
+              "label": "One loop can call the same method name on different object types",
+              "explanation": "Spot on! Polymorphism lets one game loop call `.update()` or `.draw()` on every object!"
+            },
+            {
+              "id": "b",
+              "label": "It deletes all classes automatically",
+              "explanation": "Polymorphism works WITH your classes — it doesn't delete them!"
+            },
+            {
+              "id": "c",
+              "label": "It only works with integers",
+              "explanation": "Polymorphism is an object-oriented superpower for custom classes!"
+            },
+            {
+              "id": "d",
+              "label": "It prevents methods from returning values",
+              "explanation": "Polymorphic methods can return any value they want!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Remember how `[o.tick() for o in objs]` worked on both `Torch` and `Fountain`!'",
+            "tier2_pattern": "Same method name across different classes",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-64-05-07",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Stop right there, {heroName}! You will NEVER unlock Vector's Logic Vault in Poly-Forge Arena!"
+          },
+          {
+            "speaker": "Vector",
+            "spriteKey": "nova",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "You've practiced every piece, {heroName}! Put it all together and break Lord Null's seal!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! We've got this, {heroName} — let's rescue Vector!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Nooo! My Poly-Forge Arena lock shattered?! Returning None... OUT!"
+          },
+          {
+            "speaker": "Vector",
+            "spriteKey": "nova",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "Thank you, {heroName}! My scales shine again! The portal to Clockwork Testing Lab is open!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Vector is free! Onward to Clockwork Testing Lab!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-64-06-atelier",
+      "number": 4,
+      "name": "Clockwork Testing Lab",
+      "dragon": {
+        "id": "dragon-verify",
+        "name": "Verify",
+        "title": "Sentinel of Truth",
+        "element": "Lightning",
+        "rescueDialogue": "All assertions GREEN! You debug like a true 64-Bit Code-Tamer! Step through to Star-Mesh Observatory!"
+      },
+      "miniVisualUpgrade": "64-Bit Upgrade: Emerald diagnostic runes pulse cleanly across the lab's precision gears.",
+      "storyIntro": "In the Clockwork Testing Lab, lightning dragon Verify teaches you how real programmers catch bugs early using `assert` self-tests and edge-case checks!",
+      "storyOutro": "Verify's diagnostic beacons flash green, opening the portal to Star-Mesh Observatory!",
+      "primaryConcepts": [
+        "debugging"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-64-06-01",
+          "trialType": "multiple_choice",
+          "title": "Spot the Failing assert!",
+          "storyPrompt": "Welcome to the Clockwork Testing Lab! Remember: `assert condition` stays quiet if `condition` is `True`, and raises `AssertionError` if it is `False`.",
+          "objective": "Choose the `assert` line that raises an `AssertionError`.",
+          "concepts": [
+            "debugging"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "choices": [
+            {
+              "id": "a",
+              "label": "Option A",
+              "code": "assert 2 + 3 == 5",
+              "explanation": "`2 + 3 == 5` is `True`, so this assertion passes quietly!"
+            },
+            {
+              "id": "b",
+              "label": "Option B",
+              "code": "assert len([1, 2]) == 2",
+              "explanation": "`len([1, 2])` is `2`, so this assertion passes!"
+            },
+            {
+              "id": "c",
+              "label": "Option C",
+              "code": "assert max(4, 9) == 4",
+              "explanation": "Spot on! `max(4, 9)` is `9` (not `4`), so `9 == 4` is `False` and raises `AssertionError`!"
+            },
+            {
+              "id": "d",
+              "label": "Option D",
+              "code": "assert \"a\" in \"cat\"",
+              "explanation": "`\"a\"` IS in `\"cat\"`, so this assertion passes!"
+            }
+          ],
+          "correctChoiceId": "c",
+          "hints": {
+            "tier1_nudge": "Pip points at `max(4, 9)`: 'Which one is the BIGGER number of 4 and 9?'",
+            "tier2_pattern": "max(4, 9) is 9, not 4",
+            "tier3_walkthrough": "Tap Option C!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-06-02",
+          "trialType": "fix_bug",
+          "title": "The Off-by-One Counter!",
+          "storyPrompt": "Our `assert total == 10` caught a bug! The accumulator `total` started at `1` instead of `0`. Fix the starting value so the `assert` passes and Python prints `10`.",
+          "objective": "Fix `total` so the `assert total == 10` passes and Python prints 10.",
+          "concepts": [
+            "debugging",
+            "for_loops"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "bugSummary": "`total` starts at 1 instead of 0, making `assert total == 10` fail.",
+          "starterCode": {
+            "explorer": "total = 1\nfor n in [2, 3, 5]:\n    total += n\nassert total == 10\nprint(total)\n",
+            "standard": "total = 1\nfor n in [2, 3, 5]:\n    total += n\nassert total == 10\nprint(total)\n",
+            "challenge": "total = 1\nfor n in [2, 3, 5]:\n    total += n\nassert total == 10\nprint(total)\n"
+          },
+          "referenceSolution": "total = 0\nfor n in [2, 3, 5]:\n    total += n\nassert total == 10\nprint(total)\n",
+          "testCode": "assert total == 10\nassert OUTPUT.strip() == '10', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at line 1: 'An accumulator sum should start at `0`, not `1`!'",
+            "tier2_pattern": "total = 0",
+            "tier3_walkthrough": "Change `total = 1` to `total = 0`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "compare",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-06-03",
+          "trialType": "code",
+          "title": "Self-Test a Helper Function",
+          "storyPrompt": "Given `def double(n): return n * 2`, write two `assert` checks verifying `double(5) == 10` and `double(0) == 0`, then print `\"PASSED\"`!",
+          "objective": "Write `assert` statements verifying `double(5) == 10` and `double(0) == 0`, then print 'PASSED'.",
+          "concepts": [
+            "debugging",
+            "functions_def"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def double(n):\n    return n * 2\n\nassert double(5) == ???\nassert double(0) == 0\nprint(\"PASSED\")\n",
+            "standard": "def double(n):\n    return n * 2\n\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def double(n):\n    return n * 2\n\nassert double(5) == 10\nassert double(0) == 0\nprint(\"PASSED\")\n",
+          "testCode": "assert OUTPUT.strip() == 'PASSED', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'Write `assert double(5) == 10`, `assert double(0) == 0`, and `print(\"PASSED\")`!'",
+            "tier2_pattern": "assert double(5) == 10\nassert double(0) == 0\nprint(\"PASSED\")",
+            "tier3_walkthrough": "Add:\nassert double(5) == 10\nassert double(0) == 0\nprint(\"PASSED\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "compare",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-06-04",
+          "trialType": "code",
+          "title": "Debug a Larger-Of-Two Function",
+          "storyPrompt": "Write `def bigger(a, b):` that returns `a` if `a >= b`, otherwise returns `b`. Verify it with `assert bigger(3, 8) == 8` and print `bigger(3, 8)`!",
+          "objective": "Define `bigger(a, b)` returning the larger number, verify `assert bigger(3, 8) == 8`, and print `bigger(3, 8)`.",
+          "concepts": [
+            "debugging",
+            "functions_def",
+            "functions_return",
+            "conditionals_if"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def bigger(a, b):\n    if a >= b:\n        return a\n    return ???\n\nassert bigger(3, 8) == 8\nprint(bigger(3, 8))\n",
+            "standard": "def bigger(a, b):\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def bigger(a, b):\n    if a >= b:\n        return a\n    return b\n\nassert bigger(3, 8) == 8\nprint(bigger(3, 8))\n",
+          "testCode": "assert bigger(9, 2) == 9 and bigger(3, 8) == 8 and bigger(5, 5) == 5\nassert OUTPUT.strip() == '8', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip says: 'If `a >= b`, return `a`; otherwise return `b`!'",
+            "tier2_pattern": "def bigger(a, b):\n    if a >= b:\n        return a\n    return b",
+            "tier3_walkthrough": "Complete `bigger(a, b)`, add `assert bigger(3, 8) == 8`, and `print(bigger(3, 8))`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "if",
+            "return",
+            "compare",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-06-05",
+          "trialType": "code",
+          "title": "Guard an Empty List Edge Case",
+          "storyPrompt": "Dividing by `len(nums)` crashes if `nums` is empty (`[]`)! Write `def safe_avg(nums):` returning `0` if `len(nums) == 0`, otherwise `sum(nums) // len(nums)`. Verify `assert safe_avg([]) == 0`!",
+          "objective": "Define `safe_avg(nums)` returning 0 for an empty list or `sum(nums) // len(nums)` otherwise. Verify `assert safe_avg([]) == 0` and print `safe_avg([10, 20])`.",
+          "concepts": [
+            "debugging",
+            "functions_def",
+            "functions_return",
+            "conditionals_if"
+          ],
+          "shardReward": 75,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def safe_avg(nums):\n    if len(nums) == 0:\n        return 0\n    return sum(nums) // len(???)\n\nassert safe_avg([]) == 0\nprint(safe_avg([10, 20]))\n",
+            "standard": "def safe_avg(nums):\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def safe_avg(nums):\n    if len(nums) == 0:\n        return 0\n    return sum(nums) // len(nums)\n\nassert safe_avg([]) == 0\nprint(safe_avg([10, 20]))\n",
+          "testCode": "assert safe_avg([]) == 0 and safe_avg([10, 20]) == 15\nassert OUTPUT.strip() == '15', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Check `if len(nums) == 0: return 0` first, then `return sum(nums) // len(nums)`!'",
+            "tier2_pattern": "def safe_avg(nums):\n    if len(nums) == 0:\n        return 0\n    return sum(nums) // len(nums)",
+            "tier3_walkthrough": "Complete `safe_avg(nums)`, add `assert safe_avg([]) == 0`, and `print(safe_avg([10, 20]))`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "if",
+            "return",
+            "call:len",
+            "call:sum",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-06-06",
+          "trialType": "code",
+          "title": "Test All Three Edge Cases",
+          "storyPrompt": "Good tests check LOW, MIDDLE, and HIGH inputs! Given `clamp(n, lo, hi)`, write 3 `assert` lines checking `clamp(-5, 0, 10) == 0`, `clamp(5, 0, 10) == 5`, and `clamp(20, 0, 10) == 10`, then print `\"ALL 3 PASSED\"`!",
+          "objective": "Add 3 `assert` checks for low (-5 -> 0), mid (5 -> 5), and high (20 -> 10) inputs to `clamp`, then print 'ALL 3 PASSED'.",
+          "concepts": [
+            "debugging",
+            "functions_def"
+          ],
+          "shardReward": 75,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\n\nassert clamp(-5, 0, 10) == 0\nassert clamp(5, 0, 10) == ???\nassert clamp(20, 0, 10) == 10\nprint(\"ALL 3 PASSED\")\n",
+            "standard": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\n\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\n\nassert clamp(-5, 0, 10) == 0\nassert clamp(5, 0, 10) == 5\nassert clamp(20, 0, 10) == 10\nprint(\"ALL 3 PASSED\")\n",
+          "testCode": "assert OUTPUT.strip() == 'ALL 3 PASSED', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts: 'Test `-5` (-> 0), `5` (-> 5), and `20` (-> 10), then print `\"ALL 3 PASSED\"`!'",
+            "tier2_pattern": "assert clamp(-5, 0, 10) == 0\nassert clamp(5, 0, 10) == 5\nassert clamp(20, 0, 10) == 10\nprint(\"ALL 3 PASSED\")",
+            "tier3_walkthrough": "Add the 3 `assert` lines and `print(\"ALL 3 PASSED\")`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "compare",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-06-07",
+          "trialType": "code",
+          "title": "Pass Verify's 64-Bit Diagnostic Suite (Boss)",
+          "storyPrompt": "Write `def is_valid_bit(n):` returning `True` when `n` is between `1` and `64` inclusive (`1 <= n <= 64`). Verify with `assert is_valid_bit(64)` and `assert not is_valid_bit(0)`, then print `\"VERIFY FREE!\"`!",
+          "objective": "Define `is_valid_bit(n)` returning `1 <= n <= 64`. Assert `is_valid_bit(64)` and `not is_valid_bit(0)`, then print 'VERIFY FREE!'.",
+          "concepts": [
+            "debugging",
+            "functions_def",
+            "functions_return"
+          ],
+          "shardReward": 95,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def is_valid_bit(n):\n    return 1 <= n <= 64\n\nassert is_valid_bit(64)\nassert not is_valid_bit(0)\nprint(\"VERIFY FREE!\")\n",
+            "standard": "# Define is_valid_bit(n), run both asserts, and print \"VERIFY FREE!\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "def is_valid_bit(n):\n    return 1 <= n <= 64\n\nassert is_valid_bit(64)\nassert not is_valid_bit(0)\nprint(\"VERIFY FREE!\")\n",
+          "testCode": "assert is_valid_bit(1) is True and is_valid_bit(64) is True and is_valid_bit(0) is False and is_valid_bit(65) is False\nassert OUTPUT.strip() == 'VERIFY FREE!', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Return `1 <= n <= 64` inside `is_valid_bit(n)`, then run both asserts and print `\"VERIFY FREE!\"`!'",
+            "tier2_pattern": "def is_valid_bit(n):\n    return 1 <= n <= 64",
+            "tier3_walkthrough": "Write `is_valid_bit(n)`, both `assert` lines, and `print(\"VERIFY FREE!\")`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "compare",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-64-06-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Verify's Off-by-One Riddle!",
+          "storyPrompt": "A crackling lab rune asks: why did `range(1, 5)` miss the number `5`?",
+          "objective": "Explain why `sum(range(1, 5))` equals 10 instead of 15.",
+          "concepts": [
+            "debugging",
+            "range_function"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "choices": [
+            {
+              "id": "a",
+              "label": "range(1, 5) stops right before 5 (visiting 1, 2, 3, 4)",
+              "explanation": "Spot on! `range(start, stop)` excludes `stop`, so you need `range(1, 6)` to include `5`!"
+            },
+            {
+              "id": "b",
+              "label": "sum() ignores odd numbers",
+              "explanation": "`sum()` adds every number you give it — it was `range(1, 5)` that stopped at `4`!"
+            },
+            {
+              "id": "c",
+              "label": "range() always skips the first number",
+              "explanation": "`range(1, 5)` INCLUDES `1` and excludes `5`!"
+            },
+            {
+              "id": "d",
+              "label": "Python cannot add 5",
+              "explanation": "Python loves adding 5 — you just need `range(1, 6)`!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Remember how `range(start, stop)` stops one BEFORE `stop`!'",
+            "tier2_pattern": "range(1, 5) -> 1, 2, 3, 4",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-64-06-07",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Stop right there, {heroName}! You will NEVER unlock Verify's Logic Vault in Clockwork Testing Lab!"
+          },
+          {
+            "speaker": "Verify",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "You've practiced every piece, {heroName}! Put it all together and break Lord Null's seal!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! We've got this, {heroName} — let's rescue Verify!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Nooo! My Clockwork Testing Lab lock shattered?! Returning None... OUT!"
+          },
+          {
+            "speaker": "Verify",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "Thank you, {heroName}! My scales shine again! The portal to Star-Mesh Observatory is open!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Verify is free! Onward to Star-Mesh Observatory!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-64-03-observatory",
+      "number": 5,
       "name": "Star-Mesh Observatory",
       "dragon": {
         "id": "dragon-quasar",
@@ -1393,7 +2103,7 @@
     },
     {
       "id": "realm-64-04-sanctum",
-      "number": 4,
+      "number": 6,
       "name": "Null's 64-Bit Sanctum",
       "dragon": {
         "id": "dragon-aurelion",
