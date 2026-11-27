@@ -44,7 +44,13 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
 
     case 'IndentationError':
     case 'TabError':
-      pipMessage = `Watch your spacing${linePart}! Code inside an 'if' or 'for' block needs to be indented 4 spaces (press Tab), and normal lines start at the left edge.`;
+      if (msg.includes('expected an indented block')) {
+        pipMessage = `Watch your spacing${linePart}! After a colon ':', the lines inside MUST be pushed over by 4 spaces — put your cursor at the start of that line and tap '⇥ Indent' (or 4 spaces)!`;
+      } else if (msg.includes('unexpected indent')) {
+        pipMessage = `Extra spaces spotted${linePart}! Normal lines (not inside an 'if' or 'for') need to start all the way at the left edge with 0 spaces.`;
+      } else {
+        pipMessage = `Watch your spacing${linePart}! Code inside an 'if', 'elif', 'else', or 'for' block needs to be indented 4 spaces (tap '⇥ Indent'), and normal lines start at the left edge.`;
+      }
       break;
 
     case 'NameError': {
@@ -135,7 +141,7 @@ class PyRunner {
     }
     this.ready = false;
     this.initError = null;
-    this.worker = new Worker('/js/pyWorker.js?v=20261127a');
+    this.worker = new Worker('/js/pyWorker.js?v=20261127b');
     this.worker.onmessage = (event) => this.handleMessage(event.data);
     this.worker.onerror = (err) => {
       this.initError = err.message || 'Worker failed';

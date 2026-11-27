@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261127a';
-import { music } from './music.js?v=20261127a';
-import { pyRunner } from './pyRunner.js?v=20261127a';
+import { audio } from './audio.js?v=20261127b';
+import { music } from './music.js?v=20261127b';
+import { pyRunner } from './pyRunner.js?v=20261127b';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261127a';
+} from './autocomplete.js?v=20261127b';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -19,7 +19,7 @@ function escapeHtml(str) {
 }
 
 const BASE_QUICK_KEYS = [
-  { label: 'Tab (4 sp)', insert: '    ', cursorOffset: 4 },
+  { label: '⇥ Indent', insert: '    ', cursorOffset: 4 },
   { label: '( )', insert: '()', cursorOffset: 1 },
   { label: '" "', insert: '""', cursorOffset: 1 },
   { label: ':', insert: ':', cursorOffset: 1 },
@@ -86,6 +86,23 @@ export function attachCodeEditorKeys(textarea, onRun) {
       textarea.value = val.substring(0, start) + '    ' + val.substring(end);
       textarea.selectionStart = textarea.selectionEnd = start + 4;
       textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    } else if (e.key === 'Enter' && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+      const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+      const currentLine = val.substring(lineStart, start);
+      const leadingSpaces = (currentLine.match(/^ */) || [''])[0];
+      const trimmed = currentLine.trim();
+      const extraIndent = trimmed.endsWith(':') && !trimmed.startsWith('#') ? '    ' : '';
+      const nextIndent = leadingSpaces + extraIndent;
+      if (nextIndent.length > 0) {
+        e.preventDefault();
+        const insert = '\n' + nextIndent;
+        textarea.value = val.substring(0, start) + insert + val.substring(end);
+        textarea.selectionStart = textarea.selectionEnd = start + insert.length;
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
       if (onRun) onRun();
@@ -659,6 +676,8 @@ export class ModalManager {
       const isFixBug = trial.trialType === 'fix_bug';
       const hasHashComment = (code) => /^\s*#/m.test(code || '');
       const showCommentTip = (Number(realm?.number) || 1) <= 3 && hasHashComment(initialCode);
+      const blockConcepts = new Set(['conditionals_if', 'conditionals_elif_else', 'loops', 'functions']);
+      const showIndentTip = (trial.concepts || []).some((c) => blockConcepts.has(c));
       const ensureTrailingEditableLine = (code) => {
         if (!code) return '';
         const lines = code.split('\n');
@@ -712,6 +731,17 @@ export class ModalManager {
           <strong>💬 What are <code>#</code> lines?</strong>
           Lines starting with <code>#</code> are <strong>comments</strong> — helpful notes that Python completely ignores. Type your real Python code on a <strong>new line without <code>#</code></strong>!
         </div>
+
+        ${
+          showIndentTip
+            ? `
+              <div class="comment-tip-banner">
+                <strong>📏 Golden Rule — Colons <code>:</code> &amp; Indentation:</strong>
+                End every <code>if</code>, <code>elif</code>, <code>else</code>, <code>for</code>, or <code>def</code> line with a colon <code>:</code>, then indent the lines inside by <strong>4 spaces</strong> (tap <strong>⇥ Indent</strong> or press <strong>Enter</strong> right after <code>:</code>).
+              </div>
+            `
+            : ''
+        }
 
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <span class="muted-text">Quick symbol buttons (tap to insert):</span>
