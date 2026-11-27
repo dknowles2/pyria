@@ -13,15 +13,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126z';
-import { audio } from './audio.js?v=20261126z';
-import { music, resolveRegionTheme } from './music.js?v=20261126z';
-import { pyRunner } from './pyRunner.js?v=20261126z';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126z';
-import { SpriteManager } from './sprites.js?v=20261126z';
-import { WorldEngine } from './world.js?v=20261126z';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126z';
-import { playCutscene } from './cutscene.js?v=20261126z';
+} from './api.js?v=20261127a';
+import { audio } from './audio.js?v=20261127a';
+import { music, resolveRegionTheme } from './music.js?v=20261127a';
+import { pyRunner } from './pyRunner.js?v=20261127a';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127a';
+import { SpriteManager } from './sprites.js?v=20261127a';
+import { WorldEngine } from './world.js?v=20261127a';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127a';
+import { playCutscene } from './cutscene.js?v=20261127a';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -556,6 +556,7 @@ function setCharCreateMode(advanced) {
   if (state.ccAdvancedMode) {
     // Sync latest visual selections into the Python editor
     $('#charcreate-code').value = buildHeroForgePython(state.ccAppearance);
+    state.ccGutter?.setMarks(new Map());
     visualPanel?.classList.add('hidden');
     livePyBox?.classList.add('hidden');
     advancedPanel?.classList.remove('hidden');
@@ -721,6 +722,7 @@ function buildCharCreateSpellbook() {
           }
           codeEl.value = lines.join('\n');
         }
+        state.ccGutter?.setMarks(new Map());
         codeEl.focus();
       });
       container.appendChild(btn);
@@ -740,6 +742,7 @@ function openCharCreateScreen() {
   state.ccEraKey = '8bit';
   $('#btn-preview-era').textContent = '8-Bit View';
   $('#charcreate-code').value = cc.starterCode || buildHeroForgePython(state.ccAppearance);
+  state.ccGutter?.setMarks(new Map());
   $('#cc-visual-error')?.classList.add('hidden');
   setCharCreateMode(false);
   syncVisualPickerSelection();
@@ -790,6 +793,7 @@ async function runCharCreateCode() {
   }
 
   if (res.passed) {
+    state.ccGutter?.setMarks(new Map());
     audio.playSuccess();
     outEl.className = 'pip-console success';
     outEl.innerHTML = `
@@ -823,6 +827,15 @@ async function runCharCreateCode() {
       }
     }
   } else {
+    if (res.errorLine) {
+      const errLn = Number(res.errorLine);
+      state.ccGutter?.setMarks(
+        new Map([[errLn, { kind: 'hl-error', icon: '⚠️', badge: 'check this line' }]])
+      );
+      state.ccGutter?.scrollToLine(errLn);
+    } else {
+      state.ccGutter?.setMarks(new Map());
+    }
     audio.playError();
     outEl.className = 'pip-console error';
     outEl.innerHTML = `
@@ -1317,13 +1330,21 @@ function wireControls() {
     }
   });
 
+  const ccCodeEl = $('#charcreate-code');
+  state.ccGutter = attachCodeGutter(
+    ccCodeEl,
+    $('#charcreate-code-gutter'),
+    $('#charcreate-code-highlights')
+  );
+  ccCodeEl.addEventListener('input', () => state.ccGutter?.setMarks(new Map()));
   $('#btn-charcreate-run').addEventListener('click', runCharCreateCode);
   $('#btn-charcreate-reset').addEventListener('click', () => {
-    $('#charcreate-code').value = state.catalog?.characterCreation?.starterCode || '';
+    ccCodeEl.value = state.catalog?.characterCreation?.starterCode || '';
+    state.ccGutter?.setMarks(new Map());
     audio.playClick();
   });
-  attachCodeEditorKeys($('#charcreate-code'), runCharCreateCode);
-  attachAutocomplete($('#charcreate-code'), () => buildCharCreateSuggestions(state.catalog));
+  attachCodeEditorKeys(ccCodeEl, runCharCreateCode);
+  attachAutocomplete(ccCodeEl, () => buildCharCreateSuggestions(state.catalog));
 
   // HUD
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
