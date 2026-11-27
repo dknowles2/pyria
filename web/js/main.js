@@ -20,16 +20,17 @@ import {
   updateGuestSave,
   deleteGuestSave,
   createHeroCode,
+  createHeroLinkToken,
   redeemHeroCode,
   logoutSession,
-} from './api.js?v=20261127m';
+} from './api.js?v=20261127n';
 import { audio } from './audio.js?v=20261127i';
 import { music, resolveRegionTheme } from './music.js?v=20261127i';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127m';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127n';
 import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 import { AppRouter } from './router.js?v=20261127l';
 
@@ -650,6 +651,7 @@ function renderAccountIdentityBar() {
   const pill = $('#title-user-pill');
   const builderBtn = $('#btn-title-builder');
   const parentsBtn = $('#btn-title-parents');
+  const heroLinkParentBtn = $('#btn-hero-link-parent');
   const heroSignOutBtn = $('#btn-hero-signout');
   const enterCodeBtn = $('#btn-enter-hero-code');
   const adminBar = $('#admin-account-bar');
@@ -672,6 +674,7 @@ function renderAccountIdentityBar() {
         builderBtn.classList.remove('hidden');
       }
       parentsBtn?.classList.add('hidden');
+      heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
     } else if (auth.role === 'parent') {
       if (pill) {
@@ -684,14 +687,18 @@ function renderAccountIdentityBar() {
         builderBtn.classList.remove('hidden');
       }
       parentsBtn?.classList.add('hidden');
+      heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
     } else if (auth.role === 'hero') {
       if (pill) {
         pill.className = 'pill pill-green';
-        pill.textContent = `🧙 Hero: ${auth.heroName || 'Code-Tamer'}`;
+        pill.textContent = auth.linkedToParent
+          ? `🧙 Hero: ${auth.heroName || 'Code-Tamer'} · 🛡️ Linked`
+          : `🧙 Hero: ${auth.heroName || 'Code-Tamer'}`;
       }
       builderBtn?.classList.add('hidden');
       parentsBtn?.classList.remove('hidden');
+      heroLinkParentBtn?.classList.toggle('hidden', Boolean(auth.linkedToParent));
       heroSignOutBtn?.classList.remove('hidden');
     } else {
       if (pill) {
@@ -700,10 +707,12 @@ function renderAccountIdentityBar() {
       }
       builderBtn?.classList.add('hidden');
       parentsBtn?.classList.remove('hidden');
+      heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
     }
   } else {
     parentsBtn?.classList.add('hidden');
+    heroLinkParentBtn?.classList.add('hidden');
     heroSignOutBtn?.classList.add('hidden');
     if (me.authenticated || me.email || me.isAdmin) {
       bar?.classList.remove('hidden');
@@ -831,12 +840,54 @@ async function upgradeGuestSaveToHeroCode(targetSave) {
     state.modals.openHeroCodeDisplayModal({
       heroName: res.save.heroName,
       heroCode: res.heroCode,
+      parentLinkToken: res.parentLinkToken || '',
+      onPollLinked: pollHeroLinkedStatus,
     });
   } catch (err) {
     audio.playError();
     showToast(`Could not create Hero Code: ${err.detail || err.message}`);
   } finally {
     heroCodeUpgradeInFlight = false;
+  }
+}
+
+async function pollHeroLinkedStatus() {
+  const freshMe = await fetchMe();
+  state.me = freshMe;
+  if (freshMe?.auth?.linkedToParent) {
+    renderAccountIdentityBar();
+    if ($('#screen-title')?.classList.contains('active')) {
+      refreshSavesList().catch(() => {});
+    }
+    return true;
+  }
+  return false;
+}
+
+async function openLinkToParentFlow() {
+  try {
+    const res = await createHeroLinkToken();
+    if (!res.parentLinkToken) {
+      throw new Error('Could not generate a parent link right now.');
+    }
+    state.modals.openLinkToParentModal({
+      heroName: res.heroName || state.me?.auth?.heroName || 'Hero',
+      parentLinkToken: res.parentLinkToken,
+      expiresInSeconds: res.expiresInSeconds,
+      onPollLinked: pollHeroLinkedStatus,
+    });
+  } catch (err) {
+    audio.playError();
+    if (err?.status === 409) {
+      state.me = await fetchMe();
+      renderAccountIdentityBar();
+      if ($('#screen-title')?.classList.contains('active')) {
+        await refreshSavesList();
+      }
+      showToast('This hero is already linked to a Parent Console!');
+      return;
+    }
+    showToast(`Could not create parent link: ${err?.detail || err?.message || 'Try again'}`);
   }
 }
 
@@ -896,12 +947,18 @@ async function refreshSavesList() {
           ? `<div class="save-owner-pill">${escapeHtml(s.ownerEmail)}</div>`
           : '';
       const guestBadgeHtml = s.isGuest
-        ? '<div class="save-guest-pill">Local Guest Save</div>'
-        : '';
+        ? '<div class="save-guest-pill">Local Save (This Device)</div>'
+        : isCloudflare && s.linkedToParent
+          ? '<div class="save-linked-pill">☁️ Cloud Save · 🛡️ Parent Linked</div>'
+          : isCloudflare
+            ? '<div class="save-cloud-pill">☁️ Cloud Save</div>'
+            : '';
       const upgradeBtnHtml =
         isCloudflare && s.isGuest
           ? '<button type="button" class="btn btn-sm btn-sky btn-card-hero-code">☁️ Save to Cloud</button>'
-          : '';
+          : isCloudflare && !s.isGuest && !s.linkedToParent && state.me?.auth?.role === 'hero'
+            ? '<button type="button" class="btn btn-sm btn-ghost btn-card-link-parent">🔗 Link to Parent</button>'
+            : '';
       card.innerHTML = `
         <div class="save-card-info">
           <div class="save-card-name">${escapeHtml(s.heroName)}</div>
@@ -926,6 +983,17 @@ async function refreshSavesList() {
         await upgradeGuestSaveToHeroCode(s);
         upgradeBtn.disabled = false;
         upgradeBtn.textContent = '☁️ Save to Cloud';
+      });
+
+      const linkParentBtn = card.querySelector('.btn-card-link-parent');
+      linkParentBtn?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        audio.playClick();
+        linkParentBtn.disabled = true;
+        linkParentBtn.textContent = 'Generating...';
+        await openLinkToParentFlow();
+        linkParentBtn.disabled = false;
+        linkParentBtn.textContent = '🔗 Link to Parent';
       });
 
       card.addEventListener('click', async () => {
@@ -1972,6 +2040,23 @@ function wireControls() {
   $('#btn-enter-hero-code')?.addEventListener('click', () => {
     audio.playClick();
     openEnterHeroCodeFlow();
+  });
+
+  $('#btn-hero-link-parent')?.addEventListener('click', async () => {
+    const btn = $('#btn-hero-link-parent');
+    audio.playClick();
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+    }
+    try {
+      await openLinkToParentFlow();
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🔗 Link Parent';
+      }
+    }
   });
 
   $('#btn-hero-signout')?.addEventListener('click', async () => {
