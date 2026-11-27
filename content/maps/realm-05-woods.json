@@ -186,6 +186,9 @@
     {"id": "chest-05-03", "type": "chest", "x": 40, "y": 3, "label": "Echo Glade Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-05-02"},
     {"id": "chest-05-04", "type": "chest", "x": 26, "y": 44, "label": "Mossy Grove Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-05-03"},
     {"id": "chest-05-05", "type": "chest", "x": 60, "y": 44, "label": "Root Stream Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-05-04"},
-    {"id": "chest-05-06", "type": "chest", "x": 60, "y": 15, "label": "Bramble Spire Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-05-05"}
+    {"id": "chest-05-06", "type": "chest", "x": 60, "y": 15, "label": "Bramble Spire Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-05-05"},
+    {"id": "bonus-trial-05", "type": "bonus_trial", "x": 18, "y": 44, "label": "Secret Rune: Bramble's Hidden Echo", "refId": "trial-05-bonus", "spriteKey": "torch"},
+    {"id": "egg-05-a", "type": "easter_egg", "x": 2, "y": 19, "label": "Glowing Treehouse Ladder", "refId": null, "spriteKey": "statue", "title": "Secret Obby Treehouse", "message": "A wooden sign nailed to an oak reads: 'VIP Code-Tamer Clubhouse! Password: definitely_not_null. Free virtual pizza inside!'", "shardReward": 15},
+    {"id": "egg-05-b", "type": "easter_egg", "x": 38, "y": 44, "label": "Hollow Log", "refId": null, "spriteKey": "campfire", "title": "Toothless's Fish Stash", "message": "Inside the hollow log sits a neat stack of pixel salmon with a tiny note: 'For emergencies and good dragons only. \u2014 T.'", "shardReward": 15}
   ]
 }

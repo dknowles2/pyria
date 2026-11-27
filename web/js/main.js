@@ -12,15 +12,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126q';
-import { audio } from './audio.js?v=20261126q';
-import { music, resolveRegionTheme } from './music.js?v=20261126q';
-import { pyRunner } from './pyRunner.js?v=20261126q';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126q';
-import { SpriteManager } from './sprites.js?v=20261126q';
-import { WorldEngine } from './world.js?v=20261126q';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126q';
-import { playCutscene } from './cutscene.js?v=20261126q';
+} from './api.js?v=20261126r';
+import { audio } from './audio.js?v=20261126r';
+import { music, resolveRegionTheme } from './music.js?v=20261126r';
+import { pyRunner } from './pyRunner.js?v=20261126r';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126r';
+import { SpriteManager } from './sprites.js?v=20261126r';
+import { WorldEngine } from './world.js?v=20261126r';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126r';
+import { playCutscene } from './cutscene.js?v=20261126r';
 
 const state = {
   gameConfig: null,
@@ -262,6 +262,23 @@ function getSolvedTrialsSet(save) {
   ]);
 }
 
+function getSecretsStats(save) {
+  const solved = getSolvedTrialsSet(save);
+  let solvedBonusCount = 0;
+  for (const r of state.era?.realms || []) {
+    for (const t of r.trials || []) {
+      if (t.isBonus && solved.has(t.id)) solvedBonusCount += 1;
+    }
+  }
+  const foundEggsCount = Array.isArray(save?.foundEasterEggs) ? save.foundEasterEggs.length : 0;
+  return {
+    solvedBonusCount,
+    foundEggsCount,
+    totalSecrets: solvedBonusCount + foundEggsCount,
+    bonusHints: solvedBonusCount + Math.floor(foundEggsCount / 2),
+  };
+}
+
 function updateInteractPrompt(entity) {
   const prompt = $('#interact-prompt');
   const label = $('#interact-prompt-label');
@@ -276,7 +293,7 @@ function updateInteractPrompt(entity) {
   }
   const solved = getSolvedTrialsSet(state.activeSave);
   touchBtn?.classList.add('near-target');
-  if (entity.type === 'trial' && solved.has(entity.refId)) {
+  if ((entity.type === 'trial' || entity.type === 'bonus_trial') && solved.has(entity.refId)) {
     label.textContent = `✓ ${entity.label} (Completed)`;
     if (touchLabel) touchLabel.textContent = 'Done';
     prompt.classList.remove('hidden');
@@ -290,6 +307,8 @@ function updateInteractPrompt(entity) {
   else if (entity.type === 'vault') { verb = 'Enter'; shortLabel = 'Vault'; }
   else if (entity.type === 'portal') { verb = 'Step into'; shortLabel = 'Portal'; }
   else if (entity.type === 'trial') { verb = 'Begin'; shortLabel = 'Code'; }
+  else if (entity.type === 'bonus_trial') { verb = 'Discover'; shortLabel = 'Bonus'; }
+  else if (entity.type === 'easter_egg') { verb = 'Inspect'; shortLabel = 'Secret'; }
   label.textContent = `${verb} ${entity.label}`;
   if (touchLabel) touchLabel.textContent = shortLabel;
   prompt.classList.remove('hidden');
@@ -308,9 +327,9 @@ function updateHud() {
   $('#hud-shards').textContent = String(save.byteShards ?? 0);
   $('#btn-hud-mute').textContent = audio.isMuted() ? '🔇' : '🔊';
 
-  // Realm Trials progress indicator
+  // Realm Trials progress indicator (excludes hidden isBonus Trials from main Vault count)
   const completed = getSolvedTrialsSet(save);
-  const realmTrials = state.activeRealm?.trials || [];
+  const realmTrials = (state.activeRealm?.trials || []).filter((t) => !t.isBonus);
   const solvedInRealm = realmTrials.filter((t) => completed.has(t.id)).length;
   const totalInRealm = realmTrials.length;
   const trialsEl = $('#hud-trials-progress');
@@ -318,6 +337,14 @@ function updateHud() {
     const allDone = totalInRealm > 0 && solvedInRealm >= totalInRealm;
     trialsEl.textContent = `${allDone ? '✓' : '★'} Trials: ${solvedInRealm}/${totalInRealm}`;
     trialsEl.classList.toggle('all-complete', allDone);
+  }
+
+  // Secrets counter (Bonus Trials + Easter Eggs)
+  const secrets = getSecretsStats(save);
+  const secretsEl = $('#hud-secrets');
+  if (secretsEl) {
+    secretsEl.textContent = `✦ Secrets: ${secrets.totalSecrets}`;
+    secretsEl.title = `Secrets Found: ${secrets.solvedBonusCount} Bonus Trials, ${secrets.foundEggsCount} Easter Eggs (+${secrets.bonusHints} Bonus Hints)`;
   }
 
   // Hero mini portrait
@@ -804,7 +831,7 @@ async function handleEntityInteract(entity) {
     const npc = getNpc(entity.refId);
     if (entity.refId === 'elder-ada') {
       const realm = state.activeRealm;
-      const realmTrials = realm?.trials || [];
+      const realmTrials = (realm?.trials || []).filter((t) => !t.isBonus);
       const solvedCount = realmTrials.filter((t) => completed.has(t.id)).length;
       const nextTrial = realmTrials.find((t) => !completed.has(t.id));
       const dragon = realm?.dragon;
@@ -864,7 +891,28 @@ async function handleEntityInteract(entity) {
     return;
   }
 
-  if (entity.type === 'trial') {
+  if (entity.type === 'easter_egg') {
+    if (!Array.isArray(save.foundEasterEggs)) save.foundEasterEggs = [];
+    const alreadyFound = save.foundEasterEggs.includes(entity.id);
+    const reward = Number(entity.shardReward) || 15;
+    if (!alreadyFound) {
+      save.foundEasterEggs.push(entity.id);
+      save.byteShards += reward;
+      updateHud();
+      await persistSave();
+    }
+    const secrets = getSecretsStats(save);
+    state.modals.openEasterEggModal({
+      entity,
+      alreadyFound,
+      shardReward: reward,
+      totalEggs: secrets.foundEggsCount,
+      bonusHints: secrets.bonusHints,
+    });
+    return;
+  }
+
+  if (entity.type === 'trial' || entity.type === 'bonus_trial') {
     if (entity.requiredTrialId && !completed.has(entity.requiredTrialId)) {
       audio.playError();
       showToast('Solve the earlier Trial first to unlock this path!');
@@ -915,6 +963,7 @@ async function handleEntityInteract(entity) {
         ? 'The mossy gate slid open — the path ahead is clear!'
         : null;
 
+    const secretsStats = getSecretsStats(save);
     state.modals.openTrialModal({
       trial,
       realm,
@@ -924,6 +973,16 @@ async function handleEntityInteract(entity) {
       save,
       alreadySolved,
       unlockNote,
+      bonusHints: secretsStats.bonusHints,
+      onEquipKitReward: async (kit) => {
+        if (kit?.equipLayer && kit?.equipKey) {
+          save.appearance[kit.equipLayer] = kit.equipKey;
+          state.world.setSave(save);
+          updateHud();
+          showToast(`✨ Equipped ${kit.name}!`);
+          await persistSave();
+        }
+      },
       savedDraft: alreadySolved ? null : getTrialDraft(save, trial.id),
       onDraftChange: (code) => updateTrialDraft(save, trial.id, code, { immediatePersist: false }),
       onDraftFlush: (code) => updateTrialDraft(save, trial.id, code, { immediatePersist: true }),
@@ -939,7 +998,25 @@ async function handleEntityInteract(entity) {
           save.solvedTrials = [...solvedSet];
           save.completedTrials = [...solvedSet];
           save.byteShards += Number(solvedTrial.shardReward) || 0;
-          showToast(`✓ Trial Complete! +${solvedTrial.shardReward} Byte Shards!`);
+          if (solvedTrial.isBonus) {
+            audio.playSecretFound();
+            const kit = solvedTrial.bonusKitReward;
+            if (kit?.unlockId) {
+              if (!Array.isArray(save.ownedUnlockIds)) save.ownedUnlockIds = [];
+              if (!save.ownedUnlockIds.includes(kit.unlockId)) {
+                save.ownedUnlockIds.push(kit.unlockId);
+              }
+            }
+            if (kit?.spellName) {
+              if (!Array.isArray(save.unlockedSpells)) save.unlockedSpells = [];
+              if (!save.unlockedSpells.includes(kit.spellName)) {
+                save.unlockedSpells.push(kit.spellName);
+              }
+            }
+            showToast(`🌟 Bonus Complete! +${solvedTrial.shardReward} Shards & +1 Bonus Hint!`);
+          } else {
+            showToast(`✓ Trial Complete! +${solvedTrial.shardReward} Byte Shards!`);
+          }
         } else {
           showToast(`✓ Practice run passed for ${solvedTrial.title}!`);
         }

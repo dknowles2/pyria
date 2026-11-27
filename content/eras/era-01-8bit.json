@@ -180,6 +180,58 @@
             "tier3_walkthrough": "Add:\nshout(\"SPARK READY!\")"
           },
           "difficultyOverride": null
+        },
+        {
+          "id": "trial-01-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Pip's Favorite Snack!",
+          "storyPrompt": "You found a hidden Meadow Rune! Pip gasps: 'Ooh! A secret Code-Tamer bonus riddle!' Read the two lines of Python below\u2014what will `say()` display?",
+          "objective": "Predict what `say(len(\"DRAGON\"))` will output to unlock the Starlight Violet Tunic!",
+          "concepts": [
+            "function_calls",
+            "strings",
+            "print_output"
+          ],
+          "shardReward": 35,
+          "unlockId": null,
+          "bonusKitReward": {
+            "name": "Starlight Violet Tunic",
+            "description": "A shimmering violet adventurer tunic woven from hidden meadow starlight!",
+            "unlockId": "bonus-tunic-violet",
+            "equipLayer": "tunic",
+            "equipKey": "violet"
+          },
+          "codeSnippet": "snack = \"DRAGON\"\nsay(len(snack))",
+          "choices": [
+            {
+              "id": "a",
+              "label": "DRAGON",
+              "explanation": "Close! `say(snack)` would say `DRAGON`, but `len(snack)` counts how many LETTERS are inside `\"DRAGON\"`!"
+            },
+            {
+              "id": "b",
+              "label": "6",
+              "explanation": "BOOM! D-R-A-G-O-N has 6 letters, so `len(\"DRAGON\")` gives `6`\u2014Secret Tunic unlocked!"
+            },
+            {
+              "id": "c",
+              "label": "5",
+              "explanation": "Count carefully on your fingers: D(1) R(2) A(3) G(4) O(5) N(6)!"
+            },
+            {
+              "id": "d",
+              "label": "snack",
+              "explanation": "Remember: `snack` is a variable box without quotes, and `len()` measures what's inside it!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip counts on his claws: '`len()` counts every letter in `\"DRAGON\"`!'",
+            "tier2_pattern": "D-R-A-G-O-N -> count each letter from 1 to the end!",
+            "tier3_walkthrough": "Tap Option B (`6`) because `\"DRAGON\"` has 6 letters!"
+          },
+          "difficultyOverride": null
         }
       ],
       "cutscenes": {
@@ -405,6 +457,42 @@
             "tier1_nudge": "Pip cheers: 'Add key_a + key_b into vault_code, then shout(guardian) and shout(vault_code)!'",
             "tier2_pattern": "vault_code = key_a + key_b\nshout(guardian)\nshout(vault_code)",
             "tier3_walkthrough": "Complete vault_code with:\nvault_code = key_a + key_b"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-02-bonus",
+          "trialType": "fix_bug",
+          "isBonus": true,
+          "title": "Secret Rune: The Hidden Torch Count",
+          "storyPrompt": "Whoa\u2014a secret Mossy Ruins rune! Lord Null tried to hide the treasure by putting quotes around a variable name inside `say(\"gold\")`. Remove the quotes so Python says the NUMBER inside the `gold` box!",
+          "objective": "Fix `say(\"gold\")` to `say(gold)` so Python outputs `50` and unlocks the Sunstone Amber Tunic!",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "print_output"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "bonusKitReward": {
+            "name": "Sunstone Amber Tunic",
+            "description": "A warm golden-amber tunic forged from secret Mossy Ruins sunstones!",
+            "unlockId": "bonus-tunic-amber",
+            "equipLayer": "tunic",
+            "equipKey": "amber"
+          },
+          "bugSummary": "Lord Null put quotes around `\"gold\"`! Remove the quotes inside `say(...)` so Python prints the number 50.",
+          "starterCode": {
+            "explorer": "gold = 20 + 30\n# Remove the quotes around \"gold\" so Python looks INSIDE the variable box!\nsay(\"gold\")\n",
+            "standard": "gold = 20 + 30\nsay(\"gold\")\n",
+            "challenge": "gold = 20 + 30\nsay(\"gold\")\n"
+          },
+          "referenceSolution": "gold = 20 + 30\nsay(gold)\n",
+          "testCode": "assert gold == 50\nassert OUTPUT.strip() == '50', f'Expected 50, got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip giggles: 'With quotes, Python literally says the word gold. Without quotes, Python opens the gold box!'",
+            "tier2_pattern": "Change `say(\"gold\")` to `say(gold)`",
+            "tier3_walkthrough": "Delete the two quotes on line 2 so it reads:\nsay(gold)"
           },
           "difficultyOverride": null
         }
@@ -668,6 +756,44 @@
             "tier3_walkthrough": "Finish the else block with:\n    gate_status = \"LOCKED\""
           },
           "difficultyOverride": null
+        },
+        {
+          "id": "trial-03-bonus",
+          "trialType": "fix_bug",
+          "isBonus": true,
+          "title": "Secret Rune: Emberwing's Secret Flame",
+          "storyPrompt": "You discovered a glowing volcanic rune! Lord Null flipped the comparison arrow the wrong way (`<` instead of `>`), so Emberwing's spark spell won't fire! Flip it back to unlock a secret tunic AND the `fire_spark()` spell!",
+          "objective": "Fix `<` to `>` in `if spark_level < 50:` so `spark_ready` becomes `True` and Python shouts `FIRE SPARK!`.",
+          "concepts": [
+            "variables",
+            "comparisons",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "bonusKitReward": {
+            "name": "Shadow Slate Tunic + fire_spark()",
+            "description": "A stealthy obsidian-slate tunic paired with Emberwing's secret `fire_spark()` spell!",
+            "unlockId": "bonus-tunic-slate",
+            "equipLayer": "tunic",
+            "equipKey": "slate",
+            "spellName": "fire_spark()"
+          },
+          "bugSummary": "Lord Null flipped `>` into `<`! Change `<` to `>` so `spark_level` (90) passes the check.",
+          "starterCode": {
+            "explorer": "spark_level = 90\nspark_ready = False\n# Flip < to > so 90 is GREATER than 50!\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
+            "standard": "spark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
+            "challenge": "spark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n"
+          },
+          "referenceSolution": "spark_level = 90\nspark_ready = False\nif spark_level > 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
+          "testCode": "assert spark_ready is True, 'Expected spark_ready is True'\nassert OUTPUT.strip() == 'FIRE SPARK!', f'Expected FIRE SPARK!, got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the arrow: '90 is GREATER than 50, so use `>` instead of `<`!'",
+            "tier2_pattern": "Change `if spark_level < 50:` to `if spark_level > 50:`",
+            "tier3_walkthrough": "Replace `<` with `>` on line 3:\nif spark_level > 50:"
+          },
+          "difficultyOverride": null
         }
       ],
       "cutscenes": {
@@ -915,6 +1041,59 @@
             "tier1_nudge": "Pip cheers: '4 * 5 is 20, which matches crystals >= 20! Keep print() indented 4 spaces.'",
             "tier2_pattern": "if crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")",
             "tier3_walkthrough": "Add:\n    print(\"Glacier is free!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-04-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Glacier's Snowball Riddle",
+          "storyPrompt": "Hidden behind the frost pillars sits Glacier's secret bonus rune! Trace this `if / elif / else` snippet when `snowballs = 10` to unlock the Frostguard Navy Tunic and `ice_shimmer()`!",
+          "objective": "Predict what Python will `print()` when `snowballs = 10`.",
+          "concepts": [
+            "conditionals_elif_else",
+            "comparisons",
+            "print_output"
+          ],
+          "shardReward": 50,
+          "unlockId": null,
+          "bonusKitReward": {
+            "name": "Frostguard Navy Tunic + ice_shimmer()",
+            "description": "Glacier's midnight-blue frost tunic plus the secret `ice_shimmer()` spell!",
+            "unlockId": "tunic-navy",
+            "equipLayer": "tunic",
+            "equipKey": "navy",
+            "spellName": "ice_shimmer()"
+          },
+          "codeSnippet": "snowballs = 10\nif snowballs > 10:\n    print(\"MEGA FORT\")\nelif snowballs == 10:\n    print(\"PERFECT TEN\")\nelse:\n    print(\"KEEP PACKING\")",
+          "choices": [
+            {
+              "id": "a",
+              "label": "MEGA FORT",
+              "explanation": "Careful! `10 > 10` is False because 10 is EQUAL to 10, not strictly greater!"
+            },
+            {
+              "id": "b",
+              "label": "PERFECT TEN",
+              "explanation": "Bullseye! `10 > 10` is False, so Python checks `elif snowballs == 10:`\u2014True! `PERFECT TEN`!"
+            },
+            {
+              "id": "c",
+              "label": "KEEP PACKING",
+              "explanation": "Not quite\u2014`elif snowballs == 10` matches before Python ever reaches `else:`!"
+            },
+            {
+              "id": "d",
+              "label": "10",
+              "explanation": "Look inside the `print(...)` calls\u2014each branch prints a message string, not the number 10!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip tosses a snowball: 'Is 10 strictly GREATER than 10? Nope! Check the `elif` next!'",
+            "tier2_pattern": "`snowballs == 10` is True when `snowballs` is `10`.",
+            "tier3_walkthrough": "Tap Option B (`PERFECT TEN`)!"
           },
           "difficultyOverride": null
         }
@@ -1169,6 +1348,44 @@
             "tier3_walkthrough": "Add:\n    print(\"Bramble is free!\")"
           },
           "difficultyOverride": null
+        },
+        {
+          "id": "trial-05-bonus",
+          "trialType": "fix_bug",
+          "isBonus": true,
+          "title": "Secret Rune: Bramble's Hidden Echo",
+          "storyPrompt": "A glowing emerald rune hides deep in Echo Woods! Lord Null swapped `or` for `and`, so you can't cross with just wings! Change `and` to `or` so either a rope OR wings opens the secret treasure!",
+          "objective": "Fix `and` to `or` so `can_fly` becomes `True` and Python prints `ECHO CALL!`.",
+          "concepts": [
+            "boolean_logic",
+            "booleans",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "bonusKitReward": {
+            "name": "Star-Loop Wizard Cap + echo_call()",
+            "description": "A pointed silver-rune wizard cap paired with Bramble's secret `echo_call()` spell!",
+            "unlockId": "hat-wizard-cap",
+            "equipLayer": "hat",
+            "equipKey": "hat_wizard_cap",
+            "spellName": "echo_call()"
+          },
+          "bugSummary": "Lord Null swapped `or` for `and`! Change `and` to `or` so having `has_wings = True` is enough.",
+          "starterCode": {
+            "explorer": "has_rope = False\nhas_wings = True\n# Change 'and' to 'or' so EITHER one being True works!\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
+            "standard": "has_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
+            "challenge": "has_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n"
+          },
+          "referenceSolution": "has_rope = False\nhas_wings = True\ncan_fly = has_rope or has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
+          "testCode": "assert can_fly is True, 'Expected can_fly is True'\nassert OUTPUT.strip() == 'ECHO CALL!', f'Expected ECHO CALL!, got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip flaps happily: '`or` only needs ONE side to be True!'",
+            "tier2_pattern": "Change `has_rope and has_wings` to `has_rope or has_wings`",
+            "tier3_walkthrough": "Replace `and` with `or` on line 3:\ncan_fly = has_rope or has_wings"
+          },
+          "difficultyOverride": null
         }
       ],
       "cutscenes": {
@@ -1405,6 +1622,45 @@
             "tier1_nudge": "Pip cheers in a bubble helmet: '5 * 6 is 30 and call becomes \"MIRE\"\u2014both sides of and are True!'",
             "tier2_pattern": "if (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")",
             "tier3_walkthrough": "Add:\n    print(\"Mire is free!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-06-bonus",
+          "trialType": "code",
+          "isBonus": true,
+          "title": "Secret Rune: Mire's Pearl Cipher",
+          "storyPrompt": "You found Mire's sunken secret rune! Clean `raw_word = \"  tide  \"` with `.strip().upper()` into `cipher`, multiply `pearls = 3 * 4`, and if `cipher == \"TIDE\" and pearls == 12`, print `\"TIDE WAVE!\"` to claim the Tide-Weaver Cloak!",
+          "objective": "Set cipher = raw_word.strip().upper() and pearls = 3 * 4. If cipher == \"TIDE\" and pearls == 12, print(\"TIDE WAVE!\").",
+          "concepts": [
+            "variables",
+            "basic_math",
+            "string_methods",
+            "boolean_logic",
+            "conditionals_if",
+            "print_output"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "bonusKitReward": {
+            "name": "Tide-Weaver Cloak + tide_wave()",
+            "description": "A shimmering sea-green cape plus Mire's secret `tide_wave()` spell!",
+            "unlockId": "cloak-tide",
+            "equipLayer": "cloak",
+            "equipKey": "cloak_tide",
+            "spellName": "tide_wave()"
+          },
+          "starterCode": {
+            "explorer": "raw_word = \"  tide  \"\ncipher = raw_word.strip().upper()\npearls = 3 * 4\nif cipher == \"TIDE\" and pearls == 12:\n    # Print \"TIDE WAVE!\" here:\n    \n",
+            "standard": "raw_word = \"  tide  \"\n# Clean raw_word into cipher with .strip().upper(), set pearls = 3 * 4, and if both match print(\"TIDE WAVE!\")\n",
+            "challenge": "raw_word = \"  tide  \"\n# Normalize raw_word into cipher, compute pearls = 3 * 4, and print \"TIDE WAVE!\" if cipher == \"TIDE\" and pearls == 12.\n"
+          },
+          "referenceSolution": "raw_word = \"  tide  \"\ncipher = raw_word.strip().upper()\npearls = 3 * 4\nif cipher == \"TIDE\" and pearls == 12:\n    print(\"TIDE WAVE!\")\n",
+          "testCode": "assert cipher == 'TIDE', f'Expected TIDE, got {cipher!r}'\nassert pearls == 12, f'Expected 12, got {pearls!r}'\nassert OUTPUT.strip() == 'TIDE WAVE!', f'Expected TIDE WAVE!, got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip blows a bubble: 'Combine `.strip().upper()`, `3 * 4`, and `and`!'",
+            "tier2_pattern": "if cipher == \"TIDE\" and pearls == 12:\n    print(\"TIDE WAVE!\")",
+            "tier3_walkthrough": "Add:\n    print(\"TIDE WAVE!\")"
           },
           "difficultyOverride": null
         }

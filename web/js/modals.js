@@ -7,7 +7,7 @@ import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126q';
+} from './autocomplete.js?v=20261126r';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -237,6 +237,44 @@ export class ModalManager {
     });
   }
 
+  // ==================== EASTER EGG DISCOVERY MODAL ====================
+  openEasterEggModal({ entity, alreadyFound, shardReward, totalEggs, bonusHints }) {
+    audio.playSecretFound();
+    const toNextHint = totalEggs % 2 === 1 ? 1 : 2;
+    const hintLine =
+      !alreadyFound && totalEggs % 2 === 0
+        ? '✨ You discovered 2 Easter Eggs and unlocked <strong>+1 Bonus Hint</strong>!'
+        : `Find <strong>${toNextHint} more</strong> Easter Egg${toNextHint === 1 ? '' : 's'} to earn your next Bonus Hint! (Current Bonus Hints: <strong>${bonusHints}</strong>)`;
+
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>✨ Secret Easter Egg Found!</h2>
+          <div class="modal-badges">
+            <span class="pill pill-violet">✦ Hidden Secret</span>
+            ${alreadyFound ? '<span class="pill pill-green">✓ Discovered</span>' : `<span class="pill pill-gold">+${shardReward} Byte Shards</span>`}
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" data-close>✕</button>
+      </div>
+      <div class="kit-reward-card">
+        <h3 style="margin:0; color:var(--accent-gold);">${escapeHtml(entity.title || entity.label)}</h3>
+        <p class="dialogue-text">${escapeHtml(entity.message || 'You found a hidden secret of Pyria!')}</p>
+        <p class="muted-text" style="margin:0;">${hintLine}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close>Awesome!</button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
+  }
+
   // ==================== PYTHON TRIAL MODAL ====================
   openTrialModal({
     trial,
@@ -247,6 +285,8 @@ export class ModalManager {
     save,
     alreadySolved,
     unlockNote,
+    bonusHints = 0,
+    onEquipKitReward,
     savedDraft,
     onDraftChange,
     onDraftFlush,
@@ -259,11 +299,24 @@ export class ModalManager {
     const diff = resolveDifficulty(gameConfig, realm, trial);
     let currentMode = diff.mode || 'standard';
     let hintsUsed = 0;
-    const maxHints = diff.maxHintsAllowed ?? 3;
+    const baseMaxHints = diff.maxHintsAllowed ?? 3;
+    const maxHints = Math.min(4, baseMaxHints + (bonusHints > 0 ? bonusHints : 0));
+
+    const buildTier4SecretHint = () => {
+      if (trial.trialType === 'multiple_choice') {
+        const right = (trial.choices || []).find((c) => c.id === trial.correctChoiceId);
+        return right
+          ? `Secret Answer: "${right.label}" — ${right.explanation || ''}`
+          : 'Look closely at the exact Python syntax in each choice!';
+      }
+      return `Pip's Secret Solution Guide:\n${trial.referenceSolution || ''}`;
+    };
+
     const hintTiers = [
       { key: 'tier1_nudge', label: 'Tier 1: Gentle Nudge' },
       { key: 'tier2_pattern', label: 'Tier 2: Code Pattern' },
       { key: 'tier3_walkthrough', label: 'Tier 3: Step-by-Step' },
+      { key: 'tier4_secret', label: "Tier 4: 🌟 Pip's Secret Solution Guide", customText: buildTier4SecretHint() },
     ];
 
     const unlockItem = trial.unlockId
@@ -287,6 +340,7 @@ export class ModalManager {
             <div class="modal-badges">
               <span class="pill pill-green">✓ COMPLETED</span>
               <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
+              ${bonusHints > 0 ? `<span class="pill pill-violet">✨ +${bonusHints} Bonus Hint${bonusHints === 1 ? '' : 's'}</span>` : ''}
               ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
             </div>
           </div>
@@ -326,13 +380,16 @@ export class ModalManager {
     };
 
     const renderCelebrationView = ({ stdout, explanation, isPractice }) => {
+      const kit = trial.isBonus && trial.bonusKitReward && !isPractice ? trial.bonusKitReward : null;
+      const canEquipKit = Boolean(kit && kit.equipLayer && kit.equipKey);
+
       this.open(
         `
         <div class="modal-header">
           <div>
             <h2>✓ ${escapeHtml(trial.title)}</h2>
             <div class="modal-badges">
-              <span class="pill pill-green">${isPractice ? '✓ PRACTICE COMPLETE' : '✓ TRIAL COMPLETE'}</span>
+              <span class="pill pill-green">${isPractice ? '✓ PRACTICE COMPLETE' : trial.isBonus ? '✦ BONUS TRIAL COMPLETE' : '✓ TRIAL COMPLETE'}</span>
               <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
             </div>
           </div>
@@ -341,7 +398,7 @@ export class ModalManager {
 
         <div class="trial-complete-card">
           <div class="trial-complete-icon">✓</div>
-          <h3 class="trial-complete-title">${isPractice ? 'Great Practice Run!' : '🎉 Trial Complete!'}</h3>
+          <h3 class="trial-complete-title">${isPractice ? 'Great Practice Run!' : trial.isBonus ? '🌟 Hidden Bonus Complete!' : '🎉 Trial Complete!'}</h3>
           <p class="dialogue-text">
             ${
               isPractice
@@ -349,6 +406,19 @@ export class ModalManager {
                 : `Chirp! Pip does a backflip! You earned <strong style="color: var(--accent-gold);">+${trial.shardReward} Byte Shards</strong> and saved your progress!`
             }
           </p>
+          ${
+            kit
+              ? `
+                <div class="kit-reward-card">
+                  <div class="pill pill-violet">🎁 Personal Kit Reward Unlocked (FREE!)</div>
+                  <strong style="font-size:16px; color:var(--accent-gold);">${escapeHtml(kit.name)}</strong>
+                  <div class="muted-text" style="margin:0;">${escapeHtml(kit.description || '')}</div>
+                  <div class="pill pill-gold">✨ +1 Bonus Hint Earned!</div>
+                  ${canEquipKit ? `<button id="btn-equip-kit-now" type="button" class="btn btn-gold btn-sm">✨ Equip Now!</button>` : ''}
+                </div>
+              `
+              : ''
+          }
           ${explanation ? `<div class="objective-box" style="width:100%; text-align:left;"><strong>🐉 Pip explains:</strong> ${escapeHtml(explanation)}</div>` : ''}
           ${!isPractice && unlockNote ? `<div class="upgrade-callout" style="width:100%;">✨ ${escapeHtml(unlockNote)}</div>` : ''}
           ${!isPractice && unlockItem ? `<p class="muted-text" style="margin:0;">New blueprint ready in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</p>` : ''}
@@ -361,6 +431,16 @@ export class ModalManager {
         `,
         'modal-compact'
       );
+
+      if (canEquipKit) {
+        const equipBtn = this.content.querySelector('#btn-equip-kit-now');
+        equipBtn?.addEventListener('click', () => {
+          audio.playForge();
+          if (onEquipKitReward) onEquipKitReward(kit);
+          equipBtn.textContent = '✓ Equipped!';
+          equipBtn.disabled = true;
+        });
+      }
 
       this.content.querySelectorAll('[data-close]').forEach((btn) => {
         btn.addEventListener('click', () => this.close());
@@ -384,6 +464,7 @@ export class ModalManager {
                   ? '<span class="pill pill-green">✓ COMPLETED · Practice Mode (No Extra Shards)</span>'
                   : `<span class="pill pill-gold">+${trial.shardReward} Byte Shards</span>`
               }
+              ${bonusHints > 0 ? `<span class="pill pill-violet">✨ +${bonusHints} Bonus Hint${bonusHints === 1 ? '' : 's'}</span>` : ''}
               ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
             </div>
           </div>
@@ -442,7 +523,7 @@ export class ModalManager {
         hintsArea.classList.remove('hidden');
 
         const shown = hintTiers.slice(0, hintsUsed).map((t) => {
-          const text = trial.hints?.[t.key] || '';
+          const text = t.customText ?? trial.hints?.[t.key] ?? '';
           return `
             <div class="hint-box" style="margin-bottom:8px;">
               <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
@@ -533,6 +614,7 @@ export class ModalManager {
                   : `<span class="pill pill-gold">+${trial.shardReward} Byte Shards</span>`
               }
               <span id="trial-draft-badge" class="pill pill-gold ${hasRestoredDraft ? '' : 'hidden'}">💾 Restored your saved draft</span>
+              ${bonusHints > 0 ? `<span class="pill pill-violet">✨ +${bonusHints} Bonus Hint${bonusHints === 1 ? '' : 's'}</span>` : ''}
               ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
             </div>
           </div>
@@ -649,7 +731,7 @@ export class ModalManager {
         hintsArea.classList.remove('hidden');
 
         const shown = hintTiers.slice(0, hintsUsed).map((t) => {
-          const text = trial.hints?.[t.key] || '';
+          const text = t.customText ?? trial.hints?.[t.key] ?? '';
           return `
             <div class="hint-box" style="margin-bottom:8px;">
               <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>

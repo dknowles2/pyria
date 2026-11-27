@@ -55,79 +55,213 @@
         "collisionWhenUnlocked"
       ],
       "properties": {
-        "x": { "type": "integer", "minimum": 0 },
-        "y": { "type": "integer", "minimum": 0 },
-        "layer": { "type": "string", "enum": ["ground", "decor"] },
-        "tileWhenLocked": { "$ref": "#/$defs/tileId" },
-        "tileWhenUnlocked": { "$ref": "#/$defs/tileId" },
-        "collisionWhenLocked": { "type": "integer", "enum": [0, 1] },
-        "collisionWhenUnlocked": { "type": "integer", "enum": [0, 1] }
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "layer": {
+          "type": "string",
+          "enum": [
+            "ground",
+            "decor"
+          ]
+        },
+        "tileWhenLocked": {
+          "$ref": "#/$defs/tileId"
+        },
+        "tileWhenUnlocked": {
+          "$ref": "#/$defs/tileId"
+        },
+        "collisionWhenLocked": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        },
+        "collisionWhenUnlocked": {
+          "type": "integer",
+          "enum": [
+            0,
+            1
+          ]
+        }
       },
       "additionalProperties": false
     },
     "region": {
       "type": "object",
-      "required": ["id", "name", "x", "y", "width", "height"],
+      "required": [
+        "id",
+        "name",
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "x": { "type": "integer", "minimum": 0 },
-        "y": { "type": "integer", "minimum": 0 },
-        "width": { "type": "integer", "minimum": 1 },
-        "height": { "type": "integer", "minimum": 1 }
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
       },
       "additionalProperties": false
     },
     "entity": {
       "type": "object",
-      "required": ["id", "type", "x", "y", "label", "refId", "spriteKey"],
+      "required": [
+        "id",
+        "type",
+        "x",
+        "y",
+        "label",
+        "refId",
+        "spriteKey"
+      ],
       "properties": {
-        "id": { "type": "string" },
+        "id": {
+          "type": "string"
+        },
         "type": {
           "type": "string",
-          "enum": ["npc", "trial", "chest", "vault", "portal", "workshop"]
+          "enum": [
+            "npc",
+            "trial",
+            "chest",
+            "vault",
+            "portal",
+            "workshop",
+            "bonus_trial",
+            "easter_egg"
+          ]
         },
-        "x": { "type": "integer", "minimum": 0 },
-        "y": { "type": "integer", "minimum": 0 },
-        "label": { "type": "string" },
-        "refId": { "type": ["string", "null"] },
-        "spriteKey": { "type": "string" },
-        "shardReward": { "type": "integer", "minimum": 0 },
-        "requiredTrialId": { "type": ["string", "null"] },
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "label": {
+          "type": "string"
+        },
+        "refId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spriteKey": {
+          "type": "string"
+        },
+        "shardReward": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "requiredTrialId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "dynamicTiles": {
           "type": "array",
-          "items": { "$ref": "#/$defs/dynamicTile" }
+          "items": {
+            "$ref": "#/$defs/dynamicTile"
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
         }
       },
       "additionalProperties": false
     }
   },
   "properties": {
-    "id": { "type": "string" },
-    "realmId": { "type": "string" },
-    "name": { "type": "string" },
-    "width": { "type": "integer", "minimum": 1 },
-    "height": { "type": "integer", "minimum": 1 },
-    "tileSize": { "type": "integer", "const": 16 },
-    "tilesetId": { "type": "string", "const": "meadow_ruins" },
+    "id": {
+      "type": "string"
+    },
+    "realmId": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "tileSize": {
+      "type": "integer",
+      "const": 16
+    },
+    "tilesetId": {
+      "type": "string",
+      "const": "meadow_ruins"
+    },
     "spawn": {
       "type": "object",
-      "required": ["x", "y"],
+      "required": [
+        "x",
+        "y"
+      ],
       "properties": {
-        "x": { "type": "integer", "minimum": 0 },
-        "y": { "type": "integer", "minimum": 0 }
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        }
       },
       "additionalProperties": false
     },
     "layers": {
       "type": "object",
-      "required": ["ground", "decor", "collision"],
+      "required": [
+        "ground",
+        "decor",
+        "collision"
+      ],
       "properties": {
         "ground": {
           "type": "array",
           "items": {
             "type": "array",
-            "items": { "$ref": "#/$defs/tileId" }
+            "items": {
+              "$ref": "#/$defs/tileId"
+            }
           }
         },
         "decor": {
@@ -136,8 +270,12 @@
             "type": "array",
             "items": {
               "oneOf": [
-                { "$ref": "#/$defs/tileId" },
-                { "type": "null" }
+                {
+                  "$ref": "#/$defs/tileId"
+                },
+                {
+                  "type": "null"
+                }
               ]
             }
           }
@@ -146,7 +284,13 @@
           "type": "array",
           "items": {
             "type": "array",
-            "items": { "type": "integer", "enum": [0, 1] }
+            "items": {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            }
           }
         }
       },
@@ -154,11 +298,15 @@
     },
     "regions": {
       "type": "array",
-      "items": { "$ref": "#/$defs/region" }
+      "items": {
+        "$ref": "#/$defs/region"
+      }
     },
     "entities": {
       "type": "array",
-      "items": { "$ref": "#/$defs/entity" }
+      "items": {
+        "$ref": "#/$defs/entity"
+      }
     }
   },
   "additionalProperties": false

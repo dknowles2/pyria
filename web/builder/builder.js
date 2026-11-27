@@ -257,6 +257,8 @@ function getEventBadge(eventType) {
       return { cls: 'pill-blue', text: '🚪 Entered Realm' };
     case 'parent_override':
       return { cls: 'pill-violet', text: '🛡️ Parent Override' };
+    case 'easter_egg_found':
+      return { cls: 'pill-gold', text: '✨ Easter Egg' };
     default:
       return { cls: 'pill-muted', text: eventType || 'Event' };
   }

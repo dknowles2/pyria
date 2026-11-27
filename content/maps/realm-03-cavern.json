@@ -186,6 +186,9 @@
     {"id": "chest-03-03", "type": "chest", "x": 40, "y": 3, "label": "Magma Pool Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-03-02"},
     {"id": "chest-03-04", "type": "chest", "x": 26, "y": 44, "label": "Obsidian Hall Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-03-03"},
     {"id": "chest-03-05", "type": "chest", "x": 60, "y": 44, "label": "Ash Canal Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-03-04"},
-    {"id": "chest-03-06", "type": "chest", "x": 60, "y": 15, "label": "Ember Approach Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-03-05"}
+    {"id": "chest-03-06", "type": "chest", "x": 60, "y": 15, "label": "Ember Approach Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-03-05"},
+    {"id": "bonus-trial-03", "type": "bonus_trial", "x": 18, "y": 44, "label": "Secret Rune: Emberwing's Secret Flame", "refId": "trial-03-bonus", "spriteKey": "torch"},
+    {"id": "egg-03-a", "type": "easter_egg", "x": 2, "y": 19, "label": "Obsidian Pickaxe", "refId": null, "spriteKey": "statue", "title": "Diamond Pickaxe Needed!", "message": "A sign next to a gleaming purple-black rock reads: 'Do NOT try mining this obsidian with a wooden pickaxe. Trust me, it takes 250 seconds.'", "shardReward": 15},
+    {"id": "egg-03-b", "type": "easter_egg", "x": 38, "y": 44, "label": "Singed Parchment", "refId": null, "spriteKey": "campfire", "title": "Lord Null's Secret Diary #2", "message": "Dear Diary: I tried roasting marshmallows over Cinder Cavern lava and dropped my evil cape in. Now my cape smells like s'mores.", "shardReward": 15}
   ]
 }
