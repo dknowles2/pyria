@@ -66,7 +66,12 @@ class PyriaServerTestCase(unittest.TestCase):
         elif isinstance(body, str):
             payload = body.encode("utf-8")
             headers["Content-Type"] = "application/json"
-        conn.request(method, path, body=payload, headers=headers)
+        try:
+            conn.request(method, path, body=payload, headers=headers)
+        except (BrokenPipeError, ConnectionResetError):
+            # Server may reply early (e.g., 413 Payload Too Large) and close before the
+            # client finishes writing an oversized body (common on Linux loopback).
+            pass
         resp = conn.getresponse()
         raw = resp.read()
         resp_headers = {k.lower(): v for k, v in resp.getheaders()}
@@ -361,6 +366,15 @@ class PyriaServerTestCase(unittest.TestCase):
                 self.assertIn(b"Builder", body)
                 st, _ = req("GET", "/builder/")
                 self.assertEqual(st, 200)
+
+                # SPA game routes (/new, /play/:saveId) serve web/index.html
+                (iso_root / "web" / "index.html").write_text(
+                    "<!doctype html><div id='screen-game'>Pyria</div>", encoding="utf-8"
+                )
+                for spa_path in ("/new", "/new/", "/play/save-123", "/play/guest-123-abc"):
+                    st, body = req("GET", spa_path)
+                    self.assertEqual(st, 200, f"expected 200 for {spa_path}")
+                    self.assertIn(b"screen-game", body)
 
                 # PUT /api/builder/difficulty (global)
                 st, raw = req(

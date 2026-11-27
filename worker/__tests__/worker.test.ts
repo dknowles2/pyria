@@ -175,6 +175,18 @@ describe('Security Headers, Static Routing & Sandbox CSP', () => {
     }
   });
 
+  it('routes SPA game screens (/new, /play/:saveId) cleanly to index.html', async () => {
+    for (const path of ['/new', '/new/', '/play/save-abc-123', '/play/guest-1700000-ab12']) {
+      const res = await SELF.fetch(`${BASE}${path}`);
+      expect(res.status, `path ${path}`).toBe(200);
+      expect(res.headers.get('Content-Type')).toContain('text/html');
+      expect(res.headers.get('X-Frame-Options')).toBe('DENY');
+      expect(res.headers.get('Cache-Control')).toBe('no-cache');
+      const html = await res.text();
+      expect(html).toContain('screen-game');
+    }
+  });
+
   it('blocks cross-site and cross-origin mutating requests (CSRF defense)', async () => {
     const crossSite = await apiJson('/api/auth/logout', {
       method: 'POST',

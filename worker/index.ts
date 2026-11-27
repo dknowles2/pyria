@@ -394,6 +394,25 @@ async function serveStaticWithHeaders(
     });
   }
 
+  // Route SPA game screens (/new, /play/:saveId) cleanly to /index.html so page refreshes stay in-app
+  if (
+    lowerPath === '/new' ||
+    lowerPath === '/new/' ||
+    lowerPath === '/play' ||
+    lowerPath.startsWith('/play/')
+  ) {
+    const indexRes = await env.ASSETS.fetch(
+      new Request(new URL('/index.html', request.url).toString(), { method })
+    );
+    const headers = new Headers(indexRes.headers);
+    headers.set('Cache-Control', 'no-cache');
+    applySecurityHeaders(headers);
+    return new Response(method === 'HEAD' ? null : indexRes.body, {
+      status: indexRes.status,
+      headers,
+    });
+  }
+
   // Route /console, /console/*, /admin, /admin/*, /builder, /builder/* cleanly to console/builder assets
   let assetReq = request;
   if (

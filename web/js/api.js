@@ -340,11 +340,12 @@ export async function getSave(id) {
   return { ...normalizeSave(data.save || data), isGuest: false };
 }
 
-export async function updateSave(id, saveData) {
+export async function updateSave(id, saveData, { keepalive = false } = {}) {
   const payload = buildCleanSavePayload(saveData, { includeHeroName: true, includeOwnerEmail: false });
   const data = await requestJson(`/api/saves/${encodeURIComponent(id)}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
+    ...(keepalive ? { keepalive: true } : {}),
   });
   return { ...normalizeSave(data.save || data), isGuest: false };
 }
