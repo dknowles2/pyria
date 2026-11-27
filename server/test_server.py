@@ -66,7 +66,12 @@ class PyriaServerTestCase(unittest.TestCase):
         elif isinstance(body, str):
             payload = body.encode("utf-8")
             headers["Content-Type"] = "application/json"
-        conn.request(method, path, body=payload, headers=headers)
+        try:
+            conn.request(method, path, body=payload, headers=headers)
+        except (BrokenPipeError, ConnectionResetError):
+            # Server may reply early (e.g., 413 Payload Too Large) and close before the
+            # client finishes writing an oversized body (common on Linux loopback).
+            pass
         resp = conn.getresponse()
         raw = resp.read()
         resp_headers = {k.lower(): v for k, v in resp.getheaders()}
