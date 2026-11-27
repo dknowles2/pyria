@@ -1,5 +1,6 @@
 import { applyD1Migrations, env, SELF } from 'cloudflare:test';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { sanitizeCsvCell } from '../analytics';
 import {
   HERO_SESSION_COOKIE,
   PARENT_SESSION_COOKIE,
@@ -80,6 +81,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   await env.DB.batch([
     env.DB.prepare('DELETE FROM trial_attempts'),
+    env.DB.prepare('DELETE FROM trial_stats_daily'),
     env.DB.prepare('DELETE FROM activity_events'),
     env.DB.prepare('DELETE FROM saves'),
     env.DB.prepare('DELETE FROM rate_limits'),
@@ -848,5 +850,460 @@ describe('#45 Input Validation, Quotas, Cascading Delete & Rate Limiting', () =>
       const res = await SELF.fetch(`${BASE}${p}`);
       expect(res.status, `Expected 404 for excluded asset ${p}`).toBe(404);
     }
+  });
+});
+
+describe('#70 Trial Analytics, Durable Rollups & Admin Calibration Metrics', () => {
+  it('validates enriched attempt payloads and stores defaults for legacy clients', async () => {
+    const created = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: { heroName: 'MetricHero' },
+    });
+    expect(created.res.status).toBe(201);
+    const saveId = created.data.save.id;
+    const heroCookie = extractCookie(created.res, 'pyria_hero_session');
+
+    // Legacy payload (no analytics fields) uses defaults
+    const legacyRes = await apiJson(`/api/saves/${saveId}/attempts`, {
+      method: 'POST',
+      cookie: heroCookie,
+      body: { trialId: 'trial-01-01', passed: false, hintsUsed: 0, code: 'say(1)' },
+    });
+    expect(legacyRes.res.status).toBe(201);
+
+    // Enriched failed attempt
+    const failRes = await apiJson(`/api/saves/${saveId}/attempts`, {
+      method: 'POST',
+      cookie: heroCookie,
+      body: {
+        trialId: 'trial-01-01',
+        passed: false,
+        hintsUsed: 2,
+        code: 'say(1)',
+        difficultyMode: 'challenge',
+        isPractice: false,
+        errorType: 'choice:b',
+        durationMs: 12500,
+      },
+    });
+    expect(failRes.res.status).toBe(201);
+
+    // Passed attempt forces errorType to null
+    const passRes = await apiJson(`/api/saves/${saveId}/attempts`, {
+      method: 'POST',
+      cookie: heroCookie,
+      body: {
+        trialId: 'trial-01-01',
+        passed: true,
+        hintsUsed: 1,
+        code: 'say("Hello, Pyria!")',
+        difficultyMode: 'explorer',
+        isPractice: true,
+        errorType: 'SyntaxError',
+        durationMs: 4200,
+      },
+    });
+    expect(passRes.res.status).toBe(201);
+
+    const listRes = await apiJson(`/api/saves/${saveId}/attempts`, { cookie: heroCookie });
+    expect(listRes.res.status).toBe(200);
+    const attempts = listRes.data.attempts;
+    expect(attempts.length).toBe(3);
+    expect(attempts[0]).toMatchObject({
+      passed: true,
+      difficultyMode: 'explorer',
+      isPractice: true,
+      errorType: null,
+      durationMs: 4200,
+    });
+    expect(attempts[1]).toMatchObject({
+      passed: false,
+      difficultyMode: 'challenge',
+      isPractice: false,
+      errorType: 'choice:b',
+      durationMs: 12500,
+    });
+    expect(attempts[2]).toMatchObject({
+      passed: false,
+      difficultyMode: 'standard',
+      isPractice: false,
+      errorType: null,
+      durationMs: null,
+    });
+
+    // Reject invalid values with 400
+    const invalidPayloads = [
+      { trialId: 'trial-01-01', passed: false, difficultyMode: 'nightmare' },
+      { trialId: 'trial-01-01', passed: false, isPractice: 'yes' },
+      { trialId: 'trial-01-01', passed: false, errorType: 'Syntax Error with spaces!' },
+      { trialId: 'trial-01-01', passed: false, errorType: 'A'.repeat(65) },
+      { trialId: 'trial-01-01', passed: false, durationMs: -1 },
+      { trialId: 'trial-01-01', passed: false, durationMs: 86_400_001 },
+      { trialId: 'trial-01-01', passed: false, durationMs: 12.5 },
+      { trialId: 'trial-01-01', passed: false, durationMs: '100' },
+    ];
+    for (const bad of invalidPayloads) {
+      const r = await apiJson(`/api/saves/${saveId}/attempts`, {
+        method: 'POST',
+        cookie: heroCookie,
+        body: bad,
+      });
+      expect(r.res.status, `Expected 400 for ${JSON.stringify(bad)}`).toBe(400);
+    }
+  });
+
+  it('enforces strict admin-only 403 access control on GET /api/admin/trial-metrics', async () => {
+    const heroCreated = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: { heroName: 'ChildHero' },
+    });
+    const heroCookie = extractCookie(heroCreated.res, 'pyria_hero_session');
+    const parentCookie = await makeParentCookie('non-admin@example.com');
+    const adminCookie = await makeParentCookie('admin@pyria.test');
+
+    // Guest -> 403
+    expect((await apiJson('/api/admin/trial-metrics')).res.status).toBe(403);
+    // Child hero session -> 403
+    expect((await apiJson('/api/admin/trial-metrics', { cookie: heroCookie })).res.status).toBe(403);
+    // Non-admin parent session -> 403
+    expect((await apiJson('/api/admin/trial-metrics', { cookie: parentCookie })).res.status).toBe(403);
+    // Admin session -> 200
+    const adminRes = await apiJson('/api/admin/trial-metrics', { cookie: adminCookie });
+    expect(adminRes.res.status).toBe(200);
+    expect(adminRes.data.summary.totalTrials).toBeGreaterThan(0);
+    expect(Array.isArray(adminRes.data.trials)).toBe(true);
+  });
+
+  it('computes accurate metrics, practice/date/difficulty filters, outlier flags, and CSV export', async () => {
+    const adminCookie = await makeParentCookie('admin@pyria.test');
+    const parentCookie = await makeParentCookie('teacher@example.com');
+
+    // Create 5 heroes to satisfy default minHeroes=5
+    const heroIds: string[] = [];
+    for (let i = 1; i <= 5; i += 1) {
+      const created = await apiJson('/api/console/heroes', {
+        method: 'POST',
+        cookie: parentCookie,
+        body: { heroName: `Student ${i}` },
+      });
+      expect(created.res.status).toBe(201);
+      heroIds.push(created.data.save.id);
+    }
+
+    // trial-01-03: 5 heroes, varied attempts to solve [1, 2, 3, 5] + 1 unsolved (hero 5 overridden)
+    // Hero 1: pass on 1st try (0 hints)
+    await apiJson(`/api/saves/${heroIds[0]}/attempts`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: { trialId: 'trial-01-03', passed: true, hintsUsed: 0, difficultyMode: 'standard' },
+    });
+    // Hero 1 practice replay (should be excluded by default!)
+    await apiJson(`/api/saves/${heroIds[0]}/attempts`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: {
+        trialId: 'trial-01-03',
+        passed: true,
+        hintsUsed: 0,
+        difficultyMode: 'standard',
+        isPractice: true,
+      },
+    });
+    // Hero 2: 1 fail (SyntaxError, 1 hint) then pass (1 hint) -> 2 attempts to solve
+    await apiJson(`/api/saves/${heroIds[1]}/attempts`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: {
+        trialId: 'trial-01-03',
+        passed: false,
+        hintsUsed: 1,
+        errorType: 'SyntaxError',
+        difficultyMode: 'standard',
+      },
+    });
+    await apiJson(`/api/saves/${heroIds[1]}/attempts`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: { trialId: 'trial-01-03', passed: true, hintsUsed: 1, difficultyMode: 'standard' },
+    });
+    // Hero 3: 2 fails (AssertionError) then pass (tier3 hint) -> 3 attempts to solve
+    for (let j = 0; j < 2; j += 1) {
+      await apiJson(`/api/saves/${heroIds[2]}/attempts`, {
+        method: 'POST',
+        cookie: parentCookie,
+        body: {
+          trialId: 'trial-01-03',
+          passed: false,
+          hintsUsed: 2,
+          errorType: 'AssertionError',
+          difficultyMode: 'standard',
+        },
+      });
+    }
+    await apiJson(`/api/saves/${heroIds[2]}/attempts`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: { trialId: 'trial-01-03', passed: true, hintsUsed: 3, difficultyMode: 'standard' },
+    });
+    // Hero 4: 4 fails (SyntaxError) then pass -> 5 attempts to solve
+    for (let j = 0; j < 4; j += 1) {
+      await apiJson(`/api/saves/${heroIds[3]}/attempts`, {
+        method: 'POST',
+        cookie: parentCookie,
+        body: {
+          trialId: 'trial-01-03',
+          passed: false,
+          hintsUsed: 3,
+          errorType: 'SyntaxError',
+          difficultyMode: 'standard',
+        },
+      });
+    }
+    await apiJson(`/api/saves/${heroIds[3]}/attempts`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: { trialId: 'trial-01-03', passed: true, hintsUsed: 3, difficultyMode: 'standard' },
+    });
+    // Hero 5: 1 fail + parent override
+    await apiJson(`/api/saves/${heroIds[4]}/attempts`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: {
+        trialId: 'trial-01-03',
+        passed: false,
+        hintsUsed: 3,
+        errorType: 'NameError',
+        difficultyMode: 'standard',
+      },
+    });
+    const ovRes = await apiJson(`/api/console/saves/${heroIds[4]}/override-trial`, {
+      method: 'POST',
+      cookie: parentCookie,
+      body: { trialId: 'trial-01-03', solved: true },
+    });
+    expect(ovRes.res.status).toBe(200);
+
+    // trial-01-01: all 5 heroes pass on 1st try with 0 hints -> too_easy
+    for (const hid of heroIds) {
+      await apiJson(`/api/saves/${hid}/attempts`, {
+        method: 'POST',
+        cookie: parentCookie,
+        body: { trialId: 'trial-01-01', passed: true, hintsUsed: 0, difficultyMode: 'explorer' },
+      });
+    }
+
+    // Default query (includePractice=0)
+    const metricsRes = await apiJson('/api/admin/trial-metrics?eraId=era-01-8bit&realmId=realm-01-meadow', {
+      cookie: adminCookie,
+    });
+    expect(metricsRes.res.status).toBe(200);
+    const t03 = metricsRes.data.trials.find((t: any) => t.trialId === 'trial-01-03');
+    expect(t03).toBeTruthy();
+    expect(t03.uniqueHeroes).toBe(5);
+    expect(t03.uniqueSolvers).toBe(4);
+    expect(t03.attempts).toBe(12); // 1 + 2 + 3 + 5 + 1 (practice excluded, no double count!)
+    expect(t03.passes).toBe(4);
+    expect(t03.completionRate).toBe(80.0);
+    expect(t03.firstTryPassRate).toBe(20.0);
+    // Attempts to solve: [1, 2, 3, 5] -> median = 2.5, p75 = 3 + 0.25*(5-3) = 3.5
+    expect(t03.medianAttemptsToSolve).toBe(2.5);
+    expect(t03.p75AttemptsToSolve).toBe(3.5);
+    expect(t03.parentOverrides).toBe(1);
+    expect(t03.parentOverrideRate).toBe(20.0);
+    expect(t03.hintTierBreakdown).toEqual({ tier0: 1, tier1: 2, tier2: 2, tier3: 7 });
+    expect(t03.topErrors[0]).toEqual({ errorType: 'SyntaxError', count: 5 });
+    expect(t03.flag).toBe('too_hard');
+
+    const t01 = metricsRes.data.trials.find((t: any) => t.trialId === 'trial-01-01');
+    expect(t01.flag).toBe('too_easy');
+    expect(t01.firstTryPassRate).toBe(100.0);
+
+    // includePractice=1 adds Hero 1's practice attempt (12 -> 13) without double-counting non-practice
+    const withPractice = await apiJson('/api/admin/trial-metrics?includePractice=1', {
+      cookie: adminCookie,
+    });
+    const t03Pr = withPractice.data.trials.find((t: any) => t.trialId === 'trial-01-03');
+    expect(t03Pr.attempts).toBe(13);
+    expect(t03Pr.passes).toBe(5);
+
+    // Difficulty filter isolates explorer vs standard
+    const expOnly = await apiJson('/api/admin/trial-metrics?difficulty=explorer', {
+      cookie: adminCookie,
+    });
+    expect(expOnly.data.trials.find((t: any) => t.trialId === 'trial-01-01').attempts).toBe(5);
+    expect(expOnly.data.trials.find((t: any) => t.trialId === 'trial-01-03').attempts).toBe(0);
+
+    // since filter in the future excludes today's attempts
+    const futureRes = await apiJson('/api/admin/trial-metrics?since=2099-01-01', {
+      cookie: adminCookie,
+    });
+    expect(futureRes.res.status).toBe(200);
+    expect(futureRes.data.summary.trialsWithData).toBe(0);
+
+    // Invalid query params return 400
+    for (const badQs of [
+      '?since=2026-02-30',
+      '?since=not-a-date',
+      '?difficulty=impossible',
+      '?days=999',
+      '?minHeroes=0',
+      '?includePractice=maybe',
+      '?format=xml',
+    ]) {
+      const badRes = await apiJson(`/api/admin/trial-metrics${badQs}`, { cookie: adminCookie });
+      expect(badRes.res.status, `Expected 400 for ${badQs}`).toBe(400);
+    }
+
+    // CSV export & formula injection neutralization
+    const csvRes = await SELF.fetch(`${BASE}/api/admin/trial-metrics?format=csv`, {
+      headers: { Cookie: adminCookie },
+    });
+    expect(csvRes.status).toBe(200);
+    expect(csvRes.headers.get('Content-Type')).toContain('text/csv');
+    expect(csvRes.headers.get('Content-Disposition')).toContain('pyria-trial-metrics.csv');
+    const csvText = await csvRes.text();
+    expect(csvText).toContain('trialId,title,eraId,realmId');
+    expect(csvText).toContain('trial-01-03');
+
+    expect(sanitizeCsvCell('=CMD()')).toBe("'=CMD()");
+    expect(sanitizeCsvCell('+1+1')).toBe("'+1+1");
+    expect(sanitizeCsvCell('-2')).toBe("'-2");
+    expect(sanitizeCsvCell('@SUM(A1)')).toBe("'@SUM(A1)");
+    expect(sanitizeCsvCell('\t=1')).toBe("'\t=1");
+    expect(sanitizeCsvCell('  =HYPERLINK("x")')).toBe('"\'  =HYPERLINK(""x"")"');
+  });
+
+  it('preserves durable daily rollup metrics after trial_attempts pruning', async () => {
+    const adminCookie = await makeParentCookie('admin@pyria.test');
+    const db = new PyriaD1({
+      ...env,
+      PYRIA_MAX_ATTEMPT_CODE_ROWS: '2',
+      PYRIA_MAX_ATTEMPTS_PER_SAVE: '2',
+    });
+    const save = await db.createSave({ heroName: 'PrunedAnalyticsHero' });
+
+    // Log 5 attempts on trial-01-02 (raw table will prune down to 2 rows!)
+    for (let i = 1; i <= 4; i += 1) {
+      await db.logAttempt({
+        saveId: save.id,
+        trialId: 'trial-01-02',
+        passed: false,
+        hintsUsed: i === 4 ? 3 : 1,
+        code: `bad(${i})`,
+        difficultyMode: 'standard',
+        isPractice: false,
+        errorType: 'SyntaxError',
+      });
+    }
+    await db.logAttempt({
+      saveId: save.id,
+      trialId: 'trial-01-02',
+      passed: true,
+      hintsUsed: 3,
+      code: 'say("Wake up, Spark!")',
+      difficultyMode: 'standard',
+      isPractice: false,
+    });
+
+    // Confirm raw rows were pruned to 2
+    const remaining = await db.listAttempts(save.id);
+    expect(remaining?.length).toBe(2);
+
+    // Metrics endpoint still reports all 5 attempts, 1 pass, 1 uniqueSolver, and 2 tier3 hints!
+    const res = await apiJson('/api/admin/trial-metrics?minHeroes=1', { cookie: adminCookie });
+    expect(res.res.status).toBe(200);
+    const t02 = res.data.trials.find((t: any) => t.trialId === 'trial-01-02');
+    expect(t02.attempts).toBe(5);
+    expect(t02.passes).toBe(1);
+    expect(t02.uniqueHeroes).toBe(1);
+    expect(t02.uniqueSolvers).toBe(1);
+    expect(t02.hintUsageRate).toBe(100.0);
+    expect(t02.tier3HintRate).toBe(40.0);
+  });
+
+  it('preserves durable uniqueHeroes/completionRate/hintUsageRate after save deletion and prevents windowed first-try inflation', async () => {
+    const adminCookie = await makeParentCookie('admin@pyria.test');
+    const db = new PyriaD1(env);
+
+    // 5 heroes on trial-01-04: 3 non-solvers (0 hints) + 2 solvers (1 with 3 hints, 1 with 0 hints)
+    const saves = [];
+    for (let i = 1; i <= 5; i += 1) {
+      saves.push(await db.createSave({ heroName: `DeletedHero${i}` }));
+    }
+    for (let i = 0; i < 3; i += 1) {
+      await db.logAttempt({
+        saveId: saves[i].id,
+        trialId: 'trial-01-04',
+        passed: false,
+        hintsUsed: 0,
+        code: 'bad()',
+        difficultyMode: 'standard',
+      });
+    }
+    await db.logAttempt({
+      saveId: saves[3].id,
+      trialId: 'trial-01-04',
+      passed: true,
+      hintsUsed: 3,
+      code: 'ok()',
+      difficultyMode: 'standard',
+    });
+    await db.logAttempt({
+      saveId: saves[4].id,
+      trialId: 'trial-01-04',
+      passed: true,
+      hintsUsed: 0,
+      code: 'ok()',
+      difficultyMode: 'standard',
+    });
+
+    // Delete ALL 5 saves (cascading all raw trial_attempts rows!)
+    for (const s of saves) {
+      await db.deleteSave(s.id);
+    }
+
+    const afterDel = await apiJson('/api/admin/trial-metrics?minHeroes=5', { cookie: adminCookie });
+    expect(afterDel.res.status).toBe(200);
+    const t04 = afterDel.data.trials.find((t: any) => t.trialId === 'trial-01-04');
+    expect(t04.uniqueHeroes).toBe(5);
+    expect(t04.uniqueSolvers).toBe(2);
+    expect(t04.completionRate).toBe(40.0);
+    // Only 1 of 5 attempts used hints (hintsUsed=3) -> exact 20.0% (not 60% from total_hints=3!)
+    expect(t04.hintUsageRate).toBe(20.0);
+    expect(t04.flag).toBe('too_hard');
+
+    // Windowed first-try inflation check: hero fails BEFORE window (2026-01-10) and passes INSIDE window (2026-01-15)
+    const wSave = await db.createSave({ heroName: 'WindowHero' });
+    await env.DB.prepare(
+      `INSERT INTO trial_attempts (save_id, trial_id, passed, hints_used, code, difficulty_mode, is_practice, created_at)
+       VALUES (?, 'trial-01-05', 0, 0, 'bad()', 'standard', 0, '2026-01-10T10:00:00Z'),
+              (?, 'trial-01-05', 1, 0, 'ok()',  'standard', 0, '2026-01-15T10:00:00Z')`
+    )
+      .bind(wSave.id, wSave.id)
+      .run();
+    await env.DB.prepare(
+      `INSERT INTO trial_stats_daily (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_attempters, unique_solvers, hinted_attempts, total_hints, tier3_hints, parent_overrides)
+       VALUES ('2026-01-10', 'trial-01-05', 'standard', 1, 0, 0, 1, 0, 0, 0, 0, 0),
+              ('2026-01-15', 'trial-01-05', 'standard', 1, 1, 0, 0, 1, 0, 0, 0, 0)`
+    ).run();
+
+    const winRes = await apiJson('/api/admin/trial-metrics?since=2026-01-14&minHeroes=1', {
+      cookie: adminCookie,
+    });
+    expect(winRes.res.status).toBe(200);
+    const t05 = winRes.data.trials.find((t: any) => t.trialId === 'trial-01-05');
+    expect(t05.passes).toBe(1);
+    expect(t05.firstTryPassRate).toBe(0.0);
+
+    // parentOverrideRate is clamped to 100.0 even when parentOverrides > uniqueHeroes
+    const ovSave1 = await db.createSave({ heroName: 'OvHero1' });
+    const ovSave2 = await db.createSave({ heroName: 'OvHero2' });
+    await db.overrideTrial({ saveId: ovSave1.id, trialId: 'trial-01-06', solved: true, awardShards: false, shardReward: 0 });
+    await db.overrideTrial({ saveId: ovSave2.id, trialId: 'trial-01-06', solved: true, awardShards: false, shardReward: 0 });
+    await db.logAttempt({ saveId: ovSave1.id, trialId: 'trial-01-06', passed: false, hintsUsed: 0, code: 'x' });
+    const ovMetrics = await apiJson('/api/admin/trial-metrics?minHeroes=1', { cookie: adminCookie });
+    const t06 = ovMetrics.data.trials.find((t: any) => t.trialId === 'trial-01-06');
+    expect(t06.parentOverrides).toBe(2);
+    expect(t06.parentOverrideRate).toBe(100.0);
   });
 });

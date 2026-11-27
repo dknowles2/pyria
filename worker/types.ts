@@ -94,7 +94,87 @@ export interface AttemptRecord {
   passed: boolean;
   hintsUsed: number;
   code: string;
+  difficultyMode: DifficultyMode;
+  isPractice: boolean;
+  errorType: string | null;
+  durationMs: number | null;
   createdAt: string;
+}
+
+export type TrialCalibrationFlag = 'too_hard' | 'too_easy' | 'possible_bug' | 'low_data' | 'ok';
+
+export interface TrialMetadata {
+  trialId: string;
+  title: string;
+  eraId: string;
+  eraName: string;
+  realmId: string;
+  realmName: string;
+  trialType: string;
+  concepts: string[];
+}
+
+export interface TrialMetricsFilters {
+  eraId: string | null;
+  realmId: string | null;
+  trialType: string | null;
+  difficulty: 'all' | DifficultyMode;
+  days: '7' | '30' | '90' | 'all';
+  since: string | null;
+  minHeroes: number;
+  includePractice: boolean;
+  format: 'json' | 'csv';
+}
+
+export interface TrialMetricRow {
+  trialId: string;
+  title: string;
+  eraId: string;
+  eraName: string;
+  realmId: string;
+  realmName: string;
+  trialType: string;
+  concepts: string[];
+  uniqueHeroes: number;
+  uniqueSolvers: number;
+  attempts: number;
+  passes: number;
+  completionRate: number | null;
+  firstTryPassRate: number | null;
+  medianAttemptsToSolve: number | null;
+  p75AttemptsToSolve: number | null;
+  hintUsageRate: number | null;
+  tier3HintRate: number | null;
+  hintTierBreakdown: {
+    tier0: number;
+    tier1: number;
+    tier2: number;
+    tier3: number;
+  };
+  parentOverrides: number;
+  parentOverrideRate: number | null;
+  topErrors: Array<{ errorType: string; count: number }>;
+  dailyTrend: Array<{ day: string; attempts: number; passes: number }>;
+  flag: TrialCalibrationFlag;
+  flagReasons: string[];
+}
+
+export interface TrialMetricsSummary {
+  totalTrials: number;
+  trialsWithData: number;
+  flaggedTooHard: number;
+  flaggedTooEasy: number;
+  flaggedPossibleBug: number;
+  flaggedLowData: number;
+  overallMedianAttempts: number | null;
+  totalOverrides: number;
+  truncated?: boolean;
+}
+
+export interface TrialMetricsResponse {
+  filters: TrialMetricsFilters;
+  summary: TrialMetricsSummary;
+  trials: TrialMetricRow[];
 }
 
 export interface ActivityEventRecord {

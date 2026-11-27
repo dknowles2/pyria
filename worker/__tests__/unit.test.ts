@@ -294,7 +294,16 @@ describe('worker/validation.ts unit tests', () => {
       hints_used: '3',
       code: null,
     });
-    expect(snake).toEqual({ trialId: 'trial-01', passed: true, hintsUsed: 3, code: '' });
+    expect(snake).toEqual({
+      trialId: 'trial-01',
+      passed: true,
+      hintsUsed: 3,
+      code: '',
+      difficultyMode: 'standard',
+      isPractice: false,
+      errorType: null,
+      durationMs: null,
+    });
 
     // Clamping negative and >1000 hintsUsed
     expect(validateAttemptPayload({ trialId: 't1', hintsUsed: -5 }).hintsUsed).toBe(0);

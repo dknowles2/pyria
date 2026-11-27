@@ -1485,6 +1485,294 @@ class PyriaServerTestCase(unittest.TestCase):
         st, _, _ = self._request("GET", "/console", extra_headers=kid_hdr)
         self.assertEqual(st, 403)
 
+    def test_trial_analytics_metrics_rollups_csv_and_cli_report(self) -> None:
+        import sqlite3
+        import subprocess
+
+        # 1. Enriched attempt validation (defaults + invalid 400 checks)
+        st, _, raw = self._request("POST", "/api/saves", {"heroName": "MetricHero1"})
+        self.assertEqual(st, 201)
+        save1 = json.loads(raw)["save"]["id"]
+
+        st, _, _ = self._request(
+            "POST",
+            f"/api/saves/{save1}/attempts",
+            {
+                "trialId": "trial-01-03",
+                "passed": False,
+                "hintsUsed": 3,
+                "code": "say()",
+                "difficultyMode": "standard",
+                "isPractice": False,
+                "errorType": "AssertionError",
+                "durationMs": 5500,
+            },
+        )
+        self.assertEqual(st, 201)
+
+        # Passed attempt forces errorType to null
+        st, _, _ = self._request(
+            "POST",
+            f"/api/saves/{save1}/attempts",
+            {
+                "trialId": "trial-01-03",
+                "passed": True,
+                "hintsUsed": 3,
+                "code": 'say("Hello, Pyria!")',
+                "difficultyMode": "standard",
+                "isPractice": False,
+                "errorType": "AssertionError",
+                "durationMs": 8000,
+            },
+        )
+        self.assertEqual(st, 201)
+
+        # Practice replay
+        st, _, _ = self._request(
+            "POST",
+            f"/api/saves/{save1}/attempts",
+            {
+                "trialId": "trial-01-03",
+                "passed": True,
+                "hintsUsed": 0,
+                "code": 'say("Hello, Pyria!")',
+                "difficultyMode": "standard",
+                "isPractice": True,
+            },
+        )
+        self.assertEqual(st, 201)
+
+        st, _, raw = self._request("GET", f"/api/saves/{save1}/attempts")
+        self.assertEqual(st, 200)
+        att_list = json.loads(raw)["attempts"]
+        self.assertEqual(len(att_list), 3)
+        self.assertTrue(att_list[0]["isPractice"])
+        self.assertIsNone(att_list[1]["errorType"])
+        self.assertEqual(att_list[2]["errorType"], "AssertionError")
+        self.assertEqual(att_list[2]["durationMs"], 5500)
+
+        # Invalid enriched attempt payloads -> 400
+        for bad in (
+            {"trialId": "trial-01-03", "passed": False, "difficultyMode": "extreme"},
+            {"trialId": "trial-01-03", "passed": False, "isPractice": "true"},
+            {"trialId": "trial-01-03", "passed": False, "errorType": "bad error!"},
+            {"trialId": "trial-01-03", "passed": False, "durationMs": -5},
+            {"trialId": "trial-01-03", "passed": False, "durationMs": 99999999},
+            {"trialId": "trial-01-03", "passed": False, "durationMs": True},
+        ):
+            self.assertEqual(
+                self._request("POST", f"/api/saves/{save1}/attempts", bad)[0],
+                400,
+                f"Expected 400 for {bad}",
+            )
+
+        # 2. Parent override increments parent_overrides in trial_stats_daily
+        st, _, raw = self._request("POST", "/api/saves", {"heroName": "MetricHero2"})
+        save2 = json.loads(raw)["save"]["id"]
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/builder/saves/{save2}/override-trial",
+                {"trialId": "trial-01-03", "solved": True},
+            )[0],
+            200,
+        )
+
+        # 3. GET /api/builder/trial-metrics & /api/admin/trial-metrics alias
+        for ep in ("/api/builder/trial-metrics?minHeroes=1", "/api/admin/trial-metrics?minHeroes=1"):
+            st, _, raw = self._request("GET", ep)
+            self.assertEqual(st, 200)
+            data = json.loads(raw)
+            t03 = next(t for t in data["trials"] if t["trialId"] == "trial-01-03")
+            self.assertEqual(t03["attempts"], 2)  # practice excluded, no double count
+            self.assertEqual(t03["passes"], 1)
+            self.assertEqual(t03["uniqueSolvers"], 1)
+            self.assertEqual(t03["parentOverrides"], 1)
+            self.assertEqual(t03["topErrors"], [{"errorType": "AssertionError", "count": 1}])
+
+        # includePractice=1 includes the practice replay
+        st, _, raw = self._request(
+            "GET", "/api/builder/trial-metrics?minHeroes=1&includePractice=1"
+        )
+        self.assertEqual(st, 200)
+        t03_pr = next(t for t in json.loads(raw)["trials"] if t["trialId"] == "trial-01-03")
+        self.assertEqual(t03_pr["attempts"], 3)
+        self.assertEqual(t03_pr["passes"], 2)
+
+        # 4. Admin-only 403 enforcement when PYRIA_ADMIN_EMAILS is set
+        os.environ["PYRIA_ADMIN_EMAILS"] = "admin@example.com"
+        kid_hdr = {"Cf-Access-Authenticated-User-Email": "kid@example.com"}
+        admin_hdr = {"Cf-Access-Authenticated-User-Email": "admin@example.com"}
+        self.assertEqual(
+            self._request("GET", "/api/builder/trial-metrics", extra_headers=kid_hdr)[0],
+            403,
+        )
+        self.assertEqual(
+            self._request("GET", "/api/admin/trial-metrics", extra_headers=kid_hdr)[0],
+            403,
+        )
+        self.assertEqual(
+            self._request("GET", "/api/admin/trial-metrics", extra_headers=admin_hdr)[0],
+            200,
+        )
+        os.environ.pop("PYRIA_ADMIN_EMAILS", None)
+
+        # 5. CSV export + formula injection neutralization
+        st, hdrs, raw = self._request("GET", "/api/builder/trial-metrics?format=csv")
+        self.assertEqual(st, 200)
+        self.assertIn("text/csv", hdrs.get("content-type", ""))
+        self.assertIn("pyria-trial-metrics.csv", hdrs.get("content-disposition", ""))
+        self.assertIn("trial-01-03", raw.decode("utf-8"))
+        self.assertEqual(pyria_app.sanitize_csv_cell("=CMD()"), "'=CMD()")
+        self.assertEqual(pyria_app.sanitize_csv_cell("+1+1"), "'+1+1")
+        self.assertEqual(pyria_app.sanitize_csv_cell("-2"), "'-2")
+        self.assertEqual(pyria_app.sanitize_csv_cell("@SUM(A1)"), "'@SUM(A1)")
+
+        # 6. Invalid query params return 400
+        for bad_q in ("?since=2026-02-30", "?difficulty=hardcore", "?days=12", "?minHeroes=0"):
+            self.assertEqual(
+                self._request("GET", f"/api/builder/trial-metrics{bad_q}")[0], 400
+            )
+
+        # 7. Idempotent schema migration on legacy SQLite DB missing new columns
+        legacy_db_path = Path(self._tmpdir.name) / "legacy.sqlite3"
+        conn = sqlite3.connect(str(legacy_db_path))
+        conn.executescript(
+            """
+            CREATE TABLE saves (
+                id TEXT PRIMARY KEY,
+                hero_name TEXT NOT NULL,
+                state_json TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            );
+            CREATE TABLE trial_attempts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                save_id TEXT NOT NULL,
+                trial_id TEXT NOT NULL,
+                passed INTEGER NOT NULL,
+                hints_used INTEGER NOT NULL DEFAULT 0,
+                code TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL
+            );
+            """
+        )
+        conn.commit()
+        conn.close()
+        migrated_db = pyria_app.PyriaDatabase(legacy_db_path)
+        with migrated_db._connect() as c:
+            cols = {r["name"] for r in c.execute("PRAGMA table_info(trial_attempts)").fetchall()}
+            self.assertTrue({"difficulty_mode", "is_practice", "error_type", "duration_ms"} <= cols)
+            tables = {
+                r["name"]
+                for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+            }
+            self.assertIn("trial_stats_daily", tables)
+
+        # 8. CLI calibration_report.py smoke test (--db, --compare-cutoff, --format csv, --input)
+        cli_script = str(REPO_ROOT / "scripts" / "calibration_report.py")
+        res_md = subprocess.run(
+            [
+                sys.executable,
+                cli_script,
+                "--db",
+                str(self.db_path),
+                "--min-heroes",
+                "1",
+                "--compare-cutoff",
+                "2026-01-01",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn("# Pyria Trial Calibration Report", res_md.stdout)
+        self.assertIn("trial-01-03", res_md.stdout)
+        self.assertIn("## Before vs. After Calibration (`2026-01-01`)", res_md.stdout)
+
+        res_csv = subprocess.run(
+            [sys.executable, cli_script, "--db", str(self.db_path), "--format", "csv"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn("trialId,title,eraId,realmId", res_csv.stdout)
+
+        # --input JSON mode
+        st, _, raw = self._request("GET", "/api/builder/trial-metrics?minHeroes=1")
+        json_path = Path(self._tmpdir.name) / "metrics.json"
+        json_path.write_bytes(raw)
+        res_in = subprocess.run(
+            [sys.executable, cli_script, "--input", str(json_path)],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn("# Pyria Trial Calibration Report", res_in.stdout)
+        self.assertIn("trial-01-03", res_in.stdout)
+
+        # --days all formats window as `all` (not `alld`) and non-dict JSON input fails cleanly with code 2
+        res_all = subprocess.run(
+            [sys.executable, cli_script, "--db", str(self.db_path), "--days", "all"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn("**Window:** `all`", res_all.stdout)
+        self.assertNotIn("`alld`", res_all.stdout)
+
+        bad_json_path = Path(self._tmpdir.name) / "bad.json"
+        bad_json_path.write_text("[1, 2, 3]", encoding="utf-8")
+        res_bad = subprocess.run(
+            [sys.executable, cli_script, "--input", str(bad_json_path)],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(res_bad.returncode, 2)
+
+        # 9. Durable uniqueHeroes / completionRate / exact hintUsageRate after deleting all 5 saves
+        del_ids: list[str] = []
+        for idx in range(5):
+            st, _, raw = self._request("POST", "/api/saves", {"heroName": f"DelHero{idx}"})
+            self.assertEqual(st, 201)
+            del_ids.append(json.loads(raw)["save"]["id"])
+        for idx in range(3):
+            self.assertEqual(
+                self._request(
+                    "POST",
+                    f"/api/saves/{del_ids[idx]}/attempts",
+                    {"trialId": "trial-01-04", "passed": False, "hintsUsed": 0, "code": "x"},
+                )[0],
+                201,
+            )
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/saves/{del_ids[3]}/attempts",
+                {"trialId": "trial-01-04", "passed": True, "hintsUsed": 3, "code": "ok"},
+            )[0],
+            201,
+        )
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/saves/{del_ids[4]}/attempts",
+                {"trialId": "trial-01-04", "passed": True, "hintsUsed": 0, "code": "ok"},
+            )[0],
+            201,
+        )
+        for sid in del_ids:
+            self.assertEqual(self._request("DELETE", f"/api/saves/{sid}")[0], 200)
+
+        st, _, raw = self._request("GET", "/api/builder/trial-metrics?minHeroes=5")
+        self.assertEqual(st, 200)
+        t04 = next(t for t in json.loads(raw)["trials"] if t["trialId"] == "trial-01-04")
+        self.assertEqual(t04["uniqueHeroes"], 5)
+        self.assertEqual(t04["uniqueSolvers"], 2)
+        self.assertEqual(t04["completionRate"], 40.0)
+        self.assertEqual(t04["hintUsageRate"], 20.0)
+        self.assertEqual(t04["flag"], "too_hard")
+
 
 if __name__ == "__main__":
     unittest.main()

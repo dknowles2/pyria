@@ -21,7 +21,7 @@ import sqlite3
 import threading
 import unicodedata
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -59,6 +59,15 @@ MAX_TRIAL_DRAFTS = 512
 MAX_APPEARANCE_KEYS = 32
 MAX_BYTE_SHARDS = 1_000_000_000
 MAX_DIFF_EVENTS_PER_UPDATE = 100
+MAX_ERROR_TYPE_LEN = 64
+MAX_DURATION_MS = 86_400_000
+MAX_RAW_ATTEMPT_ROWS = 50_000
+VALID_DIFFICULTY_MODES: frozenset[str] = frozenset({"explorer", "standard", "challenge"})
+VALID_DIFFICULTY_FILTERS: frozenset[str] = frozenset({"all", "explorer", "standard", "challenge"})
+VALID_DAYS_FILTERS: frozenset[str] = frozenset({"7", "30", "90", "all"})
+ERROR_TYPE_RE = re.compile(r"^[A-Za-z0-9_.:-]+$")
+ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+CSV_FORMULA_PREFIX_RE = re.compile(r"^(?:[=+\-@\t\r]|\s+[=+\-@])")
 
 DEFAULT_MAX_SAVES_PER_ACCOUNT = 10
 DEFAULT_MAX_TOTAL_SAVES = 100
@@ -620,6 +629,698 @@ def validate_save_payload(
     return sanitized, hero_name
 
 
+def _round1(val: float) -> float:
+    return round(val, 1)
+
+
+def compute_percentile(sorted_values: list[float | int], percentile: float) -> float | None:
+    if not sorted_values:
+        return None
+    if len(sorted_values) == 1:
+        return _round1(float(sorted_values[0]))
+    idx = percentile * (len(sorted_values) - 1)
+    lo = math.floor(idx)
+    hi = math.ceil(idx)
+    interpolated = sorted_values[lo] + (idx - lo) * (sorted_values[hi] - sorted_values[lo])
+    return _round1(float(interpolated))
+
+
+def is_valid_iso_date(value: str) -> bool:
+    if not ISO_DATE_RE.match(value):
+        return False
+    try:
+        date.fromisoformat(value)
+        return True
+    except ValueError:
+        return False
+
+
+def sanitize_csv_cell(value: Any) -> str:
+    if value is None:
+        return ""
+    text = str(value)
+    if CSV_FORMULA_PREFIX_RE.match(text):
+        text = f"'{text}"
+    if any(ch in text for ch in (",", '"', "\n", "\r")):
+        return '"' + text.replace('"', '""') + '"'
+    return text
+
+
+def format_trial_metrics_csv(trials: list[dict[str, Any]]) -> str:
+    headers = [
+        "trialId",
+        "title",
+        "eraId",
+        "realmId",
+        "trialType",
+        "concepts",
+        "uniqueHeroes",
+        "uniqueSolvers",
+        "attempts",
+        "passes",
+        "completionRate",
+        "firstTryPassRate",
+        "medianAttemptsToSolve",
+        "p75AttemptsToSolve",
+        "hintUsageRate",
+        "tier3HintRate",
+        "parentOverrides",
+        "parentOverrideRate",
+        "topError",
+        "flag",
+        "flagReasons",
+    ]
+    lines = [",".join(headers)]
+    for t in trials:
+        top_errors = t.get("topErrors") or []
+        top_err = f"{top_errors[0]['errorType']} ({top_errors[0]['count']})" if top_errors else ""
+        row = [
+            t.get("trialId", ""),
+            t.get("title", ""),
+            t.get("eraId", ""),
+            t.get("realmId", ""),
+            t.get("trialType", ""),
+            "; ".join(t.get("concepts") or []),
+            t.get("uniqueHeroes", 0),
+            t.get("uniqueSolvers", 0),
+            t.get("attempts", 0),
+            t.get("passes", 0),
+            "" if t.get("completionRate") is None else t["completionRate"],
+            "" if t.get("firstTryPassRate") is None else t["firstTryPassRate"],
+            "" if t.get("medianAttemptsToSolve") is None else t["medianAttemptsToSolve"],
+            "" if t.get("p75AttemptsToSolve") is None else t["p75AttemptsToSolve"],
+            "" if t.get("hintUsageRate") is None else t["hintUsageRate"],
+            "" if t.get("tier3HintRate") is None else t["tier3HintRate"],
+            t.get("parentOverrides", 0),
+            "" if t.get("parentOverrideRate") is None else t["parentOverrideRate"],
+            top_err,
+            t.get("flag", ""),
+            "; ".join(t.get("flagReasons") or []),
+        ]
+        lines.append(",".join(sanitize_csv_cell(v) for v in row))
+    return "\r\n".join(lines) + "\r\n"
+
+
+def parse_trial_metrics_filters(qs: dict[str, list[str]]) -> dict[str, Any]:
+    def opt_str(name: str, max_len: int) -> str | None:
+        raw = (qs.get(name, [""])[0] or "").strip()
+        if not raw:
+            return None
+        if len(raw) > max_len or _has_control_chars(raw):
+            raise SaveValidationError(f"Invalid {name} filter")
+        return raw
+
+    era_id = opt_str("eraId", 128)
+    realm_id = opt_str("realmId", 128)
+    trial_type = opt_str("trialType", 64)
+
+    difficulty = (qs.get("difficulty", ["all"])[0] or "all").strip().lower() or "all"
+    if difficulty not in VALID_DIFFICULTY_FILTERS:
+        raise SaveValidationError("difficulty must be 'all', 'explorer', 'standard', or 'challenge'")
+
+    days = (qs.get("days", ["30"])[0] or "30").strip().lower() or "30"
+    if days not in VALID_DAYS_FILTERS:
+        raise SaveValidationError("days must be '7', '30', '90', or 'all'")
+
+    raw_since = (qs.get("since", [""])[0] or "").strip()
+    since: str | None = None
+    if raw_since:
+        if not is_valid_iso_date(raw_since):
+            raise SaveValidationError("since must be a valid YYYY-MM-DD date")
+        since = raw_since
+
+    raw_min_heroes = (qs.get("minHeroes", [""])[0] or "").strip()
+    min_heroes = 5
+    if raw_min_heroes:
+        if not raw_min_heroes.isdigit():
+            raise SaveValidationError("minHeroes must be an integer >= 1")
+        min_heroes = int(raw_min_heroes)
+        if min_heroes < 1 or min_heroes > 10000:
+            raise SaveValidationError("minHeroes must be between 1 and 10000")
+
+    raw_practice = (qs.get("includePractice", ["0"])[0] or "0").strip().lower()
+    if raw_practice in ("1", "true"):
+        include_practice = True
+    elif raw_practice in ("0", "false", ""):
+        include_practice = False
+    else:
+        raise SaveValidationError("includePractice must be '0' or '1'")
+
+    fmt = (qs.get("format", ["json"])[0] or "json").strip().lower() or "json"
+    if fmt not in ("json", "csv"):
+        raise SaveValidationError("format must be 'json' or 'csv'")
+
+    return {
+        "eraId": era_id,
+        "realmId": realm_id,
+        "trialType": trial_type,
+        "difficulty": difficulty,
+        "days": days,
+        "since": since,
+        "minHeroes": min_heroes,
+        "includePractice": include_practice,
+        "format": fmt,
+    }
+
+
+def compute_min_day(filters: dict[str, Any], now_utc: datetime | None = None) -> str | None:
+    if filters.get("since"):
+        return str(filters["since"])
+    days = str(filters.get("days") or "30")
+    if days == "all":
+        return None
+    now_dt = now_utc or datetime.now(timezone.utc)
+    cutoff = now_dt.date() - timedelta(days=int(days) - 1)
+    return cutoff.isoformat()
+
+
+def _evaluate_calibration_flag(
+    *,
+    trial_type: str,
+    unique_heroes: int,
+    min_heroes: int,
+    attempts: int,
+    passes: int,
+    completion_rate: float | None,
+    first_try_pass_rate: float | None,
+    median_attempts: float | None,
+    hint_usage_rate: float | None,
+    tier3_hint_rate: float | None,
+    parent_override_rate: float | None,
+    assertion_error_count: int,
+) -> tuple[str, list[str]]:
+    if unique_heroes < min_heroes:
+        if unique_heroes == 0:
+            return "low_data", ["No attempts recorded"]
+        return "low_data", [f"Only {unique_heroes} hero(es) attempted (minimum {min_heroes})"]
+
+    bug_reasons: list[str] = []
+    hard_reasons: list[str] = []
+    easy_reasons: list[str] = []
+
+    failed_attempts = max(0, attempts - passes)
+    if (
+        failed_attempts >= 3
+        and (assertion_error_count / failed_attempts) >= 0.6
+        and ((tier3_hint_rate or 0.0) >= 20.0 or (completion_rate if completion_rate is not None else 100.0) < 60.0)
+    ):
+        pct = _round1((assertion_error_count / failed_attempts) * 100.0)
+        bug_reasons.append(f"High AssertionError share of failures ({pct}%) despite hints/low completion")
+
+    if completion_rate is not None and completion_rate < 60.0:
+        hard_reasons.append(f"Low completion rate ({completion_rate}%)")
+    if median_attempts is not None and median_attempts >= 5.0:
+        hard_reasons.append(f"High median attempts to solve ({median_attempts})")
+    if tier3_hint_rate is not None and tier3_hint_rate >= 35.0:
+        hard_reasons.append(f"High Tier-3 walkthrough hint rate ({tier3_hint_rate}%)")
+    if parent_override_rate is not None and parent_override_rate >= 15.0:
+        hard_reasons.append(f"Elevated parent override rate ({parent_override_rate}%)")
+
+    easy_threshold = 95.0 if trial_type == "multiple_choice" else 90.0
+    if (
+        first_try_pass_rate is not None
+        and first_try_pass_rate >= easy_threshold
+        and (hint_usage_rate or 0.0) <= 5.0
+        and (median_attempts is None or median_attempts <= 1.0)
+    ):
+        easy_reasons.append(
+            f"Very high first-try pass rate ({first_try_pass_rate}%) with minimal hints ({hint_usage_rate or 0.0}%)"
+        )
+
+    if bug_reasons:
+        return "possible_bug", bug_reasons + hard_reasons
+    if hard_reasons:
+        return "too_hard", hard_reasons
+    if easy_reasons:
+        return "too_easy", easy_reasons
+    return "ok", []
+
+
+def extract_trial_catalog(eras: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    catalog: list[dict[str, Any]] = []
+    for era in eras:
+        era_id = str(era.get("id") or "")
+        era_name = str(era.get("name") or era_id)
+        for realm in era.get("realms") or []:
+            realm_id = str(realm.get("id") or "")
+            realm_name = str(realm.get("name") or realm_id)
+            for trial in realm.get("trials") or []:
+                tid = trial.get("id")
+                if not tid:
+                    continue
+                concepts = trial.get("concepts")
+                catalog.append(
+                    {
+                        "trialId": str(tid),
+                        "title": str(trial.get("title") or tid),
+                        "eraId": era_id,
+                        "eraName": era_name,
+                        "realmId": realm_id,
+                        "realmName": realm_name,
+                        "trialType": str(trial.get("trialType") or "code"),
+                        "concepts": [str(c) for c in concepts] if isinstance(concepts, list) else [],
+                    }
+                )
+    return catalog
+
+
+def compute_trial_metrics_from_conn(
+    conn: sqlite3.Connection,
+    catalog: list[dict[str, Any]],
+    filters: dict[str, Any],
+    *,
+    now_utc: datetime | None = None,
+    max_day: str | None = None,
+) -> dict[str, Any]:
+    min_day = compute_min_day(filters, now_utc=now_utc)
+    difficulty = str(filters.get("difficulty") or "all")
+    include_practice = bool(filters.get("includePractice", False))
+    min_heroes = int(filters.get("minHeroes") or 5)
+
+    # Check whether trial_stats_daily & enriched columns exist (graceful for older DBs)
+    tables = {
+        r["name"]
+        for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    }
+    attempt_cols = {
+        r["name"] for r in conn.execute("PRAGMA table_info(trial_attempts)").fetchall()
+    }
+    has_diff_col = "difficulty_mode" in attempt_cols
+    has_practice_col = "is_practice" in attempt_cols
+    has_error_col = "error_type" in attempt_cols
+
+    rollup_by_trial: dict[str, dict[str, dict[str, int]]] = {}
+    if "trial_stats_daily" in tables:
+        daily_cols = {
+            r["name"]
+            for r in conn.execute("PRAGMA table_info(trial_stats_daily)").fetchall()
+        }
+        has_unique_attempters = "unique_attempters" in daily_cols
+        has_hinted_attempts = "hinted_attempts" in daily_cols
+        r_where: list[str] = []
+        r_params: list[Any] = []
+        if min_day:
+            r_where.append("day >= ?")
+            r_params.append(min_day)
+        if max_day:
+            r_where.append("day < ?")
+            r_params.append(max_day)
+        if difficulty != "all":
+            r_where.append("difficulty_mode = ?")
+            r_params.append(difficulty)
+        ua_expr = "SUM(unique_attempters)" if has_unique_attempters else "0"
+        ha_expr = "SUM(hinted_attempts)" if has_hinted_attempts else "0"
+        r_sql = (
+            "SELECT day, trial_id, "
+            "SUM(attempts) AS attempts, SUM(passes) AS passes, "
+            "SUM(first_try_passes) AS first_try_passes, "
+            f"{ua_expr} AS unique_attempters, "
+            "SUM(unique_solvers) AS unique_solvers, "
+            f"{ha_expr} AS hinted_attempts, "
+            "SUM(total_hints) AS total_hints, SUM(tier3_hints) AS tier3_hints, "
+            "SUM(parent_overrides) AS parent_overrides "
+            "FROM trial_stats_daily "
+            + (f"WHERE {' AND '.join(r_where)} " if r_where else "")
+            + "GROUP BY day, trial_id ORDER BY day ASC"
+        )
+        for row in conn.execute(r_sql, r_params).fetchall():
+            tid = str(row["trial_id"])
+            day = str(row["day"])
+            rollup_by_trial.setdefault(tid, {})[day] = {
+                "attempts": int(row["attempts"] or 0),
+                "passes": int(row["passes"] or 0),
+                "first_try_passes": int(row["first_try_passes"] or 0),
+                "unique_attempters": int(row["unique_attempters"] or 0),
+                "unique_solvers": int(row["unique_solvers"] or 0),
+                "hinted_attempts": int(row["hinted_attempts"] or 0),
+                "total_hints": int(row["total_hints"] or 0),
+                "tier3_hints": int(row["tier3_hints"] or 0),
+                "parent_overrides": int(row["parent_overrides"] or 0),
+            }
+
+    raw_by_trial: dict[str, list[sqlite3.Row]] = {}
+    prior_before_window: dict[tuple[str, str], bool] = {}
+    truncated = False
+    if "trial_attempts" in tables:
+        a_where: list[str] = []
+        a_params: list[Any] = []
+        if min_day:
+            a_where.append("created_at >= ?")
+            a_params.append(min_day)
+        if max_day:
+            a_where.append("SUBSTR(created_at, 1, 10) < ?")
+            a_params.append(max_day)
+        if difficulty != "all":
+            if has_diff_col:
+                a_where.append("COALESCE(difficulty_mode, 'standard') = ?")
+                a_params.append(difficulty)
+            elif difficulty != "standard":
+                a_where.append("1 = 0")
+        if not include_practice and has_practice_col:
+            a_where.append("COALESCE(is_practice, 0) = 0")
+
+        practice_expr = "COALESCE(is_practice, 0)" if has_practice_col else "0"
+        error_expr = "error_type" if has_error_col else "NULL"
+        a_sql = (
+            f"SELECT save_id, trial_id, passed, hints_used, "
+            f"{practice_expr} AS is_practice, {error_expr} AS error_type, "
+            "SUBSTR(created_at, 1, 10) AS day "
+            "FROM trial_attempts "
+            + (f"WHERE {' AND '.join(a_where)} " if a_where else "")
+            + "ORDER BY trial_id ASC, save_id ASC, created_at ASC, id ASC LIMIT ?"
+        )
+        raw_fetched = conn.execute(a_sql, [*a_params, MAX_RAW_ATTEMPT_ROWS + 1]).fetchall()
+        if len(raw_fetched) > MAX_RAW_ATTEMPT_ROWS:
+            truncated = True
+            raw_fetched = raw_fetched[:MAX_RAW_ATTEMPT_ROWS]
+        for row in raw_fetched:
+            raw_by_trial.setdefault(str(row["trial_id"]), []).append(row)
+
+        if min_day:
+            p_sql = (
+                "SELECT save_id, trial_id, MAX(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS had_pass "
+                f"FROM trial_attempts WHERE created_at < ? AND {practice_expr} = 0 "
+                "GROUP BY save_id, trial_id"
+            )
+            for prow in conn.execute(p_sql, (min_day,)).fetchall():
+                prior_before_window[(str(prow["trial_id"]), str(prow["save_id"]))] = bool(
+                    prow["had_pass"]
+                )
+
+    meta_by_id: dict[str, dict[str, Any]] = {}
+    ordered_meta: list[dict[str, Any]] = []
+    for meta in catalog:
+        meta_by_id[meta["trialId"]] = meta
+        ordered_meta.append(meta)
+    for tid in sorted(set(rollup_by_trial.keys()) | set(raw_by_trial.keys())):
+        if tid not in meta_by_id:
+            fallback = {
+                "trialId": tid,
+                "title": tid,
+                "eraId": "unknown",
+                "eraName": "Unknown Era",
+                "realmId": "unknown",
+                "realmName": "Unknown Realm",
+                "trialType": "code",
+                "concepts": [],
+            }
+            meta_by_id[tid] = fallback
+            ordered_meta.append(fallback)
+
+    era_filter = filters.get("eraId")
+    realm_filter = filters.get("realmId")
+    type_filter = filters.get("trialType")
+    filtered_meta = [
+        m
+        for m in ordered_meta
+        if (not era_filter or m["eraId"] == era_filter)
+        and (not realm_filter or m["realmId"] == realm_filter)
+        and (not type_filter or m["trialType"] == type_filter)
+    ]
+
+    trial_rows: list[dict[str, Any]] = []
+    all_medians: list[float] = []
+    trials_with_data = 0
+    flagged_too_hard = 0
+    flagged_too_easy = 0
+    flagged_possible_bug = 0
+    flagged_low_data = 0
+    total_overrides = 0
+
+    for meta in filtered_meta:
+        tid = meta["trialId"]
+        raw_rows = raw_by_trial.get(tid) or []
+        rollup_days = rollup_by_trial.get(tid) or {}
+
+        raw_np_by_day: dict[str, dict[str, int]] = {}
+        raw_pr_by_day: dict[str, dict[str, int]] = {}
+
+        hero_saves: set[str] = set()
+        hero_solved: set[str] = set()
+        hero_first_passed: set[str] = set()
+        hero_attempts_before_solve: dict[str, int] = {}
+        hero_solved_counts: dict[str, int] = {}
+
+        hint_breakdown = {"tier0": 0, "tier1": 0, "tier2": 0, "tier3": 0}
+        error_counts: dict[str, int] = {}
+        raw_np_count = 0
+
+        for r in raw_rows:
+            save_id = str(r["save_id"])
+            passed = bool(r["passed"])
+            hints = int(r["hints_used"] or 0)
+            is_practice = bool(r["is_practice"])
+            day = str(r["day"])
+            err_type = r["error_type"]
+
+            if hints <= 0:
+                hint_breakdown["tier0"] += 1
+            elif hints == 1:
+                hint_breakdown["tier1"] += 1
+            elif hints == 2:
+                hint_breakdown["tier2"] += 1
+            else:
+                hint_breakdown["tier3"] += 1
+
+            if not passed and err_type:
+                err_str = str(err_type)
+                error_counts[err_str] = error_counts.get(err_str, 0) + 1
+
+            target_map = raw_pr_by_day if is_practice else raw_np_by_day
+            bucket = target_map.setdefault(
+                day, {"attempts": 0, "passes": 0, "hinted_attempts": 0, "tier3_hints": 0}
+            )
+            bucket["attempts"] += 1
+            if passed:
+                bucket["passes"] += 1
+            if hints > 0:
+                bucket["hinted_attempts"] += 1
+            if hints >= 3:
+                bucket["tier3_hints"] += 1
+
+            if not is_practice:
+                raw_np_count += 1
+                prior_key = (tid, save_id)
+                had_prior_attempt = prior_key in prior_before_window
+                had_prior_pass = prior_before_window.get(prior_key) is True
+
+                is_first = save_id not in hero_saves
+                hero_saves.add(save_id)
+                if is_first and passed and not had_prior_attempt:
+                    hero_first_passed.add(save_id)
+                if not had_prior_pass and save_id not in hero_solved:
+                    next_cnt = hero_attempts_before_solve.get(save_id, 0) + 1
+                    hero_attempts_before_solve[save_id] = next_cnt
+                    if passed:
+                        hero_solved.add(save_id)
+                        if not had_prior_attempt:
+                            hero_solved_counts[save_id] = next_cnt
+
+        all_days = sorted(
+            set(rollup_days.keys()) | set(raw_np_by_day.keys()) | set(raw_pr_by_day.keys())
+        )
+        merged_np_attempts = 0
+        merged_np_passes = 0
+        merged_np_hinted = 0
+        merged_np_tier3 = 0
+        rollup_first_try_total = 0
+        rollup_unique_attempters_total = 0
+        rollup_unique_solvers_total = 0
+        parent_overrides = 0
+
+        practice_attempts = 0
+        practice_passes = 0
+        practice_hinted = 0
+        practice_tier3 = 0
+        all_raw_days_covered_by_rollup = bool(rollup_days)
+        daily_trend: list[dict[str, Any]] = []
+
+        for day in all_days:
+            r_day = rollup_days.get(day)
+            np_day = raw_np_by_day.get(day)
+            pr_day = raw_pr_by_day.get(day)
+
+            if np_day and (r_day["attempts"] if r_day else 0) < np_day["attempts"]:
+                all_raw_days_covered_by_rollup = False
+
+            day_np_attempts = max(
+                np_day["attempts"] if np_day else 0,
+                r_day["attempts"] if r_day else 0,
+            )
+            day_np_passes = max(
+                np_day["passes"] if np_day else 0,
+                r_day["passes"] if r_day else 0,
+            )
+            day_np_hinted = max(
+                np_day["hinted_attempts"] if np_day else 0,
+                r_day["hinted_attempts"] if r_day else 0,
+            )
+            day_np_tier3 = max(
+                np_day["tier3_hints"] if np_day else 0,
+                r_day["tier3_hints"] if r_day else 0,
+            )
+
+            merged_np_attempts += day_np_attempts
+            merged_np_passes += day_np_passes
+            merged_np_hinted += day_np_hinted
+            merged_np_tier3 += day_np_tier3
+
+            if r_day:
+                rollup_first_try_total += r_day["first_try_passes"]
+                rollup_unique_attempters_total += r_day["unique_attempters"]
+                rollup_unique_solvers_total += r_day["unique_solvers"]
+                parent_overrides += r_day["parent_overrides"]
+
+            day_pr_attempts = pr_day["attempts"] if pr_day else 0
+            day_pr_passes = pr_day["passes"] if pr_day else 0
+            practice_attempts += day_pr_attempts
+            practice_passes += day_pr_passes
+            practice_hinted += pr_day["hinted_attempts"] if pr_day else 0
+            practice_tier3 += pr_day["tier3_hints"] if pr_day else 0
+
+            day_tot_attempts = day_np_attempts + day_pr_attempts
+            day_tot_passes = day_np_passes + day_pr_passes
+            if day_tot_attempts > 0 or day_tot_passes > 0:
+                daily_trend.append(
+                    {"day": day, "attempts": day_tot_attempts, "passes": day_tot_passes}
+                )
+
+        attempts = merged_np_attempts + practice_attempts
+        passes = merged_np_passes + practice_passes
+        hinted_attempts = min(attempts, merged_np_hinted + practice_hinted)
+        tier3_hints = merged_np_tier3 + practice_tier3
+
+        rollup_authoritative = all_raw_days_covered_by_rollup
+        unique_solvers = (
+            rollup_unique_solvers_total
+            if rollup_authoritative
+            else max(len(hero_solved), rollup_unique_solvers_total)
+        )
+        first_try_passes = min(
+            unique_solvers,
+            rollup_first_try_total
+            if rollup_authoritative
+            else max(len(hero_first_passed), rollup_first_try_total),
+        )
+        unique_heroes = max(
+            len(hero_saves), rollup_unique_attempters_total, unique_solvers
+        )
+        if unique_heroes == 0 and attempts > 0:
+            unique_heroes = 1
+
+        completion_rate = (
+            _round1(min(100.0, (unique_solvers / unique_heroes) * 100.0))
+            if unique_heroes > 0
+            else None
+        )
+        first_try_pass_rate = (
+            _round1(min(100.0, (first_try_passes / unique_heroes) * 100.0))
+            if unique_heroes > 0
+            else None
+        )
+
+        solved_sorted = sorted(hero_solved_counts.values())
+        median_attempts = compute_percentile(solved_sorted, 0.5)
+        p75_attempts = compute_percentile(solved_sorted, 0.75)
+
+        hint_usage_rate = (
+            _round1((hinted_attempts / attempts) * 100.0) if attempts > 0 else None
+        )
+        tier3_hint_rate = (
+            _round1((tier3_hints / attempts) * 100.0) if attempts > 0 else None
+        )
+
+        if unique_heroes > 0:
+            parent_override_rate = _round1(min(100.0, (parent_overrides / unique_heroes) * 100.0))
+        elif parent_overrides > 0:
+            parent_override_rate = 100.0
+        else:
+            parent_override_rate = None
+
+        top_errors = [
+            {"errorType": k, "count": v}
+            for k, v in sorted(error_counts.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+        ]
+
+        flag, flag_reasons = _evaluate_calibration_flag(
+            trial_type=meta["trialType"],
+            unique_heroes=unique_heroes,
+            min_heroes=min_heroes,
+            attempts=attempts,
+            passes=passes,
+            completion_rate=completion_rate,
+            first_try_pass_rate=first_try_pass_rate,
+            median_attempts=median_attempts,
+            hint_usage_rate=hint_usage_rate,
+            tier3_hint_rate=tier3_hint_rate,
+            parent_override_rate=parent_override_rate,
+            assertion_error_count=error_counts.get("AssertionError", 0),
+        )
+
+        if attempts > 0 or parent_overrides > 0:
+            trials_with_data += 1
+        if median_attempts is not None:
+            all_medians.append(median_attempts)
+        total_overrides += parent_overrides
+        if flag == "too_hard":
+            flagged_too_hard += 1
+        elif flag == "too_easy":
+            flagged_too_easy += 1
+        elif flag == "possible_bug":
+            flagged_possible_bug += 1
+        elif flag == "low_data":
+            flagged_low_data += 1
+
+        trial_rows.append(
+            {
+                "trialId": meta["trialId"],
+                "title": meta["title"],
+                "eraId": meta["eraId"],
+                "eraName": meta["eraName"],
+                "realmId": meta["realmId"],
+                "realmName": meta["realmName"],
+                "trialType": meta["trialType"],
+                "concepts": meta["concepts"],
+                "uniqueHeroes": unique_heroes,
+                "uniqueSolvers": unique_solvers,
+                "attempts": attempts,
+                "passes": passes,
+                "completionRate": completion_rate,
+                "firstTryPassRate": first_try_pass_rate,
+                "medianAttemptsToSolve": median_attempts,
+                "p75AttemptsToSolve": p75_attempts,
+                "hintUsageRate": hint_usage_rate,
+                "tier3HintRate": tier3_hint_rate,
+                "hintTierBreakdown": hint_breakdown,
+                "parentOverrides": parent_overrides,
+                "parentOverrideRate": parent_override_rate,
+                "topErrors": top_errors,
+                "dailyTrend": daily_trend,
+                "flag": flag,
+                "flagReasons": flag_reasons,
+            }
+        )
+
+    all_medians.sort()
+    overall_median = compute_percentile(all_medians, 0.5)
+
+    return {
+        "filters": filters,
+        "summary": {
+            "totalTrials": len(trial_rows),
+            "trialsWithData": trials_with_data,
+            "flaggedTooHard": flagged_too_hard,
+            "flaggedTooEasy": flagged_too_easy,
+            "flaggedPossibleBug": flagged_possible_bug,
+            "flaggedLowData": flagged_low_data,
+            "overallMedianAttempts": overall_median,
+            "totalOverrides": total_overrides,
+            "truncated": truncated,
+        },
+        "trials": trial_rows,
+    }
+
+
 def _extract_string_set(state: dict[str, Any], *keys: str) -> set[str]:
     out: set[str] = set()
     for key in keys:
@@ -719,8 +1420,28 @@ class PyriaDatabase:
                     passed INTEGER NOT NULL,
                     hints_used INTEGER NOT NULL DEFAULT 0,
                     code TEXT NOT NULL DEFAULT '',
+                    difficulty_mode TEXT,
+                    is_practice INTEGER NOT NULL DEFAULT 0,
+                    error_type TEXT,
+                    duration_ms INTEGER,
                     created_at TEXT NOT NULL,
                     FOREIGN KEY (save_id) REFERENCES saves(id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS trial_stats_daily (
+                    day TEXT NOT NULL,
+                    trial_id TEXT NOT NULL,
+                    difficulty_mode TEXT NOT NULL,
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    passes INTEGER NOT NULL DEFAULT 0,
+                    first_try_passes INTEGER NOT NULL DEFAULT 0,
+                    unique_attempters INTEGER NOT NULL DEFAULT 0,
+                    unique_solvers INTEGER NOT NULL DEFAULT 0,
+                    hinted_attempts INTEGER NOT NULL DEFAULT 0,
+                    total_hints INTEGER NOT NULL DEFAULT 0,
+                    tier3_hints INTEGER NOT NULL DEFAULT 0,
+                    parent_overrides INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY (day, trial_id, difficulty_mode)
                 );
 
                 CREATE TABLE IF NOT EXISTS activity_events (
@@ -739,6 +1460,10 @@ class PyriaDatabase:
                     ON saves(updated_at DESC);
                 CREATE INDEX IF NOT EXISTS idx_attempts_save_id
                     ON trial_attempts(save_id, created_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_attempts_trial_id
+                    ON trial_attempts(trial_id, created_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_trial_stats_daily_trial
+                    ON trial_stats_daily(trial_id, day DESC);
                 CREATE INDEX IF NOT EXISTS idx_activity_events_id
                     ON activity_events(id DESC);
                 CREATE INDEX IF NOT EXISTS idx_activity_events_save_id
@@ -754,6 +1479,32 @@ class PyriaDatabase:
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_saves_owner_email ON saves(owner_email)"
             )
+            attempt_cols = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(trial_attempts)").fetchall()
+            }
+            if "difficulty_mode" not in attempt_cols:
+                conn.execute("ALTER TABLE trial_attempts ADD COLUMN difficulty_mode TEXT")
+            if "is_practice" not in attempt_cols:
+                conn.execute(
+                    "ALTER TABLE trial_attempts ADD COLUMN is_practice INTEGER NOT NULL DEFAULT 0"
+                )
+            if "error_type" not in attempt_cols:
+                conn.execute("ALTER TABLE trial_attempts ADD COLUMN error_type TEXT")
+            if "duration_ms" not in attempt_cols:
+                conn.execute("ALTER TABLE trial_attempts ADD COLUMN duration_ms INTEGER")
+            daily_cols = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(trial_stats_daily)").fetchall()
+            }
+            if "unique_attempters" not in daily_cols:
+                conn.execute(
+                    "ALTER TABLE trial_stats_daily ADD COLUMN unique_attempters INTEGER NOT NULL DEFAULT 0"
+                )
+            if "hinted_attempts" not in daily_cols:
+                conn.execute(
+                    "ALTER TABLE trial_stats_daily ADD COLUMN hinted_attempts INTEGER NOT NULL DEFAULT 0"
+                )
 
     @staticmethod
     def _row_to_save(row: sqlite3.Row) -> dict[str, Any]:
@@ -1138,8 +1889,15 @@ class PyriaDatabase:
         passed: bool,
         hints_used: int,
         code: str,
+        difficulty_mode: str = "standard",
+        is_practice: bool = False,
+        error_type: str | None = None,
+        duration_ms: int | None = None,
     ) -> int | None:
         now = utc_now_iso()
+        day = now[:10]
+        eff_difficulty = difficulty_mode if difficulty_mode in VALID_DIFFICULTY_MODES else "standard"
+        eff_error_type = None if passed else error_type
         with self._lock, self._connect() as conn:
             row = conn.execute(
                 "SELECT hero_name, state_json FROM saves WHERE id = ?",
@@ -1150,17 +1908,84 @@ class PyriaDatabase:
             hero_name = str(row["hero_name"])
             try:
                 st = json.loads(row["state_json"])
-                realm_id = str(st.get("realmId") or "") or None if isinstance(st, dict) else None
+                if not isinstance(st, dict):
+                    st = {}
+                realm_id = str(st.get("realmId") or "") or None
             except json.JSONDecodeError:
+                st = {}
                 realm_id = None
+
+            first_try_inc = 0
+            unique_attempter_inc = 0
+            unique_solver_inc = 0
+            if not is_practice:
+                already_solved_in_state = trial_id in _extract_string_set(
+                    st, "solvedTrials", "completedTrials"
+                )
+                prior = conn.execute(
+                    "SELECT COUNT(*) AS prior_attempts, "
+                    "SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS prior_passes "
+                    "FROM trial_attempts "
+                    "WHERE save_id = ? AND trial_id = ? AND COALESCE(is_practice, 0) = 0",
+                    (save_id, trial_id),
+                ).fetchone()
+                prior_attempts = int(prior["prior_attempts"] or 0) if prior else 0
+                prior_passes = int(prior["prior_passes"] or 0) if prior else 0
+                if not already_solved_in_state:
+                    if prior_attempts == 0:
+                        unique_attempter_inc = 1
+                    if passed and prior_attempts == 0:
+                        first_try_inc = 1
+                    if passed and prior_passes == 0:
+                        unique_solver_inc = 1
 
             cur = conn.execute(
                 "INSERT INTO trial_attempts "
-                "(save_id, trial_id, passed, hints_used, code, created_at) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (save_id, trial_id, 1 if passed else 0, hints_used, code, now),
+                "(save_id, trial_id, passed, hints_used, code, difficulty_mode, is_practice, error_type, duration_ms, created_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    save_id,
+                    trial_id,
+                    1 if passed else 0,
+                    hints_used,
+                    code,
+                    eff_difficulty,
+                    1 if is_practice else 0,
+                    eff_error_type,
+                    duration_ms,
+                    now,
+                ),
             )
             attempt_id = int(cur.lastrowid)
+
+            if not is_practice:
+                conn.execute(
+                    "INSERT INTO trial_stats_daily "
+                    "(day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_attempters, unique_solvers, hinted_attempts, total_hints, tier3_hints, parent_overrides) "
+                    "VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, 0) "
+                    "ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET "
+                    "attempts = attempts + excluded.attempts, "
+                    "passes = passes + excluded.passes, "
+                    "first_try_passes = first_try_passes + excluded.first_try_passes, "
+                    "unique_attempters = unique_attempters + excluded.unique_attempters, "
+                    "unique_solvers = unique_solvers + excluded.unique_solvers, "
+                    "hinted_attempts = hinted_attempts + excluded.hinted_attempts, "
+                    "total_hints = total_hints + excluded.total_hints, "
+                    "tier3_hints = tier3_hints + excluded.tier3_hints",
+                    (
+                        day,
+                        trial_id,
+                        eff_difficulty,
+                        1 if passed else 0,
+                        first_try_inc,
+                        unique_attempter_inc,
+                        unique_solver_inc,
+                        1 if hints_used > 0 else 0,
+                        hints_used,
+                        1 if hints_used >= 3 else 0,
+                    ),
+                )
+
             # Blank code blobs on older attempts while preserving aggregate stats
             conn.execute(
                 "UPDATE trial_attempts SET code = '' "
@@ -1195,6 +2020,10 @@ class PyriaDatabase:
                     "passed": passed,
                     "hintsUsed": hints_used,
                     "code": code,
+                    "difficultyMode": eff_difficulty,
+                    "isPractice": is_practice,
+                    "errorType": eff_error_type,
+                    "durationMs": duration_ms,
                     "attemptId": attempt_id,
                 },
                 created_at=now,
@@ -1209,7 +2038,10 @@ class PyriaDatabase:
             if exists is None:
                 return None
             rows = conn.execute(
-                "SELECT id, save_id, trial_id, passed, hints_used, code, created_at "
+                "SELECT id, save_id, trial_id, passed, hints_used, code, "
+                "COALESCE(difficulty_mode, 'standard') AS difficulty_mode, "
+                "COALESCE(is_practice, 0) AS is_practice, "
+                "error_type, duration_ms, created_at "
                 "FROM trial_attempts WHERE save_id = ? "
                 "ORDER BY created_at DESC, id DESC",
                 (save_id,),
@@ -1222,10 +2054,22 @@ class PyriaDatabase:
                     "passed": bool(r["passed"]),
                     "hintsUsed": int(r["hints_used"]),
                     "code": r["code"],
+                    "difficultyMode": str(r["difficulty_mode"] or "standard"),
+                    "isPractice": bool(r["is_practice"]),
+                    "errorType": r["error_type"],
+                    "durationMs": int(r["duration_ms"]) if r["duration_ms"] is not None else None,
                     "createdAt": r["created_at"],
                 }
                 for r in rows
             ]
+
+    def get_trial_metrics(
+        self,
+        catalog: list[dict[str, Any]],
+        filters: dict[str, Any],
+    ) -> dict[str, Any]:
+        with self._lock, self._connect() as conn:
+            return compute_trial_metrics_from_conn(conn, catalog, filters)
 
     def get_activity_since(
         self, since_id: int = 0, limit: int = 50
@@ -1383,8 +2227,8 @@ class PyriaDatabase:
                             ordered_solved.append(s)
 
             shards_delta = 0
+            was_already_solved = trial_id in seen
             if solved:
-                was_already_solved = trial_id in seen
                 if not was_already_solved:
                     ordered_solved.append(trial_id)
                     if award_shards and shard_reward > 0:
@@ -1416,6 +2260,23 @@ class PyriaDatabase:
                     save_id,
                 ),
             )
+
+            if solved and not was_already_solved:
+                day = now[:10]
+                prefs = state.get("preferences")
+                override_diff = (
+                    prefs.get("difficulty")
+                    if isinstance(prefs, dict) and prefs.get("difficulty") in VALID_DIFFICULTY_MODES
+                    else "standard"
+                )
+                conn.execute(
+                    "INSERT INTO trial_stats_daily "
+                    "(day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_solvers, total_hints, tier3_hints, parent_overrides) "
+                    "VALUES (?, ?, ?, 0, 0, 0, 0, 0, 0, 1) "
+                    "ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET "
+                    "parent_overrides = parent_overrides + 1",
+                    (day, trial_id, override_diff),
+                )
 
             realm_id = str(state.get("realmId") or "") or None
             self._insert_event(
@@ -1906,10 +2767,44 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             )
             return
 
+        if path in ("/api/builder/trial-metrics", "/api/admin/trial-metrics"):
+            qs = parse_qs(query)
+            try:
+                filters = parse_trial_metrics_filters(qs)
+            except SaveValidationError as exc:
+                self._send_json(exc.status, {"error": exc.message})
+                return
+            try:
+                with self.server.content_lock:
+                    game, _ = self.server.load_game_and_catalog()
+                    eras = self.server.load_all_eras(game)
+            except (FileNotFoundError, json.JSONDecodeError):
+                eras = []
+            catalog = extract_trial_catalog(eras)
+            metrics = self.server.db.get_trial_metrics(catalog, filters)
+            if filters["format"] == "csv":
+                csv_bytes = format_trial_metrics_csv(metrics["trials"]).encode("utf-8")
+                self._sec_headers_sent = False
+                self.send_response(HTTPStatus.OK)
+                self.send_header("Content-Type", "text/csv; charset=utf-8")
+                self.send_header(
+                    "Content-Disposition",
+                    'attachment; filename="pyria-trial-metrics.csv"',
+                )
+                self.send_header("Content-Length", str(len(csv_bytes)))
+                self.send_header("Cache-Control", "no-store")
+                self._send_security_headers()
+                self.end_headers()
+                if self.command != "HEAD":
+                    self.wfile.write(csv_bytes)
+                return
+            self._send_json(HTTPStatus.OK, metrics)
+            return
+
         self._send_json(HTTPStatus.NOT_FOUND, {"error": "Unknown builder API endpoint"})
 
     def _handle_api_get(self, path: str, query: str) -> None:
-        if path.startswith("/api/builder/"):
+        if path.startswith("/api/builder/") or path == "/api/admin/trial-metrics":
             self._handle_builder_get(path, query)
             return
 
@@ -2230,12 +3125,90 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                     },
                 )
                 return
+
+            raw_diff = (
+                body.get("difficultyMode")
+                if "difficultyMode" in body
+                else body.get("difficulty_mode")
+            )
+            difficulty_mode = "standard"
+            if raw_diff is not None:
+                if not isinstance(raw_diff, str) or raw_diff not in VALID_DIFFICULTY_MODES:
+                    self._send_json(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": "difficultyMode must be 'explorer', 'standard', or 'challenge'"},
+                    )
+                    return
+                difficulty_mode = raw_diff
+
+            raw_practice = (
+                body.get("isPractice")
+                if "isPractice" in body
+                else body.get("is_practice")
+            )
+            is_practice = False
+            if raw_practice is not None:
+                if not isinstance(raw_practice, bool):
+                    self._send_json(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": "isPractice must be a boolean"},
+                    )
+                    return
+                is_practice = raw_practice
+
+            raw_error_type = (
+                body.get("errorType")
+                if "errorType" in body
+                else body.get("error_type")
+            )
+            error_type: str | None = None
+            if raw_error_type is not None and raw_error_type != "":
+                if (
+                    not isinstance(raw_error_type, str)
+                    or len(raw_error_type) > MAX_ERROR_TYPE_LEN
+                    or not ERROR_TYPE_RE.match(raw_error_type)
+                ):
+                    self._send_json(
+                        HTTPStatus.BAD_REQUEST,
+                        {
+                            "error": f"errorType must be a string up to {MAX_ERROR_TYPE_LEN} characters matching /^[A-Za-z0-9_.:-]+$/"
+                        },
+                    )
+                    return
+                error_type = raw_error_type
+            if passed:
+                error_type = None
+
+            raw_duration = (
+                body.get("durationMs")
+                if "durationMs" in body
+                else body.get("duration_ms")
+            )
+            duration_ms: int | None = None
+            if raw_duration is not None:
+                if (
+                    isinstance(raw_duration, bool)
+                    or not isinstance(raw_duration, int)
+                    or raw_duration < 0
+                    or raw_duration > MAX_DURATION_MS
+                ):
+                    self._send_json(
+                        HTTPStatus.BAD_REQUEST,
+                        {"error": f"durationMs must be an integer between 0 and {MAX_DURATION_MS}"},
+                    )
+                    return
+                duration_ms = raw_duration
+
             attempt_id = self.server.db.log_attempt(
                 save_id=parts[2],
                 trial_id=trial_id,
                 passed=passed,
                 hints_used=max(0, min(hints_used, 1000)),
                 code=code,
+                difficulty_mode=difficulty_mode,
+                is_practice=is_practice,
+                error_type=error_type,
+                duration_ms=duration_ms,
             )
             if attempt_id is None:
                 self._send_json(

@@ -19,6 +19,7 @@
     "test:content": "node scripts/validate-content.mjs",
     "test:python": "python3 -m unittest discover -s server -p 'test_*.py' -v",
     "test:all": "npm run build:assets && npm run typecheck && npm run test:coverage && npm run test:web:coverage && npm run test:content && npm run test:python",
+    "calibration-report": "python3 scripts/calibration_report.py",
     "db:migrate:local": "wrangler d1 migrations apply pyria-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply pyria-db --remote"
   },
