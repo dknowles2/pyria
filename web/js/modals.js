@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261126x';
-import { music } from './music.js?v=20261126x';
-import { pyRunner } from './pyRunner.js?v=20261126x';
+import { audio } from './audio.js?v=20261126y';
+import { music } from './music.js?v=20261126y';
+import { pyRunner } from './pyRunner.js?v=20261126y';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126x';
+} from './autocomplete.js?v=20261126y';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -894,28 +894,51 @@ export class ModalManager {
     const estimateCart = (codeText) => {
       const seenOwned = new Set(workingSave.ownedUnlockIds || []);
       const queuedIds = new Set();
+      const currentShards = Number(workingSave.byteShards) || 0;
       let totalCost = 0;
+      let runningShards = currentShards;
+      let firstOverBudget = null;
       const lines = String(codeText || '').split('\n');
       const items = [];
-      for (const rawLine of lines) {
+      lines.forEach((rawLine, idx) => {
         const item = matchUnlockableForLine(rawLine);
-        if (!item) continue;
+        if (!item) return;
+        const lineNumber = idx + 1;
         queuedIds.add(item.id);
         const alreadyOwned = seenOwned.has(item.id);
         const cost = alreadyOwned ? 0 : Number(item.shardCost) || 0;
+        const shardsBefore = runningShards;
         if (!alreadyOwned) {
           seenOwned.add(item.id);
           totalCost += cost;
+          runningShards -= cost;
         }
-        items.push({ id: item.id, name: item.name, cost, alreadyOwned });
-      }
-      const currentShards = Number(workingSave.byteShards) || 0;
+        const wentOverHere = !alreadyOwned && shardsBefore >= 0 && runningShards < 0;
+        const overBudget = runningShards < 0;
+        const entry = {
+          id: item.id,
+          name: item.name,
+          call: rawLine.trim(),
+          lineNumber,
+          cost,
+          alreadyOwned,
+          shardsBefore,
+          shardsAfter: runningShards,
+          wentOverHere,
+          overBudget,
+        };
+        if (wentOverHere && !firstOverBudget) {
+          firstOverBudget = entry;
+        }
+        items.push(entry);
+      });
       return {
         currentShards,
         totalCost,
         remaining: currentShards - totalCost,
         items,
         queuedIds,
+        firstOverBudget,
       };
     };
 
@@ -1071,11 +1094,30 @@ export class ModalManager {
           `;
         } else {
           const shortBy = Math.abs(cart.remaining);
+          const overLine = cart.firstOverBudget;
+          const lineRows = cart.items
+            .map((it) => {
+              if (it.alreadyOwned) {
+                return `<div class="ws-cart-line ok">Line ${it.lineNumber}: ${escapeHtml(it.name)} (Owned · 0 💎) ✓</div>`;
+              }
+              if (it.wentOverHere) {
+                const need = Math.max(1, it.cost - Math.max(0, it.shardsBefore));
+                return `<div class="ws-cart-line over-trigger">⚠️ <strong>Line ${it.lineNumber}</strong>: ${escapeHtml(it.name)} (−${it.cost} 💎) — <strong>went over budget here!</strong> (had ${Math.max(0, it.shardsBefore)} 💎, need ${need} more)</div>`;
+              }
+              if (it.overBudget) {
+                return `<div class="ws-cart-line over-after">Line ${it.lineNumber}: ${escapeHtml(it.name)} (−${it.cost} 💎) — still over budget</div>`;
+              }
+              return `<div class="ws-cart-line ok">Line ${it.lineNumber}: ${escapeHtml(it.name)} (−${it.cost} 💎 → ${it.shardsAfter} left) ✓</div>`;
+            })
+            .join('');
           cartBarEl.className = 'ws-cart-bar over';
           cartBarEl.innerHTML = `
-            <span>💎 Have: <strong>${cart.currentShards}</strong></span>
-            <span>− 🛒 Order (${cart.items.length}): <strong>${cart.totalCost}</strong></span>
-            <span>= 🔒 <strong>Short by ${shortBy} 💎!</strong> Remove a line before running.</span>
+            <div class="ws-cart-summary">
+              <span>💎 Have: <strong>${cart.currentShards}</strong></span>
+              <span>− 🛒 Order (${cart.items.length}): <strong>${cart.totalCost}</strong></span>
+              <span>= 🔒 <strong>Short by ${shortBy} 💎</strong>${overLine ? ` (over budget on <strong>Line ${overLine.lineNumber}</strong>)` : ''}</span>
+            </div>
+            <div class="ws-cart-lines">${lineRows}</div>
           `;
         }
       }
@@ -1155,14 +1197,15 @@ export class ModalManager {
           const leftAtFailure = Number(shardMatch[3]);
           const spentEarlier = Math.max(0, startShards - leftAtFailure);
           const missing = Math.max(1, neededCost - leftAtFailure);
+          const lineTag = res.errorLine ? ` on <strong>Line ${Number(res.errorLine)}</strong>` : '';
           outputEl.className = 'pip-console error ws-insufficient-alert';
           outputEl.innerHTML = `
-            <div class="pip-console-header">🔒 Not enough Byte Shards — nothing was spent!</div>
+            <div class="pip-console-header">🔒 Over budget${lineTag} — nothing was spent!</div>
             <div class="pip-console-body">
               ${
                 spentEarlier > 0
-                  ? `You have <strong>${startShards} 💎</strong> total. Earlier lines in your code used <strong>${spentEarlier} 💎</strong> (leaving <strong>${leftAtFailure} 💎</strong>), so <strong>${escapeHtml(itemName)}</strong> (<strong>${neededCost} 💎</strong>) is short by <strong>${missing} 💎</strong>. Remove a line or forge one item at a time!`
-                  : `You have <strong>${startShards} 💎</strong>, and <strong>${escapeHtml(itemName)}</strong> costs <strong>${neededCost} 💎</strong> — earn <strong>${missing} more Byte Shards</strong> from Trials or hidden chests!`
+                  ? `You have <strong>${startShards} 💎</strong> total. Earlier lines used <strong>${spentEarlier} 💎</strong> (leaving <strong>${leftAtFailure} 💎</strong>), then <strong>${escapeHtml(itemName)}</strong>${lineTag} costs <strong>${neededCost} 💎</strong> (short by <strong>${missing} 💎</strong>). Delete${res.errorLine ? ` Line ${Number(res.errorLine)}` : ' a line'} and run again!`
+                  : `You have <strong>${startShards} 💎</strong>, and <strong>${escapeHtml(itemName)}</strong>${lineTag} costs <strong>${neededCost} 💎</strong> — earn <strong>${missing} more Byte Shards</strong> from Trials or hidden chests!`
               }
             </div>
           `;
