@@ -202,7 +202,36 @@
                 "best_idx": 2
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Index + Item Together with enumerate()",
+            "prompt": "`enumerate(my_list)` pairs every item with its index `(idx, item)`! Unpacking `for idx, h in enumerate(heights):` gives you BOTH the position AND the value in one clean loop.",
+            "question": "In `heights = [4, 9, 6]`, which `(idx, h)` pair has the highest `h`?",
+            "codeSnippet": "heights = [4, 9, 6]\nfor idx, h in enumerate(heights):\n    print(idx, h)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "idx = 2, h = 9",
+                "explanation": "Remember `enumerate()` starts counting indexes at `0`! So `4` is `0`, `9` is `1`, and `6` is `2`."
+              },
+              {
+                "id": "b",
+                "label": "idx = 1, h = 9",
+                "explanation": "Nailed it! `enumerate([4, 9, 6])` yields `(0, 4)`, `(1, 9)`, `(2, 6)` — so `9` is at index `1`!"
+              },
+              {
+                "id": "c",
+                "label": "idx = 9, h = 1",
+                "explanation": "`enumerate()` always puts the INDEX first and the ITEM second: `(idx, h)`!"
+              },
+              {
+                "id": "d",
+                "label": "idx = 0, h = 4",
+                "explanation": "`(0, 4)` is the first pair, but `9` at index `1` is higher!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-32-01-05",
@@ -256,7 +285,36 @@
                 "max_z": 15
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Tuple Unpacking in a for Loop",
+            "prompt": "When you have a list of 3D tuples like `[(1, 2, 4), (3, 1, 9)]`, a `for` loop can unpack EVERY tuple automatically right in the header: `for x, y, z in peaks:`!",
+            "question": "What does this loop print?",
+            "codeSnippet": "peaks = [(1, 2, 4), (3, 1, 9)]\nfor x, y, z in peaks:\n    print(z)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "4 then 9",
+                "explanation": "Awesome! On turn 1, `z` is `4`; on turn 2, `z` is `9`!"
+              },
+              {
+                "id": "b",
+                "label": "1 then 3",
+                "explanation": "Those are the `x` values! The loop prints `z` (the third value of each tuple)."
+              },
+              {
+                "id": "c",
+                "label": "(1, 2, 4) then (3, 1, 9)",
+                "explanation": "Because we unpacked into `x, y, z`, `z` holds just the third number of each tuple!"
+              },
+              {
+                "id": "d",
+                "label": "13",
+                "explanation": "It prints each `z` on its own line (`4`, then `9`) rather than summing them!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-32-01-06",
@@ -588,7 +646,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Filtering Inside a List Comprehension",
+            "prompt": "You can add an `if` filter at the END of a list comprehension to keep only matching items: `[n for n in nums if n >= 10]`!",
+            "question": "What list does `[n for n in [5, 12, 8, 20] if n >= 10]` build?",
+            "codeSnippet": "hot = [n for n in [5, 12, 8, 20] if n >= 10]\nprint(hot)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[5, 8]",
+                "explanation": "Those are the numbers `< 10`! The filter keeps items where `n >= 10`."
+              },
+              {
+                "id": "b",
+                "label": "[False, True, False, True]",
+                "explanation": "The `if` clause filters which `n` values to keep rather than outputting Booleans!"
+              },
+              {
+                "id": "c",
+                "label": "[12, 20]",
+                "explanation": "Nailed it! Only `12` and `20` pass `n >= 10`, so the comprehension builds `[12, 20]` in one line!"
+              },
+              {
+                "id": "d",
+                "label": "2",
+                "explanation": "A list comprehension always builds a new list (`[12, 20]`), not a count!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-02-04",
@@ -619,7 +706,36 @@
             "list_comp",
             "tuple",
             "call:len"
-          ]
+          ],
+          "introChoice": {
+            "title": "Nested List Comprehensions",
+            "prompt": "Just like nested `for` loops, a list comprehension can have TWO `for` clauses to generate every `(x, y)` pair on a 2D grid!",
+            "question": "How many `(x, y)` pairs does `[(x, y) for x in range(2) for y in range(2)]` create?",
+            "codeSnippet": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "2",
+                "explanation": "Each of the 2 values of `x` (`0, 1`) pairs with BOTH values of `y` (`0, 1`), giving `2 * 2` pairs!"
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Count all combinations of `x in {0, 1}` and `y in {0, 1}`: `(0,0), (0,1), (1,0), (1,1)`!"
+              },
+              {
+                "id": "c",
+                "label": "4",
+                "explanation": "Boom! `2 * 2 = 4` pairs: `[(0, 0), (0, 1), (1, 0), (1, 1)]`!"
+              },
+              {
+                "id": "d",
+                "label": "8",
+                "explanation": "`range(2)` has 2 values (`0` and `1`), so `2 * 2 = 4` combinations!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-02-05",
@@ -936,7 +1052,36 @@
               },
               "expectOutput": "LOCKED"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Nested Dictionary Lookups",
+            "prompt": "A dictionary can store ANOTHER dictionary as a value! To reach inside, chain two bracket lookups: `cavern[\"gate\"][\"north\"]`.",
+            "question": "What does `cavern[\"gate\"][\"north\"]` return?",
+            "codeSnippet": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "gate",
+                "explanation": "`\"gate\"` is the outer key, whose value is the inner dictionary `{\"north\": \"OPEN\"}`!"
+              },
+              {
+                "id": "b",
+                "label": "{\"north\": \"OPEN\"}",
+                "explanation": "That's `cavern[\"gate\"]`! Adding `[\"north\"]` steps one level deeper to get `\"OPEN\"`!"
+              },
+              {
+                "id": "c",
+                "label": "OPEN",
+                "explanation": "Spot on! First `cavern[\"gate\"]` gets the inner dict, then `[\"north\"]` grabs `\"OPEN\"`!"
+              },
+              {
+                "id": "d",
+                "label": "KeyError",
+                "explanation": "Both keys (`\"gate\"` and `\"north\"`) exist and are spelled right, so it works cleanly!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-03-03",
@@ -1011,7 +1156,36 @@
           "requiredConstructs": [
             "set",
             "call:len"
-          ]
+          ],
+          "introChoice": {
+            "title": "Set Intersection (&)",
+            "prompt": "With Python sets, the `&` operator computes the INTERSECTION — a new set containing ONLY the items that appear in BOTH sets!",
+            "question": "What does `{\"cyan\", \"gold\", \"ruby\"} & {\"gold\", \"ruby\", \"jade\"}` produce?",
+            "codeSnippet": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b",
+            "choices": [
+              {
+                "id": "a",
+                "label": "{\"cyan\", \"gold\", \"ruby\", \"jade\"}",
+                "explanation": "That's the union (`a | b`), which combines everything. Intersection (`a & b`) keeps ONLY shared items!"
+              },
+              {
+                "id": "b",
+                "label": "{\"cyan\", \"jade\"}",
+                "explanation": "Those are the items NOT shared! `a & b` keeps items present in BOTH `a` and `b`."
+              },
+              {
+                "id": "c",
+                "label": "{\"gold\", \"ruby\"}",
+                "explanation": "Yes! Only `\"gold\"` and `\"ruby\"` appear in BOTH sets, so `a & b` is `{\"gold\", \"ruby\"}`!"
+              },
+              {
+                "id": "d",
+                "label": "set() (empty)",
+                "explanation": "Look closely — `\"gold\"` and `\"ruby\"` are in both sets!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-03-05",
@@ -1339,7 +1513,36 @@
                 "total": 12
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Catching ValueError & Skipping with pass",
+            "prompt": "When `int(\"null\")` fails with a `ValueError`, you can catch it with `except ValueError:` and write `pass` (Python's 'do nothing' placeholder) to skip the bad entry and keep looping!",
+            "question": "What does `total` equal after this loop finishes?",
+            "codeSnippet": "raw = [\"10\", \"null\", \"5\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError:\n        pass\nprint(total)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "15",
+                "explanation": "Spot on! `\"10\"` adds `10`, `\"null\"` is safely skipped by `except ValueError: pass`, and `\"5\"` adds `5` (= `15`)!"
+              },
+              {
+                "id": "b",
+                "label": "10",
+                "explanation": "`pass` doesn't stop the loop — it just skips `\"null\"` and continues on to `\"5\"`!"
+              },
+              {
+                "id": "c",
+                "label": "0",
+                "explanation": "`\"10\"` and `\"5\"` convert cleanly with `int(s)` and get added to `total`!"
+              },
+              {
+                "id": "d",
+                "label": "It crashes with ValueError",
+                "explanation": "Because `except ValueError:` catches the error from `int(\"null\")`, the loop finishes without crashing!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-32-04-03",
@@ -1410,7 +1613,36 @@
             "return",
             "try",
             "except"
-          ]
+          ],
+          "introChoice": {
+            "title": "Integer Division (//)",
+            "prompt": "In Python, single `/` always gives a decimal (`7 / 2` is `3.5`), while double `//` does INTEGER (floor) division — dropping any remainder (`7 // 2` is `3`)!",
+            "question": "What does `20 // 6` evaluate to?",
+            "codeSnippet": "print(20 // 6)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "3",
+                "explanation": "Nailed it! 6 fits into 20 three full times (`6 * 3 = 18`), so `20 // 6` is `3`!"
+              },
+              {
+                "id": "b",
+                "label": "2",
+                "explanation": "`2` is the remainder (`20 % 6`), whereas `20 // 6` asks how many full times 6 fits into 20!"
+              },
+              {
+                "id": "c",
+                "label": "3.333...",
+                "explanation": "That's regular `/` division! Double `//` drops the decimal part and returns a whole integer."
+              },
+              {
+                "id": "d",
+                "label": "4",
+                "explanation": "`//` always rounds DOWN (floor), never up — `6 * 4 = 24` is too big!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-32-04-05",
@@ -1460,7 +1692,36 @@
                 "d2": 9
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Exponents with **",
+            "prompt": "In Python, `**` raises a number to a power! For example, `3 ** 2` means '3 squared' (`3 * 3 = 9`), and `2 ** 3` means `2 * 2 * 2 = 8`.",
+            "question": "What does `(4 - 1) ** 2` equal?",
+            "codeSnippet": "print((4 - 1) ** 2)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "6",
+                "explanation": "Watch out: `**` is exponentiation (power), NOT multiplication! `3 ** 2` is `3 * 3`, not `3 * 2`."
+              },
+              {
+                "id": "b",
+                "label": "1",
+                "explanation": "`4 - 1` is `3`, and squaring `3` gives `9`!"
+              },
+              {
+                "id": "c",
+                "label": "15",
+                "explanation": "Because of the parentheses, `4 - 1` happens first (= `3`), then `3 ** 2` (= `9`)!"
+              },
+              {
+                "id": "d",
+                "label": "9",
+                "explanation": "Boom! First `4 - 1` is `3`, then `3 ** 2` (`3 * 3`) is `9`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-32-04-06",

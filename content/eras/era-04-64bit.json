@@ -168,7 +168,36 @@
             "def",
             "return",
             "fstring"
-          ]
+          ],
+          "introChoice": {
+            "title": "Custom Printing with __str__",
+            "prompt": "Normally, `print(my_object)` prints an ugly memory address like `<Dragon object at 0x...>`. Defining `def __str__(self):` tells Python the exact friendly string to show whenever you `print()` that object!",
+            "question": "What does `print(Dragon(\"Polywing\", \"Sky\"))` display?",
+            "codeSnippet": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\n\nprint(Dragon(\"Polywing\", \"Sky\"))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Polywing (Sky)",
+                "explanation": "Awesome! `print()` automatically calls `__str__(self)`, which formats `Polywing (Sky)`!"
+              },
+              {
+                "id": "b",
+                "label": "<Dragon object>",
+                "explanation": "Because `Dragon` defines `__str__`, Python uses its returned string instead of the ugly default!"
+              },
+              {
+                "id": "c",
+                "label": "Polywing Sky",
+                "explanation": "Check the f-string in `__str__`: it puts parentheses around `{self.elem}` -> `Polywing (Sky)`!"
+              },
+              {
+                "id": "d",
+                "label": "Nothing — you didn't call __str__()",
+                "explanation": "You never have to call `__str__()` manually — `print()` calls it automatically behind the scenes!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-64-01-05",
@@ -200,7 +229,36 @@
             "self_attr",
             "def",
             "return"
-          ]
+          ],
+          "introChoice": {
+            "title": "Object Composition (An Object Holding Another Object)",
+            "prompt": "One class can store ANOTHER object inside an attribute! Here `Camera` stores `self.target = target` (an `Entity` object), so its method can read `self.target.z` live!",
+            "question": "What does `cam.view_z()` return below?",
+            "codeSnippet": "class Entity:\n    def __init__(self, z): self.z = z\n\nclass Camera:\n    def __init__(self, target, offset=5):\n        self.target = target\n        self.offset = offset\n    def view_z(self):\n        return self.target.z + self.offset\n\nhero = Entity(10)\ncam = Camera(hero)\nprint(cam.view_z())",
+            "choices": [
+              {
+                "id": "a",
+                "label": "AttributeError",
+                "explanation": "`hero` is an `Entity` with a `.z` attribute, so `self.target.z` works cleanly!"
+              },
+              {
+                "id": "b",
+                "label": "10",
+                "explanation": "`self.target.z` is `10`, and `view_z()` also adds `self.offset` (`5`) to get `15`!"
+              },
+              {
+                "id": "c",
+                "label": "5",
+                "explanation": "`5` is just `self.offset` — don't forget `self.target.z` (`10`)!"
+              },
+              {
+                "id": "d",
+                "label": "15",
+                "explanation": "Awesome! `self.target` is `hero` (`hero.z` is `10`) and `self.offset` defaults to `5`, so `10 + 5 = 15`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-64-01-06",
@@ -464,7 +522,36 @@
             "class",
             "def",
             "return"
-          ]
+          ],
+          "introChoice": {
+            "title": "Overriding a Parent Method",
+            "prompt": "A subclass inherits all methods from its parent class — AND if the subclass defines a method with the SAME name, it OVERRIDES (replaces) the parent's version for that subclass!",
+            "question": "What does `BossDragon().power()` return?",
+            "codeSnippet": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\n\nprint(BossDragon().power())",
+            "choices": [
+              {
+                "id": "a",
+                "label": "20",
+                "explanation": "`Dragon().power()` returns `20`, but `BossDragon` overrode `power()` with its own version!"
+              },
+              {
+                "id": "b",
+                "label": "100",
+                "explanation": "Nailed it! `BossDragon.power` overrides `Dragon.power`, so calling it on a `BossDragon` returns `100`!"
+              },
+              {
+                "id": "c",
+                "label": "120",
+                "explanation": "Overriding REPLACES the parent's method rather than adding them together!"
+              },
+              {
+                "id": "d",
+                "label": "Error — duplicate method name",
+                "explanation": "Defining a method with the same name in a subclass is called overriding, and it's a core OOP superpower!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-64-02-04",
@@ -496,7 +583,36 @@
             "self_attr",
             "def",
             "call:super"
-          ]
+          ],
+          "introChoice": {
+            "title": "Calling the Parent with super().__init__()",
+            "prompt": "When a subclass defines its OWN `__init__`, it replaces the parent's `__init__`! Calling `super().__init__(name)` runs the parent's setup first so you keep `self.name` AND add new attributes like `self.altitude`.",
+            "question": "After `g = SkyDragon(\"Gale\", 50)`, what are `g.name` and `g.altitude`?",
+            "codeSnippet": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude",
+            "choices": [
+              {
+                "id": "a",
+                "label": "TypeError — super() takes self",
+                "explanation": "In Python 3, `super().__init__(name)` passes `self` automatically — no need to pass `self`!"
+              },
+              {
+                "id": "b",
+                "label": "Only g.altitude exists (g.name is missing)",
+                "explanation": "That's what would happen WITHOUT `super().__init__(name)`! Calling `super()` runs the parent's `__init__` too."
+              },
+              {
+                "id": "c",
+                "label": "Only g.name exists (g.altitude is missing)",
+                "explanation": "Right after `super().__init__(name)`, line 8 sets `self.altitude = altitude`!"
+              },
+              {
+                "id": "d",
+                "label": "g.name is \"Gale\" and g.altitude is 50",
+                "explanation": "Boom! `super().__init__(name)` lets `Dragon` set `self.name`, and then `SkyDragon` sets `self.altitude`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-64-02-05",
@@ -528,7 +644,36 @@
             "def",
             "return",
             "list_comp"
-          ]
+          ],
+          "introChoice": {
+            "title": "Polymorphism (Same Method, Different Objects)",
+            "prompt": "Different classes can share the SAME method name (like `.tick()`). That means one loop can call `o.tick()` on a mixed list of objects and each one responds in its own way — that's polymorphism!",
+            "question": "What list does `[o.tick() for o in objs]` produce?",
+            "codeSnippet": "class Torch:\n    def tick(self): return \"flicker\"\nclass Fountain:\n    def tick(self): return \"splash\"\n\nobjs = [Torch(), Fountain()]\nprint([o.tick() for o in objs])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[\"flicker\", \"splash\"]",
+                "explanation": "Spot on! `Torch().tick()` returns `\"flicker\"` and `Fountain().tick()` returns `\"splash\"`!"
+              },
+              {
+                "id": "b",
+                "label": "[\"flicker\", \"flicker\"]",
+                "explanation": "Each object runs its OWN class's `tick()` method — `Fountain` returns `\"splash\"`!"
+              },
+              {
+                "id": "c",
+                "label": "TypeError — lists can't hold two different classes",
+                "explanation": "Python lists can hold objects of ANY mix of classes!"
+              },
+              {
+                "id": "d",
+                "label": "[\"Torch\", \"Fountain\"]",
+                "explanation": "`o.tick()` calls the method and collects its return values (`\"flicker\"`, `\"splash\"`)!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-64-02-06",
@@ -759,7 +904,36 @@
           "difficultyOverride": null,
           "requiredConstructs": [
             "call:sum"
-          ]
+          ],
+          "introChoice": {
+            "title": "Self-Testing with assert",
+            "prompt": "`assert condition` is Python's built-in truth checker! If `condition` is `True`, Python quietly continues. If `condition` is `False`, Python immediately raises an `AssertionError` to alert you to a bug!",
+            "question": "What happens when `assert 2 + 2 == 5` runs?",
+            "codeSnippet": "assert 2 + 2 == 5\nprint(\"Done\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "It prints False and then Done",
+                "explanation": "`assert` doesn't just print `False` — it stops execution with an `AssertionError`!"
+              },
+              {
+                "id": "b",
+                "label": "Nothing happens — it prints Done",
+                "explanation": "`assert` only stays silent when the condition is `True`!"
+              },
+              {
+                "id": "c",
+                "label": "It fixes 2 + 2 to equal 5",
+                "explanation": "`assert` only CHECKS whether a condition is true; it never changes math!"
+              },
+              {
+                "id": "d",
+                "label": "It raises an AssertionError and stops",
+                "explanation": "Yes! Because `2 + 2 == 5` is `False`, `assert` halts right there with an `AssertionError`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-64-03-03",
@@ -806,7 +980,36 @@
               },
               "expectOutput": "B"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Descending Sort with reverse=True",
+            "prompt": "`sorted()` normally puts the SMALLEST value first. Adding `reverse=True` flips it so the LARGEST value comes first — great for leaderboards and back-to-front 3D drawing!",
+            "question": "Which tuple is at index `0` after sorting with `reverse=True`?",
+            "codeSnippet": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Spark",
+                "explanation": "`Spark` has the LOWEST power (`10`). With `reverse=True`, the HIGHEST power comes first!"
+              },
+              {
+                "id": "b",
+                "label": "Pebble",
+                "explanation": "`Pebble` is in the middle (`30`), not the highest!"
+              },
+              {
+                "id": "c",
+                "label": "80",
+                "explanation": "`ranked[0]` is `(\"Nova\", 80)`, and `[0]` of that tuple is `\"Nova\"` (index `1` is `80`)!"
+              },
+              {
+                "id": "d",
+                "label": "Nova",
+                "explanation": "Boom! `key=lambda d: d[1]` sorts by power, and `reverse=True` puts `(\"Nova\", 80)` first at `ranked[0]`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-64-03-04",
@@ -836,7 +1039,36 @@
           "requiredConstructs": [
             "def",
             "return"
-          ]
+          ],
+          "introChoice": {
+            "title": "Clamping a Number with min() and max()",
+            "prompt": "Clamping keeps a number safely inside a `[lo, hi]` range! `min(hi, n)` caps it so it can't go above `hi`, and `max(lo, ...)` lifts it so it can't drop below `lo`.",
+            "question": "What does `max(0, min(10, 15))` return?",
+            "codeSnippet": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\n\nprint(clamp(15, 0, 10))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "15",
+                "explanation": "15 is above `hi` (10), so `min(10, 15)` caps it down to `10`!"
+              },
+              {
+                "id": "b",
+                "label": "0",
+                "explanation": "First `min(10, 15)` is `10`, then `max(0, 10)` picks the LARGER of 0 and 10, which is `10`!"
+              },
+              {
+                "id": "c",
+                "label": "10",
+                "explanation": "Spot on! `min(10, 15)` caps `15` to `10`, and `max(0, 10)` keeps `10`!"
+              },
+              {
+                "id": "d",
+                "label": "5",
+                "explanation": "`clamp()` doesn't average — it caps values to stay between `lo` (0) and `hi` (10)!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-64-03-05",

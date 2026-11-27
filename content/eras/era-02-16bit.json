@@ -210,7 +210,36 @@
                 "sigil": "W"
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Negative Indexing ([-1])",
+            "prompt": "You know `items[0]` grabs the FIRST item in a list. Python also lets you count backwards from the end: `items[-1]` ALWAYS grabs the LAST item!",
+            "question": "What does `gems[-1]` return below?",
+            "codeSnippet": "gems = [\"aqua\", \"pearl\", \"amber\"]\nprint(gems[-1])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "amber",
+                "explanation": "Yes! Index `-1` jumps straight to the LAST item in the list (`\"amber\"`)!"
+              },
+              {
+                "id": "b",
+                "label": "aqua",
+                "explanation": "`gems[0]` is the first item (`\"aqua\"`). Negative `-1` counts from the right end!"
+              },
+              {
+                "id": "c",
+                "label": "pearl",
+                "explanation": "`\"pearl\"` is at index `1` (or `-2`). Index `-1` is the very last item!"
+              },
+              {
+                "id": "d",
+                "label": "IndexError",
+                "explanation": "Negative indexes are totally valid in Python — `-1` means 'last item'!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-16-01-04",
@@ -253,7 +282,36 @@
               },
               "expectOutput": "4"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Growing a List with .append()",
+            "prompt": "Lists can grow! Calling `my_list.append(item)` adds a brand-new item to the very END of the list.",
+            "question": "After running this code, what is `len(bag)`?",
+            "codeSnippet": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "2",
+                "explanation": "`.append(\"pearl\")` adds a 3rd item right onto `bag`, so its length grows!"
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Boom! `bag` starts with 2 items and `.append(\"pearl\")` makes it `[\"shell\", \"coral\", \"pearl\"]` — length 3!"
+              },
+              {
+                "id": "c",
+                "label": "1",
+                "explanation": "`.append()` adds to the existing list without erasing what was already inside!"
+              },
+              {
+                "id": "d",
+                "label": "pearl",
+                "explanation": "`len(bag)` returns the NUMBER of items in `bag` (3), not the item itself!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-01-05",
@@ -302,7 +360,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Replacing an Item by Index",
+            "prompt": "Lists are mutable (changeable)! Assigning to an index like `tiles[1] = \"coral\"` swaps out the item at position `1` while leaving the rest of the list untouched.",
+            "question": "What is `tiles` after line 2 runs?",
+            "codeSnippet": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[\"coral\", \"broken\", \"sand\"]",
+                "explanation": "Remember zero-based indexing! Index `0` is the first item; index `1` is the SECOND item (`\"broken\"`)."
+              },
+              {
+                "id": "b",
+                "label": "[\"sand\", \"coral\", \"sand\"]",
+                "explanation": "Spot on! Index `1` is the middle slot, so `\"broken\"` gets swapped for `\"coral\"`!"
+              },
+              {
+                "id": "c",
+                "label": "[\"sand\", \"broken\", \"coral\"]",
+                "explanation": "The last slot is index `2` (or `-1`), whereas index `1` is the middle slot!"
+              },
+              {
+                "id": "d",
+                "label": "[\"sand\", \"coral\", \"broken\", \"sand\"]",
+                "explanation": "Assigning `tiles[1] = ...` REPLACES the item at index 1 rather than inserting a 4th item!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-01-06",
@@ -973,7 +1060,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Sorting a List with sorted()",
+            "prompt": "`sorted(my_list)` returns a brand-new list arranged from smallest to largest (without scrambling the original list).",
+            "question": "What does `sorted([30, 10, 20])` return?",
+            "codeSnippet": "pearls = [30, 10, 20]\nprint(sorted(pearls))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[30, 20, 10]",
+                "explanation": "By default `sorted()` goes smallest-to-largest (you'd need `reverse=True` for largest-to-smallest)."
+              },
+              {
+                "id": "b",
+                "label": "[10, 20, 30]",
+                "explanation": "Exactly! `sorted()` arranges numbers in ascending order from smallest to largest!"
+              },
+              {
+                "id": "c",
+                "label": "[30, 10, 20]",
+                "explanation": "`sorted()` reorders the elements into ascending order!"
+              },
+              {
+                "id": "d",
+                "label": "10",
+                "explanation": "`min()` returns a single number; `sorted()` returns the whole sorted list!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-03-03",
@@ -1023,7 +1139,36 @@
                 "mid": "HEL"
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "List Slicing ([:2])",
+            "prompt": "A slice like `items[:2]` cuts out a sub-list starting from index `0` and stopping RIGHT BEFORE index `2` — giving you the first 2 items!",
+            "question": "What does `gems[:2]` produce below?",
+            "codeSnippet": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\nprint(gems[:2])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[\"ruby\", \"onyx\"]",
+                "explanation": "That would be `gems[2:]` (from index 2 onward). `gems[:2]` grabs the FIRST two items!"
+              },
+              {
+                "id": "b",
+                "label": "[\"opal\", \"jade\", \"ruby\"]",
+                "explanation": "Just like `range()`, slicing stops RIGHT BEFORE the end index (`2`), so it only grabs indexes 0 and 1!"
+              },
+              {
+                "id": "c",
+                "label": "[\"opal\", \"jade\"]",
+                "explanation": "Awesome! `gems[:2]` takes index `0` (`\"opal\"`) and index `1` (`\"jade\"`), stopping before index `2`!"
+              },
+              {
+                "id": "d",
+                "label": "\"ruby\"",
+                "explanation": "`gems[2]` grabs one item at index 2; `gems[:2]` with a colon returns a sliced list!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-16-03-04",
@@ -1073,7 +1218,36 @@
                 "low": 10
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Decimals with float(), Plus sum() & min()",
+            "prompt": "`float(\"2.5\")` converts decimal text into a real decimal number (a float), while `sum()`, `max()`, and `min()` compute the total, largest, and smallest values of a list!",
+            "question": "What does `sum([10, 20]) + float(\"2.5\")` equal?",
+            "codeSnippet": "scores = [10, 20]\nprint(sum(scores) + float(\"2.5\"))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "ValueError",
+                "explanation": "`float(\"2.5\")` handles decimals cleanly (it's `int(\"2.5\")` that would raise a ValueError)!"
+              },
+              {
+                "id": "b",
+                "label": "32",
+                "explanation": "`float(\"2.5\")` keeps the `.5` decimal part (unlike `int()`), so the sum is `32.5`!"
+              },
+              {
+                "id": "c",
+                "label": "302.5",
+                "explanation": "`float(\"2.5\")` turns text into a number, so `+` adds mathematically (`30 + 2.5 = 32.5`)!"
+              },
+              {
+                "id": "d",
+                "label": "32.5",
+                "explanation": "Awesome! `sum([10, 20])` is `30`, `float(\"2.5\")` is `2.5`, and `30 + 2.5 = 32.5`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-16-03-05",
@@ -1126,7 +1300,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Filtering into a New List",
+            "prompt": "A super useful Python pattern is starting with an empty list `kept = []`, looping through items, and calling `kept.append(item)` ONLY when an `if` check passes!",
+            "question": "What will `big` contain after this loop finishes?",
+            "codeSnippet": "nums = [4, 20, 9, 15]\nbig = []\nfor n in nums:\n    if n >= 15:\n        big.append(n)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[4, 9]",
+                "explanation": "Those are the numbers `< 15`, not `>= 15`!"
+              },
+              {
+                "id": "b",
+                "label": "[20]",
+                "explanation": "Check `>=` (greater than OR EQUAL to): `15 >= 15` is `True`, so `15` is included too!"
+              },
+              {
+                "id": "c",
+                "label": "[20, 15]",
+                "explanation": "Nailed it! Only `20` and `15` are `>= 15`, so they get appended in order into `big`!"
+              },
+              {
+                "id": "d",
+                "label": "2",
+                "explanation": "`big` is a list of the matching values `[20, 15]`, not a count!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-16-03-06",
@@ -1552,7 +1755,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Transforming & Splitting Strings (.replace() & .split())",
+            "prompt": "`.replace(old, new)` swaps pieces of text inside a string, and `.split(sep)` chops a string into a LIST of words wherever `sep` appears!",
+            "question": "What list does `\"A_B_C\".replace(\"_\", \"-\").split(\"-\")` produce?",
+            "codeSnippet": "raw = \"A_B_C\"\nclean = raw.replace(\"_\", \"-\")\nparts = clean.split(\"-\")\nprint(parts)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[\"A-\", \"B-\", \"C\"]",
+                "explanation": "`.split(\"-\")` removes the separator `\"-\"` when chopping the string into list items!"
+              },
+              {
+                "id": "b",
+                "label": "\"A-B-C\"",
+                "explanation": "That's `clean`! Calling `.split(\"-\")` turns the string into a list of 3 strings!"
+              },
+              {
+                "id": "c",
+                "label": "[\"A\", \"B\", \"C\"]",
+                "explanation": "Nailed it! `.replace(\"_\", \"-\")` makes `\"A-B-C\"`, and `.split(\"-\")` chops it into `[\"A\", \"B\", \"C\"]`!"
+              },
+              {
+                "id": "d",
+                "label": "[\"A_B_C\"]",
+                "explanation": "Line 2 replaced every `\"_\"` with `\"-\"`, so `.split(\"-\")` finds two dashes and splits into 3 pieces!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-16-04-06",
@@ -1879,7 +2111,36 @@
               },
               "expectOutput": "2\n1"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Counting Down with while",
+            "prompt": "A `while` loop can count DOWN too! Start above zero (`sec = 3`), keep looping `while sec > 0:`, and subtract 1 each turn (`sec = sec - 1`) so the loop eventually stops.",
+            "question": "What numbers does this countdown loop print?",
+            "codeSnippet": "sec = 3\nwhile sec > 0:\n    print(sec)\n    sec = sec - 1",
+            "choices": [
+              {
+                "id": "a",
+                "label": "1, 2, 3",
+                "explanation": "Since `sec` starts at `3` and subtracts `1`, it counts downwards!"
+              },
+              {
+                "id": "b",
+                "label": "3, 2, 1, 0",
+                "explanation": "When `sec` becomes `0`, `sec > 0` is `False`, so `0` is NOT printed!"
+              },
+              {
+                "id": "c",
+                "label": "2, 1, 0",
+                "explanation": "`print(sec)` runs BEFORE `sec = sec - 1`, so `3` prints first!"
+              },
+              {
+                "id": "d",
+                "label": "3, 2, 1",
+                "explanation": "Spot on! It prints `3`, `2`, `1`, then `sec` hits `0`, making `0 > 0` `False`, so the loop stops!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-16-05-05",
@@ -2212,7 +2473,36 @@
             "continue",
             "if",
             "list"
-          ]
+          ],
+          "introChoice": {
+            "title": "Skipping a Turn with continue",
+            "prompt": "While `break` exits a loop completely, `continue` only SKIPS the rest of the CURRENT turn and immediately jumps to the next item!",
+            "question": "What does `total` equal after this loop?",
+            "codeSnippet": "total = 0\nfor n in [5, -2, 10]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "0",
+                "explanation": "Positive numbers (`5` and `10`) do NOT hit `continue`, so they get added to `total`!"
+              },
+              {
+                "id": "b",
+                "label": "5",
+                "explanation": "That's what `break` would do (stopping the loop at `-2`). `continue` only skips `-2` and still adds `10`!"
+              },
+              {
+                "id": "c",
+                "label": "13",
+                "explanation": "Because `-2 < 0` triggers `continue`, `-2` is skipped instead of subtracted!"
+              },
+              {
+                "id": "d",
+                "label": "15",
+                "explanation": "Yes! When `n` is `-2`, `continue` skips `total = total + n` and moves on to `10`, giving `5 + 10 = 15`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-16-06-05",
@@ -2262,7 +2552,36 @@
                 "done": 1
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Looping Until a Stop Command (while True & break)",
+            "prompt": "`while True:` creates a loop that keeps asking for commands until an `if` check hits `break`! Pairing `while True:` with `if cmd == \"STOP\": break` is the classic command-loop pattern.",
+            "question": "If the commands are `[\"GO\", \"GO\", \"STOP\"]`, what is `done` when this loop ends?",
+            "codeSnippet": "done = 0\nwhile True:\n    cmd = next_cmd()\n    if cmd == \"STOP\":\n        break\n    done += 1",
+            "choices": [
+              {
+                "id": "a",
+                "label": "0",
+                "explanation": "The first two commands are `\"GO\"` (not `\"STOP\"`), so `done += 1` runs twice!"
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Look at the order: `if cmd == \"STOP\": break` runs BEFORE `done += 1`, so `\"STOP\"` isn't counted!"
+              },
+              {
+                "id": "c",
+                "label": "2",
+                "explanation": "Spot on! It counts both `\"GO\"` commands (`done = 2`), then immediately hits `break` on `\"STOP\"` before adding 1!"
+              },
+              {
+                "id": "d",
+                "label": "It loops forever",
+                "explanation": "As soon as `cmd == \"STOP\"`, `break` exits the `while True:` loop cleanly!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-16-06-06",
@@ -2575,7 +2894,36 @@
           "requiredConstructs": [
             "def",
             "return"
-          ]
+          ],
+          "introChoice": {
+            "title": "Sending Values Back with return",
+            "prompt": "`print()` only displays text on screen, whereas `return` SENDS a value back to the code that called the function — so you can save it in a variable or use it in math!",
+            "question": "What does `ans` equal when this code runs?",
+            "codeSnippet": "def double(n):\n    return n * 2\n\nans = double(6)\nprint(ans)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "None",
+                "explanation": "A function only returns `None` if it FORGETS `return`. Here `return n * 2` sends back `12`!"
+              },
+              {
+                "id": "b",
+                "label": "12",
+                "explanation": "Awesome! `double(6)` computes `6 * 2` and `return` sends `12` back to be stored in `ans`!"
+              },
+              {
+                "id": "c",
+                "label": "6",
+                "explanation": "Inside `double`, `n * 2` multiplies `6` by `2` before returning it!"
+              },
+              {
+                "id": "d",
+                "label": "n * 2",
+                "explanation": "Python evaluates `n * 2` (`12`) and returns the resulting number!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-07-06",
@@ -2836,7 +3184,36 @@
           "requiredConstructs": [
             "def",
             "return"
-          ]
+          ],
+          "introChoice": {
+            "title": "A Function Calling Another Function",
+            "prompt": "Functions can call OTHER functions! When you nest calls like `add_one(add_one(8))`, Python runs the INNER call first, then passes its result to the OUTER call.",
+            "question": "What does `add_one(add_one(8))` return?",
+            "codeSnippet": "def add_one(x):\n    return x + 1\n\nprint(add_one(add_one(8)))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "16",
+                "explanation": "`add_one` adds `1` (not doubles), so calling it twice adds `2` total!"
+              },
+              {
+                "id": "b",
+                "label": "9",
+                "explanation": "`add_one` is called TWICE — once on `8` (-> `9`), then again on `9` (-> `10`)!"
+              },
+              {
+                "id": "c",
+                "label": "10",
+                "explanation": "Spot on! Inner `add_one(8)` returns `9`, and outer `add_one(9)` returns `10`!"
+              },
+              {
+                "id": "d",
+                "label": "Error — you can't nest function calls",
+                "explanation": "Nesting function calls is totally valid in Python — it evaluates from the inside out!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-16-08-04",
@@ -2900,7 +3277,36 @@
           "requiredConstructs": [
             "def",
             "return"
-          ]
+          ],
+          "introChoice": {
+            "title": "Returning a True/False Check",
+            "prompt": "A comparison like `n % 2 == 0` ALREADY evaluates to `True` or `False`! So a function can simply `return n % 2 == 0` directly without even needing an `if` statement.",
+            "question": "What does `is_even(8)` return?",
+            "codeSnippet": "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "0",
+                "explanation": "`8 % 2` is `0`, and then `== 0` compares it and produces the Boolean `True`!"
+              },
+              {
+                "id": "b",
+                "label": "True",
+                "explanation": "Yes! `8 % 2` is `0`, and `0 == 0` is `True`, so `is_even(8)` returns `True`!"
+              },
+              {
+                "id": "c",
+                "label": "False",
+                "explanation": "8 divides evenly by 2 (remainder 0), so `8 % 2 == 0` is `True`!"
+              },
+              {
+                "id": "d",
+                "label": "8",
+                "explanation": "The function returns the result of the comparison `n % 2 == 0`, which is `True`!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-08-06",
@@ -3183,7 +3589,36 @@
                 }
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Adding a New Key to a Dictionary",
+            "prompt": "You can add a brand-new key/value pair to an existing dictionary using square brackets and `=`: `vial[\"glow\"] = 15`!",
+            "question": "What does `print(vial[\"glow\"])` output below?",
+            "codeSnippet": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "20",
+                "explanation": "`20` is stored under `\"heat\"`, while `\"glow\"` stores `15`!"
+              },
+              {
+                "id": "b",
+                "label": "15",
+                "explanation": "Awesome! Line 2 adds the new key `\"glow\"` with value `15`, so `vial[\"glow\"]` returns `15`!"
+              },
+              {
+                "id": "c",
+                "label": "KeyError",
+                "explanation": "Assigning `vial[\"glow\"] = 15` creates the key if it doesn't exist yet — no KeyError!"
+              },
+              {
+                "id": "d",
+                "label": "35",
+                "explanation": "Each key holds its own separate value (`\"heat\": 20`, `\"glow\": 15`)."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-09-04",
@@ -3263,7 +3698,36 @@
             "return",
             "dict",
             "method_call:get"
-          ]
+          ],
+          "introChoice": {
+            "title": "Safe Lookups with .get()",
+            "prompt": "Looking up a missing key with `bag[\"ice\"]` crashes with a `KeyError`! Instead, `bag.get(\"ice\", 0)` safely returns the fallback value (`0`) when the key isn't there.",
+            "question": "What does `bag.get(\"ice\", 0)` return below?",
+            "codeSnippet": "bag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\nprint(val)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "ice",
+                "explanation": "`.get(key, default)` returns the SECOND argument (`0`) when the key isn't found!"
+              },
+              {
+                "id": "b",
+                "label": "KeyError",
+                "explanation": "That's why `.get()` is so useful — it NEVER throws a KeyError when a key is missing!"
+              },
+              {
+                "id": "c",
+                "label": "9",
+                "explanation": "`9` is the value for `\"fire\"`, not `\"ice\"`!"
+              },
+              {
+                "id": "d",
+                "label": "0",
+                "explanation": "Spot on! Since `\"ice\"` isn't in `bag`, `.get(\"ice\", 0)` safely returns the default value `0`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-16-09-06",
@@ -3607,7 +4071,36 @@
                 "total": 25
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Grabbing All Values with .values()",
+            "prompt": "When you only need a dictionary's values (not its keys), `my_dict.values()` hands you every value — ready to pass straight into `sum(...)`!",
+            "question": "What does `sum(gems.values())` return below?",
+            "codeSnippet": "gems = {\"ruby\": 4, \"opal\": 6}\nprint(sum(gems.values()))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "10",
+                "explanation": "Boom! `gems.values()` gives `4` and `6`, and `sum()` totals them to `10`!"
+              },
+              {
+                "id": "b",
+                "label": "2",
+                "explanation": "`len(gems)` is 2; `sum(gems.values())` adds the numeric values (`4 + 6 = 10`)!"
+              },
+              {
+                "id": "c",
+                "label": "rubyopal",
+                "explanation": "`.values()` grabs the numbers on the right side of `:`, not the key names!"
+              },
+              {
+                "id": "d",
+                "label": "TypeError",
+                "explanation": "All the values are numbers (`4` and `6`), so `sum(gems.values())` works cleanly!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-16-10-05",
@@ -4374,7 +4867,36 @@
               },
               "expectOutput": "3"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Counting Frequencies with .get()",
+            "prompt": "To count how many times each item appears in a list, combine a dictionary with `.get(x, 0) + 1`! The first time we see `\"gold\"`, `.get(\"gold\", 0)` gives `0`, so `0 + 1 = 1`. Next time it gives `1 + 1 = 2`!",
+            "question": "What is `counts[\"gold\"]` after this loop?",
+            "codeSnippet": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "2",
+                "explanation": "Spot on! `\"gold\"` appears twice in `ore`, so `counts[\"gold\"]` goes `0 -> 1 -> 2`!"
+              },
+              {
+                "id": "b",
+                "label": "1",
+                "explanation": "Check `ore` again — `\"gold\"` appears TWICE, so `.get(\"gold\", 0) + 1` increments it to `2`!"
+              },
+              {
+                "id": "c",
+                "label": "3",
+                "explanation": "There are 3 items total, but `\"iron\"` is counted under its own key `counts[\"iron\"]`!"
+              },
+              {
+                "id": "d",
+                "label": "KeyError",
+                "explanation": "`.get(x, 0)` safely returns `0` the first time a new key is seen — no KeyError!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-16-12-05",
@@ -4420,7 +4942,36 @@
               },
               "expectOutput": "3"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Copying & Merging Dicts with .update()",
+            "prompt": "`dict(a)` makes a fresh copy of dictionary `a`, and `c.update(b)` merges all key/value pairs from `b` into `c`!",
+            "question": "What is `len(c)` after merging `a` and `b`?",
+            "codeSnippet": "a = {\"x\": 1}\nb = {\"y\": 2, \"z\": 3}\nc = dict(a)\nc.update(b)\nprint(len(c))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "1",
+                "explanation": "`.update(b)` adds `b`'s keys into `c`, so `c` grows from 1 key to 3!"
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Yes! `c` starts with `{\"x\": 1}` and `.update(b)` adds `\"y\"` and `\"z\"`, giving 3 keys total!"
+              },
+              {
+                "id": "c",
+                "label": "2",
+                "explanation": "`.update(b)` keeps `a`'s existing key `\"x\"` AND adds both `\"y\"` and `\"z\"` (= 3)!"
+              },
+              {
+                "id": "d",
+                "label": "6",
+                "explanation": "`len(c)` counts how many KEYS are in `c` (3), not the sum of values!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-12-06",
@@ -4698,7 +5249,36 @@
                 "total": 15
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Looping Over a 2D Grid",
+            "prompt": "A 2D grid is a list of lists, like `grid = [[1, 2], [3, 4]]`. The OUTER `for row in grid:` grabs one row at a time (`[1, 2]`, then `[3, 4]`), and the INNER `for val in row:` visits each number inside that row!",
+            "question": "What does `total` equal after visiting every cell in `grid`?",
+            "codeSnippet": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "10",
+                "explanation": "Nailed it! The nested loops visit `1`, `2`, `3`, and `4`, summing `1 + 2 + 3 + 4 = 10`!"
+              },
+              {
+                "id": "b",
+                "label": "4",
+                "explanation": "There are 4 cells, but we're adding `val` (`1 + 2 + 3 + 4 = 10`), not counting cells!"
+              },
+              {
+                "id": "c",
+                "label": "3",
+                "explanation": "That's just the first row (`1 + 2`). The outer loop also visits the second row (`3 + 4`)!"
+              },
+              {
+                "id": "d",
+                "label": "[1, 2, 3, 4]",
+                "explanation": "`total` starts at `0` and adds numbers, so it ends up as the number `10`!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-16-13-04",
@@ -5090,7 +5670,36 @@
             "def",
             "return",
             "fstring"
-          ]
+          ],
+          "introChoice": {
+            "title": "Adding a Method to a Class",
+            "prompt": "A method is a function defined INSIDE a class. Its first parameter is ALWAYS `self`, which lets it read the object's own attributes like `self.name`!",
+            "question": "What does `d.roar()` return below?",
+            "codeSnippet": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Comet ROARS!",
+                "explanation": "Awesome! Inside `roar(self)`, `self.name` looks up `\"Comet\"` on object `d` and returns `Comet ROARS!`!"
+              },
+              {
+                "id": "b",
+                "label": "self.name ROARS!",
+                "explanation": "Because it's an f-string (`f\"...\"`), `{self.name}` gets replaced with `\"Comet\"`!"
+              },
+              {
+                "id": "c",
+                "label": "Dragon ROARS!",
+                "explanation": "`self.name` is the name passed into `Dragon(\"Comet\")`, which is `\"Comet\"`!"
+              },
+              {
+                "id": "d",
+                "label": "TypeError — roar() needs an argument",
+                "explanation": "Python passes `self` automatically when you call `d.roar()` — no extra argument needed!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-16-14-05",
@@ -5121,7 +5730,36 @@
             "self_attr",
             "def",
             "aug_assign"
-          ]
+          ],
+          "introChoice": {
+            "title": "Updating an Object's Attribute",
+            "prompt": "A class method can CHANGE the object's own data by assigning to `self.power = self.power + amt`! That change stays saved inside the object.",
+            "question": "What does `print(d.power)` output after calling `d.boost(15)`?",
+            "codeSnippet": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "15",
+                "explanation": "`boost()` ADDS `amt` (`15`) to the existing `self.power` (`10`) rather than replacing it!"
+              },
+              {
+                "id": "b",
+                "label": "10",
+                "explanation": "Because `boost()` modifies `self.power`, the object remembers its new value (`25`)!"
+              },
+              {
+                "id": "c",
+                "label": "25",
+                "explanation": "Boom! `d.power` starts at `10`, and `d.boost(15)` updates `self.power` to `10 + 15 = 25`!"
+              },
+              {
+                "id": "d",
+                "label": "None",
+                "explanation": "`d.boost(15)` returns `None`, but we are printing `d.power` — which is `25`!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-16-14-06",

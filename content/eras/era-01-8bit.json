@@ -162,7 +162,40 @@
           "difficultyOverride": null,
           "requiredConstructs": [
             "call:shout"
-          ]
+          ],
+          "introChoice": {
+            "title": "Two Lines in a Row!",
+            "prompt": "Python reads your spellbook from TOP to BOTTOM, one line at a time! And `shout(\"...\")` works just like `say(\"...\")`, printing a bold message on its own line.",
+            "question": "What will Python display when these two lines run?",
+            "codeSnippet": "shout(\"Go!\")\nshout(\"Spark!\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "One line: Go! Spark!",
+                "code": "Go! Spark!",
+                "explanation": "Close! Each `shout(...)` puts its message on its OWN separate line."
+              },
+              {
+                "id": "b",
+                "label": "Two lines: Go! then Spark!",
+                "code": "Go!\nSpark!",
+                "explanation": "Spot on! Python runs line 1 first (`Go!`) and then moves down to line 2 (`Spark!`)!"
+              },
+              {
+                "id": "c",
+                "label": "Only the last line: Spark!",
+                "code": "Spark!",
+                "explanation": "Nope — Python runs EVERY line from top to bottom, not just the last one!"
+              },
+              {
+                "id": "d",
+                "label": "Backwards: Spark! then Go!",
+                "code": "Spark!\nGo!",
+                "explanation": "Not quite! Python always starts at line 1 and works downward."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-01-05",
@@ -192,7 +225,36 @@
           "requiredConstructs": [
             "call:say",
             "str_concat"
-          ]
+          ],
+          "introChoice": {
+            "title": "Gluing Strings with +",
+            "prompt": "In Python, the `+` symbol can glue two text strings together — this is called string concatenation! Notice that `+` joins them right next to each other with NO extra space unless you put a space inside the quotes.",
+            "question": "What does `say(\"Fire\" + \"fly\")` display?",
+            "codeSnippet": "say(\"Fire\" + \"fly\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Fire + fly",
+                "explanation": "Careful! The `+` is OUTSIDE the quotes, so Python uses it as glue instead of printing the `+` symbol."
+              },
+              {
+                "id": "b",
+                "label": "Firefly",
+                "explanation": "Awesome! `+` glues `\"Fire\"` and `\"fly\"` directly together into `Firefly` with no extra space!"
+              },
+              {
+                "id": "c",
+                "label": "Fire fly",
+                "explanation": "Almost! Neither `\"Fire\"` nor `\"fly\"` has a space inside its quotes, so `+` doesn't add one!"
+              },
+              {
+                "id": "d",
+                "label": "Nothing — it causes an error",
+                "explanation": "No error here! Both pieces are strings in quotes, so Python happily glues them with `+`."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-01-06",
@@ -520,7 +582,36 @@
                 "total_gems": 17
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Adding Variables & Converting with str()",
+            "prompt": "You can add two number variables with `+` (`total = a + b`), AND if you want to glue a number onto a string, wrap the number in `str(...)` first — like `\"Gems: \" + str(total)`!",
+            "question": "What does `say(\"Gems: \" + str(4 + 3))` display?",
+            "codeSnippet": "a = 4\nb = 3\ntotal = a + b\nsay(\"Gems: \" + str(total))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "TypeError — can't glue string and number",
+                "explanation": "Without `str()` it would raise a TypeError — wrapping `total` in `str(total)` makes it work cleanly!"
+              },
+              {
+                "id": "b",
+                "label": "Gems: 43",
+                "explanation": "Because `a` and `b` are numbers, `a + b` adds them mathematically to `7` before `str()` converts it!"
+              },
+              {
+                "id": "c",
+                "label": "Gems: total",
+                "explanation": "`str(total)` converts the VALUE inside `total` (`7`) to text, not the word `\"total\"`!"
+              },
+              {
+                "id": "d",
+                "label": "Gems: 7",
+                "explanation": "Spot on! `a + b` is `7`, `str(7)` turns it into text `\"7\"`, and `+` glues it onto `\"Gems: \"`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-02-05",
@@ -566,7 +657,36 @@
                 "power": 27
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Updating Variables & Converting with int()",
+            "prompt": "Text like `\"5\"` (in quotes) is a string, not a number! Wrapping it in `int(\"5\")` converts it into the integer `5` so you can add it onto a variable: `power = power + int(boost_text)`.",
+            "question": "What does `say(power)` display below?",
+            "codeSnippet": "power = 10\nboost_text = \"5\"\npower = power + int(boost_text)\nsay(power)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "15",
+                "explanation": "Boom! `int(\"5\")` turns `\"5\"` into the number `5`, and `10 + 5` updates `power` to `15`!"
+              },
+              {
+                "id": "b",
+                "label": "105",
+                "explanation": "Because `int(boost_text)` converts `\"5\"` into a real number, Python ADDS `10 + 5` (= `15`) instead of gluing text!"
+              },
+              {
+                "id": "c",
+                "label": "10",
+                "explanation": "Line 3 saves the new total (`15`) right back into `power`!"
+              },
+              {
+                "id": "d",
+                "label": "TypeError",
+                "explanation": "`int(\"5\")` safely turns the digit string into an integer, so adding it to `10` works with no error!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-02-06",
@@ -913,7 +1033,39 @@
                 "gate": "LOCKED"
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "= (Store) vs == (Compare)",
+            "prompt": "Watch out for one of Python's classic traps! A SINGLE `=` STORES a value in a variable (`word = \"FIRE\"`). A DOUBLE `==` ASKS A QUESTION: 'Are these two values equal?'",
+            "question": "Which `if` line correctly checks whether `word` equals `\"FIRE\"`?",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Option A",
+                "code": "if word = \"FIRE\":",
+                "explanation": "Careful! Single `=` tries to STORE a value, which causes a SyntaxError inside an `if` check!"
+              },
+              {
+                "id": "b",
+                "label": "Option B",
+                "code": "if word = FIRE:",
+                "explanation": "Two bugs here: it needs double `==` to compare AND quotes around `\"FIRE\"`!"
+              },
+              {
+                "id": "c",
+                "label": "Option C",
+                "code": "if word == FIRE:",
+                "explanation": "Close — it uses `==`, but `FIRE` is text so it needs quotes `\"FIRE\"`!"
+              },
+              {
+                "id": "d",
+                "label": "Option D",
+                "code": "if word == \"FIRE\":",
+                "explanation": "Spot on! Double `==` compares `word` to `\"FIRE\"` and ends with a colon `:`!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-03-05",
@@ -1005,7 +1157,36 @@
                 "gate_status": "LOCKED"
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Adding an else: Backup Path",
+            "prompt": "What if an `if` condition is `False`? Adding `else:` gives Python a backup block that runs ONLY when the `if` condition was `False`!",
+            "question": "What does Python print when `power = 40`?",
+            "codeSnippet": "power = 40\nif power > 50:\n    shout(\"OPEN\")\nelse:\n    shout(\"LOCKED\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "LOCKED",
+                "explanation": "Yes! Because `40 > 50` is `False`, Python jumps straight to the `else:` block and shouts `LOCKED`!"
+              },
+              {
+                "id": "b",
+                "label": "OPEN",
+                "explanation": "Check the condition: is `40 > 50`? No, that's `False`, so Python skips the `if` block!"
+              },
+              {
+                "id": "c",
+                "label": "Both OPEN and LOCKED",
+                "explanation": "In an `if / else`, Python ALWAYS picks just ONE branch — never both!"
+              },
+              {
+                "id": "d",
+                "label": "Nothing",
+                "explanation": "Because there's an `else:` backup path, it runs whenever the `if` is `False`!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-03-bonus",
@@ -1354,7 +1535,36 @@
                 "badge": "STARTER"
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Chaining Multiple elif Branches",
+            "prompt": "You can stack as many `elif` branches as you want! Python checks them from TOP to BOTTOM and runs ONLY the VERY FIRST branch that is `True` — then skips the rest.",
+            "question": "When `pts = 85`, what does this 4-tier chain print?",
+            "codeSnippet": "pts = 85\nif pts >= 80:\n    print(\"GOLD\")\nelif pts >= 40:\n    print(\"SILVER\")\nelif pts >= 10:\n    print(\"BRONZE\")\nelse:\n    print(\"STARTER\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "GOLD only",
+                "explanation": "Exactly! `85 >= 80` is `True`, so Python prints `GOLD` and immediately skips all the remaining `elif` and `else` blocks!"
+              },
+              {
+                "id": "b",
+                "label": "GOLD, SILVER, and BRONZE",
+                "explanation": "Even though 85 is also `>= 40` and `>= 10`, Python stops after the FIRST matching branch in an `if / elif / else` chain!"
+              },
+              {
+                "id": "c",
+                "label": "SILVER",
+                "explanation": "Python checks from top to bottom, so `pts >= 80` matches first!"
+              },
+              {
+                "id": "d",
+                "label": "STARTER",
+                "explanation": "`else` only runs if NONE of the `if` or `elif` conditions were `True`."
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-04-05",
@@ -1467,7 +1677,39 @@
                 "vault_open": false
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Multiplying (*) & Booleans (True/False)",
+            "prompt": "In Python, `*` multiplies numbers (`4 * 5` is `20`), and `True` / `False` (capital first letter, NO quotes!) are special Boolean yes/no values.",
+            "question": "Which line correctly stores a Boolean `True`?",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Option A",
+                "code": "vault_open == True",
+                "explanation": "Careful! `==` compares values — use single `=` to store `True` in `vault_open`!"
+              },
+              {
+                "id": "b",
+                "label": "Option B",
+                "code": "vault_open = true",
+                "explanation": "Almost! Python is case-sensitive — Booleans MUST start with a capital letter: `True` or `False`."
+              },
+              {
+                "id": "c",
+                "label": "Option C",
+                "code": "vault_open = \"True\"",
+                "explanation": "Watch out! Putting quotes around `\"True\"` turns it into a text string instead of a Boolean!"
+              },
+              {
+                "id": "d",
+                "label": "Option D",
+                "code": "vault_open = True",
+                "explanation": "Spot on! Booleans are capitalized (`True` or `False`) with NO quotes around them!"
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-04-bonus",
@@ -1680,7 +1922,36 @@
                 "clean": "bramble"
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Trimming Spaces with .strip()",
+            "prompt": "Messy text often has extra spaces at the start or end, like `\"  echo  \"`. Calling `.strip()` trims those outer spaces off — and you can chain methods like `.strip().lower()`!",
+            "question": "What does `\"  Hi  \".strip().lower()` produce?",
+            "codeSnippet": "clean = \"  Hi  \".strip().lower()\nprint(clean)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "\"Hi\" (still capital H)",
+                "explanation": "`.lower()` converts every uppercase letter to lowercase, so `H` becomes `h`!"
+              },
+              {
+                "id": "b",
+                "label": "\"  hi  \" (keeps the spaces)",
+                "explanation": "`.strip()` specifically trims away the leading and trailing spaces!"
+              },
+              {
+                "id": "c",
+                "label": "\"hi\" (no spaces, all lowercase)",
+                "explanation": "Awesome! `.strip()` removes the spaces at both ends, and `.lower()` turns `Hi` into `hi`!"
+              },
+              {
+                "id": "d",
+                "label": "An error — you can't chain two methods",
+                "explanation": "You CAN chain string methods in Python! Each one returns a new string for the next method."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-05-03",
@@ -1792,7 +2063,36 @@
                 "can_cross": true
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Either One Works: or",
+            "prompt": "While `and` requires BOTH sides to be `True`, `or` only needs AT LEAST ONE side to be `True`!",
+            "question": "What does `False or True` evaluate to?",
+            "codeSnippet": "has_rope = False\nhas_wings = True\ncan_cross = has_rope or has_wings\nprint(can_cross)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "True",
+                "explanation": "Yes! With `or`, if EITHER side is `True`, the whole expression is `True`!"
+              },
+              {
+                "id": "b",
+                "label": "False",
+                "explanation": "That's how `and` works! With `or`, only ONE side needs to be `True`."
+              },
+              {
+                "id": "c",
+                "label": "has_wings",
+                "explanation": "`or` combines the two Booleans (`False` and `True`) and produces a Boolean value: `True`."
+              },
+              {
+                "id": "d",
+                "label": "Nothing",
+                "explanation": "`print(can_cross)` prints the Boolean result of `False or True`!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-05-05",
@@ -1835,7 +2135,36 @@
                 "status": "QUIET"
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Flipping Booleans with not",
+            "prompt": "The `not` keyword flips a Boolean to its opposite! `not False` becomes `True`, and `not True` becomes `False`.",
+            "question": "What does this snippet print when `is_asleep = False`?",
+            "codeSnippet": "is_asleep = False\nif not is_asleep:\n    print(\"AWAKE\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "False",
+                "explanation": "The `print()` inside the `if` prints the string `\"AWAKE\"`, not the variable."
+              },
+              {
+                "id": "b",
+                "label": "Nothing prints",
+                "explanation": "Look closely at `not`! `not False` becomes `True`, so the `if` block DOES run!"
+              },
+              {
+                "id": "c",
+                "label": "AWAKE",
+                "explanation": "Spot on! Since `is_asleep` is `False`, `not is_asleep` flips it to `True`, so Python prints `AWAKE`!"
+              },
+              {
+                "id": "d",
+                "label": "not AWAKE",
+                "explanation": "`not` only flips the Boolean condition — it doesn't change the printed text!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-05-06",
@@ -1882,7 +2211,36 @@
                 "gate_open": false
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": ".upper() and len()",
+            "prompt": "Two handy string tools: `.upper()` turns all letters into CAPITALS, and `len(text)` counts how many characters are in a string!",
+            "question": "What does this snippet print?",
+            "codeSnippet": "word = \"pyria\".upper()\nprint(word, len(word))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "PYRIA 5",
+                "explanation": "Boom! `.upper()` turns `\"pyria\"` into `\"PYRIA\"`, and `len(\"PYRIA\")` counts its 5 letters!"
+              },
+              {
+                "id": "b",
+                "label": "pyria 5",
+                "explanation": "Close on the length, but `.upper()` capitalizes every letter to `PYRIA`!"
+              },
+              {
+                "id": "c",
+                "label": "PYRIA 4",
+                "explanation": "Count the letters in P-Y-R-I-A: that's 5 characters!"
+              },
+              {
+                "id": "d",
+                "label": "PYRIA 1",
+                "explanation": "`len()` counts every character in the string, not the number of words!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-05-bonus",
@@ -2577,7 +2935,36 @@
             "for",
             "call:range",
             "call:print"
-          ]
+          ],
+          "introChoice": {
+            "title": "Counting with range(start, stop)",
+            "prompt": "When you give `range(start, stop)` TWO numbers, it starts at `start` and stops RIGHT BEFORE `stop`! So `range(1, 4)` produces `1, 2, 3` (not 4).",
+            "question": "Which numbers does `for n in range(1, 6):` visit?",
+            "codeSnippet": "for n in range(1, 6):\n    print(n)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "1, 2, 3, 4, 5, 6",
+                "explanation": "Classic Python gotcha! `range(start, stop)` NEVER includes the `stop` number — it stops one before `6`!"
+              },
+              {
+                "id": "b",
+                "label": "1, 2, 3, 4, 5",
+                "explanation": "Nailed it! `range(1, 6)` starts at `1` and stops right before `6`, giving `1, 2, 3, 4, 5`!"
+              },
+              {
+                "id": "c",
+                "label": "0, 1, 2, 3, 4, 5",
+                "explanation": "Because we gave a start of `1`, it begins at `1` instead of `0`!"
+              },
+              {
+                "id": "d",
+                "label": "Only 1 and 6",
+                "explanation": "`range(1, 6)` counts through every whole number from 1 up to (but not including) 6."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-07-05",
@@ -2611,7 +2998,36 @@
             "call:range",
             "aug_assign",
             "call:print"
-          ]
+          ],
+          "introChoice": {
+            "title": "Shortcut Accumulator (+=)",
+            "prompt": "Adding to a running total is so common that Python has a shortcut: `total += crystal` means the EXACT same thing as `total = total + crystal`!",
+            "question": "What does `total` equal after this loop?",
+            "codeSnippet": "total = 0\nfor n in range(1, 4):\n    total += n\nprint(total)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "6",
+                "explanation": "Spot on! `range(1, 4)` gives `1, 2, 3`, and `total += n` adds `0 + 1 + 2 + 3 = 6`!"
+              },
+              {
+                "id": "b",
+                "label": "10",
+                "explanation": "Remember `range(1, 4)` stops before `4`, so it adds `1 + 2 + 3` (= `6`)!"
+              },
+              {
+                "id": "c",
+                "label": "3",
+                "explanation": "`+=` ADDS `n` onto `total` each turn (`0 -> 1 -> 3 -> 6`), rather than replacing it!"
+              },
+              {
+                "id": "d",
+                "label": "0",
+                "explanation": "`total` starts at `0`, then grows by `1`, `2`, and `3`!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-07-06",
