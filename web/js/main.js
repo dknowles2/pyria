@@ -655,6 +655,7 @@ function renderAccountIdentityBar() {
   const parentsBtn = $('#btn-title-parents');
   const heroLinkParentBtn = $('#btn-hero-link-parent');
   const heroSignOutBtn = $('#btn-hero-signout');
+  const accountSignOutBtn = $('#btn-account-signout');
   const enterCodeBtn = $('#btn-enter-hero-code');
   const adminBar = $('#admin-account-bar');
   const adminSel = $('#admin-account-select');
@@ -678,6 +679,7 @@ function renderAccountIdentityBar() {
       parentsBtn?.classList.add('hidden');
       heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
+      accountSignOutBtn?.classList.remove('hidden');
     } else if (auth.role === 'parent') {
       if (pill) {
         pill.className = 'pill pill-blue';
@@ -691,6 +693,7 @@ function renderAccountIdentityBar() {
       parentsBtn?.classList.add('hidden');
       heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
+      accountSignOutBtn?.classList.remove('hidden');
     } else if (auth.role === 'hero') {
       if (pill) {
         pill.className = 'pill pill-green';
@@ -702,6 +705,7 @@ function renderAccountIdentityBar() {
       parentsBtn?.classList.remove('hidden');
       heroLinkParentBtn?.classList.toggle('hidden', Boolean(auth.linkedToParent));
       heroSignOutBtn?.classList.remove('hidden');
+      accountSignOutBtn?.classList.add('hidden');
     } else {
       if (pill) {
         pill.className = 'pill pill-violet';
@@ -711,11 +715,13 @@ function renderAccountIdentityBar() {
       parentsBtn?.classList.remove('hidden');
       heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
+      accountSignOutBtn?.classList.add('hidden');
     }
   } else {
     parentsBtn?.classList.add('hidden');
     heroLinkParentBtn?.classList.add('hidden');
     heroSignOutBtn?.classList.add('hidden');
+    accountSignOutBtn?.classList.add('hidden');
     if (me.authenticated || me.email || me.isAdmin) {
       bar?.classList.remove('hidden');
       if (pill) {
@@ -2059,6 +2065,40 @@ function wireControls() {
         btn.textContent = '🔗 Link Account';
       }
     }
+  });
+
+  $('#btn-account-signout')?.addEventListener('click', async () => {
+    const btn = $('#btn-account-signout');
+    audio.playClick();
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Signing out...';
+    }
+    try {
+      await logoutSession('parent');
+    } catch (err) {
+      console.warn('Account sign out warning:', err);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Sign Out';
+      }
+    }
+    const [freshMe, freshConfig] = await Promise.all([
+      fetchMe(),
+      fetchConfig().catch(() => null),
+    ]);
+    state.me = freshMe;
+    if (freshConfig?.game) {
+      state.gameConfig = freshConfig.game;
+      if (freshConfig.heroPreferences) {
+        state.gameConfig.heroPreferences = freshConfig.heroPreferences;
+      }
+    }
+    renderAccountIdentityBar();
+    renderAdminRealmJump();
+    await refreshSavesList();
+    showToast('Signed out!');
   });
 
   $('#btn-hero-signout')?.addEventListener('click', async () => {
