@@ -32,6 +32,55 @@ async function ensurePyodide() {
 // Start warming up Pyodide immediately on worker boot.
 ensurePyodide().catch(() => {});
 
+const SANDBOX_GUARD_PY = `
+import sys
+
+_PYRIA_BLOCKED_MODULES = frozenset({
+    "js",
+    "pyodide",
+    "pyodide_js",
+    "pyodide_ffi",
+    "_pyodide",
+    "_pyodide_core",
+    "micropip",
+})
+
+class _PyriaImportBlocker:
+    def find_spec(self, fullname, path=None, target=None):
+        top = fullname.split(".", 1)[0]
+        if top in _PYRIA_BLOCKED_MODULES:
+            raise ImportError(
+                f"Importing '{fullname}' is not allowed in Pyria's Python spellbook."
+            )
+        return None
+
+_pyria_saved_meta_path = None
+_pyria_saved_modules = None
+
+def _pyria_enter_sandbox():
+    global _pyria_saved_meta_path, _pyria_saved_modules
+    blocker = _PyriaImportBlocker()
+    _pyria_saved_meta_path = list(sys.meta_path)
+    _pyria_saved_modules = {}
+    for mod_name in list(sys.modules.keys()):
+        if mod_name.split(".", 1)[0] in _PYRIA_BLOCKED_MODULES:
+            _pyria_saved_modules[mod_name] = sys.modules.pop(mod_name)
+    sys.meta_path[:] = [blocker] + [
+        f for f in _pyria_saved_meta_path
+        if "pyodide" not in type(f).__module__.lower()
+        and "js" not in type(f).__name__.lower()
+    ]
+
+def _pyria_exit_sandbox():
+    global _pyria_saved_meta_path, _pyria_saved_modules
+    if _pyria_saved_meta_path is not None:
+        sys.meta_path[:] = _pyria_saved_meta_path
+        _pyria_saved_meta_path = None
+    if _pyria_saved_modules is not None:
+        sys.modules.update(_pyria_saved_modules)
+        _pyria_saved_modules = None
+`;
+
 const TRIAL_HARNESS_PY = `
 import io
 import json
@@ -444,6 +493,7 @@ let harnessesLoaded = false;
 
 async function loadHarnesses(py) {
   if (harnessesLoaded) return;
+  await py.runPythonAsync(SANDBOX_GUARD_PY);
   await py.runPythonAsync(TRIAL_HARNESS_PY);
   await py.runPythonAsync(CHARCREATE_HARNESS_PY);
   await py.runPythonAsync(WORKSHOP_HARNESS_PY);
@@ -465,8 +515,14 @@ self.onmessage = async (event) => {
     if (msg.mode === 'charcreate') fnName = '_pyria_run_charcreate';
     else if (msg.mode === 'workshop') fnName = '_pyria_run_workshop';
 
-    const resultJson = py.runPython(`${fnName}(_pyria_payload_json)`);
-    py.globals.delete('_pyria_payload_json');
+    let resultJson;
+    py.runPython('_pyria_enter_sandbox()');
+    try {
+      resultJson = py.runPython(`${fnName}(_pyria_payload_json)`);
+    } finally {
+      py.runPython('_pyria_exit_sandbox()');
+      py.globals.delete('_pyria_payload_json');
+    }
 
     self.postMessage({
       type: 'result',

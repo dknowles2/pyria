@@ -19,6 +19,7 @@ REPO_ROOT = SERVER_DIR.parent
 if str(SERVER_DIR) not in sys.path:
     sys.path.insert(0, str(SERVER_DIR))
 
+import app as pyria_app  # noqa: E402
 from app import create_server  # noqa: E402
 
 
@@ -32,6 +33,7 @@ class PyriaServerTestCase(unittest.TestCase):
             root_dir=REPO_ROOT,
             db_path=self.db_path,
             quiet=True,
+            dev_mode=True,
         )
         self.host, self.port = self.server.server_address[:2]
         self._thread = threading.Thread(
@@ -42,6 +44,7 @@ class PyriaServerTestCase(unittest.TestCase):
     def tearDown(self) -> None:
         os.environ.pop("PYRIA_BUILDER_PASSCODE", None)
         os.environ.pop("PYRIA_ADMIN_EMAILS", None)
+        os.environ.pop("PYRIA_DEV_MODE", None)
         self.server.shutdown()
         self.server.server_close()
         self._thread.join(timeout=3)
@@ -305,8 +308,8 @@ class PyriaServerTestCase(unittest.TestCase):
         )
         os.environ.pop("PYRIA_BUILDER_PASSCODE", None)
 
-        # /api/builder/test-trial PASS
-        status, _, raw = self._request(
+        # /api/builder/test-trial has been removed (zero server-side Python execution)
+        status, _, _ = self._request(
             "POST",
             "/api/builder/test-trial",
             {
@@ -314,52 +317,10 @@ class PyriaServerTestCase(unittest.TestCase):
                 "testCode": 'assert "Hello, Pyria!" in OUTPUT',
             },
         )
-        self.assertEqual(status, 200)
-        res = json.loads(raw)
-        self.assertTrue(res["passed"])
-        self.assertFalse(res["timedOut"])
-        self.assertIn("Hello, Pyria!", res["stdout"])
-        self.assertTrue(res["pipFriendlyHint"])
-
-        # /api/builder/test-trial PASS with say() and shout() aliases
-        status, _, raw = self._request(
-            "POST",
-            "/api/builder/test-trial",
-            {
-                "code": 'say("hi")\nshout("HI")\n',
-                "testCode": 'assert "hi\\nHI\\n" == OUTPUT',
-            },
-        )
-        self.assertEqual(status, 200)
-        res = json.loads(raw)
-        self.assertTrue(res["passed"])
-        self.assertEqual(res["stdout"], "hi\nHI\n")
-
-        # /api/builder/test-trial FAIL
-        status, _, raw = self._request(
-            "POST",
-            "/api/builder/test-trial",
-            {
-                "code": 'print("Oops")\n',
-                "testCode": 'assert "Hello, Pyria!" in OUTPUT, "Missing greeting"',
-            },
-        )
-        self.assertEqual(status, 200)
-        res = json.loads(raw)
-        self.assertFalse(res["passed"])
-        self.assertIn("Missing greeting", res["pipFriendlyHint"])
-
-        # /api/builder/test-trial TIMEOUT
-        status, _, raw = self._request(
-            "POST",
-            "/api/builder/test-trial",
-            {"code": "while True:\n    pass\n", "testCode": ""},
-        )
-        self.assertEqual(status, 200)
-        res = json.loads(raw)
-        self.assertFalse(res["passed"])
-        self.assertTrue(res["timedOut"])
-        self.assertIn("3 seconds", res["pipFriendlyHint"])
+        self.assertEqual(status, 404)
+        self.assertFalse(hasattr(pyria_app, "run_sandboxed_trial_test"))
+        self.assertFalse(hasattr(pyria_app, "PYTHON_TRIAL_HARNESS"))
+        self.assertFalse(hasattr(pyria_app, "subprocess"))
 
     def test_builder_static_and_content_mutations_isolated(self) -> None:
         # Spin up a second server against a temporary copied root so mutations never dirty repo content/
@@ -378,6 +339,7 @@ class PyriaServerTestCase(unittest.TestCase):
                 root_dir=iso_root,
                 db_path=Path(iso_tmp) / "iso.sqlite3",
                 quiet=True,
+                dev_mode=True,
             )
             host, port = iso_srv.server_address[:2]
             t = threading.Thread(target=iso_srv.serve_forever, daemon=True)
@@ -589,13 +551,13 @@ class PyriaServerTestCase(unittest.TestCase):
         kid_hdr = {"Cf-Access-Authenticated-User-Email": "jacob.elliott.knowles@gmail.com"}
         other_hdr = {"Cf-Access-Authenticated-User-Email": "guest@example.com"}
 
-        # Helper to construct an unsigned JWT payload for Cf-Access-Jwt-Assertion fallback
+        # Helper to construct an unsigned JWT payload — MUST be ignored (no unverified JWT fallback)
         jwt_payload = base64.urlsafe_b64encode(
-            json.dumps({"email": "jacob.elliott.knowles@gmail.com"}).encode("utf-8")
+            json.dumps({"email": "dknowles2@gmail.com"}).encode("utf-8")
         ).decode("ascii").rstrip("=")
-        kid_jwt_hdr = {"Cf-Access-Jwt-Assertion": f"eyJhbGciOiJSUzI1NiJ9.{jwt_payload}.sig"}
+        forged_jwt_hdr = {"Cf-Access-Jwt-Assertion": f"eyJhbGciOiJSUzI1NiJ9.{jwt_payload}.sig"}
 
-        # 2. /api/me for kid via email header and via JWT fallback
+        # 2. /api/me for kid via email header; forged unsigned JWT must NOT authenticate
         status, _, raw = self._request("GET", "/api/me", extra_headers=kid_hdr)
         self.assertEqual(status, 200)
         me_kid = json.loads(raw)
@@ -604,9 +566,27 @@ class PyriaServerTestCase(unittest.TestCase):
         self.assertFalse(me_kid["isAdmin"])
         self.assertEqual(me_kid["accounts"], ["jacob.elliott.knowles@gmail.com"])
 
-        status, _, raw = self._request("GET", "/api/me", extra_headers=kid_jwt_hdr)
+        status, _, raw = self._request("GET", "/api/me", extra_headers=forged_jwt_hdr)
         self.assertEqual(status, 200)
-        self.assertEqual(json.loads(raw)["email"], "jacob.elliott.knowles@gmail.com")
+        me_forged = json.loads(raw)
+        self.assertFalse(me_forged["authenticated"])
+        self.assertIsNone(me_forged["email"])
+        self.assertFalse(me_forged["isAdmin"])
+
+        # /api/health hides dbPath & saveCount from non-admin players, exposes to admin
+        status, _, raw = self._request("GET", "/api/health", extra_headers=kid_hdr)
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(raw), {"ok": True})
+        status, _, raw = self._request("GET", "/api/health", extra_headers=admin_hdr)
+        self.assertEqual(status, 200)
+        self.assertIn("dbPath", json.loads(raw))
+        self.assertIn("saveCount", json.loads(raw))
+
+        # Unauthenticated POST /api/saves rejected with 401 when auth is enabled
+        self.assertEqual(
+            self._request("POST", "/api/saves", {"heroName": "Anon"})[0],
+            401,
+        )
 
         # 3. Kid creates a hero; admin creates a hero for self and one for guest
         status, _, raw = self._request(
@@ -765,6 +745,174 @@ class PyriaServerTestCase(unittest.TestCase):
         # Kid now sees 2 saves
         status, _, raw = self._request("GET", "/api/saves", extra_headers=kid_hdr)
         self.assertEqual(len(json.loads(raw)["saves"]), 2)
+
+        # Builder path normalization bypasses must still return 403 for non-admin
+        for bypass_path in (
+            "/%2fbuilder/",
+            "/%2Fbuilder/builder.js",
+            "/./builder/",
+            "/./builder/index.html",
+            "//builder/",
+        ):
+            st, _, _ = self._request("GET", bypass_path, extra_headers=kid_hdr)
+            self.assertEqual(st, 403, f"Expected 403 for {bypass_path}, got {st}")
+
+    def test_security_headers_csrf_and_body_limit(self) -> None:
+        # 1. Security headers present on API, HTML, and static responses
+        for path in ("/api/health", "/", "/assets/world/preview.html"):
+            status, headers, _ = self._request("GET", path)
+            self.assertEqual(status, 200)
+            self.assertEqual(headers.get("x-content-type-options"), "nosniff")
+            self.assertEqual(headers.get("x-frame-options"), "SAMEORIGIN")
+            self.assertEqual(headers.get("referrer-policy"), "same-origin")
+            self.assertIn("camera=()", headers.get("permissions-policy", ""))
+            csp = headers.get("content-security-policy", "")
+            self.assertIn("frame-ancestors 'self'", csp)
+            if path == "/assets/world/preview.html":
+                self.assertIn("'unsafe-inline'", csp)
+            else:
+                self.assertIn("'wasm-unsafe-eval'", csp)
+                self.assertIn("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/", csp)
+                self.assertNotIn("https://cdn.jsdelivr.net;", csp)
+                self.assertNotIn("https://cdn.jsdelivr.net ", csp)
+
+        # 2. CSRF / Same-Origin protection on POST / PUT / DELETE
+        same_origin = f"http://{self.host}:{self.port}"
+        status, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {"heroName": "SameOriginHero"},
+            extra_headers={"Origin": same_origin, "Sec-Fetch-Site": "same-origin"},
+        )
+        self.assertEqual(status, 201)
+        save_id = json.loads(raw)["save"]["id"]
+
+        # Reject Sec-Fetch-Site: cross-site
+        self.assertEqual(
+            self._request(
+                "POST",
+                "/api/saves",
+                {"heroName": "Evil"},
+                extra_headers={"Sec-Fetch-Site": "cross-site"},
+            )[0],
+            403,
+        )
+        # Reject mismatched Origin on POST, PUT, DELETE
+        for method, path, body in (
+            ("POST", "/api/saves", {"heroName": "Evil"}),
+            ("PUT", f"/api/saves/{save_id}", {"heroName": "Evil"}),
+            ("DELETE", f"/api/saves/{save_id}", None),
+        ):
+            st, _, _ = self._request(
+                method,
+                path,
+                body,
+                extra_headers={"Origin": "https://evil.example.com"},
+            )
+            self.assertEqual(st, 403, f"Expected 403 for cross-origin {method} {path}")
+
+        # Reject Origin: null
+        self.assertEqual(
+            self._request(
+                "POST",
+                "/api/saves",
+                {"heroName": "NullOrigin"},
+                extra_headers={"Origin": "null"},
+            )[0],
+            403,
+        )
+
+        # Allow matching X-Forwarded-Host
+        self.assertEqual(
+            self._request(
+                "PUT",
+                f"/api/saves/{save_id}",
+                {"heroName": "ProxyHero"},
+                extra_headers={
+                    "Origin": "https://pyria.example.com",
+                    "X-Forwarded-Host": "pyria.example.com",
+                },
+            )[0],
+            200,
+        )
+
+        # 3. Request body size limit -> 413 Payload Too Large
+        oversized = json.dumps({"heroName": "Big", "pad": "A" * (520 * 1024)})
+        status, _, _ = self._request("POST", "/api/saves", oversized)
+        self.assertEqual(status, 413)
+
+        # 4. Defense-in-depth numeric coercion of byteShards & strict JSON (reject NaN/Infinity)
+        status, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {"heroName": "SafeHero", "byteShards": "<svg onload=alert(1)>"},
+        )
+        self.assertEqual(status, 201)
+        self.assertEqual(json.loads(raw)["save"]["byteShards"], 0)
+
+        for bad_json in (
+            '{"heroName": "Poison", "junk": NaN}',
+            '{"heroName": "Poison", "junk": Infinity}',
+            '{"heroName": "Poison", "byteShards": 1e400}',
+        ):
+            st, _, _ = self._request("POST", "/api/saves", bad_json)
+            self.assertEqual(st, 400, f"Expected 400 for {bad_json}, got {st}")
+
+        # 5. Content-Type: application/json required on JSON POST/PUT mutations -> 415
+        conn = http.client.HTTPConnection(self.host, self.port, timeout=5)
+        conn.request(
+            "POST",
+            "/api/saves",
+            body=b'{"heroName": "Plain"}',
+            headers={"Content-Type": "text/plain"},
+        )
+        resp = conn.getresponse()
+        resp.read()
+        conn.close()
+        self.assertEqual(resp.status, 415)
+
+    def test_fail_closed_when_not_dev_mode(self) -> None:
+        # Spin up a production-mode (dev_mode=False) server with PYRIA_ADMIN_EMAILS unset
+        os.environ.pop("PYRIA_ADMIN_EMAILS", None)
+        os.environ.pop("PYRIA_DEV_MODE", None)
+        with tempfile.TemporaryDirectory() as tmp:
+            srv = create_server(
+                host="127.0.0.1",
+                port=0,
+                root_dir=REPO_ROOT,
+                db_path=Path(tmp) / "prod.sqlite3",
+                quiet=True,
+                dev_mode=False,
+            )
+            host, port = srv.server_address[:2]
+            t = threading.Thread(target=srv.serve_forever, daemon=True)
+            t.start()
+            try:
+                def req(method: str, path: str, body: dict | None = None):
+                    conn = http.client.HTTPConnection(host, port, timeout=5)
+                    headers = {"Content-Type": "application/json"} if body is not None else {}
+                    payload = json.dumps(body).encode("utf-8") if body is not None else None
+                    conn.request(method, path, body=payload, headers=headers)
+                    r = conn.getresponse()
+                    data = r.read()
+                    conn.close()
+                    return r.status, data
+
+                st, raw = req("GET", "/api/me")
+                self.assertEqual(st, 200)
+                self.assertFalse(json.loads(raw)["isAdmin"])
+
+                st, raw = req("GET", "/api/health")
+                self.assertEqual(st, 200)
+                self.assertEqual(json.loads(raw), {"ok": True})
+
+                self.assertEqual(req("GET", "/builder")[0], 403)
+                self.assertEqual(req("GET", "/api/builder/overview")[0], 403)
+                self.assertEqual(req("POST", "/api/saves", {"heroName": "Anon"})[0], 401)
+            finally:
+                srv.shutdown()
+                srv.server_close()
+                t.join(timeout=3)
 
 
 if __name__ == "__main__":

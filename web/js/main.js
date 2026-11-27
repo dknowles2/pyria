@@ -13,15 +13,24 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126s';
-import { audio } from './audio.js?v=20261126s';
-import { music, resolveRegionTheme } from './music.js?v=20261126s';
-import { pyRunner } from './pyRunner.js?v=20261126s';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126s';
-import { SpriteManager } from './sprites.js?v=20261126s';
-import { WorldEngine } from './world.js?v=20261126s';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126s';
-import { playCutscene } from './cutscene.js?v=20261126s';
+} from './api.js?v=20261126u';
+import { audio } from './audio.js?v=20261126u';
+import { music, resolveRegionTheme } from './music.js?v=20261126u';
+import { pyRunner } from './pyRunner.js?v=20261126u';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126u';
+import { SpriteManager } from './sprites.js?v=20261126u';
+import { WorldEngine } from './world.js?v=20261126u';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126u';
+import { playCutscene } from './cutscene.js?v=20261126u';
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 const ADMIN_OWNER_STORAGE_KEY = 'pyria_admin_owner_filter';
 
@@ -176,6 +185,12 @@ function writeLocalDrafts(saveId, drafts) {
 
 function getTrialDraft(save, trialId) {
   if (!save || !trialId) return null;
+  const saveOwner = (save.ownerEmail || '').trim().toLowerCase();
+  const currentEmail = (state.me?.email || '').trim().toLowerCase();
+  // Never auto-load another account's server draft into the runnable editor (e.g. admin inspecting a player save)
+  if (saveOwner && saveOwner !== currentEmail) {
+    return null;
+  }
   const local = readLocalDrafts(save.id);
   if (typeof local[trialId] === 'string' && local[trialId].trim().length > 0) {
     return local[trialId];
@@ -368,9 +383,9 @@ function updateHud() {
   const rescuedInEra = eraRealms.filter((r) => r.dragon && rescued.has(r.dragon.id));
   const currentDragon = state.activeRealm?.dragon;
   const currentRescued = currentDragon && rescued.has(currentDragon.id);
-  const dragonSummaryHtml = `<span class="dragon-badge ${rescuedInEra.length > 0 ? 'rescued' : ''}" title="Rescued Dragons in ${state.era?.name || '8-Bit Era'}">🐉 ${rescuedInEra.length}/${totalDragons}</span>`;
+  const dragonSummaryHtml = `<span class="dragon-badge ${rescuedInEra.length > 0 ? 'rescued' : ''}" title="Rescued Dragons in ${escapeHtml(state.era?.name || '8-Bit Era')}">🐉 ${rescuedInEra.length}/${totalDragons}</span>`;
   const currentDragonHtml = currentDragon
-    ? `<span class="dragon-badge ${currentRescued ? 'rescued' : ''}">${currentDragon.name}${currentRescued ? ' ✓' : ''}</span>`
+    ? `<span class="dragon-badge ${currentRescued ? 'rescued' : ''}">${escapeHtml(currentDragon.name)}${currentRescued ? ' ✓' : ''}</span>`
     : '';
   dragonsEl.innerHTML = dragonSummaryHtml + currentDragonHtml;
 
@@ -425,7 +440,7 @@ function renderAccountIdentityBar() {
       const sorted = [...accounts].filter(Boolean).sort();
       const opts = ['<option value="all">All Accounts</option>'];
       for (const email of sorted) {
-        opts.push(`<option value="${email}">${email}</option>`);
+        opts.push(`<option value="${escapeHtml(email)}">${escapeHtml(email)}</option>`);
       }
       adminSel.innerHTML = opts.join('');
       if (state.adminOwnerFilter !== 'all' && !sorted.includes(state.adminOwnerFilter)) {
@@ -460,13 +475,13 @@ async function refreshSavesList() {
       card.className = 'save-card';
       const ownerBadgeHtml =
         showingAll && s.ownerEmail
-          ? `<div class="save-owner-pill">${s.ownerEmail}</div>`
+          ? `<div class="save-owner-pill">${escapeHtml(s.ownerEmail)}</div>`
           : '';
       card.innerHTML = `
         <div class="save-card-info">
-          <div class="save-card-name">${s.heroName}</div>
+          <div class="save-card-name">${escapeHtml(s.heroName)}</div>
           <div class="save-card-meta">
-            ${realm ? realm.name : s.realmId} · ✦ ${s.byteShards} Shards · 🐉 ${(s.rescuedDragons || []).length} Dragons
+            ${escapeHtml(realm ? realm.name : s.realmId)} · ✦ ${Number(s.byteShards) || 0} Shards · 🐉 ${(s.rescuedDragons || []).length} Dragons
           </div>
           ${ownerBadgeHtml}
         </div>
@@ -486,7 +501,7 @@ async function refreshSavesList() {
     }
   } catch (err) {
     countEl.textContent = 'Offline';
-    listEl.innerHTML = `<div class="empty-state">Could not reach save server: ${err.message}</div>`;
+    listEl.innerHTML = `<div class="empty-state">Could not reach save server: ${escapeHtml(err.message)}</div>`;
   }
 }
 
@@ -779,7 +794,7 @@ async function runCharCreateCode() {
     outEl.className = 'pip-console success';
     outEl.innerHTML = `
       <div class="pip-console-header">🎉 Hero Forged!</div>
-      <div class="pip-console-body">${res.stdout ? res.stdout.trim() : 'Preview updated!'}</div>
+      <div class="pip-console-body">${escapeHtml(res.stdout ? res.stdout.trim() : 'Preview updated!')}</div>
     `;
 
     if (res.confirmed) {
@@ -803,7 +818,7 @@ async function runCharCreateCode() {
         outEl.className = 'pip-console error';
         outEl.innerHTML = `
           <div class="pip-console-header">⚠️ Could not save hero</div>
-          <div class="pip-console-body">${err.message}</div>
+          <div class="pip-console-body">${escapeHtml(err.message)}</div>
         `;
       }
     }
@@ -812,7 +827,7 @@ async function runCharCreateCode() {
     outEl.className = 'pip-console error';
     outEl.innerHTML = `
       <div class="pip-console-header">🐉 Pip's Clue:</div>
-      <div class="pip-console-body">${res.pipMessage}</div>
+      <div class="pip-console-body">${escapeHtml(res.pipMessage)}</div>
     `;
   }
 }
@@ -1571,7 +1586,7 @@ async function init() {
     console.error('Pyria boot failed:', err);
     const listEl = $('#saves-list');
     if (listEl) {
-      listEl.innerHTML = `<div class="empty-state">Failed to boot Pyria: ${err.message}</div>`;
+      listEl.innerHTML = `<div class="empty-state">Failed to boot Pyria: ${escapeHtml(err.message)}</div>`;
     }
   }
 }

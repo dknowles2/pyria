@@ -1,5 +1,7 @@
 // Pyria Parent & Builder Console — Live Progress Stream, Difficulty Tuning & Story Editor
 
+import { pyRunner } from '/js/pyRunner.js?v=20261126u';
+
 const POLL_INTERVAL_MS = 2500;
 const PASSCODE_STORAGE_KEY = 'pyria_builder_passcode';
 
@@ -62,7 +64,8 @@ function escapeHtml(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function showToast(msg, isError = false) {
@@ -214,14 +217,14 @@ function renderHeroCards() {
         : Array.isArray(st.completedTrials)
           ? st.completedTrials
           : [];
-      const solvedCount = stats.solvedCount ?? solvedList.length;
+      const solvedCount = Number(stats.solvedCount ?? solvedList.length) || 0;
       const pct = Math.min(100, Math.round((solvedCount / Math.max(1, totalRealmTrials)) * 100));
-      const shards = st.byteShards ?? 0;
+      const shards = Number(st.byteShards) || 0;
       const dragons = Array.isArray(st.rescuedDragons) ? st.rescuedDragons : [];
-      const attemptCount = stats.attemptCount ?? 0;
-      const passCount = stats.passCount ?? 0;
+      const attemptCount = Number(stats.attemptCount) || 0;
+      const passCount = Number(stats.passCount) || 0;
       const passPct = attemptCount > 0 ? `${Math.round((passCount / attemptCount) * 100)}%` : '—';
-      const hintsUsed = stats.totalHintsUsed ?? 0;
+      const hintsUsed = Number(stats.totalHintsUsed) || 0;
       const lastActive = stats.lastActive || save.updatedAt;
       const isSelected = state.selectedHeroId === save.id;
 
@@ -339,7 +342,7 @@ function renderActivityStream(newlyArrivedIds = new Set()) {
         <div class="event-card type-${escapeHtml(ev.eventType)} ${isNew ? 'event-new' : ''}">
           <div class="event-top">
             <div class="event-badges">
-              <span class="pill ${badge.cls}">${badge.text}</span>
+              <span class="pill ${escapeHtml(badge.cls)}">${escapeHtml(badge.text)}</span>
               <strong>${escapeHtml(ev.heroName || 'Hero')}</strong>
               ${ev.trialId ? `<span class="pill pill-muted">${escapeHtml(ev.trialId)}</span>` : ''}
               ${hintsUsed > 0 ? `<span class="pill pill-gold">💡 ${hintsUsed} ${hintsUsed === 1 ? 'hint' : 'hints'}</span>` : ''}
@@ -353,7 +356,7 @@ function renderActivityStream(newlyArrivedIds = new Set()) {
             hasCode
               ? `
                 <div>
-                  <button class="btn btn-sm btn-ghost btn-toggle-code" data-event-id="${ev.id}">
+                  <button class="btn btn-sm btn-ghost btn-toggle-code" data-event-id="${escapeHtml(ev.id)}">
                     ${isExpanded ? '▾ Hide Python Code' : '▸ View Python Code'}
                   </button>
                   <pre class="event-code-pre ${isExpanded ? '' : 'hidden'}">${escapeHtml(details.code)}</pre>
@@ -519,7 +522,7 @@ function renderEraRealmTree() {
           const active = era.id === state.selectedEraId && r.id === state.selectedRealmId;
           return `
             <button type="button" class="realm-nav-btn ${active ? 'active' : ''}" data-era-id="${escapeHtml(era.id)}" data-realm-id="${escapeHtml(r.id)}">
-              <span>${r.number}. ${escapeHtml(r.name)}</span>
+              <span>${escapeHtml(r.number)}. ${escapeHtml(r.name)}</span>
               <span class="pill pill-muted">${(r.trials || []).length}</span>
             </button>
           `;
@@ -771,21 +774,23 @@ async function testCurrentTrialSolution() {
   const testCode = $('#te-test').value;
 
   btn.disabled = true;
-  btn.textContent = 'Testing...';
+  btn.textContent = 'Testing in Pyodide...';
   try {
-    const res = await apiFetch('/api/builder/test-trial', {
-      method: 'POST',
-      body: JSON.stringify({ code, testCode }),
-    });
+    const res = await pyRunner.runTrial(code, testCode, true);
+    const stderrText =
+      res.rawTraceback ||
+      (!res.passed && res.errorMessage
+        ? `${res.errorType || 'Error'}: ${res.errorMessage}`
+        : '');
     box.className = `test-result-box ${res.passed ? 'passed' : 'failed'}`;
     box.classList.remove('hidden');
     box.innerHTML = `
       <div style="font-weight:800; margin-bottom:6px; color:${res.passed ? 'var(--accent-emerald)' : 'var(--accent-rose)'};">
         ${res.passed ? '✓ Reference Solution PASSED!' : res.timedOut ? '⏱ Timed Out (3s limit)' : '✗ Test Failed'}
       </div>
-      ${res.pipFriendlyHint ? `<div style="margin-bottom:6px;">🐉 <strong>Pip:</strong> ${escapeHtml(res.pipFriendlyHint)}</div>` : ''}
+      ${res.pipMessage ? `<div style="margin-bottom:6px;">🐉 <strong>Pip:</strong> ${escapeHtml(res.pipMessage)}</div>` : ''}
       ${res.stdout ? `<pre class="event-code-pre">stdout:\n${escapeHtml(res.stdout)}</pre>` : ''}
-      ${res.stderr ? `<pre class="event-code-pre" style="color:#fecdd3;">stderr:\n${escapeHtml(res.stderr)}</pre>` : ''}
+      ${stderrText ? `<pre class="event-code-pre" style="color:#fecdd3;">stderr:\n${escapeHtml(stderrText)}</pre>` : ''}
     `;
   } catch (err) {
     showToast(`Test error: ${err.message}`, true);
@@ -831,7 +836,7 @@ function renderConceptHealth() {
       rows.push(`
         <tr>
           <td>${escapeHtml(era.name)}</td>
-          <td><strong>${realm.number}. ${escapeHtml(realm.name)}</strong></td>
+          <td><strong>${escapeHtml(realm.number)}. ${escapeHtml(realm.name)}</strong></td>
           <td>${(realm.trials || []).length}</td>
           <td>
             <select class="input input-sm realm-diff-select" data-era="${escapeHtml(era.id)}" data-realm="${escapeHtml(realm.id)}" data-field="mode">
@@ -911,7 +916,7 @@ function populateTrackerRealmSelect() {
   const options = [];
   for (const era of state.overview.eras || []) {
     for (const r of era.realms || []) {
-      options.push(`<option value="${escapeHtml(r.id)}">${r.number}. ${escapeHtml(r.name)}</option>`);
+      options.push(`<option value="${escapeHtml(r.id)}">${escapeHtml(r.number)}. ${escapeHtml(r.name)}</option>`);
     }
   }
   if (options.length) {
@@ -1045,7 +1050,7 @@ function updateTrackerCallout(mapData, items) {
     calloutEl.innerHTML = `
       <strong>${escapeHtml(item.title)}</strong>
       <span class="pill ${item.done ? 'pill-green' : item.locked ? 'pill-rose' : 'pill-gold'}" style="margin:0 6px;">${escapeHtml(item.statusLabel)}</span>
-      <span class="hint-sub">${escapeHtml(item.regionName)} · (${item.x}, ${item.y})</span>
+      <span class="hint-sub">${escapeHtml(item.regionName)} · (${Number(item.x) || 0}, ${Number(item.y) || 0})</span>
     `;
     return;
   }
@@ -1055,7 +1060,7 @@ function updateTrackerCallout(mapData, items) {
     calloutEl.innerHTML = `
       <strong>${escapeHtml(ent.label)}</strong>
       <span class="pill pill-violet" style="margin:0 6px;">${escapeHtml(ent.type)}</span>
-      <span class="hint-sub">${escapeHtml(regionName)} · (${ent.x}, ${ent.y})</span>
+      <span class="hint-sub">${escapeHtml(regionName)} · (${Number(ent.x) || 0}, ${Number(ent.y) || 0})</span>
     `;
   }
 }
@@ -1124,7 +1129,7 @@ function renderTrackerChecklist(mapData, realmMeta, save, items) {
                   </div>
                   <div class="tracker-row-right">
                     ${overrideBtnHtml}
-                    <span class="tracker-coords">(${it.x}, ${it.y})</span>
+                    <span class="tracker-coords">(${Number(it.x) || 0}, ${Number(it.y) || 0})</span>
                   </div>
                 </div>
               `;
