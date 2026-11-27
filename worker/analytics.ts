@@ -639,6 +639,7 @@ export async function computeTrialMetrics(
     let practicePasses = 0;
     let practiceHintedAttempts = 0;
     let practiceTier3 = 0;
+    let allRawDaysCoveredByRollup = rollupDayMap.size > 0;
 
     const dailyTrend: Array<{ day: string; attempts: number; passes: number }> = [];
 
@@ -646,6 +647,10 @@ export async function computeTrialMetrics(
       const rDay = rollupDayMap.get(day);
       const npDay = rawNpByDay.get(day);
       const prDay = rawPracticeByDay.get(day);
+
+      if (npDay && (rDay?.attempts ?? 0) < npDay.attempts) {
+        allRawDaysCoveredByRollup = false;
+      }
 
       const dayNpAttempts = Math.max(npDay?.attempts ?? 0, rDay?.attempts ?? 0);
       const dayNpPasses = Math.max(npDay?.passes ?? 0, rDay?.passes ?? 0);
@@ -687,8 +692,8 @@ export async function computeTrialMetrics(
     const hintedAttempts = Math.min(attempts, mergedNpHintedAttempts + practiceHintedAttempts);
     const tier3Hints = mergedNpTier3 + practiceTier3;
 
-    // Use lifetime-accurate rollup counts when rollup covers all raw non-practice attempts
-    const rollupAuthoritative = rollupDayMap.size > 0 && rawNpCount <= mergedNpAttempts;
+    // Use lifetime-accurate rollup counts only when rollups cover every raw non-practice day
+    const rollupAuthoritative = allRawDaysCoveredByRollup;
     const uniqueSolvers = rollupAuthoritative
       ? rollupUniqueSolversTotal
       : Math.max(heroSolved.size, rollupUniqueSolversTotal);

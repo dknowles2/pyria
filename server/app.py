@@ -1132,12 +1132,16 @@ def compute_trial_metrics_from_conn(
         practice_passes = 0
         practice_hinted = 0
         practice_tier3 = 0
+        all_raw_days_covered_by_rollup = bool(rollup_days)
         daily_trend: list[dict[str, Any]] = []
 
         for day in all_days:
             r_day = rollup_days.get(day)
             np_day = raw_np_by_day.get(day)
             pr_day = raw_pr_by_day.get(day)
+
+            if np_day and (r_day["attempts"] if r_day else 0) < np_day["attempts"]:
+                all_raw_days_covered_by_rollup = False
 
             day_np_attempts = max(
                 np_day["attempts"] if np_day else 0,
@@ -1186,7 +1190,7 @@ def compute_trial_metrics_from_conn(
         hinted_attempts = min(attempts, merged_np_hinted + practice_hinted)
         tier3_hints = merged_np_tier3 + practice_tier3
 
-        rollup_authoritative = bool(rollup_days) and raw_np_count <= merged_np_attempts
+        rollup_authoritative = all_raw_days_covered_by_rollup
         unique_solvers = (
             rollup_unique_solvers_total
             if rollup_authoritative
