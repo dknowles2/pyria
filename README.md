@@ -29,15 +29,14 @@ pyria/
 │   ├── catalog.json       # Python character creation & Byte Shard unlockables
 │   ├── schema.json        # JSON Schema + Python OUTPUT test harness convention
 │   ├── eras/              # era-01-8bit.json (8 Realms) & era-02-16bit.json (16 Realms)
-│   └── maps/              # 32x24 Zelda-style Realm tilemaps (realm-01-meadow, realm-02-ruins)
+│   └── maps/              # 64x48 Zelda-style Realm tilemaps (Realms 1–6)
 ├── assets/        # Visual art, deterministic pixel-art generators & previewers
 │   ├── concept-art/       # Key concept art renders & sprite dimension specs
 │   ├── sprites/           # Modular 8-bit/16-bit Hero + Pip generator & preview.html
 │   ├── tilesets/          # 8-bit/16-bit meadow & ruins tilesets + NPC/Dragon sheets
 │   └── world/             # Interactive walkable world previewer & 8-bit/16-bit comparison
-├── sidecar/       # Pyria Builder — Antigravity MCP App for authoring story, Realms & Trials
 ├── server/        # Zero-dependency Python 3 + SQLite backend (local dev & elzar deploy)
-└── web/           # Playable browser RPG (HTML5 Canvas + Pyodide live Python execution)
+└── web/           # Playable browser RPG (HTML5 Canvas + Pyodide) & native /builder Admin Console
 ```
 
 ---
@@ -63,22 +62,18 @@ python3 assets/tilesets/build_tilesets.py
 
 You can also open `assets/sprites/preview.html` or `assets/world/preview.html` directly in a browser to inspect hero customization layers or walk around Realms 1 & 2 with live 8-Bit ↔ 16-Bit switching.
 
-### 3. Build & Run the Antigravity Sidecar (`Pyria Builder`)
-The **Pyria Builder** MCP App lets you brainstorm and edit Realms, Trials, Pip hints, difficulty overrides, and live Python tests right inside Antigravity:
-
-```bash
-cd sidecar
-npm install
-npm run build
-```
-
-The plugin manifest installs at `~/.gemini/config/plugins/pyria-builder/` pointing to `sidecar/dist/server.mjs --content-dir=<repo>/content`.
+### 3. Open the Native Parent & Builder Console (`/builder`)
+Visit [http://127.0.0.1:8080/builder](http://127.0.0.1:8080/builder) (or `https://<your-tunnel>/builder` on `elzar`) for the admin-only **Pyria Parent & Builder Console**:
+- **Live Progress Stream**: Real-time activity feed with expandable Python code viewer, Hero progress cards, Account Switcher, and interactive `64×48` Realm Map Tracker with one-click Trial overrides (`✓ Mark Done` / `↺ Reset`).
+- **Story & Trials**: Edit Eras, Realms, Trials, Pip hints, and run sandboxed Python solution tests.
+- **Concept Health & Overrides**: Anti-repetition concept checks and global/per-Realm difficulty overrides.
+- **Sprites & World**: Embedded Sprite Studio and Walkable World Map previewers.
 
 ### 4. Deploy to `elzar`
 Production deployment helpers for `elzar` live under `server/`:
 
-- `server/pyria.service` — `systemd` unit running `server/app.py` backed by `/var/lib/pyria/pyria.sqlite3`
-- `server/deploy_elzar.sh` — `rsync` deploy script with optional `systemd` restart
+- `server/pyria.service` — Lingering user `systemd` unit running `server/app.py` on `127.0.0.1:8000` backed by `~/.local/share/pyria/pyria.sqlite3` with Cloudflare Access per-user auth (`PYRIA_ADMIN_EMAILS`).
+- `server/deploy_elzar.sh` — Deploy script syncing to `elzar:~/pyria` and restarting `pyria.service` (`./server/deploy_elzar.sh --restart`).
 
 See [server/README.md](server/README.md) for full `elzar` setup and Cloudflare Tunnel details.
 
