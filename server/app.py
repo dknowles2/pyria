@@ -61,6 +61,7 @@ MAX_BYTE_SHARDS = 1_000_000_000
 MAX_DIFF_EVENTS_PER_UPDATE = 100
 MAX_ERROR_TYPE_LEN = 64
 MAX_DURATION_MS = 86_400_000
+MAX_RAW_ATTEMPT_ROWS = 50_000
 VALID_DIFFICULTY_MODES: frozenset[str] = frozenset({"explorer", "standard", "challenge"})
 VALID_DIFFICULTY_FILTERS: frozenset[str] = frozenset({"all", "explorer", "standard", "challenge"})
 VALID_DAYS_FILTERS: frozenset[str] = frozenset({"7", "30", "90", "all"})
@@ -910,6 +911,12 @@ def compute_trial_metrics_from_conn(
 
     rollup_by_trial: dict[str, dict[str, dict[str, int]]] = {}
     if "trial_stats_daily" in tables:
+        daily_cols = {
+            r["name"]
+            for r in conn.execute("PRAGMA table_info(trial_stats_daily)").fetchall()
+        }
+        has_unique_attempters = "unique_attempters" in daily_cols
+        has_hinted_attempts = "hinted_attempts" in daily_cols
         r_where: list[str] = []
         r_params: list[Any] = []
         if min_day:
@@ -921,11 +928,15 @@ def compute_trial_metrics_from_conn(
         if difficulty != "all":
             r_where.append("difficulty_mode = ?")
             r_params.append(difficulty)
+        ua_expr = "SUM(unique_attempters)" if has_unique_attempters else "0"
+        ha_expr = "SUM(hinted_attempts)" if has_hinted_attempts else "0"
         r_sql = (
             "SELECT day, trial_id, "
             "SUM(attempts) AS attempts, SUM(passes) AS passes, "
             "SUM(first_try_passes) AS first_try_passes, "
+            f"{ua_expr} AS unique_attempters, "
             "SUM(unique_solvers) AS unique_solvers, "
+            f"{ha_expr} AS hinted_attempts, "
             "SUM(total_hints) AS total_hints, SUM(tier3_hints) AS tier3_hints, "
             "SUM(parent_overrides) AS parent_overrides "
             "FROM trial_stats_daily "
@@ -939,13 +950,17 @@ def compute_trial_metrics_from_conn(
                 "attempts": int(row["attempts"] or 0),
                 "passes": int(row["passes"] or 0),
                 "first_try_passes": int(row["first_try_passes"] or 0),
+                "unique_attempters": int(row["unique_attempters"] or 0),
                 "unique_solvers": int(row["unique_solvers"] or 0),
+                "hinted_attempts": int(row["hinted_attempts"] or 0),
                 "total_hints": int(row["total_hints"] or 0),
                 "tier3_hints": int(row["tier3_hints"] or 0),
                 "parent_overrides": int(row["parent_overrides"] or 0),
             }
 
     raw_by_trial: dict[str, list[sqlite3.Row]] = {}
+    prior_before_window: dict[tuple[str, str], bool] = {}
+    truncated = False
     if "trial_attempts" in tables:
         a_where: list[str] = []
         a_params: list[Any] = []
@@ -972,10 +987,25 @@ def compute_trial_metrics_from_conn(
             "SUBSTR(created_at, 1, 10) AS day "
             "FROM trial_attempts "
             + (f"WHERE {' AND '.join(a_where)} " if a_where else "")
-            + "ORDER BY trial_id ASC, save_id ASC, created_at ASC, id ASC"
+            + "ORDER BY trial_id ASC, save_id ASC, created_at ASC, id ASC LIMIT ?"
         )
-        for row in conn.execute(a_sql, a_params).fetchall():
+        raw_fetched = conn.execute(a_sql, [*a_params, MAX_RAW_ATTEMPT_ROWS + 1]).fetchall()
+        if len(raw_fetched) > MAX_RAW_ATTEMPT_ROWS:
+            truncated = True
+            raw_fetched = raw_fetched[:MAX_RAW_ATTEMPT_ROWS]
+        for row in raw_fetched:
             raw_by_trial.setdefault(str(row["trial_id"]), []).append(row)
+
+        if min_day:
+            p_sql = (
+                "SELECT save_id, trial_id, MAX(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS had_pass "
+                f"FROM trial_attempts WHERE created_at < ? AND {practice_expr} = 0 "
+                "GROUP BY save_id, trial_id"
+            )
+            for prow in conn.execute(p_sql, (min_day,)).fetchall():
+                prior_before_window[(str(prow["trial_id"]), str(prow["save_id"]))] = bool(
+                    prow["had_pass"]
+                )
 
     meta_by_id: dict[str, dict[str, Any]] = {}
     ordered_meta: list[dict[str, Any]] = []
@@ -1033,10 +1063,7 @@ def compute_trial_metrics_from_conn(
 
         hint_breakdown = {"tier0": 0, "tier1": 0, "tier2": 0, "tier3": 0}
         error_counts: dict[str, int] = {}
-        raw_attempts_with_hints = 0
         raw_np_count = 0
-        raw_np_total_hints = 0
-        raw_np_tier3 = 0
 
         for r in raw_rows:
             save_id = str(r["save_id"])
@@ -1055,54 +1082,55 @@ def compute_trial_metrics_from_conn(
             else:
                 hint_breakdown["tier3"] += 1
 
-            if hints > 0:
-                raw_attempts_with_hints += 1
-
             if not passed and err_type:
                 err_str = str(err_type)
                 error_counts[err_str] = error_counts.get(err_str, 0) + 1
 
             target_map = raw_pr_by_day if is_practice else raw_np_by_day
             bucket = target_map.setdefault(
-                day, {"attempts": 0, "passes": 0, "total_hints": 0, "tier3_hints": 0}
+                day, {"attempts": 0, "passes": 0, "hinted_attempts": 0, "tier3_hints": 0}
             )
             bucket["attempts"] += 1
             if passed:
                 bucket["passes"] += 1
-            bucket["total_hints"] += hints
+            if hints > 0:
+                bucket["hinted_attempts"] += 1
             if hints >= 3:
                 bucket["tier3_hints"] += 1
 
             if not is_practice:
                 raw_np_count += 1
-                raw_np_total_hints += hints
-                if hints >= 3:
-                    raw_np_tier3 += 1
+                prior_key = (tid, save_id)
+                had_prior_attempt = prior_key in prior_before_window
+                had_prior_pass = prior_before_window.get(prior_key) is True
 
-            is_first = save_id not in hero_saves
-            hero_saves.add(save_id)
-            if is_first and passed:
-                hero_first_passed.add(save_id)
-            if save_id not in hero_solved:
-                next_cnt = hero_attempts_before_solve.get(save_id, 0) + 1
-                hero_attempts_before_solve[save_id] = next_cnt
-                if passed:
-                    hero_solved.add(save_id)
-                    hero_solved_counts[save_id] = next_cnt
+                is_first = save_id not in hero_saves
+                hero_saves.add(save_id)
+                if is_first and passed and not had_prior_attempt:
+                    hero_first_passed.add(save_id)
+                if not had_prior_pass and save_id not in hero_solved:
+                    next_cnt = hero_attempts_before_solve.get(save_id, 0) + 1
+                    hero_attempts_before_solve[save_id] = next_cnt
+                    if passed:
+                        hero_solved.add(save_id)
+                        if not had_prior_attempt:
+                            hero_solved_counts[save_id] = next_cnt
 
         all_days = sorted(
             set(rollup_days.keys()) | set(raw_np_by_day.keys()) | set(raw_pr_by_day.keys())
         )
         merged_np_attempts = 0
         merged_np_passes = 0
-        merged_np_total_hints = 0
+        merged_np_hinted = 0
         merged_np_tier3 = 0
         rollup_first_try_total = 0
+        rollup_unique_attempters_total = 0
         rollup_unique_solvers_total = 0
         parent_overrides = 0
 
         practice_attempts = 0
         practice_passes = 0
+        practice_hinted = 0
         practice_tier3 = 0
         daily_trend: list[dict[str, Any]] = []
 
@@ -1119,9 +1147,9 @@ def compute_trial_metrics_from_conn(
                 np_day["passes"] if np_day else 0,
                 r_day["passes"] if r_day else 0,
             )
-            day_np_total_hints = max(
-                np_day["total_hints"] if np_day else 0,
-                r_day["total_hints"] if r_day else 0,
+            day_np_hinted = max(
+                np_day["hinted_attempts"] if np_day else 0,
+                r_day["hinted_attempts"] if r_day else 0,
             )
             day_np_tier3 = max(
                 np_day["tier3_hints"] if np_day else 0,
@@ -1130,11 +1158,12 @@ def compute_trial_metrics_from_conn(
 
             merged_np_attempts += day_np_attempts
             merged_np_passes += day_np_passes
-            merged_np_total_hints += day_np_total_hints
+            merged_np_hinted += day_np_hinted
             merged_np_tier3 += day_np_tier3
 
             if r_day:
                 rollup_first_try_total += r_day["first_try_passes"]
+                rollup_unique_attempters_total += r_day["unique_attempters"]
                 rollup_unique_solvers_total += r_day["unique_solvers"]
                 parent_overrides += r_day["parent_overrides"]
 
@@ -1142,6 +1171,7 @@ def compute_trial_metrics_from_conn(
             day_pr_passes = pr_day["passes"] if pr_day else 0
             practice_attempts += day_pr_attempts
             practice_passes += day_pr_passes
+            practice_hinted += pr_day["hinted_attempts"] if pr_day else 0
             practice_tier3 += pr_day["tier3_hints"] if pr_day else 0
 
             day_tot_attempts = day_np_attempts + day_pr_attempts
@@ -1153,19 +1183,24 @@ def compute_trial_metrics_from_conn(
 
         attempts = merged_np_attempts + practice_attempts
         passes = merged_np_passes + practice_passes
+        hinted_attempts = min(attempts, merged_np_hinted + practice_hinted)
         tier3_hints = merged_np_tier3 + practice_tier3
 
-        pruned_np_attempts = max(0, merged_np_attempts - raw_np_count)
-        pruned_np_tier3 = max(0, merged_np_tier3 - raw_np_tier3)
-        pruned_np_hints = max(0, merged_np_total_hints - raw_np_total_hints)
-        if pruned_np_tier3 > 0:
-            hint_breakdown["tier3"] += pruned_np_tier3
-
-        unique_solvers = max(len(hero_solved), rollup_unique_solvers_total)
-        first_try_passes = min(
-            unique_solvers, max(len(hero_first_passed), rollup_first_try_total)
+        rollup_authoritative = bool(rollup_days) and raw_np_count <= merged_np_attempts
+        unique_solvers = (
+            rollup_unique_solvers_total
+            if rollup_authoritative
+            else max(len(hero_solved), rollup_unique_solvers_total)
         )
-        unique_heroes = max(len(hero_saves), unique_solvers)
+        first_try_passes = min(
+            unique_solvers,
+            rollup_first_try_total
+            if rollup_authoritative
+            else max(len(hero_first_passed), rollup_first_try_total),
+        )
+        unique_heroes = max(
+            len(hero_saves), rollup_unique_attempters_total, unique_solvers
+        )
         if unique_heroes == 0 and attempts > 0:
             unique_heroes = 1
 
@@ -1184,17 +1219,15 @@ def compute_trial_metrics_from_conn(
         median_attempts = compute_percentile(solved_sorted, 0.5)
         p75_attempts = compute_percentile(solved_sorted, 0.75)
 
-        est_pruned_hinted = min(pruned_np_attempts, pruned_np_hints)
-        attempts_with_hints = min(attempts, raw_attempts_with_hints + est_pruned_hinted)
         hint_usage_rate = (
-            _round1((attempts_with_hints / attempts) * 100.0) if attempts > 0 else None
+            _round1((hinted_attempts / attempts) * 100.0) if attempts > 0 else None
         )
         tier3_hint_rate = (
             _round1((tier3_hints / attempts) * 100.0) if attempts > 0 else None
         )
 
         if unique_heroes > 0:
-            parent_override_rate = _round1((parent_overrides / unique_heroes) * 100.0)
+            parent_override_rate = _round1(min(100.0, (parent_overrides / unique_heroes) * 100.0))
         elif parent_overrides > 0:
             parent_override_rate = 100.0
         else:
@@ -1278,6 +1311,7 @@ def compute_trial_metrics_from_conn(
             "flaggedLowData": flagged_low_data,
             "overallMedianAttempts": overall_median,
             "totalOverrides": total_overrides,
+            "truncated": truncated,
         },
         "trials": trial_rows,
     }
@@ -1397,7 +1431,9 @@ class PyriaDatabase:
                     attempts INTEGER NOT NULL DEFAULT 0,
                     passes INTEGER NOT NULL DEFAULT 0,
                     first_try_passes INTEGER NOT NULL DEFAULT 0,
+                    unique_attempters INTEGER NOT NULL DEFAULT 0,
                     unique_solvers INTEGER NOT NULL DEFAULT 0,
+                    hinted_attempts INTEGER NOT NULL DEFAULT 0,
                     total_hints INTEGER NOT NULL DEFAULT 0,
                     tier3_hints INTEGER NOT NULL DEFAULT 0,
                     parent_overrides INTEGER NOT NULL DEFAULT 0,
@@ -1453,6 +1489,18 @@ class PyriaDatabase:
                 conn.execute("ALTER TABLE trial_attempts ADD COLUMN error_type TEXT")
             if "duration_ms" not in attempt_cols:
                 conn.execute("ALTER TABLE trial_attempts ADD COLUMN duration_ms INTEGER")
+            daily_cols = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(trial_stats_daily)").fetchall()
+            }
+            if "unique_attempters" not in daily_cols:
+                conn.execute(
+                    "ALTER TABLE trial_stats_daily ADD COLUMN unique_attempters INTEGER NOT NULL DEFAULT 0"
+                )
+            if "hinted_attempts" not in daily_cols:
+                conn.execute(
+                    "ALTER TABLE trial_stats_daily ADD COLUMN hinted_attempts INTEGER NOT NULL DEFAULT 0"
+                )
 
     @staticmethod
     def _row_to_save(row: sqlite3.Row) -> dict[str, Any]:
@@ -1856,13 +1904,20 @@ class PyriaDatabase:
             hero_name = str(row["hero_name"])
             try:
                 st = json.loads(row["state_json"])
-                realm_id = str(st.get("realmId") or "") or None if isinstance(st, dict) else None
+                if not isinstance(st, dict):
+                    st = {}
+                realm_id = str(st.get("realmId") or "") or None
             except json.JSONDecodeError:
+                st = {}
                 realm_id = None
 
             first_try_inc = 0
+            unique_attempter_inc = 0
             unique_solver_inc = 0
-            if not is_practice and passed:
+            if not is_practice:
+                already_solved_in_state = trial_id in _extract_string_set(
+                    st, "solvedTrials", "completedTrials"
+                )
                 prior = conn.execute(
                     "SELECT COUNT(*) AS prior_attempts, "
                     "SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS prior_passes "
@@ -1872,10 +1927,13 @@ class PyriaDatabase:
                 ).fetchone()
                 prior_attempts = int(prior["prior_attempts"] or 0) if prior else 0
                 prior_passes = int(prior["prior_passes"] or 0) if prior else 0
-                if prior_attempts == 0:
-                    first_try_inc = 1
-                if prior_passes == 0:
-                    unique_solver_inc = 1
+                if not already_solved_in_state:
+                    if prior_attempts == 0:
+                        unique_attempter_inc = 1
+                    if passed and prior_attempts == 0:
+                        first_try_inc = 1
+                    if passed and prior_passes == 0:
+                        unique_solver_inc = 1
 
             cur = conn.execute(
                 "INSERT INTO trial_attempts "
@@ -1899,13 +1957,15 @@ class PyriaDatabase:
             if not is_practice:
                 conn.execute(
                     "INSERT INTO trial_stats_daily "
-                    "(day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_solvers, total_hints, tier3_hints, parent_overrides) "
-                    "VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, 0) "
+                    "(day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_attempters, unique_solvers, hinted_attempts, total_hints, tier3_hints, parent_overrides) "
+                    "VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, 0) "
                     "ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET "
                     "attempts = attempts + excluded.attempts, "
                     "passes = passes + excluded.passes, "
                     "first_try_passes = first_try_passes + excluded.first_try_passes, "
+                    "unique_attempters = unique_attempters + excluded.unique_attempters, "
                     "unique_solvers = unique_solvers + excluded.unique_solvers, "
+                    "hinted_attempts = hinted_attempts + excluded.hinted_attempts, "
                     "total_hints = total_hints + excluded.total_hints, "
                     "tier3_hints = tier3_hints + excluded.tier3_hints",
                     (
@@ -1914,7 +1974,9 @@ class PyriaDatabase:
                         eff_difficulty,
                         1 if passed else 0,
                         first_try_inc,
+                        unique_attempter_inc,
                         unique_solver_inc,
+                        1 if hints_used > 0 else 0,
                         hints_used,
                         1 if hints_used >= 3 else 0,
                     ),

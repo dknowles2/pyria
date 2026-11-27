@@ -1203,7 +1203,95 @@ describe('#70 Trial Analytics, Durable Rollups & Admin Calibration Metrics', () 
     const t02 = res.data.trials.find((t: any) => t.trialId === 'trial-01-02');
     expect(t02.attempts).toBe(5);
     expect(t02.passes).toBe(1);
+    expect(t02.uniqueHeroes).toBe(1);
     expect(t02.uniqueSolvers).toBe(1);
+    expect(t02.hintUsageRate).toBe(100.0);
     expect(t02.tier3HintRate).toBe(40.0);
+  });
+
+  it('preserves durable uniqueHeroes/completionRate/hintUsageRate after save deletion and prevents windowed first-try inflation', async () => {
+    const adminCookie = await makeParentCookie('admin@pyria.test');
+    const db = new PyriaD1(env);
+
+    // 5 heroes on trial-01-04: 3 non-solvers (0 hints) + 2 solvers (1 with 3 hints, 1 with 0 hints)
+    const saves = [];
+    for (let i = 1; i <= 5; i += 1) {
+      saves.push(await db.createSave({ heroName: `DeletedHero${i}` }));
+    }
+    for (let i = 0; i < 3; i += 1) {
+      await db.logAttempt({
+        saveId: saves[i].id,
+        trialId: 'trial-01-04',
+        passed: false,
+        hintsUsed: 0,
+        code: 'bad()',
+        difficultyMode: 'standard',
+      });
+    }
+    await db.logAttempt({
+      saveId: saves[3].id,
+      trialId: 'trial-01-04',
+      passed: true,
+      hintsUsed: 3,
+      code: 'ok()',
+      difficultyMode: 'standard',
+    });
+    await db.logAttempt({
+      saveId: saves[4].id,
+      trialId: 'trial-01-04',
+      passed: true,
+      hintsUsed: 0,
+      code: 'ok()',
+      difficultyMode: 'standard',
+    });
+
+    // Delete ALL 5 saves (cascading all raw trial_attempts rows!)
+    for (const s of saves) {
+      await db.deleteSave(s.id);
+    }
+
+    const afterDel = await apiJson('/api/admin/trial-metrics?minHeroes=5', { cookie: adminCookie });
+    expect(afterDel.res.status).toBe(200);
+    const t04 = afterDel.data.trials.find((t: any) => t.trialId === 'trial-01-04');
+    expect(t04.uniqueHeroes).toBe(5);
+    expect(t04.uniqueSolvers).toBe(2);
+    expect(t04.completionRate).toBe(40.0);
+    // Only 1 of 5 attempts used hints (hintsUsed=3) -> exact 20.0% (not 60% from total_hints=3!)
+    expect(t04.hintUsageRate).toBe(20.0);
+    expect(t04.flag).toBe('too_hard');
+
+    // Windowed first-try inflation check: hero fails BEFORE window (2026-01-10) and passes INSIDE window (2026-01-15)
+    const wSave = await db.createSave({ heroName: 'WindowHero' });
+    await env.DB.prepare(
+      `INSERT INTO trial_attempts (save_id, trial_id, passed, hints_used, code, difficulty_mode, is_practice, created_at)
+       VALUES (?, 'trial-01-05', 0, 0, 'bad()', 'standard', 0, '2026-01-10T10:00:00Z'),
+              (?, 'trial-01-05', 1, 0, 'ok()',  'standard', 0, '2026-01-15T10:00:00Z')`
+    )
+      .bind(wSave.id, wSave.id)
+      .run();
+    await env.DB.prepare(
+      `INSERT INTO trial_stats_daily (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_attempters, unique_solvers, hinted_attempts, total_hints, tier3_hints, parent_overrides)
+       VALUES ('2026-01-10', 'trial-01-05', 'standard', 1, 0, 0, 1, 0, 0, 0, 0, 0),
+              ('2026-01-15', 'trial-01-05', 'standard', 1, 1, 0, 0, 1, 0, 0, 0, 0)`
+    ).run();
+
+    const winRes = await apiJson('/api/admin/trial-metrics?since=2026-01-14&minHeroes=1', {
+      cookie: adminCookie,
+    });
+    expect(winRes.res.status).toBe(200);
+    const t05 = winRes.data.trials.find((t: any) => t.trialId === 'trial-01-05');
+    expect(t05.passes).toBe(1);
+    expect(t05.firstTryPassRate).toBe(0.0);
+
+    // parentOverrideRate is clamped to 100.0 even when parentOverrides > uniqueHeroes
+    const ovSave1 = await db.createSave({ heroName: 'OvHero1' });
+    const ovSave2 = await db.createSave({ heroName: 'OvHero2' });
+    await db.overrideTrial({ saveId: ovSave1.id, trialId: 'trial-01-06', solved: true, awardShards: false, shardReward: 0 });
+    await db.overrideTrial({ saveId: ovSave2.id, trialId: 'trial-01-06', solved: true, awardShards: false, shardReward: 0 });
+    await db.logAttempt({ saveId: ovSave1.id, trialId: 'trial-01-06', passed: false, hintsUsed: 0, code: 'x' });
+    const ovMetrics = await apiJson('/api/admin/trial-metrics?minHeroes=1', { cookie: adminCookie });
+    const t06 = ovMetrics.data.trials.find((t: any) => t.trialId === 'trial-01-06');
+    expect(t06.parentOverrides).toBe(2);
+    expect(t06.parentOverrideRate).toBe(100.0);
   });
 });

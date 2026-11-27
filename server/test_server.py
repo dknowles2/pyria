@@ -1697,6 +1697,68 @@ class PyriaServerTestCase(unittest.TestCase):
         self.assertIn("# Pyria Trial Calibration Report", res_in.stdout)
         self.assertIn("trial-01-03", res_in.stdout)
 
+        # --days all formats window as `all` (not `alld`) and non-dict JSON input fails cleanly with code 2
+        res_all = subprocess.run(
+            [sys.executable, cli_script, "--db", str(self.db_path), "--days", "all"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        self.assertIn("**Window:** `all`", res_all.stdout)
+        self.assertNotIn("`alld`", res_all.stdout)
+
+        bad_json_path = Path(self._tmpdir.name) / "bad.json"
+        bad_json_path.write_text("[1, 2, 3]", encoding="utf-8")
+        res_bad = subprocess.run(
+            [sys.executable, cli_script, "--input", str(bad_json_path)],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(res_bad.returncode, 2)
+
+        # 9. Durable uniqueHeroes / completionRate / exact hintUsageRate after deleting all 5 saves
+        del_ids: list[str] = []
+        for idx in range(5):
+            st, _, raw = self._request("POST", "/api/saves", {"heroName": f"DelHero{idx}"})
+            self.assertEqual(st, 201)
+            del_ids.append(json.loads(raw)["save"]["id"])
+        for idx in range(3):
+            self.assertEqual(
+                self._request(
+                    "POST",
+                    f"/api/saves/{del_ids[idx]}/attempts",
+                    {"trialId": "trial-01-04", "passed": False, "hintsUsed": 0, "code": "x"},
+                )[0],
+                201,
+            )
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/saves/{del_ids[3]}/attempts",
+                {"trialId": "trial-01-04", "passed": True, "hintsUsed": 3, "code": "ok"},
+            )[0],
+            201,
+        )
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/saves/{del_ids[4]}/attempts",
+                {"trialId": "trial-01-04", "passed": True, "hintsUsed": 0, "code": "ok"},
+            )[0],
+            201,
+        )
+        for sid in del_ids:
+            self.assertEqual(self._request("DELETE", f"/api/saves/{sid}")[0], 200)
+
+        st, _, raw = self._request("GET", "/api/builder/trial-metrics?minHeroes=5")
+        self.assertEqual(st, 200)
+        t04 = next(t for t in json.loads(raw)["trials"] if t["trialId"] == "trial-01-04")
+        self.assertEqual(t04["uniqueHeroes"], 5)
+        self.assertEqual(t04["uniqueSolvers"], 2)
+        self.assertEqual(t04["completionRate"], 40.0)
+        self.assertEqual(t04["hintUsageRate"], 20.0)
+        self.assertEqual(t04["flag"], "too_hard")
+
 
 if __name__ == "__main__":
     unittest.main()

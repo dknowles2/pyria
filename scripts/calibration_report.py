@@ -165,10 +165,15 @@ def render_markdown_report(
     trials = list(metrics.get("trials") or [])
     with_data = [t for t in trials if (t.get("attempts") or 0) > 0 or (t.get("parentOverrides") or 0) > 0]
 
+    since_val = filters.get("since")
+    days_val = str(filters.get("days", "30"))
+    window_label = since_val if since_val else ("all" if days_val == "all" else f"{days_val}d")
+
     lines: list[str] = [
         "# Pyria Trial Calibration Report",
         "",
-        f"- **Difficulty:** `{filters.get('difficulty', 'all')}` | **Window:** `{filters.get('since') or (str(filters.get('days', '30')) + 'd')}` | **Min Heroes:** `{filters.get('minHeroes', 5)}` | **Include Practice:** `{bool(filters.get('includePractice', False))}`",
+        f"- **Difficulty:** `{filters.get('difficulty', 'all')}` | **Window:** `{window_label}` | **Min Heroes:** `{filters.get('minHeroes', 5)}` | **Include Practice:** `{bool(filters.get('includePractice', False))}`",
+        "- _Note: `Median Att` / `p75` and hint-tier breakdowns are computed from retained raw `trial_attempts` rows (showing `—` if raw rows were pruned); aggregate counts and rates are preserved in `trial_stats_daily`._",
         "",
         "## Summary",
         "",
@@ -418,6 +423,9 @@ def main(argv: list[str] | None = None) -> int:
             metrics = json.loads(args.input.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             print(f"Error: failed to read JSON input: {exc}", file=sys.stderr)
+            return 2
+        if not isinstance(metrics, dict):
+            print("Error: JSON input must be an object exported from /api/admin/trial-metrics", file=sys.stderr)
             return 2
         if args.compare_cutoff:
             compare_rows = _compare_from_json_trends(

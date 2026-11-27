@@ -614,8 +614,11 @@ export class PyriaD1 {
     const durationMs = params.durationMs ?? null;
 
     let firstTryInc = 0;
+    let uniqueAttempterInc = 0;
     let uniqueSolverInc = 0;
-    if (!isPractice && params.passed) {
+    if (!isPractice) {
+      const solvedInState = extractStringSet(st, 'solvedTrials', 'completedTrials');
+      const alreadySolvedInState = solvedInState.has(params.trialId);
       const prior = await this.db
         .prepare(
           `SELECT COUNT(*) AS prior_attempts,
@@ -627,8 +630,11 @@ export class PyriaD1 {
         .first<{ prior_attempts: number; prior_passes: number | null }>();
       const priorAttempts = Number(prior?.prior_attempts ?? 0);
       const priorPasses = Number(prior?.prior_passes ?? 0);
-      if (priorAttempts === 0) firstTryInc = 1;
-      if (priorPasses === 0) uniqueSolverInc = 1;
+      if (!alreadySolvedInState) {
+        if (priorAttempts === 0) uniqueAttempterInc = 1;
+        if (params.passed && priorAttempts === 0) firstTryInc = 1;
+        if (params.passed && priorPasses === 0) uniqueSolverInc = 1;
+      }
     }
 
     const insertRes = await this.db
@@ -660,13 +666,15 @@ export class PyriaD1 {
         this.db
           .prepare(
             `INSERT INTO trial_stats_daily
-             (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_solvers, total_hints, tier3_hints, parent_overrides)
-             VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, 0)
+             (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_attempters, unique_solvers, hinted_attempts, total_hints, tier3_hints, parent_overrides)
+             VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, 0)
              ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET
                attempts = attempts + excluded.attempts,
                passes = passes + excluded.passes,
                first_try_passes = first_try_passes + excluded.first_try_passes,
+               unique_attempters = unique_attempters + excluded.unique_attempters,
                unique_solvers = unique_solvers + excluded.unique_solvers,
+               hinted_attempts = hinted_attempts + excluded.hinted_attempts,
                total_hints = total_hints + excluded.total_hints,
                tier3_hints = tier3_hints + excluded.tier3_hints`
           )
@@ -676,7 +684,9 @@ export class PyriaD1 {
             difficultyMode,
             params.passed ? 1 : 0,
             firstTryInc,
+            uniqueAttempterInc,
             uniqueSolverInc,
+            params.hintsUsed > 0 ? 1 : 0,
             params.hintsUsed,
             params.hintsUsed >= 3 ? 1 : 0
           )

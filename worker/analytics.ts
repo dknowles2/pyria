@@ -15,6 +15,7 @@ const VALID_DIFFICULTY_FILTERS = new Set(['all', 'explorer', 'standard', 'challe
 const VALID_DAYS_FILTERS = new Set(['7', '30', '90', 'all']);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const FORMULA_PREFIX_RE = /^(?:[=+\-@\t\r]|\s+[=+\-@])/;
+const MAX_RAW_ATTEMPT_ROWS = 50_000;
 
 interface DailyRollupRow {
   day: string;
@@ -22,10 +23,18 @@ interface DailyRollupRow {
   attempts: number;
   passes: number;
   first_try_passes: number;
+  unique_attempters: number;
   unique_solvers: number;
+  hinted_attempts: number;
   total_hints: number;
   tier3_hints: number;
   parent_overrides: number;
+}
+
+interface PriorBeforeWindowRow {
+  save_id: string;
+  trial_id: string;
+  had_pass: number;
 }
 
 interface RawAttemptRow {
@@ -389,7 +398,9 @@ export async function computeTrialMetrics(
            SUM(attempts) AS attempts,
            SUM(passes) AS passes,
            SUM(first_try_passes) AS first_try_passes,
+           SUM(unique_attempters) AS unique_attempters,
            SUM(unique_solvers) AS unique_solvers,
+           SUM(hinted_attempts) AS hinted_attempts,
            SUM(total_hints) AS total_hints,
            SUM(tier3_hints) AS tier3_hints,
            SUM(parent_overrides) AS parent_overrides
@@ -420,12 +431,39 @@ export async function computeTrialMetrics(
     FROM trial_attempts
     ${rawWhere.length > 0 ? `WHERE ${rawWhere.join(' AND ')}` : ''}
     ORDER BY trial_id ASC, save_id ASC, created_at ASC, id ASC
+    LIMIT ?
   `;
+  rawBinds.push(MAX_RAW_ATTEMPT_ROWS + 1);
 
-  const [rollupRes, rawRes] = await Promise.all([
+  const priorPromise = minDay
+    ? db
+        .prepare(
+          `SELECT save_id, trial_id,
+                  MAX(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS had_pass
+           FROM trial_attempts
+           WHERE created_at < ? AND COALESCE(is_practice, 0) = 0
+           GROUP BY save_id, trial_id`
+        )
+        .bind(minDay)
+        .all<PriorBeforeWindowRow>()
+    : Promise.resolve({ results: [] as PriorBeforeWindowRow[] });
+
+  const [rollupRes, rawRes, priorRes] = await Promise.all([
     db.prepare(rollupSql).bind(...rollupBinds).all<DailyRollupRow>(),
     db.prepare(rawSql).bind(...rawBinds).all<RawAttemptRow>(),
+    priorPromise,
   ]);
+
+  const truncated = rawRes.results.length > MAX_RAW_ATTEMPT_ROWS;
+  const boundedRawRows = truncated
+    ? rawRes.results.slice(0, MAX_RAW_ATTEMPT_ROWS)
+    : rawRes.results;
+
+  // Track (trialId::saveId) -> hadPassBeforeWindow so windowed first-try & uniqueSolvers are never inflated
+  const priorBeforeWindow = new Map<string, boolean>();
+  for (const p of priorRes.results) {
+    priorBeforeWindow.set(`${p.trial_id}\u0000${p.save_id}`, Boolean(p.had_pass));
+  }
 
   // Index rollup rows by trial_id -> day
   const rollupByTrial = new Map<string, Map<string, DailyRollupRow>>();
@@ -441,7 +479,9 @@ export async function computeTrialMetrics(
       attempts: Number(r.attempts ?? 0),
       passes: Number(r.passes ?? 0),
       first_try_passes: Number(r.first_try_passes ?? 0),
+      unique_attempters: Number(r.unique_attempters ?? 0),
       unique_solvers: Number(r.unique_solvers ?? 0),
+      hinted_attempts: Number(r.hinted_attempts ?? 0),
       total_hints: Number(r.total_hints ?? 0),
       tier3_hints: Number(r.tier3_hints ?? 0),
       parent_overrides: Number(r.parent_overrides ?? 0),
@@ -450,7 +490,7 @@ export async function computeTrialMetrics(
 
   // Group raw attempts by trial_id
   const rawByTrial = new Map<string, RawAttemptRow[]>();
-  for (const r of rawRes.results) {
+  for (const r of boundedRawRows) {
     let list = rawByTrial.get(r.trial_id);
     if (!list) {
       list = [];
@@ -508,11 +548,11 @@ export async function computeTrialMetrics(
     // Per-day raw non-practice and raw practice buckets (to avoid double-counting with rollup!)
     const rawNpByDay = new Map<
       string,
-      { attempts: number; passes: number; totalHints: number; tier3Hints: number }
+      { attempts: number; passes: number; hintedAttempts: number; tier3Hints: number }
     >();
     const rawPracticeByDay = new Map<
       string,
-      { attempts: number; passes: number; totalHints: number; tier3Hints: number }
+      { attempts: number; passes: number; hintedAttempts: number; tier3Hints: number }
     >();
 
     const heroSaves = new Set<string>();
@@ -523,10 +563,7 @@ export async function computeTrialMetrics(
 
     const hintTierBreakdown = { tier0: 0, tier1: 0, tier2: 0, tier3: 0 };
     const errorCounts = new Map<string, number>();
-    let rawAttemptsWithHints = 0;
     let rawNpCount = 0;
-    let rawNpTotalHints = 0;
-    let rawNpTier3 = 0;
 
     for (const r of rawRows) {
       const passed = Boolean(r.passed);
@@ -539,8 +576,6 @@ export async function computeTrialMetrics(
       else if (hints === 2) hintTierBreakdown.tier2 += 1;
       else hintTierBreakdown.tier3 += 1;
 
-      if (hints > 0) rawAttemptsWithHints += 1;
-
       if (!passed && r.error_type) {
         errorCounts.set(r.error_type, (errorCounts.get(r.error_type) ?? 0) + 1);
       }
@@ -548,32 +583,38 @@ export async function computeTrialMetrics(
       const targetMap = isPractice ? rawPracticeByDay : rawNpByDay;
       let bucket = targetMap.get(day);
       if (!bucket) {
-        bucket = { attempts: 0, passes: 0, totalHints: 0, tier3Hints: 0 };
+        bucket = { attempts: 0, passes: 0, hintedAttempts: 0, tier3Hints: 0 };
         targetMap.set(day, bucket);
       }
       bucket.attempts += 1;
       if (passed) bucket.passes += 1;
-      bucket.totalHints += hints;
+      if (hints > 0) bucket.hintedAttempts += 1;
       if (hints >= 3) bucket.tier3Hints += 1;
 
       if (!isPractice) {
         rawNpCount += 1;
-        rawNpTotalHints += hints;
-        if (hints >= 3) rawNpTier3 += 1;
       }
 
-      // Per-hero tracking (rows are ordered by save_id, created_at ASC, id ASC)
-      const isFirstForHero = !heroSaves.has(r.save_id);
-      heroSaves.add(r.save_id);
-      if (isFirstForHero && passed) {
-        heroFirstPassed.add(r.save_id);
-      }
-      if (!heroSolved.has(r.save_id)) {
-        const nextCount = (heroAttemptCountsBeforeSolve.get(r.save_id) ?? 0) + 1;
-        heroAttemptCountsBeforeSolve.set(r.save_id, nextCount);
-        if (passed) {
-          heroSolved.add(r.save_id);
-          heroSolvedCounts.set(r.save_id, nextCount);
+      // Per-hero progression tracking (non-practice rows only, excluding heroes with pre-window history)
+      if (!isPractice) {
+        const priorKey = `${meta.trialId}\u0000${r.save_id}`;
+        const hadPriorAttempt = priorBeforeWindow.has(priorKey);
+        const hadPriorPass = priorBeforeWindow.get(priorKey) === true;
+
+        const isFirstInWindow = !heroSaves.has(r.save_id);
+        heroSaves.add(r.save_id);
+        if (isFirstInWindow && passed && !hadPriorAttempt) {
+          heroFirstPassed.add(r.save_id);
+        }
+        if (!hadPriorPass && !heroSolved.has(r.save_id)) {
+          const nextCount = (heroAttemptCountsBeforeSolve.get(r.save_id) ?? 0) + 1;
+          heroAttemptCountsBeforeSolve.set(r.save_id, nextCount);
+          if (passed) {
+            heroSolved.add(r.save_id);
+            if (!hadPriorAttempt) {
+              heroSolvedCounts.set(r.save_id, nextCount);
+            }
+          }
         }
       }
     }
@@ -587,14 +628,16 @@ export async function computeTrialMetrics(
 
     let mergedNpAttempts = 0;
     let mergedNpPasses = 0;
-    let mergedNpTotalHints = 0;
+    let mergedNpHintedAttempts = 0;
     let mergedNpTier3 = 0;
     let rollupFirstTryTotal = 0;
+    let rollupUniqueAttemptersTotal = 0;
     let rollupUniqueSolversTotal = 0;
     let parentOverrides = 0;
 
     let practiceAttempts = 0;
     let practicePasses = 0;
+    let practiceHintedAttempts = 0;
     let practiceTier3 = 0;
 
     const dailyTrend: Array<{ day: string; attempts: number; passes: number }> = [];
@@ -606,16 +649,17 @@ export async function computeTrialMetrics(
 
       const dayNpAttempts = Math.max(npDay?.attempts ?? 0, rDay?.attempts ?? 0);
       const dayNpPasses = Math.max(npDay?.passes ?? 0, rDay?.passes ?? 0);
-      const dayNpTotalHints = Math.max(npDay?.totalHints ?? 0, rDay?.total_hints ?? 0);
+      const dayNpHinted = Math.max(npDay?.hintedAttempts ?? 0, rDay?.hinted_attempts ?? 0);
       const dayNpTier3 = Math.max(npDay?.tier3Hints ?? 0, rDay?.tier3_hints ?? 0);
 
       mergedNpAttempts += dayNpAttempts;
       mergedNpPasses += dayNpPasses;
-      mergedNpTotalHints += dayNpTotalHints;
+      mergedNpHintedAttempts += dayNpHinted;
       mergedNpTier3 += dayNpTier3;
 
       if (rDay) {
         rollupFirstTryTotal += rDay.first_try_passes;
+        rollupUniqueAttemptersTotal += rDay.unique_attempters;
         rollupUniqueSolversTotal += rDay.unique_solvers;
         parentOverrides += rDay.parent_overrides;
       }
@@ -624,6 +668,7 @@ export async function computeTrialMetrics(
       const dayPrPasses = prDay?.passes ?? 0;
       practiceAttempts += dayPrAttempts;
       practicePasses += dayPrPasses;
+      practiceHintedAttempts += prDay?.hintedAttempts ?? 0;
       practiceTier3 += prDay?.tier3Hints ?? 0;
 
       const dayTotalAttempts = dayNpAttempts + dayPrAttempts;
@@ -639,22 +684,21 @@ export async function computeTrialMetrics(
 
     const attempts = mergedNpAttempts + practiceAttempts;
     const passes = mergedNpPasses + practicePasses;
+    const hintedAttempts = Math.min(attempts, mergedNpHintedAttempts + practiceHintedAttempts);
     const tier3Hints = mergedNpTier3 + practiceTier3;
 
-    // Account for pruned attempts in tier3 & hint usage estimates
-    const prunedNpAttempts = Math.max(0, mergedNpAttempts - rawNpCount);
-    const prunedNpTier3 = Math.max(0, mergedNpTier3 - rawNpTier3);
-    const prunedNpHints = Math.max(0, mergedNpTotalHints - rawNpTotalHints);
-    if (prunedNpTier3 > 0) {
-      hintTierBreakdown.tier3 += prunedNpTier3;
-    }
-
-    const uniqueSolvers = Math.max(heroSolved.size, rollupUniqueSolversTotal);
+    // Use lifetime-accurate rollup counts when rollup covers all raw non-practice attempts
+    const rollupAuthoritative = rollupDayMap.size > 0 && rawNpCount <= mergedNpAttempts;
+    const uniqueSolvers = rollupAuthoritative
+      ? rollupUniqueSolversTotal
+      : Math.max(heroSolved.size, rollupUniqueSolversTotal);
     const firstTryPasses = Math.min(
       uniqueSolvers,
-      Math.max(heroFirstPassed.size, rollupFirstTryTotal)
+      rollupAuthoritative
+        ? rollupFirstTryTotal
+        : Math.max(heroFirstPassed.size, rollupFirstTryTotal)
     );
-    let uniqueHeroes = Math.max(heroSaves.size, uniqueSolvers);
+    let uniqueHeroes = Math.max(heroSaves.size, rollupUniqueAttemptersTotal, uniqueSolvers);
     if (uniqueHeroes === 0 && attempts > 0) {
       uniqueHeroes = 1;
     }
@@ -668,14 +712,12 @@ export async function computeTrialMetrics(
     const medianAttemptsToSolve = computePercentile(attemptsToSolveSorted, 0.5);
     const p75AttemptsToSolve = computePercentile(attemptsToSolveSorted, 0.75);
 
-    const estPrunedHintedAttempts = Math.min(prunedNpAttempts, prunedNpHints);
-    const attemptsWithHints = Math.min(attempts, rawAttemptsWithHints + estPrunedHintedAttempts);
-    const hintUsageRate = attempts > 0 ? round1((attemptsWithHints / attempts) * 100) : null;
+    const hintUsageRate = attempts > 0 ? round1((hintedAttempts / attempts) * 100) : null;
     const tier3HintRate = attempts > 0 ? round1((tier3Hints / attempts) * 100) : null;
 
     const parentOverrideRate =
       uniqueHeroes > 0
-        ? round1((parentOverrides / uniqueHeroes) * 100)
+        ? round1(Math.min(100, (parentOverrides / uniqueHeroes) * 100))
         : parentOverrides > 0
           ? 100.0
           : null;
@@ -756,6 +798,7 @@ export async function computeTrialMetrics(
       flaggedLowData,
       overallMedianAttempts,
       totalOverrides,
+      truncated,
     },
     trials: trialRows,
   };

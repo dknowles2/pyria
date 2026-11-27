@@ -168,6 +168,7 @@ export interface TrialMetricsSummary {
   flaggedLowData: number;
   overallMedianAttempts: number | null;
   totalOverrides: number;
+  truncated?: boolean;
 }
 
 export interface TrialMetricsResponse {
