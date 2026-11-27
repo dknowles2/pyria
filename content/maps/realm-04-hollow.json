@@ -186,6 +186,9 @@
     {"id": "chest-04-03", "type": "chest", "x": 40, "y": 3, "label": "Frozen Spring Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-04-02"},
     {"id": "chest-04-04", "type": "chest", "x": 26, "y": 44, "label": "Blizzard Hall Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-04-03"},
     {"id": "chest-04-05", "type": "chest", "x": 60, "y": 44, "label": "Crystal Trench Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-04-04"},
-    {"id": "chest-04-06", "type": "chest", "x": 60, "y": 15, "label": "Glacier Alcove Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-04-05"}
+    {"id": "chest-04-06", "type": "chest", "x": 60, "y": 15, "label": "Glacier Alcove Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-04-05"},
+    {"id": "bonus-trial-04", "type": "bonus_trial", "x": 18, "y": 44, "label": "Secret Rune: Glacier's Snowball Riddle", "refId": "trial-04-bonus", "spriteKey": "torch"},
+    {"id": "egg-04-a", "type": "easter_egg", "x": 2, "y": 19, "label": "Frozen Snow Golem", "refId": null, "spriteKey": "statue", "title": "Pumpkin-Headed Guard", "message": "Two stacked snow blocks wear a carved pumpkin on top! A frozen tag says: 'Will trade 16 snowballs for 1 emerald. No lowball offers!'", "shardReward": 15},
+    {"id": "egg-04-b", "type": "easter_egg", "x": 38, "y": 44, "label": "Frosty Dragon Toy", "refId": null, "spriteKey": "torch", "title": "Pip's Secret Snow-Angel", "message": "You spot a tiny Pip-shaped snow angel with little wing prints! Pip blushes: 'Hey! Even glitch-dragons need a snow day!'", "shardReward": 15}
   ]
 }

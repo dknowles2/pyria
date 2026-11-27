@@ -182,6 +182,9 @@
     {"id": "chest-02-03", "type": "chest", "x": 58, "y": 42, "label": "Sunken Cistern Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 20, "requiredTrialId": "trial-02-02"},
     {"id": "chest-02-04", "type": "chest", "x": 59, "y": 14, "label": "Torchlight Gallery Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-02-03"},
     {"id": "chest-02-05", "type": "chest", "x": 4, "y": 22, "label": "Golem Forge Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-02-04"},
-    {"id": "chest-02-06", "type": "chest", "x": 5, "y": 4, "label": "Ancient Treasury Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-02-05"}
+    {"id": "chest-02-06", "type": "chest", "x": 5, "y": 4, "label": "Ancient Treasury Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-02-05"},
+    {"id": "bonus-trial-02", "type": "bonus_trial", "x": 18, "y": 44, "label": "Secret Rune: The Hidden Torch Count", "refId": "trial-02-bonus", "spriteKey": "torch"},
+    {"id": "egg-02-a", "type": "easter_egg", "x": 24, "y": 44, "label": "Floating Invisible Stair", "refId": null, "spriteKey": "statue", "title": "Obby Checkpoint #99", "message": "A tiny Roblox-style glowing neon pad beeps under your boots: 'CHECKPOINT REACHED! Warning: lava bricks ahead in Realm 3\u2014no jumping over them!'", "shardReward": 15},
+    {"id": "egg-02-b", "type": "easter_egg", "x": 2, "y": 14, "label": "Carved Wing Print", "refId": null, "spriteKey": "torch", "title": "Night Fury Claw Marks", "message": "Sleek black dragon scales shimmer on the mossy stone! Pip whispers: 'Whoa... I think a Night Fury stopped by here for fish snacks!'", "shardReward": 15}
   ]
 }

@@ -186,6 +186,9 @@
     {"id": "chest-06-03", "type": "chest", "x": 40, "y": 3, "label": "Sunken Cistern Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-06-02"},
     {"id": "chest-06-04", "type": "chest", "x": 26, "y": 44, "label": "Flooded Hall Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-06-03"},
     {"id": "chest-06-05", "type": "chest", "x": 60, "y": 44, "label": "Marsh Canal Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 30, "requiredTrialId": "trial-06-04"},
-    {"id": "chest-06-06", "type": "chest", "x": 60, "y": 15, "label": "Bell Chamber Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-06-05"}
+    {"id": "chest-06-06", "type": "chest", "x": 60, "y": 15, "label": "Bell Chamber Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 35, "requiredTrialId": "trial-06-05"},
+    {"id": "bonus-trial-06", "type": "bonus_trial", "x": 18, "y": 44, "label": "Secret Rune: Mire's Pearl Cipher", "refId": "trial-06-bonus", "spriteKey": "torch"},
+    {"id": "egg-06-a", "type": "easter_egg", "x": 2, "y": 19, "label": "Soggy Bottle", "refId": null, "spriteKey": "statue", "title": "Lord Null's Secret Diary #3", "message": "Dear Diary: Why did I build a crypt UNDERWATER?! My villain boots squish every time I walk. Squish. Squish. So un-intimidating.", "shardReward": 15},
+    {"id": "egg-06-b", "type": "easter_egg", "x": 38, "y": 44, "label": "Sunken Conduit", "refId": null, "spriteKey": "torch", "title": "Heart of the Sea!", "message": "A glowing blue prism hums beneath the water! Pip gasps: 'Water breathing + night vision! We're basically ocean superheroes now!'", "shardReward": 15}
   ]
 }

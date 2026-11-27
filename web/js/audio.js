@@ -145,6 +145,16 @@ class RetroAudio {
     this.playTone(523.25, 0.25, 'triangle', 0.07, 0.24);
     this.playTone(783.99, 0.3, 'triangle', 0.07, 0.32);
   }
+
+  playSecretFound() {
+    // Classic Zelda-style sparkling ascending discovery arpeggio
+    const notes = [783.99, 739.99, 622.25, 440.0, 415.3, 659.25, 830.61, 1046.5];
+    notes.forEach((f, i) => {
+      const dur = i === notes.length - 1 ? 0.26 : 0.085;
+      this.playTone(f, dur, 'square', 0.06, i * 0.08);
+      this.playTone(f * 0.5, dur, 'triangle', 0.04, i * 0.08);
+    });
+  }
 }
 
 export const audio = new RetroAudio();

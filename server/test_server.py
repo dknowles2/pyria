@@ -239,6 +239,7 @@ class PyriaServerTestCase(unittest.TestCase):
                 "openedChests": ["chest-01-01"],
                 "ownedUnlockIds": ["hat-explorer"],
                 "rescuedDragons": ["dragon-spark"],
+                "foundEasterEggs": ["egg-01-a"],
             },
         )
         self.assertEqual(status, 200)
@@ -254,6 +255,7 @@ class PyriaServerTestCase(unittest.TestCase):
         self.assertIn("chest_opened", event_types)
         self.assertIn("workshop_purchase", event_types)
         self.assertIn("dragon_rescued", event_types)
+        self.assertIn("easter_egg_found", event_types)
         self.assertIn("realm_entered", event_types)
         self.assertGreater(act["latestId"], 0)
 

@@ -572,6 +572,20 @@ class PyriaDatabase:
                     created_at=now,
                 )
 
+            prev_eggs = _extract_string_set(prev_state, "foundEasterEggs")
+            new_eggs = _extract_string_set(state, "foundEasterEggs")
+            for egg_id in sorted(new_eggs - prev_eggs):
+                self._insert_event(
+                    conn,
+                    save_id=save_id,
+                    hero_name=hero_name,
+                    event_type="easter_egg_found",
+                    realm_id=cur_realm,
+                    summary=f"Found hidden Easter Egg: {egg_id}",
+                    details={"eggId": egg_id, "byteShards": state.get("byteShards")},
+                    created_at=now,
+                )
+
             if prev_realm and cur_realm and prev_realm != cur_realm:
                 self._insert_event(
                     conn,

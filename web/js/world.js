@@ -801,10 +801,30 @@ export class WorldEngine {
     ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
 
     // Entity markers
+    const foundEggs = new Set(this.save.foundEasterEggs || []);
     const pulse = 0.5 + 0.5 * Math.sin(this.time * 6);
     for (const ent of this.map.entities || []) {
       const ex = Math.round(mx + (ent.x + 0.5) * scale);
       const ey = Math.round(my + (ent.y + 0.5) * scale);
+
+      if (ent.type === 'bonus_trial') {
+        // Hidden from minimap until discovered/solved!
+        if (completed.has(ent.refId)) {
+          ctx.fillStyle = '#c084fc';
+          ctx.beginPath();
+          ctx.arc(ex, ey, 3.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        continue;
+      }
+      if (ent.type === 'easter_egg') {
+        // Hidden from minimap until discovered!
+        if (foundEggs.has(ent.id)) {
+          ctx.fillStyle = '#c084fc';
+          ctx.fillRect(ex - 2, ey - 2, 4, 4);
+        }
+        continue;
+      }
 
       if (ent.type === 'trial') {
         const isDone = completed.has(ent.refId);
@@ -963,6 +983,37 @@ export class WorldEngine {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('!', cx, cy + 1);
+        ctx.textBaseline = 'alphabetic';
+      }
+    } else if (ent.type === 'bonus_trial' || ent.type === 'easter_egg') {
+      const foundEggs = new Set(this.save.foundEasterEggs || []);
+      const isFound = ent.type === 'bonus_trial' ? completed.has(ent.refId) : foundEggs.has(ent.id);
+      const cx = sx + TILE_PX / 2;
+      const cy = sy + TILE_PX / 2;
+      const shimmer = 0.45 + 0.5 * Math.sin(this.time * 4.5 + ent.x * 1.3 + ent.y);
+
+      if (isFound) {
+        ctx.fillStyle = 'rgba(192, 132, 252, 0.25)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#d8b4fe';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✓', cx, cy + 1);
+        ctx.textBaseline = 'alphabetic';
+      } else {
+        // Subtle mysterious violet/gold sparkle rewarding sharp-eyed explorers
+        ctx.fillStyle = `rgba(192, 132, 252, ${(0.18 + shimmer * 0.25).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 12 + shimmer * 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = shimmer > 0.7 ? '#fde68a' : '#d8b4fe';
+        ctx.font = 'bold 15px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✦', cx, cy - 2 + bob);
         ctx.textBaseline = 'alphabetic';
       }
     }
