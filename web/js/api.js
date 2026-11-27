@@ -245,7 +245,11 @@ export function updateGuestSave(id, saveData) {
   const now = new Date().toISOString();
   const all = readGuestSavesRaw();
   const idx = all.findIndex((s) => s && s.id === id);
-  const existing = idx >= 0 ? all[idx] : {};
+  if (idx < 0) {
+    // Save was deleted or upgraded to a cloud Hero Code; do not re-insert a stale duplicate.
+    return null;
+  }
+  const existing = all[idx];
   const updated = {
     ...normalizeSave({ ...existing, ...saveData, id }),
     id,
@@ -254,11 +258,7 @@ export function updateGuestSave(id, saveData) {
     updatedAt: now,
     isGuest: true,
   };
-  if (idx >= 0) {
-    all[idx] = updated;
-  } else {
-    all.unshift(updated);
-  }
+  all[idx] = updated;
   writeGuestSavesRaw(all);
   return updated;
 }
@@ -269,13 +269,33 @@ export function deleteGuestSave(id) {
   writeGuestSavesRaw(all);
 }
 
+let lastKnownMe = null;
+
 // ==================== REMOTE API & CONTENT ====================
 export async function fetchMe() {
   try {
     const data = await requestJson('/api/me', { cache: 'no-store' });
-    return normalizeMe(data);
+    lastKnownMe = normalizeMe(data);
+    return lastKnownMe;
   } catch {
-    return normalizeMe({ mode: 'local', authenticated: false, email: null, isAdmin: false, accounts: [] });
+    if (lastKnownMe) return lastKnownMe;
+    // Fail safely to guest mode so transient /api/me outages never drop guest saves
+    // or attempt unauthenticated writes to /api/saves.
+    return normalizeMe({
+      mode: 'cloudflare',
+      auth: {
+        role: 'guest',
+        heroSaveId: null,
+        heroName: null,
+        parentEmail: null,
+        isAdmin: false,
+        googleOAuthEnabled: false,
+      },
+      authenticated: false,
+      email: null,
+      isAdmin: false,
+      accounts: [],
+    });
   }
 }
 

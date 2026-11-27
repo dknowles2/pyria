@@ -1,7 +1,5 @@
 // Pyria Parent & Builder Console — Live Progress Stream, Difficulty Tuning & Story Editor
 
-import { pyRunner } from '/js/pyRunner.js?v=20261127j';
-
 const POLL_INTERVAL_MS = 2500;
 const PASSCODE_STORAGE_KEY = 'pyria_builder_passcode';
 
@@ -119,7 +117,7 @@ async function apiFetch(url, options = {}) {
     $('#passcode-bar')?.classList.remove('hidden');
     throw new Error('Builder passcode required');
   }
-  if (!isLocal && res.status === 401) {
+  if (!isLocal && (res.status === 401 || res.status === 403)) {
     setLivePolling(false);
     showCloudflareSignInScreen();
     throw new Error('Parent sign-in required');
@@ -380,6 +378,78 @@ function openClaimHeroModal() {
   });
 }
 
+function openHeroPreferencesModal(save) {
+  const prefs = save?.preferences && typeof save.preferences === 'object' ? save.preferences : {};
+  const prefDiff = prefs.difficulty || 'standard';
+  const prefHints = Number.isFinite(Number(prefs.maxPipHints)) ? Number(prefs.maxPipHints) : 3;
+  const prefTracebacks = Boolean(prefs.showRawTracebacks);
+
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>⚙️ Learning Settings</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      Customize Python difficulty and Pip hints for <strong style="color:var(--text-main);">${escapeHtml(save.heroName || 'Hero')}</strong>.
+    </p>
+    <div class="form-grid">
+      <div class="field">
+        <label for="pref-modal-diff">Difficulty</label>
+        <select id="pref-modal-diff" class="input">
+          <option value="explorer" ${prefDiff === 'explorer' ? 'selected' : ''}>Explorer</option>
+          <option value="standard" ${prefDiff === 'standard' ? 'selected' : ''}>Standard</option>
+          <option value="challenge" ${prefDiff === 'challenge' ? 'selected' : ''}>Challenge</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="pref-modal-hints">Max Pip Hints</label>
+        <select id="pref-modal-hints" class="input">
+          <option value="0" ${prefHints === 0 ? 'selected' : ''}>0 (No hints)</option>
+          <option value="1" ${prefHints === 1 ? 'selected' : ''}>1 (Nudge)</option>
+          <option value="2" ${prefHints === 2 ? 'selected' : ''}>2 (Pattern)</option>
+          <option value="3" ${prefHints === 3 ? 'selected' : ''}>3 (Full)</option>
+        </select>
+      </div>
+    </div>
+    <label class="control-group checkbox-control">
+      <input id="pref-modal-tracebacks" type="checkbox" ${prefTracebacks ? 'checked' : ''} />
+      <span>Show Raw Python Tracebacks</span>
+    </label>
+    <div id="pref-modal-error" class="console-error-msg hidden"></div>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+      <button id="btn-submit-hero-prefs" type="button" class="btn btn-primary">Save Settings</button>
+    </div>
+  `);
+
+  const errEl = $('#pref-modal-error');
+  const submitBtn = $('#btn-submit-hero-prefs');
+  submitBtn?.addEventListener('click', async () => {
+    const difficulty = $('#pref-modal-diff')?.value || 'standard';
+    const maxPipHints = Number($('#pref-modal-hints')?.value ?? 3);
+    const showRawTracebacks = Boolean($('#pref-modal-tracebacks')?.checked);
+    if (errEl) errEl.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    try {
+      await apiFetch(`/api/console/saves/${encodeURIComponent(save.id)}/preferences`, {
+        method: 'PUT',
+        body: JSON.stringify({ difficulty, maxPipHints, showRawTracebacks }),
+      });
+      closeConsoleModal();
+      showToast(`Saved settings for "${save.heroName}"!`);
+      await loadProgressFull();
+    } catch (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'Could not save settings.';
+        errEl.classList.remove('hidden');
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Settings';
+    }
+  });
+}
+
 function openAssignOwnerModal(save) {
   openConsoleModal(`
     <div class="console-modal-header">
@@ -543,35 +613,14 @@ function renderHeroCards() {
       const lastActive = stats.lastActive || save.updatedAt;
       const isSelected = state.selectedHeroId === save.id;
 
+      const diffLabel = prefDiff.charAt(0).toUpperCase() + prefDiff.slice(1);
       const consoleControlsHtml =
         state.mode === 'cloudflare'
           ? `
             <div class="hero-card-console-controls" data-stop-card-click>
-              <div class="hero-prefs-row">
-                <label>
-                  Difficulty
-                  <select class="input input-sm hero-pref-diff" data-save-id="${escapeHtml(save.id)}">
-                    <option value="explorer" ${prefDiff === 'explorer' ? 'selected' : ''}>Explorer</option>
-                    <option value="standard" ${prefDiff === 'standard' ? 'selected' : ''}>Standard</option>
-                    <option value="challenge" ${prefDiff === 'challenge' ? 'selected' : ''}>Challenge</option>
-                  </select>
-                </label>
-                <label>
-                  Hints
-                  <select class="input input-sm hero-pref-hints" data-save-id="${escapeHtml(save.id)}">
-                    <option value="0" ${prefHints === 0 ? 'selected' : ''}>0</option>
-                    <option value="1" ${prefHints === 1 ? 'selected' : ''}>1</option>
-                    <option value="2" ${prefHints === 2 ? 'selected' : ''}>2</option>
-                    <option value="3" ${prefHints === 3 ? 'selected' : ''}>3</option>
-                  </select>
-                </label>
-                <label>
-                  <input type="checkbox" class="hero-pref-tracebacks" data-save-id="${escapeHtml(save.id)}" ${prefTracebacks ? 'checked' : ''} />
-                  Tracebacks
-                </label>
-                <button type="button" class="btn btn-sm btn-primary btn-save-hero-prefs" data-save-id="${escapeHtml(save.id)}">Save Settings</button>
-              </div>
               <div class="hero-console-actions-row">
+                <span class="pill pill-muted">⚙️ ${escapeHtml(diffLabel)} · ${prefHints} ${prefHints === 1 ? 'Hint' : 'Hints'}${prefTracebacks ? ' · Tracebacks' : ''}</span>
+                <button type="button" class="btn btn-sm btn-primary btn-edit-hero-prefs" data-save-id="${escapeHtml(save.id)}">⚙️ Settings</button>
                 <button type="button" class="btn btn-sm btn-gold btn-rotate-hero-code" data-save-id="${escapeHtml(save.id)}">🔄 Rotate / Revoke Code</button>
                 ${
                   state.isAdmin
@@ -620,28 +669,11 @@ function renderHeroCards() {
     el.addEventListener('click', (e) => e.stopPropagation());
   });
 
-  listEl.querySelectorAll('.btn-save-hero-prefs').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
+  listEl.querySelectorAll('.btn-edit-hero-prefs').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const saveId = btn.dataset.saveId;
-      const card = btn.closest('.hero-card');
-      const difficulty = card?.querySelector('.hero-pref-diff')?.value || 'standard';
-      const maxPipHints = Number(card?.querySelector('.hero-pref-hints')?.value ?? 3);
-      const showRawTracebacks = Boolean(card?.querySelector('.hero-pref-tracebacks')?.checked);
-      btn.disabled = true;
-      btn.textContent = 'Saving...';
-      try {
-        await apiFetch(`/api/console/saves/${encodeURIComponent(saveId)}/preferences`, {
-          method: 'PUT',
-          body: JSON.stringify({ difficulty, maxPipHints, showRawTracebacks }),
-        });
-        showToast('Saved hero learning settings!');
-        await loadProgressFull();
-      } catch (err) {
-        showToast(`Failed to save settings: ${err.message}`, true);
-        btn.disabled = false;
-        btn.textContent = 'Save Settings';
-      }
+      const save = state.saves.find((s) => s.id === btn.dataset.saveId);
+      if (save) openHeroPreferencesModal(save);
     });
   });
 
@@ -1236,6 +1268,7 @@ async function testCurrentTrialSolution() {
   btn.disabled = true;
   btn.textContent = 'Testing in Pyodide...';
   try {
+    const { pyRunner } = await import('/js/pyRunner.js?v=20261127j');
     const res = await pyRunner.runTrial(code, testCode, true);
     const stderrText =
       res.rawTraceback ||
@@ -1964,7 +1997,7 @@ function wireEvents() {
   const VALID_TABS = new Set(['live', 'story', 'health', 'assets']);
   const normalizeTab = (t) => (t === 'progress' ? 'live' : VALID_TABS.has(t) ? t : 'live');
   const activateTab = (target, { updateUrl = true } = {}) => {
-    const tab = normalizeTab(target);
+    const tab = state.mode === 'cloudflare' ? 'live' : normalizeTab(target);
     document.querySelectorAll('.tab-btn').forEach((b) => {
       const active = b.dataset.tab === tab;
       b.classList.toggle('active', active);
@@ -1973,6 +2006,12 @@ function wireEvents() {
     document.querySelectorAll('.tab-panel').forEach((p) => {
       p.classList.toggle('active', p.id === `tab-${tab}`);
     });
+    if (tab === 'assets' && state.mode !== 'cloudflare') {
+      const iframe = $('#assets-iframe');
+      if (iframe && !iframe.getAttribute('src')) {
+        iframe.src = '/assets/world/preview.html';
+      }
+    }
     try {
       localStorage.setItem('pyria_builder_tab', tab);
     } catch {
@@ -2108,9 +2147,11 @@ function wireEvents() {
 }
 
 function showCloudflareSignInScreen() {
+  closeConsoleModal();
   $('#console-signin-panel')?.classList.remove('hidden');
   $('#tab-live')?.classList.remove('active');
   $('#tab-live')?.classList.add('hidden');
+  $('#builder-admin-pill')?.classList.add('hidden');
   $('#live-indicator')?.classList.add('hidden');
   $('#btn-toggle-live')?.classList.add('hidden');
   $('#btn-refresh-now')?.classList.add('hidden');
@@ -2175,6 +2216,11 @@ function configureConsoleMode() {
 
 // ==================== BOOTSTRAP ====================
 async function init() {
+  const isConsolePath = /^\/(console|admin)(\/|$)/i.test(window.location.pathname);
+  if (isConsolePath) {
+    state.mode = 'cloudflare';
+    state.isParentAuthenticated = false;
+  }
   wireEvents();
   wireTrackerEvents();
   try {
@@ -2199,9 +2245,15 @@ async function init() {
         adminPill.className = `pill ${state.isAdmin ? 'pill-gold' : 'pill-blue'}`;
         adminPill.classList.remove('hidden');
       }
+    } else if (isConsolePath) {
+      state.mode = 'cloudflare';
+      state.isParentAuthenticated = false;
     }
   } catch {
-    // ignore if /api/me unavailable
+    if (isConsolePath) {
+      state.mode = 'cloudflare';
+      state.isParentAuthenticated = false;
+    }
   }
 
   configureConsoleMode();

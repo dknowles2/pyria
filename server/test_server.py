@@ -1465,7 +1465,7 @@ class PyriaServerTestCase(unittest.TestCase):
         me_player = json.loads(raw)
         self.assertEqual(me_player["mode"], "local")
         self.assertFalse(me_player["isAdmin"])
-        self.assertEqual(me_player["auth"]["role"], "parent")
+        self.assertEqual(me_player["auth"]["role"], "player")
         self.assertEqual(me_player["auth"]["parentEmail"], "player@example.com")
 
         st, _, _ = self._request("GET", "/console", extra_headers=kid_hdr)

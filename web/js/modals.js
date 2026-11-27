@@ -179,25 +179,25 @@ export function resolveDifficulty(gameConfig, realm, trial, save = null) {
     ...(realm?.difficultyOverride || {}),
     ...(trial?.difficultyOverride || {}),
   };
-  const prefs =
-    (save?.preferences && typeof save.preferences === 'object' ? save.preferences : null) ||
-    (gameConfig?.heroPreferences && typeof gameConfig.heroPreferences === 'object'
+  const cfgPrefs =
+    gameConfig?.heroPreferences && typeof gameConfig.heroPreferences === 'object'
       ? gameConfig.heroPreferences
-      : null);
-  if (prefs) {
-    if (prefs.difficulty === 'explorer' || prefs.difficulty === 'standard' || prefs.difficulty === 'challenge') {
-      merged.mode = prefs.difficulty;
-    }
-    if (typeof prefs.showRawTracebacks === 'boolean') {
-      merged.showRawTracebacks = prefs.showRawTracebacks;
-    }
-    if (
-      prefs.maxPipHints !== null &&
-      prefs.maxPipHints !== undefined &&
-      Number.isFinite(Number(prefs.maxPipHints))
-    ) {
-      merged.maxHintsAllowed = Math.max(0, Math.min(3, Number(prefs.maxPipHints)));
-    }
+      : {};
+  const savePrefs =
+    save?.preferences && typeof save.preferences === 'object' ? save.preferences : {};
+  const prefs = { ...cfgPrefs, ...savePrefs };
+  if (prefs.difficulty === 'explorer' || prefs.difficulty === 'standard' || prefs.difficulty === 'challenge') {
+    merged.mode = prefs.difficulty;
+  }
+  if (typeof prefs.showRawTracebacks === 'boolean') {
+    merged.showRawTracebacks = prefs.showRawTracebacks;
+  }
+  if (
+    prefs.maxPipHints !== null &&
+    prefs.maxPipHints !== undefined &&
+    Number.isFinite(Number(prefs.maxPipHints))
+  ) {
+    merged.maxHintsAllowed = Math.max(0, Math.min(3, Number(prefs.maxPipHints)));
   }
   return merged;
 }
@@ -1628,5 +1628,44 @@ export class ModalManager {
       btn.addEventListener('click', () => this.close());
     });
     setTimeout(() => inputEl?.focus(), 30);
+  }
+
+  // ==================== HERO SESSION EXPIRED MODAL ====================
+  openHeroSessionExpiredModal({ heroName, onEnterHeroCode }) {
+    audio.playError();
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>🔑 Hero Code Changed</h2>
+          <div class="modal-badges">
+            <span class="pill pill-gold">💾 Local Backup Saved</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" data-close>✕</button>
+      </div>
+
+      <p class="dialogue-text">
+        Your Hero Code session for <strong>${escapeHtml(heroName || 'your hero')}</strong> was updated or expired.
+      </p>
+      <p class="muted-text">
+        Don't worry — Pip saved a safe backup of your progress right on this device! Ask a parent for your new Hero Code, or keep playing locally.
+      </p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close>Keep Playing Locally</button>
+        <button id="btn-expired-enter-code" type="button" class="btn btn-sky">🔑 Enter Hero Code</button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    this.content.querySelector('#btn-expired-enter-code')?.addEventListener('click', () => {
+      this.close();
+      if (onEnterHeroCode) onEnterHeroCode();
+    });
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
   }
 }

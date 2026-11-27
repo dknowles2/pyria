@@ -1942,7 +1942,7 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                 accounts = self.server.db.list_accounts(extra_email=email)
             else:
                 accounts = [email] if email else []
-            role = "admin" if is_admin else ("parent" if email else "guest")
+            role = "admin" if is_admin else ("player" if email else "guest")
             self._send_json(
                 HTTPStatus.OK,
                 {
