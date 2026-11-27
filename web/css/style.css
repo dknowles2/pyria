@@ -2193,3 +2193,69 @@ textarea, input, pre, code {
 .hero-code-input:focus {
   border-color: var(--accent-sky);
 }
+
+/* ==================== IN-GAME NAVIGATION & PAUSE MENU ==================== */
+.hud-back-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.game-menu-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(15, 22, 40, 0.72);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 14px;
+}
+
+.game-menu-hero-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.game-menu-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.game-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.game-menu-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.game-menu-title-btn {
+  border-color: rgba(251, 113, 133, 0.35);
+  color: #fecdd3;
+}
+
+.game-menu-title-btn:hover {
+  border-color: rgba(251, 113, 133, 0.7);
+  background: rgba(251, 113, 133, 0.14);
+}
+
+.game-menu-settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}

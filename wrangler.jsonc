@@ -9,6 +9,10 @@
     "run_worker_first": [
       "/api/*",
       "/py-sandbox.html",
+      "/new",
+      "/new/*",
+      "/play",
+      "/play/*",
       "/console",
       "/console/*",
       "/admin",

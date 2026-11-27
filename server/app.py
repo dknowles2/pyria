@@ -1763,6 +1763,10 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         elif decoded.startswith("/assets/"):
             base_dir = self.server.assets_dir
             rel = decoded[len("/assets/") :]
+        elif decoded in ("/new", "/new/", "/play") or decoded.startswith("/play/"):
+            base_dir = self.server.web_dir
+            rel = "index.html"
+            no_store = True
         elif decoded in ("/builder", "/builder/", "/console", "/console/"):
             if not self._check_builder_auth(html=True):
                 return
