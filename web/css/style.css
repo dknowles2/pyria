@@ -2181,6 +2181,17 @@ textarea, input, pre, code {
   opacity: 0.82;
 }
 
+.mc-choice-card:disabled {
+  cursor: default;
+  transform: none;
+}
+
+.intro-continue-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
 .mc-letter {
   width: 30px;
   height: 30px;

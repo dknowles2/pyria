@@ -519,6 +519,19 @@ export class ModalManager {
       return found ? found.label : cid;
     });
 
+    const hasIntroChoice = Boolean(
+      trial.trialType !== 'multiple_choice' &&
+        trial.introChoice &&
+        Array.isArray(trial.introChoice.choices) &&
+        trial.introChoice.choices.length > 0
+    );
+
+    const hasExistingDraft = (() => {
+      if (!trial.starterCode || typeof savedDraft !== 'string' || !savedDraft.trim()) return false;
+      const starterText = trial.starterCode[currentMode] || trial.starterCode.standard || '';
+      return savedDraft !== starterText;
+    })();
+
     const renderCompletedSummary = () => {
       const useTrainingSpells = era?.id === 'era-01-8bit' && (Number(realm?.number) || 1) <= 3;
       const trialQuickKeys = getQuickKeysForContext({ useTrainingSpells });
@@ -565,6 +578,8 @@ export class ModalManager {
         trialOpenedAt = Date.now();
         if (trial.trialType === 'multiple_choice') {
           renderMultipleChoiceView(true);
+        } else if (hasIntroChoice) {
+          renderIntroChoiceView(true);
         } else {
           renderEditorView(true);
         }
@@ -807,6 +822,114 @@ export class ModalManager {
       });
     };
 
+    const renderIntroChoiceView = (isPractice) => {
+      const intro = trial.introChoice;
+      const choices = Array.isArray(intro.choices) ? intro.choices : [];
+      const letters = ['A', 'B', 'C', 'D'];
+      const stepTitle = intro.title ? `${trial.title} — ${intro.title}` : trial.title;
+
+      this.open(
+        `
+        <div class="modal-header">
+          <div>
+            <h2>${isPractice ? '✓ ' : '🧠 '}${escapeHtml(stepTitle)}</h2>
+            <div class="modal-badges">
+              <span class="pill pill-violet">🧠 Step 1 of 2: Learn It First!</span>
+              <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
+              ${
+                isPractice
+                  ? '<span class="pill pill-green">✓ COMPLETED · Practice Mode</span>'
+                  : `<span class="pill pill-gold">+${trial.shardReward} Byte Shards (after Step 2)</span>`
+              }
+              ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn-sm btn-ghost" data-close>✕</button>
+        </div>
+
+        <p class="dialogue-text">${renderSafeMarkdown(intro.prompt)}</p>
+
+        <div class="objective-box">
+          <strong>Quick Check (Step 1 of 2):</strong> ${renderSafeMarkdown(intro.question)}
+        </div>
+
+        ${intro.codeSnippet ? `<pre class="mc-code-snippet"><code>${escapeHtml(intro.codeSnippet)}</code></pre>` : ''}
+
+        <div id="intro-choices-grid" class="mc-choices-grid">
+          ${choices
+            .map(
+              (c, idx) => `
+              <button type="button" class="mc-choice-card" data-choice-id="${escapeHtml(c.id)}">
+                <span class="mc-letter">${letters[idx] || idx + 1}</span>
+                <div class="mc-choice-body">
+                  <div class="mc-choice-label">${escapeHtml(c.label)}</div>
+                  ${c.code ? `<pre class="mc-choice-code">${escapeHtml(c.code)}</pre>` : ''}
+                </div>
+              </button>
+            `
+            )
+            .join('')}
+        </div>
+
+        <div id="intro-output" class="pip-console">
+          <div class="pip-console-header">🐉 Pip says:</div>
+          <div class="pip-console-body">Pick the right answer first to unlock Step 2 and write your own Python spell!</div>
+        </div>
+
+        <div id="intro-continue-row" class="intro-continue-row hidden">
+          <button id="btn-intro-continue" type="button" class="btn btn-primary btn-lg">⌨️ Now Try It Yourself! (Step 2 of 2) →</button>
+        </div>
+        `,
+        'modal-wide'
+      );
+
+      const outputEl = this.content.querySelector('#intro-output');
+      const continueRow = this.content.querySelector('#intro-continue-row');
+      const continueBtn = this.content.querySelector('#btn-intro-continue');
+      const cards = Array.from(this.content.querySelectorAll('.mc-choice-card'));
+
+      cards.forEach((card) => {
+        card.addEventListener('click', () => {
+          const choiceId = card.dataset.choiceId;
+          const choice = choices.find((c) => c.id === choiceId);
+          if (!choice) return;
+          const isCorrect = choice.id === intro.correctChoiceId;
+
+          if (isCorrect) {
+            card.classList.add('correct');
+            cards.forEach((btn) => {
+              btn.disabled = true;
+            });
+            audio.playSuccess();
+            outputEl.className = 'pip-console success';
+            outputEl.innerHTML = `
+              <div class="pip-console-header">🐉 Spot on! You unlocked Step 2!</div>
+              <div class="pip-console-body">${renderSafeMarkdown(choice.explanation || 'Great job! Now try writing it yourself!')}</div>
+            `;
+            continueRow.classList.remove('hidden');
+            continueBtn?.focus();
+          } else {
+            card.classList.add('wrong');
+            audio.playError();
+            outputEl.className = 'pip-console error';
+            outputEl.innerHTML = `
+              <div class="pip-console-header">🐉 Not quite — try another choice!</div>
+              <div class="pip-console-body">${renderSafeMarkdown(choice.explanation || 'Look closely at the Python example and try again!')}</div>
+            `;
+          }
+        });
+      });
+
+      continueBtn?.addEventListener('click', () => {
+        audio.playClick();
+        renderEditorView(isPractice);
+      });
+
+      this.content.querySelectorAll('[data-close]').forEach((btn) => {
+        btn.addEventListener('click', () => this.close());
+      });
+    };
+
     const renderEditorView = (isPractice) => {
       const starterText = trial.starterCode[currentMode] || trial.starterCode.standard || '';
       const hasRestoredDraft =
@@ -858,6 +981,7 @@ export class ModalManager {
           <div>
             <h2>${isPractice ? '✓ ' : isFixBug ? '🐛 ' : '★ '}${escapeHtml(trial.title)}</h2>
             <div class="modal-badges">
+              ${hasIntroChoice ? '<span class="pill pill-green">✓ Step 1 Done · ⌨️ Step 2 of 2: Code It!</span>' : ''}
               ${isFixBug ? '<span class="pill pill-rose">🐛 Fix the Bug!</span>' : ''}
               <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
               <span class="pill pill-violet" id="trial-diff-badge">Mode: ${escapeHtml(currentMode)}</span>
@@ -945,6 +1069,7 @@ export class ModalManager {
             💡 Ask Pip (Hint 1/${initialMaxHints})
           </button>
           <button id="btn-trial-reset" class="btn btn-ghost">↺ Reset Code</button>
+          ${hasIntroChoice ? '<button id="btn-review-intro" class="btn btn-ghost">← Review Concept</button>' : ''}
         </div>
 
         <div id="trial-hints-area" class="hidden"></div>
@@ -1210,6 +1335,11 @@ export class ModalManager {
 
       runBtn.addEventListener('click', runSpell);
       attachCodeEditorKeys(codeEl, runSpell);
+      this.content.querySelector('#btn-review-intro')?.addEventListener('click', () => {
+        audio.playClick();
+        if (!isPractice && onDraftFlush) onDraftFlush(trial.id, codeEl.value);
+        renderIntroChoiceView(isPractice);
+      });
       this.content.querySelectorAll('[data-close]').forEach((btn) => {
         btn.addEventListener('click', () => this.close());
       });
@@ -1219,6 +1349,8 @@ export class ModalManager {
       renderCompletedSummary();
     } else if (trial.trialType === 'multiple_choice') {
       renderMultipleChoiceView(false);
+    } else if (hasIntroChoice && !hasExistingDraft) {
+      renderIntroChoiceView(false);
     } else {
       renderEditorView(false);
     }

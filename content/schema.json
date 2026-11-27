@@ -261,6 +261,76 @@
               }
             }
           }
+        },
+        "introChoice": {
+          "type": "object",
+          "description": "Optional Step 1 Predict & Choose multiple-choice warm-up shown before the code editor when a code or fix_bug trial introduces a new Python concept.",
+          "required": [
+            "prompt",
+            "question",
+            "choices",
+            "correctChoiceId"
+          ],
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Optional short subtitle for the Step 1 concept warm-up."
+            },
+            "prompt": {
+              "type": "string",
+              "description": "Friendly explanation introducing the new concept before the choice question."
+            },
+            "question": {
+              "type": "string",
+              "description": "Specific multiple-choice question to check understanding before coding."
+            },
+            "codeSnippet": {
+              "type": "string",
+              "description": "Optional read-only Python snippet shown above the choices."
+            },
+            "choices": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 4,
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "label",
+                  "explanation"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "enum": [
+                      "a",
+                      "b",
+                      "c",
+                      "d"
+                    ]
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "explanation": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "correctChoiceId": {
+              "type": "string",
+              "enum": [
+                "a",
+                "b",
+                "c",
+                "d"
+              ]
+            }
+          }
         }
       }
     },
