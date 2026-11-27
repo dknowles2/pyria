@@ -312,7 +312,12 @@
           <span class="pip-tag">🐉 Pip</span>
           <span id="hud-objective">Walk with WASD or Arrow keys. Press E or click nearby to talk to Elder Ada!</span>
         </div>
-        <div id="hud-py-status" class="py-status pill pill-muted">Python: Loading...</div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <button id="btn-hud-autopath" type="button" class="btn btn-sm btn-sky" title="Auto-walk to your next Trial or objective (or click any minimap marker to travel)">
+            🧭 Walk to Next
+          </button>
+          <div id="hud-py-status" class="py-status pill pill-muted">Python: Loading...</div>
+        </div>
       </footer>
     </section>
 

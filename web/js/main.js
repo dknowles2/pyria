@@ -2291,6 +2291,28 @@ function wireControls() {
     openGameMenu();
   });
 
+  $('#btn-hud-autopath')?.addEventListener('click', () => {
+    if (!state.world) return;
+    if (state.world.autoPath) {
+      state.world.cancelAutoPath();
+      audio.playClick();
+      return;
+    }
+    const res = state.world.startAutoPathToNextObjective();
+    if (!res.ok) {
+      audio.playError();
+      if (res.reason === 'blocked') {
+        showToast('🧭 Path is blocked right now — try unlocking the gate or bridge first!');
+      } else {
+        showToast('✨ No remaining objectives in this Realm!');
+      }
+    } else if (res.arrived) {
+      showToast(`✨ You're already right at ${res.entity?.label || 'your next objective'}!`);
+    } else {
+      showToast(`🧭 Walking to ${res.entity?.label || 'next Trial'}… (press WASD/Arrows to cancel)`);
+    }
+  });
+
   // Escape opens the Game Menu when in the overworld with no modal or cutscene active
   window.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || e.defaultPrevented) return;
@@ -2592,6 +2614,25 @@ async function init() {
       },
       onNearestEntityChange: (entity) => {
         updateInteractPrompt(entity);
+      },
+      onAutoPathChange: (path) => {
+        const btn = $('#btn-hud-autopath');
+        if (!btn) return;
+        btn.textContent = path ? '⏹ Stop Walking' : '🧭 Walk to Next';
+      },
+      onFastTravel: (ent) => {
+        showToast(`✨ Fast-traveled to ${ent.label || 'marker'}!`);
+        persistSave().catch(() => {});
+      },
+      onMinimapAutoPath: (ent, res) => {
+        if (!res?.ok) {
+          audio.playError();
+          showToast(`🧭 Can't reach ${ent.label || 'that marker'} yet — clear earlier paths first!`);
+        } else if (res.arrived) {
+          showToast(`✨ You're already next to ${ent.label || 'that marker'}!`);
+        } else {
+          showToast(`🧭 Walking to ${ent.label || 'marker'}… (press WASD/Arrows to cancel)`);
+        }
       },
       onInteract: (entity) => handleEntityInteract(entity),
     });
