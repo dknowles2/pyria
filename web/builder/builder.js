@@ -242,7 +242,7 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, playToken = '', title, n
         ? `
         <div style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; border-radius:12px; background:rgba(56,189,248,0.08); border:1.5px solid rgba(56,189,248,0.38); text-align:center;">
           <div style="font-size:12px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent-sky);">
-            📱 Scan on Kid's Tablet or Phone to Play
+            📱 Scan on Another Device to Play
           </div>
           <div class="console-qr-card">${qrSvg}</div>
           <div class="muted-text" style="font-size:12px; margin:0;">
@@ -266,7 +266,7 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, playToken = '', title, n
     <p class="muted-text" style="margin:0;">
       ${escapeHtml(
         note ||
-          'Shown once — scan on your child’s device or save the code to type under "Enter Hero Code". You can generate a new code anytime.'
+          'Shown once — scan on another device or save the code to type under "Enter Hero Code". You can generate a new code anytime.'
       )}
     </p>
     <div class="console-modal-footer">
@@ -312,7 +312,7 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, playToken = '', title, n
 function openAddChildHeroModal() {
   openConsoleModal(`
     <div class="console-modal-header">
-      <h2>✨ Add Child Hero</h2>
+      <h2>✨ Add Hero</h2>
       <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
     </div>
     <div class="field">
@@ -383,7 +383,7 @@ function openAddChildHeroModal() {
         heroName: res.save?.heroName || heroName,
         heroCode: res.heroCode,
         playToken: res.playToken || '',
-        title: '🔑 Child Hero Created!',
+        title: '🔑 Hero Created!',
       });
     } catch (err) {
       if (errEl) {
@@ -411,7 +411,7 @@ function openClaimHeroModal() {
       <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
     </div>
     <p class="muted-text" style="margin:0;">
-      Enter the Hero Code from your child's device to link their hero to your Parent Console.
+      Enter a Hero Code to link that hero to your account.
     </p>
     <div class="field">
       <label for="claim-hero-code">Hero Code</label>
@@ -783,7 +783,7 @@ function renderHeroCards() {
           Generate a new Hero Code for <strong style="color:var(--text-main);">${escapeHtml(save.heroName)}</strong>?
         </p>
         <p class="muted-text" style="margin:0;">
-          This will immediately sign out any child device using the old code. Their progress stays safe in the cloud.
+          This will immediately sign out any device using the old code. Progress stays safe in the cloud.
         </p>
         <div id="rotate-code-error" class="console-error-msg hidden"></div>
         <div class="console-modal-footer">
@@ -807,7 +807,7 @@ function renderHeroCards() {
             heroCode: res.heroCode,
             playToken: res.playToken,
             title: '🔄 New Hero Code Generated',
-            note: 'Old child-device sessions have been signed out. Scan on your child’s device or share this code — you can generate a new one anytime.',
+            note: 'Old device sessions have been signed out. Scan on another device or share this code — you can generate a new one anytime.',
           });
         } catch (err) {
           if (errEl) {
@@ -2941,7 +2941,7 @@ async function handlePendingParentLinkToken(linkToken) {
         ${escapeHtml(err.message || 'This parent link has expired or is no longer available.')}
       </p>
       <p class="muted-text" style="margin:0;">
-        Ask your child to tap <strong>🔗 Link Parent</strong> on their screen to generate a fresh QR code, or type their Hero Code manually.
+        Tap <strong>🔗 Link Account</strong> on the hero's title screen to generate a fresh QR code, or type the Hero Code manually.
       </p>
       <div class="console-modal-footer">
         <button type="button" class="btn btn-ghost" data-close-modal>Close</button>
@@ -3015,11 +3015,11 @@ async function handlePendingParentLinkToken(linkToken) {
             <strong style="color:var(--text-main);">${escapeHtml(linkedName)}</strong> is now linked to <strong style="color:var(--text-main);">${escapeHtml(parentLabel)}</strong>.
           </p>
           <p class="muted-text" style="margin:0;">
-            Since you linked on your child's device, tap below to sign out of the Parent Console while keeping ${escapeHtml(linkedName)} signed in to play!
+            Since this device also has a Hero signed in, you can switch back to Hero-only mode (great for handing a shared tablet back to a kid) or stay signed in.
           </p>
           <div class="console-modal-footer">
             <button type="button" class="btn btn-ghost" data-close-modal>Stay in Console</button>
-            <button id="btn-hand-back-to-kid" type="button" class="btn btn-primary">🎮 Hand Device Back to Kid</button>
+            <button id="btn-hand-back-to-kid" type="button" class="btn btn-primary">🎮 Switch to Hero-Only Mode</button>
           </div>
         `);
         $('#btn-hand-back-to-kid')?.addEventListener('click', async () => {
@@ -3088,7 +3088,7 @@ function showCloudflareSignInScreen() {
   }
   if (linkBannerEl) {
     if (pendingLink) {
-      linkBannerEl.textContent = '🔗 Ready to link a Hero to your Parent Console — sign in below to finish!';
+      linkBannerEl.textContent = '🔗 Ready to link a Hero to your account — sign in below to finish!';
       linkBannerEl.classList.remove('hidden');
     } else {
       linkBannerEl.classList.add('hidden');
@@ -3183,14 +3183,14 @@ function configureConsoleMode() {
   const titleEl = $('#topbar-title');
   const subEl = $('#topbar-sub');
   if (titleEl) {
-    titleEl.textContent = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Parent Console';
+    titleEl.textContent = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Console';
   }
   if (subEl) {
     subEl.textContent = state.isAdmin
       ? 'Global hero progress, trial calibration, account management & Hero Codes'
-      : 'Real-time child progress, Hero Codes & learning settings';
+      : 'Sync heroes across devices, track progress, Hero Codes & learning settings';
   }
-  document.title = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Parent Console';
+  document.title = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Console';
 
   $('#passcode-bar')?.classList.add('hidden');
   $('#tab-story')?.classList.add('hidden');

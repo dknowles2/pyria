@@ -32,7 +32,7 @@ import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127n';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127o';
 import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 import { AppRouter } from './router.js?v=20261127l';
 
@@ -681,11 +681,11 @@ function renderAccountIdentityBar() {
     } else if (auth.role === 'parent') {
       if (pill) {
         pill.className = 'pill pill-blue';
-        pill.textContent = auth.parentEmail ? `👤 Parent: ${auth.parentEmail}` : '👤 Parent';
+        pill.textContent = auth.parentEmail ? `👤 ${auth.parentEmail}` : '👤 Signed In';
       }
       if (builderBtn) {
         builderBtn.href = '/console';
-        builderBtn.textContent = '🛡️ Parent Console';
+        builderBtn.textContent = '👤 Console';
         builderBtn.classList.remove('hidden');
       }
       parentsBtn?.classList.add('hidden');
@@ -695,7 +695,7 @@ function renderAccountIdentityBar() {
       if (pill) {
         pill.className = 'pill pill-green';
         pill.textContent = auth.linkedToParent
-          ? `🧙 Hero: ${auth.heroName || 'Code-Tamer'} · 🛡️ Linked`
+          ? `🧙 Hero: ${auth.heroName || 'Code-Tamer'} · ✓ Account Linked`
           : `🧙 Hero: ${auth.heroName || 'Code-Tamer'}`;
       }
       builderBtn?.classList.add('hidden');
@@ -773,7 +773,7 @@ function maybeShowGuestCloudNudge(save) {
     return;
   }
   setTimeout(() => {
-    showToast('☁️ Tip: Tap Save to Cloud anytime to back up your hero and link a parent!');
+    showToast('☁️ Tip: Tap Save to Cloud anytime to back up your hero across devices!');
   }, 2400);
 }
 
@@ -886,10 +886,10 @@ async function openLinkToParentFlow() {
       if ($('#screen-title')?.classList.contains('active')) {
         await refreshSavesList();
       }
-      showToast('This hero is already linked to a Parent Console!');
+      showToast('This hero is already linked to an account!');
       return;
     }
-    showToast(`Could not create parent link: ${err?.detail || err?.message || 'Try again'}`);
+    showToast(`Could not create link: ${err?.detail || err?.message || 'Try again'}`);
   }
 }
 
@@ -951,7 +951,7 @@ async function refreshSavesList() {
       const guestBadgeHtml = s.isGuest
         ? '<div class="save-guest-pill">Local Save (This Device)</div>'
         : isCloudflare && s.linkedToParent
-          ? '<div class="save-linked-pill">☁️ Cloud Save · 🛡️ Parent Linked</div>'
+          ? '<div class="save-linked-pill">☁️ Cloud Save · ✓ Account Linked</div>'
           : isCloudflare
             ? '<div class="save-cloud-pill">☁️ Cloud Save</div>'
             : '';
@@ -959,7 +959,7 @@ async function refreshSavesList() {
         isCloudflare && s.isGuest
           ? '<button type="button" class="btn btn-sm btn-sky btn-card-hero-code">☁️ Save to Cloud</button>'
           : isCloudflare && !s.isGuest && !s.linkedToParent && state.me?.auth?.role === 'hero'
-            ? '<button type="button" class="btn btn-sm btn-ghost btn-card-link-parent">🔗 Link to Parent</button>'
+            ? '<button type="button" class="btn btn-sm btn-ghost btn-card-link-parent">🔗 Link to Account</button>'
             : '';
       card.innerHTML = `
         <div class="save-card-info">
@@ -995,7 +995,7 @@ async function refreshSavesList() {
         linkParentBtn.textContent = 'Generating...';
         await openLinkToParentFlow();
         linkParentBtn.disabled = false;
-        linkParentBtn.textContent = '🔗 Link to Parent';
+        linkParentBtn.textContent = '🔗 Link to Account';
       });
 
       card.addEventListener('click', async () => {
@@ -1140,7 +1140,7 @@ async function createHeroForCurrentAuth(newSavePayload) {
       badge: `Current: ${activeHeroLabel}`,
       message: `This will sign out ${activeHeroLabel} on this device so a new adventure can begin.`,
       subtext: linked
-        ? `${activeHeroLabel} is safely linked to a Parent Console — a parent can always share a fresh Hero Code anytime!`
+        ? `${activeHeroLabel} is safely linked to an account — you can always generate a fresh Hero Code in the Console!`
         : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later.`,
       confirmLabel: 'Start New Hero',
       confirmClass: 'btn-primary',
@@ -2056,7 +2056,7 @@ function wireControls() {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '🔗 Link Parent';
+        btn.textContent = '🔗 Link Account';
       }
     }
   });
@@ -2070,7 +2070,7 @@ function wireControls() {
       badge: `Signed in as ${activeHeroLabel}`,
       message: `Sign out ${activeHeroLabel} on this device?`,
       subtext: linked
-        ? `${activeHeroLabel}'s cloud progress is safe and linked to a Parent Console — a parent can always generate a fresh Hero Code if needed.`
+        ? `${activeHeroLabel}'s cloud progress is safe and linked to an account — you can always generate a fresh Hero Code in the Console.`
         : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later!`,
       confirmLabel: 'Switch Hero',
       confirmClass: 'btn-sky',

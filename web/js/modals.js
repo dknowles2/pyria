@@ -1588,14 +1588,14 @@ export class ModalManager {
           linkUrl
             ? `
             <div id="hero-code-parent-zone" class="parent-link-zone">
-              <div class="hero-code-zone-label">🛡️ For a Parent — Instant Link</div>
-              <h3>Have a Parent Scan to Link</h3>
+              <div class="hero-code-zone-label">👤 Back Up &amp; Track Progress</div>
+              <h3>Scan to Link to an Account</h3>
               <p class="muted-text" style="margin:0; font-size:12.5px;">
-                Track live Python progress, adjust difficulty &amp; Pip hints, and back up this hero.
+                Connect to your account or a parent's phone to sync progress, tune difficulty &amp; Pip hints, and recover this hero anytime.
               </p>
               ${qrSvg ? `<div class="qr-card">${qrSvg}</div>` : ''}
               <a href="${escapeHtml(linkUrl)}" class="parent-same-device-link">
-                Parent on this device? Open Parent Console →
+                Already on your device? Link in Console →
               </a>
             </div>
             `
@@ -1604,7 +1604,7 @@ export class ModalManager {
       </div>
 
       <p class="muted-text" style="margin-top:6px; font-size:12.5px;">
-        <strong>No parent nearby right now?</strong> No problem — you can tap <strong>🔗 Link Parent</strong> on the title screen anytime later.
+        <strong>Want to link later?</strong> No problem — tap <strong>🔗 Link Account</strong> on the title screen anytime.
       </p>
 
       <div class="modal-footer">
@@ -1653,10 +1653,10 @@ export class ModalManager {
             if (zone) {
               zone.classList.add('linked');
               zone.innerHTML = `
-                <div class="pill pill-green">✓ Linked to Parent!</div>
-                <h3>${escapeHtml(heroName || 'Your hero')} is connected to a Parent Console</h3>
+                <div class="pill pill-green">✓ Linked to Account!</div>
+                <h3>${escapeHtml(heroName || 'Your hero')} is connected to an account</h3>
                 <p class="muted-text" style="margin:0; font-size:12.5px;">
-                  Your parent can now see your progress and generate a fresh Hero Code if you ever forget it.
+                  You can now track progress and generate a fresh Hero Code anytime in the Console.
                 </p>
               `;
             }
@@ -1693,7 +1693,7 @@ export class ModalManager {
       `
       <div class="modal-header">
         <div>
-          <h2>🔗 Link ${escapeHtml(heroName || 'Hero')} to a Parent</h2>
+          <h2>🔗 Link ${escapeHtml(heroName || 'Hero')} to an Account</h2>
           <div class="modal-badges">
             <span class="pill pill-blue">Valid for ${mins} minutes</span>
           </div>
@@ -1702,13 +1702,13 @@ export class ModalManager {
       </div>
 
       <div id="link-parent-zone" class="parent-link-zone">
-        <h3>Scan with a Parent's Phone</h3>
+        <h3>Scan with a Phone or Open Console</h3>
         <p class="muted-text" style="margin:0; font-size:13px;">
-          Have a parent scan this QR code to view live progress, tune hints, and back up your hero. You can create a fresh link anytime.
+          Scan this QR code on your phone (or a parent's phone) to view live progress, tune settings, and back up your hero. You can create a fresh link anytime.
         </p>
         ${qrSvg ? `<div class="qr-card">${qrSvg}</div>` : ''}
         <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:4px;">
-          <button id="btn-copy-parent-link" type="button" class="btn btn-sm btn-gold">🔗 Copy Parent Link</button>
+          <button id="btn-copy-parent-link" type="button" class="btn btn-sm btn-gold">🔗 Copy Link</button>
           <a href="${escapeHtml(linkUrl)}" class="btn btn-sm btn-ghost">Open on This Device →</a>
         </div>
       </div>
@@ -1754,10 +1754,10 @@ export class ModalManager {
             if (zone) {
               zone.classList.add('linked');
               zone.innerHTML = `
-                <div class="pill pill-green" style="font-size:13px;">✓ Linked to Parent!</div>
+                <div class="pill pill-green" style="font-size:13px;">✓ Linked to Account!</div>
                 <h3>${escapeHtml(heroName || 'Your hero')} is now connected!</h3>
                 <p class="muted-text" style="margin:0; font-size:13px;">
-                  Your parent can now track your progress and help recover your hero anytime.
+                  You can now track progress and recover your hero anytime in the Console.
                 </p>
               `;
             }
@@ -1883,7 +1883,7 @@ export class ModalManager {
         Your Hero Code session for <strong>${escapeHtml(heroName || 'your hero')}</strong> was updated or expired.
       </p>
       <p class="muted-text">
-        Don't worry — Pip saved a safe backup of your progress right on this device! Ask a parent for your new Hero Code, or keep playing locally.
+        Don't worry — Pip saved a safe backup of your progress right on this device! Get a fresh Hero Code from the Console, or keep playing locally.
       </p>
 
       <div class="modal-footer">
@@ -2190,7 +2190,7 @@ export class ModalManager {
         ${escapeHtml(message || 'That play link has expired or was replaced by a newer Hero Code.')}
       </p>
       <p class="muted-text" style="margin-top:0;">
-        Ask your parent to generate a fresh QR code in the Parent Console, or type your Hero Code below!
+        Generate a fresh QR code in the Console, or type your Hero Code below!
       </p>
 
       <div class="modal-footer">
