@@ -914,6 +914,468 @@ class PyriaServerTestCase(unittest.TestCase):
                 srv.server_close()
                 t.join(timeout=3)
 
+    def test_hero_name_and_save_field_validation(self) -> None:
+        # 1. Full client save schema (matching web/js/api.js createDefaultSaveState) succeeds
+        full_client_save = {
+            "heroName": "Al",  # exact min boundary (2 chars)
+            "appearance": {
+                "skin": "warm_tan",
+                "hair": "spiky",
+                "tunic": "emerald",
+                "hat": None,
+                "boots": "boots_default",
+                "shield": None,
+                "cloak": None,
+                "aura": None,
+                "pipScarf": None,
+            },
+            "eraId": "era-01-8bit",
+            "realmId": "realm-01-meadow",
+            "visualEra": "8bit",
+            "byteShards": 0,
+            "stats": {"charisma": 0, "courage": 0},
+            "solvedTrials": [],
+            "completedTrials": [],
+            "trialDrafts": {"trial-01-01": 'print("hi")\n'},
+            "seenCutscenes": ["intro-01"],
+            "foundEasterEggs": [],
+            "unlockedSpells": [],
+            "rescuedDragons": [],
+            "openedChests": [],
+            "ownedUnlockIds": [],
+            "position": {"realmId": "realm-01-meadow", "x": 120, "y": 240},
+        }
+        status, _, raw = self._request("POST", "/api/saves", full_client_save)
+        self.assertEqual(status, 201)
+        created = json.loads(raw)["save"]
+        save_id = created["id"]
+        self.assertEqual(created["heroName"], "Al")
+
+        # 2. Exact max boundary (24 chars) and whitespace trimming
+        max_name = "A" * 24
+        status, _, raw = self._request(
+            "PUT", f"/api/saves/{save_id}", {**created, "heroName": f"  {max_name}  "}
+        )
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(raw)["save"]["heroName"], max_name)
+
+        # Partial PUT omitting heroName preserves existing heroName
+        status, _, raw = self._request(
+            "PUT", f"/api/saves/{save_id}", {"byteShards": 42}
+        )
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(raw)["save"]["heroName"], max_name)
+        self.assertEqual(json.loads(raw)["save"]["byteShards"], 42)
+
+        # 3. Reject invalid heroName on POST and PUT
+        for bad_name in (
+            "",
+            " ",
+            "A",
+            "  A  ",
+            "B" * 25,
+            "龍" * 25,
+            "Rowan\nEvil",
+            "Rowan\rEvil",
+            "Rowan\tTab",
+            "Rowan\x00Null",
+            "Rowan\x1b[31m",
+            "Rowan\u202eBidi",
+            "Rowan\u2028LineSep",
+            "Rowan\u2029ParaSep",
+            123,
+            None,
+            ["Rowan"],
+        ):
+            st, _, raw = self._request("POST", "/api/saves", {"heroName": bad_name})
+            self.assertEqual(st, 400, f"Expected 400 for POST heroName={bad_name!r}, got {st}")
+            self.assertIn("error", json.loads(raw))
+
+            st, _, raw = self._request(
+                "PUT", f"/api/saves/{save_id}", {"heroName": bad_name}
+            )
+            self.assertEqual(st, 400, f"Expected 400 for PUT heroName={bad_name!r}, got {st}")
+            self.assertIn("error", json.loads(raw))
+
+        # Non-ASCII exact max (24 CJK chars) and ZWJ emoji hero names accepted
+        cjk_24 = "龍" * 24
+        st, _, raw = self._request("POST", "/api/saves", {"heroName": cjk_24})
+        self.assertEqual(st, 201)
+        self.assertEqual(json.loads(raw)["save"]["heroName"], cjk_24)
+
+        zwj_name = "👨‍👩‍👧 Kid"
+        st, _, raw = self._request("POST", "/api/saves", {"heroName": zwj_name})
+        self.assertEqual(st, 201)
+        self.assertEqual(json.loads(raw)["save"]["heroName"], zwj_name)
+
+        # byteShards clamped to [0, MAX_BYTE_SHARDS] and bool rejected to fallback
+        st, _, raw = self._request(
+            "PUT", f"/api/saves/{save_id}", {"byteShards": -50}
+        )
+        self.assertEqual(st, 200)
+        self.assertEqual(json.loads(raw)["save"]["byteShards"], 0)
+
+        st, _, raw = self._request(
+            "PUT", f"/api/saves/{save_id}", {"byteShards": 10**20}
+        )
+        self.assertEqual(st, 200)
+        self.assertEqual(
+            json.loads(raw)["save"]["byteShards"], pyria_app.MAX_BYTE_SHARDS
+        )
+
+        st, _, raw = self._request(
+            "POST", "/api/saves", {"heroName": "BoolShards", "byteShards": True}
+        )
+        self.assertEqual(st, 201)
+        self.assertEqual(json.loads(raw)["save"]["byteShards"], 0)
+
+        # Legacy save with non-conforming heroName ("X") can still be PUT when echoing "X",
+        # while renaming to another invalid name ("Y") is rejected with 400
+        legacy_id = "legacy-save-001"
+        with self.server.db._connect() as conn:
+            conn.execute(
+                "INSERT INTO saves (id, hero_name, owner_email, state_json, created_at, updated_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    legacy_id,
+                    "X",
+                    None,
+                    json.dumps({"id": legacy_id, "heroName": "X", "byteShards": 5}),
+                    "2026-01-01T00:00:00Z",
+                    "2026-01-01T00:00:00Z",
+                ),
+            )
+        st, _, raw = self._request(
+            "PUT",
+            f"/api/saves/{legacy_id}",
+            {"heroName": "X", "byteShards": 15, "solvedTrials": ["trial-01-01"]},
+        )
+        self.assertEqual(st, 200)
+        self.assertEqual(json.loads(raw)["save"]["heroName"], "X")
+        self.assertEqual(json.loads(raw)["save"]["byteShards"], 15)
+
+        st, _, _ = self._request(
+            "PUT", f"/api/saves/{legacy_id}", {"heroName": "Y", "byteShards": 20}
+        )
+        self.assertEqual(st, 400)
+
+        # Missing heroName on POST -> 400
+        st, _, raw = self._request("POST", "/api/saves", {"realmId": "realm-01-meadow"})
+        self.assertEqual(st, 400)
+        self.assertIn("heroName", json.loads(raw)["error"])
+
+        # 4. Disallowed top-level keys -> 400 on POST and PUT
+        st, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {"heroName": "Rowan", "evilKey": "boom", "extraBlob": [1, 2, 3]},
+        )
+        self.assertEqual(st, 400)
+        self.assertIn("Disallowed save field", json.loads(raw)["error"])
+
+        st, _, raw = self._request(
+            "PUT",
+            f"/api/saves/{save_id}",
+            {"heroName": "Rowan", "injectedField": True},
+        )
+        self.assertEqual(st, 400)
+        self.assertIn("Disallowed save field", json.loads(raw)["error"])
+
+        # 5. Invalid types on allowed fields -> 400
+        for bad_payload in (
+            {"heroName": "Rowan", "solvedTrials": "not-a-list"},
+            {"heroName": "Rowan", "solvedTrials": [123]},
+            {"heroName": "Rowan", "appearance": "not-a-dict"},
+            {"heroName": "Rowan", "stats": {"courage": True}},
+            {"heroName": "Rowan", "position": ["x", "y"]},
+            {"heroName": "Rowan", "trialDrafts": {"trial-01-01": 999}},
+            {"heroName": "Rowan", "realmId": "realm-01\x00bad"},
+        ):
+            st, _, raw = self._request("POST", "/api/saves", bad_payload)
+            self.assertEqual(st, 400, f"Expected 400 for {bad_payload!r}, got {st}")
+            self.assertIn("error", json.loads(raw))
+
+    def test_save_payload_size_and_attempt_code_caps(self) -> None:
+        # 1. Raw body > 128 KiB on POST /api/saves -> 413
+        big_drafts = {
+            f"trial-{i:03d}": "x" * (28 * 1024) for i in range(6)
+        }  # ~168 KiB raw
+        st, _, raw = self._request(
+            "POST", "/api/saves", {"heroName": "Rowan", "trialDrafts": big_drafts}
+        )
+        self.assertEqual(st, 413)
+        self.assertIn("error", json.loads(raw))
+
+        # 2. Single trialDraft > 32 KiB -> 413
+        st, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {
+                "heroName": "Rowan",
+                "trialDrafts": {
+                    "trial-01-01": "a" * (pyria_app.MAX_ATTEMPT_CODE_BYTES + 1)
+                },
+            },
+        )
+        self.assertEqual(st, 413)
+        self.assertIn("error", json.loads(raw))
+
+        # 3. Serialized state_json > 128 KiB even when raw body is just under 128 KiB -> 413
+        # Construct a compact JSON payload whose raw size is < 128 KiB, so adding server
+        # metadata (id, ownerEmail, createdAt, updatedAt + default json spacing) pushes
+        # state_json over MAX_SAVE_STATE_BYTES.
+        drafts_near_limit = {
+            "trial-01": "a" * (30 * 1024),
+            "trial-02": "b" * (30 * 1024),
+            "trial-03": "c" * (30 * 1024),
+            "trial-04": "d" * (30 * 1024),
+            "trial-05": "e" * (8 * 1024 - 160),
+        }
+        compact_raw = json.dumps(
+            {"heroName": "Rowan", "trialDrafts": drafts_near_limit},
+            separators=(",", ":"),
+        )
+        self.assertLessEqual(len(compact_raw.encode("utf-8")), pyria_app.MAX_SAVE_BODY_BYTES)
+        st, _, raw = self._request("POST", "/api/saves", compact_raw)
+        self.assertEqual(st, 413)
+        self.assertIn("Save state exceeds maximum size", json.loads(raw)["error"])
+
+        # Create a valid save for PUT and attempt tests
+        st, _, raw = self._request("POST", "/api/saves", {"heroName": "Rowan"})
+        self.assertEqual(st, 201)
+        save_id = json.loads(raw)["save"]["id"]
+
+        # Oversized PUT (> 128 KiB raw body) -> 413
+        st, _, _ = self._request(
+            "PUT",
+            f"/api/saves/{save_id}",
+            {"heroName": "Rowan", "trialDrafts": big_drafts},
+        )
+        self.assertEqual(st, 413)
+
+        # Single oversized draft (> 32 KiB UTF-8, total body < 128 KiB) on PUT is truncated
+        # rather than rejecting the whole progress save (prevents silent data loss)
+        oversized_draft = "é" * (17 * 1024)  # 34 KiB UTF-8 (~102 KiB ASCII-escaped JSON)
+        st, _, raw = self._request(
+            "PUT",
+            f"/api/saves/{save_id}",
+            {
+                "heroName": "Rowan",
+                "byteShards": 77,
+                "solvedTrials": ["trial-01-01"],
+                "trialDrafts": {"trial-01-02": oversized_draft},
+            },
+        )
+        self.assertEqual(st, 200)
+        saved_after_trunc = json.loads(raw)["save"]
+        self.assertEqual(saved_after_trunc["byteShards"], 77)
+        self.assertEqual(saved_after_trunc["solvedTrials"], ["trial-01-01"])
+        trunc_draft = saved_after_trunc["trialDrafts"]["trial-01-02"]
+        self.assertLessEqual(
+            len(trunc_draft.encode("utf-8")), pyria_app.MAX_ATTEMPT_CODE_BYTES
+        )
+        self.assertGreater(len(trunc_draft), 0)
+
+        # Lone Unicode surrogate and NUL byte in trialDrafts or attempt code -> 400 (never 500/crash)
+        for bad_raw_json in (
+            '{"heroName":"Rowan","trialDrafts":{"t1":"\\uD800"}}',
+            '{"heroName":"Rowan","trialDrafts":{"t1":"abc\\u0000def"}}',
+        ):
+            st, _, raw = self._request("POST", "/api/saves", bad_raw_json)
+            self.assertEqual(st, 400)
+            self.assertIn("error", json.loads(raw))
+            st, _, raw = self._request("PUT", f"/api/saves/{save_id}", bad_raw_json)
+            self.assertEqual(st, 400)
+            self.assertIn("error", json.loads(raw))
+
+        for bad_attempt_json in (
+            '{"trialId":"trial-01-01","passed":true,"code":"\\uD800"}',
+            '{"trialId":"trial-01-01","passed":true,"code":"print(1)\\u0000"}',
+        ):
+            st, _, raw = self._request(
+                "POST", f"/api/saves/{save_id}/attempts", bad_attempt_json
+            )
+            self.assertEqual(st, 400)
+            self.assertIn("error", json.loads(raw))
+
+        # 4. Attempt code cap: exactly 32 KiB succeeds, 32 KiB + 1 byte -> 413
+        exact_code = "p" * pyria_app.MAX_ATTEMPT_CODE_BYTES
+        st, _, raw = self._request(
+            "POST",
+            f"/api/saves/{save_id}/attempts",
+            {"trialId": "trial-01-01", "passed": True, "hintsUsed": 0, "code": exact_code},
+        )
+        self.assertEqual(st, 201)
+
+        too_long_code = "p" * (pyria_app.MAX_ATTEMPT_CODE_BYTES + 1)
+        st, _, raw = self._request(
+            "POST",
+            f"/api/saves/{save_id}/attempts",
+            {"trialId": "trial-01-01", "passed": False, "hintsUsed": 0, "code": too_long_code},
+        )
+        self.assertEqual(st, 413)
+        self.assertIn("Attempt code exceeds maximum length", json.loads(raw)["error"])
+
+        # Attempt field validation (bad trialId, bool hintsUsed, non-string code) -> 400
+        for bad_attempt in (
+            {"trialId": "trial\x00bad", "passed": True},
+            {"trialId": "t" * (pyria_app.MAX_TRIAL_ID_LEN + 1), "passed": True},
+            {"trialId": 123, "passed": True},
+            {"trialId": "trial-01-01", "passed": True, "hintsUsed": True},
+            {"trialId": "trial-01-01", "passed": True, "code": ["not", "str"]},
+        ):
+            st, _, raw = self._request(
+                "POST", f"/api/saves/{save_id}/attempts", bad_attempt
+            )
+            self.assertEqual(st, 400, f"Expected 400 for {bad_attempt!r}, got {st}")
+            self.assertIn("error", json.loads(raw))
+
+    def test_save_quotas_and_attempt_event_pruning(self) -> None:
+        os.environ["PYRIA_ADMIN_EMAILS"] = "admin@example.com"
+        user_a_hdr = {"Cf-Access-Authenticated-User-Email": "alice@example.com"}
+        user_b_hdr = {"Cf-Access-Authenticated-User-Email": "bob@example.com"}
+        admin_hdr = {"Cf-Access-Authenticated-User-Email": "admin@example.com"}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            srv = create_server(
+                host="127.0.0.1",
+                port=0,
+                root_dir=REPO_ROOT,
+                db_path=Path(tmp) / "quota.sqlite3",
+                quiet=True,
+                dev_mode=False,
+                max_saves_per_account=2,
+                max_total_saves=3,
+                max_attempt_code_rows=3,
+                max_attempts_per_save=5,
+                max_events_per_save=5,
+            )
+            host, port = srv.server_address[:2]
+            t = threading.Thread(target=srv.serve_forever, daemon=True)
+            t.start()
+            try:
+                def req(
+                    method: str,
+                    path: str,
+                    body: dict | None = None,
+                    extra_headers: dict[str, str] | None = None,
+                ):
+                    conn = http.client.HTTPConnection(host, port, timeout=5)
+                    headers = dict(extra_headers or {})
+                    payload = None
+                    if body is not None:
+                        headers["Content-Type"] = "application/json"
+                        payload = json.dumps(body).encode("utf-8")
+                    conn.request(method, path, body=payload, headers=headers)
+                    r = conn.getresponse()
+                    data = r.read()
+                    conn.close()
+                    return r.status, data
+
+                # 1. Per-account save cap (max_saves_per_account=2)
+                st, raw = req("POST", "/api/saves", {"heroName": "Alice1"}, user_a_hdr)
+                self.assertEqual(st, 201)
+                alice1_id = json.loads(raw)["save"]["id"]
+
+                st, raw = req("POST", "/api/saves", {"heroName": "Alice2"}, user_a_hdr)
+                self.assertEqual(st, 201)
+                alice2_id = json.loads(raw)["save"]["id"]
+
+                st, raw = req("POST", "/api/saves", {"heroName": "Alice3"}, user_a_hdr)
+                self.assertEqual(st, 429)
+                self.assertIn("per account", json.loads(raw)["error"])
+
+                # 2. Global save cap (max_total_saves=3)
+                st, raw = req("POST", "/api/saves", {"heroName": "Bob1"}, user_b_hdr)
+                self.assertEqual(st, 201)
+                bob1_id = json.loads(raw)["save"]["id"]
+
+                st, raw = req("POST", "/api/saves", {"heroName": "Bob2"}, user_b_hdr)
+                self.assertEqual(st, 429)
+                self.assertIn("total saves", json.loads(raw)["error"])
+
+                # Deleting a save frees quota
+                st, _ = req("DELETE", f"/api/saves/{alice2_id}", None, user_a_hdr)
+                self.assertEqual(st, 200)
+                st, _ = req("POST", "/api/saves", {"heroName": "Alice3"}, user_a_hdr)
+                self.assertEqual(st, 201)
+
+                # 3. Attempt & activity_events pruning per save (cap = 5)
+                attempt_ids = []
+                for i in range(8):
+                    st, raw = req(
+                        "POST",
+                        f"/api/saves/{alice1_id}/attempts",
+                        {
+                            "trialId": f"trial-{i:02d}",
+                            "passed": (i % 2 == 0),
+                            "hintsUsed": i,
+                            "code": f"print({i})",
+                        },
+                        user_a_hdr,
+                    )
+                    self.assertEqual(st, 201)
+                    attempt_ids.append(json.loads(raw)["attemptId"])
+
+                st, raw = req("GET", f"/api/saves/{alice1_id}/attempts", None, user_a_hdr)
+                self.assertEqual(st, 200)
+                attempts = json.loads(raw)["attempts"]
+                self.assertEqual(len(attempts), 5)
+                # Oldest 3 pruned by hard cap (5); newest 5 kept
+                by_id = {a["id"]: a for a in attempts}
+                self.assertEqual(sorted(by_id.keys()), attempt_ids[-5:])
+                # Code retention window (3): newest 3 keep code, older 2 have code blanked
+                for aid in attempt_ids[-3:]:
+                    self.assertTrue(by_id[aid]["code"].startswith("print("))
+                for aid in attempt_ids[-5:-3]:
+                    self.assertEqual(by_id[aid]["code"], "")
+
+                # Dashboard totals reflect all 5 retained attempt rows (including code-blanked ones)
+                st, raw = req("GET", "/api/builder/progress", None, admin_hdr)
+                self.assertEqual(st, 200)
+                prog = json.loads(raw)
+                alice1_prog = next(
+                    s for s in prog["saves"] if s["id"] == alice1_id
+                )
+                self.assertEqual(alice1_prog["stats"]["attemptCount"], 5)
+                self.assertEqual(alice1_prog["stats"]["passCount"], 2)  # i=4,6
+                self.assertEqual(alice1_prog["stats"]["totalHintsUsed"], 3 + 4 + 5 + 6 + 7)
+
+                # Check activity_events pruned to 5 for alice1_id while bob1_id event remains intact
+                st, raw = req(
+                    "GET", "/api/builder/activity?since=0&limit=200", None, admin_hdr
+                )
+                self.assertEqual(st, 200)
+                events = json.loads(raw)["events"]
+                alice1_events = [e for e in events if e["saveId"] == alice1_id]
+                bob1_events = [e for e in events if e["saveId"] == bob1_id]
+                self.assertEqual(len(alice1_events), 5)
+                self.assertEqual(
+                    [e["trialId"] for e in alice1_events],
+                    ["trial-03", "trial-04", "trial-05", "trial-06", "trial-07"],
+                )
+                self.assertEqual(len(bob1_events), 1)
+                self.assertEqual(bob1_events[0]["eventType"], "hero_created")
+
+                # Deleting alice1_id removes its activity_events (prevents orphaned storage abuse)
+                st, _ = req("DELETE", f"/api/saves/{alice1_id}", None, user_a_hdr)
+                self.assertEqual(st, 200)
+                st, raw = req(
+                    "GET", "/api/builder/activity?since=0&limit=200", None, admin_hdr
+                )
+                self.assertEqual(st, 200)
+                events_after_del = json.loads(raw)["events"]
+                self.assertEqual(
+                    [e for e in events_after_del if e["saveId"] == alice1_id], []
+                )
+                self.assertEqual(
+                    len([e for e in events_after_del if e["saveId"] == bob1_id]), 1
+                )
+            finally:
+                srv.shutdown()
+                srv.server_close()
+                t.join(timeout=3)
+
 
 if __name__ == "__main__":
     unittest.main()
