@@ -271,6 +271,10 @@ export function deleteGuestSave(id) {
 
 let lastKnownMe = null;
 
+export function resetMeCache() {
+  lastKnownMe = null;
+}
+
 // ==================== REMOTE API & CONTENT ====================
 export async function fetchMe() {
   try {
