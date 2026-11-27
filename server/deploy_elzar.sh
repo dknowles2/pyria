@@ -22,7 +22,6 @@ COPYFILE_DISABLE=1 tar -C "${REPO_ROOT}" \
   --no-xattrs \
   --exclude '.git' \
   --exclude 'data' \
-  --exclude 'sidecar' \
   --exclude '__pycache__' \
   --exclude '*.pyc' \
   --exclude '._*' \
