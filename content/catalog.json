@@ -105,8 +105,8 @@
       "category": "boots",
       "name": "Swift-Step Boots",
       "description": "Increases overworld walk speed across mossy stones and dungeon tiles.",
-      "shardCost": 55,
-      "unlockRealmId": "realm-02-ruins",
+      "shardCost": 35,
+      "unlockRealmId": "realm-01-meadow",
       "eraId": "era-01-8bit",
       "spriteLayer": "footwear",
       "spriteKey": "boots_swift"
