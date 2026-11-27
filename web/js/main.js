@@ -24,7 +24,7 @@ import {
   logoutSession,
 } from './api.js?v=20261127k';
 import { audio } from './audio.js?v=20261127i';
-import { music, resolveRegionTheme } from './music.js?v=20261127i';
+import { music, resolveRegionTheme } from './music.js?v=20261127j';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
