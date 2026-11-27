@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pyria Parent &amp; Builder Console</title>
-  <link rel="stylesheet" href="/builder/builder.css?v=20261126r" />
+  <link rel="stylesheet" href="/builder/builder.css?v=20261126s" />
 </head>
 <body>
   <div id="builder-app">
@@ -26,6 +26,7 @@
       </nav>
 
       <div class="topbar-right">
+        <span id="builder-admin-pill" class="pill pill-gold hidden">🛡️ Admin</span>
         <div id="live-indicator" class="live-pill active" title="Auto-polling every 2.5 seconds">
           <span class="live-dot"></span>
           <span id="live-indicator-text">LIVE</span>
@@ -71,6 +72,13 @@
 
       <!-- Quick Parent Controls -->
       <section class="card parent-controls-bar">
+        <div class="control-group">
+          <label for="account-filter-select" class="control-label">Account</label>
+          <select id="account-filter-select" class="input input-sm">
+            <option value="all">All Accounts</option>
+          </select>
+        </div>
+
         <div class="control-group">
           <span class="control-label">Global Difficulty</span>
           <div id="global-diff-segmented" class="segmented">
@@ -390,6 +398,6 @@
     <div id="toast-container" class="toast-container"></div>
   </div>
 
-  <script type="module" src="/builder/builder.js?v=20261126r"></script>
+  <script type="module" src="/builder/builder.js?v=20261126s"></script>
 </body>
 </html>

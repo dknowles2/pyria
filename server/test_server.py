@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import base64
 import http.client
 import json
 import os
@@ -40,6 +41,7 @@ class PyriaServerTestCase(unittest.TestCase):
 
     def tearDown(self) -> None:
         os.environ.pop("PYRIA_BUILDER_PASSCODE", None)
+        os.environ.pop("PYRIA_ADMIN_EMAILS", None)
         self.server.shutdown()
         self.server.server_close()
         self._thread.join(timeout=3)
@@ -571,6 +573,198 @@ class PyriaServerTestCase(unittest.TestCase):
         self.assertEqual(len(override_events), 3)
         self.assertIn("complete", override_events[0]["summary"])
         self.assertIn("reset", override_events[2]["summary"].lower())
+
+    def test_cloudflare_access_auth_isolation_and_admin_switching(self) -> None:
+        # 1. Local dev (no PYRIA_ADMIN_EMAILS, no CF header) -> local admin
+        status, _, raw = self._request("GET", "/api/me")
+        self.assertEqual(status, 200)
+        me_local = json.loads(raw)
+        self.assertFalse(me_local["authenticated"])
+        self.assertIsNone(me_local["email"])
+        self.assertTrue(me_local["isAdmin"])
+
+        # Enable admin email enforcement
+        os.environ["PYRIA_ADMIN_EMAILS"] = "dknowles2@gmail.com"
+        admin_hdr = {"Cf-Access-Authenticated-User-Email": "DKnowles2@gmail.com"}
+        kid_hdr = {"Cf-Access-Authenticated-User-Email": "jacob.elliott.knowles@gmail.com"}
+        other_hdr = {"Cf-Access-Authenticated-User-Email": "guest@example.com"}
+
+        # Helper to construct an unsigned JWT payload for Cf-Access-Jwt-Assertion fallback
+        jwt_payload = base64.urlsafe_b64encode(
+            json.dumps({"email": "jacob.elliott.knowles@gmail.com"}).encode("utf-8")
+        ).decode("ascii").rstrip("=")
+        kid_jwt_hdr = {"Cf-Access-Jwt-Assertion": f"eyJhbGciOiJSUzI1NiJ9.{jwt_payload}.sig"}
+
+        # 2. /api/me for kid via email header and via JWT fallback
+        status, _, raw = self._request("GET", "/api/me", extra_headers=kid_hdr)
+        self.assertEqual(status, 200)
+        me_kid = json.loads(raw)
+        self.assertTrue(me_kid["authenticated"])
+        self.assertEqual(me_kid["email"], "jacob.elliott.knowles@gmail.com")
+        self.assertFalse(me_kid["isAdmin"])
+        self.assertEqual(me_kid["accounts"], ["jacob.elliott.knowles@gmail.com"])
+
+        status, _, raw = self._request("GET", "/api/me", extra_headers=kid_jwt_hdr)
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(raw)["email"], "jacob.elliott.knowles@gmail.com")
+
+        # 3. Kid creates a hero; admin creates a hero for self and one for guest
+        status, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {"heroName": "JacobHero", "ownerEmail": "spoofed@evil.com"},
+            extra_headers=kid_hdr,
+        )
+        self.assertEqual(status, 201)
+        kid_save = json.loads(raw)["save"]
+        # Non-admin cannot spoof ownerEmail
+        self.assertEqual(kid_save["ownerEmail"], "jacob.elliott.knowles@gmail.com")
+
+        status, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {"heroName": "DadHero"},
+            extra_headers=admin_hdr,
+        )
+        self.assertEqual(status, 201)
+        dad_save = json.loads(raw)["save"]
+        self.assertEqual(dad_save["ownerEmail"], "dknowles2@gmail.com")
+
+        status, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {"heroName": "GuestHero", "ownerEmail": "guest@example.com"},
+            extra_headers=admin_hdr,
+        )
+        self.assertEqual(status, 201)
+        guest_save = json.loads(raw)["save"]
+        self.assertEqual(guest_save["ownerEmail"], "guest@example.com")
+
+        # 4. Per-email save isolation for non-admin
+        status, _, raw = self._request("GET", "/api/saves", extra_headers=kid_hdr)
+        self.assertEqual(status, 200)
+        kid_saves = json.loads(raw)["saves"]
+        self.assertEqual([s["id"] for s in kid_saves], [kid_save["id"]])
+
+        # Cross-user 403 on GET / PUT / DELETE / attempts
+        self.assertEqual(
+            self._request("GET", f"/api/saves/{dad_save['id']}", extra_headers=kid_hdr)[0],
+            403,
+        )
+        self.assertEqual(
+            self._request(
+                "PUT",
+                f"/api/saves/{dad_save['id']}",
+                {"heroName": "Hacked"},
+                extra_headers=kid_hdr,
+            )[0],
+            403,
+        )
+        self.assertEqual(
+            self._request("DELETE", f"/api/saves/{dad_save['id']}", extra_headers=kid_hdr)[0],
+            403,
+        )
+        self.assertEqual(
+            self._request(
+                "POST",
+                f"/api/saves/{dad_save['id']}/attempts",
+                {"trialId": "trial-01-01", "passed": True},
+                extra_headers=kid_hdr,
+            )[0],
+            403,
+        )
+        self.assertEqual(
+            self._request("GET", f"/api/saves/{dad_save['id']}/attempts", extra_headers=kid_hdr)[0],
+            403,
+        )
+
+        # 5. Admin /api/me accounts list & ?owner=all / ?owner=<email> switching
+        status, _, raw = self._request("GET", "/api/me", extra_headers=admin_hdr)
+        self.assertEqual(status, 200)
+        me_admin = json.loads(raw)
+        self.assertTrue(me_admin["isAdmin"])
+        self.assertEqual(
+            me_admin["accounts"],
+            ["dknowles2@gmail.com", "guest@example.com", "jacob.elliott.knowles@gmail.com"],
+        )
+
+        # Admin default (no owner param) -> own saves
+        status, _, raw = self._request("GET", "/api/saves", extra_headers=admin_hdr)
+        self.assertEqual([s["id"] for s in json.loads(raw)["saves"]], [dad_save["id"]])
+
+        # Admin ?owner=all -> all 3 saves
+        status, _, raw = self._request("GET", "/api/saves?owner=all", extra_headers=admin_hdr)
+        self.assertEqual(len(json.loads(raw)["saves"]), 3)
+
+        # Admin ?owner=jacob... -> Jacob's save
+        status, _, raw = self._request(
+            "GET",
+            "/api/saves?owner=jacob.elliott.knowles@gmail.com",
+            extra_headers=admin_hdr,
+        )
+        self.assertEqual([s["id"] for s in json.loads(raw)["saves"]], [kid_save["id"]])
+
+        # 6. Lock /builder and /api/builder/* to admins
+        status, headers, raw = self._request("GET", "/builder", extra_headers=kid_hdr)
+        self.assertEqual(status, 403)
+        self.assertIn("text/html", headers.get("content-type", ""))
+        self.assertIn(b"403", raw)
+
+        self.assertEqual(
+            self._request("GET", "/builder/builder.js", extra_headers=kid_hdr)[0],
+            403,
+        )
+        self.assertEqual(
+            self._request("GET", "/api/builder/progress", extra_headers=kid_hdr)[0],
+            403,
+        )
+        self.assertEqual(
+            self._request("GET", "/api/builder/overview", extra_headers=other_hdr)[0],
+            403,
+        )
+
+        # Admin gets 200 on /builder and /api/builder/progress (with accounts + ?owner= filter)
+        self.assertEqual(
+            self._request("GET", "/builder", extra_headers=admin_hdr)[0], 200
+        )
+        status, _, raw = self._request(
+            "GET", "/api/builder/progress", extra_headers=admin_hdr
+        )
+        self.assertEqual(status, 200)
+        prog_all = json.loads(raw)
+        self.assertEqual(len(prog_all["saves"]), 3)
+        self.assertEqual(
+            prog_all["accounts"],
+            ["dknowles2@gmail.com", "guest@example.com", "jacob.elliott.knowles@gmail.com"],
+        )
+
+        status, _, raw = self._request(
+            "GET",
+            "/api/builder/progress?owner=jacob.elliott.knowles@gmail.com",
+            extra_headers=admin_hdr,
+        )
+        self.assertEqual(status, 200)
+        prog_kid = json.loads(raw)
+        self.assertEqual(len(prog_kid["saves"]), 1)
+        self.assertEqual(prog_kid["saves"][0]["ownerEmail"], "jacob.elliott.knowles@gmail.com")
+
+        # 7. POST /api/builder/saves/<id>/assign-owner
+        status, _, raw = self._request(
+            "POST",
+            f"/api/builder/saves/{guest_save['id']}/assign-owner",
+            {"ownerEmail": "jacob.elliott.knowles@gmail.com"},
+            extra_headers=admin_hdr,
+        )
+        self.assertEqual(status, 200)
+        reassigned = json.loads(raw)
+        self.assertTrue(reassigned["ok"])
+        self.assertEqual(
+            reassigned["save"]["ownerEmail"], "jacob.elliott.knowles@gmail.com"
+        )
+
+        # Kid now sees 2 saves
+        status, _, raw = self._request("GET", "/api/saves", extra_headers=kid_hdr)
+        self.assertEqual(len(json.loads(raw)["saves"]), 2)
 
 
 if __name__ == "__main__":

@@ -11,13 +11,18 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <title>Pyria: Return of the Bits</title>
-  <link rel="stylesheet" href="/css/style.css?v=20261126r" />
+  <link rel="stylesheet" href="/css/style.css?v=20261126s" />
 </head>
 <body>
   <div id="app">
     <!-- ==================== SCREEN 1: TITLE & SAVE PICKER ==================== -->
     <section id="screen-title" class="screen active">
       <div class="title-shell">
+        <div id="title-account-bar" class="title-account-bar hidden">
+          <span id="title-user-pill" class="pill pill-blue">👤 Signed In</span>
+          <a id="btn-title-builder" href="/builder" class="btn btn-sm btn-gold hidden">🛠️ Builder</a>
+        </div>
+
         <header class="title-hero">
           <div class="title-badge">PYTHON ADVENTURE RPG</div>
           <h1 class="game-title">PYRIA</h1>
@@ -42,7 +47,15 @@
         <section class="saves-panel card">
           <div class="panel-header">
             <h2>Saved Heroes</h2>
-            <span id="saves-count" class="pill pill-muted">Loading...</span>
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <div id="admin-account-bar" class="admin-account-bar hidden">
+                <label for="admin-account-select" class="hint-sub" style="font-weight:700;">Account:</label>
+                <select id="admin-account-select" class="admin-account-select">
+                  <option value="all">All Accounts</option>
+                </select>
+              </div>
+              <span id="saves-count" class="pill pill-muted">Loading...</span>
+            </div>
           </div>
           <div id="saves-list" class="saves-list">
             <div class="empty-state">Checking Elder Ada's Great Compiler for saved heroes...</div>
@@ -268,6 +281,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/main.js?v=20261126r"></script>
+  <script type="module" src="/js/main.js?v=20261126s"></script>
 </body>
 </html>
