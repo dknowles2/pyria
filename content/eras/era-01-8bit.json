@@ -93,7 +93,7 @@
             "challenge": "say(\"Wake up, Spark!)\n"
           },
           "referenceSolution": "say(\"Wake up, Spark!\")\n",
-          "testCode": "assert OUTPUT.strip() == \"Wake up, Spark!\", f'Expected \"Wake up, Spark!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call say(...).\"\nif _norm(_got) != _norm('Wake up, Spark!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Wake up, Spark!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Wake up, Spark!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip points at the end of the text: 'Every opening quote `\"` needs a matching closing quote `\"`!'",
             "tier2_pattern": "Every opening quote needs a matching closing quote before `)`: say(\"<message>\")",
@@ -123,7 +123,7 @@
             "challenge": ""
           },
           "referenceSolution": "say(\"Hello, Pyria!\")\n",
-          "testCode": "assert OUTPUT.strip() == \"Hello, Pyria!\", f'Expected \"Hello, Pyria!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call say(...).\"\nif _norm(_got) != _norm('Hello, Pyria!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Hello, Pyria!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Hello, Pyria!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip whispers: 'Python uses say() to speak aloud, and text needs quotes around it!'",
             "tier2_pattern": "Pattern: say(\"<your message>\") — check capital letters, comma, and exclamation mark!",
@@ -153,7 +153,7 @@
             "challenge": ""
           },
           "referenceSolution": "shout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")\n",
-          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert len(lines) == 2, f'Expected 2 lines, got {len(lines)}'\nassert lines[0] == \"WAKE UP, SPARK!\", f'Line 1 was {lines[0]!r}'\nassert lines[1] == \"THE MEADOW NEEDS YOU!\", f'Line 2 was {lines[1]!r}'\n",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call shout(...).\"\nassert len(_lines) == 2, f\"Expected 2 lines of output, got {len(_lines)}: {_lines!r}\"\nif _norm(_lines[0]) != _norm('WAKE UP, SPARK!'):\n    if \"\".join(_norm(_lines[0])) == \"\".join(_norm('WAKE UP, SPARK!')):\n        assert False, f'Almost on line 1! Some words got squished together (got {_lines[0]!r}). Check the spaces between words!'\n    assert False, f\"Line 1: expected 'WAKE UP, SPARK!', got {_lines[0]!r}\"\nif _norm(_lines[1]) != _norm('THE MEADOW NEEDS YOU!'):\n    if \"\".join(_norm(_lines[1])) == \"\".join(_norm('THE MEADOW NEEDS YOU!')):\n        assert False, f'Almost on line 2! Some words got squished together (got {_lines[1]!r}). Check the spaces between words!'\n    assert False, f\"Line 2: expected 'THE MEADOW NEEDS YOU!', got {_lines[1]!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip hops between the stones: 'Put one shout() on line 1 and a second shout() on line 2 — shout() turns your words into ALL CAPS!'",
             "tier2_pattern": "shout(\"<first message>\")\nshout(\"<second message>\")",
@@ -202,7 +202,7 @@
           "trialType": "code",
           "title": "Glue Two Strings Together!",
           "storyPrompt": "A torn banner hangs over the Firefly Glade! In Python, you can glue two strings together using `+` right inside `say(...)` — like `say(\"Fire\" + \"fly\")`!",
-          "objective": "Glue the two text pieces 'Code-' and 'Tamer' together using + inside say() so Python outputs: Code-Tamer",
+          "objective": "Use `say()` with `+` to glue `\"Code-\"` and `\"Tamer\"` together (the `-` can be in either string!) so Python outputs: `Code-Tamer`",
           "concepts": [
             "strings",
             "print_output"
@@ -215,7 +215,7 @@
             "challenge": ""
           },
           "referenceSolution": "say(\"Code-\" + \"Tamer\")\n",
-          "testCode": "assert OUTPUT.strip() == \"Code-Tamer\", f'Expected \"Code-Tamer\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call say(...).\"\nif _norm(_got) != _norm('Code-Tamer'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Code-Tamer')):\n        assert False, f'Almost! You got {_got!r} — include the dash \"-\" in either \"Code-\" or \"-Tamer\" (or between them)!'\n    assert False, f\"Expected 'Code-Tamer', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip tugs the banner: 'Put + between \"Code-\" and \"Tamer\" inside say(...)!'",
             "tier2_pattern": "say(\"<first part>\" + \"<second part>\")",
@@ -261,7 +261,7 @@
           "trialType": "code",
           "title": "Unseal Spark's Lightning Vault",
           "storyPrompt": "You reached Spark's Lightning Vault! Combine everything you mastered in Whispering Meadow: shout the ready signal on line 1, then glue two strings together on line 2 to unseal the vault!",
-          "objective": "On line 1, shout the message Spark ready! so it appears in ALL CAPS. On line 2, glue 'Open' and ' the vault!' together and say the result.",
+          "objective": "Line 1: `shout(\"SPARK READY!\")`. Line 2: use `say()` with `+` to join `\"Open\"` and `\"the vault!\"` (put the space in either string, like `\"Open \" + \"the vault!\"` or `\"Open\" + \" the vault!\"`).",
           "concepts": [
             "function_calls",
             "strings",
@@ -275,9 +275,9 @@
             "challenge": ""
           },
           "referenceSolution": "shout(\"Spark ready!\")\nsay(\"Open\" + \" the vault!\")\n",
-          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"SPARK READY!\", \"Open the vault!\"], f'Expected [\"SPARK READY!\", \"Open the vault!\"], got {lines!r}'\n",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call shout/say(...).\"\nassert len(_lines) == 2, f\"Expected 2 lines of output, got {len(_lines)}: {_lines!r}\"\nif _norm(_lines[0]) != _norm('SPARK READY!'):\n    if \"\".join(_norm(_lines[0])) == \"\".join(_norm('SPARK READY!')):\n        assert False, f'Almost on line 1! Some words got squished together (got {_lines[0]!r}). Check the spaces between words!'\n    assert False, f\"Line 1: expected 'SPARK READY!', got {_lines[0]!r}\"\nif _norm(_lines[1]) != _norm('Open the vault!'):\n    if \"\".join(_norm(_lines[1])) == \"\".join(_norm('Open the vault!')):\n        assert False, f'Almost on line 2! \"Open\" and \"the vault!\" got squished together (got {_lines[1]!r}). Put a space at the end of \"Open \" or at the start of \" the vault!\"!'\n    assert False, f\"Line 2: expected 'Open the vault!', got {_lines[1]!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement: 'Check the space before `the` in \" the vault!\" so the words don't squish together!'",
+            "tier1_nudge": "Pip sparks with excitement: 'Make sure there is a space between \"Open\" and \"the vault!\" — either at the end of \"Open \" or at the start of \" the vault!\" so the words don\\'t squish together!'",
             "tier2_pattern": "shout(\"<ready signal>\")\nsay(\"<first part>\" + \"<second part>\")",
             "tier3_walkthrough": "Write both lines:\nshout(\"Spark ready!\")\nsay(\"Open\" + \" the vault!\")"
           },
@@ -557,7 +557,7 @@
             "challenge": ""
           },
           "referenceSolution": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(total_gems))\n",
-          "testCode": "assert left_gems == 8 and right_gems == 5\nassert total_gems == 13, f'Expected 13, got {total_gems!r}'\nassert OUTPUT.strip() == 'Gems: 13', f'Expected \"Gems: 13\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert left_gems == 8 and right_gems == 5, f\"Expected left_gems == 8 and right_gems == 5, got {left_gems!r}, {right_gems!r}\"\nassert total_gems == 13, f\"Expected total_gems == 13, got {total_gems!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call say(...).\"\nif _norm(_got) != _norm('Gems: 13'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Gems: 13')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Gems: 13', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip holds up two boxes: 'Add left_gems + right_gems, then wrap total_gems in str(...) before gluing with +!'",
             "tier2_pattern": "total_gems = <box1> + <box2>\nsay(\"Gems: \" + str(<total>))",
@@ -577,10 +577,10 @@
                 "left_gems": 10,
                 "right_gems": 7
               },
-              "expectOutput": "Gems: 17",
               "expectVars": {
                 "total_gems": 17
-              }
+              },
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('Gems: 17')\n"
             }
           ],
           "introChoice": {
@@ -708,7 +708,7 @@
             "challenge": ""
           },
           "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nshout(guardian)\nsay(\"Code: \" + str(vault_code))\n",
-          "testCode": "assert guardian == \"Pebble\"\nassert vault_code == 20, f'Expected 20, got {vault_code!r}'\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"PEBBLE\", \"Code: 20\"], f'Expected [\"PEBBLE\", \"Code: 20\"], got {lines!r}'\n",
+          "testCode": "assert isinstance(guardian, str) and guardian.strip().upper() == 'PEBBLE', f\"Expected guardian to be 'Pebble', got {guardian!r}\"\nassert vault_code == 20, f\"Expected vault_code == 20, got {vault_code!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call shout/say(...).\"\nassert len(_lines) == 2, f\"Expected 2 lines of output, got {len(_lines)}: {_lines!r}\"\nif _norm(_lines[0]) != _norm('PEBBLE'):\n    if \"\".join(_norm(_lines[0])) == \"\".join(_norm('PEBBLE')):\n        assert False, f'Almost on line 1! Some words got squished together (got {_lines[0]!r}). Check the spaces between words!'\n    assert False, f\"Line 1: expected 'PEBBLE', got {_lines[0]!r}\"\nif _norm(_lines[1]) != _norm('Code: 20'):\n    if \"\".join(_norm(_lines[1])) == \"\".join(_norm('Code: 20')):\n        assert False, f'Almost on line 2! Some words got squished together (got {_lines[1]!r}). Check the spaces between words!'\n    assert False, f\"Line 2: expected 'Code: 20', got {_lines[1]!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Add key_a + key_b into vault_code, shout(guardian), and use str(vault_code) when gluing to \"Code: \"!'",
             "tier2_pattern": "vault_code = <key1> + <key2>\nshout(<guardian>)\nsay(\"Code: \" + str(<code_var>))",
@@ -730,10 +730,10 @@
                 "key_a": 10,
                 "key_b": 4
               },
-              "expectOutput": "SPARK\nCode: 14",
               "expectVars": {
                 "vault_code": 14
-              }
+              },
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_vlines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert len(_vlines) == 2\nassert _norm(_vlines[0]) == _norm('SPARK')\nassert _norm(_vlines[1]) == _norm('Code: 14')\n"
             }
           ]
         },
@@ -919,7 +919,7 @@
             "challenge": "heat = 80\nalarm_on = False\nif heat > 50\n    alarm_on = True\n    shout(\"Shield up!\")\n"
           },
           "referenceSolution": "heat = 80\nalarm_on = False\nif heat > 50:\n    alarm_on = True\n    shout(\"Shield up!\")\n",
-          "testCode": "assert alarm_on is True, f'Expected alarm_on is True, got {alarm_on!r}'\nassert OUTPUT.strip() == \"SHIELD UP!\", f'Expected \"SHIELD UP!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert alarm_on is True, f\"Expected alarm_on is True, got {alarm_on!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call shout(...).\"\nif _norm(_got) != _norm('SHIELD UP!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('SHIELD UP!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'SHIELD UP!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip taps line 3: 'Every `if` line in Python MUST end with a colon `:`!'",
             "tier2_pattern": "if <condition>:\n    <indented action>",
@@ -965,7 +965,7 @@
             "challenge": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n"
           },
           "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")\n",
-          "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"CLICK!\", f'Expected \"CLICK!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(door, str) and door.strip().upper() == 'OPEN', f\"Expected door to be 'OPEN', got {door!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call shout(...).\"\nif _norm(_got) != _norm('CLICK!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('CLICK!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'CLICK!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip hops 4 steps to the right: 'Put 4 spaces (or tap ⇥ Indent) before both lines under `if gems == 7:`!'",
             "tier2_pattern": "if <condition>:\n    <line 1 indented 4 spaces>\n    <line 2 indented 4 spaces>",
@@ -983,9 +983,7 @@
                 "gems": 2
               },
               "expectOutput": "",
-              "expectVars": {
-                "door": "SHUT"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(door, str) and door.strip().upper() == 'SHUT'\n"
             }
           ]
         },
@@ -1011,7 +1009,7 @@
             "challenge": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n"
           },
           "referenceSolution": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password == \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
-          "testCode": "assert gate == \"OPEN\", f'Expected gate == \"OPEN\", got {gate!r}'\nassert OUTPUT.strip() == \"GATE OPEN!\", f'Expected \"GATE OPEN!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(gate, str) and gate.strip().upper() == 'OPEN', f\"Expected gate to be 'OPEN', got {gate!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call shout(...).\"\nif _norm(_got) != _norm('GATE OPEN!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('GATE OPEN!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'GATE OPEN!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip grins: 'Use TWO equals signs `==` whenever you ask if two values match inside an `if`!'",
             "tier2_pattern": "if <var> == \"<word>\":\n    <action>",
@@ -1029,9 +1027,7 @@
                 "password": "WRONG"
               },
               "expectOutput": "",
-              "expectVars": {
-                "gate": "LOCKED"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(gate, str) and gate.strip().upper() == 'LOCKED'\n"
             }
           ],
           "introChoice": {
@@ -1088,7 +1084,7 @@
             "challenge": ""
           },
           "referenceSolution": "password = \"EMBER\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    seal = \"INTACT\"\n",
-          "testCode": "assert seal == \"BROKEN\", f'Expected seal == \"BROKEN\", got {seal!r}'\nassert OUTPUT.strip() == \"SEAL BROKEN!\", f'Expected \"SEAL BROKEN!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(seal, str) and seal.strip().upper() == 'BROKEN', f\"Expected seal to be 'BROKEN', got {seal!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call shout(...).\"\nif _norm(_got) != _norm('SEAL BROKEN!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('SEAL BROKEN!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'SEAL BROKEN!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Use == to check \"EMBER\", and put the backup line indented 4 spaces under else:!'",
             "tier2_pattern": "if <var> == \"<word>\":\n    <if actions>\nelse:\n    <backup action>",
@@ -1107,9 +1103,7 @@
                 "password": "ASH"
               },
               "expectOutput": "",
-              "expectVars": {
-                "seal": "INTACT"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(seal, str) and seal.strip().upper() == 'INTACT'\n"
             }
           ]
         },
@@ -1133,7 +1127,7 @@
             "challenge": ""
           },
           "referenceSolution": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"\n",
-          "testCode": "assert gate_status == \"OPEN\", f'Expected gate_status == \"OPEN\", got {gate_status!r}'\nassert OUTPUT.strip() == \"EMBERWING IS FREE!\", f'Expected \"EMBERWING IS FREE!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(gate_status, str) and gate_status.strip().upper() == 'OPEN', f\"Expected gate_status to be 'OPEN', got {gate_status!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call shout(...).\"\nif _norm(_got) != _norm('EMBERWING IS FREE!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('EMBERWING IS FREE!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'EMBERWING IS FREE!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip glows orange: 'Compare ember_power > lock_power, and write the backup plan indented 4 spaces under else:!'",
             "tier2_pattern": "if <power> > <lock>:\n    gate_status = \"OPEN\"\n    shout(\"<message>\")\nelse:\n    gate_status = \"LOCKED\"",
@@ -1153,9 +1147,7 @@
                 "lock_power": 60
               },
               "expectOutput": "",
-              "expectVars": {
-                "gate_status": "LOCKED"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(gate_status, str) and gate_status.strip().upper() == 'LOCKED'\n"
             }
           ],
           "introChoice": {
@@ -1218,7 +1210,7 @@
             "challenge": "spark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n"
           },
           "referenceSolution": "spark_level = 90\nspark_ready = False\nif spark_level > 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
-          "testCode": "assert spark_ready is True, 'Expected spark_ready is True'\nassert OUTPUT.strip() == 'FIRE SPARK!', f'Expected FIRE SPARK!, got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert spark_ready is True, f\"Expected spark_ready is True, got {spark_ready!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call shout(...).\"\nif _norm(_got) != _norm('FIRE SPARK!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('FIRE SPARK!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'FIRE SPARK!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip points at the arrow: '90 is GREATER than 50, so check which way the arrow points!'",
             "tier2_pattern": "if <var> > 50:\n    <actions>",
@@ -1384,7 +1376,7 @@
             "challenge": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n"
           },
           "referenceSolution": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
-          "testCode": "assert ice_state == \"slush\", f'Expected \"slush\" for temp 5, got {ice_state!r}'\nassert OUTPUT.strip() == \"slush\", f'Expected printed \"slush\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(ice_state, str) and ice_state.strip().upper() == 'SLUSH', f\"Expected ice_state to be 'slush', got {ice_state!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('slush'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('slush')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'slush', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip shivers: 'Check the end of `elif temp <= 10` — every branch header needs a colon `:`!'",
             "tier2_pattern": "elif <condition>:\n    <indented action>",
@@ -1403,19 +1395,13 @@
               "overrides": {
                 "temp": -5
               },
-              "expectOutput": "frozen",
-              "expectVars": {
-                "ice_state": "frozen"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('frozen')\nassert isinstance(ice_state, str) and ice_state.strip().upper() == 'FROZEN'\n"
             },
             {
               "overrides": {
                 "temp": 20
               },
-              "expectOutput": "melted",
-              "expectVars": {
-                "ice_state": "melted"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('melted')\nassert isinstance(ice_state, str) and ice_state.strip().upper() == 'MELTED'\n"
             }
           ]
         },
@@ -1438,7 +1424,7 @@
             "challenge": ""
           },
           "referenceSolution": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)\n",
-          "testCode": "assert weather == \"GUSTY\", f'Expected \"GUSTY\", got {weather!r}'\nassert OUTPUT.strip() == \"GUSTY\", f'Expected printed \"GUSTY\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(weather, str) and weather.strip().upper() == 'GUSTY', f\"Expected weather to be 'GUSTY', got {weather!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('GUSTY'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('GUSTY')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'GUSTY', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip holds onto his ears: 'Check >= 60 first, then elif >= 30, then else for everything smaller!'",
             "tier2_pattern": "if wind >= 60:\n    weather = \"<high>\"\nelif wind >= 30:\n    weather = \"<mid>\"\nelse:\n    weather = \"<low>\"\nprint(weather)",
@@ -1457,19 +1443,13 @@
               "overrides": {
                 "wind": 70
               },
-              "expectOutput": "BLIZZARD",
-              "expectVars": {
-                "weather": "BLIZZARD"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('BLIZZARD')\nassert isinstance(weather, str) and weather.strip().upper() == 'BLIZZARD'\n"
             },
             {
               "overrides": {
                 "wind": 10
               },
-              "expectOutput": "CALM",
-              "expectVars": {
-                "weather": "CALM"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('CALM')\nassert isinstance(weather, str) and weather.strip().upper() == 'CALM'\n"
             }
           ]
         },
@@ -1492,7 +1472,7 @@
             "challenge": ""
           },
           "referenceSolution": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    badge = \"BRONZE\"\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
-          "testCode": "assert shards == 55, f'Expected 55 shards, got {shards!r}'\nassert badge == \"SILVER\", f'Expected \"SILVER\" for 55 shards, got {badge!r}'\nassert OUTPUT.strip() == \"SILVER\", f'Expected printed \"SILVER\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert shards == 55, f\"Expected 55 shards, got {shards!r}\"\nassert isinstance(badge, str) and badge.strip().upper() == 'SILVER', f\"Expected badge to be 'SILVER', got {badge!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('SILVER'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('SILVER')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'SILVER', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip sparkles: 'Python stops at the FIRST True branch — so 55 matches SILVER!'",
             "tier2_pattern": "if shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    ...\nelif shards >= 10:\n    ...\nelse:\n    ...",
@@ -1512,28 +1492,19 @@
               "overrides": {
                 "shards": 90
               },
-              "expectOutput": "GOLD",
-              "expectVars": {
-                "badge": "GOLD"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('GOLD')\nassert isinstance(badge, str) and badge.strip().upper() == 'GOLD'\n"
             },
             {
               "overrides": {
                 "shards": 20
               },
-              "expectOutput": "BRONZE",
-              "expectVars": {
-                "badge": "BRONZE"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('BRONZE')\nassert isinstance(badge, str) and badge.strip().upper() == 'BRONZE'\n"
             },
             {
               "overrides": {
                 "shards": 5
               },
-              "expectOutput": "STARTER",
-              "expectVars": {
-                "badge": "STARTER"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('STARTER')\nassert isinstance(badge, str) and badge.strip().upper() == 'STARTER'\n"
             }
           ],
           "introChoice": {
@@ -1586,7 +1557,7 @@
             "challenge": ""
           },
           "referenceSolution": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\nelif rune == \"ICE\":\n    action = \"GLOW\"\nelse:\n    action = \"WAIT\"\nprint(action)\n",
-          "testCode": "assert action == \"GLOW\", f'Expected \"GLOW\", got {action!r}'\nassert OUTPUT.strip() == \"GLOW\", f'Expected printed \"GLOW\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(action, str) and action.strip().upper() == 'GLOW', f\"Expected action to be 'GLOW', got {action!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('GLOW'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('GLOW')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'GLOW', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip taps the obelisk: 'Use == to check each string rune, and quotes around \"GLOW\"!'",
             "tier2_pattern": "if rune == \"<word1>\":\n    action = \"...\"\nelif rune == \"<word2>\":\n    action = \"...\"\nelse:\n    action = \"...\"\nprint(action)",
@@ -1605,19 +1576,13 @@
               "overrides": {
                 "rune": "FIRE"
               },
-              "expectOutput": "MELT",
-              "expectVars": {
-                "action": "MELT"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('MELT')\nassert isinstance(action, str) and action.strip().upper() == 'MELT'\n"
             },
             {
               "overrides": {
                 "rune": "WIND"
               },
-              "expectOutput": "WAIT",
-              "expectVars": {
-                "action": "WAIT"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('WAIT')\nassert isinstance(action, str) and action.strip().upper() == 'WAIT'\n"
             }
           ]
         },
@@ -1642,7 +1607,7 @@
             "challenge": ""
           },
           "referenceSolution": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")\nelif crystals >= 10:\n    vault_open = False\nelse:\n    vault_open = False\n",
-          "testCode": "assert crystals == 20, f'Expected crystals == 20, got {crystals!r}'\nassert vault_open is True, f'Expected vault_open is True, got {vault_open!r}'\nassert OUTPUT.strip() == \"Glacier is free!\", f'Expected \"Glacier is free!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert crystals == 20, f\"Expected crystals == 20, got {crystals!r}\"\nassert vault_open is True, f\"Expected vault_open is True, got {vault_open!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Glacier is free!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Glacier is free!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Glacier is free!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip cheers: '4 * 5 is 20, which matches >= 20! Keep print() indented 4 spaces.'",
             "tier2_pattern": "if crystals >= 20:\n    vault_open = True\n    print(\"<message>\")\nelif crystals >= 10:\n    ...\nelse:\n    ...",
@@ -1900,7 +1865,7 @@
             "challenge": "raw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n"
           },
           "referenceSolution": "raw = \"  ECHO  \"\nclean = raw.strip().lower()\nprint(clean)\n",
-          "testCode": "assert clean == \"echo\", f'Expected \"echo\", got {clean!r}'\nassert OUTPUT.strip() == \"echo\", f'Expected printed \"echo\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert not callable(clean), \"Don't forget the parentheses () at the end of .lower() so Python actually runs it!\"\nassert isinstance(clean, str), f\"Expected clean to be a string, got {clean!r}\"\nif clean != 'echo':\n    if clean != clean.strip():\n        assert False, f\"Almost! clean still has extra spaces at the edges ({clean!r}) — make sure you called .strip()!\"\n    if clean.lower() == 'echo':\n        assert False, f\"Almost! Check the capitalization of clean ({clean!r}) — make sure you called .lower()!\"\n    assert False, f\"Expected clean == 'echo', got {clean!r}\"\nassert OUTPUT.strip() == \"echo\", f\"Expected printed 'echo', got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip taps the parentheses keys: 'Methods like `.strip()` and `.lower()` ALWAYS need `()` to run!'",
             "tier2_pattern": "clean = raw.strip().<method>()",
@@ -1973,7 +1938,7 @@
             "challenge": ""
           },
           "referenceSolution": "raw_key = \"gold\"\nhas_torch = True\nkey = raw_key.upper()\ncan_enter = (key == \"GOLD\") and has_torch\nif can_enter:\n    print(\"Enter!\")\n",
-          "testCode": "assert key == \"GOLD\", f'Expected key == \"GOLD\", got {key!r}'\nassert can_enter is True, f'Expected can_enter is True, got {can_enter!r}'\nassert OUTPUT.strip() == \"Enter!\", f'Expected \"Enter!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert not callable(key), \"Don't forget the parentheses () at the end of .upper() so Python actually runs it!\"\nassert isinstance(key, str), f\"Expected key to be a string, got {key!r}\"\nif key != 'GOLD':\n    if key.lower() == 'gold':\n        assert False, f\"Almost! Check the capitalization of key ({key!r}) — make sure you called .upper()!\"\n    assert False, f\"Expected key == 'GOLD', got {key!r}\"\nassert can_enter is True, f\"Expected can_enter is True, got {can_enter!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Enter!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Enter!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Enter!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip holds up a key and a torch: 'Call raw_key.upper(), then combine both checks with lowercase and!'",
             "tier2_pattern": "key = raw_key.upper()\ncan_enter = (key == \"...\") and <bool_var>\nif can_enter:\n    print(\"...\")",
@@ -2029,7 +1994,7 @@
             "challenge": ""
           },
           "referenceSolution": "bridge_word = \"oak\"\nhas_wings = True\ncan_cross = (len(bridge_word) > 4) or has_wings\nif can_cross:\n    print(\"Crossed!\")\n",
-          "testCode": "assert can_cross is True, f'Expected can_cross is True, got {can_cross!r}'\nassert OUTPUT.strip() == \"Crossed!\", f'Expected \"Crossed!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert can_cross is True, f\"Expected can_cross is True, got {can_cross!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Crossed!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Crossed!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Crossed!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip flaps his tiny wings: 'Use len(bridge_word) > 4 and combine it with has_wings using or!'",
             "tier2_pattern": "can_cross = (len(<word>) > 4) or <bool_var>\nif can_cross:\n    print(\"...\")",
@@ -2058,10 +2023,10 @@
                 "bridge_word": "canopy",
                 "has_wings": false
               },
-              "expectOutput": "Crossed!",
               "expectVars": {
                 "can_cross": true
-              }
+              },
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('Crossed!')\n"
             }
           ],
           "introChoice": {
@@ -2114,7 +2079,7 @@
             "challenge": ""
           },
           "referenceSolution": "is_asleep = False\nstatus = \"QUIET\"\nif not is_asleep:\n    status = \"AWAKE\"\n    print(\"Bramble hears you!\")\n",
-          "testCode": "assert status == \"AWAKE\", f'Expected \"AWAKE\", got {status!r}'\nassert OUTPUT.strip() == \"Bramble hears you!\", f'Expected \"Bramble hears you!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(status, str) and status.strip().upper() == 'AWAKE', f\"Expected status to be 'AWAKE', got {status!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Bramble hears you!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Bramble hears you!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Bramble hears you!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip nods: 'not flips False into True, so Python runs the indented lines!'",
             "tier2_pattern": "if not <flag>:\n    status = \"...\"\n    print(\"...\")",
@@ -2131,9 +2096,7 @@
                 "is_asleep": true
               },
               "expectOutput": "",
-              "expectVars": {
-                "status": "QUIET"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(status, str) and status.strip().upper() == 'QUIET'\n"
             }
           ],
           "introChoice": {
@@ -2186,7 +2149,7 @@
             "challenge": ""
           },
           "referenceSolution": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\ngate_open = False\nif (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    print(\"Bramble is free!\")\n",
-          "testCode": "assert chant == \"BRAMBLE WAKE\", f'Expected \"BRAMBLE WAKE\", got {chant!r}'\nassert gate_open is True, 'Expected gate_open is True'\nassert OUTPUT.strip() == \"Bramble is free!\", f'Expected \"Bramble is free!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert not callable(chant), \"Don't forget the parentheses () at the end of .upper() so Python actually runs it!\"\nassert isinstance(chant, str), f\"Expected chant to be a string, got {chant!r}\"\nif chant != 'BRAMBLE WAKE':\n    if chant != chant.strip():\n        assert False, f\"Almost! chant still has extra spaces at the edges ({chant!r}) — make sure you called .strip()!\"\n    if chant.lower() == 'bramble wake':\n        assert False, f\"Almost! Check the capitalization of chant ({chant!r}) — make sure you called .upper()!\"\n    assert False, f\"Expected chant == 'BRAMBLE WAKE', got {chant!r}\"\nassert gate_open is True, f\"Expected gate_open is True, got {gate_open!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Bramble is free!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Bramble is free!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Bramble is free!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Clean the string with .strip().upper(), then check both conditions with and!'",
             "tier2_pattern": "chant = raw_chant.strip().upper()\nif (chant == \"...\") and (len(chant) > 5):\n    gate_open = True\n    print(\"...\")",
@@ -2272,7 +2235,7 @@
             "challenge": "has_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n"
           },
           "referenceSolution": "has_rope = False\nhas_wings = True\ncan_fly = has_rope or has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
-          "testCode": "assert can_fly is True, 'Expected can_fly is True'\nassert OUTPUT.strip() == 'ECHO CALL!', f'Expected ECHO CALL!, got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert can_fly is True, f\"Expected can_fly is True, got {can_fly!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('ECHO CALL!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('ECHO CALL!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'ECHO CALL!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip flaps happily: 'Which boolean keyword only needs ONE side to be True?'",
             "tier2_pattern": "can_fly = <option1> or <option2>",
@@ -2434,7 +2397,7 @@
             "challenge": "raw_rune = \"  TIDE  \"\nrune = raw_rune.lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n"
           },
           "referenceSolution": "raw_rune = \"  TIDE  \"\nrune = raw_rune.strip().lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
-          "testCode": "assert rune == \"tide\", f'Expected \"tide\", got {rune!r}'\nassert valve == \"OPEN\", f'Expected \"OPEN\", got {valve!r}'\nassert OUTPUT.strip() == \"OPEN\", f'Expected \"OPEN\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert not callable(rune), \"Don't forget the parentheses () at the end of .lower() so Python actually runs it!\"\nassert isinstance(rune, str), f\"Expected rune to be a string, got {rune!r}\"\nif rune != 'tide':\n    if rune != rune.strip():\n        assert False, f\"Almost! rune still has extra spaces at the edges ({rune!r}) — make sure you called .strip()!\"\n    if rune.lower() == 'tide':\n        assert False, f\"Almost! Check the capitalization of rune ({rune!r}) — make sure you called .lower()!\"\n    assert False, f\"Expected rune == 'tide', got {rune!r}\"\nassert isinstance(valve, str) and valve.strip().upper() == 'OPEN', f\"Expected valve to be 'OPEN', got {valve!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('OPEN'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('OPEN')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'OPEN', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip splashes: 'Without `.strip()`, `rune` is `\"  tide  \"` with spaces, which doesn't equal `\"tide\"`!'",
             "tier2_pattern": "rune = raw_rune.<trim_spaces>().lower()",
@@ -2454,10 +2417,7 @@
               "overrides": {
                 "raw_rune": "  STONE  "
               },
-              "expectOutput": "SHUT",
-              "expectVars": {
-                "valve": "SHUT"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('SHUT')\nassert isinstance(valve, str) and valve.strip().upper() == 'SHUT'\n"
             }
           ]
         },
@@ -2482,7 +2442,7 @@
             "challenge": ""
           },
           "referenceSolution": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\nif (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    print(seal)\n",
-          "testCode": "assert seal == \"BALANCED\", f'Expected \"BALANCED\", got {seal!r}'\nassert OUTPUT.strip() == \"BALANCED\", f'Expected printed \"BALANCED\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert isinstance(seal, str) and seal.strip().upper() == 'BALANCED', f\"Expected seal to be 'BALANCED', got {seal!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('BALANCED'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('BALANCED')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'BALANCED', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip checks both dials: 'Pass seal (without quotes!) to print(seal).'",
             "tier2_pattern": "if (<left_check>) and (<right_check>):\n    seal = \"...\"\n    print(seal)",
@@ -2502,9 +2462,7 @@
                 "right_psi": 40
               },
               "expectOutput": "",
-              "expectVars": {
-                "seal": "UNBALANCED"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(seal, str) and seal.strip().upper() == 'UNBALANCED'\n"
             }
           ]
         },
@@ -2529,7 +2487,7 @@
             "challenge": ""
           },
           "referenceSolution": "depth = 18 + 7\nleak = False\npump_on = False\nif (depth > 20) or leak:\n    pump_on = True\n    print(\"Pumps active!\")\n",
-          "testCode": "assert depth == 25, f'Expected depth == 25, got {depth!r}'\nassert pump_on is True, 'Expected pump_on is True'\nassert OUTPUT.strip() == \"Pumps active!\", f'Expected \"Pumps active!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert depth == 25, f\"Expected depth == 25, got {depth!r}\"\nassert pump_on is True, f\"Expected pump_on is True, got {pump_on!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Pumps active!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Pumps active!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Pumps active!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip watches the gauge: '18 + 7 is 25, which is > 20, so the or condition is True!'",
             "tier2_pattern": "if (<depth_check>) or <flag>:\n    pump_on = True\n    print(\"...\")",
@@ -2559,10 +2517,10 @@
                 "depth": 10,
                 "leak": true
               },
-              "expectOutput": "Pumps active!",
               "expectVars": {
                 "pump_on": true
-              }
+              },
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('Pumps active!')\n"
             }
           ]
         },
@@ -2587,7 +2545,7 @@
             "challenge": ""
           },
           "referenceSolution": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    boat = \"TOO HEAVY\"\nprint(boat)\n",
-          "testCode": "assert total_weight == 45, f'Expected 45, got {total_weight!r}'\nassert boat == \"SAFE\", f'Expected \"SAFE\", got {boat!r}'\nassert OUTPUT.strip() == \"SAFE\", f'Expected printed \"SAFE\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert total_weight == 45, f\"Expected total_weight == 45, got {total_weight!r}\"\nassert isinstance(boat, str) and boat.strip().upper() == 'SAFE', f\"Expected boat to be 'SAFE', got {boat!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('SAFE'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('SAFE')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'SAFE', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip balances on the bow: '3 * 15 is 45, which is <= 50!'",
             "tier2_pattern": "total_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"...\"\nelse:\n    boat = \"...\"\nprint(boat)",
@@ -2607,11 +2565,10 @@
                 "chests": 4,
                 "weight_each": 15
               },
-              "expectOutput": "TOO HEAVY",
               "expectVars": {
-                "total_weight": 60,
-                "boat": "TOO HEAVY"
-              }
+                "total_weight": 60
+              },
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('TOO HEAVY')\nassert isinstance(boat, str) and boat.strip().upper() == 'TOO HEAVY'\n"
             }
           ]
         },
@@ -2637,7 +2594,7 @@
             "challenge": ""
           },
           "referenceSolution": "bubbles = 5 * 6\ncall = \"  mire  \".strip().upper()\nmire_free = False\nif (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")\n",
-          "testCode": "assert bubbles == 30, f'Expected 30, got {bubbles!r}'\nassert call == \"MIRE\", f'Expected \"MIRE\", got {call!r}'\nassert mire_free is True, 'Expected mire_free is True'\nassert OUTPUT.strip() == \"Mire is free!\", f'Expected \"Mire is free!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert bubbles == 30, f\"Expected bubbles == 30, got {bubbles!r}\"\nassert not callable(call), \"Don't forget the parentheses () at the end of .upper() so Python actually runs it!\"\nassert isinstance(call, str), f\"Expected call to be a string, got {call!r}\"\nif call != 'MIRE':\n    if call != call.strip():\n        assert False, f\"Almost! call still has extra spaces at the edges ({call!r}) — make sure you called .strip()!\"\n    if call.lower() == 'mire':\n        assert False, f\"Almost! Check the capitalization of call ({call!r}) — make sure you called .upper()!\"\n    assert False, f\"Expected call == 'MIRE', got {call!r}\"\nassert mire_free is True, f\"Expected mire_free is True, got {mire_free!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Mire is free!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Mire is free!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Mire is free!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip cheers in a bubble helmet: '5 * 6 is 30 and call becomes \"MIRE\" — both sides of and are True!'",
             "tier2_pattern": "if (<bubbles_check>) and (<call_check>):\n    mire_free = True\n    print(\"...\")",
@@ -2695,7 +2652,7 @@
             "challenge": ""
           },
           "referenceSolution": "raw_word = \"  tide  \"\ncipher = raw_word.strip().upper()\npearls = 3 * 4\nif cipher == \"TIDE\" and pearls == 12:\n    print(\"TIDE WAVE!\")\n",
-          "testCode": "assert cipher == 'TIDE', f'Expected TIDE, got {cipher!r}'\nassert pearls == 12, f'Expected 12, got {pearls!r}'\nassert OUTPUT.strip() == 'TIDE WAVE!', f'Expected TIDE WAVE!, got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert not callable(cipher), \"Don't forget the parentheses () at the end of .upper() so Python actually runs it!\"\nassert isinstance(cipher, str), f\"Expected cipher to be a string, got {cipher!r}\"\nif cipher != 'TIDE':\n    if cipher != cipher.strip():\n        assert False, f\"Almost! cipher still has extra spaces at the edges ({cipher!r}) — make sure you called .strip()!\"\n    if cipher.lower() == 'tide':\n        assert False, f\"Almost! Check the capitalization of cipher ({cipher!r}) — make sure you called .upper()!\"\n    assert False, f\"Expected cipher == 'TIDE', got {cipher!r}\"\nassert pearls == 12, f\"Expected pearls == 12, got {pearls!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('TIDE WAVE!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('TIDE WAVE!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'TIDE WAVE!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip blows a bubble: 'Combine `.strip().upper()`, `3 * 4`, and `and`!'",
             "tier2_pattern": "cipher = raw_word.strip().upper()\npearls = 3 * 4\nif <checks>:\n    print(\"...\")",
@@ -2860,7 +2817,7 @@
             "challenge": "for step in range(3)\n    print(\"Spin!\")\n"
           },
           "referenceSolution": "for step in range(3):\n    print(\"Spin!\")\n",
-          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Spin!\"] * 3, f\"Expected 3 Spin! lines, got {lines!r}\"\n",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call print(...) inside your loop.\"\nassert len(_lines) == 3, f\"Expected 3 lines of output, got {len(_lines)}: {_lines!r}\"\nfor _i, _line in enumerate(_lines, 1):\n    if _norm(_line) != _norm('Spin!'):\n        if \"\".join(_norm(_line)) == \"\".join(_norm('Spin!')):\n            assert False, f\"Almost on line {_i}! Some words got squished together (got {_line!r}). Check your spaces!\"\n        assert False, f\"Line {_i}: expected 'Spin!', got {_line!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip points at the end of the `for` line: 'Every `for` line needs a colon `:`!'",
             "tier2_pattern": "for <var> in range(<count>):\n    <indented action>",
@@ -2892,7 +2849,7 @@
             "challenge": ""
           },
           "referenceSolution": "for i in range(4):\n    print(\"GALE!\")\n",
-          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"GALE!\"] * 4, f\"Expected 4 GALE! lines, got {lines!r}\"\n",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call print(...) inside your loop.\"\nassert len(_lines) == 4, f\"Expected 4 lines of output, got {len(_lines)}: {_lines!r}\"\nfor _i, _line in enumerate(_lines, 1):\n    if _norm(_line) != _norm('GALE!'):\n        if \"\".join(_norm(_line)) == \"\".join(_norm('GALE!')):\n            assert False, f\"Almost on line {_i}! Some words got squished together (got {_line!r}). Check your spaces!\"\n        assert False, f\"Line {_i}: expected 'GALE!', got {_line!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip blows a tiny horn: 'Indent `print(\"GALE!\")` 4 spaces inside `for i in range(4):`!'",
             "tier2_pattern": "for i in range(<count>):\n    print(\"...\")",
@@ -3049,7 +3006,7 @@
             "challenge": ""
           },
           "referenceSolution": "total_wind = 0\nfor power in range(1, 6):\n    total_wind += power\n    print(\"Turbine ready!\")\n",
-          "testCode": "assert total_wind == 15, f\"Expected total_wind == 15, got {total_wind}\"\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Turbine ready!\"] * 5, f\"Expected 5 Turbine ready! lines, got {lines!r}\"\n",
+          "testCode": "assert total_wind == 15, f\"Expected total_wind == 15, got {total_wind!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call print(...) inside your loop.\"\nassert len(_lines) == 5, f\"Expected 5 lines of output, got {len(_lines)}: {_lines!r}\"\nfor _i, _line in enumerate(_lines, 1):\n    if _norm(_line) != _norm('Turbine ready!'):\n        if \"\".join(_norm(_line)) == \"\".join(_norm('Turbine ready!')):\n            assert False, f\"Almost on line {_i}! Some words got squished together (got {_line!r}). Check your spaces!\"\n        assert False, f\"Line {_i}: expected 'Turbine ready!', got {_line!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip spins in the wind: 'Put `print(\"Turbine ready!\")` indented 4 spaces INSIDE the loop!'",
             "tier2_pattern": "total_wind = 0\nfor <p> in range(1, 6):\n    total_wind += <p>\n    print(\"...\")",
@@ -3292,7 +3249,7 @@
             "challenge": ""
           },
           "referenceSolution": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\nvalid = False\nif \"NOVA\" in clean:\n    valid = True\n    print(clean)\n",
-          "testCode": "assert clean == \"NOVA-8\", f\"Expected NOVA-8, got {clean!r}\"\nassert valid is True, f\"Expected valid is True, got {valid!r}\"\nassert OUTPUT.strip() == \"NOVA-8\", f\"Expected printed NOVA-8, got {OUTPUT.strip()!r}\"\n",
+          "testCode": "assert not callable(clean), \"Don't forget the parentheses () at the end of .upper() so Python actually runs it!\"\nassert isinstance(clean, str), f\"Expected clean to be a string, got {clean!r}\"\nif clean != 'NOVA-8':\n    if clean != clean.strip():\n        assert False, f\"Almost! clean still has extra spaces at the edges ({clean!r}) — make sure you called .strip()!\"\n    if clean.lower() == 'nova-8':\n        assert False, f\"Almost! Check the capitalization of clean ({clean!r}) — make sure you called .upper()!\"\n    assert False, f\"Expected clean == 'NOVA-8', got {clean!r}\"\nassert valid is True, f\"Expected valid is True, got {valid!r}\"\nassert OUTPUT.strip() == \"NOVA-8\", f\"Expected printed 'NOVA-8', got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip polishes the rune: 'Chain `.strip().upper()`, then check `if \"NOVA\" in clean:`!'",
             "tier2_pattern": "clean = raw.strip().upper()\nif \"<word>\" in clean:\n    valid = True\n    print(clean)",
@@ -3338,7 +3295,7 @@
             "challenge": ""
           },
           "referenceSolution": "bits_ready = 7\nhas_key = True\ndoor = \"LOCKED\"\nif bits_ready == 7 and has_key:\n    door = \"OPEN\"\n    print(\"ACCESS GRANTED\")\n",
-          "testCode": "assert door == \"OPEN\", f\"Expected OPEN, got {door!r}\"\nassert OUTPUT.strip() == \"ACCESS GRANTED\", f\"Expected ACCESS GRANTED, got {OUTPUT.strip()!r}\"\n",
+          "testCode": "assert isinstance(door, str) and door.strip().upper() == 'OPEN', f\"Expected door to be 'OPEN', got {door!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('ACCESS GRANTED'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('ACCESS GRANTED')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'ACCESS GRANTED', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip holds up two keys: '`and` checks that BOTH sides are True!'",
             "tier2_pattern": "if <check1> and <check2>:\n    door = \"OPEN\"\n    print(\"...\")",
@@ -3358,9 +3315,7 @@
                 "has_key": true
               },
               "expectOutput": "",
-              "expectVars": {
-                "door": "LOCKED"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(door, str) and door.strip().upper() == 'LOCKED'\n"
             },
             {
               "overrides": {
@@ -3368,9 +3323,7 @@
                 "has_key": false
               },
               "expectOutput": "",
-              "expectVars": {
-                "door": "LOCKED"
-              }
+              "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert isinstance(door, str) and door.strip().upper() == 'LOCKED'\n"
             }
           ]
         },
@@ -3429,7 +3382,7 @@
             "challenge": ""
           },
           "referenceSolution": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge += bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")\n",
-          "testCode": "assert shield_charge == 20, f\"Expected shield_charge == 20, got {shield_charge}\"\nassert citadel_breached is True, \"Expected citadel_breached to be True\"\nassert OUTPUT.strip() == \"8-BIT RESTORED!\", f\"Expected 8-BIT RESTORED!, got {OUTPUT.strip()!r}\"\n",
+          "testCode": "assert shield_charge == 20, f\"Expected shield_charge == 20, got {shield_charge!r}\"\nassert citadel_breached is True, \"Expected citadel_breached to be True\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('8-BIT RESTORED!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('8-BIT RESTORED!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected '8-BIT RESTORED!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip glows bright gold: 'A number is even when `bit % 2 == 0`!'",
             "tier2_pattern": "for bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge += bit\nif shield_charge >= 20:\n    ...\n    print(\"...\")",
