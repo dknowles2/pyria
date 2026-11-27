@@ -920,7 +920,8 @@
         "classes_intro",
         "class_inheritance",
         "world_scripting_3d",
-        "debugging"
+        "debugging",
+        "error_handling"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -1067,7 +1068,8 @@
             "classes_intro",
             "class_inheritance",
             "world_scripting_3d",
-            "debugging"
+            "debugging",
+            "error_handling"
           ],
           "shardReward": 275,
           "unlockId": null,

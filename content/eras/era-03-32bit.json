@@ -158,7 +158,8 @@
           "objective": "Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.",
           "concepts": [
             "tuples",
-            "coords_3d"
+            "coords_3d",
+            "for_loops"
           ],
           "shardReward": 135,
           "unlockId": null,
@@ -184,7 +185,8 @@
           "objective": "Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.",
           "concepts": [
             "tuples",
-            "coords_3d"
+            "coords_3d",
+            "for_loops"
           ],
           "shardReward": 150,
           "unlockId": null,
@@ -919,7 +921,8 @@
       "primaryConcepts": [
         "error_handling",
         "tuples",
-        "dictionaries_nested"
+        "dictionaries_nested",
+        "functions_def"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -1007,7 +1010,9 @@
           "concepts": [
             "error_handling",
             "tuples",
-            "dictionaries_nested"
+            "dictionaries_nested",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 165,
           "unlockId": null,
@@ -1034,7 +1039,9 @@
           "concepts": [
             "error_handling",
             "tuples",
-            "dictionaries_nested"
+            "dictionaries_nested",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 170,
           "unlockId": null,

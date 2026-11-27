@@ -815,7 +815,8 @@
           "concepts": [
             "lists",
             "list_indexing",
-            "basic_math"
+            "basic_math",
+            "list_iteration"
           ],
           "shardReward": 90,
           "unlockId": null,
@@ -1580,7 +1581,8 @@
       "storyOutro": "Tock chimes a victorious chord and restores Bit 14.",
       "primaryConcepts": [
         "while_loops",
-        "conditionals_if"
+        "conditionals_if",
+        "for_loops"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -1665,7 +1667,8 @@
           "objective": "Loop `for p in [\"brass\", \"iron\", \"gold\", \"lead\"]:`. If `p == \"gold\"`, set `found = True` and `break`. Print `found`.",
           "concepts": [
             "while_loops",
-            "conditionals_if"
+            "conditionals_if",
+            "for_loops"
           ],
           "shardReward": 95,
           "unlockId": null,
@@ -1691,7 +1694,8 @@
           "objective": "`continue` skips the rest of the current turn! Sum all positive numbers in `[5, -2, 10, -1, 5]` (skipping `< 0` with `continue`) into `total` and `print(total)`.",
           "concepts": [
             "while_loops",
-            "conditionals_if"
+            "conditionals_if",
+            "for_loops"
           ],
           "shardReward": 100,
           "unlockId": null,
@@ -1879,8 +1883,8 @@
       "storyIntro": "Roaring boilers power the Steam Foundry, where dragon Piston's cage is locked by pressure gauges controlled with while-loops and lists.",
       "storyOutro": "Piston vents a celebratory plume of steam and restores Bit 15.",
       "primaryConcepts": [
-        "while_loops",
-        "list_iteration"
+        "functions_def",
+        "functions_return"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -1894,8 +1898,7 @@
           "storyPrompt": "With `def`, you can invent your OWN reusable Python spells! What will the code below print?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
-            "while_loops",
-            "list_iteration"
+            "functions_def"
           ],
           "shardReward": 90,
           "unlockId": null,
@@ -1937,8 +1940,7 @@
           "storyPrompt": "Lord Null forgot the colon `:` at the end of `def vent_steam()`! Every `def` line needs `:`.",
           "objective": "Add `:` to `def vent_steam()` so calling `vent_steam()` prints `HISS!`.",
           "concepts": [
-            "while_loops",
-            "list_iteration"
+            "functions_def"
           ],
           "shardReward": 95,
           "unlockId": null,
@@ -1964,8 +1966,7 @@
           "storyPrompt": "In Steam Foundry, put your new skill into action! Define `def blast():` that prints `\"STEAM ON!\"`, then call `blast()` twice.",
           "objective": "Define `def blast():` that prints `\"STEAM ON!\"`, then call `blast()` twice.",
           "concepts": [
-            "while_loops",
-            "list_iteration"
+            "functions_def"
           ],
           "shardReward": 100,
           "unlockId": null,
@@ -1990,8 +1991,7 @@
           "storyPrompt": "Keep pushing deeper into Steam Foundry! Define `def heat_up(level):` that prints `level * 2`. Call `heat_up(15)`.",
           "objective": "Define `def heat_up(level):` that prints `level * 2`. Call `heat_up(15)`.",
           "concepts": [
-            "while_loops",
-            "list_iteration"
+            "functions_def"
           ],
           "shardReward": 105,
           "unlockId": null,
@@ -2016,8 +2016,8 @@
           "storyPrompt": "Almost at Piston's Logic Vault! `return` sends a result BACK to whoever called the function! Define `def double(n): return n * 2`, set `ans = double(12)`, and `print(ans)`.",
           "objective": "`return` sends a result BACK to whoever called the function! Define `def double(n): return n * 2`, set `ans = double(12)`, and `print(ans)`.",
           "concepts": [
-            "while_loops",
-            "list_iteration"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 110,
           "unlockId": null,
@@ -2042,8 +2042,8 @@
           "storyPrompt": "You reached Piston's Logic Vault! Define `def calc_pressure(a, b): return a + b`. Set `total = calc_pressure(35, 45)`. If `total >= 80`, print `\"PISTON FREE!\"`.",
           "objective": "Define `def calc_pressure(a, b): return a + b`. Set `total = calc_pressure(35, 45)`. If `total >= 80`, print `\"PISTON FREE!\"`.",
           "concepts": [
-            "while_loops",
-            "list_iteration"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 120,
           "unlockId": null,
@@ -2068,8 +2068,8 @@
           "storyPrompt": "You uncovered a hidden 16-Bit Rune in Steam Foundry! What does `add(3, 4) + 10` equal when `def add(x, y): return x + y`?",
           "objective": "What does `add(3, 4) + 10` equal when `def add(x, y): return x + y`?",
           "concepts": [
-            "while_loops",
-            "list_iteration"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 105,
           "unlockId": null,
@@ -2179,8 +2179,8 @@
       "storyIntro": "At the summit of Clockwork Spire sits the Grand Chronometer, where dragon Aether is bound by synchronized for- and while-loops.",
       "storyOutro": "Aether restarts the Spire's star-clock and opens the bridge to the volcanic Alchemist's Caldera.",
       "primaryConcepts": [
-        "while_loops",
-        "for_loops"
+        "functions_def",
+        "functions_return"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -2194,8 +2194,8 @@
           "storyPrompt": "Functions can have **default values** like `def chime(times=2):` if you don't pass an argument! What will `print(boost(5))` output?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
-            "while_loops",
-            "for_loops"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 95,
           "unlockId": null,
@@ -2237,8 +2237,8 @@
           "storyPrompt": "Lord Null deleted `return` from `triple(n)`, so it returns `None`! Put `return` before `n * 3`.",
           "objective": "Add `return` inside `triple(n)` so `print(triple(7))` outputs `21`.",
           "concepts": [
-            "while_loops",
-            "for_loops"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 100,
           "unlockId": null,
@@ -2264,8 +2264,8 @@
           "storyPrompt": "In Grand Chronometer, put your new skill into action! Given `def add_one(x): return x + 1`, write `def add_two(x): return add_one(add_one(x))` and `print(add_two(8))`.",
           "objective": "Given `def add_one(x): return x + 1`, write `def add_two(x): return add_one(add_one(x))` and `print(add_two(8))`.",
           "concepts": [
-            "while_loops",
-            "for_loops"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 105,
           "unlockId": null,
@@ -2290,8 +2290,9 @@
           "storyPrompt": "Keep pushing deeper into Grand Chronometer! Write `def total_gears(lst): return sum(lst)` and print `total_gears([4, 6, 10])`.",
           "objective": "Write `def total_gears(lst): return sum(lst)` and print `total_gears([4, 6, 10])`.",
           "concepts": [
-            "while_loops",
-            "for_loops"
+            "functions_def",
+            "functions_return",
+            "list_iteration"
           ],
           "shardReward": 110,
           "unlockId": null,
@@ -2316,8 +2317,8 @@
           "storyPrompt": "Almost at Aether's Logic Vault! Define `def is_even(n): return n % 2 == 0`, then `print(is_even(8))`.",
           "objective": "Define `def is_even(n): return n % 2 == 0`, then `print(is_even(8))`.",
           "concepts": [
-            "while_loops",
-            "for_loops"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 115,
           "unlockId": null,
@@ -2342,8 +2343,8 @@
           "storyPrompt": "You reached Aether's Logic Vault! Define `def sync_clock(h, m=30): return h * 60 + m`. Set `mins = sync_clock(2)`. If `mins == 150`, print `\"AETHER FREE!\"`.",
           "objective": "Define `def sync_clock(h, m=30): return h * 60 + m`. Set `mins = sync_clock(2)`. If `mins == 150`, print `\"AETHER FREE!\"`.",
           "concepts": [
-            "while_loops",
-            "for_loops"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 125,
           "unlockId": null,
@@ -2368,8 +2369,8 @@
           "storyPrompt": "You uncovered a hidden 16-Bit Rune in Grand Chronometer! What does `sync(3, 10)` return if `def sync(a, b=5): return a + b`?",
           "objective": "What does `sync(3, 10)` return if `def sync(a, b=5): return a + b`?",
           "concepts": [
-            "while_loops",
-            "for_loops"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 110,
           "unlockId": null,
@@ -2479,7 +2480,7 @@
       "storyIntro": "Steaming terraces ring the Alchemist's Caldera. Dragon Cinderel teaches you to package reusable spells using def.",
       "storyOutro": "Cinderel glides across the warm thermals, lighting the path to the Crystal Alembic.",
       "primaryConcepts": [
-        "functions_def"
+        "dictionaries"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -2493,7 +2494,7 @@
           "storyPrompt": "Welcome to Act III: Alchemist's Caldera! A **dictionary** pairs keys with values inside curly braces `{\"name\": \"Cinderel\"}`. What will `print(potion[\"power\"])` output?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
-            "functions_def"
+            "dictionaries"
           ],
           "shardReward": 100,
           "unlockId": null,
@@ -2535,7 +2536,7 @@
           "storyPrompt": "Lord Null replaced the colon `:` between key and value with `=`! Dictionaries use `:` (`\"fire\": 10`).",
           "objective": "Change `=` to `:` inside `herbs` so `print(herbs[\"fire\"])` outputs `10`.",
           "concepts": [
-            "functions_def"
+            "dictionaries"
           ],
           "shardReward": 105,
           "unlockId": null,
@@ -2561,7 +2562,7 @@
           "storyPrompt": "In Sulfur Terrace, put your new skill into action! Given `vial = {\"heat\": 20}`, add a new key `vial[\"glow\"] = 15` and `print(vial[\"glow\"])`.",
           "objective": "Given `vial = {\"heat\": 20}`, add a new key `vial[\"glow\"] = 15` and `print(vial[\"glow\"])`.",
           "concepts": [
-            "functions_def"
+            "dictionaries"
           ],
           "shardReward": 110,
           "unlockId": null,
@@ -2586,7 +2587,7 @@
           "storyPrompt": "Keep pushing deeper into Sulfur Terrace! Given `stock = {\"sulfur\": 4}`, increase `stock[\"sulfur\"]` by 6 and `print(stock[\"sulfur\"])`.",
           "objective": "Given `stock = {\"sulfur\": 4}`, increase `stock[\"sulfur\"]` by 6 and `print(stock[\"sulfur\"])`.",
           "concepts": [
-            "functions_def"
+            "dictionaries"
           ],
           "shardReward": 115,
           "unlockId": null,
@@ -2611,7 +2612,7 @@
           "storyPrompt": "Almost at Cinderel's Logic Vault! `.get(\"ice\", 0)` safely returns `0` if `\"ice\"` is missing! Set `val = {\"fire\": 9}.get(\"ice\", 0)` and `print(val)`.",
           "objective": "`.get(\"ice\", 0)` safely returns `0` if `\"ice\"` is missing! Set `val = {\"fire\": 9}.get(\"ice\", 0)` and `print(val)`.",
           "concepts": [
-            "functions_def"
+            "dictionaries"
           ],
           "shardReward": 120,
           "unlockId": null,
@@ -2636,7 +2637,7 @@
           "storyPrompt": "You reached Cinderel's Logic Vault! Create `tonic = {\"ember\": 30, \"ash\": 20}`. Set `total = tonic[\"ember\"] + tonic[\"ash\"]`. If `total == 50`, print `\"CINDEREL FREE!\"`.",
           "objective": "Create `tonic = {\"ember\": 30, \"ash\": 20}`. Set `total = tonic[\"ember\"] + tonic[\"ash\"]`. If `total == 50`, print `\"CINDEREL FREE!\"`.",
           "concepts": [
-            "functions_def"
+            "dictionaries"
           ],
           "shardReward": 130,
           "unlockId": null,
@@ -2661,7 +2662,7 @@
           "storyPrompt": "You uncovered a hidden 16-Bit Rune in Sulfur Terrace! What does `\"ash\" in {\"ember\": 30, \"ash\": 20}` evaluate to?",
           "objective": "What does `\"ash\" in {\"ember\": 30, \"ash\": 20}` evaluate to?",
           "concepts": [
-            "functions_def"
+            "dictionaries"
           ],
           "shardReward": 115,
           "unlockId": null,
@@ -2771,8 +2772,8 @@
       "storyIntro": "Towering glass tubes fill the Crystal Alembic, where dragon Prism waits for functions that return exact potion measurements.",
       "storyOutro": "Prism scatters a rainbow across the laboratory and unlocks the Potion Vault.",
       "primaryConcepts": [
-        "functions_def",
-        "functions_return"
+        "f_strings",
+        "dictionaries"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -2786,8 +2787,7 @@
           "storyPrompt": "Put `f` before quotes (`f\"Hello, {name}!\"`) to drop variables right into text! What will the code below print?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
-            "functions_def",
-            "functions_return"
+            "f_strings"
           ],
           "shardReward": 105,
           "unlockId": null,
@@ -2829,8 +2829,7 @@
           "storyPrompt": "Lord Null stole the `f` from the front of the f-string! Put `f` right before the opening quote.",
           "objective": "Add `f` before `\"Crystal power: {power}\"` so it prints `Crystal power: 42`.",
           "concepts": [
-            "functions_def",
-            "functions_return"
+            "f_strings"
           ],
           "shardReward": 110,
           "unlockId": null,
@@ -2856,8 +2855,7 @@
           "storyPrompt": "In Crystal Alembic, put your new skill into action! Given `gem = \"Ruby\"` and `rank = 5`, set `label = f\"{gem} Lv.{rank}\"` and `print(label)`.",
           "objective": "Given `gem = \"Ruby\"` and `rank = 5`, set `label = f\"{gem} Lv.{rank}\"` and `print(label)`.",
           "concepts": [
-            "functions_def",
-            "functions_return"
+            "f_strings"
           ],
           "shardReward": 115,
           "unlockId": null,
@@ -2882,8 +2880,8 @@
           "storyPrompt": "Keep pushing deeper into Crystal Alembic! Use `for k, v in gems.items():` to sum all values of `gems = {\"ruby\": 4, \"opal\": 6}` into `total` and `print(total)`.",
           "objective": "Use `for k, v in gems.items():` to sum all values of `gems = {\"ruby\": 4, \"opal\": 6}` into `total` and `print(total)`.",
           "concepts": [
-            "functions_def",
-            "functions_return"
+            "dictionaries",
+            "for_loops"
           ],
           "shardReward": 120,
           "unlockId": null,
@@ -2908,8 +2906,8 @@
           "storyPrompt": "Almost at Prism's Logic Vault! Given `item = {\"name\": \"Dew\", \"qty\": 3}`, print `f\"{item['name']}: {item['qty']}\"`.",
           "objective": "Given `item = {\"name\": \"Dew\", \"qty\": 3}`, print `f\"{item['name']}: {item['qty']}\"`.",
           "concepts": [
-            "functions_def",
-            "functions_return"
+            "f_strings",
+            "dictionaries"
           ],
           "shardReward": 125,
           "unlockId": null,
@@ -2934,8 +2932,8 @@
           "storyPrompt": "You reached Prism's Logic Vault! Given `colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}`, sum all values with `.values()` into `light`, and print `f\"PRISM {light}!\"`.",
           "objective": "Given `colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}`, sum all values with `.values()` into `light`, and print `f\"PRISM {light}!\"`.",
           "concepts": [
-            "functions_def",
-            "functions_return"
+            "f_strings",
+            "dictionaries"
           ],
           "shardReward": 135,
           "unlockId": null,
@@ -2960,8 +2958,7 @@
           "storyPrompt": "You uncovered a hidden 16-Bit Rune in Crystal Alembic! What does `print(f\"2+3={2+3}\")` print?",
           "objective": "What does `print(f\"2+3={2+3}\")` print?",
           "concepts": [
-            "functions_def",
-            "functions_return"
+            "f_strings"
           ],
           "shardReward": 120,
           "unlockId": null,
@@ -3955,7 +3952,7 @@
       "storyIntro": "Suspended between clouds, Starlight Bridge flickers in and out of existence. Dragon Comet relies on dictionaries and return functions to anchor each star tile.",
       "storyOutro": "Comet streaks across the skyway, locking the bridge solid to Storm Bastion.",
       "primaryConcepts": [
-        "dictionaries",
+        "classes_intro",
         "functions_return"
       ],
       "difficultyOverride": {
@@ -3970,8 +3967,7 @@
           "storyPrompt": "A **class** is a blueprint for creating objects (like dragons!). `__init__` runs when you create a new dragon. What does `print(d.name)` display?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
-            "dictionaries",
-            "functions_return"
+            "classes_intro"
           ],
           "shardReward": 125,
           "unlockId": null,
@@ -4013,8 +4009,7 @@
           "storyPrompt": "Lord Null forgot `self` as the first parameter of `__init__`! Methods inside a class always start with `self`.",
           "objective": "Add `self` as the first parameter of `__init__(self, name)` so it prints `Comet`.",
           "concepts": [
-            "dictionaries",
-            "functions_return"
+            "classes_intro"
           ],
           "shardReward": 130,
           "unlockId": null,
@@ -4040,8 +4035,7 @@
           "storyPrompt": "In Starlight Bridge, put your new skill into action! Define `class Star:` with `__init__(self, brightness)` saving `self.brightness = brightness`. Create `s = Star(99)` and `print(s.brightness)`.",
           "objective": "Define `class Star:` with `__init__(self, brightness)` saving `self.brightness = brightness`. Create `s = Star(99)` and `print(s.brightness)`.",
           "concepts": [
-            "dictionaries",
-            "functions_return"
+            "classes_intro"
           ],
           "shardReward": 135,
           "unlockId": null,
@@ -4066,7 +4060,7 @@
           "storyPrompt": "Keep pushing deeper into Starlight Bridge! Add `def roar(self): return f\"{self.name} ROARS!\"` to `Dragon`, create `d = Dragon(\"Comet\")`, and `print(d.roar())`.",
           "objective": "Add `def roar(self): return f\"{self.name} ROARS!\"` to `Dragon`, create `d = Dragon(\"Comet\")`, and `print(d.roar())`.",
           "concepts": [
-            "dictionaries",
+            "classes_intro",
             "functions_return"
           ],
           "shardReward": 140,
@@ -4092,8 +4086,7 @@
           "storyPrompt": "Almost at Comet's Logic Vault! Give `Dragon` a `power` attribute and a `boost(self, amt)` method that adds `amt` to `self.power`. Create `d = Dragon(10)`, call `d.boost(15)`, and `print(d.power)`.",
           "objective": "Give `Dragon` a `power` attribute and a `boost(self, amt)` method that adds `amt` to `self.power`. Create `d = Dragon(10)`, call `d.boost(15)`, and `print(d.power)`.",
           "concepts": [
-            "dictionaries",
-            "functions_return"
+            "classes_intro"
           ],
           "shardReward": 145,
           "unlockId": null,
@@ -4118,7 +4111,7 @@
           "storyPrompt": "You reached Comet's Logic Vault! Define `class Bridge:` with `__init__(self, spans)` and `is_ready(self)` returning `self.spans >= 5`. Create `b = Bridge(6)`; if `b.is_ready()`, print `\"COMET FREE!\"`.",
           "objective": "Define `class Bridge:` with `__init__(self, spans)` and `is_ready(self)` returning `self.spans >= 5`. Create `b = Bridge(6)`; if `b.is_ready()`, print `\"COMET FREE!\"`.",
           "concepts": [
-            "dictionaries",
+            "classes_intro",
             "functions_return"
           ],
           "shardReward": 155,
@@ -4144,7 +4137,7 @@
           "storyPrompt": "You uncovered a hidden 16-Bit Rune in Starlight Bridge! Can you create TWO separate dragons from the same `Dragon` class?",
           "objective": "Can you create TWO separate dragons from the same `Dragon` class?",
           "concepts": [
-            "dictionaries",
+            "classes_intro",
             "functions_return"
           ],
           "shardReward": 140,
@@ -4255,7 +4248,8 @@
       "storyIntro": "Lightning crackles around Storm Bastion, the final fortress before Lord Null. Dragon Fulmin introduces Python classes to blueprint storm-shields.",
       "storyOutro": "Fulmin shatters the bastion gates, revealing Lord Null's 16-Bit Throne.",
       "primaryConcepts": [
-        "classes_intro"
+        "classes_intro",
+        "list_iteration"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -4337,7 +4331,8 @@
           "storyPrompt": "In Storm Bastion, put your new skill into action! Loop over `squad = [Dragon(15), Dragon(20), Dragon(25)]` summing `d.p` into `total` and `print(total)`.",
           "objective": "Loop over `squad = [Dragon(15), Dragon(20), Dragon(25)]` summing `d.p` into `total` and `print(total)`.",
           "concepts": [
-            "classes_intro"
+            "classes_intro",
+            "list_iteration"
           ],
           "shardReward": 140,
           "unlockId": null,
@@ -4362,7 +4357,8 @@
           "storyPrompt": "Keep pushing deeper into Storm Bastion! Count how many coils in `[Coil(40), Coil(80), Coil(90)]` have `c.power >= 50` into `ready` and `print(ready)`.",
           "objective": "Count how many coils in `[Coil(40), Coil(80), Coil(90)]` have `c.power >= 50` into `ready` and `print(ready)`.",
           "concepts": [
-            "classes_intro"
+            "classes_intro",
+            "list_iteration"
           ],
           "shardReward": 145,
           "unlockId": null,
@@ -4412,7 +4408,8 @@
           "storyPrompt": "You reached Fulmin's Logic Vault! Create `class Bolt:` with `power`. Given `bolts = [Bolt(30), Bolt(40), Bolt(30)]`, sum `b.power` into `surge`; if `surge >= 100`, print `\"FULMIN FREE!\"`.",
           "objective": "Create `class Bolt:` with `power`. Given `bolts = [Bolt(30), Bolt(40), Bolt(30)]`, sum `b.power` into `surge`; if `surge >= 100`, print `\"FULMIN FREE!\"`.",
           "concepts": [
-            "classes_intro"
+            "classes_intro",
+            "list_iteration"
           ],
           "shardReward": 160,
           "unlockId": null,

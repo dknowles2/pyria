@@ -212,6 +212,7 @@ function main() {
             codingTrials.push({
               eraId,
               id: trial.id,
+              concepts: trialConcepts || [],
               referenceSolution: trial.referenceSolution,
               testCode: trial.testCode,
             });
@@ -313,21 +314,45 @@ function main() {
     }
   }
 
-  // 6. Execute coding trial referenceSolutions against testCode in python3
+  // 6. Execute coding trial referenceSolutions against testCode and cross-check AST concepts in python3
   let passedCoding = 0;
   if (codingTrials.length > 0) {
     const pyScript = `
-import contextlib, io, json, sys
+import ast, contextlib, io, json, sys
 trials = json.loads(sys.stdin.read())
 errs = []
 passed = 0
 for t in trials:
     tid = f"{t['eraId']}/{t['id']}"
+    code = t["referenceSolution"]
+    concepts = set(t.get("concepts", []))
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as e:
+        errs.append(f"Trial {tid} referenceSolution SyntaxError: {e}")
+        continue
+    feats = set()
+    for n in ast.walk(tree):
+        if isinstance(n, ast.FunctionDef): feats.add("def")
+        elif isinstance(n, ast.ClassDef): feats.add("class")
+        elif isinstance(n, ast.For): feats.add("for")
+        elif isinstance(n, ast.While): feats.add("while")
+        elif isinstance(n, ast.Try): feats.add("try")
+    if "def" in feats and not (concepts & {"functions_def", "functions_return", "classes_intro", "class_inheritance", "world_scripting_3d", "debugging"}):
+        errs.append(f"Trial {tid}: uses 'def' in referenceSolution but concepts={sorted(concepts)}")
+    if "class" in feats and not (concepts & {"classes_intro", "class_inheritance", "world_scripting_3d"}):
+        errs.append(f"Trial {tid}: uses 'class' in referenceSolution but concepts={sorted(concepts)}")
+    if "for" in feats and not (concepts & {"for_loops", "list_iteration", "nested_loops", "list_comprehensions", "dictionaries", "dictionaries_nested", "world_scripting_3d", "debugging", "sorting_lambdas"}):
+        errs.append(f"Trial {tid}: uses 'for' in referenceSolution but concepts={sorted(concepts)}")
+    if "while" in feats and not (concepts & {"while_loops", "debugging"}):
+        errs.append(f"Trial {tid}: uses 'while' in referenceSolution but concepts={sorted(concepts)}")
+    if "try" in feats and "error_handling" not in concepts:
+        errs.append(f"Trial {tid}: uses 'try' in referenceSolution but concepts={sorted(concepts)}")
     try:
         ns = {"say": print, "shout": print}
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            exec(compile(t["referenceSolution"], "<student>", "exec"), ns)
+            exec(compile(code, "<student>", "exec"), ns)
         ns["OUTPUT"] = buf.getvalue()
         exec(compile(t["testCode"], "<test>", "exec"), ns)
         passed += 1
