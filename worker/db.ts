@@ -18,6 +18,7 @@ import {
   coerceByteShards,
   normalizeEmail,
   utf8ByteLength,
+  validateHeroName,
   validateSavePayload,
 } from './validation';
 
@@ -541,6 +542,13 @@ export class PyriaD1 {
       pushDiff('realm_entered', `Entered ${curRealm}`, {
         fromRealmId: prevRealm,
         toRealmId: curRealm,
+      });
+    }
+
+    if (heroName !== existing.hero_name) {
+      pushDiff('hero_renamed', `Renamed hero from ${existing.hero_name} to ${heroName}`, {
+        previousHeroName: existing.hero_name,
+        heroName,
       });
     }
 
@@ -1158,6 +1166,43 @@ export class PyriaD1 {
       .run();
 
     return { saveId, preferences: merged };
+  }
+
+  async renameHero(saveId: string, rawHeroName: unknown): Promise<SaveRecord | null> {
+    const row = await this.getSaveRow(saveId);
+    if (!row) return null;
+
+    const heroName = validateHeroName(rawHeroName);
+    const prevName = row.hero_name;
+    const state = PyriaD1.rowToSave(row);
+    if (heroName === prevName) {
+      return state;
+    }
+
+    const now = utcNowIso();
+    state.heroName = heroName;
+    state.updatedAt = now;
+
+    const stateToStore = { ...state };
+    delete stateToStore.preferences;
+
+    await this.db
+      .prepare('UPDATE saves SET hero_name = ?, state_json = ?, updated_at = ? WHERE id = ?')
+      .bind(heroName, JSON.stringify(stateToStore), now, saveId)
+      .run();
+
+    const realmId = typeof state.realmId === 'string' && state.realmId ? state.realmId : null;
+    await this.insertEvent({
+      saveId,
+      heroName,
+      eventType: 'hero_renamed',
+      realmId,
+      summary: `Renamed hero from ${prevName} to ${heroName}`,
+      details: { previousHeroName: prevName, heroName },
+      createdAt: now,
+    });
+
+    return state;
   }
 
   async rotateHeroCode(

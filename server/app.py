@@ -1885,6 +1885,16 @@ class PyriaDatabase:
                 )
                 emitted_events += 1
 
+            if hero_name != existing_hero_name:
+                emit_diff_event(
+                    "hero_renamed",
+                    f"Renamed hero from {existing_hero_name} to {hero_name}",
+                    {
+                        "previousHeroName": existing_hero_name,
+                        "heroName": hero_name,
+                    },
+                )
+
             prev_chests = _extract_string_set(prev_state, "openedChests")
             new_chests = _extract_string_set(state, "openedChests")
             for chest_id in sorted(new_chests - prev_chests):
