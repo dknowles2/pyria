@@ -1,10 +1,12 @@
 import { handleAdminTrialMetrics } from './analytics';
 import {
+  handleCreateHeroLinkToken,
   handleGetMe,
   handleGoogleCallback,
   handleGoogleStart,
   handleHeroCodeCreate,
   handleHeroCodeRedeem,
+  handleHeroPlayPreview,
   handleLogout,
   handleMagicLinkRequest,
   handleMagicLinkVerify,
@@ -128,6 +130,9 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   if (method === 'POST' && pathname === '/api/auth/hero-code/redeem') {
     return handleHeroCodeRedeem(request, env, db);
   }
+  if (method === 'POST' && pathname === '/api/auth/play-preview') {
+    return handleHeroPlayPreview(request, env, db);
+  }
   if (method === 'GET' && pathname === '/api/auth/google/start') {
     return handleGoogleStart(request, env);
   }
@@ -145,6 +150,10 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   }
 
   const auth = await resolveAuthContext(request, env, db);
+
+  if (method === 'POST' && pathname === '/api/auth/hero-link-token') {
+    return handleCreateHeroLinkToken(request, env, db, auth);
+  }
 
   // GET /api/me
   if ((method === 'GET' || method === 'HEAD') && pathname === '/api/me') {

@@ -34,7 +34,13 @@ export interface SavePreferences {
   maxPipHints?: number;
 }
 
-export type TokenType = 'hero' | 'parent' | 'oauth_state' | 'magic_link';
+export type TokenType =
+  | 'hero'
+  | 'parent'
+  | 'oauth_state'
+  | 'magic_link'
+  | 'parent_link'
+  | 'hero_play';
 
 export interface HeroSessionPayload {
   typ: 'hero';
@@ -65,12 +71,26 @@ export interface MagicLinkTokenPayload {
   exp: number;
 }
 
+export interface ParentLinkTokenPayload {
+  typ: 'parent_link';
+  saveId: string;
+  exp: number;
+}
+
+export interface HeroPlayTokenPayload {
+  typ: 'hero_play';
+  saveId: string;
+  sessionVersion: number;
+  exp: number;
+}
+
 export type AuthRole = 'guest' | 'hero' | 'parent' | 'admin';
 
 export interface AuthContext {
   role: AuthRole;
   heroSaveId: string | null;
   heroName: string | null;
+  heroLinkedToParent: boolean;
   heroPreferences: SavePreferences | null;
   parentEmail: string | null;
   isAdmin: boolean;
@@ -94,6 +114,7 @@ export interface SaveRecord {
   id: string;
   heroName: string;
   ownerEmail: string | null;
+  linkedToParent?: boolean;
   createdAt: string;
   updatedAt: string;
   preferences?: SavePreferences;

@@ -143,11 +143,13 @@ export class PyriaD1 {
   static rowToSave(row: SaveDbRow): SaveRecord {
     const state = safeParseObject(row.state_json);
     const prefs = parsePreferencesJson(row.preferences_json);
+    const ownerEmail = row.owner_email ?? null;
     return {
       ...state,
       id: row.id,
       heroName: row.hero_name,
-      ownerEmail: row.owner_email ?? null,
+      ownerEmail,
+      linkedToParent: Boolean(ownerEmail && ownerEmail.trim()),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       preferences: prefs,
@@ -431,6 +433,7 @@ export class PyriaD1 {
       id: saveId,
       heroName,
       ownerEmail: normOwner,
+      linkedToParent: Boolean(normOwner),
       createdAt: now,
       updatedAt: now,
       preferences: prefs,
@@ -566,6 +569,7 @@ export class PyriaD1 {
       id: saveId,
       heroName,
       ownerEmail: existing.owner_email ?? null,
+      linkedToParent: Boolean(existing.owner_email && existing.owner_email.trim()),
       createdAt: existing.created_at,
       updatedAt: now,
       preferences: parsePreferencesJson(existing.preferences_json),
@@ -1182,6 +1186,7 @@ export class PyriaD1 {
     const now = utcNowIso();
     const state = PyriaD1.rowToSave(row);
     state.ownerEmail = normOwner;
+    state.linkedToParent = Boolean(normOwner);
     state.updatedAt = now;
 
     const stateToStore = { ...state };
@@ -1226,6 +1231,7 @@ export class PyriaD1 {
     const now = utcNowIso();
     const state = PyriaD1.rowToSave(row);
     state.ownerEmail = normOwner;
+    state.linkedToParent = Boolean(normOwner);
     state.updatedAt = now;
     const stateToStore = { ...state };
     delete stateToStore.preferences;
