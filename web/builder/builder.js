@@ -4,6 +4,9 @@ const POLL_INTERVAL_MS = 2500;
 const PASSCODE_STORAGE_KEY = 'pyria_builder_passcode';
 
 const state = {
+  me: null,
+  accounts: [],
+  selectedAccount: 'all',
   liveEnabled: true,
   pollTimer: null,
   latestEventId: 0,
@@ -162,17 +165,44 @@ function renderSummaryStrip() {
   $('#kpi-dragons').textContent = String(s.totalDragonsRescued ?? 0);
 }
 
+function getVisibleSaves() {
+  if (!state.selectedAccount || state.selectedAccount === 'all') {
+    return state.saves;
+  }
+  return state.saves.filter((s) => (s.ownerEmail || '') === state.selectedAccount);
+}
+
+function populateAccountFilter() {
+  const sel = $('#account-filter-select');
+  if (!sel) return;
+  const set = new Set(Array.isArray(state.accounts) ? state.accounts : []);
+  for (const s of state.saves) {
+    if (s.ownerEmail) set.add(s.ownerEmail);
+  }
+  const sorted = [...set].filter(Boolean).sort();
+  const opts = ['<option value="all">All Accounts</option>'];
+  for (const email of sorted) {
+    opts.push(`<option value="${escapeHtml(email)}">${escapeHtml(email)}</option>`);
+  }
+  sel.innerHTML = opts.join('');
+  if (state.selectedAccount !== 'all' && !sorted.includes(state.selectedAccount)) {
+    state.selectedAccount = 'all';
+  }
+  sel.value = state.selectedAccount;
+}
+
 function renderHeroCards() {
   const listEl = $('#hero-cards-list');
   if (!listEl) return;
 
-  if (!state.saves.length) {
+  const visibleSaves = getVisibleSaves();
+  if (!visibleSaves.length) {
     listEl.innerHTML =
-      '<div class="empty-state">No saved heroes yet. Launch <a href="/" style="color:var(--accent-sky);">Pyria</a> and forge a hero to see live progress here!</div>';
+      '<div class="empty-state">No saved heroes yet for this account. Launch <a href="/" style="color:var(--accent-sky);">Pyria</a> and forge a hero to see live progress here!</div>';
     return;
   }
 
-  listEl.innerHTML = state.saves
+  listEl.innerHTML = visibleSaves
     .map((save) => {
       const st = save.state && typeof save.state === 'object' ? save.state : save;
       const stats = save.stats || {};
@@ -201,6 +231,7 @@ function renderHeroCards() {
             <div>
               <div class="hero-card-name">${escapeHtml(save.heroName || st.heroName || 'Hero')}</div>
               <div class="hint-sub">${escapeHtml(era?.name || '8-Bit Era')} · ${escapeHtml(realm?.name || realmId)}</div>
+              ${save.ownerEmail ? `<span class="pill pill-blue" style="margin-top:4px;">👤 ${escapeHtml(save.ownerEmail)}</span>` : ''}
             </div>
             <span class="pill pill-muted">${escapeHtml(formatRelativeTime(lastActive))}</span>
           </div>
@@ -272,11 +303,15 @@ function renderActivityStream(newlyArrivedIds = new Set()) {
   if (!streamEl) return;
 
   let filtered = state.events;
+  if (state.selectedAccount && state.selectedAccount !== 'all') {
+    const allowedSaveIds = new Set(getVisibleSaves().map((s) => s.id));
+    filtered = filtered.filter((ev) => allowedSaveIds.has(ev.saveId));
+  }
   if (state.selectedHeroId) {
     const hero = state.saves.find((s) => s.id === state.selectedHeroId);
     filterChip?.classList.remove('hidden');
     if (filterName) filterName.textContent = hero?.heroName || 'Hero';
-    filtered = state.events.filter((ev) => ev.saveId === state.selectedHeroId);
+    filtered = filtered.filter((ev) => ev.saveId === state.selectedHeroId);
   } else {
     filterChip?.classList.add('hidden');
   }
@@ -348,6 +383,7 @@ function renderActivityStream(newlyArrivedIds = new Set()) {
 async function loadProgressFull() {
   const data = await apiFetch('/api/builder/progress');
   state.saves = Array.isArray(data.saves) ? data.saves : [];
+  state.accounts = Array.isArray(data.accounts) ? data.accounts : [];
   state.summary = data.summary || null;
   if (data.globalDifficultyOverride) {
     state.globalDifficulty = data.globalDifficultyOverride;
@@ -357,6 +393,7 @@ async function loadProgressFull() {
   state.events = recent;
   state.latestEventId = recent.reduce((max, ev) => Math.max(max, Number(ev.id) || 0), 0);
 
+  populateAccountFilter();
   renderGlobalControls();
   renderSummaryStrip();
   renderHeroCards();
@@ -372,6 +409,7 @@ async function pollLiveUpdates() {
     ]);
 
     state.saves = Array.isArray(progData.saves) ? progData.saves : [];
+    state.accounts = Array.isArray(progData.accounts) ? progData.accounts : [];
     state.summary = progData.summary || null;
     if (progData.globalDifficultyOverride) {
       state.globalDifficulty = progData.globalDifficultyOverride;
@@ -396,6 +434,7 @@ async function pollLiveUpdates() {
       state.latestEventId = Math.max(state.latestEventId, actData.latestId);
     }
 
+    populateAccountFilter();
     renderGlobalControls();
     renderSummaryStrip();
     renderHeroCards();
@@ -844,12 +883,13 @@ function renderConceptHealth() {
 
 // ==================== REALM PROGRESS & LIVE MAP TRACKER ====================
 function getActiveTrackerSave() {
-  if (!state.saves.length) return null;
+  const visible = getVisibleSaves();
+  if (!visible.length) return null;
   if (state.selectedHeroId) {
-    const found = state.saves.find((s) => s.id === state.selectedHeroId);
+    const found = visible.find((s) => s.id === state.selectedHeroId);
     if (found) return found;
   }
-  return state.saves[0];
+  return visible[0];
 }
 
 function getSaveStateObj(save) {
@@ -1528,6 +1568,17 @@ function wireEvents() {
     }
   });
 
+  // Account filter switcher
+  $('#account-filter-select')?.addEventListener('change', (e) => {
+    state.selectedAccount = e.target.value || 'all';
+    state.selectedHeroId = null;
+    state.trackerManualRealm = false;
+    state.trackerPinnedEntityId = null;
+    renderHeroCards();
+    renderActivityStream();
+    refreshRealmTracker();
+  });
+
   // Quick parent difficulty controls
   document.querySelectorAll('#global-diff-segmented .seg-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -1566,6 +1617,19 @@ function wireEvents() {
 async function init() {
   wireEvents();
   wireTrackerEvents();
+  try {
+    const meRes = await fetch(`/api/me?_ts=${Date.now()}`, { cache: 'no-store' });
+    if (meRes.ok) {
+      state.me = await meRes.json();
+      const adminPill = $('#builder-admin-pill');
+      if (adminPill && state.me?.email) {
+        adminPill.textContent = `🛡️ ${state.me.email}`;
+        adminPill.classList.remove('hidden');
+      }
+    }
+  } catch {
+    // ignore if /api/me unavailable
+  }
   try {
     await Promise.all([loadOverview(), loadProgressFull()]);
   } catch (err) {

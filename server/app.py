@@ -8,6 +8,7 @@ third-party dependencies.
 from __future__ import annotations
 
 import argparse
+import base64
 from contextlib import contextmanager
 import json
 import mimetypes
@@ -89,6 +90,38 @@ except BaseException as exc:
 
 sys.stdout.write(json.dumps(result))
 """
+
+
+def extract_email_from_cf_jwt(token: str) -> str | None:
+    """Safely base64url-decode a Cloudflare Access JWT payload and extract email."""
+    parts = token.strip().split(".")
+    if len(parts) < 2 or not parts[1]:
+        return None
+    seg = parts[1]
+    padded = seg + "=" * (-len(seg) % 4)
+    try:
+        raw = base64.urlsafe_b64decode(padded.encode("ascii"))
+        payload = json.loads(raw.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    email = payload.get("email")
+    if isinstance(email, str) and email.strip():
+        return email.strip().lower()
+    return None
+
+
+def get_admin_emails() -> set[str]:
+    raw = os.environ.get("PYRIA_ADMIN_EMAILS", "")
+    return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
+
+def normalize_email(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    cleaned = value.strip().lower()
+    return cleaned or None
 
 
 def utc_now_iso() -> str:
@@ -325,6 +358,7 @@ class PyriaDatabase:
                 CREATE TABLE IF NOT EXISTS saves (
                     id TEXT PRIMARY KEY,
                     hero_name TEXT NOT NULL,
+                    owner_email TEXT,
                     state_json TEXT NOT NULL,
                     created_at TEXT NOT NULL,
                     updated_at TEXT NOT NULL
@@ -363,6 +397,15 @@ class PyriaDatabase:
                     ON activity_events(save_id, id DESC);
                 """
             )
+            cols = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(saves)").fetchall()
+            }
+            if "owner_email" not in cols:
+                conn.execute("ALTER TABLE saves ADD COLUMN owner_email TEXT")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_saves_owner_email ON saves(owner_email)"
+            )
 
     @staticmethod
     def _row_to_save(row: sqlite3.Row) -> dict[str, Any]:
@@ -372,10 +415,12 @@ class PyriaDatabase:
                 state = {}
         except json.JSONDecodeError:
             state = {}
+        owner_email = row["owner_email"] if "owner_email" in row.keys() else None
         return {
             **state,
             "id": row["id"],
             "heroName": row["hero_name"],
+            "ownerEmail": owner_email,
             "createdAt": row["created_at"],
             "updatedAt": row["updated_at"],
         }
@@ -386,10 +431,12 @@ class PyriaDatabase:
             details = json.loads(row["details_json"])
         except json.JSONDecodeError:
             details = {}
+        owner_email = row["owner_email"] if "owner_email" in row.keys() else None
         return {
             "id": int(row["id"]),
             "saveId": row["save_id"],
             "heroName": row["hero_name"],
+            "ownerEmail": owner_email,
             "eventType": row["event_type"],
             "realmId": row["realm_id"],
             "trialId": row["trial_id"],
@@ -433,33 +480,69 @@ class PyriaDatabase:
             row = conn.execute("SELECT COUNT(*) AS cnt FROM saves").fetchone()
             return int(row["cnt"]) if row else 0
 
-    def list_saves(self) -> list[dict[str, Any]]:
+    def list_accounts(self, extra_email: str | None = None) -> list[str]:
+        accounts: set[str] = set()
         with self._lock, self._connect() as conn:
             rows = conn.execute(
-                "SELECT id, hero_name, state_json, created_at, updated_at "
-                "FROM saves ORDER BY updated_at DESC, created_at DESC"
+                "SELECT DISTINCT LOWER(TRIM(owner_email)) AS email "
+                "FROM saves WHERE owner_email IS NOT NULL AND TRIM(owner_email) != ''"
             ).fetchall()
+            for r in rows:
+                if r["email"]:
+                    accounts.add(str(r["email"]))
+        norm_extra = normalize_email(extra_email)
+        if norm_extra:
+            accounts.add(norm_extra)
+        return sorted(accounts)
+
+    def get_save_owner(self, save_id: str) -> tuple[bool, str | None]:
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                "SELECT owner_email FROM saves WHERE id = ?", (save_id,)
+            ).fetchone()
+            if row is None:
+                return False, None
+            return True, normalize_email(row["owner_email"])
+
+    def list_saves(self, owner_filter: str | None = None) -> list[dict[str, Any]]:
+        with self._lock, self._connect() as conn:
+            if owner_filter is not None:
+                rows = conn.execute(
+                    "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
+                    "FROM saves WHERE LOWER(COALESCE(owner_email, '')) = ? "
+                    "ORDER BY updated_at DESC, created_at DESC",
+                    (owner_filter.lower(),),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
+                    "FROM saves ORDER BY updated_at DESC, created_at DESC"
+                ).fetchall()
             return [self._row_to_save(r) for r in rows]
 
     def get_save(self, save_id: str) -> dict[str, Any] | None:
         with self._lock, self._connect() as conn:
             row = conn.execute(
-                "SELECT id, hero_name, state_json, created_at, updated_at "
+                "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
                 "FROM saves WHERE id = ?",
                 (save_id,),
             ).fetchone()
             return self._row_to_save(row) if row else None
 
-    def create_save(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def create_save(
+        self, payload: dict[str, Any], owner_email: str | None = None
+    ) -> dict[str, Any]:
         save_id = str(uuid.uuid4())
         hero_name = str(
             payload.get("heroName") or payload.get("hero_name") or "Code-Tamer"
         ).strip() or "Code-Tamer"
+        norm_owner = normalize_email(owner_email)
         now = utc_now_iso()
         state = {
             **payload,
             "id": save_id,
             "heroName": hero_name,
+            "ownerEmail": norm_owner,
             "createdAt": now,
             "updatedAt": now,
         }
@@ -467,9 +550,9 @@ class PyriaDatabase:
         realm_id = str(state.get("realmId") or "realm-01-meadow")
         with self._lock, self._connect() as conn:
             conn.execute(
-                "INSERT INTO saves (id, hero_name, state_json, created_at, updated_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (save_id, hero_name, state_json, now, now),
+                "INSERT INTO saves (id, hero_name, owner_email, state_json, created_at, updated_at) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (save_id, hero_name, norm_owner, state_json, now, now),
             )
             self._insert_event(
                 conn,
@@ -483,12 +566,34 @@ class PyriaDatabase:
             )
         return state
 
+    def assign_owner(
+        self, save_id: str, owner_email: str | None
+    ) -> dict[str, Any] | None:
+        norm_owner = normalize_email(owner_email)
+        now = utc_now_iso()
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
+                "FROM saves WHERE id = ?",
+                (save_id,),
+            ).fetchone()
+            if row is None:
+                return None
+            state = self._row_to_save(row)
+            state["ownerEmail"] = norm_owner
+            state["updatedAt"] = now
+            conn.execute(
+                "UPDATE saves SET owner_email = ?, state_json = ?, updated_at = ? WHERE id = ?",
+                (norm_owner, json.dumps(state, ensure_ascii=False), now, save_id),
+            )
+            return state
+
     def update_save(
         self, save_id: str, payload: dict[str, Any]
     ) -> dict[str, Any] | None:
         with self._lock, self._connect() as conn:
             existing = conn.execute(
-                "SELECT id, hero_name, state_json, created_at, updated_at "
+                "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
                 "FROM saves WHERE id = ?",
                 (save_id,),
             ).fetchone()
@@ -512,6 +617,7 @@ class PyriaDatabase:
                 **payload,
                 "id": save_id,
                 "heroName": hero_name,
+                "ownerEmail": existing["owner_email"],
                 "createdAt": existing["created_at"],
                 "updatedAt": now,
             }
@@ -691,9 +797,11 @@ class PyriaDatabase:
         clamped_limit = max(1, min(limit, 200))
         with self._lock, self._connect() as conn:
             rows = conn.execute(
-                "SELECT id, save_id, hero_name, event_type, realm_id, trial_id, "
-                "summary, details_json, created_at "
-                "FROM activity_events WHERE id > ? ORDER BY id ASC LIMIT ?",
+                "SELECT e.id, e.save_id, e.hero_name, s.owner_email, e.event_type, "
+                "e.realm_id, e.trial_id, e.summary, e.details_json, e.created_at "
+                "FROM activity_events e "
+                "LEFT JOIN saves s ON s.id = e.save_id "
+                "WHERE e.id > ? ORDER BY e.id ASC LIMIT ?",
                 (since_id, clamped_limit),
             ).fetchall()
             latest_row = conn.execute(
@@ -702,12 +810,25 @@ class PyriaDatabase:
             latest_id = int(latest_row["latest_id"]) if latest_row else 0
             return [self._row_to_event(r) for r in rows], latest_id
 
-    def get_progress_snapshot(self) -> dict[str, Any]:
+    def get_progress_snapshot(
+        self,
+        owner_filter: str | None = None,
+        extra_account: str | None = None,
+    ) -> dict[str, Any]:
+        norm_filter = normalize_email(owner_filter) if owner_filter and owner_filter.lower() != "all" else None
         with self._lock, self._connect() as conn:
-            save_rows = conn.execute(
-                "SELECT id, hero_name, state_json, created_at, updated_at "
-                "FROM saves ORDER BY updated_at DESC, created_at DESC"
-            ).fetchall()
+            if norm_filter:
+                save_rows = conn.execute(
+                    "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
+                    "FROM saves WHERE LOWER(COALESCE(owner_email, '')) = ? "
+                    "ORDER BY updated_at DESC, created_at DESC",
+                    (norm_filter,),
+                ).fetchall()
+            else:
+                save_rows = conn.execute(
+                    "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
+                    "FROM saves ORDER BY updated_at DESC, created_at DESC"
+                ).fetchall()
             attempt_rows = conn.execute(
                 "SELECT save_id, COUNT(*) AS attempt_count, "
                 "SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS pass_count, "
@@ -715,12 +836,26 @@ class PyriaDatabase:
                 "MAX(created_at) AS last_attempt_at "
                 "FROM trial_attempts GROUP BY save_id"
             ).fetchall()
-            event_rows = conn.execute(
-                "SELECT id, save_id, hero_name, event_type, realm_id, trial_id, "
-                "summary, details_json, created_at "
-                "FROM activity_events ORDER BY id DESC LIMIT 80"
-            ).fetchall()
+            if norm_filter:
+                event_rows = conn.execute(
+                    "SELECT e.id, e.save_id, e.hero_name, s.owner_email, e.event_type, "
+                    "e.realm_id, e.trial_id, e.summary, e.details_json, e.created_at "
+                    "FROM activity_events e "
+                    "LEFT JOIN saves s ON s.id = e.save_id "
+                    "WHERE LOWER(COALESCE(s.owner_email, '')) = ? "
+                    "ORDER BY e.id DESC LIMIT 80",
+                    (norm_filter,),
+                ).fetchall()
+            else:
+                event_rows = conn.execute(
+                    "SELECT e.id, e.save_id, e.hero_name, s.owner_email, e.event_type, "
+                    "e.realm_id, e.trial_id, e.summary, e.details_json, e.created_at "
+                    "FROM activity_events e "
+                    "LEFT JOIN saves s ON s.id = e.save_id "
+                    "ORDER BY e.id DESC LIMIT 80"
+                ).fetchall()
 
+        accounts = self.list_accounts(extra_email=extra_account)
         attempts_by_save = {str(r["save_id"]): r for r in attempt_rows}
         enriched_saves: list[dict[str, Any]] = []
         total_attempts = 0
@@ -750,6 +885,7 @@ class PyriaDatabase:
                 {
                     "id": save_id,
                     "heroName": str(row["hero_name"]),
+                    "ownerEmail": row["owner_email"],
                     "state": state,
                     "stats": {
                         "attemptCount": attempt_count,
@@ -766,6 +902,7 @@ class PyriaDatabase:
         pass_rate = round((total_passes / total_attempts) * 100, 1) if total_attempts > 0 else 0.0
         return {
             "saves": enriched_saves,
+            "accounts": accounts,
             "recentEvents": [self._row_to_event(r) for r in event_rows],
             "summary": {
                 "totalSaves": len(enriched_saves),
@@ -787,7 +924,7 @@ class PyriaDatabase:
         now = utc_now_iso()
         with self._lock, self._connect() as conn:
             row = conn.execute(
-                "SELECT id, hero_name, state_json, created_at, updated_at "
+                "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
                 "FROM saves WHERE id = ?",
                 (save_id,),
             ).fetchone()
@@ -876,6 +1013,7 @@ class PyriaDatabase:
         enriched = {
             "id": save_id,
             "heroName": hero_name,
+            "ownerEmail": row["owner_email"],
             "state": state,
             "stats": {
                 "attemptCount": attempt_count,
@@ -997,7 +1135,67 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return None, "JSON body must be an object"
         return parsed, None
 
-    def _check_builder_auth(self) -> bool:
+    def _get_identity(self) -> tuple[str | None, bool, set[str]]:
+        email = normalize_email(
+            self.headers.get("Cf-Access-Authenticated-User-Email")
+        )
+        if email is None:
+            jwt_hdr = self.headers.get("Cf-Access-Jwt-Assertion")
+            if jwt_hdr:
+                email = extract_email_from_cf_jwt(jwt_hdr)
+        admin_emails = get_admin_emails()
+        is_admin = bool(
+            (email and email in admin_emails)
+            or (not admin_emails and email is None)
+        )
+        return email, is_admin, admin_emails
+
+    def _require_save_access(self, save_id: str) -> bool:
+        """Verify save exists (404) and caller owns it or is admin (403)."""
+        exists, owner_email = self.server.db.get_save_owner(save_id)
+        if not exists:
+            self._send_json(HTTPStatus.NOT_FOUND, {"error": "Save not found"})
+            return False
+        email, is_admin, _ = self._get_identity()
+        if is_admin:
+            return True
+        if not email or owner_email != email:
+            self._send_json(HTTPStatus.FORBIDDEN, {"error": "Forbidden"})
+            return False
+        return True
+
+    def _send_html(self, status: int, html: str) -> None:
+        body = html.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(body)
+
+    def _check_builder_auth(self, html: bool = False) -> bool:
+        _, is_admin, admin_emails = self._get_identity()
+        if admin_emails and not is_admin:
+            if html:
+                self._send_html(
+                    HTTPStatus.FORBIDDEN,
+                    "<!doctype html><html lang='en'><head><meta charset='utf-8'>"
+                    "<title>403 — Parent / Admin Access Only</title>"
+                    "<style>body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;"
+                    "display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}"
+                    ".card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:28px 32px;"
+                    "max-width:420px;text-align:center}a{color:#38bdf8;text-decoration:none;font-weight:600}</style>"
+                    "</head><body><div class='card'><h1>403 — Parent / Admin Access Only</h1>"
+                    "<p>The Pyria Builder &amp; Parent Console is restricted to admin accounts.</p>"
+                    "<p><a href='/'>← Back to Pyria</a></p></div></body></html>",
+                )
+            else:
+                self._send_json(
+                    HTTPStatus.FORBIDDEN, {"error": "Admin access required"}
+                )
+            return False
+
         passcode = os.environ.get("PYRIA_BUILDER_PASSCODE", "")
         if not passcode:
             return True
@@ -1034,9 +1232,13 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             base_dir = self.server.assets_dir
             rel = decoded[len("/assets/") :]
         elif decoded == "/builder" or decoded == "/builder/":
+            if not self._check_builder_auth(html=True):
+                return
             base_dir = self.server.web_dir
             rel = "builder/index.html"
         elif decoded.startswith("/builder/"):
+            if not self._check_builder_auth(html=True):
+                return
             base_dir = self.server.web_dir
             rel = decoded.lstrip("/")
         else:
@@ -1083,7 +1285,12 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/builder/progress":
-            snapshot = self.server.db.get_progress_snapshot()
+            email, _, _ = self._get_identity()
+            qs = parse_qs(query)
+            owner_param = qs.get("owner", [None])[0]
+            snapshot = self.server.db.get_progress_snapshot(
+                owner_filter=owner_param, extra_account=email
+            )
             try:
                 game, _ = self.server.load_game_and_catalog()
                 global_diff = game.get("globalDifficultyOverride", {})
@@ -1176,14 +1383,46 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             self._send_json(HTTPStatus.OK, {"game": game, "catalog": catalog})
             return
 
-        if path == "/api/saves":
+        if path == "/api/me":
+            email, is_admin, _ = self._get_identity()
+            if is_admin:
+                accounts = self.server.db.list_accounts(extra_email=email)
+            else:
+                accounts = [email] if email else []
             self._send_json(
-                HTTPStatus.OK, {"saves": self.server.db.list_saves()}
+                HTTPStatus.OK,
+                {
+                    "authenticated": bool(email),
+                    "email": email,
+                    "isAdmin": is_admin,
+                    "accounts": accounts,
+                },
             )
+            return
+
+        if path == "/api/saves":
+            email, is_admin, _ = self._get_identity()
+            qs = parse_qs(query)
+            owner_param = (qs.get("owner", [""])[0] or "").strip().lower()
+            if not is_admin:
+                if email:
+                    saves = self.server.db.list_saves(owner_filter=email)
+                else:
+                    saves = []
+            else:
+                if owner_param == "all" or (not owner_param and email is None):
+                    saves = self.server.db.list_saves(owner_filter=None)
+                elif owner_param:
+                    saves = self.server.db.list_saves(owner_filter=owner_param)
+                else:
+                    saves = self.server.db.list_saves(owner_filter=email)
+            self._send_json(HTTPStatus.OK, {"saves": saves})
             return
 
         parts = [p for p in path.split("/") if p]
         if len(parts) == 3 and parts[0] == "api" and parts[1] == "saves":
+            if not self._require_save_access(parts[2]):
+                return
             save = self.server.db.get_save(parts[2])
             if save is None:
                 self._send_json(
@@ -1199,6 +1438,8 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             and parts[1] == "saves"
             and parts[3] == "attempts"
         ):
+            if not self._require_save_access(parts[2]):
+                return
             attempts = self.server.db.list_attempts(parts[2])
             if attempts is None:
                 self._send_json(
@@ -1294,6 +1535,41 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             )
             return
 
+        # POST /api/builder/saves/<saveId>/assign-owner
+        if (
+            len(parts) == 5
+            and parts[0] == "api"
+            and parts[1] == "builder"
+            and parts[2] == "saves"
+            and parts[4] == "assign-owner"
+        ):
+            if not self._check_builder_auth():
+                return
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
+                return
+            if "ownerEmail" not in body:
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST, {"error": "ownerEmail is required"}
+                )
+                return
+            owner_val = body.get("ownerEmail")
+            if owner_val is not None and not isinstance(owner_val, str):
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST,
+                    {"error": "ownerEmail must be a string or null"},
+                )
+                return
+            updated = self.server.db.assign_owner(unquote(parts[3]), owner_val)
+            if updated is None:
+                self._send_json(
+                    HTTPStatus.NOT_FOUND, {"error": "Save not found"}
+                )
+                return
+            self._send_json(HTTPStatus.OK, {"ok": True, "save": updated})
+            return
+
         if path == "/api/saves":
             body, err = self._read_json_body()
             if err is not None or body is None:
@@ -1305,7 +1581,10 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                 and isinstance(body["save"], dict)
             ):
                 body = body["save"]
-            save = self.server.db.create_save(body)
+            email, is_admin, _ = self._get_identity()
+            requested_owner = normalize_email(body.get("ownerEmail"))
+            owner_email = requested_owner if (is_admin and requested_owner) else email
+            save = self.server.db.create_save(body, owner_email=owner_email)
             self._send_json(HTTPStatus.CREATED, {"save": save})
             return
 
@@ -1315,6 +1594,8 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             and parts[1] == "saves"
             and parts[3] == "attempts"
         ):
+            if not self._require_save_access(parts[2]):
+                return
             body, err = self._read_json_body()
             if err is not None or body is None:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
@@ -1538,6 +1819,8 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return
 
         if len(parts) == 3 and parts[0] == "api" and parts[1] == "saves":
+            if not self._require_save_access(parts[2]):
+                return
             body, err = self._read_json_body()
             if err is not None or body is None:
                 self._send_json(HTTPStatus.BAD_REQUEST, {"error": err})
@@ -1598,6 +1881,8 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                 return
 
         if len(parts) == 3 and parts[0] == "api" and parts[1] == "saves":
+            if not self._require_save_access(parts[2]):
+                return
             deleted = self.server.db.delete_save(parts[2])
             if not deleted:
                 self._send_json(

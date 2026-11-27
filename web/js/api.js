@@ -102,9 +102,18 @@ export function normalizeSave(raw) {
     openedChests: Array.isArray(merged.openedChests) ? [...merged.openedChests] : [],
     ownedUnlockIds: Array.isArray(merged.ownedUnlockIds) ? [...merged.ownedUnlockIds] : [],
     position: merged.position || null,
+    ownerEmail: merged.ownerEmail || merged.owner_email || null,
     createdAt: merged.createdAt || merged.created_at || null,
     updatedAt: merged.updatedAt || merged.updated_at || null,
   };
+}
+
+export async function fetchMe() {
+  try {
+    return await requestJson(`/api/me?_ts=${Date.now()}`, { cache: 'no-store' });
+  } catch {
+    return { authenticated: false, email: null, isAdmin: false, accounts: [] };
+  }
 }
 
 export async function fetchConfig() {
@@ -131,8 +140,9 @@ export async function fetchTilesetManifest() {
   return requestJson('/assets/tilesets/manifest.json');
 }
 
-export async function listSaves() {
-  const data = await requestJson('/api/saves');
+export async function listSaves(ownerFilter = null) {
+  const qs = ownerFilter ? `?owner=${encodeURIComponent(ownerFilter)}` : '';
+  const data = await requestJson(`/api/saves${qs}`, { cache: 'no-store' });
   const list = Array.isArray(data.saves) ? data.saves : [];
   return list.map(normalizeSave);
 }

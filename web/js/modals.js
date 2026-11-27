@@ -7,7 +7,7 @@ import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126r';
+} from './autocomplete.js?v=20261126s';
 
 function escapeHtml(str) {
   return String(str ?? '')

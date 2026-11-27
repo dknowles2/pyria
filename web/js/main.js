@@ -1,6 +1,7 @@
 // Pyria: Return of the Bits — Main Application Controller
 
 import {
+  fetchMe,
   fetchConfig,
   fetchEra,
   fetchMap,
@@ -12,17 +13,21 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126r';
-import { audio } from './audio.js?v=20261126r';
-import { music, resolveRegionTheme } from './music.js?v=20261126r';
-import { pyRunner } from './pyRunner.js?v=20261126r';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126r';
-import { SpriteManager } from './sprites.js?v=20261126r';
-import { WorldEngine } from './world.js?v=20261126r';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126r';
-import { playCutscene } from './cutscene.js?v=20261126r';
+} from './api.js?v=20261126s';
+import { audio } from './audio.js?v=20261126s';
+import { music, resolveRegionTheme } from './music.js?v=20261126s';
+import { pyRunner } from './pyRunner.js?v=20261126s';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126s';
+import { SpriteManager } from './sprites.js?v=20261126s';
+import { WorldEngine } from './world.js?v=20261126s';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126s';
+import { playCutscene } from './cutscene.js?v=20261126s';
+
+const ADMIN_OWNER_STORAGE_KEY = 'pyria_admin_owner_filter';
 
 const state = {
+  me: { authenticated: false, email: null, isAdmin: false, accounts: [] },
+  adminOwnerFilter: sessionStorage.getItem(ADMIN_OWNER_STORAGE_KEY) || 'all',
   gameConfig: null,
   catalog: null,
   era: null,
@@ -388,11 +393,59 @@ function updateHud() {
 }
 
 // ==================== TITLE & SAVE PICKER ====================
+function renderAccountIdentityBar() {
+  const me = state.me || {};
+  const bar = $('#title-account-bar');
+  const pill = $('#title-user-pill');
+  const builderBtn = $('#btn-title-builder');
+  const adminBar = $('#admin-account-bar');
+  const adminSel = $('#admin-account-select');
+
+  if (me.authenticated || me.email || me.isAdmin) {
+    bar?.classList.remove('hidden');
+    if (pill) {
+      if (me.isAdmin) {
+        pill.className = 'pill pill-gold';
+        pill.textContent = me.email ? `🛡️ Admin: ${me.email}` : '🛡️ Admin Mode';
+      } else {
+        pill.className = 'pill pill-blue';
+        pill.textContent = `👤 ${me.email}`;
+      }
+    }
+  } else {
+    bar?.classList.add('hidden');
+  }
+
+  if (me.isAdmin) {
+    builderBtn?.classList.remove('hidden');
+    adminBar?.classList.remove('hidden');
+    if (adminSel) {
+      const accounts = new Set(Array.isArray(me.accounts) ? me.accounts : []);
+      if (me.email) accounts.add(me.email);
+      const sorted = [...accounts].filter(Boolean).sort();
+      const opts = ['<option value="all">All Accounts</option>'];
+      for (const email of sorted) {
+        opts.push(`<option value="${email}">${email}</option>`);
+      }
+      adminSel.innerHTML = opts.join('');
+      if (state.adminOwnerFilter !== 'all' && !sorted.includes(state.adminOwnerFilter)) {
+        state.adminOwnerFilter = 'all';
+      }
+      adminSel.value = state.adminOwnerFilter;
+    }
+  } else {
+    builderBtn?.classList.add('hidden');
+    adminBar?.classList.add('hidden');
+  }
+}
+
 async function refreshSavesList() {
   const listEl = $('#saves-list');
   const countEl = $('#saves-count');
   try {
-    const saves = await listSaves();
+    const ownerParam = state.me?.isAdmin ? state.adminOwnerFilter || 'all' : null;
+    const saves = await listSaves(ownerParam);
+    const showingAll = Boolean(state.me?.isAdmin && ownerParam === 'all');
     countEl.textContent = `${saves.length} ${saves.length === 1 ? 'Hero' : 'Heroes'}`;
     if (saves.length === 0) {
       listEl.innerHTML =
@@ -405,12 +458,17 @@ async function refreshSavesList() {
       const realm = getRealm(s.realmId);
       const card = document.createElement('div');
       card.className = 'save-card';
+      const ownerBadgeHtml =
+        showingAll && s.ownerEmail
+          ? `<div class="save-owner-pill">${s.ownerEmail}</div>`
+          : '';
       card.innerHTML = `
         <div class="save-card-info">
           <div class="save-card-name">${s.heroName}</div>
           <div class="save-card-meta">
             ${realm ? realm.name : s.realmId} · ✦ ${s.byteShards} Shards · 🐉 ${(s.rescuedDragons || []).length} Dragons
           </div>
+          ${ownerBadgeHtml}
         </div>
         <button class="btn btn-sm btn-primary">Continue →</button>
       `;
@@ -570,6 +628,9 @@ async function launchAdventureFromHeroForge(errorEl) {
     hair: state.ccAppearance.hair,
     tunic: state.ccAppearance.tunic,
   });
+  if (state.me?.isAdmin && state.adminOwnerFilter && state.adminOwnerFilter !== 'all') {
+    newSavePayload.ownerEmail = state.adminOwnerFilter;
+  }
 
   try {
     const created = await createSave(newSavePayload);
@@ -731,6 +792,9 @@ async function runCharCreateCode() {
         hair: state.ccAppearance.hair,
         tunic: state.ccAppearance.tunic,
       });
+      if (state.me?.isAdmin && state.adminOwnerFilter && state.adminOwnerFilter !== 'all') {
+        newSavePayload.ownerEmail = state.adminOwnerFilter;
+      }
       try {
         const created = await createSave(newSavePayload);
         await enterOverworld(created);
@@ -1175,6 +1239,13 @@ function wireControls() {
     openCharCreateScreen();
   });
 
+  $('#admin-account-select')?.addEventListener('change', async (e) => {
+    state.adminOwnerFilter = e.target.value || 'all';
+    sessionStorage.setItem(ADMIN_OWNER_STORAGE_KEY, state.adminOwnerFilter);
+    audio.playClick();
+    await refreshSavesList();
+  });
+
   // Character Creation
   $('#btn-charcreate-back').addEventListener('click', async () => {
     audio.playClick();
@@ -1451,18 +1522,21 @@ function wireControls() {
 // ==================== BOOTSTRAP ====================
 async function init() {
   try {
-    const [config, era, spriteManifest, tilesetManifest] = await Promise.all([
+    const [me, config, era, spriteManifest, tilesetManifest] = await Promise.all([
+      fetchMe(),
       fetchConfig(),
       fetchEra('era-01-8bit'),
       fetchSpriteManifest(),
       fetchTilesetManifest(),
     ]);
 
+    state.me = me || { authenticated: false, email: null, isAdmin: false, accounts: [] };
     state.gameConfig = config.game;
     state.catalog = config.catalog;
     state.era = era;
     state.sprites = new SpriteManager(spriteManifest, tilesetManifest);
     state.sprites.preloadCore('8bit');
+    renderAccountIdentityBar();
 
     state.modals = new ModalManager($('#modal-backdrop'), $('#modal-content'), {
       sprites: state.sprites,
