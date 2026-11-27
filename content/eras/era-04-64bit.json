@@ -182,7 +182,7 @@
           "id": "trial-64-01-06",
           "trialType": "code",
           "title": "Launch Polywing Over the Valley (Boss)",
-          "storyPrompt": "Final lock before Polywing! Define `class Flyer:` with `alt=0` and `flap(self, lift)` adding `lift` to `self.alt`. Create `f = Flyer()`, call `f.flap(20)` twice; if `f.alt >= 40`, print `\"POLYWING FREE!\"`.",
+          "storyPrompt": "Final lock before Polywing! Define `class Flyer:` with `self.alt = 0` and `def flap(self, lift): self.alt += lift`. Create `f = Flyer()`, call `f.flap(10)` then `f.flap(15)`, and if `f.alt >= 25`, print `\"POLYWING FREE!\"`.",
           "objective": "Launch Polywing over the Valley! Create a `Flyer` class starting at altitude 0 with a `flap(lift)` method that raises altitude using `+=`. Flap twice (10, then 15) on `f`, and when altitude reaches at least 25, announce `POLYWING FREE!`.",
           "concepts": [
             "classes_intro",
@@ -191,16 +191,16 @@
           "shardReward": 200,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    \n",
+            "explorer": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += lift\n\nf = Flyer()\nf.flap(10)\nf.flap(15)\nif f.alt >= 25:\n    \n",
             "standard": "",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += lift\n\nf = Flyer()\nf.flap(10)\nf.flap(15)\nif f.alt >= 25:\n    print(\"POLYWING FREE!\")\n",
           "testCode": "assert f.alt == 25 and OUTPUT.strip() == \"POLYWING FREE!\"\n_f2 = Flyer()\n_f2.flap(7)\nassert _f2.alt == 7",
           "hints": {
-            "tier1_nudge": "One last spell to free Polywing!",
-            "tier2_pattern": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")",
-            "tier3_walkthrough": "Write:\nclass Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")"
+            "tier1_nudge": "Use `self.alt += lift` inside `flap()`, call `f.flap(10)` and `f.flap(15)`, then check `if f.alt >= 25:`.",
+            "tier2_pattern": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += ___\n# flap(10), flap(15), check if f.alt >= 25",
+            "tier3_walkthrough": "Define `class Flyer:` with `__init__` setting `self.alt = 0` and `flap(self, lift)` doing `self.alt += lift`. Create `f = Flyer()`, call `f.flap(10)` and `f.flap(15)`, and `if f.alt >= 25: print(\"POLYWING FREE!\")`."
           },
           "difficultyOverride": null
         },
