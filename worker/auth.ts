@@ -30,6 +30,7 @@ import type {
   AuthContext,
   Env,
   HeroSessionPayload,
+  MagicLinkTokenPayload,
   OAuthStatePayload,
   ParentSessionPayload,
 } from './types';
@@ -49,6 +50,12 @@ const DEFAULT_REDEEM_LIMIT = 15;
 const DEFAULT_REDEEM_WINDOW_SEC = 300; // 5 minutes
 const DEFAULT_GLOBAL_FAIL_LIMIT = 200;
 const DEFAULT_GLOBAL_FAIL_WINDOW_SEC = 300; // 5 minutes
+const MAGIC_LINK_TTL_SECONDS = 900; // 15 minutes
+const DEFAULT_MAGIC_LINK_IP_LIMIT = 5;
+const DEFAULT_MAGIC_LINK_EMAIL_LIMIT = 3;
+const DEFAULT_MAGIC_LINK_WINDOW_SEC = 600; // 10 minutes
+const DEFAULT_MAGIC_LINK_FROM = 'Pyria <noreply@pyria.dev>';
+const EMAIL_FORMAT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export function getAdminEmails(env: Env): Set<string> {
   const raw = env.PYRIA_ADMIN_EMAILS || '';
@@ -72,6 +79,10 @@ export function isGoogleOAuthEnabled(env: Env): boolean {
   return Boolean((env.GOOGLE_CLIENT_ID || '').trim() && (env.GOOGLE_CLIENT_SECRET || '').trim());
 }
 
+export function isMagicLinkEnabled(env: Env): boolean {
+  return Boolean((env.RESEND_API_KEY || '').trim() && (env.PYRIA_SESSION_SECRET || '').trim());
+}
+
 export async function resolveAuthContext(
   request: Request,
   env: Env,
@@ -79,6 +90,7 @@ export async function resolveAuthContext(
 ): Promise<AuthContext> {
   const secret = (env.PYRIA_SESSION_SECRET || '').trim();
   const googleOAuthEnabled = isGoogleOAuthEnabled(env);
+  const magicLinkEnabled = isMagicLinkEnabled(env);
   if (!secret) {
     return {
       role: 'guest',
@@ -88,6 +100,7 @@ export async function resolveAuthContext(
       parentEmail: null,
       isAdmin: false,
       googleOAuthEnabled,
+      magicLinkEnabled,
     };
   }
 
@@ -143,6 +156,7 @@ export async function resolveAuthContext(
     parentEmail,
     isAdmin,
     googleOAuthEnabled,
+    magicLinkEnabled,
   };
 }
 
@@ -171,6 +185,7 @@ export async function handleGetMe(auth: AuthContext): Promise<Response> {
       parentEmail: auth.parentEmail,
       isAdmin: auth.isAdmin,
       googleOAuthEnabled: auth.googleOAuthEnabled,
+      magicLinkEnabled: auth.magicLinkEnabled,
     },
   });
 }
@@ -478,6 +493,180 @@ export async function handleGoogleCallback(request: Request, env: Env): Promise<
     })
   );
   headers.append('Set-Cookie', clearCookie(OAUTH_STATE_COOKIE, secure, '/api/auth/google/callback'));
+  applySecurityHeaders(headers);
+
+  return new Response(null, { status: 302, headers });
+}
+
+function redirectMagicLinkInvalid(): Response {
+  const headers = new Headers();
+  headers.set('Location', '/console?auth_error=magic_link_invalid');
+  headers.set('Cache-Control', 'no-store');
+  applySecurityHeaders(headers);
+  return new Response(null, { status: 302, headers });
+}
+
+function buildMagicLinkEmailHtml(verifyUrl: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#0b1020;color:#eef3ff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:520px;margin:0 auto;background:#151c32;border:2px solid #2b385c;border-radius:16px;padding:28px;">
+    <p style="margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:0.1em;color:#f6c945;text-transform:uppercase;">PYRIA PARENT CONSOLE</p>
+    <h1 style="margin:0 0 12px;font-size:24px;color:#eef3ff;">Sign in to Pyria</h1>
+    <p style="margin:0 0 22px;font-size:15px;line-height:1.55;color:#9eb0d6;">
+      Click the button below to sign in to the Pyria Parent Console. This link works once and expires in 15 minutes.
+    </p>
+    <p style="margin:0 0 22px;">
+      <a href="${verifyUrl}" style="display:inline-block;padding:13px 24px;border-radius:10px;background:#34d399;color:#062118;font-weight:800;font-size:15px;text-decoration:none;">
+        Sign In to Pyria Console →
+      </a>
+    </p>
+    <p style="margin:0;font-size:12.5px;line-height:1.5;color:#9eb0d6;">
+      If you didn't request this link, you can safely ignore this email.
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
+export async function handleMagicLinkRequest(request: Request, env: Env): Promise<Response> {
+  if (!isMagicLinkEnabled(env)) {
+    return jsonResponse({ error: 'Email Magic Link sign-in is not configured on this server' }, 503);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJsonBody(request, 4096);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return jsonResponse({ error: err.message }, err.status);
+    }
+    return jsonResponse({ error: 'Invalid request body' }, 400);
+  }
+
+  const rawEmail = typeof body.email === 'string' ? body.email : '';
+  const email = normalizeEmail(rawEmail);
+  if (!email || email.length > 254 || !EMAIL_FORMAT_RE.test(email)) {
+    return jsonResponse({ error: 'Please enter a valid email address.' }, 400);
+  }
+
+  const ipLimit =
+    Number.parseInt(env.PYRIA_RATE_LIMIT_MAGIC_LINK || '', 10) || DEFAULT_MAGIC_LINK_IP_LIMIT;
+  const ip = getClientIp(request);
+  const ipRl = await checkRateLimit(
+    env.DB,
+    `magic-ip:${ip}`,
+    ipLimit,
+    DEFAULT_MAGIC_LINK_WINDOW_SEC
+  );
+  if (!ipRl.allowed) {
+    return rateLimitExceededResponse(ipRl.retryAfterSeconds);
+  }
+
+  const emailLimit = Math.min(ipLimit, DEFAULT_MAGIC_LINK_EMAIL_LIMIT);
+  const emailRl = await checkRateLimit(
+    env.DB,
+    `magic-email:${email}`,
+    emailLimit,
+    DEFAULT_MAGIC_LINK_WINDOW_SEC
+  );
+  if (!emailRl.allowed) {
+    return rateLimitExceededResponse(emailRl.retryAfterSeconds);
+  }
+
+  const secret = getSessionSecret(env);
+  const url = new URL(request.url);
+  const nextPath = sanitizeNextPath(typeof body.next === 'string' ? body.next : null, '/console');
+  const jti = generateRandomToken(16);
+  const exp = Math.floor(Date.now() / 1000) + MAGIC_LINK_TTL_SECONDS;
+  const token = await signToken(
+    { typ: 'magic_link', email, jti, next: nextPath, exp } satisfies MagicLinkTokenPayload,
+    secret
+  );
+
+  const verifyUrl = `${url.origin}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
+  const resendUrl = env.RESEND_API_URL || 'https://api.resend.com/emails';
+  const fromAddress = (env.MAGIC_LINK_FROM_EMAIL || '').trim() || DEFAULT_MAGIC_LINK_FROM;
+
+  const resendRes = await fetch(resendUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY!.trim()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: fromAddress,
+      to: [email],
+      subject: 'Sign in to Pyria Parent Console',
+      html: buildMagicLinkEmailHtml(verifyUrl),
+      text: `Sign in to the Pyria Parent Console:\n\n${verifyUrl}\n\nThis link works once and expires in 15 minutes. If you didn't request this email, you can safely ignore it.`,
+    }),
+  });
+
+  if (!resendRes.ok) {
+    return jsonResponse(
+      { error: 'Unable to send sign-in email right now. Please try again in a moment.' },
+      502
+    );
+  }
+
+  return jsonResponse({
+    ok: true,
+    message: 'Check your email for your sign-in link! It expires in 15 minutes.',
+  });
+}
+
+export async function handleMagicLinkVerify(request: Request, env: Env): Promise<Response> {
+  if (!isMagicLinkEnabled(env)) {
+    return jsonResponse({ error: 'Email Magic Link sign-in is not configured on this server' }, 503);
+  }
+
+  const secret = getSessionSecret(env);
+  const url = new URL(request.url);
+  const token = (url.searchParams.get('token') || '').trim();
+  if (!token) {
+    return redirectMagicLinkInvalid();
+  }
+
+  const payload = await verifyToken<MagicLinkTokenPayload>(token, secret, 'magic_link');
+  const email = payload ? normalizeEmail(payload.email) : null;
+  if (!payload || !email || typeof payload.jti !== 'string' || !payload.jti) {
+    return redirectMagicLinkInvalid();
+  }
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  // Prune expired entries opportunistically and consume jti atomically (single-use)
+  await env.DB.prepare('DELETE FROM magic_link_tokens WHERE expires_at < ?').bind(nowSec).run();
+  const insertRes = await env.DB.prepare(
+    'INSERT OR IGNORE INTO magic_link_tokens (jti, expires_at) VALUES (?, ?)'
+  )
+    .bind(payload.jti, payload.exp)
+    .run();
+
+  if (!insertRes.meta || Number(insertRes.meta.changes) === 0) {
+    return redirectMagicLinkInvalid();
+  }
+
+  const exp = nowSec + PARENT_SESSION_TTL_SECONDS;
+  const sessionToken = await signToken(
+    { typ: 'parent', email, exp } satisfies ParentSessionPayload,
+    secret
+  );
+
+  const nextPath = sanitizeNextPath(payload.next, '/console');
+  const headers = new Headers();
+  headers.set('Location', nextPath);
+  headers.set('Cache-Control', 'no-store');
+  headers.append(
+    'Set-Cookie',
+    serializeCookie(PARENT_SESSION_COOKIE, sessionToken, {
+      maxAge: PARENT_SESSION_TTL_SECONDS,
+      path: '/',
+      httpOnly: true,
+      sameSite: 'Lax',
+      secure: isHttpsRequest(request),
+    })
+  );
   applySecurityHeaders(headers);
 
   return new Response(null, { status: 302, headers });

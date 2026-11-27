@@ -40,6 +40,7 @@ export function normalizeMe(raw) {
     auth.role ||
     (isAdmin ? 'admin' : parentEmail ? 'parent' : heroSaveId ? 'hero' : 'guest');
   const googleOAuthEnabled = Boolean(auth.googleOAuthEnabled);
+  const magicLinkEnabled = Boolean(auth.magicLinkEnabled);
 
   return {
     mode,
@@ -50,6 +51,7 @@ export function normalizeMe(raw) {
       parentEmail,
       isAdmin,
       googleOAuthEnabled,
+      magicLinkEnabled,
     },
     authenticated: Boolean(raw?.authenticated ?? (role !== 'guest')),
     email: parentEmail,
