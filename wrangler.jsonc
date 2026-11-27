@@ -3,6 +3,9 @@
   "name": "pyria",
   "main": "worker/index.ts",
   "compatibility_date": "2025-03-01",
+  // Preserve runtime variables & secrets configured in the Cloudflare Dashboard
+  // (PYRIA_ADMIN_EMAILS, GOOGLE_CLIENT_ID, PYRIA_SESSION_SECRET, GOOGLE_CLIENT_SECRET).
+  "keep_vars": true,
   "routes": [
     {
       "pattern": "play.pyria.dev",
@@ -34,14 +37,5 @@
       "database_id": "87992442-0ecc-4ae7-8c5c-ab6e466efdcf",
       "migrations_dir": "migrations"
     }
-  ],
-  "vars": {
-    // Comma-separated list of admin email addresses (e.g. "admin@example.com")
-    "PYRIA_ADMIN_EMAILS": "",
-    // Public Google OAuth 2.0 Client ID for Parent Console sign-in
-    "GOOGLE_CLIENT_ID": ""
-    // Required production secrets (set via `wrangler secret put`):
-    // - PYRIA_SESSION_SECRET (32+ random bytes for HMAC-SHA256 cookies & Hero Code hashes)
-    // - GOOGLE_CLIENT_SECRET (Google OAuth 2.0 Client Secret)
-  }
+  ]
 }
