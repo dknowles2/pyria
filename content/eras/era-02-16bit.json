@@ -1895,41 +1895,41 @@
           "id": "trial-16-07-01",
           "trialType": "multiple_choice",
           "title": "Your First Custom Function (def)!",
-          "storyPrompt": "With `def`, you can invent your OWN reusable Python spells! What will the code below print?",
+          "storyPrompt": "With `def`, you can bundle lines of code into your OWN reusable spell! Start with the simplest kind: a function with empty parentheses `()` that runs whenever you call it by name.",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "functions_def"
           ],
           "shardReward": 90,
           "unlockId": null,
-          "codeSnippet": "def greet(name):\n    print(\"Hi, \" + name + \"!\")\n\ngreet(\"Piston\")",
+          "codeSnippet": "def ring_bell():\n    print(\"DING!\")\n\nring_bell()\nring_bell()",
           "choices": [
             {
               "id": "a",
-              "label": "Hi, Piston!",
-              "explanation": "Choo-choo! Calling `greet(\"Piston\")` passes `\"Piston\"` into `name`!"
+              "label": "DING! printed once",
+              "explanation": "We called `ring_bell()` twice at the bottom, so it runs twice!"
             },
             {
               "id": "b",
-              "label": "Hi, name!",
-              "explanation": "`name` is a parameter box, not literal text!"
+              "label": "DING! printed twice (on two lines)",
+              "explanation": "Spot on! Defining `ring_bell()` teaches Python the spell, and calling `ring_bell()` twice runs its indented body twice!"
             },
             {
               "id": "c",
-              "label": "Nothing",
-              "explanation": "We called `greet(\"Piston\")` on line 4!"
+              "label": "Nothing prints",
+              "explanation": "A function won't run just from `def`, but we DID call `ring_bell()` right after!"
             },
             {
               "id": "d",
-              "label": "greet",
-              "explanation": "It runs the indented `print()` inside `greet`!"
+              "label": "SyntaxError",
+              "explanation": "The syntax is valid: `def name():` followed by an indented body."
             }
           ],
-          "correctChoiceId": "a",
+          "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Count how many times `ring_bell()` is called after the `def` block.",
+            "tier2_pattern": "Each call to `ring_bell()` executes the indented `print(...)` inside `def ring_bell():`.",
+            "tier3_walkthrough": "`ring_bell()` is called twice, so `DING!` prints on two lines."
           },
           "difficultyOverride": null
         },
@@ -1987,9 +1987,9 @@
         {
           "id": "trial-16-07-04",
           "trialType": "code",
-          "title": "Function with a Parameter",
-          "storyPrompt": "Keep pushing deeper into Steam Foundry! Define `def heat_up(level):` that prints `level * 2`. Call `heat_up(15)`.",
-          "objective": "Define `def heat_up(level):` that prints `level * 2`. Call `heat_up(15)`.",
+          "title": "Pass an Input (Parameter) into a Function",
+          "storyPrompt": "Now let's level up `def`! Putting a variable name inside the parentheses — like `def heat_up(level):` — creates a **parameter**, an input slot that receives whatever value you pass when calling the function.",
+          "objective": "Define `heat_up(level)` so it prints `level * 2`, then call `heat_up(15)`.",
           "concepts": [
             "functions_def"
           ],
@@ -1998,13 +1998,13 @@
           "starterCode": {
             "explorer": "def heat_up(level):\n    print(level * 2)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def heat_up(level):\n    print(level * 2)\n\nheat_up(15)\n",
-          "testCode": "assert OUTPUT.strip() == \"30\"",
+          "testCode": "import io, contextlib\n_b = io.StringIO()\nwith contextlib.redirect_stdout(_b):\n    heat_up(7)\nassert _b.getvalue().strip() == \"14\" and OUTPUT.strip() == \"30\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "def heat_up(level):\n    print(level * 2)\n\nheat_up(15)",
+            "tier2_pattern": "def heat_up(___):\n    print(___)\n___",
             "tier3_walkthrough": "Write:\ndef heat_up(level):\n    print(level * 2)\n\nheat_up(15)"
           },
           "difficultyOverride": null
@@ -2012,9 +2012,9 @@
         {
           "id": "trial-16-07-05",
           "trialType": "code",
-          "title": "Return a Value!",
-          "storyPrompt": "Almost at Piston's Logic Vault! `return` sends a result BACK to whoever called the function! Define `def double(n): return n * 2`, set `ans = double(12)`, and `print(ans)`.",
-          "objective": "`return` sends a result BACK to whoever called the function! Define `def double(n): return n * 2`, set `ans = double(12)`, and `print(ans)`.",
+          "title": "Send Back an Answer with return",
+          "storyPrompt": "Printing shows text on screen, but `return` hands a computed value back to the caller so you can store it in a variable or use it in math!",
+          "objective": "Write a function named `double` that takes one number and returns twice its value. Store the result of calling it with 12 in `ans` and print `ans`.",
           "concepts": [
             "functions_def",
             "functions_return"
@@ -2024,13 +2024,13 @@
           "starterCode": {
             "explorer": "def double(n):\n    return n * 2\n\nans = double(12)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def double(n):\n    return n * 2\n\nans = double(12)\nprint(ans)\n",
-          "testCode": "assert ans == 24 and OUTPUT.strip() == \"24\"",
+          "testCode": "assert double(12) == 24 and double(5) == 10 and ans == 24 and OUTPUT.strip() == \"24\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "def double(n):\n    return n * 2\n\nans = double(12)\nprint(ans)",
+            "tier2_pattern": "def double(___):\n    return ___\nans = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef double(n):\n    return n * 2\n\nans = double(12)\nprint(ans)"
           },
           "difficultyOverride": null
@@ -2480,7 +2480,8 @@
       "storyIntro": "Steaming terraces ring the Alchemist's Caldera. Dragon Cinderel teaches you to package reusable spells using def.",
       "storyOutro": "Cinderel glides across the warm thermals, lighting the path to the Crystal Alembic.",
       "primaryConcepts": [
-        "dictionaries"
+        "dictionaries",
+        "functions_def"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -2608,25 +2609,27 @@
         {
           "id": "trial-16-09-05",
           "trialType": "code",
-          "title": "Safe Lookup with .get()",
-          "storyPrompt": "Almost at Cinderel's Logic Vault! `.get(\"ice\", 0)` safely returns `0` if `\"ice\"` is missing! Set `val = {\"fire\": 9}.get(\"ice\", 0)` and `print(val)`.",
-          "objective": "`.get(\"ice\", 0)` safely returns `0` if `\"ice\"` is missing! Set `val = {\"fire\": 9}.get(\"ice\", 0)` and `print(val)`.",
+          "title": "Safe Lookup Function with .get()",
+          "storyPrompt": "Combine your `def` skills with dictionaries! `.get(key, default)` safely returns a fallback value instead of crashing when a key is missing.",
+          "objective": "Write a function `lookup_herb(bag, name)` that safely returns the value for `name` from `bag` (defaulting to `0` if missing). Call it for `\"ice\"` on `bag`, store in `val`, and print `val`.",
           "concepts": [
-            "dictionaries"
+            "dictionaries",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 120,
           "unlockId": null,
           "starterCode": {
-            "explorer": "bag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "bag = {\"fire\": 9}\ndef lookup_herb(bag, name):\n    return bag.get(___, ___)\n\nval = lookup_herb(bag, \"ice\")\nprint(val)\n",
+            "standard": "bag = {\"fire\": 9}\n# Define lookup_herb(bag, name) using .get() with default 0\n",
+            "challenge": "bag = {\"fire\": 9}\n"
           },
-          "referenceSolution": "bag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\nprint(val)\n",
-          "testCode": "assert val == 0 and OUTPUT.strip() == \"0\"",
+          "referenceSolution": "bag = {\"fire\": 9}\ndef lookup_herb(bag, name):\n    return bag.get(name, 0)\n\nval = lookup_herb(bag, \"ice\")\nprint(val)\n",
+          "testCode": "assert lookup_herb({\"fire\": 9}, \"fire\") == 9 and lookup_herb({\"fire\": 9}, \"ice\") == 0 and val == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "bag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\nprint(val)",
-            "tier3_walkthrough": "Write:\nbag = {\"fire\": 9}\nval = bag.get(\"ice\", 0)\nprint(val)"
+            "tier1_nudge": "Inside `lookup_herb(bag, name)`, return `bag.get(name, 0)`.",
+            "tier2_pattern": "def lookup_herb(bag, name):\n    return bag.get(___, ___)\n\nval = lookup_herb(bag, ___)",
+            "tier3_walkthrough": "Define `def lookup_herb(bag, name): return bag.get(name, 0)`, then set `val = lookup_herb(bag, \"ice\")` and `print(val)`."
           },
           "difficultyOverride": null
         },
@@ -2773,7 +2776,8 @@
       "storyOutro": "Prism scatters a rainbow across the laboratory and unlocks the Potion Vault.",
       "primaryConcepts": [
         "f_strings",
-        "dictionaries"
+        "dictionaries",
+        "functions_def"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -2901,26 +2905,28 @@
         {
           "id": "trial-16-10-05",
           "trialType": "code",
-          "title": "Format a Recipe Line",
-          "storyPrompt": "Almost at Prism's Logic Vault! Given `item = {\"name\": \"Dew\", \"qty\": 3}`, print `f\"{item['name']}: {item['qty']}\"`.",
-          "objective": "Given `item = {\"name\": \"Dew\", \"qty\": 3}`, print `f\"{item['name']}: {item['qty']}\"`.",
+          "title": "Format a Recipe Function",
+          "storyPrompt": "Functions, dictionaries, and f-strings make a super clean team! Let's build a reusable recipe formatter.",
+          "objective": "Define a function `format_item(item)` that returns a formatted string combining the dictionary's `name` and `qty` separated by a colon and space. Call it on `item` and print the result.",
           "concepts": [
             "f_strings",
-            "dictionaries"
+            "dictionaries",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 125,
           "unlockId": null,
           "starterCode": {
-            "explorer": "item = {\"name\": \"Dew\", \"qty\": 3}\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "item = {\"name\": \"Dew\", \"qty\": 3}\ndef format_item(item):\n    return f\"{item['___']}: {item['___']}\"\n\nprint(format_item(item))\n",
+            "standard": "item = {\"name\": \"Dew\", \"qty\": 3}\n# Define format_item(item) returning an f-string like \"Dew: 3\"\n",
+            "challenge": "item = {\"name\": \"Dew\", \"qty\": 3}\n"
           },
-          "referenceSolution": "item = {\"name\": \"Dew\", \"qty\": 3}\nprint(f\"{item['name']}: {item['qty']}\")\n",
-          "testCode": "assert OUTPUT.strip() == \"Dew: 3\"",
+          "referenceSolution": "item = {\"name\": \"Dew\", \"qty\": 3}\ndef format_item(item):\n    return f\"{item['name']}: {item['qty']}\"\n\nprint(format_item(item))\n",
+          "testCode": "assert format_item({\"name\": \"Ash\", \"qty\": 7}) == \"Ash: 7\" and OUTPUT.strip() == f\"{item['name']}: {item['qty']}\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "item = {\"name\": \"Dew\", \"qty\": 3}\nprint(f\"{item['name']}: {item['qty']}\")",
-            "tier3_walkthrough": "Write:\nitem = {\"name\": \"Dew\", \"qty\": 3}\nprint(f\"{item['name']}: {item['qty']}\")"
+            "tier1_nudge": "Use an f-string inside `format_item(item)` with single quotes inside double quotes for the dictionary keys.",
+            "tier2_pattern": "def format_item(item):\n    return f\"{___}: {___}\"\n\nprint(format_item(item))",
+            "tier3_walkthrough": "Return `f\"{item['name']}: {item['qty']}\"` inside `format_item(item)`, then `print(format_item(item))`."
           },
           "difficultyOverride": null
         },
@@ -3067,7 +3073,8 @@
       "storyIntro": "Hundreds of enchanted flasks line the Potion Vault. Dragon Elixir needs Python dictionaries to match every label key to its ingredient value.",
       "storyOutro": "Elixir seals the vault's leaks and opens the magma elevator to the Caldera's core.",
       "primaryConcepts": [
-        "dictionaries"
+        "dictionaries",
+        "functions_def"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -3195,25 +3202,27 @@
         {
           "id": "trial-16-11-05",
           "trialType": "code",
-          "title": "Count Rare Elixirs",
-          "storyPrompt": "Almost at Elixir's Logic Vault! Count how many items in `shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]` have `item[\"rare\"]` True into `rares` and `print(rares)`.",
-          "objective": "Count how many items in `shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]` have `item[\"rare\"]` True into `rares` and `print(rares)`.",
+          "title": "Count Rare Elixirs with a Function",
+          "storyPrompt": "Let's wrap your list-of-dictionaries loop inside a reusable function so Elixir can inspect any potion shelf!",
+          "objective": "Write a function `count_rare(shelf)` that counts how many potion dictionaries have a truthy `\"rare\"` value. Store the result for `shelf` in `rares` and print `rares`.",
           "concepts": [
-            "dictionaries"
+            "dictionaries",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\nrares = 0\nfor item in shelf:\n    if item[\"rare\"]:\n        rares = rares + 1\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\ndef count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[\"rare\"]:\n            total += 1\n    return ___\n\nrares = count_rare(shelf)\nprint(rares)\n",
+            "standard": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\n# Define count_rare(shelf), store count_rare(shelf) in rares, and print rares\n",
+            "challenge": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\n"
           },
-          "referenceSolution": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\nrares = 0\nfor item in shelf:\n    if item[\"rare\"]:\n        rares = rares + 1\nprint(rares)\n",
-          "testCode": "assert rares == 2 and OUTPUT.strip() == \"2\"",
+          "referenceSolution": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\ndef count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[\"rare\"]:\n            total = total + 1\n    return total\n\nrares = count_rare(shelf)\nprint(rares)\n",
+          "testCode": "assert count_rare([{\"rare\": True}]) == 1 and count_rare([{\"rare\": False}]) == 0 and rares == sum(1 for i in shelf if i[\"rare\"]) and OUTPUT.strip() == str(rares)",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\nrares = 0\nfor item in shelf:\n    if item[\"rare\"]:\n        rares = rares + 1\nprint(rares)",
-            "tier3_walkthrough": "Write:\nshelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\nrares = 0\nfor item in shelf:\n    if item[\"rare\"]:\n        rares = rares + 1\nprint(rares)"
+            "tier1_nudge": "Start a counter at 0 inside `count_rare(shelf)`, loop over `shelf`, increment when `item[\"rare\"]` is True, and `return` the count.",
+            "tier2_pattern": "def count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[___]:\n            total += 1\n    return total",
+            "tier3_walkthrough": "Loop over `shelf`, add 1 to `total` whenever `item[\"rare\"]` is True, `return total`, then set `rares = count_rare(shelf)` and `print(rares)`."
           },
           "difficultyOverride": null
         },
@@ -3659,7 +3668,8 @@
       "storyIntro": "Skyships creak at the floating Cloud Dock. Dragon Nimbus needs nested loops to scan every row and column of the skyway grid.",
       "storyOutro": "Nimbus launches the starlight skiff toward the Starlight Bridge.",
       "primaryConcepts": [
-        "nested_loops"
+        "nested_loops",
+        "functions_def"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -3787,25 +3797,27 @@
         {
           "id": "trial-16-13-05",
           "trialType": "code",
-          "title": "Find Max in a 2D Grid",
-          "storyPrompt": "Almost at Nimbus's Logic Vault! Find the largest number in `sky = [[4, 9], [12, 3]]` into `highest` and `print(highest)`.",
-          "objective": "Find the largest number in `sky = [[4, 9], [12, 3]]` into `highest` and `print(highest)`.",
+          "title": "Find Max in a 2D Grid Function",
+          "storyPrompt": "Package your nested loop inside a function so Nimbus can scan any 2D sky grid for its highest cloud peak!",
+          "objective": "Define a function `find_highest(grid)` that uses nested loops to return the largest number in a 2D list. Store the result for `sky` in `highest` and print `highest`.",
           "concepts": [
-            "nested_loops"
+            "nested_loops",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 140,
           "unlockId": null,
           "starterCode": {
-            "explorer": "sky = [[4, 9], [12, 3]]\nhighest = 0\nfor row in sky:\n    for n in row:\n        if n > highest:\n            highest = n\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "sky = [[4, 9], [12, 3]]\ndef find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if n > best:\n                best = ___\n    return ___\n\nhighest = find_highest(sky)\nprint(highest)\n",
+            "standard": "sky = [[4, 9], [12, 3]]\n# Define find_highest(grid) using nested loops, then print highest\n",
+            "challenge": "sky = [[4, 9], [12, 3]]\n"
           },
-          "referenceSolution": "sky = [[4, 9], [12, 3]]\nhighest = 0\nfor row in sky:\n    for n in row:\n        if n > highest:\n            highest = n\nprint(highest)\n",
-          "testCode": "assert highest == 12 and OUTPUT.strip() == \"12\"",
+          "referenceSolution": "sky = [[4, 9], [12, 3]]\ndef find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if n > best:\n                best = n\n    return best\n\nhighest = find_highest(sky)\nprint(highest)\n",
+          "testCode": "assert find_highest([[1, 5], [2, 3]]) == 5 and highest == max(n for r in sky for n in r) and OUTPUT.strip() == str(highest)",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "sky = [[4, 9], [12, 3]]\nhighest = 0\nfor row in sky:\n    for n in row:\n        if n > highest:\n            highest = n\nprint(highest)",
-            "tier3_walkthrough": "Write:\nsky = [[4, 9], [12, 3]]\nhighest = 0\nfor row in sky:\n    for n in row:\n        if n > highest:\n            highest = n\nprint(highest)"
+            "tier1_nudge": "Use an outer `for row in grid:` loop and an inner `for n in row:` loop, updating `best` whenever `n > best`, then `return best`.",
+            "tier2_pattern": "def find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if ___ > ___:\n                best = ___\n    return best",
+            "tier3_walkthrough": "Inside `find_highest(grid)`, track `best = 0`, loop `for row in grid:` and `for n in row:`, set `best = n` when `n > best`, `return best`, then set `highest = find_highest(sky)` and `print(highest)`."
           },
           "difficultyOverride": null
         },
@@ -3962,68 +3974,68 @@
         {
           "id": "trial-16-14-01",
           "trialType": "multiple_choice",
-          "title": "Meet Your First Class!",
-          "storyPrompt": "A **class** is a blueprint for creating objects (like dragons!). `__init__` runs when you create a new dragon. What does `print(d.name)` display?",
+          "title": "Meet Your First Class Blueprint!",
+          "storyPrompt": "A `class` is a blueprint for building custom objects! First, see how a simple class can store an attribute (`kind`) and how calling `Dragon()` builds an object from that blueprint so you can read `d.kind`.",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "classes_intro"
           ],
           "shardReward": 125,
           "unlockId": null,
-          "codeSnippet": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)",
+          "codeSnippet": "class Dragon:\n    kind = \"Star\"\n\nd = Dragon()\nprint(d.kind)",
           "choices": [
             {
               "id": "a",
-              "label": "Comet",
-              "explanation": "Stellar! `self.name = name` saves `\"Comet\"` inside the dragon object `d`!"
+              "label": "Dragon",
+              "explanation": "`d.kind` reads the `kind` attribute stored inside the object, not the class name."
             },
             {
               "id": "b",
-              "label": "Dragon",
-              "explanation": "`Dragon` is the class blueprint name!"
+              "label": "Star",
+              "explanation": "Yes! `Dragon()` creates a new object `d` from the `Dragon` blueprint, and `d.kind` reads its `kind` attribute: `\"Star\"`!"
             },
             {
               "id": "c",
-              "label": "self",
-              "explanation": "`self` refers to the object `d`!"
+              "label": "kind",
+              "explanation": "Without quotes around `kind`, Python looks up the value stored in the attribute `d.kind`."
             },
             {
               "id": "d",
-              "label": "Error",
-              "explanation": "That's valid Python OOP!"
+              "label": "AttributeError",
+              "explanation": "`kind` is defined right inside `class Dragon:`, so every `Dragon()` object has `.kind`."
             }
           ],
-          "correctChoiceId": "a",
+          "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Calling `Dragon()` builds an object `d`, and the dot in `d.kind` reads the `kind` attribute.",
+            "tier2_pattern": "`d = Dragon()` makes an instance; `d.kind` looks up `kind` from the `Dragon` blueprint.",
+            "tier3_walkthrough": "`kind` is set to `\"Star\"` inside `Dragon`, so `print(d.kind)` prints `Star`."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-16-14-02",
           "trialType": "fix_bug",
-          "title": "Fix __init__!",
-          "storyPrompt": "Lord Null forgot `self` as the first parameter of `__init__`! Methods inside a class always start with `self`.",
-          "objective": "Add `self` as the first parameter of `__init__(self, name)` so it prints `Comet`.",
+          "title": "Give Each Dragon Its Own Name (__init__ & self)",
+          "storyPrompt": "To give each dragon its OWN custom name when you create it, Python uses a special setup method called `__init__`. Its first parameter is ALWAYS `self` — `self` means 'this brand-new object being built right now' so `self.name = name` attaches the name onto it! Right now creating `Dragon(\"Comet\")` crashes with a `TypeError`.",
+          "objective": "Fix the broken `Dragon` class so creating `Dragon(\"Comet\")` stores its name and prints `Comet`.",
           "concepts": [
             "classes_intro"
           ],
           "shardReward": 130,
           "unlockId": null,
-          "bugSummary": "Add `self` as the first parameter of `__init__(self, name)` so it prints `Comet`.",
+          "bugSummary": "Creating `Dragon(\"Comet\")` crashes with a `TypeError` about the number of arguments!",
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n",
             "standard": "class Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n",
-            "challenge": "class Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nclass Dragon:\n    def __init__(name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)\n",
           "testCode": "assert d.name == \"Comet\" and OUTPUT.strip() == \"Comet\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)",
-            "tier3_walkthrough": "Update the code to:\nclass Dragon:\n    def __init__(self, name):\n        self.name = name\n\nd = Dragon(\"Comet\")\nprint(d.name)"
+            "tier1_nudge": "Every method inside a class — including `__init__` — must accept `self` as its very first parameter.",
+            "tier2_pattern": "class Dragon:\n    def __init__(___, name):\n        self.name = name",
+            "tier3_walkthrough": "Change `def __init__(name):` to `def __init__(self, name):` so Python can pass the new object as `self`."
           },
           "difficultyOverride": null
         },

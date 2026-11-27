@@ -31,12 +31,13 @@
         {
           "id": "trial-64-01-01",
           "trialType": "multiple_choice",
-          "title": "3D Entity Objects!",
-          "storyPrompt": "In 64-Bit 3D games, every hero, dragon, and castle tower is a Python **object** with `(x, y, z)` position attributes! What will `h.y` be after `h.jump()`?",
+          "title": "Level Up Classes for 3D Worlds!",
+          "storyPrompt": "You already mastered classes in Starlight Bridge & Storm Bastion — now put them to work scripting 3D entities! Notice how `Hero3D` combines Era 2 classes with Era 3 tuple unpacking (`self.x, self.y, self.z = x, y, z`).",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "classes_intro",
-            "world_scripting_3d"
+            "world_scripting_3d",
+            "tuples"
           ],
           "shardReward": 160,
           "unlockId": null,
@@ -106,7 +107,8 @@
           "objective": "Define `class Gem3D:` with `__init__(self, x, y, z, value)` and `coords(self)` returning `(self.x, self.y, self.z)`. Print `Gem3D(2, 4, 6, 10).coords()`.",
           "concepts": [
             "classes_intro",
-            "world_scripting_3d"
+            "world_scripting_3d",
+            "tuples"
           ],
           "shardReward": 175,
           "unlockId": null,
@@ -153,9 +155,9 @@
         {
           "id": "trial-64-01-05",
           "trialType": "code",
-          "title": "Move a 3D Camera",
-          "storyPrompt": "You're right outside Polywing's vault! Define `class Camera:` with `z=10` and `zoom(self, delta)` updating `self.z += delta`. Create `cam = Camera()`, call `cam.zoom(-4)`, and `print(cam.z)`.",
-          "objective": "Define `class Camera:` with `z=10` and `zoom(self, delta)` updating `self.z += delta`. Create `cam = Camera()`, call `cam.zoom(-4)`, and `print(cam.z)`.",
+          "title": "Compose a 3D Camera Tracking an Entity",
+          "storyPrompt": "In 3D engines, **composition** means one object holds a reference to another object! Give `Camera` a `target` object (`self.target`) so it can follow any 3D entity's `z` coordinate plus an offset.",
+          "objective": "Define `Entity` storing `z` and `Camera` storing `target` and `offset` (default `5`), with a `view_z()` method returning `self.target.z + self.offset`. Track an `Entity(10)` with `cam = Camera(hero)` and print `cam.view_z()`.",
           "concepts": [
             "classes_intro",
             "world_scripting_3d"
@@ -163,16 +165,16 @@
           "shardReward": 185,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\nclass Camera:\n    def __init__(self, target, offset=5):\n        self.target = target\n        self.offset = offset\n    def view_z(self):\n        return self.target.___ + self.___\n\nhero = Entity(10)\ncam = Camera(hero)\nprint(cam.view_z())\n",
+            "standard": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\n# Define Camera(target, offset=5) with view_z() returning target.z + offset\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "class Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\nprint(cam.z)\n",
-          "testCode": "assert cam.z == 6 and OUTPUT.strip() == \"6\"",
+          "referenceSolution": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\nclass Camera:\n    def __init__(self, target, offset=5):\n        self.target = target\n        self.offset = offset\n    def view_z(self):\n        return self.target.z + self.offset\n\nhero = Entity(10)\ncam = Camera(hero)\nprint(cam.view_z())\n",
+          "testCode": "assert cam.view_z() == 15 and Camera(Entity(20), 3).view_z() == 23 and OUTPUT.strip() == \"15\"",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "class Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\nprint(cam.z)",
-            "tier3_walkthrough": "Write:\nclass Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\nprint(cam.z)"
+            "tier1_nudge": "Store `self.target = target` and `self.offset = offset` in `Camera.__init__`, then return `self.target.z + self.offset` in `view_z`.",
+            "tier2_pattern": "class Camera:\n    def __init__(self, target, offset=5):\n        self.target = ___\n        self.offset = ___\n    def view_z(self):\n        return self.target.z + ___",
+            "tier3_walkthrough": "Define `Entity(z)` and `Camera(target, offset=5)` with `view_z(self)` returning `self.target.z + self.offset`, then create `hero = Entity(10)`, `cam = Camera(hero)`, and `print(cam.view_z())`."
           },
           "difficultyOverride": null
         },
