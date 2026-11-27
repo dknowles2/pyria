@@ -1,6 +1,6 @@
 // Retro RPG Letterbox Cinematic Cut-Scene Player for Pyria
 
-import { audio } from './audio.js?v=20261127e';
+import { audio } from './audio.js?v=20261127f';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -17,6 +17,229 @@ const BIOME_BACKDROPS = {
   'realm-04-hollow': ['#12263a', '#09121e'],
   'realm-05-woods': ['#15281c', '#0a140e'],
   'realm-06-crypt': ['#10262b', '#071216'],
+};
+
+const CUTSCENE_IMG_CACHE = new Map();
+function getCutsceneImage(src) {
+  if (!src) return null;
+  if (CUTSCENE_IMG_CACHE.has(src)) {
+    const entry = CUTSCENE_IMG_CACHE.get(src);
+    return entry.loaded ? entry.img : null;
+  }
+  const entry = { img: new Image(), loaded: false };
+  entry.img.onload = () => { entry.loaded = true; };
+  entry.img.src = src;
+  CUTSCENE_IMG_CACHE.set(src, entry);
+  return null;
+}
+
+function drawCoverImage(ctx, img, w, h) {
+  if (!img || !img.width || !img.height) return;
+  const scale = Math.max(w / img.width, h / img.height);
+  const dw = img.width * scale;
+  const dh = img.height * scale;
+  ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+}
+
+export const STORY_CUTSCENES = {
+  opening: {
+    id: 'opening',
+    label: '📖 Opening Story: The Shattering of Pyria',
+    title: '✨ PROLOGUE: THE SHATTERING OF PYRIA',
+    subtitle: 'How the Bits Were Lost — and How Python Brings Them Back',
+    eraKey: '8bit',
+    realmId: 'realm-01-meadow',
+    finalButtonLabel: 'Begin Adventure! ▸',
+    beats: [
+      {
+        speaker: 'Elder Ada',
+        spriteKey: 'elder_ada',
+        side: 'right',
+        vfx: 'vault_glow',
+        backdropImage: '/assets/concept-art/eras/era-07-modern-4k-sandbox.jpg',
+        text: 'Long ago, the kingdom of Pyria shone in full, vibrant 3D! Great Dragons soared above crystal valleys, and ancient Python spells kept every realm alive.',
+      },
+      {
+        speaker: 'Lord Null',
+        spriteKey: 'lord_null',
+        side: 'right',
+        vfx: 'glitch',
+        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+        text: 'Mwahahaha! Far too colorful! With my Glitch Storm, I drained Pyria all the way down to flat 8-bit pixels and locked every Dragon inside a Logic Vault! Soon all of Pyria will return None!',
+      },
+      {
+        speaker: 'Elder Ada',
+        spriteKey: 'elder_ada',
+        side: 'right',
+        vfx: 'none',
+        backdropImage: '/assets/concept-art/hero_and_pip.png',
+        text: 'Our only hope is a brave young Code-Tamer with a Python Spellbook — YOU, {heroName}! Every Dragon you rescue restores another Bit of reality and levels up the world.',
+      },
+      {
+        speaker: 'Bram the Tinkerer',
+        spriteKey: 'bram',
+        side: 'right',
+        vfx: 'none',
+        backdropImage: '/assets/concept-art/modular_hero_sheet.png',
+        text: "Earn Byte Shards from Trials and hidden chests, kid! Bring 'em to my Workshop and write real Python calls to forge hats, armor, boots, and power-ups!",
+      },
+      {
+        speaker: 'Pip',
+        spriteKey: 'pip',
+        side: 'left',
+        vfx: 'celebrate',
+        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+        text: "Chirp! I'm Pip — your dragon sidekick! I'll fly right beside you with hints whenever you get stuck. Let's rescue Spark in Whispering Meadow and start the Return of the Bits!",
+      },
+    ],
+  },
+
+  'era-transition-16bit': {
+    id: 'era-transition-16bit',
+    label: '🌅 Era Upgrade: 8-Bit NES → 16-Bit SNES',
+    title: '✨ ERA EVOLUTION: 8-BIT ➔ 16-BIT SNES!',
+    subtitle: 'All 8 Bits Restored — The Sunken Isles Awaken!',
+    eraKey: '16bit',
+    realmId: 'realm-16-01-shallows',
+    finalButtonLabel: 'Sail into 16-Bit! ▸',
+    beats: [
+      {
+        speaker: 'Nova',
+        spriteKey: 'emberwing',
+        side: 'right',
+        vfx: 'bit_restore',
+        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+        text: 'ALL EIGHT BITS ARE WHOLE, {heroName}! Feel the starlight surge across the flatlands as our 8 dragons unite their power!',
+      },
+      {
+        speaker: 'Pyria World Engine',
+        spriteKey: 'elder_ada',
+        side: 'right',
+        vfx: 'bit_restore',
+        eraTransition: {
+          fromImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+          toImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+          fromLabel: '8-BIT NES',
+          toLabel: '16-BIT SNES',
+        },
+        text: 'WHOA!! The flat 8-bit pixels burst into lush 16-Bit SNES color, rich layered sprites, and sweeping multi-voice synth music!',
+      },
+      {
+        speaker: 'Lord Null',
+        spriteKey: 'lord_null',
+        side: 'right',
+        vfx: 'glitch',
+        backdropImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+        text: 'GAAAH! Too many colors! My eyes! Retreat to the Sunken Isles — try surviving 16 Realms of Lists, Functions, and Dictionaries, {heroName}!',
+      },
+      {
+        speaker: 'Pip',
+        spriteKey: 'pip',
+        side: 'left',
+        vfx: 'celebrate',
+        backdropImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+        text: 'WOOHOO!! Look at those shimmering 16-bit waves, {heroName}! Next stop: Coral Shallows in the Tideglass Archipelago!',
+      },
+    ],
+  },
+
+  'era-transition-32bit': {
+    id: 'era-transition-32bit',
+    label: '🧊 Era Upgrade: 16-Bit SNES → 32-Bit Isometric 2.5D',
+    title: '✨ ERA EVOLUTION: 16-BIT ➔ 32-BIT ISOMETRIC!',
+    subtitle: 'All 16 Bits Restored — The World Rises into 2.5D!',
+    eraKey: '32bit',
+    realmId: 'realm-32-01-highlands',
+    finalButtonLabel: 'Climb into 32-Bit! ▸',
+    beats: [
+      {
+        speaker: 'Zenith',
+        spriteKey: 'emberwing',
+        side: 'right',
+        vfx: 'bit_restore',
+        backdropImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+        text: 'Incredible, {heroName}! You conquered all four Acts of the 16-Bit Era and shattered Lord Null’s Throne! Watch the horizon tilt upward!',
+      },
+      {
+        speaker: 'Pyria World Engine',
+        spriteKey: 'elder_ada',
+        side: 'right',
+        vfx: 'bit_restore',
+        eraTransition: {
+          fromImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+          toImage: '/assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg',
+          fromLabel: '16-BIT SNES',
+          toLabel: '32-BIT ISOMETRIC 2.5D',
+        },
+        text: 'RUMBLE-SHIFT!! Flat 2D tiles extrude upward into towering 32-Bit Isometric cliffs, waterfalls, and elevated (x, y, z) highlands!',
+      },
+      {
+        speaker: 'Lord Null',
+        spriteKey: 'lord_null',
+        side: 'right',
+        vfx: 'glitch',
+        backdropImage: '/assets/concept-art/biomes/32bit-polygon-citadel.jpg',
+        text: 'A THIRD DIMENSION?! Impossible! Wait until you try navigating 3D Tuples, Sets, and Error Traps inside my Polygon Citadel!',
+      },
+      {
+        speaker: 'Pip',
+        spriteKey: 'pip',
+        side: 'left',
+        vfx: 'celebrate',
+        backdropImage: '/assets/concept-art/biomes/32bit-blockstone-highlands.jpg',
+        text: 'Chirp-WHOA!! We have HEIGHT now, {heroName}! Welcome to Blockstone Highlands in glorious 32-Bit Isometric 2.5D!',
+      },
+    ],
+  },
+
+  'era-transition-64bit': {
+    id: 'era-transition-64bit',
+    label: '🏔️ Era Upgrade: 32-Bit Isometric → 64-Bit Nintendo 64 3D',
+    title: '✨ ERA EVOLUTION: 32-BIT ➔ 64-BIT NINTENDO 64!',
+    subtitle: 'All 32 Bits Restored — Welcome to Free-Roam 3D!',
+    eraKey: '64bit',
+    realmId: 'realm-64-01-valley',
+    finalButtonLabel: 'Enter 64-Bit 3D! ▸',
+    beats: [
+      {
+        speaker: 'Vortex',
+        spriteKey: 'spark',
+        side: 'right',
+        vfx: 'bit_restore',
+        backdropImage: '/assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg',
+        text: 'ALL 32 BITS ARE RESTORED!! Hold onto your spellbook, {heroName} — the Isometric Frontier is breaking wide open into full 3D space!',
+      },
+      {
+        speaker: 'Pyria World Engine',
+        spriteKey: 'elder_ada',
+        side: 'right',
+        vfx: 'bit_restore',
+        eraTransition: {
+          fromImage: '/assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg',
+          toImage: '/assets/concept-art/eras/era-04-64bit-n64.jpg',
+          fromLabel: '32-BIT ISOMETRIC',
+          toLabel: '64-BIT NINTENDO 64 3D',
+        },
+        text: 'BOOM!! Chunky Gouraud-shaded low-poly hills, cobalt skies, distant mountains, and sweeping N64 brass fill the horizon!',
+      },
+      {
+        speaker: 'Lord Null',
+        spriteKey: 'lord_null',
+        side: 'right',
+        vfx: 'glitch',
+        backdropImage: '/assets/concept-art/eras/era-04-64bit-n64.jpg',
+        text: 'NO!! FULL 64-BIT POLYGONS?! Fine — face my 64-Bit Sanctum! Only a true master of Python Classes, Inheritance, and 3D Scripting can claim the 64-Bit Crown!',
+      },
+      {
+        speaker: 'Pip',
+        spriteKey: 'pip',
+        side: 'left',
+        vfx: 'celebrate',
+        backdropImage: '/assets/concept-art/eras/era-04-64bit-n64.jpg',
+        text: 'WOOHOO!! Look at those 3D mountains, {heroName}! Let’s soar into Polygon Valley and win the 64-Bit Crown!',
+      },
+    ],
+  },
 };
 
 /**
@@ -59,7 +282,7 @@ export function playCutscene({
       </div>
 
       <div class="cutscene-stage-wrap">
-        <canvas id="cutscene-canvas" width="320" height="148" class="pixel-canvas cutscene-canvas"></canvas>
+        <canvas id="cutscene-canvas" width="640" height="296" class="pixel-canvas cutscene-canvas"></canvas>
       </div>
 
       <div class="cutscene-bar cutscene-bottom">
@@ -201,6 +424,13 @@ export function playCutscene({
       advance();
     });
 
+    // Preload any concept-art backdrops referenced by beats
+    for (const b of beats) {
+      if (b.backdropImage) getCutsceneImage(b.backdropImage);
+      if (b.eraTransition?.fromImage) getCutsceneImage(b.eraTransition.fromImage);
+      if (b.eraTransition?.toImage) getCutsceneImage(b.eraTransition.toImage);
+    }
+
     const renderFrame = (now) => {
       if (finished) return;
       const beat = beats[beatIndex];
@@ -218,6 +448,7 @@ export function playCutscene({
       rightSlide = Math.min(1, rightSlide + 0.06);
 
       ctx.save();
+      ctx.scale(2, 2);
       ctx.imageSmoothingEnabled = false;
 
       // Subtle screen shake on glitch / shatter
@@ -229,19 +460,75 @@ export function playCutscene({
         );
       }
 
-      // 1. Backdrop gradient
+      // 1. Backdrop gradient OR Concept Art / Animated Era-Transition Wipe
       const [cTop, cBot] = BIOME_BACKDROPS[realmId] || ['#182342', '#0b1020'];
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      const grad = ctx.createLinearGradient(0, 0, 0, 148);
       grad.addColorStop(0, cTop);
       grad.addColorStop(1, cBot);
       ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, 320, 148);
+
+      if (beat.eraTransition) {
+        const tr = beat.eraTransition;
+        const fromImg = getCutsceneImage(tr.fromImage);
+        const toImg = getCutsceneImage(tr.toImage);
+        const sweep = Math.min(1, Math.max(0, (elapsedSec - 0.25) / 2.2));
+        const splitX = Math.round(sweep * 320);
+
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        if (fromImg) drawCoverImage(ctx, fromImg, 320, 148);
+        if (toImg && splitX > 0) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(0, 0, splitX, 148);
+          ctx.clip();
+          drawCoverImage(ctx, toImg, 320, 148);
+          ctx.restore();
+        }
+        ctx.restore();
+
+        // Dark cinema vignette so characters pop
+        ctx.fillStyle = 'rgba(8, 12, 24, 0.36)';
+        ctx.fillRect(0, 0, 320, 148);
+
+        // Glowing golden evolution laser sweep bar
+        if (sweep > 0.01 && sweep < 0.99) {
+          const glow = ctx.createLinearGradient(splitX - 10, 0, splitX + 10, 0);
+          glow.addColorStop(0, 'rgba(250, 204, 21, 0)');
+          glow.addColorStop(0.5, 'rgba(254, 240, 138, 0.95)');
+          glow.addColorStop(1, 'rgba(56, 189, 248, 0)');
+          ctx.fillStyle = glow;
+          ctx.fillRect(splitX - 10, 0, 20, 148);
+        }
+
+        // Era badge pill at top center
+        ctx.fillStyle = 'rgba(11, 16, 32, 0.82)';
+        ctx.fillRect(46, 6, 228, 18);
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(46, 6, 228, 18);
+        ctx.fillStyle = '#fef08a';
+        ctx.font = 'bold 8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${tr.fromLabel}  ➔  ${tr.toLabel}`, 160, 18);
+      } else if (beat.backdropImage) {
+        const bgImg = getCutsceneImage(beat.backdropImage);
+        if (bgImg) {
+          ctx.save();
+          ctx.imageSmoothingEnabled = true;
+          drawCoverImage(ctx, bgImg, 320, 148);
+          ctx.restore();
+          ctx.fillStyle = 'rgba(8, 12, 24, 0.44)';
+          ctx.fillRect(0, 0, 320, 148);
+        }
+      }
 
       // Ground horizon platform
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
-      ctx.fillRect(0, 108, canvas.width, 40);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.14)';
-      ctx.fillRect(0, 108, canvas.width, 2);
+      ctx.fillStyle = 'rgba(11, 16, 32, 0.52)';
+      ctx.fillRect(0, 108, 320, 40);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.fillRect(0, 108, 320, 2);
 
       // 2. Bit restore rising light pillars (behind characters)
       if (vfx === 'bit_restore') {
