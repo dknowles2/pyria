@@ -1,19 +1,113 @@
 # Pyria: Return of the Bits
 
-**Pyria** is a browser-based Python-learning RPG designed for a 10-year-old adventurer. Lord Null has drained the magical world of Pyria down to flat 8-bit pixels and caged its guardian dragons. As the young **Code-Tamer**—joined by **Pip**, a tiny glitch-hatchling dragon sidekick—you write real Python code to solve dungeon puzzles, rescue dragons, earn **Byte Shards**, and watch the entire game evolve across video game eras: **8-Bit NES → 16-Bit SNES → 3D**.
+**Pyria** is a browser-based Python-learning RPG designed for a 10-year-old adventurer. Lord Null has drained the magical world of Pyria down to flat 8-bit pixels and caged its guardian dragons inside **Logic Vaults**. As the young **Code-Tamer**—joined by **Pip**, a tiny glitch-hatchling dragon sidekick—you write real Python 3 (running safely in-browser via **Pyodide** WebAssembly) to solve dungeon trials, rescue **32 Dragon Guardians**, earn **Byte Shards**, uncover hidden bonus rounds and Easter eggs, and watch the entire game evolve across video game history:
+
+**8-Bit NES → 16-Bit SNES → 32-Bit PS1/GBA Isometric 2.5D → 64-Bit Nintendo 64 3D** *(with concept roadmap through 128-Bit, HD, and Modern 4K Sandbox!)*
+
+---
+
+## Live Gameplay Across All 4 Playable Eras
+
+| **1. 8-Bit Era (NES 2D)** — *Whispering Meadow* | **2. 16-Bit Era (SNES 2D)** — *Coral Shallows* |
+| :---: | :---: |
+| ![8-Bit NES Gameplay](assets/screenshots/gameplay-8bit.png) | ![16-Bit SNES Gameplay](assets/screenshots/gameplay-16bit.png) |
+| **3. 32-Bit Era (PS1 / GBA Isometric 2.5D)** — *Blockstone Highlands* | **4. 64-Bit Era (Nintendo 64 Gouraud 3D)** — *Polygon Valley* |
+| ![32-Bit Isometric 2.5D Gameplay](assets/screenshots/gameplay-32bit-iso.png) | ![64-Bit Nintendo 64 3D Gameplay](assets/screenshots/gameplay-64bit-n64.png) |
+
+---
+
+## The 4 Playable Eras & 32 Realms (`224 Trials`)
+
+Every single Realm follows a **slow-growth scaffolded cadence** so new concepts never feel like a cliff:
+1. **Multiple Choice (`Predict & Choose`)** — Read real Python and predict the output or spot valid syntax first.
+2. **Fix the Bug (`🐛`)** — Repair one targeted sabotage from Lord Null (missing quotes, colons `:`, 4-space indentation, `=` vs `==`, etc.).
+3. **Guided Coding Trials (4 steps)** — Build up gradually from Explorer/Standard/Challenge starters to the **Realm Boss Trial** with pre-boss and post-boss **Cutscenes**.
+4. **Hidden Bonus Trial & 2 Easter Eggs** — Explore off the main path to unlock free Personal Kit gear and earn **+1 Bonus Hint** (unlocking Pip's Tier 4 Secret Solution Guide).
+
+---
+
+### Era 1: The 8-Bit Era — *The Flatlands of Pixels* (NES · 8 Realms · 56 Trials)
+*Early Realms 1–3 use friendly `say()` and `shout()` training spells before graduating to real `print()` in Realm 4. Rescuing all 8 Dragons restores all 8 Bits and upgrades Pyria to 16-Bit SNES!*
+
+| # | Realm | Dragon Guardian | Python Focus | Mini World Upgrade |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | **Whispering Meadow** | **Spark** *(Lightning)* | `say()`, `shout()`, strings & string joining (`+`) | Swaying meadow grass & firefly pixels |
+| **2** | **Mossy Ruins** | **Pebble** *(Earth)* | Variables (number & word boxes), basic math (`+`, `*`) | Shaded cliff edges & ruin dust particles |
+| **3** | **Cinder Cavern** | **Emberwing** *(Fire)* | Booleans, `:` colons, 4-space indentation, `=` vs `==`, `if` / `else` | Flickering torchlight & rising embers |
+| **4** | **Frostbite Hollow** | **Glacier** *(Ice)* | Graduating to `print()`, `if` / `elif` / `else` branching | Falling pixel snowflakes & ice highlights |
+| **5** | **Echo Woods** | **Bramble** *(Forest)* | Logical operators (`and`, `or`, `not`) & string methods (`.strip()`, `.upper()`) | Swaying forest canopy & glowing wisps |
+| **6** | **Sunken Crypt** | **Mire** *(Water)* | Multi-branch conditionals, math & string cleanup combined | Rippling water & misty crypt spores |
+| **7** | **Obsidian Keep** | **Gale** *(Wind)* | `for` loops & `range()` | Drifting sky-clouds & wind trails |
+| **8** | **Null's Pixel Citadel** | **Nova** *(Starlight)* | 8-Bit Era Capstone (loops + conditionals + modulo `%` + strings) | **All 8 Bits Restored → Upgrades to 16-Bit SNES!** |
 
 ![Whispering Meadow — 8-Bit vs 16-Bit Evolution](assets/world/realm01_meadow_comparison.png)
 
 ---
 
-## Core Mechanics
+### Era 2: The 16-Bit Era — *The Sunken Isles & Beyond* (SNES · 4 Acts · 16 Realms · 112 Trials)
+*Organized into 4 themed Acts of 4 Realms each, with lush 16-bit SNES pixel art and multi-voice synth music:*
 
-- **Era → Realm → Trial Hierarchy (`N` Realms per Era)**
-  - **The 8-Bit Era (*The Flatlands of Pixels*)**: **8 Realms**, 1 Dragon rescued per Realm. Each rescued Dragon restores **1 Bit** and triggers a mini visual upgrade (swaying grass, cliff shading, glowing torchlight, snowflakes, animated water, drifting clouds). Rescuing all 8 upgrades Pyria into the **16-Bit Era**.
-  - **The 16-Bit Era (*The Sunken Isles & Beyond*)**: **16 Realms** organized into **4 Acts of 4 Realms** (Tideglass Archipelago, Clockwork Spire, Alchemist's Caldera, Shattered Skyway) introducing lists, `while` loops, functions (`def`/`return`), dictionaries, nested loops, and intro classes.
-- **Python-Powered Character Creation**: Forge your hero by running real Python calls (`set_name()`, `preview_skin()`, `preview_hair()`, `preview_tunic()`, `confirm_hero()`).
-- **Byte Shards & Bram's Workshop**: Earn **Byte Shards** from Trials and hidden chests, then spend them in Bram's Workshop by writing Python function calls (`wear_hat("explorer")`, `set_tunic_color("crimson")`, `equip_shield("oak")`, `add_charisma(1)`) to make real RPG gear and stat trade-offs.
-- **Pip's 3-Tier Help System**: Every Trial includes 3 progressive hints (`tier1_nudge`, `tier2_pattern`, `tier3_walkthrough`) plus kid-friendly Python error translations that progressively reveal real Python tracebacks in later Realms.
+| Act | Realms (1–16) | Dragons | Python Focus |
+| :--- | :--- | :--- | :--- |
+| **Act I — Tideglass Archipelago** | 1. Coral Shallows · 2. Driftwood Market · 3. Pearl Grotto · 4. Maelstrom Lighthouse | Ripple, Gullwing, Nacre, Tempest | Lists (`[...]`), zero-based & negative indexing, `.append()`, `len()`/`max()`/`min()`/`sum()`, slicing, `for` over lists & filtering |
+| **Act II — Clockwork Spire** | 5. Brass Courtyard · 6. Pendulum Halls · 7. Steam Foundry · 8. Grand Chronometer | Sprocket, Tock, Piston, Aether | `while` loops, `break` & `continue`, defining functions (`def`), parameters, default arguments & `return` |
+| **Act III — Alchemist's Caldera** | 9. Sulfur Terrace · 10. Crystal Alembic · 11. Potion Vault · 12. Magma Core | Cinderel, Prism, Elixir, Crucible | Dictionaries (`{...}`), `.get()`, `.items()`, f-strings (`f"{...}"`), lists of dictionaries & frequency counting |
+| **Act IV — Shattered Skyway** | 13. Cloud Dock · 14. Starlight Bridge · 15. Storm Bastion · 16. Null's 16-Bit Throne | Nimbus, Comet, Fulmin, Zenith | Nested loops & 2D grids, intro Classes (`class`, `__init__`, `self`, methods), object lists & **16-Bit Finale → Upgrades to 32-Bit Isometric!** |
+
+---
+
+### Era 3: The 32-Bit Era — *The Isometric Frontier* (PS1 / GBA 2.5D · 4 Realms · 28 Trials)
+*Pyria tilts into an **Isometric 2.5D Diorama** with elevated terrain terraces (`elevation` heightmaps), extruded 3D stone blocks, and crystalline 32-bit synth music:*
+
+| # | Realm | Dragon Guardian | Python Focus |
+| :-: | :--- | :--- | :--- |
+| **1** | **Blockstone Highlands** | **Terracrest** *(Earth)* | Tuples `(x, y, z)`, tuple unpacking, 3D elevation math |
+| **2** | **Sky-Forge Foundry** | **Anvilwing** *(Fire)* | List comprehensions (`[x * 2 for x in ... if ...]`) & 2D/3D coordinate grids |
+| **3** | **Prism Caverns** | **Lumina** *(Light)* | Sets (`set()`, `&` intersection, `|` union) & nested dictionary maps |
+| **4** | **Null's Polygon Citadel** | **Vortex** *(Gravity)* | Error handling (`try` / `except`), safe parsers, 3D distance & **32-Bit Finale → Upgrades to 64-Bit N64 3D!** |
+
+| Blockstone Highlands | Sky-Forge Foundry | Prism Caverns | Null's Polygon Citadel |
+| :---: | :---: | :---: | :---: |
+| ![Blockstone Highlands](assets/concept-art/biomes/32bit-blockstone-highlands.jpg) | ![Sky-Forge Foundry](assets/concept-art/biomes/32bit-skyforge-foundry.jpg) | ![Prism Caverns](assets/concept-art/biomes/32bit-prism-caverns.jpg) | ![Null's Polygon Citadel](assets/concept-art/biomes/32bit-polygon-citadel.jpg) |
+
+---
+
+### Era 4: The 64-Bit Era — *The Nintendo 64 Realm of Polygons* (N64 3D · 4 Realms · 28 Trials)
+*Pyria bursts into chunky **Nintendo 64 Gouraud-shaded perspective 3D** with a 3rd-person follow camera, cobalt skies, distant low-poly mountains, distance fog, and N64 orchestral synth music:*
+
+| # | Realm | Dragon Guardian | Python Focus |
+| :-: | :--- | :--- | :--- |
+| **1** | **Polygon Valley** | **Polywing** *(Sky)* | 3D Entity Classes (`class Hero3D`, `__str__`, camera & movement methods) |
+| **2** | **Gouraud Courtyard** | **Vertex** *(Stone)* | Class Inheritance (`class Sub(Parent):`), `super().__init__()`, method overrides & polymorphism |
+| **3** | **Star-Mesh Observatory** | **Quasar** *(Starlight)* | Debugging off-by-one bugs, `assert` self-tests, `sorted(..., key=lambda ...)` Painter's Algorithm |
+| **4** | **Null's 64-Bit Sanctum** | **Aurelion** *(Crown)* | **Grand 64-Bit Boss Gauntlet** combining Classes, 3D Paths, Sorting & Error Shields to claim the **64-Bit Crown!** |
+
+---
+
+## Visual Concept Roadmap (8-Bit NES → Modern 4K)
+
+Pyria's long-term visual ladder spans 7 eras of video game history (see [docs/game_design_blueprint.md](docs/game_design_blueprint.md)):
+
+| 8-Bit NES | 16-Bit SNES | 32-Bit PS1/GBA | 64-Bit N64 |
+| :---: | :---: | :---: | :---: |
+| ![8-Bit NES](assets/concept-art/eras/era-01-8bit-nes.jpg) | ![16-Bit SNES](assets/concept-art/eras/era-02-16bit-snes.jpg) | ![32-Bit Isometric](assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg) | ![64-Bit N64](assets/concept-art/eras/era-04-64bit-n64.jpg) |
+
+| 128-Bit GameCube/PS2 *(Planned)* | HD Era *(Planned)* | Modern / 4K Sandbox *(Planned)* |
+| :---: | :---: | :---: |
+| ![128-Bit](assets/concept-art/eras/era-05-128bit-gamecube-ps2.jpg) | ![HD Era](assets/concept-art/eras/era-06-hd-era.jpg) | ![Modern 4K](assets/concept-art/eras/era-07-modern-4k-sandbox.jpg) |
+
+---
+
+## Core Mechanics & Kid-Friendly UX
+
+- **Visual-First Hero Forge (with Python Toggle)**: Pick your hero's name, skin, hair, and tunic visually—or flip on **Advanced Python Mode** to run `set_name()`, `preview_skin()`, `preview_hair()`, `preview_tunic()`, and `confirm_hero()`.
+- **Kid-Friendly Python Editor**: Line-number gutters, inline red highlighting on syntax/runtime error lines, automatic 4-space indentation after `:`, plain-English **Quick Symbol Buttons** (`⇥ Indent`, `( )`, `" "`, `:`, `==`), IDE autocomplete, `#` comment callouts in early realms, and automatic draft saving.
+- **Bram's Tinkerer Workshop**: Earn **Byte Shards** from Trials and chests, then forge gear by writing Python (`wear_hat("explorer")`, `set_tunic_color("crimson")`, `equip_boots("swift")`, `add_charisma(1)`). Features a **live shard budget bar** and inline over-budget line highlighting right inside the editor.
+- **Pip's 3-Tier (+ Secret Tier 4) Help System**: Every Trial includes progressive hints plus warm, plain-English Python error translations.
+- **iPad & Touch Ready**: Installable Home Screen PWA with a 360° analog virtual thumbstick and touch-friendly action buttons.
+- **Multi-Account Auth & Native `/builder` Admin Console**: Backed by Cloudflare Access per-user email isolation, admin Account Switcher, an admin-only **Era/Realm Warp** dropdown in the HUD, and the `/builder` console for Live Progress tracking, Story/Trial authoring, and client-side Pyodide solution testing.
+
+![Pyria Parent & Builder Console](assets/screenshots/builder-console.png)
 
 ![Modular Code-Tamer Hero & Pip Sprite Showcase](assets/sprites/hero_showcase.png)
 
@@ -23,64 +117,55 @@
 
 ```text
 pyria/
-├── docs/          # Game design blueprint & architecture docs
-├── content/       # Data-driven JSON curriculum, economy & tilemaps
-│   ├── game.json          # Metadata, NPCs, difficulty overrides & conceptProgression
-│   ├── catalog.json       # Python character creation & Byte Shard unlockables
-│   ├── schema.json        # JSON Schema + Python OUTPUT test harness convention
-│   ├── eras/              # era-01-8bit.json (8 Realms) & era-02-16bit.json (16 Realms)
-│   └── maps/              # 64x48 Zelda-style Realm tilemaps (Realms 1–6)
-├── assets/        # Visual art, deterministic pixel-art generators & previewers
-│   ├── concept-art/       # Key concept art renders & sprite dimension specs
-│   ├── sprites/           # Modular 8-bit/16-bit Hero + Pip generator & preview.html
-│   ├── tilesets/          # 8-bit/16-bit meadow & ruins tilesets + NPC/Dragon sheets
-│   └── world/             # Interactive walkable world previewer & 8-bit/16-bit comparison
-├── server/        # Zero-dependency Python 3 + SQLite backend (local dev & elzar deploy)
-└── web/           # Playable browser RPG (HTML5 Canvas + Pyodide) & native /builder Admin Console
+├── docs/              # Game design blueprint & 7-Era architecture docs
+├── content/           # Data-driven JSON curriculum, economy & tilemaps
+│   ├── game.json              # Metadata, NPCs, 4-era eraOrder & 33-concept progression
+│   ├── catalog.json           # Python character creation & Byte Shard unlockables
+│   ├── schema.json            # JSON Schema + Python OUTPUT test harness convention
+│   ├── eras/                  # era-01-8bit (8R), era-02-16bit (16R), era-03-32bit (4R), era-04-64bit (4R)
+│   └── maps/                  # 32 playable 64x48 Realm tilemaps (with 3D elevation layers for 32/64-Bit)
+├── assets/            # Visual art, screenshots, pixel-art generators & previewers
+│   ├── screenshots/           # Live 8-Bit, 16-Bit, 32-Bit, 64-Bit & /builder screenshots
+│   ├── concept-art/           # 7-Era progression renders, 32-Bit biomes & sprite dimension specs
+│   ├── sprites/               # Modular 8-bit/16-bit Hero + Pip generator & preview.html
+│   ├── tilesets/              # 8-bit/16-bit tilesets + NPC/Dragon sheets
+│   └── world/                 # Interactive walkable world previewer & 8-bit/16-bit comparison
+├── server/            # Zero-dependency Python 3 + SQLite backend (local dev & elzar deploy)
+└── web/               # Playable browser RPG (HTML5 Canvas + 2.5D/3D Renderers + Pyodide) & /builder
 ```
 
 ---
 
 ## Quick Start
 
-### 1. Run the Game Locally
-Start the zero-dependency Python 3 + SQLite server from the repository root:
+### 1. Run Locally (Dev Mode)
+Start the zero-dependency Python 3 + SQLite server from the repository root (`--dev` enables local admin access to `/builder` and the HUD Realm Warp):
 
 ```bash
-python3 server/app.py --host 127.0.0.1 --port 8080
+python3 server/app.py --host 127.0.0.1 --port 8080 --dev
 ```
 
-Then open [http://127.0.0.1:8080](http://127.0.0.1:8080) in your browser to create your hero, explore Whispering Meadow, and cast Python spells in-browser via Pyodide.
+- **Play the Game**: [http://127.0.0.1:8080](http://127.0.0.1:8080)
+- **Parent & Builder Console**: [http://127.0.0.1:8080/builder](http://127.0.0.1:8080/builder)
 
-### 2. Regenerate Deterministic Sprites & Tilesets
-All modular pixel-art sprites and tilesets are generated with pure Python 3 stdlib (`zlib`/`struct`, zero external dependencies):
+### 2. Run Tests
+```bash
+python3 -m unittest server/test_server.py -v
+```
+
+### 3. Deploy to `elzar`
+Production deployment helpers live under `server/` (`server/pyria.service` + `server/deploy_elzar.sh`):
 
 ```bash
-python3 assets/sprites/build_sprites.py
-python3 assets/tilesets/build_tilesets.py
+./server/deploy_elzar.sh --restart
 ```
 
-You can also open `assets/sprites/preview.html` or `assets/world/preview.html` directly in a browser to inspect hero customization layers or walk around Realms 1 & 2 with live 8-Bit ↔ 16-Bit switching.
-
-### 3. Open the Native Parent & Builder Console (`/builder`)
-Visit [http://127.0.0.1:8080/builder](http://127.0.0.1:8080/builder) (or `https://<your-tunnel>/builder` on `elzar`) for the admin-only **Pyria Parent & Builder Console**:
-- **Live Progress Stream**: Real-time activity feed with expandable Python code viewer, Hero progress cards, Account Switcher, and interactive `64×48` Realm Map Tracker with one-click Trial overrides (`✓ Mark Done` / `↺ Reset`).
-- **Story & Trials**: Edit Eras, Realms, Trials, Pip hints, and run sandboxed Python solution tests.
-- **Concept Health & Overrides**: Anti-repetition concept checks and global/per-Realm difficulty overrides.
-- **Sprites & World**: Embedded Sprite Studio and Walkable World Map previewers.
-
-### 4. Deploy to `elzar`
-Production deployment helpers for `elzar` live under `server/`:
-
-- `server/pyria.service` — Lingering user `systemd` unit running `server/app.py` on `127.0.0.1:8000` backed by `~/.local/share/pyria/pyria.sqlite3` with Cloudflare Access per-user auth (`PYRIA_ADMIN_EMAILS`).
-- `server/deploy_elzar.sh` — Deploy script syncing to `elzar:~/pyria` and restarting `pyria.service` (`./server/deploy_elzar.sh --restart`).
-
-See [server/README.md](server/README.md) for full `elzar` setup and Cloudflare Tunnel details.
+See [server/README.md](server/README.md) for Cloudflare Tunnel & Access setup details.
 
 ---
 
 ## Documentation
 
-- [Game Design Blueprint](docs/game_design_blueprint.md) — Narrative arc, Era/Realm/Trial progression, economy, and UX architecture
-- [Concept Art & Sprite Specs](assets/concept-art/README.md) — Visual targets, 8-bit (`16x16`) & 16-bit (`32x32`) dimensions, and modular Z-layer order
-- [Server & Deployment Guide](server/README.md) — Local server options, SQLite save API, tests, and `elzar` deployment
+- [Game Design Blueprint](docs/game_design_blueprint.md) — Narrative arc, 7-Era visual roadmap, curriculum cadence, and economy
+- [Concept Art & Sprite Specs](assets/concept-art/README.md) — Visual targets, 8-bit/16-bit sprite specs, and modular Z-layer order
+- [Server & Deployment Guide](server/README.md) — Local server options, SQLite save API, security hardening, tests, and `elzar` deployment
