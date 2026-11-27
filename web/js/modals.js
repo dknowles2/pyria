@@ -39,6 +39,37 @@ export function renderSafeMarkdown(str) {
   });
 }
 
+function objectiveHasCodeSpoilers(objective) {
+  const text = String(objective || '');
+  if (!text) return false;
+  return (
+    /`[^`]*[(=:[\]+][^`]*`/.test(text) ||
+    /\bLine\s+\d+\s*:/i.test(text) ||
+    /\b(say|shout|print|def|for|while|if|elif|else|class)\s*\(/.test(text) ||
+    /`(say|shout|print|def|for|while|if|elif|else|class|return)\b/.test(text)
+  );
+}
+
+function buildChallengeObjectiveHtml(trial) {
+  if (trial.challengeObjective) {
+    return renderSafeMarkdown(trial.challengeObjective);
+  }
+  const raw = String(trial.objective || '');
+  if (!objectiveHasCodeSpoilers(raw)) {
+    return renderSafeMarkdown(raw);
+  }
+  const story = String(trial.storyPrompt || '');
+  const quoted = [...raw.matchAll(/["']([^"'\n]{2,60})["']/g)]
+    .map((m) => m[1])
+    .filter((s) => !story.includes(s));
+  const uniqueTargets = [...new Set(quoted)].slice(0, 4);
+  const targetNote =
+    uniqueTargets.length > 0
+      ? ` Target text: ${uniqueTargets.map((t) => `<code class="inline-md-code">${escapeHtml(t)}</code>`).join(', ')}.`
+      : '';
+  return `Solve the story quest above using your Python skills — code hints are hidden in Challenge Mode!${targetNote}`;
+}
+
 const BASE_QUICK_KEYS = [
   { label: '⇥ Indent', insert: '    ', cursorOffset: 4 },
   { label: '( )', insert: '()', cursorOffset: 1 },
@@ -425,9 +456,30 @@ export class ModalManager {
     const diff = resolveDifficulty(gameConfig, realm, trial, save);
     let currentMode = VALID_DIFFICULTY_MODES.has(diff.mode) ? diff.mode : 'standard';
     let hintsUsed = 0;
+    let failedAttempts = 0;
+    const CHALLENGE_BONUS_SHARDS = 10;
     let trialOpenedAt = Date.now();
     const baseMaxHints = diff.maxHintsAllowed ?? 3;
-    const maxHints = Math.min(4, baseMaxHints + (bonusHints > 0 ? bonusHints : 0));
+    const getEffectiveMaxHints = () =>
+      currentMode === 'challenge'
+        ? Math.min(1, baseMaxHints)
+        : Math.min(4, baseMaxHints + (bonusHints > 0 ? bonusHints : 0));
+    const maxHints = getEffectiveMaxHints();
+
+    const getHintGateMessage = (nextTierNum, isMc) => {
+      if (nextTierNum === 2 && failedAttempts < 1) {
+        return isMc
+          ? 'Chirp! Try picking an answer first! Make at least <strong>1 attempt</strong> before unlocking <strong>Tier 2: Code Pattern</strong> — guessing and checking helps your brain grow!'
+          : 'Chirp! Give your spell a try first! Press <strong>▶ Run Python Spell</strong> at least once before unlocking <strong>Tier 2: Code Pattern</strong> — making mistakes is how Code-Tamers learn!';
+      }
+      if (nextTierNum >= 3 && failedAttempts < 2) {
+        const remaining = 2 - failedAttempts;
+        return isMc
+          ? `Almost! Try <strong>${remaining} more answer${remaining === 1 ? '' : 's'}</strong> (2 attempts total) before unlocking <strong>Tier ${nextTierNum}</strong>. You've got this!`
+          : `Almost! Try running your spell <strong>${remaining} more time${remaining === 1 ? '' : 's'}</strong> (2 attempts total) before unlocking <strong>Tier ${nextTierNum}</strong>. You've got this!`;
+      }
+      return null;
+    };
 
     const isTrialSolvedInSave = () =>
       Boolean(
@@ -516,9 +568,10 @@ export class ModalManager {
       });
     };
 
-    const renderCelebrationView = ({ stdout, explanation, isPractice }) => {
+    const renderCelebrationView = ({ stdout, explanation, isPractice, solvedInChallenge = false }) => {
       const kit = trial.isBonus && trial.bonusKitReward && !isPractice ? trial.bonusKitReward : null;
       const canEquipKit = Boolean(kit && kit.equipLayer && kit.equipKey);
+      const totalAwardedShards = (Number(trial.shardReward) || 0) + (solvedInChallenge ? CHALLENGE_BONUS_SHARDS : 0);
 
       this.open(
         `
@@ -527,6 +580,7 @@ export class ModalManager {
             <h2>✓ ${escapeHtml(trial.title)}</h2>
             <div class="modal-badges">
               <span class="pill pill-green">${isPractice ? '✓ PRACTICE COMPLETE' : trial.isBonus ? '✦ BONUS TRIAL COMPLETE' : '✓ TRIAL COMPLETE'}</span>
+              ${solvedInChallenge ? `<span class="pill pill-violet">🏆 CHALLENGE MASTERED (+${CHALLENGE_BONUS_SHARDS} Bonus 💎)</span>` : ''}
               <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
             </div>
           </div>
@@ -534,13 +588,15 @@ export class ModalManager {
         </div>
 
         <div class="trial-complete-card">
-          <div class="trial-complete-icon">✓</div>
-          <h3 class="trial-complete-title">${isPractice ? 'Great Practice Run!' : trial.isBonus ? '🌟 Hidden Bonus Complete!' : '🎉 Trial Complete!'}</h3>
+          <div class="trial-complete-icon">${solvedInChallenge ? '🏆' : '✓'}</div>
+          <h3 class="trial-complete-title">${isPractice ? 'Great Practice Run!' : solvedInChallenge ? '🏆 Challenge Mode Mastered!' : trial.isBonus ? '🌟 Hidden Bonus Complete!' : '🎉 Trial Complete!'}</h3>
           <p class="dialogue-text">
             ${
               isPractice
                 ? 'Chirp! Spot-on answer again! (Byte Shards were already claimed for this Trial.)'
-                : `Chirp! Pip does a backflip! You earned <strong style="color: var(--accent-gold);">+${trial.shardReward} Byte Shards</strong> and saved your progress!`
+                : solvedInChallenge
+                  ? `Chirp! Pip does a double backflip! You conquered Challenge Mode and earned <strong style="color: var(--accent-gold);">+${totalAwardedShards} Byte Shards</strong> (including <strong>+${CHALLENGE_BONUS_SHARDS} Challenge Bonus</strong>)!`
+                  : `Chirp! Pip does a backflip! You earned <strong style="color: var(--accent-gold);">+${trial.shardReward} Byte Shards</strong> and saved your progress!`
             }
           </p>
           ${
@@ -654,7 +710,18 @@ export class ModalManager {
       const outputEl = this.content.querySelector('#trial-output');
 
       hintBtn?.addEventListener('click', () => {
-        if (hintsUsed >= maxHints) return;
+        const effMax = getEffectiveMaxHints();
+        if (hintsUsed >= effMax) return;
+        const gateMsg = getHintGateMessage(hintsUsed + 1, true);
+        if (gateMsg) {
+          audio.playClick();
+          outputEl.className = 'pip-console';
+          outputEl.innerHTML = `
+            <div class="pip-console-header">🐉 Pip encourages you:</div>
+            <div class="pip-console-body">${gateMsg}</div>
+          `;
+          return;
+        }
         audio.playClick();
         hintsUsed += 1;
         hintsArea.classList.remove('hidden');
@@ -670,11 +737,11 @@ export class ModalManager {
         });
         hintsArea.innerHTML = shown.join('');
 
-        if (hintsUsed >= maxHints) {
-          hintBtn.textContent = `💡 All ${maxHints} Hints Shown`;
+        if (hintsUsed >= effMax) {
+          hintBtn.textContent = `💡 All ${effMax} Hint${effMax === 1 ? '' : 's'} Shown`;
           hintBtn.disabled = true;
         } else {
-          hintBtn.textContent = `💡 Ask Pip (Hint ${hintsUsed + 1}/${maxHints})`;
+          hintBtn.textContent = `💡 Ask Pip (Hint ${hintsUsed + 1}/${effMax})`;
         }
       });
 
@@ -720,6 +787,7 @@ export class ModalManager {
               isPractice,
             });
           } else {
+            failedAttempts += 1;
             card.classList.add('wrong');
             audio.playError();
             outputEl.className = 'pip-console error';
@@ -763,6 +831,24 @@ export class ModalManager {
       };
       const editableInitialCode = ensureTrailingEditableLine(initialCode);
 
+      const renderBugBannerBody = () => {
+        if (currentMode === 'explorer' || failedAttempts >= 1) {
+          return renderSafeMarkdown(
+            trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!'
+          );
+        }
+        return 'Lord Null sabotaged this spell! Read the code carefully, spot what is broken, and run your fix. <em>(A detailed bug clue unlocks after your first test run, or in Explorer mode.)</em>';
+      };
+
+      const renderObjectiveInnerHtml = () => {
+        if (currentMode === 'challenge') {
+          return `<strong>🏆 Challenge Goal:</strong> ${buildChallengeObjectiveHtml(trial)}`;
+        }
+        return `<strong>Objective:</strong> ${renderSafeMarkdown(trial.objective)}`;
+      };
+
+      const initialMaxHints = getEffectiveMaxHints();
+
       this.open(
         `
         <div class="modal-header">
@@ -787,17 +873,22 @@ export class ModalManager {
 
         <p class="dialogue-text">${renderSafeMarkdown(trial.storyPrompt)}</p>
 
+        <div id="trial-challenge-banner" class="challenge-banner ${currentMode === 'challenge' ? '' : 'hidden'}">
+          <span>🏆 <strong>Challenge Mode Active</strong> — Code spoilers hidden · Hints capped at Tier 1</span>
+          <span class="pill pill-gold">+${CHALLENGE_BONUS_SHARDS} Bonus Shards &amp; 🏆 Badge</span>
+        </div>
+
         <div class="objective-box">
-          <strong>Objective:</strong> ${renderSafeMarkdown(trial.objective)}
+          <div id="trial-objective-text">${renderObjectiveInnerHtml()}</div>
           ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
         </div>
 
         ${
           isFixBug
             ? `
-              <div class="bug-banner">
+              <div id="trial-bug-banner" class="bug-banner">
                 <div class="bug-banner-title">🐛 Fix the Bug!</div>
-                <div>${renderSafeMarkdown(trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!')}</div>
+                <div id="trial-bug-summary">${renderBugBannerBody()}</div>
               </div>
             `
             : ''
@@ -847,8 +938,8 @@ export class ModalManager {
 
         <div class="editor-actions">
           <button id="btn-trial-run" class="btn btn-primary">▶ Run Python Spell</button>
-          <button id="btn-trial-hint" class="btn btn-gold" ${maxHints === 0 ? 'disabled' : ''}>
-            💡 Ask Pip (Hint 1/${maxHints})
+          <button id="btn-trial-hint" class="btn btn-gold" ${initialMaxHints === 0 ? 'disabled' : ''}>
+            💡 Ask Pip (Hint 1/${initialMaxHints})
           </button>
           <button id="btn-trial-reset" class="btn btn-ghost">↺ Reset Code</button>
         </div>
@@ -872,6 +963,9 @@ export class ModalManager {
       const diffBadge = this.content.querySelector('#trial-diff-badge');
       const draftBadge = this.content.querySelector('#trial-draft-badge');
       const commentTipEl = this.content.querySelector('#trial-comment-tip');
+      const challengeBannerEl = this.content.querySelector('#trial-challenge-banner');
+      const objectiveTextEl = this.content.querySelector('#trial-objective-text');
+      const bugSummaryEl = this.content.querySelector('#trial-bug-summary');
       const trialGutter = attachCodeGutter(
         codeEl,
         this.content.querySelector('#trial-code-gutter'),
@@ -883,6 +977,57 @@ export class ModalManager {
         if (!commentTipEl) return;
         const shouldShow = (Number(realm?.number) || 1) <= 3 && hasHashComment(code);
         commentTipEl.classList.toggle('hidden', !shouldShow);
+      };
+
+      const renderRevealedHints = () => {
+        const effMax = getEffectiveMaxHints();
+        const visibleCount = Math.min(hintsUsed, effMax);
+        if (visibleCount <= 0) {
+          hintsArea.classList.add('hidden');
+          hintsArea.innerHTML = '';
+        } else {
+          hintsArea.classList.remove('hidden');
+          const shown = hintTiers.slice(0, visibleCount).map((t) => {
+            const text = t.customText ?? trial.hints?.[t.key] ?? '';
+            return `
+              <div class="hint-box" style="margin-bottom:8px;">
+                <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
+                <div>${renderSafeMarkdown(text)}</div>
+              </div>
+            `;
+          });
+          hintsArea.innerHTML = shown.join('');
+        }
+        if (effMax === 0) {
+          hintBtn.textContent = '💡 Hints Disabled';
+          hintBtn.disabled = true;
+        } else if (visibleCount >= effMax) {
+          hintBtn.textContent =
+            currentMode === 'challenge'
+              ? '💡 Challenge Hint Shown (1/1)'
+              : `💡 All ${effMax} Hint${effMax === 1 ? '' : 's'} Shown`;
+          hintBtn.disabled = true;
+        } else {
+          hintBtn.textContent = `💡 Ask Pip (Hint ${visibleCount + 1}/${effMax})`;
+          hintBtn.disabled = false;
+        }
+      };
+
+      const syncDifficultyUi = () => {
+        this.content.querySelectorAll('[data-mode]').forEach((b) => {
+          b.classList.toggle('btn-sky', b.dataset.mode === currentMode);
+          b.classList.toggle('btn-ghost', b.dataset.mode !== currentMode);
+        });
+        diffBadge.textContent =
+          currentMode === 'challenge' ? 'Mode: 🏆 challenge' : `Mode: ${currentMode}`;
+        challengeBannerEl?.classList.toggle('hidden', currentMode !== 'challenge');
+        if (objectiveTextEl) {
+          objectiveTextEl.innerHTML = renderObjectiveInnerHtml();
+        }
+        if (bugSummaryEl) {
+          bugSummaryEl.innerHTML = renderBugBannerBody();
+        }
+        renderRevealedHints();
       };
 
       // On desktop, auto-focus the coding box with cursor at the end so the blinking caret is obvious.
@@ -911,14 +1056,7 @@ export class ModalManager {
         });
       }
 
-      const updateModeButtons = () => {
-        this.content.querySelectorAll('[data-mode]').forEach((b) => {
-          b.classList.toggle('btn-sky', b.dataset.mode === currentMode);
-          b.classList.toggle('btn-ghost', b.dataset.mode !== currentMode);
-        });
-        diffBadge.textContent = `Mode: ${currentMode}`;
-      };
-      updateModeButtons();
+      syncDifficultyUi();
 
       this.content.querySelectorAll('[data-mode]').forEach((btn) => {
         btn.addEventListener('click', () => {
@@ -928,7 +1066,7 @@ export class ModalManager {
           trialGutter.setMarks(new Map());
           draftBadge?.classList.add('hidden');
           if (!isPractice && onDraftClear) onDraftClear();
-          updateModeButtons();
+          syncDifficultyUi();
           audio.playClick();
         });
       });
@@ -943,28 +1081,23 @@ export class ModalManager {
       });
 
       hintBtn.addEventListener('click', () => {
-        if (hintsUsed >= maxHints) return;
-        audio.playClick();
-        hintsUsed += 1;
-        hintsArea.classList.remove('hidden');
-
-        const shown = hintTiers.slice(0, hintsUsed).map((t) => {
-          const text = t.customText ?? trial.hints?.[t.key] ?? '';
-          return `
-            <div class="hint-box" style="margin-bottom:8px;">
-              <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
-              <div>${renderSafeMarkdown(text)}</div>
-            </div>
+        const effMax = getEffectiveMaxHints();
+        const visibleCount = Math.min(hintsUsed, effMax);
+        if (visibleCount >= effMax) return;
+        const nextTierNum = visibleCount + 1;
+        const gateMsg = getHintGateMessage(nextTierNum, false);
+        if (gateMsg) {
+          audio.playClick();
+          outputEl.className = 'pip-console';
+          outputEl.innerHTML = `
+            <div class="pip-console-header">🐉 Pip encourages you:</div>
+            <div class="pip-console-body">${gateMsg}</div>
           `;
-        });
-        hintsArea.innerHTML = shown.join('');
-
-        if (hintsUsed >= maxHints) {
-          hintBtn.textContent = `💡 All ${maxHints} Hints Shown`;
-          hintBtn.disabled = true;
-        } else {
-          hintBtn.textContent = `💡 Ask Pip (Hint ${hintsUsed + 1}/${maxHints})`;
+          return;
         }
+        audio.playClick();
+        hintsUsed = nextTierNum;
+        renderRevealedHints();
       });
 
       let solvedInView = false;
@@ -1030,12 +1163,24 @@ export class ModalManager {
           if (!isPractice && onDraftClear) {
             onDraftClear({ skipPersist: true });
           }
+          const solvedInChallenge = !isPractice && currentMode === 'challenge';
+          const solvedPayload = solvedInChallenge
+            ? {
+                ...trial,
+                shardReward: (Number(trial.shardReward) || 0) + CHALLENGE_BONUS_SHARDS,
+                solvedInChallengeMode: true,
+              }
+            : trial;
           // Immediately persist solved state so closing/Escape can never lose progress!
           if (onSolved) {
-            await onSolved(trial);
+            await onSolved(solvedPayload);
           }
-          renderCelebrationView({ stdout: result.stdout, isPractice });
+          renderCelebrationView({ stdout: result.stdout, isPractice, solvedInChallenge });
         } else {
+          failedAttempts += 1;
+          if (bugSummaryEl) {
+            bugSummaryEl.innerHTML = renderBugBannerBody();
+          }
           if (result.errorLine) {
             const errLn = Number(result.errorLine);
             trialGutter.setMarks(

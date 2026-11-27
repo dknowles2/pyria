@@ -76,9 +76,9 @@
         {
           "id": "trial-01-02",
           "trialType": "fix_bug",
-          "title": "Fix the Broken say() Spell!",
-          "storyPrompt": "Lord Null sabotaged the meadow greeting by stealing the closing quote `\"`! Put the missing quote `\"` back right before `)` and run the spell!",
-          "objective": "Fix the missing closing quote so `say(\"Wake up, Spark!\")` runs cleanly.",
+          "title": "The Silenced Meadow Greeting",
+          "storyPrompt": "Lord Null sabotaged the meadow greeting! When you press Run, Python hits a syntax error before Spark can hear you. Inspect the spell closely and repair it!",
+          "objective": "Repair the broken say() spell so it outputs: Wake up, Spark!",
           "concepts": [
             "function_calls",
             "print_output",
@@ -86,17 +86,17 @@
           ],
           "shardReward": 25,
           "unlockId": null,
-          "bugSummary": "Lord Null stole the closing quote (\") before `)`! Add `\"` right after `!` and run the spell.",
+          "bugSummary": "The greeting spell crashes with a syntax error before it can wake Spark.",
           "starterCode": {
-            "explorer": "say(\"Wake up, Spark!)\n",
-            "standard": "say(\"Wake up, Spark!)\n",
+            "explorer": "# Look closely at the quotes!\nsay(\"Wake up, Spark!)\n",
+            "standard": "# Find and fix the broken spell\nsay(\"Wake up, Spark!)\n",
             "challenge": "say(\"Wake up, Spark!)\n"
           },
           "referenceSolution": "say(\"Wake up, Spark!\")\n",
           "testCode": "assert OUTPUT.strip() == \"Wake up, Spark!\", f'Expected \"Wake up, Spark!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip points at the end of the text: 'Every opening quote `\"` needs a matching closing quote `\"`!'",
-            "tier2_pattern": "Change `say(\"Wake up, Spark!)` to `say(\"Wake up, Spark!\")`",
+            "tier2_pattern": "Every opening quote needs a matching closing quote before `)`: say(\"<message>\")",
             "tier3_walkthrough": "Type:\nsay(\"Wake up, Spark!\")"
           },
           "difficultyOverride": null
@@ -116,14 +116,14 @@
           "unlockId": "stat-charisma-1",
           "starterCode": {
             "explorer": "say(\"???\")\n",
-            "standard": "",
+            "standard": "# Type your say() spell below\n",
             "challenge": ""
           },
           "referenceSolution": "say(\"Hello, Pyria!\")\n",
           "testCode": "assert OUTPUT.strip() == \"Hello, Pyria!\", f'Expected \"Hello, Pyria!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip whispers: 'Python uses say() to speak aloud, and text needs quotes around it!'",
-            "tier2_pattern": "Pattern: say(\"Hello, Pyria!\") — check capital H, the comma, capital P, and the exclamation mark!",
+            "tier2_pattern": "Pattern: say(\"<your message>\") — check capital letters, comma, and exclamation mark!",
             "tier3_walkthrough": "Type this exact line:\nsay(\"Hello, Pyria!\")"
           },
           "difficultyOverride": null
@@ -142,16 +142,16 @@
           "shardReward": 30,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shout(\"Wake up, Spark!\")\n",
-            "standard": "",
+            "explorer": "shout(\"Wake up, Spark!\")\nshout(\"???\")\n",
+            "standard": "shout(\"Wake up, Spark!\")\n# Add your second shout() line below\n",
             "challenge": ""
           },
           "referenceSolution": "shout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert len(lines) == 2, f'Expected 2 lines, got {len(lines)}'\nassert lines[0] == \"WAKE UP, SPARK!\", f'Line 1 was {lines[0]!r}'\nassert lines[1] == \"THE MEADOW NEEDS YOU!\", f'Line 2 was {lines[1]!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip hops between the stones: 'Put one shout() on line 1 and a second shout() on line 2!'",
-            "tier2_pattern": "shout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")",
-            "tier3_walkthrough": "Add line 2:\nshout(\"The meadow needs you!\")"
+            "tier1_nudge": "Pip hops between the stones: 'Put one shout() on line 1 and a second shout() on line 2 — shout() turns your words into ALL CAPS!'",
+            "tier2_pattern": "shout(\"<first message>\")\nshout(\"<second message>\")",
+            "tier3_walkthrough": "Write both lines:\nshout(\"Wake up, Spark!\")\nshout(\"The meadow needs you!\")"
           },
           "difficultyOverride": null
         },
@@ -159,8 +159,8 @@
           "id": "trial-01-05",
           "trialType": "code",
           "title": "Glue Two Strings Together!",
-          "storyPrompt": "A torn banner hangs over the Firefly Glade! In Python, you can glue two strings together using `+` right inside `say(...)`—like `say(\"Fire\" + \"fly\")`!",
-          "objective": "Use `say()` with `+` to glue \"Code-\" and \"Tamer\" together so Python outputs: Code-Tamer",
+          "storyPrompt": "A torn banner hangs over the Firefly Glade! In Python, you can glue two strings together using `+` right inside `say(...)` — like `say(\"Fire\" + \"fly\")`!",
+          "objective": "Glue the two text pieces 'Code-' and 'Tamer' together using + inside say() so Python outputs: Code-Tamer",
           "concepts": [
             "strings",
             "print_output"
@@ -169,14 +169,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "say(\"Code-\" + \"???\")\n",
-            "standard": "",
+            "standard": "# Glue two strings together with + inside say()\n",
             "challenge": ""
           },
           "referenceSolution": "say(\"Code-\" + \"Tamer\")\n",
           "testCode": "assert OUTPUT.strip() == \"Code-Tamer\", f'Expected \"Code-Tamer\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip tugs the banner: 'Put + between \"Code-\" and \"Tamer\" inside say(...)!'",
-            "tier2_pattern": "say(\"Code-\" + \"Tamer\")",
+            "tier2_pattern": "say(\"<first part>\" + \"<second part>\")",
             "tier3_walkthrough": "Type:\nsay(\"Code-\" + \"Tamer\")"
           },
           "difficultyOverride": null
@@ -185,8 +185,8 @@
           "id": "trial-01-06",
           "trialType": "code",
           "title": "Unseal Spark's Lightning Vault",
-          "storyPrompt": "You reached Spark's Lightning Vault! Combine everything you mastered in Whispering Meadow: cast `shout()` on line 1 to announce `\"SPARK READY!\"`, and `say()` with `+` on line 2 to say `\"Open\" + \" the vault!\"`!",
-          "objective": "Line 1: shout(\"SPARK READY!\"). Line 2: say(\"Open\" + \" the vault!\").",
+          "storyPrompt": "You reached Spark's Lightning Vault! Combine everything you mastered in Whispering Meadow: shout the ready signal on line 1, then glue two strings together on line 2 to unseal the vault!",
+          "objective": "On line 1, shout the message Spark ready! so it appears in ALL CAPS. On line 2, glue 'Open' and ' the vault!' together and say the result.",
           "concepts": [
             "function_calls",
             "strings",
@@ -195,16 +195,16 @@
           "shardReward": 45,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shout(\"SPARK READY!\")\nsay(\"Open\" + \"???\")\n",
-            "standard": "",
+            "explorer": "shout(\"Spark ready!\")\nsay(\"Open\" + \"???\")\n",
+            "standard": "# Line 1: shout the ready signal\n# Line 2: glue two strings with say()\n",
             "challenge": ""
           },
           "referenceSolution": "shout(\"SPARK READY!\")\nsay(\"Open\" + \" the vault!\")\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"SPARK READY!\", \"Open the vault!\"], f'Expected [\"SPARK READY!\", \"Open the vault!\"], got {lines!r}'\n",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement: 'Check the space before `the` in \" the vault!\" so the words don't squish together!'",
-            "tier2_pattern": "shout(\"SPARK READY!\")\nsay(\"Open\" + \" the vault!\")",
-            "tier3_walkthrough": "Write both lines:\nshout(\"SPARK READY!\")\nsay(\"Open\" + \" the vault!\")"
+            "tier2_pattern": "shout(\"<ready signal>\")\nsay(\"<first part>\" + \"<second part>\")",
+            "tier3_walkthrough": "Write both lines:\nshout(\"Spark ready!\")\nsay(\"Open\" + \" the vault!\")"
           },
           "difficultyOverride": null
         },
@@ -377,26 +377,26 @@
         {
           "id": "trial-02-02",
           "trialType": "fix_bug",
-          "title": "Fix the Quoted Variable!",
-          "storyPrompt": "Lord Null sabotaged the Ruin Bridge counter by putting quotes around `\"stones\"`! Remove the quotes inside `say(...)` so Python opens the `stones` box and says `6`!",
-          "objective": "Fix `say(\"stones\")` to `say(stones)` so Python outputs `6`.",
+          "title": "The Stubborn Ruin Counter",
+          "storyPrompt": "Lord Null tampered with the Ruin Bridge counter! Instead of displaying the number 6, the counter speaks the word 'stones'. Spot what went wrong and fix it!",
+          "objective": "Fix the spell so Python outputs the number stored in stones (6) instead of the word 'stones'.",
           "concepts": [
             "variables",
             "print_output"
           ],
           "shardReward": 35,
           "unlockId": null,
-          "bugSummary": "Lord Null put quotes around `\"stones\"`! Remove the quotes inside `say(...)` so Python prints 6.",
+          "bugSummary": "The bridge counter prints the word 'stones' instead of the number 6.",
           "starterCode": {
-            "explorer": "stones = 6\nsay(\"stones\")\n",
-            "standard": "stones = 6\nsay(\"stones\")\n",
+            "explorer": "# Look closely at line 2!\nstones = 6\nsay(\"stones\")\n",
+            "standard": "# Why does this print the word instead of 6?\nstones = 6\nsay(\"stones\")\n",
             "challenge": "stones = 6\nsay(\"stones\")\n"
           },
           "referenceSolution": "stones = 6\nsay(stones)\n",
           "testCode": "assert stones == 6\nassert OUTPUT.strip() == '6', f'Expected 6, got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Delete the two quotes around `\"stones\"` on line 2!'",
-            "tier2_pattern": "Change `say(\"stones\")` to `say(stones)`",
+            "tier1_nudge": "Pip grins: 'Without quotes, Python opens the variable box instead of printing its name!'",
+            "tier2_pattern": "Pass the variable name without quotes: say(<variable>)",
             "tier3_walkthrough": "Line 2 should read:\nsay(stones)"
           },
           "difficultyOverride": null
@@ -415,14 +415,14 @@
           "unlockId": "boots-swift",
           "starterCode": {
             "explorer": "gems = \nsay(gems)\n",
-            "standard": "",
+            "standard": "# Create the gems variable and display it\n",
             "challenge": ""
           },
           "referenceSolution": "gems = 10\nsay(gems)\n",
           "testCode": "assert gems == 10, f'Expected gems == 10, got {gems!r}'\nassert OUTPUT.strip() == '10', f'Expected 10, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip says: 'Numbers don't wear quotes! Write `gems = 10` on line 1.'",
-            "tier2_pattern": "gems = 10\nsay(gems)",
+            "tier2_pattern": "<variable> = <number>\nsay(<variable>)",
             "tier3_walkthrough": "Write:\ngems = 10\nsay(gems)"
           },
           "difficultyOverride": null
@@ -515,9 +515,9 @@
           "id": "trial-02-bonus",
           "trialType": "fix_bug",
           "isBonus": true,
-          "title": "Secret Rune: The Missing Equals Sign!",
-          "storyPrompt": "Whoa—a secret Mossy Ruins rune! Lord Null stole the `=` sign from `gold = 20 + 30` so Python can't put `50` into the `gold` box! Put `=` back to unlock the Sunstone Amber Tunic!",
-          "objective": "Fix `gold 20 + 30` to `gold = 20 + 30` so `say(gold)` outputs `50`!",
+          "title": "Secret Rune: The Jammed Gold Counter",
+          "storyPrompt": "Whoa — a secret Mossy Ruins rune! Lord Null broke line 1 so Python crashes with a syntax error instead of storing 50 in `gold`. Repair the rune to unlock the Sunstone Amber Tunic!",
+          "objective": "Fix the broken variable assignment so gold holds 50 and say(gold) outputs 50.",
           "concepts": [
             "variables",
             "basic_math",
@@ -532,17 +532,17 @@
             "equipLayer": "tunic",
             "equipKey": "amber"
           },
-          "bugSummary": "Lord Null stole the `=` sign from line 1! Put `=` between `gold` and `20 + 30`.",
+          "bugSummary": "Line 1 crashes with a syntax error before gold can be stored.",
           "starterCode": {
-            "explorer": "gold 20 + 30\nsay(gold)\n",
-            "standard": "gold 20 + 30\nsay(gold)\n",
+            "explorer": "# Something is missing between gold and 20 + 30!\ngold 20 + 30\nsay(gold)\n",
+            "standard": "# Fix the broken assignment on line 1\ngold 20 + 30\nsay(gold)\n",
             "challenge": "gold 20 + 30\nsay(gold)\n"
           },
           "referenceSolution": "gold = 20 + 30\nsay(gold)\n",
           "testCode": "assert gold == 50\nassert OUTPUT.strip() == '50', f'Expected 50, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip points at line 1: 'To put a value into a variable box, you always need `=`!'",
-            "tier2_pattern": "Change `gold 20 + 30` to `gold = 20 + 30`",
+            "tier2_pattern": "<variable> = <value1> + <value2>",
             "tier3_walkthrough": "Line 1 should read:\ngold = 20 + 30"
           },
           "difficultyOverride": null
@@ -623,7 +623,7 @@
           "id": "trial-03-01",
           "trialType": "multiple_choice",
           "title": "Spot the Right if Spell!",
-          "storyPrompt": "Welcome to Cinder Cavern! An `if` statement lets Python make a decision—when a check is True, Python runs the indented code underneath. Two golden rules: (1) put a colon `:` at the end of the `if` line, and (2) indent the line inside by 4 spaces. Tap the ONE valid Python `if` spell below!",
+          "storyPrompt": "Welcome to Cinder Cavern! In Python, a **Boolean** is a value that is either `True` or `False` (always capitalized, no quotes!). An `if` statement checks whether a condition is `True` and runs the indented code underneath. Two golden rules: (1) put a colon `:` at the end of the `if` line, and (2) indent lines inside by 4 spaces. Tap the ONE valid Python `if` spell below!",
           "objective": "Choose the valid Python `if` statement that has both a colon `:` and 4-space indentation.",
           "concepts": [
             "variables",
@@ -699,9 +699,9 @@
         {
           "id": "trial-03-03",
           "trialType": "fix_bug",
-          "title": "Fix the Indentation!",
-          "storyPrompt": "Look closely after the colon `:`! Python uses **indentation** (4 spaces pushed in from the left edge) to know which lines belong INSIDE an `if` block. Lord Null squished lines 4 and 5 back against the left edge! Tap **⇥ Indent** (or type 4 spaces) at the start of both lines under `if gems == 7:`!",
-          "objective": "Indent both lines inside `if gems == 7:` by 4 spaces so `door` becomes \"OPEN\" and Python shouts \"Click!\".",
+          "title": "The Jammed Cavern Door",
+          "storyPrompt": "The cavern door lock crashes with an indentation error when you run it! Remember: lines that belong INSIDE an `if` block must be indented 4 spaces (tap **⇥ Indent**). Fix the lock!",
+          "objective": "Fix the broken if-block so door becomes 'OPEN' and Python shouts CLICK!.",
           "concepts": [
             "variables",
             "comparisons",
@@ -710,17 +710,17 @@
           ],
           "shardReward": 40,
           "unlockId": null,
-          "bugSummary": "Lord Null removed the 4-space indentation under `if gems == 7:`! Push both lines inside the `if` over by 4 spaces (tap ⇥ Indent).",
+          "bugSummary": "Python throws an indentation error under the if-statement.",
           "starterCode": {
-            "explorer": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
-            "standard": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
+            "explorer": "# Indent both lines inside the if block!\ngems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
+            "standard": "# Fix the block inside the if-statement\ngems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
             "challenge": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n"
           },
           "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")\n",
           "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"CLICK!\", f'Expected \"CLICK!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip hops 4 steps to the right: 'Put your cursor before `door = \"OPEN\"` and tap ⇥ Indent (or 4 spaces), then do the same for `shout(\"Click!\")`!'",
-            "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")",
+            "tier1_nudge": "Pip hops 4 steps to the right: 'Put 4 spaces (or tap ⇥ Indent) before both lines under `if gems == 7:`!'",
+            "tier2_pattern": "if <condition>:\n    <line 1 indented 4 spaces>\n    <line 2 indented 4 spaces>",
             "tier3_walkthrough": "Make sure BOTH lines under `if gems == 7:` start with 4 spaces:\n    door = \"OPEN\"\n    shout(\"Click!\")"
           },
           "difficultyOverride": null
@@ -728,9 +728,9 @@
         {
           "id": "trial-03-04",
           "trialType": "fix_bug",
-          "title": "Fix = vs ==!",
-          "storyPrompt": "Another sabotage from Lord Null! Remember: ONE equals sign `=` puts a value into a variable box (`password = \"EMBER\"`), while TWO equals signs `==` asks 'Are these two values equal?' Fix Lord Null's `if` check!",
-          "objective": "Fix `=` to `==` in the `if` line so the gate opens and shouts \"Gate open!\".",
+          "title": "The Faulty Password Gate",
+          "storyPrompt": "Lord Null broke the password gate! It crashes with a syntax error on the `if` line. Remember: ONE `=` puts a value into a box, while TWO `==` asks 'Are these two values equal?' Fix the gate!",
+          "objective": "Fix the comparison in the if-statement so gate becomes 'OPEN' and Python shouts GATE OPEN!.",
           "concepts": [
             "variables",
             "strings",
@@ -740,17 +740,17 @@
           ],
           "shardReward": 40,
           "unlockId": null,
-          "bugSummary": "Lord Null swapped `==` for `=` in the `if` line! Remember: `=` puts into a box, `==` compares.",
+          "bugSummary": "The password check fails with a syntax error on the if line.",
           "starterCode": {
-            "explorer": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
-            "standard": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
+            "explorer": "# Check the equals sign on the if line!\npassword = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
+            "standard": "# Fix the broken comparison on the if line\npassword = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
             "challenge": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password = \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n"
           },
           "referenceSolution": "password = \"EMBER\"\ngate = \"LOCKED\"\nif password == \"EMBER\":\n    gate = \"OPEN\"\n    shout(\"Gate open!\")\n",
           "testCode": "assert gate == \"OPEN\", f'Expected gate == \"OPEN\", got {gate!r}'\nassert OUTPUT.strip() == \"GATE OPEN!\", f'Expected \"GATE OPEN!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip grins: 'Use TWO equals signs `==` whenever you ask if two values match inside an `if`!'",
-            "tier2_pattern": "Change `if password = \"EMBER\":` to `if password == \"EMBER\":`",
+            "tier2_pattern": "if <var> == \"<word>\":\n    <action>",
             "tier3_walkthrough": "Add a second `=` so the line reads:\nif password == \"EMBER\":"
           },
           "difficultyOverride": null
@@ -789,7 +789,7 @@
           "trialType": "code",
           "title": "Unchain Emberwing (Conditionals Capstone)",
           "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds 75 ember power, and the lock has 60 lock power. Combine variables, comparisons, and an if/else decision to shatter the lock and set Emberwing free!",
-          "objective": "Given ember_power = 75 and lock_power = 60, write an if / else: if ember_power > lock_power, set gate_status = \"OPEN\" and shout(\"Emberwing is free!\"); else, set gate_status = \"LOCKED\".",
+          "objective": "Compare ember_power (75) against lock_power (60). When ember_power is greater, set gate_status to 'OPEN' and shout 'Emberwing is free!'; otherwise set gate_status to 'LOCKED'.",
           "concepts": [
             "variables",
             "comparisons",
@@ -801,14 +801,14 @@
           "starterCode": {
             "explorer": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    \n",
             "standard": "ember_power = 75\nlock_power = 60\n",
-            "challenge": "ember_power = 75\nlock_power = 60\n"
+            "challenge": ""
           },
           "referenceSolution": "ember_power = 75\nlock_power = 60\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"\n",
           "testCode": "assert gate_status == \"OPEN\", f'Expected gate_status == \"OPEN\", got {gate_status!r}'\nassert OUTPUT.strip() == \"EMBERWING IS FREE!\", f'Expected \"EMBERWING IS FREE!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip glows orange: 'Write the backup plan inside else: with 4 spaces of indent!'",
-            "tier2_pattern": "if ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\"",
-            "tier3_walkthrough": "Finish the else block with:\n    gate_status = \"LOCKED\""
+            "tier1_nudge": "Pip glows orange: 'Compare ember_power > lock_power, and write the backup plan indented 4 spaces under else:!'",
+            "tier2_pattern": "if <power> > <lock>:\n    gate_status = \"OPEN\"\n    shout(\"<message>\")\nelse:\n    gate_status = \"LOCKED\"",
+            "tier3_walkthrough": "Complete with:\nif ember_power > lock_power:\n    gate_status = \"OPEN\"\n    shout(\"Emberwing is free!\")\nelse:\n    gate_status = \"LOCKED\""
           },
           "difficultyOverride": null
         },
@@ -816,9 +816,9 @@
           "id": "trial-03-bonus",
           "trialType": "fix_bug",
           "isBonus": true,
-          "title": "Secret Rune: Emberwing's Secret Flame",
-          "storyPrompt": "You discovered a glowing volcanic rune! Lord Null flipped the comparison arrow the wrong way (`<` instead of `>`), so Emberwing's spark spell won't fire! Flip it back to unlock a secret tunic AND the `fire_spark()` spell!",
-          "objective": "Fix `<` to `>` in `if spark_level < 50:` so `spark_ready` becomes `True` and Python shouts `FIRE SPARK!`.",
+          "title": "Secret Rune: The Cold Flame",
+          "storyPrompt": "You discovered a glowing volcanic rune! Even though `spark_level` is 90 (well above 50), Emberwing's spark spell refuses to ignite. Find Lord Null's logic bug and fix it to unlock a secret tunic and `fire_spark()`!",
+          "objective": "Fix the condition so spark_ready becomes True and Python shouts FIRE SPARK! when spark_level is above 50.",
           "concepts": [
             "variables",
             "comparisons",
@@ -835,18 +835,18 @@
             "equipKey": "slate",
             "spellName": "fire_spark()"
           },
-          "bugSummary": "Lord Null flipped `>` into `<`! Change `<` to `>` so `spark_level` (90) passes the check.",
+          "bugSummary": "Spark level is 90, yet the flame check never triggers!",
           "starterCode": {
-            "explorer": "spark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
-            "standard": "spark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
+            "explorer": "# Check the comparison symbol on the if line!\nspark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
+            "standard": "# Why doesn't spark_level = 90 trigger the spark?\nspark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
             "challenge": "spark_level = 90\nspark_ready = False\nif spark_level < 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n"
           },
           "referenceSolution": "spark_level = 90\nspark_ready = False\nif spark_level > 50:\n    spark_ready = True\n    shout(\"FIRE SPARK!\")\n",
           "testCode": "assert spark_ready is True, 'Expected spark_ready is True'\nassert OUTPUT.strip() == 'FIRE SPARK!', f'Expected FIRE SPARK!, got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at the arrow: '90 is GREATER than 50, so use `>` instead of `<`!'",
-            "tier2_pattern": "Change `if spark_level < 50:` to `if spark_level > 50:`",
-            "tier3_walkthrough": "Replace `<` with `>` on line 3:\nif spark_level > 50:"
+            "tier1_nudge": "Pip points at the arrow: '90 is GREATER than 50, so check which way the arrow points!'",
+            "tier2_pattern": "if <var> > 50:\n    <actions>",
+            "tier3_walkthrough": "Replace `<` with `>` on the if line:\nif spark_level > 50:"
           },
           "difficultyOverride": null
         }
@@ -974,9 +974,9 @@
         {
           "id": "trial-04-02",
           "trialType": "fix_bug",
-          "title": "Fix the Frozen elif Gate!",
-          "storyPrompt": "Lord Null froze the `elif` gate by stealing a colon `:`! Just like `if` and `else`, `elif` ALWAYS needs a colon `:` at the end of its line. Put `:` back and run the spell using real `print()`!",
-          "objective": "Fix the missing colon `:` on the `elif` line so Python sets `ice_state = \"slush\"` and prints `slush`.",
+          "title": "The Frozen Temperature Gate",
+          "storyPrompt": "Lord Null froze the temperature gate so the spell crashes with a syntax error before it can check `temp = 5`. Inspect the branches and repair the gate using real `print()`!",
+          "objective": "Fix the syntax error in the if/elif/else chain so ice_state becomes 'slush' and Python prints slush.",
           "concepts": [
             "conditionals_elif_else",
             "comparisons",
@@ -984,18 +984,18 @@
           ],
           "shardReward": 45,
           "unlockId": null,
-          "bugSummary": "Lord Null stole the colon (:) from the `elif` line! Add `:` after `elif temp <= 10` and run it.",
+          "bugSummary": "The temperature gate crashes with a syntax error on one of the branches.",
           "starterCode": {
-            "explorer": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
-            "standard": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+            "explorer": "# Check the end of every branch header!\ntemp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
+            "standard": "# Find and fix the syntax error in the branches\ntemp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
             "challenge": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n"
           },
           "referenceSolution": "temp = 5\nif temp <= 0:\n    ice_state = \"frozen\"\nelif temp <= 10:\n    ice_state = \"slush\"\nelse:\n    ice_state = \"melted\"\nprint(ice_state)\n",
           "testCode": "assert ice_state == \"slush\", f'Expected \"slush\" for temp 5, got {ice_state!r}'\nassert OUTPUT.strip() == \"slush\", f'Expected printed \"slush\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip shivers: 'Check the end of `elif temp <= 10`—it needs a colon `:` just like `if` and `else`!'",
-            "tier2_pattern": "Change `elif temp <= 10` to `elif temp <= 10:`",
-            "tier3_walkthrough": "Add `:` at the end of line 4:\nelif temp <= 10:"
+            "tier1_nudge": "Pip shivers: 'Check the end of `elif temp <= 10` — every branch header needs a colon `:`!'",
+            "tier2_pattern": "elif <condition>:\n    <indented action>",
+            "tier3_walkthrough": "Add `:` at the end of the elif line:\nelif temp <= 10:"
           },
           "difficultyOverride": null
         },
@@ -1015,14 +1015,14 @@
           "starterCode": {
             "explorer": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    \nprint(weather)\n",
             "standard": "wind = 45\n",
-            "challenge": "wind = 45\n"
+            "challenge": ""
           },
           "referenceSolution": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)\n",
           "testCode": "assert weather == \"GUSTY\", f'Expected \"GUSTY\", got {weather!r}'\nassert OUTPUT.strip() == \"GUSTY\", f'Expected printed \"GUSTY\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip holds onto his ears: 'Check >= 60 first, then elif >= 30, then else for everything smaller!'",
-            "tier2_pattern": "if wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"",
-            "tier3_walkthrough": "Finish the else block with:\n    weather = \"CALM\""
+            "tier2_pattern": "if wind >= 60:\n    weather = \"<high>\"\nelif wind >= 30:\n    weather = \"<mid>\"\nelse:\n    weather = \"<low>\"\nprint(weather)",
+            "tier3_walkthrough": "Write:\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)"
           },
           "difficultyOverride": null
         },
@@ -1030,8 +1030,8 @@
           "id": "trial-04-04",
           "trialType": "code",
           "title": "Four-Tier Explorer Badge",
-          "storyPrompt": "You can stack MORE than one `elif`! An ancient frost-pedestal awards a badge based on how many Byte Shards you carry: GOLD (`>= 80`), SILVER (`>= 40`), BRONZE (`>= 10`), or STARTER.",
-          "objective": "Given shards = 55, use if / elif / elif / else to set badge to \"GOLD\" (>=80), \"SILVER\" (>=40), \"BRONZE\" (>=10), or \"STARTER\", then print(badge).",
+          "storyPrompt": "You can stack MORE than one `elif`! You collected 11 pouches with 5 Byte Shards each — in Python, the star symbol `*` multiplies numbers (`11 * 5`). Compute `shards`, then award GOLD (`>= 80`), SILVER (`>= 40`), BRONZE (`>= 10`), or STARTER!",
+          "objective": "Set shards to 11 * 5, then use if / elif / elif / else to set badge to 'GOLD' (>=80), 'SILVER' (>=40), 'BRONZE' (>=10), or 'STARTER', and print badge.",
           "concepts": [
             "conditionals_elif_else",
             "comparisons",
@@ -1040,16 +1040,16 @@
           "shardReward": 50,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shards = 55\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    \nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
-            "standard": "shards = 55\n",
-            "challenge": "shards = 55\n"
+            "explorer": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    \nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
+            "standard": "shards = 11 * 5\n",
+            "challenge": ""
           },
-          "referenceSolution": "shards = 55\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    badge = \"BRONZE\"\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
-          "testCode": "assert badge == \"SILVER\", f'Expected \"SILVER\" for 55 shards, got {badge!r}'\nassert OUTPUT.strip() == \"SILVER\", f'Expected printed \"SILVER\", got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    badge = \"BRONZE\"\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
+          "testCode": "assert shards == 55, f'Expected 55 shards, got {shards!r}'\nassert badge == \"SILVER\", f'Expected \"SILVER\" for 55 shards, got {badge!r}'\nassert OUTPUT.strip() == \"SILVER\", f'Expected printed \"SILVER\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Python stops at the FIRST True branch—so 55 matches SILVER!'",
-            "tier2_pattern": "elif shards >= 10:\n    badge = \"BRONZE\"",
-            "tier3_walkthrough": "Add:\n    badge = \"BRONZE\""
+            "tier1_nudge": "Pip sparkles: 'Python stops at the FIRST True branch — so 55 matches SILVER!'",
+            "tier2_pattern": "if shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    ...\nelif shards >= 10:\n    ...\nelse:\n    ...",
+            "tier3_walkthrough": "Complete the branches:\nelif shards >= 10:\n    badge = \"BRONZE\""
           },
           "difficultyOverride": null
         },
@@ -1058,7 +1058,7 @@
           "trialType": "code",
           "title": "Matching Rune Words with elif",
           "storyPrompt": "Just like numbers, `elif` works great with string `==` checks! The Crystal Obelisk reacts differently to `\"FIRE\"`, `\"ICE\"`, or any other word.",
-          "objective": "Given rune = \"ICE\", use if / elif / else: if rune == \"FIRE\" set action = \"MELT\", elif rune == \"ICE\" set action = \"GLOW\", else set action = \"WAIT\". Then print(action).",
+          "objective": "Given rune = 'ICE', use a three-way branch so 'FIRE' sets action to 'MELT', 'ICE' sets action to 'GLOW', and anything else sets action to 'WAIT', then print action.",
           "concepts": [
             "conditionals_elif_else",
             "strings",
@@ -1070,13 +1070,13 @@
           "starterCode": {
             "explorer": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\nelif rune == \"ICE\":\n    \nelse:\n    action = \"WAIT\"\nprint(action)\n",
             "standard": "rune = \"ICE\"\n",
-            "challenge": "rune = \"ICE\"\n"
+            "challenge": ""
           },
           "referenceSolution": "rune = \"ICE\"\nif rune == \"FIRE\":\n    action = \"MELT\"\nelif rune == \"ICE\":\n    action = \"GLOW\"\nelse:\n    action = \"WAIT\"\nprint(action)\n",
           "testCode": "assert action == \"GLOW\", f'Expected \"GLOW\", got {action!r}'\nassert OUTPUT.strip() == \"GLOW\", f'Expected printed \"GLOW\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps the obelisk: 'Use == to check each string rune, and quotes around \"GLOW\"!'",
-            "tier2_pattern": "elif rune == \"ICE\":\n    action = \"GLOW\"",
+            "tier2_pattern": "if rune == \"<word1>\":\n    action = \"...\"\nelif rune == \"<word2>\":\n    action = \"...\"\nelse:\n    action = \"...\"\nprint(action)",
             "tier3_walkthrough": "Inside the elif block, write:\n    action = \"GLOW\""
           },
           "difficultyOverride": null
@@ -1085,8 +1085,8 @@
           "id": "trial-04-06",
           "trialType": "code",
           "title": "Free Glacier (Multi-Branch Capstone)",
-          "storyPrompt": "Glacier's crystal vault needs at least 20 frost crystals! In Python, the star symbol `*` multiplies numbers—you found 4 clusters with 5 crystals each (`4 * 5`). Calculate `crystals`, then use `if / elif / else` to open Glacier's Vault!",
-          "objective": "Set crystals = 4 * 5. If crystals >= 20, set vault_open = True and print(\"Glacier is free!\"); elif crystals >= 10, set vault_open = False; else, set vault_open = False.",
+          "storyPrompt": "Glacier's crystal vault needs at least 20 frost crystals! You found 4 clusters with 5 crystals each. Calculate the total crystals, then use a three-way branch to unlock Glacier's Vault!",
+          "objective": "Multiply 4 by 5 and store the result in crystals. If crystals is at least 20, set vault_open to True and print 'Glacier is free!'; if at least 10, set vault_open to False; otherwise set vault_open to False.",
           "concepts": [
             "variables",
             "basic_math",
@@ -1104,8 +1104,8 @@
           "referenceSolution": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")\nelif crystals >= 10:\n    vault_open = False\nelse:\n    vault_open = False\n",
           "testCode": "assert crystals == 20, f'Expected crystals == 20, got {crystals!r}'\nassert vault_open is True, f'Expected vault_open is True, got {vault_open!r}'\nassert OUTPUT.strip() == \"Glacier is free!\", f'Expected \"Glacier is free!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: '4 * 5 is 20, which matches crystals >= 20! Keep print() indented 4 spaces.'",
-            "tier2_pattern": "if crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")",
+            "tier1_nudge": "Pip cheers: '4 * 5 is 20, which matches >= 20! Keep print() indented 4 spaces.'",
+            "tier2_pattern": "if crystals >= 20:\n    vault_open = True\n    print(\"<message>\")\nelif crystals >= 10:\n    ...\nelse:\n    ...",
             "tier3_walkthrough": "Add:\n    print(\"Glacier is free!\")"
           },
           "difficultyOverride": null
@@ -1282,9 +1282,9 @@
         {
           "id": "trial-05-02",
           "trialType": "fix_bug",
-          "title": "Fix the Echo Woods Logic!",
-          "storyPrompt": "Lord Null sabotaged the Echo Tree cleaner by stealing the parentheses `()` off the end of `.lower`! Without `()`, Python doesn't actually RUN the method. Put `()` back so `clean` becomes `\"echo\"`!",
-          "objective": "Fix `raw.strip().lower` to `raw.strip().lower()` so Python cleans the string and prints `echo`.",
+          "title": "The Garbled Echo Cleaner",
+          "storyPrompt": "Lord Null tampered with the Echo Tree cleaner! Instead of printing `echo`, Python prints something strange like `<built-in method lower...>`. Find what's missing on line 2 and fix it!",
+          "objective": "Repair the string cleanup so clean becomes 'echo' and Python prints echo.",
           "concepts": [
             "string_methods",
             "variables",
@@ -1292,17 +1292,17 @@
           ],
           "shardReward": 45,
           "unlockId": null,
-          "bugSummary": "Lord Null stole the parentheses `()` from `.lower`! Add `()` at the end so Python actually runs the method.",
+          "bugSummary": "The cleaner prints a strange method description instead of 'echo'.",
           "starterCode": {
-            "explorer": "raw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n",
-            "standard": "raw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n",
+            "explorer": "# Methods need parentheses to actually run!\nraw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n",
+            "standard": "# Why doesn't .lower actually run?\nraw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n",
             "challenge": "raw = \"  ECHO  \"\nclean = raw.strip().lower\nprint(clean)\n"
           },
           "referenceSolution": "raw = \"  ECHO  \"\nclean = raw.strip().lower()\nprint(clean)\n",
           "testCode": "assert clean == \"echo\", f'Expected \"echo\", got {clean!r}'\nassert OUTPUT.strip() == \"echo\", f'Expected printed \"echo\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps the parentheses keys: 'Methods like `.strip()` and `.lower()` ALWAYS need `()` to run!'",
-            "tier2_pattern": "Change `raw.strip().lower` to `raw.strip().lower()`",
+            "tier2_pattern": "clean = raw.strip().<method>()",
             "tier3_walkthrough": "Add `()` at the end of line 2:\nclean = raw.strip().lower()"
           },
           "difficultyOverride": null
@@ -1368,7 +1368,7 @@
           "trialType": "code",
           "title": "Flip It Around: not",
           "storyPrompt": "Python's `not` keyword flips a Boolean upside down: `not False` becomes `True`, and `not True` becomes `False`! Check if Bramble is `not is_asleep` so you can talk to him.",
-          "objective": "Given is_asleep = False and status = \"QUIET\", write: if not is_asleep:, set status = \"AWAKE\" and print(\"Bramble hears you!\").",
+          "objective": "Given is_asleep = False and status = 'QUIET', check that Bramble is not asleep; when so, set status to 'AWAKE' and print 'Bramble hears you!'.",
           "concepts": [
             "boolean_logic",
             "booleans",
@@ -1380,14 +1380,14 @@
           "starterCode": {
             "explorer": "is_asleep = False\nstatus = \"QUIET\"\nif not is_asleep:\n    status = \"AWAKE\"\n",
             "standard": "is_asleep = False\nstatus = \"QUIET\"\n",
-            "challenge": "is_asleep = False\nstatus = \"QUIET\"\n"
+            "challenge": ""
           },
           "referenceSolution": "is_asleep = False\nstatus = \"QUIET\"\nif not is_asleep:\n    status = \"AWAKE\"\n    print(\"Bramble hears you!\")\n",
           "testCode": "assert status == \"AWAKE\", f'Expected \"AWAKE\", got {status!r}'\nassert OUTPUT.strip() == \"Bramble hears you!\", f'Expected \"Bramble hears you!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip nods: 'not flips False into True, so Python runs the indented lines!'",
-            "tier2_pattern": "if not is_asleep:\n    status = \"AWAKE\"\n    print(\"Bramble hears you!\")",
-            "tier3_walkthrough": "Add:\n    print(\"Bramble hears you!\")"
+            "tier2_pattern": "if not <flag>:\n    status = \"...\"\n    print(\"...\")",
+            "tier3_walkthrough": "Write:\nif not is_asleep:\n    status = \"AWAKE\"\n    print(\"Bramble hears you!\")"
           },
           "difficultyOverride": null
         },
@@ -1395,8 +1395,8 @@
           "id": "trial-05-06",
           "trialType": "code",
           "title": "Awaken Bramble (Logic & Strings Capstone)",
-          "storyPrompt": "Bramble's canopy vault captured a messy whisper: `\"  bramble wake  \"`. Clean it with `.strip().upper()`, and use `len(chant)` (Python's built-in letter counter!) with `and` to check BOTH that it equals `\"BRAMBLE WAKE\"` AND has more than 5 letters!",
-          "objective": "Clean raw_chant = \"  bramble wake  \" into chant = raw_chant.strip().upper(). If (chant == \"BRAMBLE WAKE\") and (len(chant) > 5), set gate_open = True and print(\"Bramble is free!\").",
+          "storyPrompt": "Bramble's canopy vault captured a messy whisper with extra spaces and lowercase letters. Clean the whisper into uppercase, then check BOTH that it matches the secret chant and has more than 5 letters to free Bramble!",
+          "objective": "Clean raw_chant into chant with no outer spaces and all uppercase letters. If chant equals 'BRAMBLE WAKE' and has more than 5 characters, set gate_open to True and print 'Bramble is free!'.",
           "concepts": [
             "string_methods",
             "boolean_logic",
@@ -1408,14 +1408,14 @@
           "starterCode": {
             "explorer": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\ngate_open = False\nif (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n",
             "standard": "raw_chant = \"  bramble wake  \"\ngate_open = False\n",
-            "challenge": "raw_chant = \"  bramble wake  \"\ngate_open = False\n"
+            "challenge": ""
           },
           "referenceSolution": "raw_chant = \"  bramble wake  \"\nchant = raw_chant.strip().upper()\ngate_open = False\nif (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    print(\"Bramble is free!\")\n",
           "testCode": "assert chant == \"BRAMBLE WAKE\", f'Expected \"BRAMBLE WAKE\", got {chant!r}'\nassert gate_open is True, 'Expected gate_open is True'\nassert OUTPUT.strip() == \"Bramble is free!\", f'Expected \"Bramble is free!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Clean the string first, then check both conditions with and!'",
-            "tier2_pattern": "if (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    print(\"Bramble is free!\")",
-            "tier3_walkthrough": "Add:\n    print(\"Bramble is free!\")"
+            "tier1_nudge": "Pip cheers: 'Clean the string with .strip().upper(), then check both conditions with and!'",
+            "tier2_pattern": "chant = raw_chant.strip().upper()\nif (chant == \"...\") and (len(chant) > 5):\n    gate_open = True\n    print(\"...\")",
+            "tier3_walkthrough": "Complete with:\nchant = raw_chant.strip().upper()\nif (chant == \"BRAMBLE WAKE\") and (len(chant) > 5):\n    gate_open = True\n    print(\"Bramble is free!\")"
           },
           "difficultyOverride": null
         },
@@ -1423,9 +1423,9 @@
           "id": "trial-05-bonus",
           "trialType": "fix_bug",
           "isBonus": true,
-          "title": "Secret Rune: Bramble's Hidden Echo",
-          "storyPrompt": "A glowing emerald rune hides deep in Echo Woods! Lord Null swapped `or` for `and`, so you can't cross with just wings! Change `and` to `or` so either a rope OR wings opens the secret treasure!",
-          "objective": "Fix `and` to `or` so `can_fly` becomes `True` and Python prints `ECHO CALL!`.",
+          "title": "Secret Rune: The Grounded Echo",
+          "storyPrompt": "A glowing emerald rune hides deep in Echo Woods! You have wings (`has_wings = True`), which should be enough to fly across even without a rope — yet the spell stays silent. Find Lord Null's logic bug and fix it!",
+          "objective": "Fix the boolean logic so having either a rope or wings sets can_fly to True and prints ECHO CALL!.",
           "concepts": [
             "boolean_logic",
             "booleans",
@@ -1442,17 +1442,17 @@
             "equipKey": "hat_wizard_cap",
             "spellName": "echo_call()"
           },
-          "bugSummary": "Lord Null swapped `or` for `and`! Change `and` to `or` so having `has_wings = True` is enough.",
+          "bugSummary": "You have wings, yet can_fly stays False and nothing prints!",
           "starterCode": {
-            "explorer": "has_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
-            "standard": "has_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
+            "explorer": "# Check the boolean keyword on line 3!\nhas_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
+            "standard": "# Why is can_fly False when has_wings is True?\nhas_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
             "challenge": "has_rope = False\nhas_wings = True\ncan_fly = has_rope and has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n"
           },
           "referenceSolution": "has_rope = False\nhas_wings = True\ncan_fly = has_rope or has_wings\nif can_fly:\n    print(\"ECHO CALL!\")\n",
           "testCode": "assert can_fly is True, 'Expected can_fly is True'\nassert OUTPUT.strip() == 'ECHO CALL!', f'Expected ECHO CALL!, got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip flaps happily: '`or` only needs ONE side to be True!'",
-            "tier2_pattern": "Change `has_rope and has_wings` to `has_rope or has_wings`",
+            "tier1_nudge": "Pip flaps happily: 'Which boolean keyword only needs ONE side to be True?'",
+            "tier2_pattern": "can_fly = <option1> or <option2>",
             "tier3_walkthrough": "Replace `and` with `or` on line 3:\ncan_fly = has_rope or has_wings"
           },
           "difficultyOverride": null
@@ -1577,9 +1577,9 @@
         {
           "id": "trial-06-02",
           "trialType": "fix_bug",
-          "title": "Fix the Crypt Sluice Rune!",
-          "storyPrompt": "Lord Null sabotaged the underwater sluice gate by forgetting `.strip()` before `.lower()`—so `\"  TIDE  \"` still has spaces around it and won't match `\"tide\"`! Add `.strip()` so the valve opens!",
-          "objective": "Fix `raw_rune.lower()` to `raw_rune.strip().lower()` so `valve` becomes `\"OPEN\"` and Python prints `OPEN`.",
+          "title": "The Stuck Sluice Rune",
+          "storyPrompt": "Lord Null tampered with the underwater sluice gate! Even though `raw_rune` contains the word tide, the gate prints `WAIT` instead of `OPEN`. Figure out why `rune` doesn't match `\"tide\"` and fix it!",
+          "objective": "Repair the string cleanup so rune becomes 'tide', valve becomes 'OPEN', and Python prints OPEN.",
           "concepts": [
             "string_methods",
             "conditionals_elif_else",
@@ -1587,17 +1587,17 @@
           ],
           "shardReward": 50,
           "unlockId": null,
-          "bugSummary": "Lord Null removed `.strip()`! Chain `.strip().lower()` so the extra spaces around `\"  TIDE  \"` are trimmed.",
+          "bugSummary": "The sluice gate prints WAIT instead of OPEN even though the word is tide.",
           "starterCode": {
-            "explorer": "raw_rune = \"  TIDE  \"\nrune = raw_rune.lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
-            "standard": "raw_rune = \"  TIDE  \"\nrune = raw_rune.lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
+            "explorer": "# Watch out for extra spaces around raw_rune!\nraw_rune = \"  TIDE  \"\nrune = raw_rune.lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
+            "standard": "# Why doesn't rune match 'tide'?\nraw_rune = \"  TIDE  \"\nrune = raw_rune.lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
             "challenge": "raw_rune = \"  TIDE  \"\nrune = raw_rune.lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n"
           },
           "referenceSolution": "raw_rune = \"  TIDE  \"\nrune = raw_rune.strip().lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
           "testCode": "assert rune == \"tide\", f'Expected \"tide\", got {rune!r}'\nassert valve == \"OPEN\", f'Expected \"OPEN\", got {valve!r}'\nassert OUTPUT.strip() == \"OPEN\", f'Expected \"OPEN\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip splashes: 'Without `.strip()`, `rune` is `\"  tide  \"` with spaces, which doesn't equal `\"tide\"`!'",
-            "tier2_pattern": "Change `raw_rune.lower()` to `raw_rune.strip().lower()`",
+            "tier2_pattern": "rune = raw_rune.<trim_spaces>().lower()",
             "tier3_walkthrough": "Line 2 should read:\nrune = raw_rune.strip().lower()"
           },
           "difficultyOverride": null
@@ -1620,14 +1620,14 @@
           "starterCode": {
             "explorer": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\nif (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n",
             "standard": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\n",
-            "challenge": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\n"
+            "challenge": ""
           },
           "referenceSolution": "left_psi = 40\nright_psi = 40\nseal = \"UNBALANCED\"\nif (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    print(seal)\n",
           "testCode": "assert seal == \"BALANCED\", f'Expected \"BALANCED\", got {seal!r}'\nassert OUTPUT.strip() == \"BALANCED\", f'Expected printed \"BALANCED\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip checks both dials: 'Pass seal (without quotes!) to print(seal).'",
-            "tier2_pattern": "if (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    print(seal)",
-            "tier3_walkthrough": "Add:\n    print(seal)"
+            "tier2_pattern": "if (<left_check>) and (<right_check>):\n    seal = \"...\"\n    print(seal)",
+            "tier3_walkthrough": "Write:\nif (left_psi >= 30) and (right_psi >= 30):\n    seal = \"BALANCED\"\n    print(seal)"
           },
           "difficultyOverride": null
         },
@@ -1636,7 +1636,7 @@
           "trialType": "code",
           "title": "Flood Pump Emergency (or + Math)",
           "storyPrompt": "Water is rising in the Lower Cistern! Add the two depth readings (`18 + 7`). If `depth > 20` OR `leak` is True, switch on the emergency pumps!",
-          "objective": "Set depth = 18 + 7, leak = False, and pump_on = False. If (depth > 20) or leak, set pump_on = True and print(\"Pumps active!\").",
+          "objective": "Compute depth as 18 + 7 with leak = False and pump_on = False. If depth exceeds 20 or leak is True, set pump_on to True and print 'Pumps active!'.",
           "concepts": [
             "variables",
             "basic_math",
@@ -1655,8 +1655,8 @@
           "testCode": "assert depth == 25, f'Expected depth == 25, got {depth!r}'\nassert pump_on is True, 'Expected pump_on is True'\nassert OUTPUT.strip() == \"Pumps active!\", f'Expected \"Pumps active!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip watches the gauge: '18 + 7 is 25, which is > 20, so the or condition is True!'",
-            "tier2_pattern": "if (depth > 20) or leak:\n    pump_on = True\n    print(\"Pumps active!\")",
-            "tier3_walkthrough": "Add:\n    print(\"Pumps active!\")"
+            "tier2_pattern": "if (<depth_check>) or <flag>:\n    pump_on = True\n    print(\"...\")",
+            "tier3_walkthrough": "Write:\nif (depth > 20) or leak:\n    pump_on = True\n    print(\"Pumps active!\")"
           },
           "difficultyOverride": null
         },
@@ -1665,7 +1665,7 @@
           "trialType": "code",
           "title": "Crypt Ferry Weight Check",
           "storyPrompt": "A wooden skiff carries 3 stone chests weighing 15 units each across the marsh. Multiply to find `total_weight`, then use `if / else` to make sure it is `<= 50`!",
-          "objective": "Set chests = 3, weight_each = 15, total_weight = chests * weight_each. If total_weight <= 50, set boat = \"SAFE\"; else set boat = \"TOO HEAVY\". Print(boat).",
+          "objective": "Multiply chests (3) by weight_each (15) into total_weight. If total_weight is at most 50, set boat to 'SAFE'; otherwise set boat to 'TOO HEAVY', then print boat.",
           "concepts": [
             "variables",
             "basic_math",
@@ -1678,14 +1678,14 @@
           "starterCode": {
             "explorer": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    \nprint(boat)\n",
             "standard": "chests = 3\nweight_each = 15\n",
-            "challenge": "chests = 3\nweight_each = 15\n"
+            "challenge": ""
           },
           "referenceSolution": "chests = 3\nweight_each = 15\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    boat = \"TOO HEAVY\"\nprint(boat)\n",
           "testCode": "assert total_weight == 45, f'Expected 45, got {total_weight!r}'\nassert boat == \"SAFE\", f'Expected \"SAFE\", got {boat!r}'\nassert OUTPUT.strip() == \"SAFE\", f'Expected printed \"SAFE\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip balances on the bow: '3 * 15 is 45, which is <= 50!'",
-            "tier2_pattern": "else:\n    boat = \"TOO HEAVY\"\nprint(boat)",
-            "tier3_walkthrough": "Inside else:, write:\n    boat = \"TOO HEAVY\""
+            "tier2_pattern": "total_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"...\"\nelse:\n    boat = \"...\"\nprint(boat)",
+            "tier3_walkthrough": "Write:\ntotal_weight = chests * weight_each\nif total_weight <= 50:\n    boat = \"SAFE\"\nelse:\n    boat = \"TOO HEAVY\"\nprint(boat)"
           },
           "difficultyOverride": null
         },
@@ -1693,8 +1693,8 @@
           "id": "trial-06-06",
           "trialType": "code",
           "title": "Release Mire (Sunken Crypt Capstone)",
-          "storyPrompt": "Mire's underwater bell-chamber needs BOTH enough bubble power (`5 * 6`) AND Mire's name cleaned into uppercase! Combine math, `.strip().upper()`, and `and` to free Mire!",
-          "objective": "Set bubbles = 5 * 6, call = \"  mire  \".strip().upper(), and mire_free = False. If (bubbles >= 25) and (call == \"MIRE\"), set mire_free = True and print(\"Mire is free!\").",
+          "storyPrompt": "Mire's underwater bell-chamber needs BOTH enough bubble power (5 groups of 6) AND Mire's messy name cleaned into uppercase! Combine math, string cleanup, and boolean logic to free Mire!",
+          "objective": "Calculate bubbles as 5 times 6, clean '  mire  ' into uppercase as call, and start mire_free as False. If bubbles is at least 25 and call equals 'MIRE', set mire_free to True and print 'Mire is free!'.",
           "concepts": [
             "variables",
             "basic_math",
@@ -1713,9 +1713,9 @@
           "referenceSolution": "bubbles = 5 * 6\ncall = \"  mire  \".strip().upper()\nmire_free = False\nif (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")\n",
           "testCode": "assert bubbles == 30, f'Expected 30, got {bubbles!r}'\nassert call == \"MIRE\", f'Expected \"MIRE\", got {call!r}'\nassert mire_free is True, 'Expected mire_free is True'\nassert OUTPUT.strip() == \"Mire is free!\", f'Expected \"Mire is free!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers in a bubble helmet: '5 * 6 is 30 and call becomes \"MIRE\"—both sides of and are True!'",
-            "tier2_pattern": "if (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")",
-            "tier3_walkthrough": "Add:\n    print(\"Mire is free!\")"
+            "tier1_nudge": "Pip cheers in a bubble helmet: '5 * 6 is 30 and call becomes \"MIRE\" — both sides of and are True!'",
+            "tier2_pattern": "if (<bubbles_check>) and (<call_check>):\n    mire_free = True\n    print(\"...\")",
+            "tier3_walkthrough": "Write:\nif (bubbles >= 25) and (call == \"MIRE\"):\n    mire_free = True\n    print(\"Mire is free!\")"
           },
           "difficultyOverride": null
         },
@@ -1747,14 +1747,14 @@
           "starterCode": {
             "explorer": "raw_word = \"  tide  \"\ncipher = raw_word.strip().upper()\npearls = 3 * 4\nif cipher == \"TIDE\" and pearls == 12:\n    \n",
             "standard": "raw_word = \"  tide  \"\n",
-            "challenge": "raw_word = \"  tide  \"\n"
+            "challenge": ""
           },
           "referenceSolution": "raw_word = \"  tide  \"\ncipher = raw_word.strip().upper()\npearls = 3 * 4\nif cipher == \"TIDE\" and pearls == 12:\n    print(\"TIDE WAVE!\")\n",
           "testCode": "assert cipher == 'TIDE', f'Expected TIDE, got {cipher!r}'\nassert pearls == 12, f'Expected 12, got {pearls!r}'\nassert OUTPUT.strip() == 'TIDE WAVE!', f'Expected TIDE WAVE!, got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip blows a bubble: 'Combine `.strip().upper()`, `3 * 4`, and `and`!'",
-            "tier2_pattern": "if cipher == \"TIDE\" and pearls == 12:\n    print(\"TIDE WAVE!\")",
-            "tier3_walkthrough": "Add:\n    print(\"TIDE WAVE!\")"
+            "tier2_pattern": "cipher = raw_word.strip().upper()\npearls = 3 * 4\nif <checks>:\n    print(\"...\")",
+            "tier3_walkthrough": "Complete with:\nif cipher == \"TIDE\" and pearls == 12:\n    print(\"TIDE WAVE!\")"
           },
           "difficultyOverride": null
         }
@@ -1879,9 +1879,9 @@
         {
           "id": "trial-07-02",
           "trialType": "fix_bug",
-          "title": "Fix the Broken Wind Loop!",
-          "storyPrompt": "Lord Null sabotaged the keep's first wind turbine by stealing the colon `:` at the end of the `for` line! Just like `if`, every `for` line MUST end with `:`.",
-          "objective": "Fix the missing colon `:` on the `for` line so Python prints `Spin!` 3 times.",
+          "title": "The Stalled Wind Turbine",
+          "storyPrompt": "Lord Null stalled the keep's first wind turbine! Running the loop causes a syntax error before it can spin 3 times. Inspect line 1 and fix it!",
+          "objective": "Repair the broken for-loop so Python prints Spin! 3 times.",
           "concepts": [
             "for_loops",
             "range_function",
@@ -1889,17 +1889,17 @@
           ],
           "shardReward": 55,
           "unlockId": null,
-          "bugSummary": "Lord Null stole the colon `:` at the end of `for step in range(3)`! Add `:` back.",
+          "bugSummary": "The wind loop crashes with a syntax error on line 1.",
           "starterCode": {
-            "explorer": "for step in range(3)\n    print(\"Spin!\")\n",
-            "standard": "for step in range(3)\n    print(\"Spin!\")\n",
+            "explorer": "# Check the end of the for line!\nfor step in range(3)\n    print(\"Spin!\")\n",
+            "standard": "# Fix the syntax error on the for line\nfor step in range(3)\n    print(\"Spin!\")\n",
             "challenge": "for step in range(3)\n    print(\"Spin!\")\n"
           },
           "referenceSolution": "for step in range(3):\n    print(\"Spin!\")\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Spin!\"] * 3, f\"Expected 3 Spin! lines, got {lines!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip points at the end of the `for` line: 'Every `for` line needs a colon `:`!'",
-            "tier2_pattern": "for step in range(3):\n    print(\"Spin!\")",
+            "tier2_pattern": "for <var> in range(<count>):\n    <indented action>",
             "tier3_walkthrough": "Add `:` right after `range(3)` so it reads `for step in range(3):`"
           },
           "difficultyOverride": null
@@ -1919,14 +1919,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "for i in range(4):\n    \n",
-            "standard": "",
+            "standard": "# Write a for loop that repeats 4 times\n",
             "challenge": ""
           },
           "referenceSolution": "for i in range(4):\n    print(\"GALE!\")\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"GALE!\"] * 4, f\"Expected 4 GALE! lines, got {lines!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip blows a tiny horn: 'Indent `print(\"GALE!\")` 4 spaces inside `for i in range(4):`!'",
-            "tier2_pattern": "for i in range(4):\n    print(\"GALE!\")",
+            "tier2_pattern": "for i in range(<count>):\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nfor i in range(4):\n    print(\"GALE!\")"
           },
           "difficultyOverride": null
@@ -1936,7 +1936,7 @@
           "trialType": "code",
           "title": "Count the Sky Towers (range(1, 6))",
           "storyPrompt": "Want to start counting at 1 instead of 0? `range(1, 6)` gives `1, 2, 3, 4, 5` (it stops right before 6!). Print each tower number from 1 to 5!",
-          "objective": "Use `for num in range(1, 6):` to print the numbers 1, 2, 3, 4, 5 (one per line).",
+          "objective": "Use a for loop with range(1, 6) to print the numbers 1 through 5, one per line.",
           "concepts": [
             "for_loops",
             "range_function",
@@ -1946,14 +1946,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "for num in range(1, 6):\n    \n",
-            "standard": "",
+            "standard": "# Loop from 1 to 5 using range(1, 6)\n",
             "challenge": ""
           },
           "referenceSolution": "for num in range(1, 6):\n    print(num)\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"1\", \"2\", \"3\", \"4\", \"5\"], f\"Expected 1..5, got {lines!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Pass `num` (no quotes!) to `print(num)` inside the loop!'",
-            "tier2_pattern": "for num in range(1, 6):\n    print(num)",
+            "tier2_pattern": "for <num> in range(1, 6):\n    print(<num>)",
             "tier3_walkthrough": "Write:\nfor num in range(1, 6):\n    print(num)"
           },
           "difficultyOverride": null
@@ -2190,9 +2190,9 @@
         {
           "id": "trial-08-02",
           "trialType": "fix_bug",
-          "title": "Fix the Citadel Indentation Trap!",
-          "storyPrompt": "Lord Null stacked an `if` INSIDE a `for` loop — that needs **8 spaces** (two indents!) for lines inside the `if`. Lord Null deleted the indent on `count = count + 1`!",
-          "objective": "Fix the indentation of `count = count + 1` (8 spaces, inside the `if`) so `count` equals 3 and prints `3`.",
+          "title": "The Citadel Counter Trap",
+          "storyPrompt": "Lord Null rigged the citadel's nested loop-and-if counter so it crashes with an indentation error! Remember: an `if` inside a `for` loop needs 8 spaces (two indents) for lines inside the `if`. Fix the counter!",
+          "objective": "Fix the broken nested block so count counts how many numbers in 1..6 are greater than 3 (3) and prints 3.",
           "concepts": [
             "for_loops",
             "conditionals_if",
@@ -2200,17 +2200,17 @@
           ],
           "shardReward": 65,
           "unlockId": null,
-          "bugSummary": "Lord Null broke the double-indent inside `if n > 3:`! Indent `count = count + 1` by 8 spaces.",
+          "bugSummary": "The nested if-inside-for counter throws an indentation error.",
           "starterCode": {
-            "explorer": "count = 0\nfor n in range(1, 7):\n    if n > 3:\ncount = count + 1\nprint(count)\n",
-            "standard": "count = 0\nfor n in range(1, 7):\n    if n > 3:\ncount = count + 1\nprint(count)\n",
+            "explorer": "# Indent the line inside the if block by 8 spaces!\ncount = 0\nfor n in range(1, 7):\n    if n > 3:\ncount = count + 1\nprint(count)\n",
+            "standard": "# Fix the indentation inside the if block\ncount = 0\nfor n in range(1, 7):\n    if n > 3:\ncount = count + 1\nprint(count)\n",
             "challenge": "count = 0\nfor n in range(1, 7):\n    if n > 3:\ncount = count + 1\nprint(count)\n"
           },
           "referenceSolution": "count = 0\nfor n in range(1, 7):\n    if n > 3:\n        count = count + 1\nprint(count)\n",
           "testCode": "assert count == 3, f\"Expected count == 3, got {count}\"\nassert OUTPUT.strip() == \"3\", f\"Expected printed 3, got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip taps ⇥ Indent twice: '4 spaces for `for`, plus 4 more spaces for `if` = 8 spaces!'",
-            "tier2_pattern": "for n in range(1, 7):\n    if n > 3:\n        count = count + 1",
+            "tier2_pattern": "for n in range(1, 7):\n    if n > 3:\n        <indented 8 spaces>",
             "tier3_walkthrough": "Put 8 spaces before `count = count + 1`."
           },
           "difficultyOverride": null
@@ -2249,7 +2249,7 @@
           "trialType": "code",
           "title": "Dual-Key Security Lock (and / or)",
           "storyPrompt": "The Inner Sanctum door requires BOTH `bits_ready == 7` AND `has_key == True`. Write an `if` check using `and` to set `door = \"OPEN\"` and print `\"ACCESS GRANTED\"`!",
-          "objective": "Given `bits_ready = 7` and `has_key = True`, use `if bits_ready == 7 and has_key:` to set `door = \"OPEN\"` and print `ACCESS GRANTED`.",
+          "objective": "Given bits_ready = 7, has_key = True, and door = 'LOCKED', check that bits_ready equals 7 and has_key is True; if so, set door to 'OPEN' and print 'ACCESS GRANTED'.",
           "concepts": [
             "boolean_logic",
             "conditionals_if",
@@ -2266,8 +2266,8 @@
           "testCode": "assert door == \"OPEN\", f\"Expected OPEN, got {door!r}\"\nassert OUTPUT.strip() == \"ACCESS GRANTED\", f\"Expected ACCESS GRANTED, got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip holds up two keys: '`and` checks that BOTH sides are True!'",
-            "tier2_pattern": "if bits_ready == 7 and has_key:\n    door = \"OPEN\"\n    print(\"ACCESS GRANTED\")",
-            "tier3_walkthrough": "Add indented:\n    print(\"ACCESS GRANTED\")"
+            "tier2_pattern": "if <check1> and <check2>:\n    door = \"OPEN\"\n    print(\"...\")",
+            "tier3_walkthrough": "Write:\nif bits_ready == 7 and has_key:\n    door = \"OPEN\"\n    print(\"ACCESS GRANTED\")"
           },
           "difficultyOverride": null
         },
@@ -2348,7 +2348,7 @@
           "testCode": "assert power == 16, f\"Expected 16, got {power}\"\nassert OUTPUT.strip() == \"16\", f\"Expected 16, got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip sparkles: '1 -> 2 -> 4 -> 8 -> 16! That's 16-Bit power!'",
-            "tier2_pattern": "power = 1\nfor star in range(4):\n    power = power * 2\nprint(power)",
+            "tier2_pattern": "power = 1\nfor <var> in range(4):\n    power = power * 2\nprint(power)",
             "tier3_walkthrough": "Add `print(power)` at the bottom."
           },
           "difficultyOverride": null,

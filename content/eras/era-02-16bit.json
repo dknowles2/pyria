@@ -125,26 +125,26 @@
         {
           "id": "trial-16-01-02",
           "trialType": "fix_bug",
-          "title": "Fix the Missing Bracket!",
-          "storyPrompt": "Lord Null broke the reef crystal list by deleting the closing square bracket `]`!",
-          "objective": "Add `]` at the end of the `crystals` list so `print(len(crystals))` outputs `3`.",
+          "title": "The Reef List Won't Run!",
+          "storyPrompt": "Lord Null scrambled the reef crystal list so Python stops with a syntax error before it can count the 3 crystals.",
+          "objective": "Find and fix the broken code so it runs cleanly and prints `3`.",
           "concepts": [
             "lists",
             "list_indexing"
           ],
           "shardReward": 65,
           "unlockId": null,
-          "bugSummary": "Add `]` at the end of the `crystals` list so `print(len(crystals))` outputs `3`.",
+          "bugSummary": "Python stops with a syntax error before printing the crystal count.",
           "starterCode": {
             "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n",
             "standard": "crystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n",
-            "challenge": "crystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ncrystals = [\"aqua\", \"pearl\", \"coral\"\nprint(len(crystals))\n"
           },
           "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\"]\nprint(len(crystals))\n",
           "testCode": "assert len(crystals) == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "crystals = [\"aqua\", \"pearl\", \"coral\"]\nprint(len(crystals))",
+            "tier2_pattern": "crystals = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ncrystals = [\"aqua\", \"pearl\", \"coral\"]\nprint(len(crystals))"
           },
           "difficultyOverride": null
@@ -190,13 +190,13 @@
           "starterCode": {
             "explorer": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))\n",
           "testCode": "assert bag == [\"shell\", \"coral\", \"pearl\"] and OUTPUT.strip() == \"3\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))",
+            "tier2_pattern": "bag = ___\n___\nprint(___)",
             "tier3_walkthrough": "Write:\nbag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))"
           },
           "difficultyOverride": null
@@ -206,7 +206,7 @@
           "trialType": "code",
           "title": "Swap a Broken Reef Tile",
           "storyPrompt": "Almost at Ripple's Logic Vault! You can replace an item in a list by index! Given `tiles = [\"sand\", \"broken\", \"sand\"]`, set `tiles[1] = \"coral\"` and `print(tiles[1])`.",
-          "objective": "You can replace an item in a list by index! Given `tiles = [\"sand\", \"broken\", \"sand\"]`, set `tiles[1] = \"coral\"` and `print(tiles[1])`.",
+          "objective": "Replace the broken tile in the middle of the `tiles` list with `\"coral\"`, then print that updated tile.",
           "concepts": [
             "lists",
             "list_indexing"
@@ -216,13 +216,13 @@
           "starterCode": {
             "explorer": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\nprint(tiles[1])\n",
           "testCode": "assert tiles[1] == \"coral\" and OUTPUT.strip() == \"coral\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\nprint(tiles[1])",
+            "tier2_pattern": "tiles = ___\ntiles[1] = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\nprint(tiles[1])"
           },
           "difficultyOverride": null
@@ -232,7 +232,7 @@
           "trialType": "code",
           "title": "Chart the Reef Crystals (Ripple Boss)",
           "storyPrompt": "You reached Ripple's Logic Vault! Given `crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]`, set `first_crystal = crystals[0]`, `last_crystal = crystals[-1]`, and `crystal_count = len(crystals)`. Print `crystal_count`.",
-          "objective": "Given `crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]`, set `first_crystal = crystals[0]`, `last_crystal = crystals[-1]`, and `crystal_count = len(crystals)`. Print `crystal_count`.",
+          "objective": "Chart Ripple's reef! From `crystals`, record the first crystal in `first_crystal`, the last crystal in `last_crystal`, and the total number of crystals in `crystal_count`, then print `crystal_count`.",
           "concepts": [
             "lists",
             "list_indexing"
@@ -242,13 +242,13 @@
           "starterCode": {
             "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\nprint(crystal_count)\n",
           "testCode": "assert first_crystal == \"aqua\" and last_crystal == \"amber\" and crystal_count == 4 and OUTPUT.strip() == \"4\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Ripple!'",
-            "tier2_pattern": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\nprint(crystal_count)",
+            "tier2_pattern": "crystals = ___\nfirst_crystal = ___\nlast_crystal = ___\ncrystal_count = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncrystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\nprint(crystal_count)"
           },
           "difficultyOverride": null
@@ -425,26 +425,26 @@
         {
           "id": "trial-16-02-02",
           "trialType": "fix_bug",
-          "title": "Fix the Market Crate Loop!",
-          "storyPrompt": "Lord Null forgot the colon `:` on the `for` loop over `crates`!",
-          "objective": "Add `:` to the end of `for item in crates` so all 3 crates print.",
+          "title": "The Market Crate Loop Crashes!",
+          "storyPrompt": "Lord Null sabotaged Gullwing's cargo loop so Python refuses to run it.",
+          "objective": "Debug the loop so all 3 crates print in order.",
           "concepts": [
             "lists",
             "list_iteration"
           ],
           "shardReward": 70,
           "unlockId": null,
-          "bugSummary": "Add `:` to the end of `for item in crates` so all 3 crates print.",
+          "bugSummary": "The crate loop fails with a syntax error instead of printing the 3 crates.",
           "starterCode": {
             "explorer": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n",
             "standard": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n",
-            "challenge": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ncrates = [\"rope\", \"sail\", \"map\"]\nfor item in crates\n    print(item)\n"
           },
           "referenceSolution": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates:\n    print(item)\n",
           "testCode": "assert OUTPUT.strip().splitlines() == [\"rope\", \"sail\", \"map\"]",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates:\n    print(item)",
+            "tier2_pattern": "crates = ___\nfor ___ in ___:\n    print(___)",
             "tier3_walkthrough": "Update the code to:\ncrates = [\"rope\", \"sail\", \"map\"]\nfor item in crates:\n    print(item)"
           },
           "difficultyOverride": null
@@ -533,7 +533,7 @@
           "trialType": "code",
           "title": "Unpack Gullwing's Pier (Boss)",
           "storyPrompt": "You reached Gullwing's Logic Vault! Loop over `gold_bags = [10, 25, 15, 30]`, sum them into `harbor_gold`, and if `harbor_gold >= 80`, print `\"GULLWING FREE!\"`.",
-          "objective": "Loop over `gold_bags = [10, 25, 15, 30]`, sum them into `harbor_gold`, and if `harbor_gold >= 80`, print `\"GULLWING FREE!\"`.",
+          "objective": "Help free Gullwing! Sum all the bags in `gold_bags` into `harbor_gold` using a loop. If the total reaches at least 80, announce `GULLWING FREE!`.",
           "concepts": [
             "lists",
             "list_iteration"
@@ -543,13 +543,13 @@
           "starterCode": {
             "explorer": "gold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "gold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    print(\"GULLWING FREE!\")\n",
           "testCode": "assert harbor_gold == 80 and OUTPUT.strip() == \"GULLWING FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Gullwing!'",
-            "tier2_pattern": "gold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    print(\"GULLWING FREE!\")",
+            "tier2_pattern": "gold_bags = ___\nharbor_gold = ___\nfor ___ in ___:\n    harbor_gold = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ngold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    print(\"GULLWING FREE!\")"
           },
           "difficultyOverride": null
@@ -728,9 +728,9 @@
         {
           "id": "trial-16-03-02",
           "trialType": "fix_bug",
-          "title": "Fix the Pearl Sorter!",
-          "storyPrompt": "Lord Null misspelled `sorted` as `sortd`! Fix the typo so the pearls sort from smallest to largest.",
-          "objective": "Fix `sortd(pearls)` to `sorted(pearls)` and print `ordered`.",
+          "title": "The Pearl Sorter Crashes!",
+          "storyPrompt": "Nacre's pearl-sorting spell throws a `NameError` instead of printing the sorted list.",
+          "objective": "Find and fix the bug so the sorted pearl list prints cleanly.",
           "concepts": [
             "lists",
             "list_indexing",
@@ -738,17 +738,17 @@
           ],
           "shardReward": 75,
           "unlockId": null,
-          "bugSummary": "Fix `sortd(pearls)` to `sorted(pearls)` and print `ordered`.",
+          "bugSummary": "Python throws a `NameError` when trying to sort the pearls.",
           "starterCode": {
             "explorer": "pearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n",
             "standard": "pearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n",
-            "challenge": "pearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\npearls = [30, 10, 20]\nordered = sortd(pearls)\nprint(ordered)\n"
           },
           "referenceSolution": "pearls = [30, 10, 20]\nordered = sorted(pearls)\nprint(ordered)\n",
           "testCode": "assert ordered == [10, 20, 30] and OUTPUT.strip() == \"[10, 20, 30]\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "pearls = [30, 10, 20]\nordered = sorted(pearls)\nprint(ordered)",
+            "tier2_pattern": "pearls = ___\nordered = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\npearls = [30, 10, 20]\nordered = sorted(pearls)\nprint(ordered)"
           },
           "difficultyOverride": null
@@ -809,7 +809,7 @@
           "trialType": "code",
           "title": "Build a Filtered List",
           "storyPrompt": "Almost at Nacre's Logic Vault! Loop over `shells = [5, 18, 9, 24]` and `.append()` every shell `>= 15` into `big_shells`, then `print(big_shells)`.",
-          "objective": "Loop over `shells = [5, 18, 9, 24]` and `.append()` every shell `>= 15` into `big_shells`, then `print(big_shells)`.",
+          "objective": "Create an empty list `big_shells` and loop through `shells`, appending every shell value that is at least 15. Print `big_shells`.",
           "concepts": [
             "lists",
             "list_indexing",
@@ -821,13 +821,13 @@
           "starterCode": {
             "explorer": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)\n",
           "testCode": "assert big_shells == [18, 24] and OUTPUT.strip() == \"[18, 24]\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)",
+            "tier2_pattern": "shells = ___\nbig_shells = ___\nfor ___ in ___:\n    if ___:\n        ___\nprint(___)",
             "tier3_walkthrough": "Write:\nshells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)"
           },
           "difficultyOverride": null
@@ -837,7 +837,7 @@
           "trialType": "code",
           "title": "Unlock Nacre's Shell Vault (Boss)",
           "storyPrompt": "You reached Nacre's Logic Vault! Given `lumens = [14, 32, 9, 25]`, compute `peak = max(lumens)` and `total = sum(lumens)`. If `total >= 80`, print `\"NACRE FREE!\"`.",
-          "objective": "Given `lumens = [14, 32, 9, 25]`, compute `peak = max(lumens)` and `total = sum(lumens)`. If `total >= 80`, print `\"NACRE FREE!\"`.",
+          "objective": "Unlock Nacre's Shell Vault! Find the brightest pearl in `lumens` as `peak` and the combined brightness as `total`. If the combined brightness is at least 80, print `NACRE FREE!`.",
           "concepts": [
             "lists",
             "list_indexing",
@@ -848,13 +848,13 @@
           "starterCode": {
             "explorer": "lumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "lumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    print(\"NACRE FREE!\")\n",
           "testCode": "assert peak == 32 and total == 80 and OUTPUT.strip() == \"NACRE FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Nacre!'",
-            "tier2_pattern": "lumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    print(\"NACRE FREE!\")",
+            "tier2_pattern": "lumens = ___\npeak = ___\ntotal = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\nlumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    print(\"NACRE FREE!\")"
           },
           "difficultyOverride": null
@@ -1034,9 +1034,9 @@
         {
           "id": "trial-16-04-02",
           "trialType": "fix_bug",
-          "title": "Fix the Beacon Append!",
-          "storyPrompt": "Lord Null wrote `strong.add(b)` instead of `strong.append(b)`! Lists use `.append()` to add items.",
-          "objective": "Change `.add(b)` to `.append(b)` so `strong` becomes `[60, 80]`.",
+          "title": "The Beacon Filter Crashes!",
+          "storyPrompt": "Tempest's beacon filter crashes with an `AttributeError` when collecting strong beacons.",
+          "objective": "Fix the broken method call so `strong` collects `[60, 80]` and prints it.",
           "concepts": [
             "lists",
             "list_iteration",
@@ -1044,17 +1044,17 @@
           ],
           "shardReward": 80,
           "unlockId": null,
-          "bugSummary": "Change `.add(b)` to `.append(b)` so `strong` becomes `[60, 80]`.",
+          "bugSummary": "Adding strong beacons to the list fails with an `AttributeError`.",
           "starterCode": {
             "explorer": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n",
             "standard": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n",
-            "challenge": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nbeacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.add(b)\nprint(strong)\n"
           },
           "referenceSolution": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.append(b)\nprint(strong)\n",
           "testCode": "assert strong == [60, 80] and OUTPUT.strip() == \"[60, 80]\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.append(b)\nprint(strong)",
+            "tier2_pattern": "beacons = ___\nstrong = ___\nfor ___ in ___:\n    if ___:\n        ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nbeacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.append(b)\nprint(strong)"
           },
           "difficultyOverride": null
@@ -1075,13 +1075,13 @@
           "starterCode": {
             "explorer": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)\n",
           "testCode": "assert boosted == [6, 10, 14] and OUTPUT.strip() == \"[6, 10, 14]\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)",
+            "tier2_pattern": "signals = ___\nboosted = ___\nfor ___ in ___:\n    ___\nprint(___)",
             "tier3_walkthrough": "Write:\nsignals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)"
           },
           "difficultyOverride": null
@@ -1102,13 +1102,13 @@
           "starterCode": {
             "explorer": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)\n",
           "testCode": "assert rough == 2 and calm == 1 and OUTPUT.strip() == \"2 1\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)",
+            "tier2_pattern": "waves = ___\nrough = ___\ncalm = ___\nfor ___ in ___:\n    if ___:\n        rough = ___",
             "tier3_walkthrough": "Write:\nwaves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)"
           },
           "difficultyOverride": null
@@ -1143,7 +1143,7 @@
           "trialType": "code",
           "title": "Light the Maelstrom Lens (Tempest Boss)",
           "storyPrompt": "You reached Tempest's Logic Vault! Given `lamps = [10, 35, 50, 20]`, build `active = []` with lamps `>= 30`, then if `sum(active) >= 80`, print `\"TEMPEST FREE!\"`.",
-          "objective": "Given `lamps = [10, 35, 50, 20]`, build `active = []` with lamps `>= 30`, then if `sum(active) >= 80`, print `\"TEMPEST FREE!\"`.",
+          "objective": "Light the Maelstrom Lens! Collect every lamp from `lamps` with power at least 30 into a list called `active`. If the combined power of the active lamps is at least 80, print `TEMPEST FREE!`.",
           "concepts": [
             "lists",
             "list_iteration",
@@ -1154,13 +1154,13 @@
           "starterCode": {
             "explorer": "lamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "lamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    print(\"TEMPEST FREE!\")\n",
           "testCode": "assert active == [35, 50] and OUTPUT.strip() == \"TEMPEST FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Tempest!'",
-            "tier2_pattern": "lamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    print(\"TEMPEST FREE!\")",
+            "tier2_pattern": "lamps = ___\nactive = ___\nfor ___ in ___:\n    if ___:\n        ___\nif ___:",
             "tier3_walkthrough": "Write:\nlamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    print(\"TEMPEST FREE!\")"
           },
           "difficultyOverride": null
@@ -1336,25 +1336,25 @@
         {
           "id": "trial-16-05-02",
           "trialType": "fix_bug",
-          "title": "Fix the Stuck Gear!",
-          "storyPrompt": "Lord Null forgot the colon `:` on `while turns < 3`! Add `:` so the gear spins 3 times.",
-          "objective": "Add `:` to `while turns < 3` so `turns` reaches 3 and prints `3`.",
+          "title": "The Brass Gear Loop Won't Start!",
+          "storyPrompt": "Sprocket's gear-turning loop won't even start — Python flags a syntax error on the loop line.",
+          "objective": "Fix the loop header so `turns` reaches 3 and prints `3`.",
           "concepts": [
             "while_loops"
           ],
           "shardReward": 85,
           "unlockId": null,
-          "bugSummary": "Add `:` to `while turns < 3` so `turns` reaches 3 and prints `3`.",
+          "bugSummary": "Python reports a syntax error on the `while` loop.",
           "starterCode": {
             "explorer": "turns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n",
             "standard": "turns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n",
-            "challenge": "turns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nturns = 0\nwhile turns < 3\n    turns = turns + 1\nprint(turns)\n"
           },
           "referenceSolution": "turns = 0\nwhile turns < 3:\n    turns = turns + 1\nprint(turns)\n",
           "testCode": "assert turns == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "turns = 0\nwhile turns < 3:\n    turns = turns + 1\nprint(turns)",
+            "tier2_pattern": "turns = ___\nwhile ___:\n    turns = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nturns = 0\nwhile turns < 3:\n    turns = turns + 1\nprint(turns)"
           },
           "difficultyOverride": null
@@ -1414,7 +1414,7 @@
           "trialType": "code",
           "title": "Count Steps to 50",
           "storyPrompt": "Almost at Sprocket's Logic Vault! Start with `charge = 10` and `steps = 0`. While `charge < 50:`, add 10 to `charge` and 1 to `steps`. Print `steps`.",
-          "objective": "Start with `charge = 10` and `steps = 0`. While `charge < 50:`, add 10 to `charge` and 1 to `steps`. Print `steps`.",
+          "objective": "Starting with `charge` at 10 and `steps` at 0, keep adding 10 to `charge` and 1 to `steps` until `charge` reaches 50, then print how many steps it took.",
           "concepts": [
             "while_loops"
           ],
@@ -1423,13 +1423,13 @@
           "starterCode": {
             "explorer": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)\n",
           "testCode": "assert steps == 4 and OUTPUT.strip() == \"4\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)",
+            "tier2_pattern": "charge = ___\nsteps = ___\nwhile ___:\n    charge = ___\n    steps = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncharge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)"
           },
           "difficultyOverride": null
@@ -1439,7 +1439,7 @@
           "trialType": "code",
           "title": "Wind Sprocket's Mainspring (Boss)",
           "storyPrompt": "You reached Sprocket's Logic Vault! Start with `gears = 0` and `power = 0`. While `gears < 4:`, add 1 to `gears` and 15 to `power`. After the loop, if `power == 60`, print `\"SPROCKET FREE!\"`.",
-          "objective": "Start with `gears = 0` and `power = 0`. While `gears < 4:`, add 1 to `gears` and 15 to `power`. After the loop, if `power == 60`, print `\"SPROCKET FREE!\"`.",
+          "objective": "Wind Sprocket's mainspring! Start `gears` and `power` at 0. Turn 4 gears using a `while` loop, adding 15 to `power` each turn. When `power` reaches 60, print `SPROCKET FREE!`.",
           "concepts": [
             "while_loops"
           ],
@@ -1448,13 +1448,13 @@
           "starterCode": {
             "explorer": "gears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "gears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    print(\"SPROCKET FREE!\")\n",
           "testCode": "assert gears == 4 and power == 60 and OUTPUT.strip() == \"SPROCKET FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Sprocket!'",
-            "tier2_pattern": "gears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    print(\"SPROCKET FREE!\")",
+            "tier2_pattern": "gears = ___\npower = ___\nwhile ___:\n    gears = ___\n    power = ___\nif ___:",
             "tier3_walkthrough": "Write:\ngears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    print(\"SPROCKET FREE!\")"
           },
           "difficultyOverride": null
@@ -1631,26 +1631,26 @@
         {
           "id": "trial-16-06-02",
           "trialType": "fix_bug",
-          "title": "Fix the Pendulum Counter!",
-          "storyPrompt": "Lord Null indented `print(ticks)` inside the `while` loop so it prints 4 times instead of once at the end! Un-indent `print(ticks)` back to 0 spaces.",
-          "objective": "Move `print(ticks)` to 0 spaces indent so it prints only `4`.",
+          "title": "Too Many Pendulum Prints!",
+          "storyPrompt": "Tock's pendulum counter is supposed to print only the final count `4`, but it prints `1`, `2`, `3`, `4` instead!",
+          "objective": "Fix the code structure so only the final value `4` prints.",
           "concepts": [
             "while_loops",
             "conditionals_if"
           ],
           "shardReward": 90,
           "unlockId": null,
-          "bugSummary": "Move `print(ticks)` to 0 spaces indent so it prints only `4`.",
+          "bugSummary": "It prints every step (`1`, `2`, `3`, `4`) instead of just the final count `4`.",
           "starterCode": {
             "explorer": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n",
             "standard": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n",
-            "challenge": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\n    print(ticks)\n"
           },
           "referenceSolution": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\nprint(ticks)\n",
           "testCode": "assert ticks == 4 and OUTPUT.strip() == \"4\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\nprint(ticks)",
+            "tier2_pattern": "ticks = ___\nwhile ___:\n    ticks = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\nprint(ticks)"
           },
           "difficultyOverride": null
@@ -1671,13 +1671,13 @@
           "starterCode": {
             "explorer": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)\n",
           "testCode": "assert found is True and OUTPUT.strip() == \"True\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)",
+            "tier2_pattern": "found = ___\nfor ___ in ___:\n    if ___:\n        found = ___\n        ___\nprint(___)",
             "tier3_walkthrough": "Write:\nfound = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)"
           },
           "difficultyOverride": null
@@ -1698,13 +1698,13 @@
           "starterCode": {
             "explorer": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)\n",
           "testCode": "assert total == 20 and OUTPUT.strip() == \"20\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)",
+            "tier2_pattern": "total = ___\nfor ___ in ___:\n    if ___:\n        ___\n    total = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntotal = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)"
           },
           "difficultyOverride": null
@@ -1741,7 +1741,7 @@
           "trialType": "code",
           "title": "Sync Tock's Pendulum (Boss)",
           "storyPrompt": "You reached Tock's Logic Vault! Start with `beats = 0` and `chime = 0`. While `beats < 6:`, add 1 to `beats` and add `beats` to `chime`. If `chime == 21`, print `\"TOCK FREE!\"`.",
-          "objective": "Start with `beats = 0` and `chime = 0`. While `beats < 6:`, add 1 to `beats` and add `beats` to `chime`. If `chime == 21`, print `\"TOCK FREE!\"`.",
+          "objective": "Sync Tock's pendulum! Count 6 beats using a `while` loop, adding each beat number (1 through 6) into `chime`. When `chime` equals 21, print `TOCK FREE!`.",
           "concepts": [
             "while_loops",
             "conditionals_if"
@@ -1751,13 +1751,13 @@
           "starterCode": {
             "explorer": "beats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "beats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    print(\"TOCK FREE!\")\n",
           "testCode": "assert chime == 21 and OUTPUT.strip() == \"TOCK FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Tock!'",
-            "tier2_pattern": "beats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    print(\"TOCK FREE!\")",
+            "tier2_pattern": "beats = ___\nchime = ___\nwhile ___:\n    beats = ___\n    chime = ___\nif ___:",
             "tier3_walkthrough": "Write:\nbeats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    print(\"TOCK FREE!\")"
           },
           "difficultyOverride": null
@@ -1933,25 +1933,25 @@
         {
           "id": "trial-16-07-02",
           "trialType": "fix_bug",
-          "title": "Fix the Steam Function!",
-          "storyPrompt": "Lord Null forgot the colon `:` at the end of `def vent_steam()`! Every `def` line needs `:`.",
-          "objective": "Add `:` to `def vent_steam()` so calling `vent_steam()` prints `HISS!`.",
+          "title": "The Steam Valve Function Won't Run!",
+          "storyPrompt": "Piston's steam-vent function stops with a syntax error before it can hiss.",
+          "objective": "Find and fix the syntax bug so calling `vent_steam()` prints `HISS!`.",
           "concepts": [
             "functions_def"
           ],
           "shardReward": 95,
           "unlockId": null,
-          "bugSummary": "Add `:` to `def vent_steam()` so calling `vent_steam()` prints `HISS!`.",
+          "bugSummary": "Python stops with a syntax error on the function definition.",
           "starterCode": {
             "explorer": "def vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n",
             "standard": "def vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n",
-            "challenge": "def vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ndef vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n"
           },
           "referenceSolution": "def vent_steam():\n    print(\"HISS!\")\n\nvent_steam()\n",
           "testCode": "assert OUTPUT.strip() == \"HISS!\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "def vent_steam():\n    print(\"HISS!\")\n\nvent_steam()",
+            "tier2_pattern": "def vent_steam():\n    print(___)\n___",
             "tier3_walkthrough": "Update the code to:\ndef vent_steam():\n    print(\"HISS!\")\n\nvent_steam()"
           },
           "difficultyOverride": null
@@ -1970,13 +1970,13 @@
           "starterCode": {
             "explorer": "def blast():\n    print(\"STEAM ON!\")\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()\n",
           "testCode": "assert OUTPUT.strip().splitlines() == [\"STEAM ON!\", \"STEAM ON!\"]",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "def blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()",
+            "tier2_pattern": "def blast():\n    print(___)\n___\n___",
             "tier3_walkthrough": "Write:\ndef blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()"
           },
           "difficultyOverride": null
@@ -2037,7 +2037,7 @@
           "trialType": "code",
           "title": "Release Piston's Pressure Valve (Boss)",
           "storyPrompt": "You reached Piston's Logic Vault! Define `def calc_pressure(a, b): return a + b`. Set `total = calc_pressure(35, 45)`. If `total >= 80`, print `\"PISTON FREE!\"`.",
-          "objective": "Define `def calc_pressure(a, b): return a + b`. Set `total = calc_pressure(35, 45)`. If `total >= 80`, print `\"PISTON FREE!\"`.",
+          "objective": "Release Piston's pressure valve! Define a function `calc_pressure(a, b)` that returns the sum of two pressure readings. Call it with 35 and 45 into `total`, and if `total` is at least 80, print `PISTON FREE!`.",
           "concepts": [
             "functions_def",
             "functions_return"
@@ -2047,13 +2047,13 @@
           "starterCode": {
             "explorer": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")\n",
           "testCode": "assert total == 80 and OUTPUT.strip() == \"PISTON FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Piston!'",
-            "tier2_pattern": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")",
+            "tier2_pattern": "def calc_pressure(___):\n    return ___\ntotal = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ndef calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")"
           },
           "difficultyOverride": null
@@ -2230,26 +2230,26 @@
         {
           "id": "trial-16-08-02",
           "trialType": "fix_bug",
-          "title": "Fix the Missing return!",
-          "storyPrompt": "Lord Null deleted `return` from `triple(n)`, so it returns `None`! Put `return` before `n * 3`.",
-          "objective": "Add `return` inside `triple(n)` so `print(triple(7))` outputs `21`.",
+          "title": "Lord Null's None Trap!",
+          "storyPrompt": "When a Python function finishes without a `return` statement, it silently gives back `None` — Lord Null's favorite empty void! Right now `print(triple(7))` prints `None` instead of `21`.",
+          "objective": "Inspect `triple(n)` and fix it so calling `triple(7)` sends back `21` instead of `None`.",
           "concepts": [
             "functions_def",
             "functions_return"
           ],
           "shardReward": 100,
           "unlockId": null,
-          "bugSummary": "Add `return` inside `triple(n)` so `print(triple(7))` outputs `21`.",
+          "bugSummary": "Calling `triple(7)` prints `None` instead of `21`!",
           "starterCode": {
             "explorer": "def triple(n):\n    n * 3\n\nprint(triple(7))\n",
             "standard": "def triple(n):\n    n * 3\n\nprint(triple(7))\n",
-            "challenge": "def triple(n):\n    n * 3\n\nprint(triple(7))\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ndef triple(n):\n    n * 3\n\nprint(triple(7))\n"
           },
           "referenceSolution": "def triple(n):\n    return n * 3\n\nprint(triple(7))\n",
           "testCode": "assert triple(7) == 21 and OUTPUT.strip() == \"21\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "def triple(n):\n    return n * 3\n\nprint(triple(7))",
+            "tier2_pattern": "def triple(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ndef triple(n):\n    return n * 3\n\nprint(triple(7))"
           },
           "difficultyOverride": null
@@ -2269,13 +2269,13 @@
           "starterCode": {
             "explorer": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))\n",
           "testCode": "assert add_two(8) == 10 and OUTPUT.strip() == \"10\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))",
+            "tier2_pattern": "def add_one(___):\n    return ___\ndef add_two(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))"
           },
           "difficultyOverride": null
@@ -2312,7 +2312,7 @@
           "trialType": "code",
           "title": "Is It Even? Function",
           "storyPrompt": "Almost at Aether's Logic Vault! Define `def is_even(n): return n % 2 == 0`, then `print(is_even(8))`.",
-          "objective": "Define `def is_even(n): return n % 2 == 0`, then `print(is_even(8))`.",
+          "objective": "Write a function `is_even(n)` that returns `True` if `n` is divisible by 2 and `False` otherwise, then print the result for 8.",
           "concepts": [
             "functions_def",
             "functions_return"
@@ -2322,13 +2322,13 @@
           "starterCode": {
             "explorer": "def is_even(n):\n    return n % 2 == 0\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))\n",
           "testCode": "assert is_even(8) is True and is_even(7) is False and OUTPUT.strip() == \"True\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))",
+            "tier2_pattern": "def is_even(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))"
           },
           "difficultyOverride": null
@@ -2338,7 +2338,7 @@
           "trialType": "code",
           "title": "Unlock the Grand Chronometer (Aether Boss)",
           "storyPrompt": "You reached Aether's Logic Vault! Define `def sync_clock(h, m=30): return h * 60 + m`. Set `mins = sync_clock(2)`. If `mins == 150`, print `\"AETHER FREE!\"`.",
-          "objective": "Define `def sync_clock(h, m=30): return h * 60 + m`. Set `mins = sync_clock(2)`. If `mins == 150`, print `\"AETHER FREE!\"`.",
+          "objective": "Unlock the Grand Chronometer! Define `sync_clock(h, m=30)` returning total minutes (`h` hours plus `m` minutes). Call it with 2 hours (using the default minutes) into `mins`; if `mins` equals 150, print `AETHER FREE!`.",
           "concepts": [
             "functions_def",
             "functions_return"
@@ -2348,13 +2348,13 @@
           "starterCode": {
             "explorer": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")\n",
           "testCode": "assert mins == 150 and OUTPUT.strip() == \"AETHER FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Aether!'",
-            "tier2_pattern": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")",
+            "tier2_pattern": "def sync_clock(___):\n    return ___\nmins = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ndef sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")"
           },
           "difficultyOverride": null
@@ -2530,25 +2530,25 @@
         {
           "id": "trial-16-09-02",
           "trialType": "fix_bug",
-          "title": "Fix the Potion Dictionary!",
-          "storyPrompt": "Lord Null replaced the colon `:` between key and value with `=`! Dictionaries use `:` (`\"fire\": 10`).",
-          "objective": "Change `=` to `:` inside `herbs` so `print(herbs[\"fire\"])` outputs `10`.",
+          "title": "The Potion Recipe Won't Parse!",
+          "storyPrompt": "Cinderel's `herbs` dictionary throws a syntax error instead of looking up `\"fire\"`.",
+          "objective": "Fix the dictionary syntax so it prints `10`.",
           "concepts": [
             "dictionaries"
           ],
           "shardReward": 105,
           "unlockId": null,
-          "bugSummary": "Change `=` to `:` inside `herbs` so `print(herbs[\"fire\"])` outputs `10`.",
+          "bugSummary": "Python rejects the dictionary definition with a syntax error.",
           "starterCode": {
             "explorer": "herbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n",
             "standard": "herbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n",
-            "challenge": "herbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nherbs = {\"fire\" = 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n"
           },
           "referenceSolution": "herbs = {\"fire\": 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n",
           "testCode": "assert herbs[\"fire\"] == 10 and OUTPUT.strip() == \"10\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "herbs = {\"fire\": 10, \"ash\": 5}\nprint(herbs[\"fire\"])",
+            "tier2_pattern": "herbs = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nherbs = {\"fire\": 10, \"ash\": 5}\nprint(herbs[\"fire\"])"
           },
           "difficultyOverride": null
@@ -2567,13 +2567,13 @@
           "starterCode": {
             "explorer": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])\n",
           "testCode": "assert vial[\"glow\"] == 15 and OUTPUT.strip() == \"15\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])",
+            "tier2_pattern": "vial = ___\nvial[\"glow\"] = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nvial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])"
           },
           "difficultyOverride": null
@@ -2636,7 +2636,7 @@
           "trialType": "code",
           "title": "Brew Cinderel's Tonic (Boss)",
           "storyPrompt": "You reached Cinderel's Logic Vault! Create `tonic = {\"ember\": 30, \"ash\": 20}`. Set `total = tonic[\"ember\"] + tonic[\"ash\"]`. If `total == 50`, print `\"CINDEREL FREE!\"`.",
-          "objective": "Create `tonic = {\"ember\": 30, \"ash\": 20}`. Set `total = tonic[\"ember\"] + tonic[\"ash\"]`. If `total == 50`, print `\"CINDEREL FREE!\"`.",
+          "objective": "Brew Cinderel's tonic! Using the `tonic` dictionary with ember and ash amounts, compute their sum in `total`. When `total` equals 50, print `CINDEREL FREE!`.",
           "concepts": [
             "dictionaries"
           ],
@@ -2645,13 +2645,13 @@
           "starterCode": {
             "explorer": "tonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "tonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    print(\"CINDEREL FREE!\")\n",
           "testCode": "assert total == 50 and OUTPUT.strip() == \"CINDEREL FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Cinderel!'",
-            "tier2_pattern": "tonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    print(\"CINDEREL FREE!\")",
+            "tier2_pattern": "tonic = ___\ntotal = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ntonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    print(\"CINDEREL FREE!\")"
           },
           "difficultyOverride": null
@@ -2827,25 +2827,25 @@
         {
           "id": "trial-16-10-02",
           "trialType": "fix_bug",
-          "title": "Fix the Missing f!",
-          "storyPrompt": "Lord Null stole the `f` from the front of the f-string! Put `f` right before the opening quote.",
-          "objective": "Add `f` before `\"Crystal power: {power}\"` so it prints `Crystal power: 42`.",
+          "title": "The Crystal Label Prints Literally!",
+          "storyPrompt": "Prism's readout prints `Crystal power: {power}` literally instead of showing the number `42`!",
+          "objective": "Fix the string formatting so it prints `Crystal power: 42`.",
           "concepts": [
             "f_strings"
           ],
           "shardReward": 110,
           "unlockId": null,
-          "bugSummary": "Add `f` before `\"Crystal power: {power}\"` so it prints `Crystal power: 42`.",
+          "bugSummary": "It prints `{power}` literally instead of substituting `42`.",
           "starterCode": {
             "explorer": "power = 42\nprint(\"Crystal power: {power}\")\n",
             "standard": "power = 42\nprint(\"Crystal power: {power}\")\n",
-            "challenge": "power = 42\nprint(\"Crystal power: {power}\")\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\npower = 42\nprint(\"Crystal power: {power}\")\n"
           },
           "referenceSolution": "power = 42\nprint(f\"Crystal power: {power}\")\n",
           "testCode": "assert OUTPUT.strip() == \"Crystal power: 42\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "power = 42\nprint(f\"Crystal power: {power}\")",
+            "tier2_pattern": "power = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\npower = 42\nprint(f\"Crystal power: {power}\")"
           },
           "difficultyOverride": null
@@ -2864,13 +2864,13 @@
           "starterCode": {
             "explorer": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)\n",
           "testCode": "assert label == \"Ruby Lv.5\" and OUTPUT.strip() == \"Ruby Lv.5\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)",
+            "tier2_pattern": "gem = ___\nrank = ___\nlabel = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ngem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)"
           },
           "difficultyOverride": null
@@ -2933,7 +2933,7 @@
           "trialType": "code",
           "title": "Focus Prism's Alembic (Boss)",
           "storyPrompt": "You reached Prism's Logic Vault! Given `colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}`, sum all values with `.values()` into `light`, and print `f\"PRISM {light}!\"`.",
-          "objective": "Given `colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}`, sum all values with `.values()` into `light`, and print `f\"PRISM {light}!\"`.",
+          "objective": "Focus Prism's alembic! Sum all color energies in `colors` into `light`, then use an f-string to announce `PRISM <light>!`.",
           "concepts": [
             "f_strings",
             "dictionaries"
@@ -2943,13 +2943,13 @@
           "starterCode": {
             "explorer": "colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\nprint(f\"PRISM {light}!\")\n",
           "testCode": "assert light == 100 and OUTPUT.strip() == \"PRISM 100!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Prism!'",
-            "tier2_pattern": "colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\nprint(f\"PRISM {light}!\")",
+            "tier2_pattern": "colors = ___\nlight = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncolors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\nprint(f\"PRISM {light}!\")"
           },
           "difficultyOverride": null
@@ -3124,25 +3124,25 @@
         {
           "id": "trial-16-11-02",
           "trialType": "fix_bug",
-          "title": "Fix the Vault Lookup!",
-          "storyPrompt": "Lord Null used `potions[2]` on a 2-item list (causing `IndexError`)! Change `2` to `1`.",
-          "objective": "Change `potions[2][\"hp\"]` to `potions[1][\"hp\"]` so it prints `25`.",
+          "title": "The Potion Vault Crashes with IndexError!",
+          "storyPrompt": "Elixir's vault lookup crashes with an `IndexError` when trying to read the second potion's HP.",
+          "objective": "Fix the lookup so it prints `25` without crashing.",
           "concepts": [
             "dictionaries"
           ],
           "shardReward": 115,
           "unlockId": null,
-          "bugSummary": "Change `potions[2][\"hp\"]` to `potions[1][\"hp\"]` so it prints `25`.",
+          "bugSummary": "Reading the second potion's HP raises an `IndexError`.",
           "starterCode": {
             "explorer": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n",
             "standard": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n",
-            "challenge": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\npotions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[2][\"hp\"])\n"
           },
           "referenceSolution": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[1][\"hp\"])\n",
           "testCode": "assert OUTPUT.strip() == \"25\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[1][\"hp\"])",
+            "tier2_pattern": "potions = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\npotions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[1][\"hp\"])"
           },
           "difficultyOverride": null
@@ -3161,13 +3161,13 @@
           "starterCode": {
             "explorer": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)\n",
           "testCode": "assert total_hp == 45 and OUTPUT.strip() == \"45\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)",
+            "tier2_pattern": "potions = ___\ntotal_hp = ___\nfor ___ in ___:\n    total_hp = ___\nprint(___)",
             "tier3_walkthrough": "Write:\npotions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)"
           },
           "difficultyOverride": null
@@ -3186,13 +3186,13 @@
           "starterCode": {
             "explorer": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)\n",
           "testCode": "assert best == 35 and OUTPUT.strip() == \"35\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)",
+            "tier2_pattern": "brews = ___\nbest = ___\nfor ___ in ___:\n    if ___:\n        best = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nbrews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)"
           },
           "difficultyOverride": null
@@ -3229,7 +3229,7 @@
           "trialType": "code",
           "title": "Open Elixir's Potion Vault (Boss)",
           "storyPrompt": "You reached Elixir's Logic Vault! Given `vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]`, sum `v[\"ml\"]` into `total_ml`. If `total_ml == 60`, print `\"ELIXIR FREE!\"`.",
-          "objective": "Given `vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]`, sum `v[\"ml\"]` into `total_ml`. If `total_ml == 60`, print `\"ELIXIR FREE!\"`.",
+          "objective": "Open Elixir's vault! Loop over `vials` to sum each vial's milliliters into `total_ml`. If the total equals 60, print `ELIXIR FREE!`.",
           "concepts": [
             "dictionaries"
           ],
@@ -3238,13 +3238,13 @@
           "starterCode": {
             "explorer": "vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    print(\"ELIXIR FREE!\")\n",
           "testCode": "assert total_ml == 60 and OUTPUT.strip() == \"ELIXIR FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Elixir!'",
-            "tier2_pattern": "vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    print(\"ELIXIR FREE!\")",
+            "tier2_pattern": "vials = ___\ntotal_ml = ___\nfor ___ in ___:\n    total_ml = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\nvials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    print(\"ELIXIR FREE!\")"
           },
           "difficultyOverride": null
@@ -3420,26 +3420,26 @@
         {
           "id": "trial-16-12-02",
           "trialType": "fix_bug",
-          "title": "Fix the Magma Key!",
-          "storyPrompt": "Lord Null typed `core[\"heat\"]` instead of `core[\"temp\"]` (`KeyError`)! Fix the key name to `\"temp\"`.",
-          "objective": "Change `\"heat\"` to `\"temp\"` so it prints `900`.",
+          "title": "The Magma Core Raises KeyError!",
+          "storyPrompt": "Crucible's core monitor crashes with a `KeyError` when checking the temperature.",
+          "objective": "Fix the dictionary lookup so it prints `900`.",
           "concepts": [
             "functions_return",
             "dictionaries"
           ],
           "shardReward": 120,
           "unlockId": null,
-          "bugSummary": "Change `\"heat\"` to `\"temp\"` so it prints `900`.",
+          "bugSummary": "Looking up the core temperature raises a `KeyError`.",
           "starterCode": {
             "explorer": "core = {\"temp\": 900}\nprint(core[\"heat\"])\n",
             "standard": "core = {\"temp\": 900}\nprint(core[\"heat\"])\n",
-            "challenge": "core = {\"temp\": 900}\nprint(core[\"heat\"])\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ncore = {\"temp\": 900}\nprint(core[\"heat\"])\n"
           },
           "referenceSolution": "core = {\"temp\": 900}\nprint(core[\"temp\"])\n",
           "testCode": "assert OUTPUT.strip() == \"900\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "core = {\"temp\": 900}\nprint(core[\"temp\"])",
+            "tier2_pattern": "core = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ncore = {\"temp\": 900}\nprint(core[\"temp\"])"
           },
           "difficultyOverride": null
@@ -3459,13 +3459,13 @@
           "starterCode": {
             "explorer": "def brew_power(r):\n    return r[\"fire\"] * 2\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))\n",
           "testCode": "assert brew_power({\"fire\": 25}) == 50 and OUTPUT.strip() == \"50\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "def brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))",
+            "tier2_pattern": "def brew_power(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))"
           },
           "difficultyOverride": null
@@ -3474,7 +3474,7 @@
           "id": "trial-16-12-04",
           "trialType": "code",
           "title": "Count Frequencies in a Dict",
-          "storyPrompt": "Keep pushing deeper into Magma Core! Loop over `ore = [\"gold\", \"iron\", \"gold\"]` and count occurrences into `counts` (`counts[x] = counts.get(x, 0) + 1`), then `print(counts[\"gold\"])`.",
+          "storyPrompt": "Dictionaries are awesome for counting how many times each ore appears! (Tip: just like `.values()` lists all values, `.keys()` lists all keys in a dictionary.)",
           "objective": "Loop over `ore = [\"gold\", \"iron\", \"gold\"]` and count occurrences into `counts` (`counts[x] = counts.get(x, 0) + 1`), then `print(counts[\"gold\"])`.",
           "concepts": [
             "functions_return",
@@ -3485,13 +3485,13 @@
           "starterCode": {
             "explorer": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])\n",
           "testCode": "assert counts[\"gold\"] == 2 and counts[\"iron\"] == 1 and OUTPUT.strip() == \"2\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])",
+            "tier2_pattern": "ore = ___\ncounts = ___\nfor ___ in ___:\n    counts[x] = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])"
           },
           "difficultyOverride": null
@@ -3501,7 +3501,7 @@
           "trialType": "code",
           "title": "Merge Two Dicts",
           "storyPrompt": "Almost at Crucible's Logic Vault! Given `a = {\"x\": 1}` and `b = {\"y\": 2}`, copy `a` into `c = dict(a)`, call `c.update(b)`, and `print(len(c))`.",
-          "objective": "Given `a = {\"x\": 1}` and `b = {\"y\": 2}`, copy `a` into `c = dict(a)`, call `c.update(b)`, and `print(len(c))`.",
+          "objective": "Copy dictionary `a` into a new dictionary `c`, merge dictionary `b` into `c`, and print how many keys `c` has.",
           "concepts": [
             "functions_return",
             "dictionaries"
@@ -3511,14 +3511,14 @@
           "starterCode": {
             "explorer": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c.keys()))\n",
           "testCode": "assert c == {\"x\": 1, \"y\": 2} and OUTPUT.strip() == \"2\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c))",
-            "tier3_walkthrough": "Write:\na = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c))"
+            "tier2_pattern": "a = ___\nb = ___\nc = ___\n___\nprint(___)",
+            "tier3_walkthrough": "Copy `a` with `c = dict(a)`, merge `b` with `c.update(b)`, and print `len(c.keys())`."
           },
           "difficultyOverride": null
         },
@@ -3527,7 +3527,7 @@
           "trialType": "code",
           "title": "Cool Crucible's Magma Core (Act III Boss)",
           "storyPrompt": "You reached Crucible's Logic Vault! Write `def core_status(d): return \"SAFE\" if d[\"temp\"] < 500 else \"HOT\"`. Print `core_status({\"temp\": 300})`.",
-          "objective": "Write `def core_status(d): return \"SAFE\" if d[\"temp\"] < 500 else \"HOT\"`. Print `core_status({\"temp\": 300})`.",
+          "objective": "Cool Crucible's magma core! Define `core_status(d)` that returns `\"SAFE\"` when the dictionary's temperature is below 500 and `\"HOT\"` otherwise. Print the status for a core at 300 degrees.",
           "concepts": [
             "functions_return",
             "dictionaries"
@@ -3537,13 +3537,13 @@
           "starterCode": {
             "explorer": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))\n",
           "testCode": "assert core_status({\"temp\": 300}) == \"SAFE\" and OUTPUT.strip() == \"SAFE\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Crucible!'",
-            "tier2_pattern": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))",
+            "tier2_pattern": "def core_status(___):\n    if ___:\n        return ___\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))"
           },
           "difficultyOverride": null
@@ -3719,25 +3719,25 @@
         {
           "id": "trial-16-13-02",
           "trialType": "fix_bug",
-          "title": "Fix the Sky Grid Loop!",
-          "storyPrompt": "Lord Null forgot the 8-space indent on `total = total + 1` inside the inner `for` loop!",
-          "objective": "Indent `total = total + 1` by 8 spaces so `total` equals `6`.",
+          "title": "The Sky Grid Count Is Too Low!",
+          "storyPrompt": "Nimbus's nested loop is supposed to count all 6 cells in the 2×3 grid, but it prints `2` instead of `6`!",
+          "objective": "Inspect the loop structure and fix it so `total` prints `6`.",
           "concepts": [
             "nested_loops"
           ],
           "shardReward": 125,
           "unlockId": null,
-          "bugSummary": "Indent `total = total + 1` by 8 spaces so `total` equals `6`.",
+          "bugSummary": "The grid counter prints `2` instead of `6`.",
           "starterCode": {
             "explorer": "total = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n",
             "standard": "total = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n",
-            "challenge": "total = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ntotal = 0\nfor r in range(2):\n    for c in range(3):\ntotal = total + 1\nprint(total)\n"
           },
           "referenceSolution": "total = 0\nfor r in range(2):\n    for c in range(3):\n        total = total + 1\nprint(total)\n",
           "testCode": "assert total == 6 and OUTPUT.strip() == \"6\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "total = 0\nfor r in range(2):\n    for c in range(3):\n        total = total + 1\nprint(total)",
+            "tier2_pattern": "total = ___\nfor ___ in ___:\n    for ___ in ___:\n        total = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ntotal = 0\nfor r in range(2):\n    for c in range(3):\n        total = total + 1\nprint(total)"
           },
           "difficultyOverride": null
@@ -3756,13 +3756,13 @@
           "starterCode": {
             "explorer": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)\n",
           "testCode": "assert total == 10 and OUTPUT.strip() == \"10\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)",
+            "tier2_pattern": "grid = ___\ntotal = ___\nfor ___ in ___:\n    for ___ in ___:\n        total = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ngrid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)"
           },
           "difficultyOverride": null
@@ -3781,13 +3781,13 @@
           "starterCode": {
             "explorer": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)\n",
           "testCode": "assert sums == [11, 21, 12, 22] and OUTPUT.strip() == \"[11, 21, 12, 22]\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)",
+            "tier2_pattern": "sums = ___\nfor ___ in ___:\n    for ___ in ___:\n        ___\nprint(___)",
             "tier3_walkthrough": "Write:\nsums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)"
           },
           "difficultyOverride": null
@@ -3824,7 +3824,7 @@
           "trialType": "code",
           "title": "Launch Nimbus from Cloud Dock (Boss)",
           "storyPrompt": "You reached Nimbus's Logic Vault! Count how many cells in `deck = [[1, 0, 1], [1, 1, 0]]` equal `1` into `lit`. If `lit == 4`, print `\"NIMBUS FREE!\"`.",
-          "objective": "Count how many cells in `deck = [[1, 0, 1], [1, 1, 0]]` equal `1` into `lit`. If `lit == 4`, print `\"NIMBUS FREE!\"`.",
+          "objective": "Launch Nimbus from Cloud Dock! Scan every cell in the 2D `deck` grid and count how many cells equal 1 into `lit`. If 4 lights are lit, print `NIMBUS FREE!`.",
           "concepts": [
             "nested_loops"
           ],
@@ -3833,13 +3833,13 @@
           "starterCode": {
             "explorer": "deck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "deck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    print(\"NIMBUS FREE!\")\n",
           "testCode": "assert lit == 4 and OUTPUT.strip() == \"NIMBUS FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Nimbus!'",
-            "tier2_pattern": "deck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    print(\"NIMBUS FREE!\")",
+            "tier2_pattern": "deck = ___\nlit = ___\nfor ___ in ___:\n    for ___ in ___:\n        if ___:\n            lit = ___",
             "tier3_walkthrough": "Write:\ndeck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    print(\"NIMBUS FREE!\")"
           },
           "difficultyOverride": null
@@ -4051,13 +4051,13 @@
           "starterCode": {
             "explorer": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)\n",
           "testCode": "assert s.brightness == 99 and OUTPUT.strip() == \"99\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)",
+            "tier2_pattern": "class Star:\n    def __init__(___):\n        self.brightness = ___\ns = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nclass Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)"
           },
           "difficultyOverride": null
@@ -4077,13 +4077,13 @@
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())\n",
           "testCode": "assert d.roar() == \"Comet ROARS!\" and OUTPUT.strip() == \"Comet ROARS!\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())",
+            "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.name = ___\n    def roar(___):\n        return ___\nd = ___",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())"
           },
           "difficultyOverride": null
@@ -4118,7 +4118,7 @@
           "trialType": "code",
           "title": "Cross Starlight Bridge (Comet Boss)",
           "storyPrompt": "You reached Comet's Logic Vault! Define `class Bridge:` with `__init__(self, spans)` and `is_ready(self)` returning `self.spans >= 5`. Create `b = Bridge(6)`; if `b.is_ready()`, print `\"COMET FREE!\"`.",
-          "objective": "Define `class Bridge:` with `__init__(self, spans)` and `is_ready(self)` returning `self.spans >= 5`. Create `b = Bridge(6)`; if `b.is_ready()`, print `\"COMET FREE!\"`.",
+          "objective": "Cross Starlight Bridge! Define a `Bridge` class storing `spans` and a method `is_ready()` that returns `True` when `spans` is at least 5. Create a 6-span bridge `b` and, if it is ready, print `COMET FREE!`.",
           "concepts": [
             "classes_intro",
             "functions_return"
@@ -4128,13 +4128,13 @@
           "starterCode": {
             "explorer": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")\n",
           "testCode": "assert b.is_ready() is True and OUTPUT.strip() == \"COMET FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Comet!'",
-            "tier2_pattern": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")",
+            "tier2_pattern": "class Bridge:\n    def __init__(___):\n        self.spans = ___\n    def is_ready(___):\n        return ___\nb = ___",
             "tier3_walkthrough": "Write:\nclass Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")"
           },
           "difficultyOverride": null
@@ -4310,25 +4310,25 @@
         {
           "id": "trial-16-15-02",
           "trialType": "fix_bug",
-          "title": "Fix the Missing self.!",
-          "storyPrompt": "Lord Null forgot `self.` before `volts` inside `charge()`! Add `self.` so `self.volts` updates.",
-          "objective": "Change `volts = volts + 10` to `self.volts = self.volts + 10` so `print(t.volts)` outputs `30`.",
+          "title": "The Storm Tower Charge Fails!",
+          "storyPrompt": "Calling `t.charge()` crashes with a `NameError`/`UnboundLocalError` instead of raising the tower's volts to `30`.",
+          "objective": "Fix the `charge` method so charging the tower raises its voltage to `30` and prints `30`.",
           "concepts": [
             "classes_intro"
           ],
           "shardReward": 135,
           "unlockId": null,
-          "bugSummary": "Change `volts = volts + 10` to `self.volts = self.volts + 10` so `print(t.volts)` outputs `30`.",
+          "bugSummary": "Calling `t.charge()` crashes instead of updating the tower's voltage.",
           "starterCode": {
             "explorer": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
             "standard": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
-            "challenge": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nclass Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n"
           },
           "referenceSolution": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        self.volts = self.volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
           "testCode": "assert t.volts == 30 and OUTPUT.strip() == \"30\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        self.volts = self.volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)",
+            "tier2_pattern": "class Tower:\n    def __init__(___):\n        self.volts = ___\n    def charge(___):\n        self.volts = ___\nt = ___",
             "tier3_walkthrough": "Update the code to:\nclass Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        self.volts = self.volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)"
           },
           "difficultyOverride": null
@@ -4348,13 +4348,13 @@
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)\n",
           "testCode": "assert total == 60 and OUTPUT.strip() == \"60\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)",
+            "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.p = ___\nsquad = ___\ntotal = ___\nfor ___ in ___:",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)"
           },
           "difficultyOverride": null
@@ -4374,13 +4374,13 @@
           "starterCode": {
             "explorer": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)\n",
           "testCode": "assert ready == 2 and OUTPUT.strip() == \"2\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)",
+            "tier2_pattern": "class Coil:\n    def __init__(___):\n        self.power = ___\ncoils = ___\nready = ___\nfor ___ in ___:",
             "tier3_walkthrough": "Write:\nclass Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)"
           },
           "difficultyOverride": null
@@ -4390,7 +4390,7 @@
           "trialType": "code",
           "title": "String Representation Helper",
           "storyPrompt": "Almost at Fulmin's Logic Vault! Define `class Shield:` with `__init__(self, name, hp)` and `info(self)` returning `f\"{self.name}:{self.hp}\"`. Print `Shield(\"Storm\", 50).info()`.",
-          "objective": "Define `class Shield:` with `__init__(self, name, hp)` and `info(self)` returning `f\"{self.name}:{self.hp}\"`. Print `Shield(\"Storm\", 50).info()`.",
+          "objective": "Build a `Shield` class storing `name` and `hp`, plus an `info()` method returning `\"<name>:<hp>\"`. Create a Storm shield with 50 HP and print its info.",
           "concepts": [
             "classes_intro"
           ],
@@ -4399,13 +4399,13 @@
           "starterCode": {
             "explorer": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())\n",
           "testCode": "assert OUTPUT.strip() == \"Storm:50\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())",
+            "tier2_pattern": "class Shield:\n    def __init__(___):\n        self.name = ___\n        self.hp = ___\n    def info(___):\n        return ___",
             "tier3_walkthrough": "Write:\nclass Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())"
           },
           "difficultyOverride": null
@@ -4415,7 +4415,7 @@
           "trialType": "code",
           "title": "Breach Storm Bastion (Fulmin Boss)",
           "storyPrompt": "You reached Fulmin's Logic Vault! Create `class Bolt:` with `power`. Given `bolts = [Bolt(30), Bolt(40), Bolt(30)]`, sum `b.power` into `surge`; if `surge >= 100`, print `\"FULMIN FREE!\"`.",
-          "objective": "Create `class Bolt:` with `power`. Given `bolts = [Bolt(30), Bolt(40), Bolt(30)]`, sum `b.power` into `surge`; if `surge >= 100`, print `\"FULMIN FREE!\"`.",
+          "objective": "Breach Storm Bastion! Create a `Bolt` class storing `power`, build a list of three bolts (30, 40, and 30), sum their powers into `surge`, and if `surge` reaches 100, print `FULMIN FREE!`.",
           "concepts": [
             "classes_intro",
             "list_iteration"
@@ -4425,13 +4425,13 @@
           "starterCode": {
             "explorer": "class Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    print(\"FULMIN FREE!\")\n",
           "testCode": "assert surge == 100 and OUTPUT.strip() == \"FULMIN FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Fulmin!'",
-            "tier2_pattern": "class Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    print(\"FULMIN FREE!\")",
+            "tier2_pattern": "class Bolt:\n    def __init__(___):\n        self.power = ___\nbolts = ___\nsurge = ___\nfor ___ in ___:",
             "tier3_walkthrough": "Write:\nclass Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    print(\"FULMIN FREE!\")"
           },
           "difficultyOverride": null
@@ -4611,9 +4611,9 @@
         {
           "id": "trial-16-16-02",
           "trialType": "fix_bug",
-          "title": "Fix Zenith's Throne Key!",
-          "storyPrompt": "Lord Null broke the `ThroneLock` class by omitting `return` from `is_open(self)`!",
-          "objective": "Add `return` before `self.bits >= 16` so `print(lock.is_open())` outputs `True`.",
+          "title": "Zenith's Throne Lock Returns None!",
+          "storyPrompt": "Calling `lock.is_open()` prints `None` instead of `True`!",
+          "objective": "Fix the `is_open` method so it sends back `True` when `bits >= 16`.",
           "concepts": [
             "functions_return",
             "dictionaries",
@@ -4622,17 +4622,17 @@
           ],
           "shardReward": 140,
           "unlockId": null,
-          "bugSummary": "Add `return` before `self.bits >= 16` so `print(lock.is_open())` outputs `True`.",
+          "bugSummary": "Calling `lock.is_open()` outputs `None` instead of `True`.",
           "starterCode": {
             "explorer": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
             "standard": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
-            "challenge": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nclass ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n"
           },
           "referenceSolution": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        return self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
           "testCode": "assert lock.is_open() is True and OUTPUT.strip() == \"True\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        return self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())",
+            "tier2_pattern": "class ThroneLock:\n    def __init__(___):\n        self.bits = ___\n    def is_open(___):\n        return ___\nlock = ___",
             "tier3_walkthrough": "Update the code to:\nclass ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        return self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())"
           },
           "difficultyOverride": null
@@ -4654,13 +4654,13 @@
           "starterCode": {
             "explorer": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)\n",
           "testCode": "assert total_dragons == 16 and OUTPUT.strip() == \"16\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)",
+            "tier2_pattern": "acts = ___\ntotal_dragons = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nacts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)"
           },
           "difficultyOverride": null
@@ -4682,13 +4682,13 @@
           "starterCode": {
             "explorer": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)\n",
           "testCode": "assert even_sum == 12 and OUTPUT.strip() == \"12\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)",
+            "tier2_pattern": "matrix = ___\neven_sum = ___\nfor ___ in ___:\n    for ___ in ___:\n        if ___:\n            even_sum = ___",
             "tier3_walkthrough": "Write:\nmatrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)"
           },
           "difficultyOverride": null
@@ -4698,7 +4698,7 @@
           "trialType": "code",
           "title": "Forge the 16-Bit Prism Class",
           "storyPrompt": "Almost at Zenith's Logic Vault! Define `class Prism:` with `__init__(self, power)` and `upgrade(self)` doubling `self.power`. Create `p = Prism(8)`, call `p.upgrade()`, and `print(p.power)`.",
-          "objective": "Define `class Prism:` with `__init__(self, power)` and `upgrade(self)` doubling `self.power`. Create `p = Prism(8)`, call `p.upgrade()`, and `print(p.power)`.",
+          "objective": "Build a `Prism` class storing `power` and an `upgrade()` method that doubles `power`. Create a prism `p` with power 8, upgrade it once, and print its new power.",
           "concepts": [
             "functions_return",
             "dictionaries",
@@ -4710,13 +4710,13 @@
           "starterCode": {
             "explorer": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)\n",
           "testCode": "assert p.power == 16 and OUTPUT.strip() == \"16\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)",
+            "tier2_pattern": "class Prism:\n    def __init__(___):\n        self.power = ___\n    def upgrade(___):\n        self.power = ___\np = ___",
             "tier3_walkthrough": "Write:\nclass Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)"
           },
           "difficultyOverride": null
@@ -4726,7 +4726,7 @@
           "trialType": "code",
           "title": "Shatter the 16-Bit Throne (Era 2 Boss)",
           "storyPrompt": "You reached Zenith's Logic Vault! Define `class EraCore:` with `bits` and `restore(self)` returning `\"32-BIT UNLOCKED!\"` if `self.bits >= 16` else `\"LOCKED\"`. Print `EraCore(16).restore()`.",
-          "objective": "Define `class EraCore:` with `bits` and `restore(self)` returning `\"32-BIT UNLOCKED!\"` if `self.bits >= 16` else `\"LOCKED\"`. Print `EraCore(16).restore()`.",
+          "objective": "Shatter the 16-Bit Throne! Define an `EraCore` class storing `bits` and a `restore()` method that returns `\"32-BIT UNLOCKED!\"` when `bits` is at least 16 (and `\"LOCKED\"` otherwise). Create a 16-bit core `core` and print `core.restore()`.",
           "concepts": [
             "functions_return",
             "dictionaries",
@@ -4738,13 +4738,13 @@
           "starterCode": {
             "explorer": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())\n",
           "testCode": "assert EraCore(16).restore() == \"32-BIT UNLOCKED!\" and OUTPUT.strip() == \"32-BIT UNLOCKED!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Zenith!'",
-            "tier2_pattern": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())",
+            "tier2_pattern": "class EraCore:\n    def __init__(___):\n        self.bits = ___\n    def restore(___):\n        if ___:\n            return ___",
             "tier3_walkthrough": "Write:\nclass EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())"
           },
           "difficultyOverride": null
