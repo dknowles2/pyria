@@ -36,10 +36,12 @@ export function normalizeMe(raw) {
   const parentEmail = auth.parentEmail ?? raw?.email ?? null;
   const heroSaveId = auth.heroSaveId || null;
   const heroName = auth.heroName || null;
+  const linkedToParent = Boolean(auth.linkedToParent);
   const role =
     auth.role ||
     (isAdmin ? 'admin' : parentEmail ? 'parent' : heroSaveId ? 'hero' : 'guest');
   const googleOAuthEnabled = Boolean(auth.googleOAuthEnabled);
+  const magicLinkEnabled = Boolean(auth.magicLinkEnabled);
 
   return {
     mode,
@@ -47,9 +49,11 @@ export function normalizeMe(raw) {
       role,
       heroSaveId,
       heroName,
+      linkedToParent,
       parentEmail,
       isAdmin,
       googleOAuthEnabled,
+      magicLinkEnabled,
     },
     authenticated: Boolean(raw?.authenticated ?? (role !== 'guest')),
     email: parentEmail,
@@ -83,6 +87,10 @@ export function createDefaultSaveState(heroName = 'Rowan', appearance = {}, pref
     stats: {
       charisma: 0,
       courage: 0,
+      arrows: 0,
+      potions: 0,
+      customItems: [],
+      completedWorkshopChallenges: [],
     },
     solvedTrials: [],
     completedTrials: [],
@@ -143,6 +151,12 @@ export function normalizeSave(raw) {
     stats: {
       charisma: merged.stats?.charisma ?? 0,
       courage: merged.stats?.courage ?? 0,
+      arrows: merged.stats?.arrows ?? 0,
+      potions: merged.stats?.potions ?? 0,
+      customItems: Array.isArray(merged.stats?.customItems) ? [...merged.stats.customItems] : [],
+      completedWorkshopChallenges: Array.isArray(merged.stats?.completedWorkshopChallenges)
+        ? [...merged.stats.completedWorkshopChallenges]
+        : [],
     },
     solvedTrials,
     completedTrials: [...solvedTrials],
@@ -155,6 +169,7 @@ export function normalizeSave(raw) {
     ownedUnlockIds: Array.isArray(merged.ownedUnlockIds) ? [...merged.ownedUnlockIds] : [],
     position: merged.position || null,
     ownerEmail: merged.ownerEmail || merged.owner_email || null,
+    linkedToParent: Boolean(merged.linkedToParent ?? (merged.ownerEmail || merged.owner_email)),
     createdAt: merged.createdAt || merged.created_at || null,
     updatedAt: merged.updatedAt || merged.updated_at || null,
     preferences: prefs,
@@ -275,6 +290,10 @@ export function deleteGuestSave(id) {
 
 let lastKnownMe = null;
 
+export function resetMeCache() {
+  lastKnownMe = null;
+}
+
 // ==================== REMOTE API & CONTENT ====================
 export async function fetchMe() {
   try {
@@ -352,24 +371,55 @@ export async function getSave(id) {
   return { ...normalizeSave(data.save || data), isGuest: false };
 }
 
-export async function updateSave(id, saveData) {
+export async function updateSave(id, saveData, { keepalive = false } = {}) {
   const payload = buildCleanSavePayload(saveData, { includeHeroName: true, includeOwnerEmail: false });
   const data = await requestJson(`/api/saves/${encodeURIComponent(id)}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
+    ...(keepalive ? { keepalive: true } : {}),
   });
   return { ...normalizeSave(data.save || data), isGuest: false };
 }
 
-export async function logAttempt(saveId, { trialId, passed, hintsUsed, code }) {
+const ALLOWED_DIFFICULTY_MODES = new Set(['explorer', 'standard', 'challenge']);
+const MAX_DURATION_MS = 86400000;
+
+export function normalizeAttemptErrorType(raw, passed = false) {
+  if (passed || typeof raw !== 'string') return null;
+  const cleaned = raw
+    .trim()
+    .replace(/[^A-Za-z0-9_.:-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 64);
+  return cleaned || null;
+}
+
+export async function logAttempt(
+  saveId,
+  { trialId, passed, hintsUsed, code, difficultyMode, isPractice, errorType, durationMs }
+) {
   if (!saveId || String(saveId).startsWith('guest-')) return { ok: false, skipped: true };
+  const passedBool = Boolean(passed);
+  const safeDifficulty = ALLOWED_DIFFICULTY_MODES.has(difficultyMode) ? difficultyMode : 'standard';
+  const safeErrorType = normalizeAttemptErrorType(errorType, passedBool);
+  const hasDuration =
+    (typeof durationMs === 'number' && Number.isFinite(durationMs)) ||
+    (typeof durationMs === 'string' && durationMs.trim() !== '' && Number.isFinite(Number(durationMs)));
+  const safeDurationMs = hasDuration
+    ? Math.max(0, Math.min(MAX_DURATION_MS, Math.round(Number(durationMs))))
+    : null;
+
   return requestJson(`/api/saves/${encodeURIComponent(saveId)}/attempts`, {
     method: 'POST',
     body: JSON.stringify({
       trialId,
-      passed: Boolean(passed),
+      passed: passedBool,
       hintsUsed: Number(hintsUsed) || 0,
       code: String(code || ''),
+      difficultyMode: safeDifficulty,
+      isPractice: Boolean(isPractice),
+      errorType: safeErrorType,
+      durationMs: safeDurationMs,
     }),
   });
 }
@@ -395,6 +445,20 @@ export async function createHeroCode(heroName, saveState = null) {
   return {
     save: data.save ? { ...normalizeSave(data.save), isGuest: false } : null,
     heroCode: data.heroCode || '',
+    parentLinkToken: data.parentLinkToken || '',
+    parentLinkExpiresInSeconds: Number(data.parentLinkExpiresInSeconds) || 900,
+  };
+}
+
+export async function createHeroLinkToken() {
+  const data = await requestJson('/api/auth/hero-link-token', {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return {
+    parentLinkToken: data.parentLinkToken || '',
+    heroName: data.heroName || '',
+    expiresInSeconds: Number(data.expiresInSeconds) || 900,
   };
 }
 
@@ -402,6 +466,28 @@ export async function redeemHeroCode(heroCode) {
   const data = await requestJson('/api/auth/hero-code/redeem', {
     method: 'POST',
     body: JSON.stringify({ heroCode: String(heroCode || '').trim().toUpperCase() }),
+  });
+  return {
+    save: data.save ? { ...normalizeSave(data.save), isGuest: false } : null,
+  };
+}
+
+export async function previewHeroPlayToken(playToken) {
+  const data = await requestJson('/api/auth/play-preview', {
+    method: 'POST',
+    body: JSON.stringify({ playToken: String(playToken || '').trim() }),
+  });
+  return {
+    valid: Boolean(data.valid),
+    saveId: data.saveId || null,
+    heroName: data.heroName || '',
+  };
+}
+
+export async function redeemHeroPlayToken(playToken) {
+  const data = await requestJson('/api/auth/hero-code/redeem', {
+    method: 'POST',
+    body: JSON.stringify({ playToken: String(playToken || '').trim() }),
   });
   return {
     save: data.save ? { ...normalizeSave(data.save), isGuest: false } : null,

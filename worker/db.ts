@@ -1,8 +1,11 @@
 import type {
   ActivityEventRecord,
   AttemptRecord,
+  DifficultyMode,
+  DigestDeliveryRecord,
   EnrichedSaveRecord,
   Env,
+  ParentPreferencesRecord,
   SaveDbRow,
   SavePreferences,
   SaveRecord,
@@ -142,11 +145,13 @@ export class PyriaD1 {
   static rowToSave(row: SaveDbRow): SaveRecord {
     const state = safeParseObject(row.state_json);
     const prefs = parsePreferencesJson(row.preferences_json);
+    const ownerEmail = row.owner_email ?? null;
     return {
       ...state,
       id: row.id,
       heroName: row.hero_name,
-      ownerEmail: row.owner_email ?? null,
+      ownerEmail,
+      linkedToParent: Boolean(ownerEmail && ownerEmail.trim()),
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       preferences: prefs,
@@ -430,6 +435,7 @@ export class PyriaD1 {
       id: saveId,
       heroName,
       ownerEmail: normOwner,
+      linkedToParent: Boolean(normOwner),
       createdAt: now,
       updatedAt: now,
       preferences: prefs,
@@ -565,6 +571,7 @@ export class PyriaD1 {
       id: saveId,
       heroName,
       ownerEmail: existing.owner_email ?? null,
+      linkedToParent: Boolean(existing.owner_email && existing.owner_email.trim()),
       createdAt: existing.created_at,
       updatedAt: now,
       preferences: parsePreferencesJson(existing.preferences_json),
@@ -592,6 +599,10 @@ export class PyriaD1 {
     passed: boolean;
     hintsUsed: number;
     code: string;
+    difficultyMode?: DifficultyMode;
+    isPractice?: boolean;
+    errorType?: string | null;
+    durationMs?: number | null;
   }): Promise<number | null> {
     const row = await this.db
       .prepare('SELECT hero_name, state_json FROM saves WHERE id = ?')
@@ -600,13 +611,43 @@ export class PyriaD1 {
     if (!row) return null;
 
     const now = utcNowIso();
+    const day = now.slice(0, 10);
     const st = safeParseObject(row.state_json);
     const realmId = typeof st.realmId === 'string' && st.realmId ? st.realmId : null;
+    const difficultyMode: DifficultyMode = params.difficultyMode ?? 'standard';
+    const isPractice = Boolean(params.isPractice);
+    const errorType = params.passed ? null : (params.errorType ?? null);
+    const durationMs = params.durationMs ?? null;
+
+    let firstTryInc = 0;
+    let uniqueAttempterInc = 0;
+    let uniqueSolverInc = 0;
+    if (!isPractice) {
+      const solvedInState = extractStringSet(st, 'solvedTrials', 'completedTrials');
+      const alreadySolvedInState = solvedInState.has(params.trialId);
+      const prior = await this.db
+        .prepare(
+          `SELECT COUNT(*) AS prior_attempts,
+                  SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS prior_passes
+           FROM trial_attempts
+           WHERE save_id = ? AND trial_id = ? AND COALESCE(is_practice, 0) = 0`
+        )
+        .bind(params.saveId, params.trialId)
+        .first<{ prior_attempts: number; prior_passes: number | null }>();
+      const priorAttempts = Number(prior?.prior_attempts ?? 0);
+      const priorPasses = Number(prior?.prior_passes ?? 0);
+      if (!alreadySolvedInState) {
+        if (priorAttempts === 0) uniqueAttempterInc = 1;
+        if (params.passed && priorAttempts === 0) firstTryInc = 1;
+        if (params.passed && priorPasses === 0) uniqueSolverInc = 1;
+      }
+    }
 
     const insertRes = await this.db
       .prepare(
-        `INSERT INTO trial_attempts (save_id, trial_id, passed, hints_used, code, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`
+        `INSERT INTO trial_attempts
+         (save_id, trial_id, passed, hints_used, code, difficulty_mode, is_practice, error_type, duration_ms, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         params.saveId,
@@ -614,15 +655,53 @@ export class PyriaD1 {
         params.passed ? 1 : 0,
         params.hintsUsed,
         params.code,
+        difficultyMode,
+        isPractice ? 1 : 0,
+        errorType,
+        durationMs,
         now
       )
       .run();
 
     const attemptId = Number(insertRes.meta.last_row_id ?? 0);
 
+    // Durable daily rollup for non-practice attempts (survives trial_attempts pruning)
+    const batchStmts: D1PreparedStatement[] = [];
+    if (!isPractice) {
+      batchStmts.push(
+        this.db
+          .prepare(
+            `INSERT INTO trial_stats_daily
+             (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_attempters, unique_solvers, hinted_attempts, total_hints, tier3_hints, parent_overrides)
+             VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, 0)
+             ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET
+               attempts = attempts + excluded.attempts,
+               passes = passes + excluded.passes,
+               first_try_passes = first_try_passes + excluded.first_try_passes,
+               unique_attempters = unique_attempters + excluded.unique_attempters,
+               unique_solvers = unique_solvers + excluded.unique_solvers,
+               hinted_attempts = hinted_attempts + excluded.hinted_attempts,
+               total_hints = total_hints + excluded.total_hints,
+               tier3_hints = tier3_hints + excluded.tier3_hints`
+          )
+          .bind(
+            day,
+            params.trialId,
+            difficultyMode,
+            params.passed ? 1 : 0,
+            firstTryInc,
+            uniqueAttempterInc,
+            uniqueSolverInc,
+            params.hintsUsed > 0 ? 1 : 0,
+            params.hintsUsed,
+            params.hintsUsed >= 3 ? 1 : 0
+          )
+      );
+    }
+
     // Blank code blobs past maxAttemptCodeRows while preserving aggregate stats,
     // and enforce hard row cap maxAttemptsPerSave.
-    await this.db.batch([
+    batchStmts.push(
       this.db
         .prepare(
           `UPDATE trial_attempts SET code = ''
@@ -638,8 +717,10 @@ export class PyriaD1 {
              SELECT id FROM trial_attempts WHERE save_id = ? ORDER BY id DESC LIMIT ?
            )`
         )
-        .bind(params.saveId, params.saveId, this.maxAttemptsPerSave),
-    ]);
+        .bind(params.saveId, params.saveId, this.maxAttemptsPerSave)
+    );
+
+    await this.db.batch(batchStmts);
 
     await this.insertEvent({
       saveId: params.saveId,
@@ -655,6 +736,10 @@ export class PyriaD1 {
         passed: params.passed,
         hintsUsed: params.hintsUsed,
         code: params.code,
+        difficultyMode,
+        isPractice,
+        errorType,
+        durationMs,
         attemptId,
       },
       createdAt: now,
@@ -672,7 +757,10 @@ export class PyriaD1 {
 
     const { results } = await this.db
       .prepare(
-        `SELECT id, save_id, trial_id, passed, hints_used, code, created_at
+        `SELECT id, save_id, trial_id, passed, hints_used, code,
+                COALESCE(difficulty_mode, 'standard') AS difficulty_mode,
+                COALESCE(is_practice, 0) AS is_practice,
+                error_type, duration_ms, created_at
          FROM trial_attempts WHERE save_id = ?
          ORDER BY created_at DESC, id DESC`
       )
@@ -684,6 +772,10 @@ export class PyriaD1 {
         passed: number;
         hints_used: number;
         code: string;
+        difficulty_mode: string;
+        is_practice: number;
+        error_type: string | null;
+        duration_ms: number | null;
         created_at: string;
       }>();
 
@@ -694,6 +786,13 @@ export class PyriaD1 {
       passed: Boolean(r.passed),
       hintsUsed: Number(r.hints_used),
       code: r.code,
+      difficultyMode:
+        r.difficulty_mode === 'explorer' || r.difficulty_mode === 'challenge'
+          ? r.difficulty_mode
+          : 'standard',
+      isPractice: Boolean(r.is_practice),
+      errorType: r.error_type ?? null,
+      durationMs: r.duration_ms !== null && r.duration_ms !== undefined ? Number(r.duration_ms) : null,
       createdAt: r.created_at,
     }));
   }
@@ -929,9 +1028,10 @@ export class PyriaD1 {
 
     let shardsDelta = 0;
     let summary: string;
+    const wasAlreadySolved = seen.has(params.trialId);
 
     if (params.solved) {
-      if (!seen.has(params.trialId)) {
+      if (!wasAlreadySolved) {
         orderedSolved.push(params.trialId);
         if (params.awardShards && params.shardReward > 0) {
           shardsDelta = Math.trunc(params.shardReward);
@@ -967,6 +1067,23 @@ export class PyriaD1 {
       .prepare('UPDATE saves SET state_json = ?, updated_at = ? WHERE id = ?')
       .bind(JSON.stringify(stateToStore), now, params.saveId)
       .run();
+
+    // Increment durable parent_overrides rollup when marking a previously unsolved trial solved
+    if (params.solved && !wasAlreadySolved) {
+      const prefs = parsePreferencesJson(row.preferences_json);
+      const overrideDifficulty: DifficultyMode = prefs.difficulty ?? 'standard';
+      const day = now.slice(0, 10);
+      await this.db
+        .prepare(
+          `INSERT INTO trial_stats_daily
+           (day, trial_id, difficulty_mode, attempts, passes, first_try_passes, unique_solvers, total_hints, tier3_hints, parent_overrides)
+           VALUES (?, ?, ?, 0, 0, 0, 0, 0, 0, 1)
+           ON CONFLICT(day, trial_id, difficulty_mode) DO UPDATE SET
+             parent_overrides = parent_overrides + 1`
+        )
+        .bind(day, params.trialId, overrideDifficulty)
+        .run();
+    }
 
     const realmId = typeof state.realmId === 'string' && state.realmId ? state.realmId : null;
     await this.insertEvent({
@@ -1071,6 +1188,7 @@ export class PyriaD1 {
     const now = utcNowIso();
     const state = PyriaD1.rowToSave(row);
     state.ownerEmail = normOwner;
+    state.linkedToParent = Boolean(normOwner);
     state.updatedAt = now;
 
     const stateToStore = { ...state };
@@ -1115,6 +1233,7 @@ export class PyriaD1 {
     const now = utcNowIso();
     const state = PyriaD1.rowToSave(row);
     state.ownerEmail = normOwner;
+    state.linkedToParent = Boolean(normOwner);
     state.updatedAt = now;
     const stateToStore = { ...state };
     delete stateToStore.preferences;
@@ -1145,5 +1264,343 @@ export class PyriaD1 {
       return { status: 'already_owned_by_other' };
     }
     return { status: 'quota_exceeded' };
+  }
+
+  // ==================== Parent Preferences & Weekly Digest (Issue #71) ====================
+
+  async getParentPreferences(ownerEmail: string): Promise<ParentPreferencesRecord> {
+    const norm = normalizeEmail(ownerEmail);
+    if (!norm) {
+      return {
+        ownerEmail: '',
+        weeklyDigestEnabled: true,
+        unsubscribedAt: null,
+        updatedAt: null,
+      };
+    }
+
+    const row = await this.db
+      .prepare(
+        `SELECT owner_email, weekly_digest_enabled, unsubscribed_at, updated_at
+         FROM parent_preferences WHERE LOWER(owner_email) = ?`
+      )
+      .bind(norm)
+      .first<{
+        owner_email: string;
+        weekly_digest_enabled: number;
+        unsubscribed_at: string | null;
+        updated_at: string;
+      }>();
+
+    if (!row) {
+      return {
+        ownerEmail: norm,
+        weeklyDigestEnabled: true,
+        unsubscribedAt: null,
+        updatedAt: null,
+      };
+    }
+
+    return {
+      ownerEmail: norm,
+      weeklyDigestEnabled: Number(row.weekly_digest_enabled) !== 0,
+      unsubscribedAt: row.unsubscribed_at ?? null,
+      updatedAt: row.updated_at ?? null,
+    };
+  }
+
+  async setParentPreferences(
+    ownerEmail: string,
+    weeklyDigestEnabled: boolean
+  ): Promise<ParentPreferencesRecord> {
+    const norm = normalizeEmail(ownerEmail);
+    if (!norm) {
+      throw new ValidationError('Valid parent email is required');
+    }
+
+    const now = utcNowIso();
+    const unsubscribedAt = weeklyDigestEnabled ? null : now;
+    const enabledInt = weeklyDigestEnabled ? 1 : 0;
+
+    await this.db
+      .prepare(
+        `INSERT INTO parent_preferences (owner_email, weekly_digest_enabled, unsubscribed_at, updated_at)
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(owner_email) DO UPDATE SET
+           weekly_digest_enabled = excluded.weekly_digest_enabled,
+           unsubscribed_at = excluded.unsubscribed_at,
+           updated_at = excluded.updated_at`
+      )
+      .bind(norm, enabledInt, unsubscribedAt, now)
+      .run();
+
+    return {
+      ownerEmail: norm,
+      weeklyDigestEnabled,
+      unsubscribedAt,
+      updatedAt: now,
+    };
+  }
+
+  async getParentPreferencesMap(
+    ownerEmails: string[]
+  ): Promise<Map<string, ParentPreferencesRecord>> {
+    const map = new Map<string, ParentPreferencesRecord>();
+    const unique = [...new Set(ownerEmails.map((e) => normalizeEmail(e)).filter(Boolean) as string[])];
+    if (unique.length === 0) return map;
+
+    const CHUNK = 50;
+    for (let i = 0; i < unique.length; i += CHUNK) {
+      const slice = unique.slice(i, i + CHUNK);
+      const placeholders = slice.map(() => '?').join(', ');
+      const { results } = await this.db
+        .prepare(
+          `SELECT owner_email, weekly_digest_enabled, unsubscribed_at, updated_at
+           FROM parent_preferences WHERE LOWER(owner_email) IN (${placeholders})`
+        )
+        .bind(...slice)
+        .all<{
+          owner_email: string;
+          weekly_digest_enabled: number;
+          unsubscribed_at: string | null;
+          updated_at: string;
+        }>();
+
+      for (const row of results) {
+        const norm = normalizeEmail(row.owner_email);
+        if (!norm) continue;
+        map.set(norm, {
+          ownerEmail: norm,
+          weeklyDigestEnabled: Number(row.weekly_digest_enabled) !== 0,
+          unsubscribedAt: row.unsubscribed_at ?? null,
+          updatedAt: row.updated_at ?? null,
+        });
+      }
+    }
+
+    return map;
+  }
+
+  async listParentEmailsWithSaves(): Promise<string[]> {
+    return this.listAccounts(null);
+  }
+
+  async getDigestDelivery(
+    ownerEmail: string,
+    weekKey: string
+  ): Promise<DigestDeliveryRecord | null> {
+    const norm = normalizeEmail(ownerEmail);
+    if (!norm) return null;
+    const row = await this.db
+      .prepare(
+        `SELECT id, owner_email, week_key, hero_count, trials_solved, status,
+                provider_message_id, error_message, sent_at
+         FROM digest_deliveries
+         WHERE LOWER(owner_email) = ? AND week_key = ?`
+      )
+      .bind(norm, weekKey)
+      .first<{
+        id: number;
+        owner_email: string;
+        week_key: string;
+        hero_count: number;
+        trials_solved: number;
+        status: string;
+        provider_message_id: string | null;
+        error_message: string | null;
+        sent_at: string;
+      }>();
+
+    if (!row) return null;
+    return {
+      id: Number(row.id),
+      ownerEmail: norm,
+      weekKey: row.week_key,
+      heroCount: Number(row.hero_count),
+      trialsSolved: Number(row.trials_solved),
+      status: row.status === 'sent' ? 'sent' : 'failed',
+      providerMessageId: row.provider_message_id ?? null,
+      errorMessage: row.error_message ?? null,
+      sentAt: row.sent_at,
+    };
+  }
+
+  async listSentDigestOwnersForWeek(weekKey: string): Promise<Set<string>> {
+    const { results } = await this.db
+      .prepare(
+        `SELECT LOWER(owner_email) AS email
+         FROM digest_deliveries
+         WHERE week_key = ? AND status = 'sent'`
+      )
+      .bind(weekKey)
+      .all<{ email: string }>();
+
+    const out = new Set<string>();
+    for (const r of results) {
+      if (r.email) out.add(r.email);
+    }
+    return out;
+  }
+
+  async recordDigestDelivery(params: {
+    ownerEmail: string;
+    weekKey: string;
+    heroCount: number;
+    trialsSolved: number;
+    status: 'sent' | 'failed';
+    providerMessageId?: string | null;
+    errorMessage?: string | null;
+    sentAt?: string;
+  }): Promise<void> {
+    const norm = normalizeEmail(params.ownerEmail);
+    if (!norm) return;
+    const sentAt = params.sentAt ?? utcNowIso();
+
+    await this.db
+      .prepare(
+        `INSERT INTO digest_deliveries
+           (owner_email, week_key, hero_count, trials_solved, status, provider_message_id, error_message, sent_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(owner_email, week_key) DO UPDATE SET
+           hero_count = excluded.hero_count,
+           trials_solved = excluded.trials_solved,
+           status = excluded.status,
+           provider_message_id = excluded.provider_message_id,
+           error_message = excluded.error_message,
+           sent_at = excluded.sent_at
+         WHERE digest_deliveries.status != 'sent'`
+      )
+      .bind(
+        norm,
+        params.weekKey,
+        Math.max(0, Math.trunc(params.heroCount)),
+        Math.max(0, Math.trunc(params.trialsSolved)),
+        params.status,
+        params.providerMessageId ?? null,
+        params.errorMessage ? params.errorMessage.slice(0, 500) : null,
+        sentAt
+      )
+      .run();
+  }
+
+  async listSavesForOwners(ownerEmails: string[]): Promise<SaveRecord[]> {
+    const unique = [...new Set(ownerEmails.map((e) => normalizeEmail(e)).filter(Boolean) as string[])];
+    if (unique.length === 0) return [];
+
+    const out: SaveRecord[] = [];
+    const CHUNK = 50;
+    for (let i = 0; i < unique.length; i += CHUNK) {
+      const slice = unique.slice(i, i + CHUNK);
+      const placeholders = slice.map(() => '?').join(', ');
+      const { results } = await this.db
+        .prepare(
+          `SELECT id, hero_name, owner_email, recovery_code_hash, session_version,
+                  preferences_json, state_json, created_at, updated_at
+           FROM saves
+           WHERE LOWER(COALESCE(owner_email, '')) IN (${placeholders})
+           ORDER BY updated_at DESC, created_at DESC`
+        )
+        .bind(...slice)
+        .all<SaveDbRow>();
+
+      for (const row of results) {
+        out.push(PyriaD1.rowToSave(row));
+      }
+    }
+    return out;
+  }
+
+  async listAttemptsForSavesInWindow(
+    saveIds: string[],
+    windowStartIso: string,
+    windowEndIso: string
+  ): Promise<AttemptRecord[]> {
+    const unique = [...new Set(saveIds.filter(Boolean))];
+    if (unique.length === 0) return [];
+
+    const out: AttemptRecord[] = [];
+    const CHUNK = 50;
+    for (let i = 0; i < unique.length; i += CHUNK) {
+      const slice = unique.slice(i, i + CHUNK);
+      const placeholders = slice.map(() => '?').join(', ');
+      const { results } = await this.db
+        .prepare(
+          `SELECT id, save_id, trial_id, passed, hints_used,
+                  COALESCE(difficulty_mode, 'standard') AS difficulty_mode,
+                  COALESCE(is_practice, 0) AS is_practice,
+                  error_type, duration_ms, created_at
+           FROM trial_attempts
+           WHERE save_id IN (${placeholders})
+             AND created_at >= ? AND created_at <= ?
+           ORDER BY created_at ASC, id ASC`
+        )
+        .bind(...slice, windowStartIso, windowEndIso)
+        .all<{
+          id: number;
+          save_id: string;
+          trial_id: string;
+          passed: number;
+          hints_used: number;
+          difficulty_mode: string;
+          is_practice: number;
+          error_type: string | null;
+          duration_ms: number | null;
+          created_at: string;
+        }>();
+
+      for (const r of results) {
+        out.push({
+          id: Number(r.id),
+          saveId: r.save_id,
+          trialId: r.trial_id,
+          passed: Boolean(r.passed),
+          hintsUsed: Number(r.hints_used),
+          code: '', // Never load raw student code for parent digest emails
+          difficultyMode:
+            r.difficulty_mode === 'explorer' || r.difficulty_mode === 'challenge'
+              ? r.difficulty_mode
+              : 'standard',
+          isPractice: Boolean(r.is_practice),
+          errorType: r.error_type ?? null,
+          durationMs:
+            r.duration_ms !== null && r.duration_ms !== undefined ? Number(r.duration_ms) : null,
+          createdAt: r.created_at,
+        });
+      }
+    }
+    return out;
+  }
+
+  async listEventsForSavesInWindow(
+    saveIds: string[],
+    windowStartIso: string,
+    windowEndIso: string
+  ): Promise<ActivityEventRecord[]> {
+    const unique = [...new Set(saveIds.filter(Boolean))];
+    if (unique.length === 0) return [];
+
+    const out: ActivityEventRecord[] = [];
+    const CHUNK = 50;
+    for (let i = 0; i < unique.length; i += CHUNK) {
+      const slice = unique.slice(i, i + CHUNK);
+      const placeholders = slice.map(() => '?').join(', ');
+      const { results } = await this.db
+        .prepare(
+          `SELECT e.id, e.save_id, e.hero_name, s.owner_email, e.event_type,
+                  e.realm_id, e.trial_id, e.summary, e.details_json, e.created_at
+           FROM activity_events e
+           LEFT JOIN saves s ON s.id = e.save_id
+           WHERE e.save_id IN (${placeholders})
+             AND e.created_at >= ? AND e.created_at <= ?
+           ORDER BY e.created_at ASC, e.id ASC`
+        )
+        .bind(...slice, windowStartIso, windowEndIso)
+        .all<EventDbRow>();
+
+      for (const r of results) {
+        out.push(PyriaD1.rowToEvent(r));
+      }
+    }
+    return out;
   }
 }

@@ -11,7 +11,7 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <title>Pyria: Return of the Bits</title>
-  <link rel="stylesheet" href="/css/style.css?v=20261127l" />
+  <link rel="stylesheet" href="/css/style.css?v=20261127p" />
 </head>
 <body>
   <div id="app">
@@ -21,8 +21,11 @@
         <div id="title-account-bar" class="title-account-bar hidden">
           <span id="title-user-pill" class="pill pill-blue">👤 Signed In</span>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <button id="btn-hero-link-parent" type="button" class="btn btn-sm btn-sky hidden">🔗 Link Account</button>
             <button id="btn-hero-signout" type="button" class="btn btn-sm btn-ghost hidden">Switch Hero</button>
+            <a id="btn-title-parents" href="/console" class="btn btn-sm btn-ghost hidden">👤 Sign In</a>
             <a id="btn-title-builder" href="/builder" class="btn btn-sm btn-gold hidden">🛠️ Builder</a>
+            <button id="btn-account-signout" type="button" class="btn btn-sm btn-ghost hidden">Sign Out</button>
           </div>
         </div>
 
@@ -69,7 +72,17 @@
         </section>
 
         <footer class="title-footer">
-          <a id="link-parent-console" href="/console" class="title-footer-link">Parent Console</a>
+          <div class="parent-discover-card">
+            <div class="parent-discover-copy">
+              <div class="parent-discover-title">👤 Account &amp; Parent Console</div>
+              <div class="parent-discover-sub">
+                Sign in to sync heroes across devices, track Python progress, tune difficulty &amp; Pip hints, or manage family heroes.
+              </div>
+            </div>
+            <a id="link-parent-console" href="/console" class="btn btn-sm btn-ghost parent-discover-btn">
+              Open Console →
+            </a>
+          </div>
         </footer>
       </div>
     </section>
@@ -209,6 +222,9 @@
       <!-- Top HUD -->
       <header class="hud-bar">
         <div class="hud-left">
+          <button id="btn-hud-title" class="btn btn-sm btn-ghost hud-back-btn" title="Save &amp; Return to Main Title Screen">
+            ← Title
+          </button>
           <div class="hud-portrait-wrap">
             <canvas id="hud-portrait" width="32" height="32" class="pixel-canvas"></canvas>
           </div>
@@ -242,7 +258,7 @@
           <select id="hud-admin-realm-jump" class="hud-admin-jump hidden" title="Admin: Jump to any Era / Realm" aria-label="Admin Jump to Era or Realm"></select>
           <select id="hud-admin-cutscene-preview" class="hud-admin-jump hidden" title="Admin: Preview Story &amp; Era-Transition Cutscenes" aria-label="Admin Preview Cutscene"></select>
           <button id="btn-hud-hero-code" class="btn btn-sm btn-sky hidden" title="Save your hero to the cloud with a Hero Code">
-            🔑 Get Hero Code
+            ☁️ Save to Cloud
           </button>
           <button id="btn-hud-workshop" class="btn btn-sm btn-gold" title="Open Bram's Workshop">
             ⚒ Workshop
@@ -256,8 +272,8 @@
           <button id="btn-hud-mute" class="btn btn-sm btn-ghost" title="Toggle Sound Effects">
             🔊
           </button>
-          <button id="btn-hud-menu" class="btn btn-sm btn-ghost" title="Return to Save Picker">
-            Saves
+          <button id="btn-hud-menu" class="btn btn-sm btn-ghost" title="Game Menu (Esc)">
+            ☰ Menu
           </button>
         </div>
       </header>
@@ -302,7 +318,12 @@
           <span class="pip-tag">🐉 Pip</span>
           <span id="hud-objective">Walk with WASD or Arrow keys. Press E or click nearby to talk to Elder Ada!</span>
         </div>
-        <div id="hud-py-status" class="py-status pill pill-muted">Python: Loading...</div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <button id="btn-hud-autopath" type="button" class="btn btn-sm btn-sky" title="Auto-walk to your next Trial or objective (or click any minimap marker to travel)">
+            🧭 Walk to Next
+          </button>
+          <div id="hud-py-status" class="py-status pill pill-muted">Python: Loading...</div>
+        </div>
       </footer>
     </section>
 
@@ -314,6 +335,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/main.js?v=20261127l"></script>
+  <script type="module" src="/js/main.js?v=20261127r"></script>
 </body>
 </html>

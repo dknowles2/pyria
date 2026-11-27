@@ -1,5 +1,7 @@
 // Pyria Parent & Builder Console — Live Progress Stream, Difficulty Tuning & Story Editor
 
+import { renderQrSvg } from '/js/qr.js?v=20261127n';
+
 const POLL_INTERVAL_MS = 2500;
 const PASSCODE_STORAGE_KEY = 'pyria_builder_passcode';
 
@@ -10,6 +12,7 @@ const state = {
   isParentAuthenticated: false,
   parentEmail: null,
   googleOAuthEnabled: false,
+  magicLinkEnabled: false,
   accounts: [],
   selectedAccount: 'all',
   liveEnabled: true,
@@ -35,6 +38,26 @@ const state = {
   trackerHoverEntityId: null,
   trackerPinnedEntityId: null,
   trackerAnimRaf: null,
+
+  // Trial Calibration state
+  calFilters: {
+    eraId: '',
+    realmId: '',
+    trialType: '',
+    difficulty: 'all',
+    days: '30',
+    since: '',
+    flag: 'all',
+    includePractice: false,
+  },
+  calSortBy: 'flag',
+  calSortDir: 'asc',
+  calData: null,
+  calLoading: false,
+  calLoadedOnce: false,
+  calReqSeq: 0,
+  bootstrapped: false,
+  activateTabFn: null,
 };
 
 const MAP_TILE_COLORS = {
@@ -171,13 +194,17 @@ function closeConsoleModal() {
   const backdrop = $('#console-modal-backdrop');
   const content = $('#console-modal-content');
   backdrop?.classList.add('hidden');
-  if (content) content.innerHTML = '';
+  if (content) {
+    content.className = 'card console-modal-card';
+    content.innerHTML = '';
+  }
 }
 
-function openConsoleModal(html) {
+function openConsoleModal(html, extraClass = '') {
   const backdrop = $('#console-modal-backdrop');
   const content = $('#console-modal-content');
   if (!backdrop || !content) return;
+  content.className = `card console-modal-card ${extraClass}`.trim();
   content.innerHTML = html;
   backdrop.classList.remove('hidden');
   content.querySelectorAll('[data-close-modal]').forEach((btn) => {
@@ -185,7 +212,23 @@ function openConsoleModal(html) {
   });
 }
 
-function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
+function openOneTimeHeroCodeModal({ heroName, heroCode, playToken = '', title, note }) {
+  const playUrl = playToken
+    ? `${window.location.origin}/?play=${encodeURIComponent(playToken)}`
+    : '';
+  let qrSvg = '';
+  if (playUrl) {
+    try {
+      qrSvg = renderQrSvg(playUrl, {
+        size: 180,
+        quietZone: 4,
+        label: `Scan on your child's device to play as ${heroName || 'Hero'}`,
+      });
+    } catch {
+      qrSvg = '';
+    }
+  }
+
   openConsoleModal(`
     <div class="console-modal-header">
       <h2>${escapeHtml(title || '🔑 Hero Code Created')}</h2>
@@ -194,14 +237,36 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
     <p class="muted-text" style="margin:0;">
       Hero: <strong style="color:var(--text-main);">${escapeHtml(heroName || 'Hero')}</strong>
     </p>
+    ${
+      playUrl && qrSvg
+        ? `
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; border-radius:12px; background:rgba(56,189,248,0.08); border:1.5px solid rgba(56,189,248,0.38); text-align:center;">
+          <div style="font-size:12px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent-sky);">
+            📱 Scan on Another Device to Play
+          </div>
+          <div class="console-qr-card">${qrSvg}</div>
+          <div class="muted-text" style="font-size:12px; margin:0;">
+            Quick-play QR valid for 15 minutes
+          </div>
+        </div>
+        `
+        : ''
+    }
     <div class="console-code-box">
       <div id="console-onetime-code" class="console-code-display"></div>
-      <button id="btn-console-copy-code" type="button" class="btn btn-sm btn-gold">📋 Copy Hero Code</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+        <button id="btn-console-copy-code" type="button" class="btn btn-sm btn-gold">📋 Copy Code</button>
+        ${
+          playUrl
+            ? '<button id="btn-console-copy-play-link" type="button" class="btn btn-sm btn-sky">🔗 Copy Play Link</button>'
+            : ''
+        }
+      </div>
     </div>
     <p class="muted-text" style="margin:0;">
       ${escapeHtml(
         note ||
-          'Give this one-time Hero Code to your child. On their tablet or computer, click "Enter Hero Code" on the title screen to play!'
+          'Shown once — scan on another device or save the code to type under "Enter Hero Code". You can generate a new code anytime.'
       )}
     </p>
     <div class="console-modal-footer">
@@ -212,12 +277,10 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
   const codeEl = $('#console-onetime-code');
   if (codeEl) codeEl.textContent = String(heroCode || '');
 
-  const copyBtn = $('#btn-console-copy-code');
-  copyBtn?.addEventListener('click', async () => {
-    const text = String(heroCode || '');
+  const copyTextWithFeedback = async (btn, text, successLabel) => {
     try {
       await navigator.clipboard.writeText(text);
-      copyBtn.textContent = '✓ Copied!';
+      btn.textContent = successLabel;
     } catch {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -227,19 +290,29 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
       ta.select();
       try {
         document.execCommand('copy');
-        copyBtn.textContent = '✓ Copied!';
+        btn.textContent = successLabel;
       } catch {
-        copyBtn.textContent = 'Select & Copy Above';
+        btn.textContent = 'Select & Copy Above';
       }
       ta.remove();
     }
+  };
+
+  const copyBtn = $('#btn-console-copy-code');
+  copyBtn?.addEventListener('click', () => {
+    copyTextWithFeedback(copyBtn, String(heroCode || ''), '✓ Code Copied!');
+  });
+
+  const copyLinkBtn = $('#btn-console-copy-play-link');
+  copyLinkBtn?.addEventListener('click', () => {
+    copyTextWithFeedback(copyLinkBtn, playUrl, '✓ Link Copied!');
   });
 }
 
 function openAddChildHeroModal() {
   openConsoleModal(`
     <div class="console-modal-header">
-      <h2>✨ Add Child Hero</h2>
+      <h2>✨ Add Hero</h2>
       <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
     </div>
     <div class="field">
@@ -281,7 +354,7 @@ function openAddChildHeroModal() {
   const submitBtn = $('#btn-submit-add-hero');
   setTimeout(() => nameEl?.focus(), 30);
 
-  submitBtn?.addEventListener('click', async () => {
+  const submitAddHero = async () => {
     const heroName = String(nameEl?.value || '').trim();
     if (heroName.length < 2 || heroName.length > 24) {
       if (errEl) {
@@ -309,7 +382,8 @@ function openAddChildHeroModal() {
       openOneTimeHeroCodeModal({
         heroName: res.save?.heroName || heroName,
         heroCode: res.heroCode,
-        title: '🔑 Child Hero Created!',
+        playToken: res.playToken || '',
+        title: '🔑 Hero Created!',
       });
     } catch (err) {
       if (errEl) {
@@ -318,6 +392,14 @@ function openAddChildHeroModal() {
       }
       submitBtn.disabled = false;
       submitBtn.textContent = 'Create Hero & Code';
+    }
+  };
+
+  submitBtn?.addEventListener('click', submitAddHero);
+  nameEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitAddHero();
     }
   });
 }
@@ -329,11 +411,12 @@ function openClaimHeroModal() {
       <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
     </div>
     <p class="muted-text" style="margin:0;">
-      Enter the Hero Code from your child's device to link their hero to your Parent Console.
+      Enter a Hero Code to link that hero to your account.
     </p>
     <div class="field">
       <label for="claim-hero-code">Hero Code</label>
-      <input id="claim-hero-code" type="text" class="input input-mono" maxlength="40" placeholder="EMBER-DRAGON-4821" autocomplete="off" />
+      <input id="claim-hero-code" type="text" class="input input-mono" maxlength="40" placeholder="EMBER-DRAGON-482103" autocomplete="off" />
+      <div class="muted-text" style="font-size:12px; margin-top:4px;">Dashes optional — spaces or no dashes work too.</div>
     </div>
     <div id="claim-hero-error" class="console-error-msg hidden"></div>
     <div class="console-modal-footer">
@@ -347,7 +430,7 @@ function openClaimHeroModal() {
   const submitBtn = $('#btn-submit-claim-hero');
   setTimeout(() => codeEl?.focus(), 30);
 
-  submitBtn?.addEventListener('click', async () => {
+  const submitClaim = async () => {
     const heroCode = String(codeEl?.value || '').trim().toUpperCase();
     if (!heroCode) {
       if (errEl) {
@@ -374,6 +457,14 @@ function openClaimHeroModal() {
       }
       submitBtn.disabled = false;
       submitBtn.textContent = 'Link Hero';
+    }
+  };
+
+  submitBtn?.addEventListener('click', submitClaim);
+  codeEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitClaim();
     }
   });
 }
@@ -678,35 +769,55 @@ function renderHeroCards() {
   });
 
   listEl.querySelectorAll('.btn-rotate-hero-code').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const saveId = btn.dataset.saveId;
       const save = state.saves.find((s) => s.id === saveId);
       if (!save) return;
-      if (
-        !confirm(
-          `Rotate Hero Code for "${save.heroName}"? This will immediately sign out any child device using the old code.`
-        )
-      ) {
-        return;
-      }
-      btn.disabled = true;
-      try {
-        const res = await apiFetch(`/api/console/saves/${encodeURIComponent(saveId)}/rotate-code`, {
-          method: 'POST',
-          body: JSON.stringify({}),
-        });
-        openOneTimeHeroCodeModal({
-          heroName: save.heroName,
-          heroCode: res.heroCode,
-          title: '🔄 New Hero Code Generated',
-          note: 'Old child-device sessions have been revoked. Share this new one-time code to sign back in.',
-        });
-      } catch (err) {
-        showToast(`Could not rotate code: ${err.message}`, true);
-      } finally {
-        btn.disabled = false;
-      }
+      openConsoleModal(`
+        <div class="console-modal-header">
+          <h2>🔄 Rotate Hero Code?</h2>
+          <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+        </div>
+        <p class="muted-text" style="margin:0;">
+          Generate a new Hero Code for <strong style="color:var(--text-main);">${escapeHtml(save.heroName)}</strong>?
+        </p>
+        <p class="muted-text" style="margin:0;">
+          This will immediately sign out any device using the old code. Progress stays safe in the cloud.
+        </p>
+        <div id="rotate-code-error" class="console-error-msg hidden"></div>
+        <div class="console-modal-footer">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button id="btn-confirm-rotate-code" type="button" class="btn btn-primary">Generate New Code</button>
+        </div>
+      `);
+      const confirmBtn = $('#btn-confirm-rotate-code');
+      const errEl = $('#rotate-code-error');
+      confirmBtn?.addEventListener('click', async () => {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Generating...';
+        if (errEl) errEl.classList.add('hidden');
+        try {
+          const res = await apiFetch(`/api/console/saves/${encodeURIComponent(saveId)}/rotate-code`, {
+            method: 'POST',
+            body: JSON.stringify({}),
+          });
+          openOneTimeHeroCodeModal({
+            heroName: save.heroName,
+            heroCode: res.heroCode,
+            playToken: res.playToken,
+            title: '🔄 New Hero Code Generated',
+            note: 'Old device sessions have been signed out. Scan on another device or share this code — you can generate a new one anytime.',
+          });
+        } catch (err) {
+          if (errEl) {
+            errEl.textContent = err.message || 'Could not rotate code.';
+            errEl.classList.remove('hidden');
+          }
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Generate New Code';
+        }
+      });
     });
   });
 
@@ -974,6 +1085,7 @@ async function loadConsoleCurriculum() {
       conceptWarnings: [],
     };
     populateTrackerRealmSelect();
+    populateCalibrationEraRealmFilters();
     renderHeroCards();
     refreshRealmTracker();
   } catch (err) {
@@ -1000,6 +1112,7 @@ async function loadOverview() {
   renderConceptHealth();
   renderHeroCards(); // refresh realm names/trial counts
   populateTrackerRealmSelect();
+  populateCalibrationEraRealmFilters();
   refreshRealmTracker();
 }
 
@@ -1991,13 +2104,633 @@ function wireTrackerEvents() {
   state.trackerAnimRaf = requestAnimationFrame(pulseTick);
 }
 
+// ==================== TRIAL CALIBRATION ====================
+function canAccessCalibration() {
+  return state.mode !== 'cloudflare' || (state.isParentAuthenticated && state.isAdmin);
+}
+
+function getCalibrationEndpoint(format = 'json') {
+  const base = state.mode === 'cloudflare' ? '/api/admin/trial-metrics' : '/api/builder/trial-metrics';
+  const params = new URLSearchParams();
+  const f = state.calFilters;
+  if (f.eraId) params.set('eraId', f.eraId);
+  if (f.realmId) params.set('realmId', f.realmId);
+  if (f.trialType) params.set('trialType', f.trialType);
+  if (f.difficulty) params.set('difficulty', f.difficulty);
+  if (f.days) params.set('days', f.days);
+  if (f.since && /^\d{4}-\d{2}-\d{2}$/.test(f.since)) params.set('since', f.since);
+  params.set('includePractice', f.includePractice ? '1' : '0');
+  params.set('format', format === 'csv' ? 'csv' : 'json');
+  return `${base}?${params.toString()}`;
+}
+
+function formatCalPct(val) {
+  if (val === null || val === undefined || !Number.isFinite(Number(val))) return '—';
+  const rounded = Math.round(Number(val) * 10) / 10;
+  return `${rounded}%`;
+}
+
+function formatCalNum(val, decimals = 1) {
+  if (val === null || val === undefined || !Number.isFinite(Number(val))) return '—';
+  const n = Number(val);
+  if (decimals <= 0) return String(Math.round(n));
+  return n.toFixed(decimals).replace(/\.0$/, '');
+}
+
+function formatTrialTypeLabel(trialType) {
+  if (trialType === 'multiple_choice') return 'Multiple Choice';
+  if (trialType === 'fix_bug') return 'Fix the Bug';
+  if (!trialType || trialType === 'code') return 'Coding';
+  return String(trialType);
+}
+
+function getCalibrationFlagMeta(flag) {
+  switch (flag) {
+    case 'possible_bug':
+      return { order: 0, cls: 'pill-violet', label: '🟣 Possible Bug' };
+    case 'too_hard':
+      return { order: 1, cls: 'pill-rose', label: '🔴 Too Hard' };
+    case 'too_easy':
+      return { order: 2, cls: 'pill-amber', label: '🟡 Too Easy' };
+    case 'low_data':
+      return { order: 3, cls: 'pill-muted', label: '⚪ Low Data' };
+    case 'ok':
+    default:
+      return { order: 4, cls: 'pill-green', label: '🟢 OK' };
+  }
+}
+
+function populateCalibrationEraRealmFilters() {
+  const eraSel = $('#cal-filter-era');
+  const realmSel = $('#cal-filter-realm');
+  if (!eraSel || !realmSel || !state.overview) return;
+
+  const eras = state.overview.eras || [];
+  const eraOpts = ['<option value="">All Eras</option>'];
+  for (const era of eras) {
+    eraOpts.push(`<option value="${escapeHtml(era.id)}">${escapeHtml(era.name || era.id)}</option>`);
+  }
+  eraSel.innerHTML = eraOpts.join('');
+  if (state.calFilters.eraId && !eras.some((e) => e.id === state.calFilters.eraId)) {
+    state.calFilters.eraId = '';
+  }
+  eraSel.value = state.calFilters.eraId;
+
+  const filteredEras = state.calFilters.eraId
+    ? eras.filter((e) => e.id === state.calFilters.eraId)
+    : eras;
+  const realmOpts = ['<option value="">All Realms</option>'];
+  const validRealmIds = new Set();
+  for (const era of filteredEras) {
+    for (const r of era.realms || []) {
+      validRealmIds.add(r.id);
+      realmOpts.push(
+        `<option value="${escapeHtml(r.id)}">${escapeHtml(r.number)}. ${escapeHtml(r.name)}</option>`
+      );
+    }
+  }
+  realmSel.innerHTML = realmOpts.join('');
+  if (state.calFilters.realmId && !validRealmIds.has(state.calFilters.realmId)) {
+    state.calFilters.realmId = '';
+  }
+  realmSel.value = state.calFilters.realmId;
+}
+
+function renderCalibrationKpis() {
+  const s = state.calData?.summary || {};
+  const withData = Number(s.trialsWithData) || 0;
+  const totalTrials = Number(s.totalTrials) || 0;
+  const setText = (sel, text) => {
+    const el = $(sel);
+    if (el) el.textContent = text;
+  };
+  setText('#cal-kpi-with-data', `${withData} / ${totalTrials}`);
+  setText('#cal-kpi-too-hard', String(Number(s.flaggedTooHard) || 0));
+  setText('#cal-kpi-too-easy', String(Number(s.flaggedTooEasy) || 0));
+  setText('#cal-kpi-possible-bug', String(Number(s.flaggedPossibleBug) || 0));
+  setText('#cal-kpi-median', formatCalNum(s.overallMedianAttempts, 1));
+  setText('#cal-kpi-overrides', String(Number(s.totalOverrides) || 0));
+}
+
+function getFilteredSortedCalibrationTrials() {
+  const all = Array.isArray(state.calData?.trials) ? state.calData.trials : [];
+  const flagFilter = state.calFilters.flag || 'all';
+  const filtered = all.filter((t) => {
+    if (flagFilter === 'all') return true;
+    if (flagFilter === 'flagged') {
+      return t.flag === 'too_hard' || t.flag === 'too_easy' || t.flag === 'possible_bug';
+    }
+    return t.flag === flagFilter;
+  });
+
+  const sortBy = state.calSortBy || 'flag';
+  const dir = state.calSortDir === 'desc' ? -1 : 1;
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === 'title') {
+      const sa = String(a.title || a.trialId || '');
+      const sb = String(b.title || b.trialId || '');
+      return sa.localeCompare(sb) * dir;
+    }
+    if (sortBy === 'flag') {
+      const oa = getCalibrationFlagMeta(a.flag).order;
+      const ob = getCalibrationFlagMeta(b.flag).order;
+      if (oa !== ob) return (oa - ob) * dir;
+      // Tie-break by uniqueHeroes descending
+      return ((Number(b.uniqueHeroes) || 0) - (Number(a.uniqueHeroes) || 0));
+    }
+    const va = a[sortBy];
+    const vb = b[sortBy];
+    const aNull = va === null || va === undefined || !Number.isFinite(Number(va));
+    const bNull = vb === null || vb === undefined || !Number.isFinite(Number(vb));
+    if (aNull && bNull) return String(a.trialId || '').localeCompare(String(b.trialId || ''));
+    if (aNull) return 1;
+    if (bNull) return -1;
+    const diff = (Number(va) - Number(vb)) * dir;
+    if (diff !== 0) return diff;
+    return String(a.trialId || '').localeCompare(String(b.trialId || ''));
+  });
+
+  return sorted;
+}
+
+function renderCalibrationTable() {
+  const tbody = $('#cal-metrics-tbody');
+  const countPill = $('#cal-table-count-pill');
+  if (!tbody) return;
+
+  // Update sort header indicators
+  document.querySelectorAll('.cal-sort-btn').forEach((btn) => {
+    const active = btn.dataset.calSort === state.calSortBy;
+    btn.classList.toggle('active', active);
+    const arrow = btn.querySelector('.cal-sort-arrow');
+    if (arrow) {
+      arrow.textContent = active ? (state.calSortDir === 'desc' ? '▼' : '▲') : '';
+    }
+  });
+
+  if (state.calLoading && !state.calData) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state">Loading Trial Calibration metrics...</div></td></tr>';
+    return;
+  }
+
+  const rows = getFilteredSortedCalibrationTrials();
+  if (countPill) {
+    countPill.textContent = `${rows.length} ${rows.length === 1 ? 'trial' : 'trials'}`;
+  }
+
+  if (!rows.length) {
+    tbody.innerHTML =
+      '<tr><td colspan="8"><div class="empty-state">No trials match the current calibration filters.</div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = rows
+    .map((t) => {
+      const flagMeta = getCalibrationFlagMeta(t.flag);
+      const { era, realm } = getRealmMeta(t.realmId);
+      const realmLabel = t.realmName || realm?.name || t.realmId || '';
+      const eraLabel = t.eraName || era?.name || t.eraId || '';
+      const typeLabel = formatTrialTypeLabel(t.trialType);
+
+      return `
+        <tr class="cal-row" tabindex="0" data-cal-trial-id="${escapeHtml(t.trialId)}">
+          <td>
+            <div class="cal-trial-title">${escapeHtml(t.title || t.trialId)}</div>
+            <div class="cal-trial-meta">
+              <code>${escapeHtml(t.trialId)}</code> · ${escapeHtml(realmLabel)}${eraLabel ? ` (${escapeHtml(eraLabel)})` : ''} · ${escapeHtml(typeLabel)}
+            </div>
+          </td>
+          <td><strong>${Number(t.uniqueHeroes) || 0}</strong></td>
+          <td>${escapeHtml(formatCalPct(t.completionRate))}</td>
+          <td>${escapeHtml(formatCalPct(t.firstTryPassRate))}</td>
+          <td>${escapeHtml(formatCalNum(t.medianAttemptsToSolve, 1))}</td>
+          <td>${escapeHtml(formatCalPct(t.hintUsageRate))}</td>
+          <td>${Number(t.parentOverrides) || 0}</td>
+          <td><span class="pill ${escapeHtml(flagMeta.cls)}">${escapeHtml(flagMeta.label)}</span></td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  tbody.querySelectorAll('.cal-row').forEach((row) => {
+    const open = () => {
+      const tid = row.dataset.calTrialId;
+      const found = (state.calData?.trials || []).find((x) => x.trialId === tid);
+      if (found) openTrialCalibrationDrillDown(found);
+    };
+    row.addEventListener('click', open);
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
+}
+
+function renderBeforeAfterSummary(dailyTrend, cutoffDay) {
+  const trend = Array.isArray(dailyTrend) ? dailyTrend : [];
+  if (!cutoffDay || !/^\d{4}-\d{2}-\d{2}$/.test(cutoffDay)) {
+    return '<div class="hint-sub">Pick a cutoff date above to compare pass rates before vs. on/after a calibration edit.</div>';
+  }
+  const agg = (items) => {
+    let attempts = 0;
+    let passes = 0;
+    for (const d of items) {
+      attempts += Number(d.attempts) || 0;
+      passes += Number(d.passes) || 0;
+    }
+    const rate = attempts > 0 ? Math.round((passes / attempts) * 1000) / 10 : null;
+    return { attempts, passes, rate };
+  };
+  const before = agg(trend.filter((d) => String(d.day || '') < cutoffDay));
+  const after = agg(trend.filter((d) => String(d.day || '') >= cutoffDay));
+  return `
+    <div class="cal-before-after-grid">
+      <div class="cal-before-after-card">
+        <span class="cal-drill-stat-label">Before ${escapeHtml(cutoffDay)}</span>
+        <strong>Pass Rate: ${escapeHtml(formatCalPct(before.rate))}</strong>
+        <span class="hint-sub">${before.passes} passes / ${before.attempts} attempts</span>
+      </div>
+      <div class="cal-before-after-card">
+        <span class="cal-drill-stat-label">On / After ${escapeHtml(cutoffDay)}</span>
+        <strong>Pass Rate: ${escapeHtml(formatCalPct(after.rate))}</strong>
+        <span class="hint-sub">${after.passes} passes / ${after.attempts} attempts</span>
+      </div>
+    </div>
+  `;
+}
+
+function openTrialCalibrationDrillDown(trial) {
+  const flagMeta = getCalibrationFlagMeta(trial.flag);
+  const { era, realm } = getRealmMeta(trial.realmId);
+  const eraLabel = trial.eraName || era?.name || trial.eraId || '';
+  const realmLabel = trial.realmName || realm?.name || trial.realmId || '';
+  const concepts = Array.isArray(trial.concepts) ? trial.concepts : [];
+  const reasons = Array.isArray(trial.flagReasons) ? trial.flagReasons : [];
+  const hints = trial.hintTierBreakdown && typeof trial.hintTierBreakdown === 'object'
+    ? trial.hintTierBreakdown
+    : { tier0: 0, tier1: 0, tier2: 0, tier3: 0 };
+  const hintTiers = [
+    { label: 'Tier 0 (No Hints)', count: Number(hints.tier0) || 0 },
+    { label: 'Tier 1 (Nudge)', count: Number(hints.tier1) || 0 },
+    { label: 'Tier 2 (Pattern)', count: Number(hints.tier2) || 0 },
+    { label: 'Tier 3+ (Walkthrough)', count: Number(hints.tier3) || 0 },
+  ];
+  const totalHintRows = Math.max(1, hintTiers.reduce((acc, h) => acc + h.count, 0));
+
+  const topErrors = Array.isArray(trial.topErrors) ? trial.topErrors : [];
+  const maxErrorCount = Math.max(1, ...topErrors.map((e) => Number(e.count) || 0));
+
+  const dailyTrend = Array.isArray(trial.dailyTrend) ? trial.dailyTrend : [];
+  const maxDailyAttempts = Math.max(1, ...dailyTrend.map((d) => Number(d.attempts) || 0));
+  const activeSince = state.calFilters.since || '';
+  const initialCutoff = '';
+  const canEditInBuilder = state.mode !== 'cloudflare';
+
+  openConsoleModal(
+    `
+    <div class="console-modal-header">
+      <div>
+        <h2>${escapeHtml(trial.title || trial.trialId)}</h2>
+        <div class="cal-trial-meta" style="margin-top:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <code>${escapeHtml(trial.trialId)}</code>
+          <span class="pill ${escapeHtml(flagMeta.cls)}">${escapeHtml(flagMeta.label)}</span>
+          <span class="pill pill-blue">${escapeHtml(formatTrialTypeLabel(trial.trialType))}</span>
+          ${realmLabel ? `<span class="pill pill-muted">${escapeHtml(realmLabel)}${eraLabel ? ` · ${escapeHtml(eraLabel)}` : ''}</span>` : ''}
+          ${concepts.map((c) => `<span class="pill pill-muted">${escapeHtml(c)}</span>`).join('')}
+        </div>
+      </div>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+
+    ${
+      reasons.length
+        ? `
+          <div class="cal-drill-section">
+            <h3>🚩 Calibration Flag Reasons</h3>
+            <ul class="cal-flag-reasons">
+              ${reasons.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}
+            </ul>
+          </div>
+        `
+        : ''
+    }
+
+    <div class="cal-drill-stats">
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">Unique Heroes</span>
+        <span class="cal-drill-stat-val">${Number(trial.uniqueHeroes) || 0}</span>
+      </div>
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">Unique Solvers</span>
+        <span class="cal-drill-stat-val">${Number(trial.uniqueSolvers) || 0}</span>
+      </div>
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">Completion %</span>
+        <span class="cal-drill-stat-val">${escapeHtml(formatCalPct(trial.completionRate))}</span>
+      </div>
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">First-Try %</span>
+        <span class="cal-drill-stat-val">${escapeHtml(formatCalPct(trial.firstTryPassRate))}</span>
+      </div>
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">Median / P75</span>
+        <span class="cal-drill-stat-val">${escapeHtml(formatCalNum(trial.medianAttemptsToSolve, 1))} / ${escapeHtml(formatCalNum(trial.p75AttemptsToSolve, 1))}</span>
+      </div>
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">Attempts / Passes</span>
+        <span class="cal-drill-stat-val">${Number(trial.attempts) || 0} / ${Number(trial.passes) || 0}</span>
+      </div>
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">Hint / Tier-3 %</span>
+        <span class="cal-drill-stat-val">${escapeHtml(formatCalPct(trial.hintUsageRate))} / ${escapeHtml(formatCalPct(trial.tier3HintRate))}</span>
+      </div>
+      <div class="cal-drill-stat">
+        <span class="cal-drill-stat-label">Overrides</span>
+        <span class="cal-drill-stat-val">${Number(trial.parentOverrides) || 0} (${escapeHtml(formatCalPct(trial.parentOverrideRate))})</span>
+      </div>
+    </div>
+
+    <div class="cal-drill-section">
+      <h3>💡 Hint-Tier Breakdown</h3>
+      <div class="cal-bar-list">
+        ${hintTiers
+          .map((h) => {
+            const pct = Math.round((h.count / totalHintRows) * 100);
+            return `
+              <div class="cal-bar-row">
+                <span class="cal-bar-label">${escapeHtml(h.label)}</span>
+                <div class="cal-bar-track"><div class="cal-bar-fill fill-hint" style="width:${pct}%;"></div></div>
+                <span class="cal-bar-val">${h.count} (${pct}%)</span>
+              </div>
+            `;
+          })
+          .join('')}
+      </div>
+    </div>
+
+    <div class="cal-drill-section">
+      <h3>⚠️ Top Failure Modes</h3>
+      ${
+        topErrors.length
+          ? `
+            <div class="cal-bar-list">
+              ${topErrors
+                .map((e) => {
+                  const cnt = Number(e.count) || 0;
+                  const pct = Math.round((cnt / maxErrorCount) * 100);
+                  return `
+                    <div class="cal-bar-row">
+                      <span class="cal-bar-label" title="${escapeHtml(e.errorType)}"><code>${escapeHtml(e.errorType)}</code></span>
+                      <div class="cal-bar-track"><div class="cal-bar-fill fill-error" style="width:${pct}%;"></div></div>
+                      <span class="cal-bar-val">${cnt}</span>
+                    </div>
+                  `;
+                })
+                .join('')}
+            </div>
+          `
+          : '<div class="hint-sub">No recorded failure error types in this window.</div>'
+      }
+    </div>
+
+    <div class="cal-drill-section">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <h3>📈 Daily Trend &amp; Before/After Check</h3>
+        <label class="control-group" style="font-size:12px;">
+          <span class="control-label">Cutoff Date:</span>
+          <input id="cal-drill-cutoff" type="date" class="input input-sm" value="${escapeHtml(initialCutoff)}" />
+        </label>
+      </div>
+      ${
+        activeSince
+          ? `<div class="hint-sub" style="color:var(--accent-amber);">Note: active <strong>Since (${escapeHtml(activeSince)})</strong> filter excludes earlier days. Clear <strong>Since</strong> and widen the Time Window to compare before vs. after.</div>`
+          : ''
+      }
+      <div id="cal-drill-before-after">${renderBeforeAfterSummary(dailyTrend, initialCutoff)}</div>
+      ${
+        dailyTrend.length
+          ? `
+            <div class="cal-trend-wrap">
+              ${dailyTrend
+                .map((d) => {
+                  const att = Number(d.attempts) || 0;
+                  const pass = Number(d.passes) || 0;
+                  const pctBar = Math.round((att / maxDailyAttempts) * 100);
+                  const passPct = att > 0 ? Math.round((pass / att) * 100) : 0;
+                  return `
+                    <div class="cal-trend-row">
+                      <code style="color:var(--text-muted);">${escapeHtml(d.day)}</code>
+                      <div class="cal-bar-track"><div class="cal-bar-fill" style="width:${pctBar}%;"></div></div>
+                      <span class="cal-bar-val">${pass}/${att} (${passPct}%)</span>
+                    </div>
+                  `;
+                })
+                .join('')}
+            </div>
+          `
+          : '<div class="hint-sub">No daily trend points in this window.</div>'
+      }
+    </div>
+
+    <div class="console-modal-footer">
+      ${
+        canEditInBuilder
+          ? '<button id="btn-cal-edit-trial" type="button" class="btn btn-primary">✏️ Edit Trial in Story &amp; Trials</button>'
+          : ''
+      }
+      <button type="button" class="btn btn-ghost" data-close-modal>Close</button>
+    </div>
+    `,
+    'console-modal-wide'
+  );
+
+  const cutoffInput = $('#cal-drill-cutoff');
+  const beforeAfterEl = $('#cal-drill-before-after');
+  cutoffInput?.addEventListener('change', () => {
+    if (beforeAfterEl) {
+      beforeAfterEl.innerHTML = renderBeforeAfterSummary(dailyTrend, cutoffInput.value);
+    }
+  });
+
+  if (canEditInBuilder) {
+    $('#btn-cal-edit-trial')?.addEventListener('click', () => {
+      closeConsoleModal();
+      const targetMeta = getRealmMeta(trial.realmId);
+      const targetEraId = trial.eraId || targetMeta.era?.id || state.selectedEraId;
+      const targetRealmId = trial.realmId || targetMeta.realm?.id || state.selectedRealmId;
+      if (targetEraId) state.selectedEraId = targetEraId;
+      if (targetRealmId) state.selectedRealmId = targetRealmId;
+      state.selectedTrialId = trial.trialId;
+      renderEraRealmTree();
+      renderRealmEditor();
+      if (state.activateTabFn) {
+        state.activateTabFn('story');
+      }
+      setTimeout(() => {
+        $('#trial-editor-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+    });
+  }
+}
+
+async function loadTrialCalibration() {
+  if (!canAccessCalibration()) return;
+  const seq = ++state.calReqSeq;
+  state.calLoading = true;
+  renderCalibrationTable();
+  try {
+    const data = await apiFetch(getCalibrationEndpoint('json'));
+    if (seq !== state.calReqSeq) return;
+    state.calData = data;
+    state.calLoadedOnce = true;
+    renderCalibrationKpis();
+    renderCalibrationTable();
+  } catch (err) {
+    if (seq !== state.calReqSeq) return;
+    state.calData = null;
+    renderCalibrationKpis();
+    const tbody = $('#cal-metrics-tbody');
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">Could not load calibration metrics: ${escapeHtml(err.message)}</div></td></tr>`;
+    }
+    const countPill = $('#cal-table-count-pill');
+    if (countPill) countPill.textContent = '0 trials';
+    showToast(`Calibration load failed: ${err.message}`, true);
+  } finally {
+    if (seq === state.calReqSeq) {
+      state.calLoading = false;
+    }
+  }
+}
+
+async function exportTrialCalibrationCsv() {
+  if (!canAccessCalibration()) return;
+  const btn = $('#btn-cal-export-csv');
+  if (btn) btn.disabled = true;
+  try {
+    const isLocal = state.mode !== 'cloudflare';
+    const passcode = isLocal ? sessionStorage.getItem(PASSCODE_STORAGE_KEY) || '' : '';
+    const headers = passcode ? { 'X-Builder-Passcode': passcode } : {};
+    const res = await fetch(getCalibrationEndpoint('csv'), { cache: 'no-store', headers });
+    if (isLocal && (res.status === 401 || res.status === 403)) {
+      $('#passcode-bar')?.classList.remove('hidden');
+      throw new Error('Builder passcode required');
+    }
+    if (!isLocal && (res.status === 401 || res.status === 403)) {
+      setLivePolling(false);
+      showCloudflareSignInScreen();
+      throw new Error('Parent sign-in required');
+    }
+    if (!res.ok) {
+      let detail = `${res.status} ${res.statusText}`;
+      try {
+        const body = await res.json();
+        if (body && body.error) detail = body.error;
+      } catch {
+        // ignore
+      }
+      throw new Error(detail);
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'pyria-trial-metrics.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast(
+      state.calFilters.flag && state.calFilters.flag !== 'all'
+        ? 'Exported pyria-trial-metrics.csv (includes all flag statuses for current server filters)'
+        : 'Exported pyria-trial-metrics.csv'
+    );
+  } catch (err) {
+    showToast(`CSV export failed: ${err.message}`, true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function wireCalibrationEvents() {
+  const onServerFilterChange = () => {
+    loadTrialCalibration();
+  };
+
+  $('#cal-filter-era')?.addEventListener('change', (e) => {
+    state.calFilters.eraId = e.target.value || '';
+    state.calFilters.realmId = '';
+    populateCalibrationEraRealmFilters();
+    onServerFilterChange();
+  });
+  $('#cal-filter-realm')?.addEventListener('change', (e) => {
+    state.calFilters.realmId = e.target.value || '';
+    onServerFilterChange();
+  });
+  $('#cal-filter-type')?.addEventListener('change', (e) => {
+    state.calFilters.trialType = e.target.value || '';
+    onServerFilterChange();
+  });
+  $('#cal-filter-difficulty')?.addEventListener('change', (e) => {
+    state.calFilters.difficulty = e.target.value || 'all';
+    onServerFilterChange();
+  });
+  $('#cal-filter-days')?.addEventListener('change', (e) => {
+    state.calFilters.days = e.target.value || '30';
+    onServerFilterChange();
+  });
+  $('#cal-filter-since')?.addEventListener('change', (e) => {
+    state.calFilters.since = e.target.value || '';
+    onServerFilterChange();
+  });
+  $('#cal-filter-practice')?.addEventListener('change', (e) => {
+    state.calFilters.includePractice = Boolean(e.target.checked);
+    onServerFilterChange();
+  });
+  $('#cal-filter-flag')?.addEventListener('change', (e) => {
+    state.calFilters.flag = e.target.value || 'all';
+    renderCalibrationTable();
+  });
+  $('#btn-cal-refresh')?.addEventListener('click', () => {
+    loadTrialCalibration();
+  });
+  $('#btn-cal-export-csv')?.addEventListener('click', () => {
+    exportTrialCalibrationCsv();
+  });
+
+  document.querySelectorAll('.cal-sort-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const col = btn.dataset.calSort;
+      if (!col) return;
+      if (state.calSortBy === col) {
+        state.calSortDir = state.calSortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.calSortBy = col;
+        state.calSortDir = col === 'title' || col === 'flag' ? 'asc' : 'desc';
+      }
+      renderCalibrationTable();
+    });
+  });
+}
+
 // ==================== WIRE UI EVENTS ====================
 function wireEvents() {
   // Tabs (sticky across refreshes via URL hash + localStorage)
-  const VALID_TABS = new Set(['live', 'story', 'health', 'assets']);
+  const VALID_TABS = new Set(['live', 'calibration', 'story', 'health', 'assets']);
   const normalizeTab = (t) => (t === 'progress' ? 'live' : VALID_TABS.has(t) ? t : 'live');
+  const isTabAllowed = (tab) => {
+    if (state.mode !== 'cloudflare') return VALID_TABS.has(tab);
+    if (!state.isParentAuthenticated) return false;
+    if (tab === 'live') return true;
+    if (tab === 'calibration') return Boolean(state.isAdmin);
+    return false;
+  };
   const activateTab = (target, { updateUrl = true } = {}) => {
-    const tab = state.mode === 'cloudflare' ? 'live' : normalizeTab(target);
+    const requested = normalizeTab(target);
+    const tab = isTabAllowed(requested) ? requested : 'live';
     document.querySelectorAll('.tab-btn').forEach((b) => {
       const active = b.dataset.tab === tab;
       b.classList.toggle('active', active);
@@ -2012,15 +2745,21 @@ function wireEvents() {
         iframe.src = '/assets/world/preview.html';
       }
     }
-    try {
-      localStorage.setItem('pyria_builder_tab', tab);
-    } catch {
-      // ignore storage errors
+    if (tab === 'calibration' && state.bootstrapped && canAccessCalibration() && !state.calLoading && !state.calLoadedOnce) {
+      loadTrialCalibration();
+    }
+    if (state.bootstrapped) {
+      try {
+        localStorage.setItem('pyria_builder_tab', tab);
+      } catch {
+        // ignore storage errors
+      }
     }
     if (updateUrl && window.location.hash !== `#${tab}`) {
       history.replaceState(null, '', `#${tab}`);
     }
   };
+  state.activateTabFn = activateTab;
 
   document.querySelectorAll('.tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => activateTab(btn.dataset.tab));
@@ -2052,6 +2791,9 @@ function wireEvents() {
   $('#btn-refresh-now').addEventListener('click', () => {
     loadProgressFull().catch((e) => showToast(e.message, true));
     loadOverview().catch(() => {});
+    if ($('#tab-calibration')?.classList.contains('active') && canAccessCalibration()) {
+      loadTrialCalibration();
+    }
   });
 
   $('#filter-chip').addEventListener('click', () => {
@@ -2065,7 +2807,11 @@ function wireEvents() {
     const val = $('#passcode-input').value.trim();
     sessionStorage.setItem(PASSCODE_STORAGE_KEY, val);
     try {
-      await Promise.all([loadProgressFull(), loadOverview()]);
+      const reloads = [loadProgressFull(), loadOverview()];
+      if ($('#tab-calibration')?.classList.contains('active') && canAccessCalibration()) {
+        reloads.push(loadTrialCalibration());
+      }
+      await Promise.all(reloads);
       showToast('Builder Console unlocked!');
     } catch (err) {
       showToast(err.message, true);
@@ -2146,11 +2892,171 @@ function wireEvents() {
   });
 }
 
+const PENDING_PARENT_LINK_KEY = 'pyria_pending_parent_link';
+
+function capturePendingParentLinkToken() {
+  let token = '';
+  try {
+    const url = new URL(window.location.href);
+    const param = (url.searchParams.get('link') || '').trim();
+    if (param) {
+      token = param;
+      sessionStorage.setItem(PENDING_PARENT_LINK_KEY, token);
+      url.searchParams.delete('link');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    } else {
+      token = (sessionStorage.getItem(PENDING_PARENT_LINK_KEY) || '').trim();
+    }
+  } catch {
+    // ignore storage/URL errors
+  }
+  return token;
+}
+
+function clearPendingParentLinkToken() {
+  try {
+    sessionStorage.removeItem(PENDING_PARENT_LINK_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+async function handlePendingParentLinkToken(linkToken) {
+  if (!linkToken) return;
+  clearPendingParentLinkToken();
+
+  let preview;
+  try {
+    preview = await apiFetch('/api/console/link-preview', {
+      method: 'POST',
+      body: JSON.stringify({ linkToken }),
+    });
+  } catch (err) {
+    openConsoleModal(`
+      <div class="console-modal-header">
+        <h2>🔗 Link Expired or Unavailable</h2>
+        <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+      </div>
+      <p class="muted-text" style="margin:0;">
+        ${escapeHtml(err.message || 'This parent link has expired or is no longer available.')}
+      </p>
+      <p class="muted-text" style="margin:0;">
+        Tap <strong>🔗 Link Account</strong> on the hero's title screen to generate a fresh QR code, or type the Hero Code manually.
+      </p>
+      <div class="console-modal-footer">
+        <button type="button" class="btn btn-ghost" data-close-modal>Close</button>
+        <button id="btn-fallback-claim-code" type="button" class="btn btn-sky">Enter Hero Code Instead</button>
+      </div>
+    `);
+    $('#btn-fallback-claim-code')?.addEventListener('click', () => {
+      openClaimHeroModal();
+    });
+    return;
+  }
+
+  const heroName = preview.heroName || 'Hero';
+  const parentLabel = state.parentEmail || 'your Parent Console';
+
+  if (preview.alreadyOwnedBySelf) {
+    openConsoleModal(`
+      <div class="console-modal-header">
+        <h2>✓ Already Linked!</h2>
+        <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+      </div>
+      <p class="muted-text" style="margin:0;">
+        <strong style="color:var(--text-main);">${escapeHtml(heroName)}</strong> is already linked to <strong style="color:var(--text-main);">${escapeHtml(parentLabel)}</strong>.
+      </p>
+      <div class="console-modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal>Great!</button>
+      </div>
+    `);
+    return;
+  }
+
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>🔗 Link Hero to Your Console?</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      Link <strong style="color:var(--text-main);">${escapeHtml(heroName)}</strong> to <strong style="color:var(--text-main);">${escapeHtml(parentLabel)}</strong>?
+    </p>
+    <p class="muted-text" style="margin:0;">
+      You'll be able to see their live Python progress, customize difficulty &amp; Pip hints, and generate a new Hero Code anytime.
+    </p>
+    <div id="confirm-link-error" class="console-error-msg hidden"></div>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+      <button id="btn-confirm-link-hero" type="button" class="btn btn-primary">✓ Link Hero</button>
+    </div>
+  `);
+
+  const confirmBtn = $('#btn-confirm-link-hero');
+  const errEl = $('#confirm-link-error');
+  confirmBtn?.addEventListener('click', async () => {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Linking...';
+    if (errEl) errEl.classList.add('hidden');
+    try {
+      const res = await apiFetch('/api/console/claim-hero', {
+        method: 'POST',
+        body: JSON.stringify({ linkToken }),
+      });
+      await loadProgressFull();
+      const linkedName = res.save?.heroName || heroName;
+      const sameDeviceHero = Boolean(state.me?.auth?.heroSaveId);
+      if (sameDeviceHero) {
+        openConsoleModal(`
+          <div class="console-modal-header">
+            <h2>✓ ${escapeHtml(linkedName)} Linked!</h2>
+            <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+          </div>
+          <p class="muted-text" style="margin:0;">
+            <strong style="color:var(--text-main);">${escapeHtml(linkedName)}</strong> is now linked to <strong style="color:var(--text-main);">${escapeHtml(parentLabel)}</strong>.
+          </p>
+          <p class="muted-text" style="margin:0;">
+            Since this device also has a Hero signed in, you can switch back to Hero-only mode (great for handing a shared tablet back to a kid) or stay signed in.
+          </p>
+          <div class="console-modal-footer">
+            <button type="button" class="btn btn-ghost" data-close-modal>Stay in Console</button>
+            <button id="btn-hand-back-to-kid" type="button" class="btn btn-primary">🎮 Switch to Hero-Only Mode</button>
+          </div>
+        `);
+        $('#btn-hand-back-to-kid')?.addEventListener('click', async () => {
+          try {
+            await fetch('/api/auth/logout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ scope: 'parent' }),
+            });
+          } catch {
+            // ignore
+          }
+          window.location.href = '/';
+        });
+      } else {
+        closeConsoleModal();
+        showToast(`✓ Linked "${linkedName}" to your Parent Console!`);
+      }
+    } catch (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'Could not link hero.';
+        errEl.classList.remove('hidden');
+      }
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = '✓ Link Hero';
+    }
+  });
+}
+
 function showCloudflareSignInScreen() {
   closeConsoleModal();
   $('#console-signin-panel')?.classList.remove('hidden');
+  $('#builder-tab-nav')?.classList.add('hidden');
   $('#tab-live')?.classList.remove('active');
   $('#tab-live')?.classList.add('hidden');
+  $('#tab-calibration')?.classList.remove('active');
+  $('#tab-calibration')?.classList.add('hidden');
   $('#builder-admin-pill')?.classList.add('hidden');
   $('#live-indicator')?.classList.add('hidden');
   $('#btn-toggle-live')?.classList.add('hidden');
@@ -2158,13 +3064,104 @@ function showCloudflareSignInScreen() {
   $('#btn-console-signout')?.classList.add('hidden');
 
   const signInBtn = $('#btn-google-signin');
+  const dividerEl = $('#console-signin-divider');
+  const magicForm = $('#magic-link-form');
   const disabledMsg = $('#console-oauth-disabled-msg');
-  if (state.googleOAuthEnabled === false) {
-    signInBtn?.classList.add('hidden');
-    disabledMsg?.classList.remove('hidden');
-  } else {
-    signInBtn?.classList.remove('hidden');
-    disabledMsg?.classList.add('hidden');
+  const linkBannerEl = $('#console-pending-link-banner');
+  const errEl = $('#console-auth-error-msg');
+  const okEl = $('#console-auth-success-msg');
+
+  const showGoogle = state.googleOAuthEnabled !== false;
+  const showMagic = Boolean(state.magicLinkEnabled);
+
+  signInBtn?.classList.toggle('hidden', !showGoogle);
+  magicForm?.classList.toggle('hidden', !showMagic);
+  dividerEl?.classList.toggle('hidden', !(showGoogle && showMagic));
+  disabledMsg?.classList.toggle('hidden', showGoogle || showMagic);
+
+  const pendingLink = state.pendingParentLinkToken || '';
+  const postLoginNext = pendingLink
+    ? `/console?link=${encodeURIComponent(pendingLink)}`
+    : '/console';
+  if (signInBtn) {
+    signInBtn.href = `/api/auth/google/start?next=${encodeURIComponent(postLoginNext)}`;
+  }
+  if (linkBannerEl) {
+    if (pendingLink) {
+      linkBannerEl.textContent = '🔗 Ready to link a Hero to your account — sign in below to finish!';
+      linkBannerEl.classList.remove('hidden');
+    } else {
+      linkBannerEl.classList.add('hidden');
+    }
+  }
+
+  // Surface expired/invalid magic link errors passed via query param
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth_error') === 'magic_link_invalid' && errEl) {
+      errEl.textContent = 'That sign-in link has expired or was already used. Please request a new one below.';
+      errEl.classList.remove('hidden');
+      okEl?.classList.add('hidden');
+    }
+  } catch {
+    // ignore URL parsing errors
+  }
+
+  if (magicForm && !magicForm.dataset.bound) {
+    magicForm.dataset.bound = '1';
+    magicForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const emailInput = $('#magic-link-email');
+      const submitBtn = $('#btn-magic-link-submit');
+      const email = (emailInput?.value || '').trim();
+      errEl?.classList.add('hidden');
+      okEl?.classList.add('hidden');
+
+      if (!email) {
+        if (errEl) {
+          errEl.textContent = 'Please enter your email address.';
+          errEl.classList.remove('hidden');
+        }
+        emailInput?.focus();
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending link...';
+      }
+      try {
+        const magicNext = state.pendingParentLinkToken
+          ? `/console?link=${encodeURIComponent(state.pendingParentLinkToken)}`
+          : '/console';
+        const res = await fetch('/api/auth/magic-link/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, next: magicNext }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (errEl) {
+            errEl.textContent = data.error || 'Could not send sign-in link. Please try again.';
+            errEl.classList.remove('hidden');
+          }
+        } else if (okEl) {
+          okEl.textContent = data.message || 'Check your email for your sign-in link!';
+          okEl.classList.remove('hidden');
+          if (emailInput) emailInput.value = '';
+        }
+      } catch {
+        if (errEl) {
+          errEl.textContent = 'Network error sending sign-in link. Please try again.';
+          errEl.classList.remove('hidden');
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✉️ Email Me a Sign-In Link';
+        }
+      }
+    });
   }
 }
 
@@ -2176,6 +3173,8 @@ function configureConsoleMode() {
     $('#local-global-diff-controls')?.classList.remove('hidden');
     $('#account-filter-group')?.classList.remove('hidden');
     $('#builder-tab-nav')?.classList.remove('hidden');
+    document.querySelectorAll('#builder-tab-nav .tab-btn').forEach((b) => b.classList.remove('hidden'));
+    $('#tab-calibration')?.classList.remove('hidden');
     $('#btn-console-signout')?.classList.add('hidden');
     return;
   }
@@ -2184,16 +3183,15 @@ function configureConsoleMode() {
   const titleEl = $('#topbar-title');
   const subEl = $('#topbar-sub');
   if (titleEl) {
-    titleEl.textContent = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Parent Console';
+    titleEl.textContent = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Console';
   }
   if (subEl) {
     subEl.textContent = state.isAdmin
-      ? 'Global hero progress, account management & Hero Codes'
-      : 'Real-time child progress, Hero Codes & learning settings';
+      ? 'Global hero progress, trial calibration, account management & Hero Codes'
+      : 'Sync heroes across devices, track progress, Hero Codes & learning settings';
   }
-  document.title = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Parent Console';
+  document.title = state.isAdmin ? 'Pyria Admin Console' : 'Pyria Console';
 
-  $('#builder-tab-nav')?.classList.add('hidden');
   $('#passcode-bar')?.classList.add('hidden');
   $('#tab-story')?.classList.add('hidden');
   $('#tab-health')?.classList.add('hidden');
@@ -2208,14 +3206,46 @@ function configureConsoleMode() {
 
   $('#console-signin-panel')?.classList.add('hidden');
   $('#tab-live')?.classList.remove('hidden');
-  $('#tab-live')?.classList.add('active');
   $('#console-hero-actions')?.classList.remove('hidden');
   $('#btn-console-signout')?.classList.remove('hidden');
   $('#account-filter-group')?.classList.toggle('hidden', !state.isAdmin);
+
+  if (state.isAdmin) {
+    // Admin in Cloudflare mode gets Live Progress + Trial Calibration tabs only
+    $('#builder-tab-nav')?.classList.remove('hidden');
+    document.querySelectorAll('#builder-tab-nav .tab-btn').forEach((b) => {
+      const allowed = b.dataset.tab === 'live' || b.dataset.tab === 'calibration';
+      b.classList.toggle('hidden', !allowed);
+    });
+    $('#tab-calibration')?.classList.remove('hidden');
+    const hashTab = window.location.hash.replace(/^#/, '');
+    let savedTab = null;
+    try {
+      savedTab = localStorage.getItem('pyria_builder_tab');
+    } catch {
+      savedTab = null;
+    }
+    const preferred = hashTab || savedTab || 'live';
+    if (state.activateTabFn) {
+      state.activateTabFn(preferred, { updateUrl: false });
+    }
+  } else {
+    // Non-admin parents NEVER see Trial Calibration or tab nav
+    $('#builder-tab-nav')?.classList.add('hidden');
+    $('#tab-btn-calibration')?.classList.add('hidden');
+    $('#tab-calibration')?.classList.remove('active');
+    $('#tab-calibration')?.classList.add('hidden');
+    if (state.activateTabFn) {
+      state.activateTabFn('live', { updateUrl: false });
+    } else {
+      $('#tab-live')?.classList.add('active');
+    }
+  }
 }
 
 // ==================== BOOTSTRAP ====================
 async function init() {
+  state.pendingParentLinkToken = capturePendingParentLinkToken();
   const isConsolePath = /^\/(console|admin)(\/|$)/i.test(window.location.pathname);
   if (isConsolePath) {
     state.mode = 'cloudflare';
@@ -2223,6 +3253,7 @@ async function init() {
   }
   wireEvents();
   wireTrackerEvents();
+  wireCalibrationEvents();
   try {
     const meRes = await fetch('/api/me', { cache: 'no-store' });
     if (meRes.ok) {
@@ -2234,6 +3265,7 @@ async function init() {
       state.parentEmail = auth.parentEmail ?? me?.email ?? null;
       state.googleOAuthEnabled =
         typeof auth.googleOAuthEnabled === 'boolean' ? auth.googleOAuthEnabled : true;
+      state.magicLinkEnabled = Boolean(auth.magicLinkEnabled);
       const role = auth.role || (state.isAdmin ? 'admin' : state.parentEmail ? 'parent' : 'guest');
       state.isParentAuthenticated = role === 'parent' || role === 'admin';
 
@@ -2256,6 +3288,7 @@ async function init() {
     }
   }
 
+  state.bootstrapped = true;
   configureConsoleMode();
 
   if (state.mode === 'cloudflare' && !state.isParentAuthenticated) {
@@ -2263,11 +3296,25 @@ async function init() {
   }
 
   try {
-    await Promise.all([loadOverview(), loadProgressFull()]);
+    const initialLoads = [loadOverview(), loadProgressFull()];
+    if (
+      $('#tab-calibration')?.classList.contains('active') &&
+      canAccessCalibration() &&
+      !state.calLoading &&
+      !state.calLoadedOnce
+    ) {
+      initialLoads.push(loadTrialCalibration());
+    }
+    await Promise.all(initialLoads);
   } catch (err) {
     console.warn('Initial builder load error:', err.message);
   }
   setLivePolling(true);
+  if (state.mode === 'cloudflare' && state.isParentAuthenticated && state.pendingParentLinkToken) {
+    const token = state.pendingParentLinkToken;
+    state.pendingParentLinkToken = '';
+    await handlePendingParentLinkToken(token);
+  }
 }
 
 init();

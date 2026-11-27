@@ -20,23 +20,27 @@ import {
   updateGuestSave,
   deleteGuestSave,
   createHeroCode,
+  createHeroLinkToken,
   redeemHeroCode,
+  previewHeroPlayToken,
+  redeemHeroPlayToken,
   logoutSession,
-} from './api.js?v=20261127l';
+} from './api.js?v=20261127o';
 import { audio } from './audio.js?v=20261127i';
-import { music, resolveRegionTheme } from './music.js?v=20261127i';
+import { music, resolveRegionTheme } from './music.js?v=20261127j';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127k';
-import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127p';
+import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
+import { AppRouter } from './router.js?v=20261127l';
 import {
   DEFAULT_FAMILIARITY_ID,
   PYTHON_FAMILIARITY_LEVELS,
   buildPreferencesForFamiliarity,
   getFamiliarityOption,
-} from './onboarding.js?v=20261127l';
+} from './onboarding.js?v=20261127r';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -72,6 +76,8 @@ const state = {
   sprites: null,
   world: null,
   modals: null,
+  router: null,
+  pendingSaveForRoute: null,
   mapsCache: new Map(),
   activeSave: null,
   activeRealm: null,
@@ -361,6 +367,7 @@ async function handleHeroSessionExpired(snapshot) {
       if (state.activeSave && state.activeSave.id === oldId) {
         state.activeSave = backup;
         state.world?.setSave(backup);
+        state.router?.replace({ name: 'game', saveId: backup.id }, { silent: true });
       }
     }
     state.me = await fetchMe();
@@ -381,22 +388,37 @@ async function handleHeroSessionExpired(snapshot) {
   }
 }
 
+function syncHeroPositionToSave() {
+  if (state.activeSave && state.world && state.activeMap) {
+    state.activeSave.position = {
+      realmId: state.activeMap.realmId,
+      x: Math.floor(state.world.hero.x),
+      y: Math.floor(state.world.hero.y),
+    };
+  }
+}
+
+function persistPositionOnPageHide() {
+  if (!$('#screen-game')?.classList.contains('active')) return;
+  if (!state.activeSave || !state.activeSave.id) return;
+  syncHeroPositionToSave();
+  const snapshot = JSON.parse(JSON.stringify(state.activeSave));
+  if (isActiveSaveGuest(snapshot)) {
+    updateGuestSave(snapshot.id, snapshot);
+  } else {
+    updateSave(snapshot.id, snapshot, { keepalive: true }).catch(() => {});
+  }
+}
+
 function persistSave() {
   if (!state.activeSave || !state.activeSave.id) return Promise.resolve();
   persistQueue = persistQueue
     .catch(() => {})
     .then(async () => {
       if (!state.activeSave || !state.activeSave.id) return;
+      syncHeroPositionToSave();
       const snapshot = JSON.parse(JSON.stringify(state.activeSave));
       try {
-        if (state.world && state.activeMap) {
-          state.activeSave.position = {
-            realmId: state.activeMap.realmId,
-            x: Math.floor(state.world.hero.x),
-            y: Math.floor(state.world.hero.y),
-          };
-          snapshot.position = { ...state.activeSave.position };
-        }
         if (isActiveSaveGuest(snapshot)) {
           const updated = updateGuestSave(snapshot.id, snapshot);
           if (state.activeSave && state.activeSave.id === snapshot.id && updated?.updatedAt) {
@@ -446,6 +468,38 @@ function getSecretsStats(save) {
   };
 }
 
+function getBonusLockInfo(entity, save, realm) {
+  if (!entity || entity.type !== 'bonus_trial') {
+    return { locked: false, reason: null };
+  }
+  const completed = getSolvedTrialsSet(save);
+  if (entity.refId && completed.has(entity.refId)) {
+    return { locked: false, reason: null };
+  }
+  if (entity.requiredTrialId && !completed.has(entity.requiredTrialId)) {
+    return {
+      locked: true,
+      reason: 'Complete the earlier Realm Trials first to unseal this secret rune!',
+    };
+  }
+  const activeRealm = realm || state.activeRealm;
+  const coreTrials = (activeRealm?.trials || []).filter((t) => !t.isBonus);
+  const bossTrialId = activeRealm?.cutscenes?.bossTrialId || coreTrials[coreTrials.length - 1]?.id;
+  const bossTrial = coreTrials.find((t) => t.id === bossTrialId);
+  const unsolvedCore = coreTrials.filter((t) => !completed.has(t.id));
+
+  if ((bossTrialId && !completed.has(bossTrialId)) || unsolvedCore.length > 0) {
+    const bossLabel = bossTrial ? `"${bossTrial.title}"` : 'the Realm Boss';
+    const remaining = unsolvedCore.length;
+    const reason =
+      remaining > 1
+        ? `Defeat ${bossLabel} (${remaining} Realm Trials left) to unseal this secret rune!`
+        : `Defeat ${bossLabel} first to unseal this secret rune!`;
+    return { locked: true, reason };
+  }
+  return { locked: false, reason: null };
+}
+
 function updateInteractPrompt(entity) {
   const prompt = $('#interact-prompt');
   const label = $('#interact-prompt-label');
@@ -465,6 +519,15 @@ function updateInteractPrompt(entity) {
     if (touchLabel) touchLabel.textContent = 'Done';
     prompt.classList.remove('hidden');
     return;
+  }
+  if (entity.type === 'bonus_trial') {
+    const lockInfo = getBonusLockInfo(entity, state.activeSave, state.activeRealm);
+    if (lockInfo.locked) {
+      label.textContent = `🔒 ${entity.label} (Beat Realm Boss to unlock)`;
+      if (touchLabel) touchLabel.textContent = 'Locked';
+      prompt.classList.remove('hidden');
+      return;
+    }
   }
   let verb = 'Inspect';
   let shortLabel = 'Act';
@@ -517,6 +580,7 @@ function renderAdminRealmJump() {
 }
 
 async function runStoryCutsceneById(cutsceneId, { markSeen = false } = {}) {
+  if (isCutsceneActive()) return;
   const cs = STORY_CUTSCENES[cutsceneId];
   if (!cs) return;
   const save = state.activeSave;
@@ -533,6 +597,7 @@ async function runStoryCutsceneById(cutsceneId, { markSeen = false } = {}) {
     audio.playDragonRescue();
   }
   await playCutscene({
+    id: cutsceneId,
     title: cs.title,
     subtitle: cs.subtitle,
     beats: cs.beats,
@@ -637,7 +702,10 @@ function renderAccountIdentityBar() {
   const bar = $('#title-account-bar');
   const pill = $('#title-user-pill');
   const builderBtn = $('#btn-title-builder');
+  const parentsBtn = $('#btn-title-parents');
+  const heroLinkParentBtn = $('#btn-hero-link-parent');
   const heroSignOutBtn = $('#btn-hero-signout');
+  const accountSignOutBtn = $('#btn-account-signout');
   const enterCodeBtn = $('#btn-enter-hero-code');
   const adminBar = $('#admin-account-bar');
   const adminSel = $('#admin-account-select');
@@ -658,35 +726,52 @@ function renderAccountIdentityBar() {
         builderBtn.textContent = '🛡️ Console';
         builderBtn.classList.remove('hidden');
       }
+      parentsBtn?.classList.add('hidden');
+      heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
+      accountSignOutBtn?.classList.remove('hidden');
     } else if (auth.role === 'parent') {
       if (pill) {
         pill.className = 'pill pill-blue';
-        pill.textContent = auth.parentEmail ? `👤 Parent: ${auth.parentEmail}` : '👤 Parent';
+        pill.textContent = auth.parentEmail ? `👤 ${auth.parentEmail}` : '👤 Signed In';
       }
       if (builderBtn) {
         builderBtn.href = '/console';
-        builderBtn.textContent = '🛡️ Parent Console';
+        builderBtn.textContent = '👤 Console';
         builderBtn.classList.remove('hidden');
       }
+      parentsBtn?.classList.add('hidden');
+      heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
+      accountSignOutBtn?.classList.remove('hidden');
     } else if (auth.role === 'hero') {
       if (pill) {
         pill.className = 'pill pill-green';
-        pill.textContent = `🧙 Hero: ${auth.heroName || 'Code-Tamer'}`;
+        pill.textContent = auth.linkedToParent
+          ? `🧙 Hero: ${auth.heroName || 'Code-Tamer'} · ✓ Account Linked`
+          : `🧙 Hero: ${auth.heroName || 'Code-Tamer'}`;
       }
       builderBtn?.classList.add('hidden');
+      parentsBtn?.classList.remove('hidden');
+      heroLinkParentBtn?.classList.toggle('hidden', Boolean(auth.linkedToParent));
       heroSignOutBtn?.classList.remove('hidden');
+      accountSignOutBtn?.classList.add('hidden');
     } else {
       if (pill) {
         pill.className = 'pill pill-violet';
         pill.textContent = '✨ Guest Mode (Saved on this device)';
       }
       builderBtn?.classList.add('hidden');
+      parentsBtn?.classList.remove('hidden');
+      heroLinkParentBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
+      accountSignOutBtn?.classList.add('hidden');
     }
   } else {
+    parentsBtn?.classList.add('hidden');
+    heroLinkParentBtn?.classList.add('hidden');
     heroSignOutBtn?.classList.add('hidden');
+    accountSignOutBtn?.classList.add('hidden');
     if (me.authenticated || me.email || me.isAdmin) {
       bar?.classList.remove('hidden');
       if (pill) {
@@ -732,6 +817,21 @@ function renderAccountIdentityBar() {
 }
 
 let heroCodeUpgradeInFlight = false;
+const GUEST_CLOUD_NUDGE_KEY = 'pyria_guest_cloud_nudge_shown';
+
+function maybeShowGuestCloudNudge(save) {
+  if (state.me?.mode !== 'cloudflare' || !isActiveSaveGuest(save)) return;
+  if (!Array.isArray(save?.rescuedDragons) || save.rescuedDragons.length !== 1) return;
+  try {
+    if (localStorage.getItem(GUEST_CLOUD_NUDGE_KEY)) return;
+    localStorage.setItem(GUEST_CLOUD_NUDGE_KEY, '1');
+  } catch {
+    return;
+  }
+  setTimeout(() => {
+    showToast('☁️ Tip: Tap Save to Cloud anytime to back up your hero across devices!');
+  }, 2400);
+}
 
 async function upgradeGuestSaveToHeroCode(targetSave) {
   if (!targetSave || heroCodeUpgradeInFlight) return;
@@ -768,6 +868,7 @@ async function upgradeGuestSaveToHeroCode(targetSave) {
       };
       state.activeSave = mergedCloudSave;
       state.world?.setSave(mergedCloudSave);
+      state.router?.replace({ name: 'game', saveId: mergedCloudSave.id }, { silent: true });
       needsPostUpgradeSync = true;
     }
     migrateLocalDrafts(oldGuestId, res.save.id);
@@ -797,12 +898,54 @@ async function upgradeGuestSaveToHeroCode(targetSave) {
     state.modals.openHeroCodeDisplayModal({
       heroName: res.save.heroName,
       heroCode: res.heroCode,
+      parentLinkToken: res.parentLinkToken || '',
+      onPollLinked: pollHeroLinkedStatus,
     });
   } catch (err) {
     audio.playError();
     showToast(`Could not create Hero Code: ${err.detail || err.message}`);
   } finally {
     heroCodeUpgradeInFlight = false;
+  }
+}
+
+async function pollHeroLinkedStatus() {
+  const freshMe = await fetchMe();
+  state.me = freshMe;
+  if (freshMe?.auth?.linkedToParent) {
+    renderAccountIdentityBar();
+    if ($('#screen-title')?.classList.contains('active')) {
+      refreshSavesList().catch(() => {});
+    }
+    return true;
+  }
+  return false;
+}
+
+async function openLinkToParentFlow() {
+  try {
+    const res = await createHeroLinkToken();
+    if (!res.parentLinkToken) {
+      throw new Error('Could not generate a parent link right now.');
+    }
+    state.modals.openLinkToParentModal({
+      heroName: res.heroName || state.me?.auth?.heroName || 'Hero',
+      parentLinkToken: res.parentLinkToken,
+      expiresInSeconds: res.expiresInSeconds,
+      onPollLinked: pollHeroLinkedStatus,
+    });
+  } catch (err) {
+    audio.playError();
+    if (err?.status === 409) {
+      state.me = await fetchMe();
+      renderAccountIdentityBar();
+      if ($('#screen-title')?.classList.contains('active')) {
+        await refreshSavesList();
+      }
+      showToast('This hero is already linked to an account!');
+      return;
+    }
+    showToast(`Could not create link: ${err?.detail || err?.message || 'Try again'}`);
   }
 }
 
@@ -828,7 +971,7 @@ function openEnterHeroCodeFlow() {
       renderAccountIdentityBar();
       renderAdminRealmJump();
       audio.playSuccess();
-      await enterOverworld(res.save);
+      await navigateToGame(res.save);
       showToast(`Welcome back, ${res.save.heroName}!`);
     },
   });
@@ -862,12 +1005,18 @@ async function refreshSavesList() {
           ? `<div class="save-owner-pill">${escapeHtml(s.ownerEmail)}</div>`
           : '';
       const guestBadgeHtml = s.isGuest
-        ? '<div class="save-guest-pill">Local Guest Save</div>'
-        : '';
+        ? '<div class="save-guest-pill">Local Save (This Device)</div>'
+        : isCloudflare && s.linkedToParent
+          ? '<div class="save-linked-pill">☁️ Cloud Save · ✓ Account Linked</div>'
+          : isCloudflare
+            ? '<div class="save-cloud-pill">☁️ Cloud Save</div>'
+            : '';
       const upgradeBtnHtml =
         isCloudflare && s.isGuest
-          ? '<button type="button" class="btn btn-sm btn-sky btn-card-hero-code">🔑 Get Hero Code</button>'
-          : '';
+          ? '<button type="button" class="btn btn-sm btn-sky btn-card-hero-code">☁️ Save to Cloud</button>'
+          : isCloudflare && !s.isGuest && !s.linkedToParent && state.me?.auth?.role === 'hero'
+            ? '<button type="button" class="btn btn-sm btn-ghost btn-card-link-parent">🔗 Link to Account</button>'
+            : '';
       card.innerHTML = `
         <div class="save-card-info">
           <div class="save-card-name">${escapeHtml(s.heroName)}</div>
@@ -891,21 +1040,25 @@ async function refreshSavesList() {
         upgradeBtn.textContent = 'Creating...';
         await upgradeGuestSaveToHeroCode(s);
         upgradeBtn.disabled = false;
-        upgradeBtn.textContent = '🔑 Get Hero Code';
+        upgradeBtn.textContent = '☁️ Save to Cloud';
+      });
+
+      const linkParentBtn = card.querySelector('.btn-card-link-parent');
+      linkParentBtn?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        audio.playClick();
+        linkParentBtn.disabled = true;
+        linkParentBtn.textContent = 'Generating...';
+        await openLinkToParentFlow();
+        linkParentBtn.disabled = false;
+        linkParentBtn.textContent = '🔗 Link to Account';
       });
 
       card.addEventListener('click', async () => {
         audio.playClick();
-        try {
-          if (s.isGuest) {
-            const localSave = getGuestSave(s.id) || s;
-            await enterOverworld(localSave);
-          } else {
-            const fullSave = s.id ? await getSave(s.id) : s;
-            await enterOverworld(fullSave);
-          }
-        } catch (err) {
-          console.error(err);
+        if (s.id) {
+          await navigateToGame(s);
+        } else {
           await enterOverworld(s);
         }
       });
@@ -1082,11 +1235,19 @@ function buildVisualHeroPickers() {
 async function createHeroForCurrentAuth(newSavePayload) {
   if (state.me?.mode === 'cloudflare' && state.me?.auth?.role === 'hero') {
     const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
-    if (
-      !confirm(
-        `This will sign out ${activeHeroLabel} on this device. Make sure you have your Hero Code written down! Continue?`
-      )
-    ) {
+    const linked = Boolean(state.me?.auth?.linkedToParent);
+    const ok = await state.modals.confirmDialog({
+      title: 'Start a New Hero?',
+      badge: `Current: ${activeHeroLabel}`,
+      message: `This will sign out ${activeHeroLabel} on this device so a new adventure can begin.`,
+      subtext: linked
+        ? `${activeHeroLabel} is safely linked to an account — you can always generate a fresh Hero Code in the Console!`
+        : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later.`,
+      confirmLabel: 'Start New Hero',
+      confirmClass: 'btn-primary',
+      cancelLabel: 'Keep Playing Current Hero',
+    });
+    if (!ok) {
       return null;
     }
     // A child hero cookie is scoped to one saveId and cannot POST /api/saves.
@@ -1137,7 +1298,7 @@ async function launchAdventureFromHeroForge(errorEl) {
     const created = await createHeroForCurrentAuth(newSavePayload);
     if (!created) return false;
     audio.playSuccess();
-    await enterOverworld(created);
+    await navigateToGame(created, { replace: true });
     showToast(`Welcome to Pyria, ${created.heroName}!`);
     return true;
   } catch (err) {
@@ -1309,7 +1470,7 @@ async function runCharCreateCode() {
       try {
         const created = await createHeroForCurrentAuth(newSavePayload);
         if (!created) return;
-        await enterOverworld(created);
+        await navigateToGame(created, { replace: true });
         showToast(`Welcome to Pyria, ${created.heroName}!`);
       } catch (err) {
         outEl.className = 'pip-console error';
@@ -1400,6 +1561,9 @@ async function loadRealm(realmId, spawnOverride = null) {
   music.setTheme(resolveRegionTheme(startRegion?.id, realm.id), { immediate: true });
   music.setEra(visualEra);
   updateHud();
+  if (state.activeSave?.heroName) {
+    document.title = `${state.activeSave.heroName} · ${realm.name} — Pyria`;
+  }
   showToast(`Entered ${realm.name} (${VISUAL_ERA_LABELS[visualEra]})!`);
 }
 
@@ -1432,8 +1596,24 @@ async function enterOverworld(save) {
 }
 
 // ==================== ENTITY INTERACTIONS ====================
+let interactionInFlight = false;
+
 async function handleEntityInteract(entity) {
+  if (!entity || interactionInFlight || isCutsceneActive()) return;
+  const modalOpen = !$('#modal-backdrop')?.classList.contains('hidden');
+  if (modalOpen) return;
+
+  interactionInFlight = true;
+  try {
+    await handleEntityInteractInner(entity);
+  } finally {
+    interactionInFlight = false;
+  }
+}
+
+async function handleEntityInteractInner(entity) {
   const save = state.activeSave;
+  if (!save) return;
   const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
   const completed = getSolvedTrialsSet(save);
   const rescued = new Set(save.rescuedDragons || []);
@@ -1524,6 +1704,14 @@ async function handleEntityInteract(entity) {
   }
 
   if (entity.type === 'trial' || entity.type === 'bonus_trial') {
+    if (entity.type === 'bonus_trial') {
+      const lockInfo = getBonusLockInfo(entity, save, state.activeRealm);
+      if (lockInfo.locked) {
+        audio.playError();
+        showToast(`🔒 Pip: ${lockInfo.reason}`);
+        return;
+      }
+    }
     if (entity.requiredTrialId && !completed.has(entity.requiredTrialId)) {
       audio.playError();
       showToast('Solve the earlier Trial first to unlock this path!');
@@ -1546,10 +1734,13 @@ async function handleEntityInteract(entity) {
       preBossBeats.length > 0 &&
       !(save.seenCutscenes || []).includes(preBossKey)
     ) {
+      if (!Array.isArray(save.seenCutscenes)) save.seenCutscenes = [];
+      save.seenCutscenes.push(preBossKey);
       state.world.setPaused(true);
       music.setTheme('vault');
       audio.playBossIntro();
       await playCutscene({
+        id: preBossKey,
         title: '⚔️ BOSS ENCOUNTER',
         subtitle: `${realm.name} — ${trial.title}`,
         beats: preBossBeats,
@@ -1559,10 +1750,6 @@ async function handleEntityInteract(entity) {
         realmId: realm.id,
         finalButtonLabel: '⚔️ Face the Boss Trial!',
       });
-      if (!Array.isArray(save.seenCutscenes)) save.seenCutscenes = [];
-      if (!save.seenCutscenes.includes(preBossKey)) {
-        save.seenCutscenes.push(preBossKey);
-      }
       await persistSave();
     }
 
@@ -1667,6 +1854,7 @@ async function handleEntityInteract(entity) {
       const upgradeNote = realm?.miniVisualUpgrade || 'Portal unlocked!';
 
       await playCutscene({
+        id: `${realm.id}:postBoss`,
         title: `✨ BIT ${bitNum} RESTORED`,
         subtitle: `${dragonName} — ${dragonTitle}`,
         beats: postBossBeats,
@@ -1686,6 +1874,7 @@ async function handleEntityInteract(entity) {
         save.seenCutscenes.push(postBossKey);
       }
       showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
+      maybeShowGuestCloudNudge(save);
       await refreshLiveContent();
       updateHud();
       await persistSave();
@@ -1705,6 +1894,7 @@ async function handleEntityInteract(entity) {
           const dragonName = realm?.dragon?.name || 'the Dragon';
           const upgradeNote = realm?.miniVisualUpgrade || 'Portal unlocked!';
           showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
+          maybeShowGuestCloudNudge(save);
           await refreshLiveContent();
           updateHud();
           await persistSave();
@@ -1797,12 +1987,191 @@ function openWorkshop() {
   });
 }
 
+// ==================== FORMAL NAVIGATION & GAME MENU ====================
+async function resolveSaveById(saveId) {
+  if (!saveId) return null;
+
+  const isGuestId = String(saveId).startsWith('guest-');
+  if (isGuestId) {
+    const local = getGuestSave(saveId);
+    if (local) return local;
+  } else {
+    try {
+      const remote = await getSave(saveId);
+      if (remote) return remote;
+    } catch (err) {
+      // Fall back to pending save or local guest save if applicable
+      console.warn(`Could not fetch save ${saveId} from server:`, err);
+    }
+  }
+
+  if (state.pendingSaveForRoute && state.pendingSaveForRoute.id === saveId) {
+    return state.pendingSaveForRoute;
+  }
+
+  return getGuestSave(saveId);
+}
+
+async function navigateToGame(save, { replace = false } = {}) {
+  if (!save) return;
+  if (!save.id || !state.router) {
+    await enterOverworld(save);
+    return;
+  }
+  state.pendingSaveForRoute = save;
+  await state.router.navigate({ name: 'game', saveId: save.id }, { replace });
+}
+
+async function returnToTitle() {
+  if (state.modals?.isOpen()) {
+    state.modals.close();
+  }
+  if (state.activeSave) {
+    await persistSave();
+  }
+  if (state.router) {
+    await state.router.navigate({ name: 'title' });
+  } else {
+    showScreen('screen-title');
+    startTitlePreview();
+    await refreshSavesList();
+  }
+}
+
+async function handleRoute(ctx) {
+  const { route, isCurrent } = ctx;
+
+  // Cleanly tear down active screen state when navigating away
+  if (route.name !== 'game') {
+    if (state.modals?.isOpen()) {
+      state.modals.close();
+    }
+    if ($('#screen-game')?.classList.contains('active') && state.activeSave) {
+      await persistSave();
+      if (!isCurrent()) return;
+    }
+  }
+  if (route.name !== 'charcreate' && state.ccAnimTimer) {
+    clearInterval(state.ccAnimTimer);
+    state.ccAnimTimer = null;
+  }
+
+  if (route.name === 'title') {
+    document.title = 'Pyria: Return of the Bits';
+    showScreen('screen-title');
+    startTitlePreview();
+    await refreshSavesList();
+    return;
+  }
+
+  if (route.name === 'charcreate') {
+    document.title = 'Forge Your Hero — Pyria';
+    openCharCreateScreen();
+    return;
+  }
+
+  if (route.name === 'game') {
+    const saveId = route.saveId;
+    const preloaded =
+      state.pendingSaveForRoute && state.pendingSaveForRoute.id === saveId
+        ? state.pendingSaveForRoute
+        : null;
+    state.pendingSaveForRoute = null;
+
+    // If already playing this exact save and screen is active, no need to reload
+    if (
+      state.activeSave &&
+      state.activeSave.id === saveId &&
+      $('#screen-game')?.classList.contains('active')
+    ) {
+      return;
+    }
+
+    let save = null;
+    if (preloaded && preloaded.isGuest) {
+      save = getGuestSave(saveId) || preloaded;
+    } else if (preloaded && ctx.source === 'replace') {
+      // Newly forged hero — already fresh from POST /api/saves
+      save = preloaded;
+    } else {
+      // Always fetch latest server state when loading from Save Picker, refresh, or browser history
+      save = await resolveSaveById(saveId);
+      if (!save && preloaded) save = preloaded;
+    }
+
+    if (!isCurrent()) return;
+
+    if (!save) {
+      await state.router.navigate({ name: 'title' }, { replace: true });
+      showToast('Could not load that hero save — returned to Main Title.');
+      return;
+    }
+
+    document.title = `${save.heroName || 'Code-Tamer'} — Pyria`;
+    await enterOverworld(save);
+  }
+}
+
+async function cycleVisualEra() {
+  if (!state.activeSave) return null;
+  audio.playClick();
+  const curr = normalizeVisualEra(state.activeSave.visualEra);
+  const next = VISUAL_ERAS[(VISUAL_ERAS.indexOf(curr) + 1) % VISUAL_ERAS.length];
+  state.activeSave.visualEra = next;
+  state.world.setEraKey(next);
+  music.setEra(next);
+  updateHud();
+  const label = VISUAL_ERA_LABELS[next] || next;
+  showToast(`Switched graphics & music to ${label}!`);
+  await persistSave();
+  return label;
+}
+
+function openGameMenu() {
+  if (!state.activeSave || !state.modals) return;
+  audio.playClick();
+  const eraKey = normalizeVisualEra(state.activeSave.visualEra);
+  state.modals.openGameMenuModal({
+    save: state.activeSave,
+    realm: state.activeRealm,
+    eraLabel: VISUAL_ERA_LABELS[eraKey] || '8-Bit NES',
+    isGuestCloudflare: state.me?.mode === 'cloudflare' && isActiveSaveGuest(state.activeSave),
+    musicEnabled: music.isEnabled(),
+    muted: audio.isMuted(),
+    onOpenWorkshop: () => openWorkshop(),
+    onSaveNow: async () => {
+      await persistSave();
+      showToast('Progress saved!');
+    },
+    onReturnToTitle: async () => {
+      await returnToTitle();
+    },
+    onToggleMusic: () => {
+      music.toggle();
+      audio.playClick();
+      syncMusicButtons();
+      return music.isEnabled();
+    },
+    onToggleMute: () => {
+      audio.toggleMute();
+      updateHud();
+      return audio.isMuted();
+    },
+    onCycleEra: async () => cycleVisualEra(),
+    onGetHeroCode: async () => {
+      if (!state.activeSave || heroCodeUpgradeInFlight) return;
+      await persistSave();
+      await upgradeGuestSaveToHeroCode(state.activeSave);
+    },
+  });
+}
+
 // ==================== WIRE UI EVENTS ====================
 function wireControls() {
   // Title
   $('#btn-new-adventure').addEventListener('click', () => {
     audio.playClick();
-    openCharCreateScreen();
+    state.router.navigate({ name: 'charcreate' });
   });
 
   $('#btn-enter-hero-code')?.addEventListener('click', () => {
@@ -1810,14 +2179,73 @@ function wireControls() {
     openEnterHeroCodeFlow();
   });
 
+  $('#btn-hero-link-parent')?.addEventListener('click', async () => {
+    const btn = $('#btn-hero-link-parent');
+    audio.playClick();
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+    }
+    try {
+      await openLinkToParentFlow();
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🔗 Link Account';
+      }
+    }
+  });
+
+  $('#btn-account-signout')?.addEventListener('click', async () => {
+    const btn = $('#btn-account-signout');
+    audio.playClick();
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Signing out...';
+    }
+    try {
+      await logoutSession('parent');
+    } catch (err) {
+      console.warn('Account sign out warning:', err);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Sign Out';
+      }
+    }
+    const [freshMe, freshConfig] = await Promise.all([
+      fetchMe(),
+      fetchConfig().catch(() => null),
+    ]);
+    state.me = freshMe;
+    if (freshConfig?.game) {
+      state.gameConfig = freshConfig.game;
+      if (freshConfig.heroPreferences) {
+        state.gameConfig.heroPreferences = freshConfig.heroPreferences;
+      }
+    }
+    renderAccountIdentityBar();
+    renderAdminRealmJump();
+    await refreshSavesList();
+    showToast('Signed out!');
+  });
+
   $('#btn-hero-signout')?.addEventListener('click', async () => {
     audio.playClick();
     const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
-    if (
-      !confirm(
-        `Sign out ${activeHeroLabel} on this device? Make sure you have your Hero Code written down so you can sign back in!`
-      )
-    ) {
+    const linked = Boolean(state.me?.auth?.linkedToParent);
+    const ok = await state.modals.confirmDialog({
+      title: 'Switch Hero?',
+      badge: `Signed in as ${activeHeroLabel}`,
+      message: `Sign out ${activeHeroLabel} on this device?`,
+      subtext: linked
+        ? `${activeHeroLabel}'s cloud progress is safe and linked to an account — you can always generate a fresh Hero Code in the Console.`
+        : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later!`,
+      confirmLabel: 'Switch Hero',
+      confirmClass: 'btn-sky',
+      cancelLabel: 'Stay Signed In',
+    });
+    if (!ok) {
       return;
     }
     try {
@@ -1842,13 +2270,7 @@ function wireControls() {
   // Character Creation
   $('#btn-charcreate-back').addEventListener('click', async () => {
     audio.playClick();
-    if (state.ccAnimTimer) {
-      clearInterval(state.ccAnimTimer);
-      state.ccAnimTimer = null;
-    }
-    showScreen('screen-title');
-    startTitlePreview();
-    await refreshSavesList();
+    await state.router.navigate({ name: 'title' });
   });
 
   $('#btn-preview-turn').addEventListener('click', () => {
@@ -1947,22 +2369,13 @@ function wireControls() {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '🔑 Get Hero Code';
+        btn.textContent = '☁️ Save to Cloud';
       }
     }
   });
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
   $('#btn-hud-era-toggle').addEventListener('click', async () => {
-    if (!state.activeSave) return;
-    audio.playClick();
-    const curr = normalizeVisualEra(state.activeSave.visualEra);
-    const next = VISUAL_ERAS[(VISUAL_ERAS.indexOf(curr) + 1) % VISUAL_ERAS.length];
-    state.activeSave.visualEra = next;
-    state.world.setEraKey(next);
-    music.setEra(next);
-    updateHud();
-    showToast(`Switched graphics & music to ${VISUAL_ERA_LABELS[next]}!`);
-    await persistSave();
+    await cycleVisualEra();
   });
 
   for (const sel of ['#btn-hud-music', '#btn-title-music', '#btn-charcreate-music']) {
@@ -1980,12 +2393,53 @@ function wireControls() {
     updateHud();
   });
 
-  $('#btn-hud-menu').addEventListener('click', async () => {
+  $('#btn-hud-title')?.addEventListener('click', async () => {
     audio.playClick();
-    await persistSave();
-    showScreen('screen-title');
-    startTitlePreview();
-    await refreshSavesList();
+    await returnToTitle();
+  });
+
+  $('#btn-hud-menu').addEventListener('click', () => {
+    openGameMenu();
+  });
+
+  $('#btn-hud-autopath')?.addEventListener('click', () => {
+    if (!state.world) return;
+    if (state.world.autoPath) {
+      state.world.cancelAutoPath();
+      audio.playClick();
+      return;
+    }
+    const res = state.world.startAutoPathToNextObjective();
+    if (!res.ok) {
+      audio.playError();
+      if (res.reason === 'blocked') {
+        showToast('🧭 Path is blocked right now — try unlocking the gate or bridge first!');
+      } else {
+        showToast('✨ No remaining objectives in this Realm!');
+      }
+    } else if (res.arrived) {
+      showToast(`✨ You're already right at ${res.entity?.label || 'your next objective'}!`);
+    } else {
+      showToast(`🧭 Walking to ${res.entity?.label || 'next Trial'}… (press WASD/Arrows to cancel)`);
+    }
+  });
+
+  // Escape opens the Game Menu when in the overworld with no modal or cutscene active
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    if (!$('#screen-game')?.classList.contains('active')) return;
+    if (state.modals?.isOpen()) return;
+    if (document.querySelector('.cutscene-overlay')) return;
+    e.preventDefault();
+    openGameMenu();
+  });
+
+  // Persist current hero position on refresh / tab hide so reloading resumes right where you stood
+  window.addEventListener('pagehide', persistPositionOnPageHide);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      persistPositionOnPageHide();
+    }
   });
 
   // Prevent iPadOS Safari text selection across the overworld screen (never blocking inputs/textareas)
@@ -2162,7 +2616,65 @@ function wireControls() {
 }
 
 // ==================== BOOTSTRAP ====================
+function capturePendingPlayToken() {
+  try {
+    const url = new URL(window.location.href);
+    const token = (url.searchParams.get('play') || '').trim();
+    if (!token) return '';
+    url.searchParams.delete('play');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    return token;
+  } catch {
+    return '';
+  }
+}
+
+async function handlePendingPlayToken(playToken) {
+  if (!playToken || state.me?.mode !== 'cloudflare') return;
+  try {
+    const preview = await previewHeroPlayToken(playToken);
+    if (!preview.valid || !preview.heroName) {
+      throw new Error('This play link has expired or is no longer valid.');
+    }
+    const currentHeroName =
+      state.me?.auth?.role === 'hero' ? state.me?.auth?.heroName || '' : '';
+    state.modals.openPlayLinkConfirmModal({
+      heroName: preview.heroName,
+      currentHeroName,
+      onConfirm: async () => {
+        const res = await redeemHeroPlayToken(playToken);
+        if (!res.save) {
+          throw new Error('Could not load hero for that play link.');
+        }
+        lastExpiredSaveId = null;
+        const [freshMe, freshConfig] = await Promise.all([
+          fetchMe(),
+          fetchConfig().catch(() => null),
+        ]);
+        state.me = freshMe;
+        if (freshConfig?.game) {
+          state.gameConfig = freshConfig.game;
+          if (freshConfig.heroPreferences) {
+            state.gameConfig.heroPreferences = freshConfig.heroPreferences;
+          }
+        }
+        renderAccountIdentityBar();
+        renderAdminRealmJump();
+        audio.playSuccess();
+        await navigateToGame(res.save);
+        showToast(`Welcome back, ${res.save.heroName}!`);
+      },
+    });
+  } catch (err) {
+    state.modals.openPlayLinkInvalidModal({
+      message: err?.detail || err?.message,
+      onEnterHeroCode: () => openEnterHeroCodeFlow(),
+    });
+  }
+}
+
 async function init() {
+  const pendingPlayToken = capturePendingPlayToken();
   try {
     const [me, config, spriteManifest, tilesetManifest] = await Promise.all([
       fetchMe(),
@@ -2214,6 +2726,25 @@ async function init() {
       onNearestEntityChange: (entity) => {
         updateInteractPrompt(entity);
       },
+      onAutoPathChange: (path) => {
+        const btn = $('#btn-hud-autopath');
+        if (!btn) return;
+        btn.textContent = path ? '⏹ Stop Walking' : '🧭 Walk to Next';
+      },
+      onFastTravel: (ent) => {
+        showToast(`✨ Fast-traveled to ${ent.label || 'marker'}!`);
+        persistSave().catch(() => {});
+      },
+      onMinimapAutoPath: (ent, res) => {
+        if (!res?.ok) {
+          audio.playError();
+          showToast(`🧭 Can't reach ${ent.label || 'that marker'} yet — clear earlier paths first!`);
+        } else if (res.arrived) {
+          showToast(`✨ You're already next to ${ent.label || 'that marker'}!`);
+        } else {
+          showToast(`🧭 Walking to ${ent.label || 'marker'}… (press WASD/Arrows to cancel)`);
+        }
+      },
       onInteract: (entity) => handleEntityInteract(entity),
     });
 
@@ -2221,8 +2752,11 @@ async function init() {
     buildFamiliarityPicker();
     buildVisualHeroPickers();
     buildCharCreateSpellbook();
-    startTitlePreview();
-    await refreshSavesList();
+    state.router = new AppRouter({ onRoute: handleRoute });
+    await state.router.start();
+    if (pendingPlayToken) {
+      await handlePendingPlayToken(pendingPlayToken);
+    }
   } catch (err) {
     console.error('Pyria boot failed:', err);
     const listEl = $('#saves-list');

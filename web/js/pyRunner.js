@@ -4,7 +4,32 @@
 
 const EXECUTION_TIMEOUT_MS = 3000;
 const BOOT_TIMEOUT_MS = 20000;
-const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127j';
+const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127m';
+const MAX_PARTIAL_STDOUT_BYTES = 16384;
+const MAX_PARTIAL_STDOUT_LINES = 200;
+const STDOUT_TRUNCATED_NOTICE = '\n... (output truncated)';
+
+const TIMEOUT_PIP_MESSAGE =
+  "Whoa! Your spell got stuck in an endless loop (like a 'while' loop that never stops)! " +
+  "I hit the emergency stop after 3 seconds so Pyria didn't freeze. " +
+  "Check that your 'while' loop updates its counter (like count += 1) or reaches a stopping condition, then try again!";
+
+function appendCappedStdout(current, chunk) {
+  if (!chunk || typeof chunk !== 'string') return current;
+  if (current.endsWith(STDOUT_TRUNCATED_NOTICE)) return current;
+  let combined = current + chunk;
+  const lines = combined.split('\n');
+  let truncated = false;
+  if (lines.length > MAX_PARTIAL_STDOUT_LINES + 1) {
+    combined = lines.slice(0, MAX_PARTIAL_STDOUT_LINES).join('\n');
+    truncated = true;
+  }
+  if (combined.length > MAX_PARTIAL_STDOUT_BYTES) {
+    combined = combined.slice(0, MAX_PARTIAL_STDOUT_BYTES);
+    truncated = true;
+  }
+  return truncated ? combined + STDOUT_TRUNCATED_NOTICE : combined;
+}
 
 /**
  * Translates raw Python errors into warm, encouraging, kid-readable Pip messages.
@@ -19,10 +44,7 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
 
   if (result.timedOut) {
     return {
-      pipMessage:
-        "Whoa! Your spell got stuck in an endless loop (like 'while True:')! " +
-        "I hit the emergency stop after 3 seconds so Pyria didn't freeze. " +
-        'Check your loop and try again!',
+      pipMessage: TIMEOUT_PIP_MESSAGE,
       rawTraceback: null,
     };
   }
@@ -34,13 +56,17 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
   let pipMessage = '';
 
   switch (type) {
+    case 'TimeoutError':
+      pipMessage = TIMEOUT_PIP_MESSAGE;
+      break;
+
     case 'SyntaxError':
       if (msg.includes('unterminated string') || msg.includes('EOL while scanning')) {
         pipMessage = `Oops${linePart}! It looks like a quote mark (" or ') was opened but never closed. Wrap your text in matching quotes!`;
       } else if (msg.includes('was never closed') || msg.includes('EOF')) {
         pipMessage = `Almost there${linePart}! Check if you left an opening parenthesis '(' without its matching ')'!`;
-      } else if (msg.includes('expected \':\'')) {
-        pipMessage = `Chirp${linePart}! Remember that 'if', 'elif', 'else', and 'for' lines need a colon ':' at the very end!`;
+      } else if (msg.includes("expected ':'")) {
+        pipMessage = `Chirp${linePart}! Remember that 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', and 'with' lines need a colon ':' at the very end!`;
       } else {
         pipMessage = `Python got a tiny bit confused by the spelling or punctuation${linePart}. Double-check quotes, parentheses (), and colons ':'! (${msg})`;
       }
@@ -49,18 +75,20 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
     case 'IndentationError':
     case 'TabError':
       if (msg.includes('expected an indented block')) {
-        pipMessage = `Watch your spacing${linePart}! After a colon ':', the lines inside MUST be pushed over by 4 spaces — put your cursor at the start of that line and tap '⇥ Indent' (or 4 spaces)!`;
+        pipMessage = `Watch your spacing${linePart}! After a colon ':' (like 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', or 'with'), the lines inside MUST be pushed over by 4 spaces — put your cursor at the start of that line and tap '⇥ Indent' (or 4 spaces)!`;
       } else if (msg.includes('unexpected indent')) {
-        pipMessage = `Extra spaces spotted${linePart}! Normal lines (not inside an 'if' or 'for') need to start all the way at the left edge with 0 spaces.`;
+        pipMessage = `Extra spaces spotted${linePart}! Normal lines (not inside an 'if', 'for', 'while', 'def', 'class', 'try', or 'with' block) need to start all the way at the left edge with 0 spaces.`;
       } else {
-        pipMessage = `Watch your spacing${linePart}! Code inside an 'if', 'elif', 'else', or 'for' block needs to be indented 4 spaces (tap '⇥ Indent'), and normal lines start at the left edge.`;
+        pipMessage = `Watch your spacing${linePart}! Code inside an 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', or 'with' block needs to be indented 4 spaces (tap '⇥ Indent'), and normal lines start at the left edge.`;
       }
       break;
 
     case 'NameError': {
       const match = msg.match(/name '([^']+)' is not defined/);
       const varName = match ? match[1] : null;
-      if (varName) {
+      if (varName === 'self') {
+        pipMessage = `Hmm${linePart}, Python doesn't know 'self' here! Remember: 'self' only exists inside a class method, and it must be the first parameter in 'def method(self, ...):'.`;
+      } else if (varName) {
         pipMessage = `Hmm${linePart}, Python doesn't know what '${varName}' is yet! Did you spell it the same way, or forget quotes around text like "${varName}"?`;
       } else {
         pipMessage = `Python couldn't find one of your variable or function names${linePart}. Check your spelling and capitalization!`;
@@ -68,8 +96,29 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
       break;
     }
 
+    case 'AttributeError': {
+      const attrMatch = msg.match(/'([^']+)' object has no attribute '([^']+)'/);
+      if (attrMatch) {
+        const [, objType, attrName] = attrMatch;
+        if (objType === 'NoneType') {
+          pipMessage = `Oops${linePart}! That value is None (empty), so it doesn't have '.${attrName}'. Make sure your variable or function actually returned a value before calling '.${attrName}'!`;
+        } else {
+          pipMessage = `Pip checked your ${objType}${linePart}, and it doesn't have '.${attrName}'! Double-check the method or attribute spelling — and in a class, make sure you set 'self.${attrName}' inside '__init__' or spelled the method name right!`;
+        }
+      } else {
+        pipMessage = `Pip couldn't find that attribute or method${linePart}! Check your spelling after the dot '.' (and make sure class attributes use 'self.'). Detail: ${msg}`;
+      }
+      break;
+    }
+
     case 'TypeError':
-      pipMessage = `Mix-and-match alert${linePart}! You tried to combine two different kinds of things (like adding text and a number, or passing the wrong kind of argument). Detail: ${msg}`;
+      if (/missing \d+ required positional argument/.test(msg)) {
+        pipMessage = `Almost there${linePart}! You called a function without enough inputs inside '()'. Check how many parameters it expects! (${msg})`;
+      } else if (/takes .* positional argument/.test(msg)) {
+        pipMessage = `Whoa${linePart}! You passed a different number of inputs than the function expects inside '()' (if this is a class method, remember 'self' counts as the first parameter!). Detail: ${msg}`;
+      } else {
+        pipMessage = `Mix-and-match alert${linePart}! You tried to combine two different kinds of things (like adding text and a number, or passing the wrong kind of argument). Detail: ${msg}`;
+      }
       break;
 
     case 'ValueError':
@@ -165,6 +214,14 @@ function sanitizeSandboxResult(mode, raw) {
         : 0;
     base.purchased = sanitizeStringArray(src.purchased);
     base.equipped = sanitizeStringArray(src.equipped);
+    const invRaw = sanitizePlainObject(src.inventory);
+    base.inventory = {
+      arrows: typeof invRaw.arrows === 'number' ? Math.max(0, Math.trunc(invRaw.arrows)) : 0,
+      potions: typeof invRaw.potions === 'number' ? Math.max(0, Math.trunc(invRaw.potions)) : 0,
+    };
+    base.customItems = sanitizeStringArray(src.customItems)
+      .map((item) => item.slice(0, 80))
+      .slice(0, 20);
   }
   return base;
 }
@@ -336,7 +393,7 @@ export class PyRunner {
         sanitizeSandboxResult(req.mode, {
           passed: false,
           timedOut: true,
-          stdout: '',
+          stdout: req.partialStdout || '',
           stderr: '',
           errorType: 'TimeoutError',
           errorMessage: 'Execution exceeded 3 seconds',
@@ -399,6 +456,12 @@ export class PyRunner {
       this._abortPending('SandboxError', this.initError);
       return;
     }
+    if (msg.type === 'stdout' && this.pending.has(msg.id)) {
+      const req = this.pending.get(msg.id);
+      if (!req.sent || typeof msg.chunk !== 'string' || !msg.chunk) return;
+      req.partialStdout = appendCappedStdout(req.partialStdout || '', msg.chunk);
+      return;
+    }
     if (msg.type === 'result' && this.pending.has(msg.id)) {
       const req = this.pending.get(msg.id);
       if (!req.sent) return;
@@ -416,18 +479,25 @@ export class PyRunner {
       const id = this.nextId++;
       if (this.ready) {
         const timer = this._scheduleExecutionTimeout(id);
-        this.pending.set(id, { resolve, timer, mode, sent: true });
+        this.pending.set(id, { resolve, timer, mode, sent: true, partialStdout: '' });
         this.port.postMessage({ type: 'run', id, mode, payload });
       } else {
         const timer = this._scheduleBootTimeout(id);
-        this.pending.set(id, { resolve, timer, mode, sent: false });
+        this.pending.set(id, { resolve, timer, mode, sent: false, partialStdout: '' });
         this.bootQueue.push({ id, mode, payload });
       }
     });
   }
 
-  async runTrial(studentCode, testCode, showRawTracebacks = false) {
-    const result = await this.execute('trial', { studentCode, testCode });
+  async runTrial(studentCode, testCode, showRawTracebacks = false, options = {}) {
+    const payload = { studentCode, testCode };
+    if (options && Array.isArray(options.requiredConstructs) && options.requiredConstructs.length > 0) {
+      payload.requiredConstructs = options.requiredConstructs;
+    }
+    if (options && Array.isArray(options.variants) && options.variants.length > 0) {
+      payload.variants = options.variants;
+    }
+    const result = await this.execute('trial', payload);
     const pip = translateErrorForPip(result, showRawTracebacks);
     return { ...result, ...pip };
   }

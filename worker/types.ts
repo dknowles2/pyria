@@ -1,11 +1,24 @@
+export interface SendEmailBinding {
+  send(message: unknown): Promise<void>;
+}
+
 export interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  SEND_EMAIL?: SendEmailBinding;
   PYRIA_SESSION_SECRET?: string;
   PYRIA_ADMIN_EMAILS?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
-  // Optional overrides for quotas, rate limits, and OAuth endpoints (useful for tests/tuning)
+  RESEND_API_KEY?: string;
+  MAGIC_LINK_FROM_EMAIL?: string;
+  // Weekly progress digest email configuration
+  PYRIA_BASE_URL?: string;
+  EMAIL_FROM?: string;
+  EMAIL_API_KEY?: string;
+  EMAIL_API_URL?: string;
+  PYRIA_DIGEST_BATCH_SIZE?: string;
+  // Optional overrides for quotas, rate limits, and OAuth/email endpoints (useful for tests/tuning)
   PYRIA_MAX_SAVES_PER_ACCOUNT?: string;
   PYRIA_MAX_UNOWNED_SAVES?: string;
   PYRIA_MAX_DAILY_ANON_CREATES?: string;
@@ -18,8 +31,10 @@ export interface Env {
   PYRIA_RATE_LIMIT_CLAIM?: string;
   PYRIA_RATE_LIMIT_GLOBAL_FAIL?: string;
   PYRIA_RATE_LIMIT_SAVES?: string;
+  PYRIA_RATE_LIMIT_MAGIC_LINK?: string;
   GOOGLE_TOKEN_URL?: string;
   GOOGLE_USERINFO_URL?: string;
+  RESEND_API_URL?: string;
 }
 
 export type DifficultyMode = 'explorer' | 'standard' | 'challenge';
@@ -30,7 +45,91 @@ export interface SavePreferences {
   maxPipHints?: number;
 }
 
-export type TokenType = 'hero' | 'parent' | 'oauth_state';
+export type TokenType =
+  | 'hero'
+  | 'parent'
+  | 'oauth_state'
+  | 'magic_link'
+  | 'parent_link'
+  | 'hero_play'
+  | 'weekly_digest_unsub';
+
+export interface WeeklyDigestUnsubPayload {
+  typ: 'weekly_digest_unsub';
+  email: string;
+  exp: number;
+}
+
+export interface ParentPreferencesRecord {
+  ownerEmail: string;
+  weeklyDigestEnabled: boolean;
+  unsubscribedAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface DigestDeliveryRecord {
+  id: number;
+  ownerEmail: string;
+  weekKey: string;
+  heroCount: number;
+  trialsSolved: number;
+  status: 'sent' | 'failed';
+  providerMessageId: string | null;
+  errorMessage: string | null;
+  sentAt: string;
+}
+
+export interface HeroWeeklyDigest {
+  saveId: string;
+  heroName: string;
+  eraId: string;
+  eraName: string;
+  realmId: string;
+  realmName: string;
+  byteShards: number;
+  overallSolvedCount: number;
+  totalTrials: number;
+  rescuedDragonsCount: number;
+  trialsSolvedThisWeek: number;
+  notableTrialsSolved: string[];
+  conceptsProgressed: string[];
+  realmsProgressed: string[];
+  dragonsRescuedThisWeek: number;
+  activeDaysThisWeek: number;
+  coachingTip: string | null;
+}
+
+export interface ParentWeeklyDigest {
+  ownerEmail: string;
+  weekKey: string;
+  windowStart: string;
+  windowEnd: string;
+  activeHeroes: HeroWeeklyDigest[];
+  inactiveHeroNames: string[];
+  totalTrialsSolved: number;
+}
+
+export interface RenderedDigestEmail {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  unsubscribeUrl: string;
+  consoleUrl: string;
+  headers: Record<string, string>;
+}
+
+export interface DigestRunSummary {
+  weekKey: string;
+  evaluatedParents: number;
+  eligibleParents: number;
+  skippedNoProgress: number;
+  skippedDisabled: number;
+  skippedAlreadySent: number;
+  sentCount: number;
+  failedCount: number;
+  errors: Array<{ ownerEmail: string; error: string }>;
+}
 
 export interface HeroSessionPayload {
   typ: 'hero';
@@ -53,16 +152,39 @@ export interface OAuthStatePayload {
   exp: number;
 }
 
+export interface MagicLinkTokenPayload {
+  typ: 'magic_link';
+  email: string;
+  jti: string;
+  next: string;
+  exp: number;
+}
+
+export interface ParentLinkTokenPayload {
+  typ: 'parent_link';
+  saveId: string;
+  exp: number;
+}
+
+export interface HeroPlayTokenPayload {
+  typ: 'hero_play';
+  saveId: string;
+  sessionVersion: number;
+  exp: number;
+}
+
 export type AuthRole = 'guest' | 'hero' | 'parent' | 'admin';
 
 export interface AuthContext {
   role: AuthRole;
   heroSaveId: string | null;
   heroName: string | null;
+  heroLinkedToParent: boolean;
   heroPreferences: SavePreferences | null;
   parentEmail: string | null;
   isAdmin: boolean;
   googleOAuthEnabled: boolean;
+  magicLinkEnabled: boolean;
 }
 
 export interface SaveDbRow {
@@ -81,6 +203,7 @@ export interface SaveRecord {
   id: string;
   heroName: string;
   ownerEmail: string | null;
+  linkedToParent?: boolean;
   createdAt: string;
   updatedAt: string;
   preferences?: SavePreferences;
@@ -94,7 +217,87 @@ export interface AttemptRecord {
   passed: boolean;
   hintsUsed: number;
   code: string;
+  difficultyMode: DifficultyMode;
+  isPractice: boolean;
+  errorType: string | null;
+  durationMs: number | null;
   createdAt: string;
+}
+
+export type TrialCalibrationFlag = 'too_hard' | 'too_easy' | 'possible_bug' | 'low_data' | 'ok';
+
+export interface TrialMetadata {
+  trialId: string;
+  title: string;
+  eraId: string;
+  eraName: string;
+  realmId: string;
+  realmName: string;
+  trialType: string;
+  concepts: string[];
+}
+
+export interface TrialMetricsFilters {
+  eraId: string | null;
+  realmId: string | null;
+  trialType: string | null;
+  difficulty: 'all' | DifficultyMode;
+  days: '7' | '30' | '90' | 'all';
+  since: string | null;
+  minHeroes: number;
+  includePractice: boolean;
+  format: 'json' | 'csv';
+}
+
+export interface TrialMetricRow {
+  trialId: string;
+  title: string;
+  eraId: string;
+  eraName: string;
+  realmId: string;
+  realmName: string;
+  trialType: string;
+  concepts: string[];
+  uniqueHeroes: number;
+  uniqueSolvers: number;
+  attempts: number;
+  passes: number;
+  completionRate: number | null;
+  firstTryPassRate: number | null;
+  medianAttemptsToSolve: number | null;
+  p75AttemptsToSolve: number | null;
+  hintUsageRate: number | null;
+  tier3HintRate: number | null;
+  hintTierBreakdown: {
+    tier0: number;
+    tier1: number;
+    tier2: number;
+    tier3: number;
+  };
+  parentOverrides: number;
+  parentOverrideRate: number | null;
+  topErrors: Array<{ errorType: string; count: number }>;
+  dailyTrend: Array<{ day: string; attempts: number; passes: number }>;
+  flag: TrialCalibrationFlag;
+  flagReasons: string[];
+}
+
+export interface TrialMetricsSummary {
+  totalTrials: number;
+  trialsWithData: number;
+  flaggedTooHard: number;
+  flaggedTooEasy: number;
+  flaggedPossibleBug: number;
+  flaggedLowData: number;
+  overallMedianAttempts: number | null;
+  totalOverrides: number;
+  truncated?: boolean;
+}
+
+export interface TrialMetricsResponse {
+  filters: TrialMetricsFilters;
+  summary: TrialMetricsSummary;
+  trials: TrialMetricRow[];
 }
 
 export interface ActivityEventRecord {

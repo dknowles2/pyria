@@ -1,8 +1,10 @@
 import {
+  HERO_PLAY_TTL_SECONDS,
   HERO_SESSION_COOKIE,
   HERO_SESSION_TTL_SECONDS,
   OAUTH_STATE_COOKIE,
   OAUTH_STATE_TTL_SECONDS,
+  PARENT_LINK_TTL_SECONDS,
   PARENT_SESSION_COOKIE,
   PARENT_SESSION_TTL_SECONDS,
   clearCookie,
@@ -29,8 +31,11 @@ import { applySecurityHeaders, jsonResponse, sanitizeNextPath } from './security
 import type {
   AuthContext,
   Env,
+  HeroPlayTokenPayload,
   HeroSessionPayload,
+  MagicLinkTokenPayload,
   OAuthStatePayload,
+  ParentLinkTokenPayload,
   ParentSessionPayload,
   SavePreferences,
 } from './types';
@@ -51,6 +56,12 @@ const DEFAULT_REDEEM_LIMIT = 15;
 const DEFAULT_REDEEM_WINDOW_SEC = 300; // 5 minutes
 const DEFAULT_GLOBAL_FAIL_LIMIT = 200;
 const DEFAULT_GLOBAL_FAIL_WINDOW_SEC = 300; // 5 minutes
+const MAGIC_LINK_TTL_SECONDS = 900; // 15 minutes
+const DEFAULT_MAGIC_LINK_IP_LIMIT = 5;
+const DEFAULT_MAGIC_LINK_EMAIL_LIMIT = 3;
+const DEFAULT_MAGIC_LINK_WINDOW_SEC = 600; // 10 minutes
+const DEFAULT_MAGIC_LINK_FROM = 'Pyria <noreply@pyria.dev>';
+const EMAIL_FORMAT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export function getAdminEmails(env: Env): Set<string> {
   const raw = env.PYRIA_ADMIN_EMAILS || '';
@@ -74,6 +85,10 @@ export function isGoogleOAuthEnabled(env: Env): boolean {
   return Boolean((env.GOOGLE_CLIENT_ID || '').trim() && (env.GOOGLE_CLIENT_SECRET || '').trim());
 }
 
+export function isMagicLinkEnabled(env: Env): boolean {
+  return Boolean((env.RESEND_API_KEY || '').trim() && (env.PYRIA_SESSION_SECRET || '').trim());
+}
+
 export async function resolveAuthContext(
   request: Request,
   env: Env,
@@ -81,15 +96,18 @@ export async function resolveAuthContext(
 ): Promise<AuthContext> {
   const secret = (env.PYRIA_SESSION_SECRET || '').trim();
   const googleOAuthEnabled = isGoogleOAuthEnabled(env);
+  const magicLinkEnabled = isMagicLinkEnabled(env);
   if (!secret) {
     return {
       role: 'guest',
       heroSaveId: null,
       heroName: null,
+      heroLinkedToParent: false,
       heroPreferences: null,
       parentEmail: null,
       isAdmin: false,
       googleOAuthEnabled,
+      magicLinkEnabled,
     };
   }
 
@@ -114,6 +132,7 @@ export async function resolveAuthContext(
 
   let heroSaveId: string | null = null;
   let heroName: string | null = null;
+  let heroLinkedToParent = false;
   let heroPreferences = null;
   if (cookies[HERO_SESSION_COOKIE]) {
     const heroPayload = await verifyToken<HeroSessionPayload>(
@@ -130,6 +149,7 @@ export async function resolveAuthContext(
       if (row && Number(row.session_version) === heroPayload.sessionVersion) {
         heroSaveId = row.id;
         heroName = row.hero_name;
+        heroLinkedToParent = Boolean(row.owner_email && row.owner_email.trim());
         heroPreferences = parsePreferencesJson(row.preferences_json);
       }
     }
@@ -141,11 +161,30 @@ export async function resolveAuthContext(
     role,
     heroSaveId,
     heroName,
+    heroLinkedToParent,
     heroPreferences,
     parentEmail,
     isAdmin,
     googleOAuthEnabled,
+    magicLinkEnabled,
   };
+}
+
+export async function signParentLinkToken(saveId: string, secret: string): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + PARENT_LINK_TTL_SECONDS;
+  return signToken({ typ: 'parent_link', saveId, exp } satisfies ParentLinkTokenPayload, secret);
+}
+
+export async function signHeroPlayToken(
+  saveId: string,
+  sessionVersion: number,
+  secret: string
+): Promise<string> {
+  const exp = Math.floor(Date.now() / 1000) + HERO_PLAY_TTL_SECONDS;
+  return signToken(
+    { typ: 'hero_play', saveId, sessionVersion, exp } satisfies HeroPlayTokenPayload,
+    secret
+  );
 }
 
 export async function generateUniqueHeroCodeHash(
@@ -170,9 +209,11 @@ export async function handleGetMe(auth: AuthContext): Promise<Response> {
       role: auth.role,
       heroSaveId: auth.heroSaveId,
       heroName: auth.heroName,
+      linkedToParent: auth.heroLinkedToParent,
       parentEmail: auth.parentEmail,
       isAdmin: auth.isAdmin,
       googleOAuthEnabled: auth.googleOAuthEnabled,
+      magicLinkEnabled: auth.magicLinkEnabled,
     },
   });
 }
@@ -263,10 +304,13 @@ export async function handleHeroCodeCreate(
     });
 
     const exp = Math.floor(Date.now() / 1000) + HERO_SESSION_TTL_SECONDS;
-    const token = await signToken(
-      { typ: 'hero', saveId: save.id, sessionVersion: 1, exp } satisfies HeroSessionPayload,
-      secret
-    );
+    const [token, parentLinkToken] = await Promise.all([
+      signToken(
+        { typ: 'hero', saveId: save.id, sessionVersion: 1, exp } satisfies HeroSessionPayload,
+        secret
+      ),
+      signParentLinkToken(save.id, secret),
+    ]);
     const cookie = serializeCookie(HERO_SESSION_COOKIE, token, {
       maxAge: HERO_SESSION_TTL_SECONDS,
       path: '/',
@@ -275,7 +319,16 @@ export async function handleHeroCodeCreate(
       secure: isHttpsRequest(request),
     });
 
-    return jsonResponse({ save, heroCode }, 201, { 'Set-Cookie': cookie });
+    return jsonResponse(
+      {
+        save,
+        heroCode,
+        parentLinkToken,
+        parentLinkExpiresInSeconds: PARENT_LINK_TTL_SECONDS,
+      },
+      201,
+      { 'Set-Cookie': cookie }
+    );
   } catch (err) {
     if (err instanceof ValidationError || err instanceof QuotaError) {
       return jsonResponse({ error: err.message }, err.status);
@@ -320,26 +373,55 @@ export async function handleHeroCodeRedeem(
     return jsonResponse({ error: 'Invalid request body' }, 400);
   }
 
-  const rawCode = typeof body.heroCode === 'string' ? body.heroCode : '';
-  const normalized = normalizeHeroCode(rawCode);
-  if (!normalized || normalized.length < 5 || normalized.length > 64) {
-    return jsonResponse({ error: 'Invalid Hero Code' }, 400);
-  }
-
   const secret = getSessionSecret(env);
-  const hash = await hashHeroCode(normalized, secret);
-  const row = await db.getSaveByRecoveryHash(hash);
-  if (!row) {
-    const failRl = await recordHeroCodeFailure(
-      env.DB,
-      ip,
-      globalFailLimit,
-      DEFAULT_GLOBAL_FAIL_WINDOW_SEC
-    );
-    if (!failRl.allowed) {
-      return rateLimitExceededResponse(failRl.retryAfterSeconds);
+  const rawPlayToken = typeof body.playToken === 'string' ? body.playToken.trim() : '';
+  let row = null;
+
+  if (rawPlayToken) {
+    const playPayload = await verifyToken<HeroPlayTokenPayload>(rawPlayToken, secret, 'hero_play');
+    if (
+      playPayload &&
+      typeof playPayload.saveId === 'string' &&
+      typeof playPayload.sessionVersion === 'number'
+    ) {
+      const candidate = await db.getSaveRow(playPayload.saveId);
+      if (candidate && Number(candidate.session_version ?? 1) === playPayload.sessionVersion) {
+        row = candidate;
+      }
     }
-    return jsonResponse({ error: 'Invalid Hero Code' }, 401);
+    if (!row) {
+      const failRl = await recordHeroCodeFailure(
+        env.DB,
+        ip,
+        globalFailLimit,
+        DEFAULT_GLOBAL_FAIL_WINDOW_SEC
+      );
+      if (!failRl.allowed) {
+        return rateLimitExceededResponse(failRl.retryAfterSeconds);
+      }
+      return jsonResponse({ error: 'This play link has expired or is no longer valid' }, 401);
+    }
+  } else {
+    const rawCode = typeof body.heroCode === 'string' ? body.heroCode : '';
+    const normalized = normalizeHeroCode(rawCode);
+    if (!normalized || normalized.length < 5 || normalized.length > 64) {
+      return jsonResponse({ error: 'Invalid Hero Code' }, 400);
+    }
+
+    const hash = await hashHeroCode(normalized, secret);
+    row = await db.getSaveByRecoveryHash(hash);
+    if (!row) {
+      const failRl = await recordHeroCodeFailure(
+        env.DB,
+        ip,
+        globalFailLimit,
+        DEFAULT_GLOBAL_FAIL_WINDOW_SEC
+      );
+      if (!failRl.allowed) {
+        return rateLimitExceededResponse(failRl.retryAfterSeconds);
+      }
+      return jsonResponse({ error: 'Invalid Hero Code' }, 401);
+    }
   }
 
   const exp = Math.floor(Date.now() / 1000) + HERO_SESSION_TTL_SECONDS;
@@ -362,6 +444,91 @@ export async function handleHeroCodeRedeem(
   });
 
   return jsonResponse({ save: PyriaD1.rowToSave(row) }, 200, { 'Set-Cookie': cookie });
+}
+
+export async function handleCreateHeroLinkToken(
+  request: Request,
+  env: Env,
+  db: PyriaD1,
+  auth: AuthContext
+): Promise<Response> {
+  if (!auth.heroSaveId) {
+    return jsonResponse({ error: 'Active hero session required' }, 401);
+  }
+
+  const ip = getClientIp(request);
+  const rl = await checkRateLimit(env.DB, `hero-link-token:${ip}`, 20, DEFAULT_CREATE_WINDOW_SEC);
+  if (!rl.allowed) {
+    return rateLimitExceededResponse(rl.retryAfterSeconds);
+  }
+
+  const row = await db.getSaveRow(auth.heroSaveId);
+  if (!row) {
+    return jsonResponse({ error: 'Hero save not found' }, 404);
+  }
+  if (row.owner_email && row.owner_email.trim()) {
+    return jsonResponse(
+      { error: 'This hero is already linked to a parent account', alreadyLinked: true },
+      409
+    );
+  }
+
+  const secret = getSessionSecret(env);
+  const parentLinkToken = await signParentLinkToken(row.id, secret);
+  return jsonResponse({
+    parentLinkToken,
+    heroName: row.hero_name,
+    expiresInSeconds: PARENT_LINK_TTL_SECONDS,
+  });
+}
+
+export async function handleHeroPlayPreview(
+  request: Request,
+  env: Env,
+  db: PyriaD1
+): Promise<Response> {
+  const limit = Number.parseInt(env.PYRIA_RATE_LIMIT_REDEEM || '', 10) || DEFAULT_REDEEM_LIMIT;
+  const ip = getClientIp(request);
+  const rl = await checkRateLimit(env.DB, `hero-play-preview:${ip}`, limit * 2, DEFAULT_REDEEM_WINDOW_SEC);
+  if (!rl.allowed) {
+    return rateLimitExceededResponse(rl.retryAfterSeconds);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJsonBody(request, 8192);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return jsonResponse({ error: err.message }, err.status);
+    }
+    return jsonResponse({ error: 'Invalid request body' }, 400);
+  }
+
+  const rawPlayToken = typeof body.playToken === 'string' ? body.playToken.trim() : '';
+  if (!rawPlayToken) {
+    return jsonResponse({ error: 'playToken is required' }, 400);
+  }
+
+  const secret = getSessionSecret(env);
+  const payload = await verifyToken<HeroPlayTokenPayload>(rawPlayToken, secret, 'hero_play');
+  if (
+    !payload ||
+    typeof payload.saveId !== 'string' ||
+    typeof payload.sessionVersion !== 'number'
+  ) {
+    return jsonResponse({ error: 'This play link has expired or is no longer valid' }, 401);
+  }
+
+  const row = await db.getSaveRow(payload.saveId);
+  if (!row || Number(row.session_version ?? 1) !== payload.sessionVersion) {
+    return jsonResponse({ error: 'This play link has expired or is no longer valid' }, 401);
+  }
+
+  return jsonResponse({
+    valid: true,
+    saveId: row.id,
+    heroName: row.hero_name,
+  });
 }
 
 export async function handleGoogleStart(request: Request, env: Env): Promise<Response> {
@@ -498,6 +665,180 @@ export async function handleGoogleCallback(request: Request, env: Env): Promise<
     })
   );
   headers.append('Set-Cookie', clearCookie(OAUTH_STATE_COOKIE, secure, '/api/auth/google/callback'));
+  applySecurityHeaders(headers);
+
+  return new Response(null, { status: 302, headers });
+}
+
+function redirectMagicLinkInvalid(): Response {
+  const headers = new Headers();
+  headers.set('Location', '/console?auth_error=magic_link_invalid');
+  headers.set('Cache-Control', 'no-store');
+  applySecurityHeaders(headers);
+  return new Response(null, { status: 302, headers });
+}
+
+function buildMagicLinkEmailHtml(verifyUrl: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#0b1020;color:#eef3ff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:520px;margin:0 auto;background:#151c32;border:2px solid #2b385c;border-radius:16px;padding:28px;">
+    <p style="margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:0.1em;color:#f6c945;text-transform:uppercase;">PYRIA PARENT CONSOLE</p>
+    <h1 style="margin:0 0 12px;font-size:24px;color:#eef3ff;">Sign in to Pyria</h1>
+    <p style="margin:0 0 22px;font-size:15px;line-height:1.55;color:#9eb0d6;">
+      Click the button below to sign in to the Pyria Parent Console. This link works once and expires in 15 minutes.
+    </p>
+    <p style="margin:0 0 22px;">
+      <a href="${verifyUrl}" style="display:inline-block;padding:13px 24px;border-radius:10px;background:#34d399;color:#062118;font-weight:800;font-size:15px;text-decoration:none;">
+        Sign In to Pyria Console →
+      </a>
+    </p>
+    <p style="margin:0;font-size:12.5px;line-height:1.5;color:#9eb0d6;">
+      If you didn't request this link, you can safely ignore this email.
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
+export async function handleMagicLinkRequest(request: Request, env: Env): Promise<Response> {
+  if (!isMagicLinkEnabled(env)) {
+    return jsonResponse({ error: 'Email Magic Link sign-in is not configured on this server' }, 503);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await readJsonBody(request, 4096);
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return jsonResponse({ error: err.message }, err.status);
+    }
+    return jsonResponse({ error: 'Invalid request body' }, 400);
+  }
+
+  const rawEmail = typeof body.email === 'string' ? body.email : '';
+  const email = normalizeEmail(rawEmail);
+  if (!email || email.length > 254 || !EMAIL_FORMAT_RE.test(email)) {
+    return jsonResponse({ error: 'Please enter a valid email address.' }, 400);
+  }
+
+  const ipLimit =
+    Number.parseInt(env.PYRIA_RATE_LIMIT_MAGIC_LINK || '', 10) || DEFAULT_MAGIC_LINK_IP_LIMIT;
+  const ip = getClientIp(request);
+  const ipRl = await checkRateLimit(
+    env.DB,
+    `magic-ip:${ip}`,
+    ipLimit,
+    DEFAULT_MAGIC_LINK_WINDOW_SEC
+  );
+  if (!ipRl.allowed) {
+    return rateLimitExceededResponse(ipRl.retryAfterSeconds);
+  }
+
+  const emailLimit = Math.min(ipLimit, DEFAULT_MAGIC_LINK_EMAIL_LIMIT);
+  const emailRl = await checkRateLimit(
+    env.DB,
+    `magic-email:${email}`,
+    emailLimit,
+    DEFAULT_MAGIC_LINK_WINDOW_SEC
+  );
+  if (!emailRl.allowed) {
+    return rateLimitExceededResponse(emailRl.retryAfterSeconds);
+  }
+
+  const secret = getSessionSecret(env);
+  const url = new URL(request.url);
+  const nextPath = sanitizeNextPath(typeof body.next === 'string' ? body.next : null, '/console');
+  const jti = generateRandomToken(16);
+  const exp = Math.floor(Date.now() / 1000) + MAGIC_LINK_TTL_SECONDS;
+  const token = await signToken(
+    { typ: 'magic_link', email, jti, next: nextPath, exp } satisfies MagicLinkTokenPayload,
+    secret
+  );
+
+  const verifyUrl = `${url.origin}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`;
+  const resendUrl = env.RESEND_API_URL || 'https://api.resend.com/emails';
+  const fromAddress = (env.MAGIC_LINK_FROM_EMAIL || '').trim() || DEFAULT_MAGIC_LINK_FROM;
+
+  const resendRes = await fetch(resendUrl, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY!.trim()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: fromAddress,
+      to: [email],
+      subject: 'Sign in to Pyria Parent Console',
+      html: buildMagicLinkEmailHtml(verifyUrl),
+      text: `Sign in to the Pyria Parent Console:\n\n${verifyUrl}\n\nThis link works once and expires in 15 minutes. If you didn't request this email, you can safely ignore it.`,
+    }),
+  });
+
+  if (!resendRes.ok) {
+    return jsonResponse(
+      { error: 'Unable to send sign-in email right now. Please try again in a moment.' },
+      502
+    );
+  }
+
+  return jsonResponse({
+    ok: true,
+    message: 'Check your email for your sign-in link! It expires in 15 minutes.',
+  });
+}
+
+export async function handleMagicLinkVerify(request: Request, env: Env): Promise<Response> {
+  if (!isMagicLinkEnabled(env)) {
+    return jsonResponse({ error: 'Email Magic Link sign-in is not configured on this server' }, 503);
+  }
+
+  const secret = getSessionSecret(env);
+  const url = new URL(request.url);
+  const token = (url.searchParams.get('token') || '').trim();
+  if (!token) {
+    return redirectMagicLinkInvalid();
+  }
+
+  const payload = await verifyToken<MagicLinkTokenPayload>(token, secret, 'magic_link');
+  const email = payload ? normalizeEmail(payload.email) : null;
+  if (!payload || !email || typeof payload.jti !== 'string' || !payload.jti) {
+    return redirectMagicLinkInvalid();
+  }
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  // Prune expired entries opportunistically and consume jti atomically (single-use)
+  await env.DB.prepare('DELETE FROM magic_link_tokens WHERE expires_at < ?').bind(nowSec).run();
+  const insertRes = await env.DB.prepare(
+    'INSERT OR IGNORE INTO magic_link_tokens (jti, expires_at) VALUES (?, ?)'
+  )
+    .bind(payload.jti, payload.exp)
+    .run();
+
+  if (!insertRes.meta || Number(insertRes.meta.changes) === 0) {
+    return redirectMagicLinkInvalid();
+  }
+
+  const exp = nowSec + PARENT_SESSION_TTL_SECONDS;
+  const sessionToken = await signToken(
+    { typ: 'parent', email, exp } satisfies ParentSessionPayload,
+    secret
+  );
+
+  const nextPath = sanitizeNextPath(payload.next, '/console');
+  const headers = new Headers();
+  headers.set('Location', nextPath);
+  headers.set('Cache-Control', 'no-store');
+  headers.append(
+    'Set-Cookie',
+    serializeCookie(PARENT_SESSION_COOKIE, sessionToken, {
+      maxAge: PARENT_SESSION_TTL_SECONDS,
+      path: '/',
+      httpOnly: true,
+      sameSite: 'Lax',
+      secure: isHttpsRequest(request),
+    })
+  );
   applySecurityHeaders(headers);
 
   return new Response(null, { status: 302, headers });
