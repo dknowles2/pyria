@@ -798,7 +798,7 @@
           "testCode": "assert beam == 100 and OUTPUT.strip() == \"LUMINA FREE!\"",
           "hints": {
             "tier1_nudge": "One last spell to free Lumina!",
-            "tier2_pattern": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")",
+            "tier2_pattern": "beam = sum([n[___] for n in nodes.___()])\nif beam == 100:\n    print(___)",
             "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")"
           },
           "difficultyOverride": null
