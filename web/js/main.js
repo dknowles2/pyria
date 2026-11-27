@@ -32,7 +32,7 @@ import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127p';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127q';
 import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 import { AppRouter } from './router.js?v=20261127l';
 import {
@@ -977,6 +977,60 @@ function openEnterHeroCodeFlow() {
   });
 }
 
+async function renameSaveRecord(targetSave, newName) {
+  if (!targetSave || !targetSave.id) {
+    throw new Error('No hero save selected.');
+  }
+  const trimmed = String(newName || '').trim();
+  const isActive = Boolean(state.activeSave && state.activeSave.id === targetSave.id);
+  const isGuest = isActiveSaveGuest(targetSave);
+
+  if (isActive) {
+    await persistQueue.catch(() => {});
+  }
+
+  let updated;
+  if (isGuest) {
+    const base = (isActive ? state.activeSave : getGuestSave(targetSave.id)) || targetSave;
+    updated = updateGuestSave(targetSave.id, { ...base, heroName: trimmed });
+    if (!updated) {
+      throw new Error('Could not find local guest save to rename.');
+    }
+  } else {
+    const base = isActive ? state.activeSave : await getSave(targetSave.id).catch(() => targetSave);
+    updated = await updateSave(targetSave.id, { ...base, heroName: trimmed });
+  }
+
+  const finalName = updated?.heroName || trimmed;
+  if (isActive && state.activeSave) {
+    state.activeSave.heroName = finalName;
+    if (updated?.updatedAt) {
+      state.activeSave.updatedAt = updated.updatedAt;
+    }
+    updateHud();
+  }
+  if (state.me?.auth?.heroSaveId === targetSave.id) {
+    state.me.auth.heroName = finalName;
+    renderAccountIdentityBar();
+  }
+  audio.playSuccess();
+  showToast(`Hero renamed to "${finalName}"!`);
+  return updated;
+}
+
+function openRenameHeroFlow(targetSave, { refreshList = false } = {}) {
+  if (!targetSave || !state.modals) return;
+  state.modals.openRenameHeroModal({
+    currentName: targetSave.heroName,
+    onRename: async (newName) => {
+      await renameSaveRecord(targetSave, newName);
+      if (refreshList) {
+        await refreshSavesList();
+      }
+    },
+  });
+}
+
 async function refreshSavesList() {
   const listEl = $('#saves-list');
   const countEl = $('#saves-count');
@@ -1028,9 +1082,16 @@ async function refreshSavesList() {
         </div>
         <div class="save-card-actions">
           ${upgradeBtnHtml}
+          <button type="button" class="btn btn-sm btn-ghost btn-card-rename" title="Rename Hero" aria-label="Rename ${escapeHtml(s.heroName)}">✏️ Rename</button>
           <button type="button" class="btn btn-sm btn-primary btn-card-continue">Continue →</button>
         </div>
       `;
+
+      const renameBtn = card.querySelector('.btn-card-rename');
+      renameBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openRenameHeroFlow(s, { refreshList: true });
+      });
 
       const upgradeBtn = card.querySelector('.btn-card-hero-code');
       upgradeBtn?.addEventListener('click', async (e) => {
@@ -2334,6 +2395,10 @@ function wireControls() {
   attachAutocomplete(ccCodeEl, () => buildCharCreateSuggestions(state.catalog));
 
   // HUD
+  $('#btn-hud-rename')?.addEventListener('click', () => {
+    if (!state.activeSave) return;
+    openRenameHeroFlow(state.activeSave);
+  });
   $('#hud-admin-realm-jump')?.addEventListener('change', async (e) => {
     const targetRealmId = e.target.value;
     e.target.blur();

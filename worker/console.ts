@@ -524,6 +524,35 @@ export async function handleConsoleRequest(
       return jsonResponse(updated);
     }
 
+    // PUT /api/console/saves/:id/rename
+    if (method === 'PUT' && action === 'rename') {
+      const accessErr = await requireParentOwnsSave(db, auth, saveId);
+      if (accessErr) return accessErr;
+
+      let body: Record<string, unknown>;
+      try {
+        body = await readJsonBody(request, 8192);
+      } catch (err) {
+        if (err instanceof ValidationError) {
+          return jsonResponse({ error: err.message }, err.status);
+        }
+        return jsonResponse({ error: 'Invalid request body' }, 400);
+      }
+
+      try {
+        const updated = await db.renameHero(saveId, body.heroName);
+        if (!updated) {
+          return jsonResponse({ error: 'Save not found' }, 404);
+        }
+        return jsonResponse({ ok: true, save: updated });
+      } catch (err) {
+        if (err instanceof ValidationError) {
+          return jsonResponse({ error: err.message }, err.status);
+        }
+        throw err;
+      }
+    }
+
     // POST /api/console/saves/:id/assign-owner (admin only)
     if (method === 'POST' && action === 'assign-owner') {
       if (!auth.isAdmin) {

@@ -2920,4 +2920,102 @@ export class ModalManager {
       btn.addEventListener('click', () => this.close());
     });
   }
+
+  // ==================== RENAME HERO MODAL ====================
+  openRenameHeroModal({ currentName, onRename }) {
+    audio.playClick();
+    const initialName = String(currentName || '').trim();
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>✏️ Rename Hero</h2>
+          <div class="modal-badges">
+            <span class="pill pill-blue">2–24 characters</span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-ghost" data-close>✕</button>
+      </div>
+
+      <p class="dialogue-text">
+        Choose a new name for <strong>${escapeHtml(initialName || 'your hero')}</strong>!
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <input
+          id="input-rename-hero"
+          type="text"
+          class="forge-text-input"
+          value="${escapeHtml(initialName)}"
+          placeholder="Enter hero name..."
+          autocomplete="off"
+          minlength="2"
+          maxlength="24"
+        />
+        <div id="rename-hero-error" class="forge-error hidden"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button id="btn-submit-rename-hero" type="button" class="btn btn-primary">✦ Save Name</button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    const inputEl = this.content.querySelector('#input-rename-hero');
+    const errEl = this.content.querySelector('#rename-hero-error');
+    const submitBtn = this.content.querySelector('#btn-submit-rename-hero');
+
+    const submit = async () => {
+      const nextName = String(inputEl?.value || '').trim();
+      const charCount = Array.from(nextName).length;
+      if (charCount < 2 || charCount > 24) {
+        if (errEl) {
+          errEl.textContent = 'Hero name must be between 2 and 24 characters.';
+          errEl.classList.remove('hidden');
+        }
+        audio.playError();
+        return;
+      }
+      if (nextName === initialName) {
+        this.close();
+        return;
+      }
+      if (errEl) errEl.classList.add('hidden');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+      }
+      try {
+        await onRename(nextName);
+        this.close();
+      } catch (err) {
+        audio.playError();
+        if (errEl) {
+          errEl.textContent = err?.detail || err?.message || 'Could not rename hero. Please try again.';
+          errEl.classList.remove('hidden');
+        }
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = '✦ Save Name';
+        }
+      }
+    };
+
+    submitBtn?.addEventListener('click', submit);
+    inputEl?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        submit();
+      }
+    });
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
+    setTimeout(() => {
+      inputEl?.focus();
+      inputEl?.select();
+    }, 30);
+  }
 }

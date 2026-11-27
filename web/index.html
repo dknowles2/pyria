@@ -11,7 +11,7 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <title>Pyria: Return of the Bits</title>
-  <link rel="stylesheet" href="/css/style.css?v=20261127p" />
+  <link rel="stylesheet" href="/css/style.css?v=20261127q" />
 </head>
 <body>
   <div id="app">
@@ -229,7 +229,10 @@
             <canvas id="hud-portrait" width="32" height="32" class="pixel-canvas"></canvas>
           </div>
           <div class="hud-identity">
-            <div id="hud-hero-name" class="hud-hero-name">Code-Tamer</div>
+            <button id="btn-hud-rename" type="button" class="hud-hero-name-btn" title="Rename Hero" aria-label="Rename Hero">
+              <span id="hud-hero-name" class="hud-hero-name">Code-Tamer</span>
+              <span class="hud-rename-icon" aria-hidden="true">✏️</span>
+            </button>
             <div class="hud-realm-row">
               <span id="hud-era-badge" class="pill pill-blue">8-Bit Era</span>
               <span id="hud-realm-name" class="hud-realm-name">Whispering Meadow</span>
@@ -335,6 +338,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/main.js?v=20261127r"></script>
+  <script type="module" src="/js/main.js?v=20261127s"></script>
 </body>
 </html>

@@ -133,6 +133,18 @@ class PyriaServerTestCase(unittest.TestCase):
         self.assertEqual(updated["heroName"], "Rowan the Brave")
         self.assertEqual(updated["byteShards"], 35)
 
+        # Verify hero_renamed activity event was emitted
+        status, _, raw = self._request("GET", "/api/builder/activity?since=0&limit=20")
+        self.assertEqual(status, 200)
+        events = json.loads(raw)["events"]
+        rename_events = [e for e in events if e["eventType"] == "hero_renamed"]
+        self.assertEqual(len(rename_events), 1)
+        self.assertEqual(rename_events[0]["heroName"], "Rowan the Brave")
+        self.assertEqual(
+            rename_events[0]["details"],
+            {"previousHeroName": "Rowan", "heroName": "Rowan the Brave"},
+        )
+
         status, _, raw = self._request(
             "POST",
             f"/api/saves/{save_id}/attempts",

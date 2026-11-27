@@ -541,6 +541,97 @@ function openHeroPreferencesModal(save) {
   });
 }
 
+function openRenameHeroModal(save) {
+  const initialName = String(save?.heroName || '').trim();
+  openConsoleModal(`
+    <div class="console-modal-header">
+      <h2>✏️ Rename Hero</h2>
+      <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+    </div>
+    <p class="muted-text" style="margin:0;">
+      Enter a new name for <strong style="color:var(--text-main);">${escapeHtml(initialName || 'Hero')}</strong> (2–24 characters):
+    </p>
+    <div class="field">
+      <label for="rename-hero-name">Hero Name</label>
+      <input id="rename-hero-name" type="text" class="input" value="${escapeHtml(initialName)}" minlength="2" maxlength="24" placeholder="Hero name..." autocomplete="off" />
+    </div>
+    <div id="rename-hero-error" class="console-error-msg hidden"></div>
+    <div class="console-modal-footer">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+      <button id="btn-submit-rename-hero" type="button" class="btn btn-primary">Save Name</button>
+    </div>
+  `);
+
+  const nameEl = $('#rename-hero-name');
+  const errEl = $('#rename-hero-error');
+  const submitBtn = $('#btn-submit-rename-hero');
+  setTimeout(() => {
+    nameEl?.focus();
+    nameEl?.select();
+  }, 30);
+
+  const submit = async () => {
+    const heroName = String(nameEl?.value || '').trim();
+    const charCount = Array.from(heroName).length;
+    if (charCount < 2 || charCount > 24) {
+      if (errEl) {
+        errEl.textContent = 'Hero name must be between 2 and 24 characters.';
+        errEl.classList.remove('hidden');
+      }
+      return;
+    }
+    if (heroName === initialName) {
+      closeConsoleModal();
+      return;
+    }
+    if (errEl) errEl.classList.add('hidden');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+    try {
+      if (state.mode === 'cloudflare') {
+        await apiFetch(`/api/console/saves/${encodeURIComponent(save.id)}/rename`, {
+          method: 'PUT',
+          body: JSON.stringify({ heroName }),
+        });
+      } else {
+        const current = await apiFetch(`/api/saves/${encodeURIComponent(save.id)}`);
+        const base = current?.save || save.state || save;
+        const {
+          preferences: _prefs,
+          stats: _stats,
+          isGuest: _isGuest,
+          sessionVersion: _sv,
+          hasHeroCode: _hhc,
+          state: _nestedState,
+          ...cleanBase
+        } = base;
+        await apiFetch(`/api/saves/${encodeURIComponent(save.id)}`, {
+          method: 'PUT',
+          body: JSON.stringify({ ...cleanBase, heroName }),
+        });
+      }
+      closeConsoleModal();
+      showToast(`Renamed hero to "${heroName}"!`);
+      await loadProgressFull();
+    } catch (err) {
+      if (errEl) {
+        errEl.textContent = err.message || 'Could not rename hero.';
+        errEl.classList.remove('hidden');
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Name';
+    }
+  };
+
+  submitBtn?.addEventListener('click', submit);
+  nameEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submit();
+    }
+  });
+}
+
 function openAssignOwnerModal(save) {
   openConsoleModal(`
     <div class="console-modal-header">
@@ -711,6 +802,7 @@ function renderHeroCards() {
             <div class="hero-card-console-controls" data-stop-card-click>
               <div class="hero-console-actions-row">
                 <span class="pill pill-muted">⚙️ ${escapeHtml(diffLabel)} · ${prefHints} ${prefHints === 1 ? 'Hint' : 'Hints'}${prefTracebacks ? ' · Tracebacks' : ''}</span>
+                <button type="button" class="btn btn-sm btn-ghost btn-rename-hero" data-save-id="${escapeHtml(save.id)}">✏️ Rename</button>
                 <button type="button" class="btn btn-sm btn-primary btn-edit-hero-prefs" data-save-id="${escapeHtml(save.id)}">⚙️ Settings</button>
                 <button type="button" class="btn btn-sm btn-gold btn-rotate-hero-code" data-save-id="${escapeHtml(save.id)}">🔄 Rotate / Revoke Code</button>
                 ${
@@ -721,7 +813,13 @@ function renderHeroCards() {
               </div>
             </div>
           `
-          : '';
+          : `
+            <div class="hero-card-console-controls" data-stop-card-click>
+              <div class="hero-console-actions-row">
+                <button type="button" class="btn btn-sm btn-ghost btn-rename-hero" data-save-id="${escapeHtml(save.id)}">✏️ Rename</button>
+              </div>
+            </div>
+          `;
 
       return `
         <div class="hero-card ${isSelected ? 'selected' : ''}" data-save-id="${escapeHtml(save.id)}">
@@ -758,6 +856,14 @@ function renderHeroCards() {
 
   listEl.querySelectorAll('[data-stop-card-click]').forEach((el) => {
     el.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  listEl.querySelectorAll('.btn-rename-hero').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const save = state.saves.find((s) => s.id === btn.dataset.saveId);
+      if (save) openRenameHeroModal(save);
+    });
   });
 
   listEl.querySelectorAll('.btn-edit-hero-prefs').forEach((btn) => {
@@ -856,6 +962,8 @@ function getEventBadge(eventType) {
       return { cls: 'pill-gold', text: '🐉 Dragon Rescued' };
     case 'hero_created':
       return { cls: 'pill-blue', text: '✨ New Hero' };
+    case 'hero_renamed':
+      return { cls: 'pill-blue', text: '✏️ Renamed' };
     case 'realm_entered':
       return { cls: 'pill-blue', text: '🚪 Entered Realm' };
     case 'parent_override':

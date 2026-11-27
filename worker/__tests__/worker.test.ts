@@ -1698,3 +1698,111 @@ describe('QR Link Tokens, Link-Later & Dashless Hero Codes', () => {
     expect(newRedeem.data.save.id).toBe(created.data.save.id);
   });
 });
+
+describe('Hero Renaming', () => {
+  it('allows hero session to rename via PUT /api/saves/:id and logs hero_renamed activity', async () => {
+    const createRes = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: { heroName: 'Rowan' },
+    });
+    expect(createRes.res.status).toBe(201);
+    const save = createRes.data.save;
+    const heroCookie = extractCookie(createRes.res, HERO_SESSION_COOKIE);
+    expect(heroCookie).toBeTruthy();
+
+    const putRes = await apiJson(`/api/saves/${save.id}`, {
+      method: 'PUT',
+      cookie: heroCookie,
+      body: {
+        heroName: 'Aria Star',
+        realmId: 'realm-01-meadow',
+        byteShards: 15,
+      },
+    });
+    expect(putRes.res.status).toBe(200);
+    expect(putRes.data.save.heroName).toBe('Aria Star');
+    expect(putRes.data.save.byteShards).toBe(15);
+
+    const meRes = await apiJson('/api/me', { cookie: heroCookie });
+    expect(meRes.res.status).toBe(200);
+    expect(meRes.data.auth.heroName).toBe('Aria Star');
+
+    const { results: events } = await env.DB.prepare(
+      'SELECT event_type, hero_name, summary, details_json FROM activity_events WHERE save_id = ? ORDER BY id ASC'
+    )
+      .bind(save.id)
+      .all<{ event_type: string; hero_name: string; summary: string; details_json: string }>();
+    const renameEv = events.find((e) => e.event_type === 'hero_renamed');
+    expect(renameEv).toBeTruthy();
+    expect(renameEv?.hero_name).toBe('Aria Star');
+    expect(renameEv?.summary).toBe('Renamed hero from Rowan to Aria Star');
+    expect(JSON.parse(renameEv!.details_json)).toEqual({
+      previousHeroName: 'Rowan',
+      heroName: 'Aria Star',
+    });
+
+    // Rejects invalid name (too short)
+    const badRes = await apiJson(`/api/saves/${save.id}`, {
+      method: 'PUT',
+      cookie: heroCookie,
+      body: { heroName: 'A' },
+    });
+    expect(badRes.res.status).toBe(400);
+  });
+
+  it('allows parent to rename owned hero via PUT /api/console/saves/:id/rename and blocks non-owners', async () => {
+    const parentACookie = await makeParentCookie('parent-a@example.com');
+    const parentBCookie = await makeParentCookie('parent-b@example.com');
+
+    const createRes = await apiJson('/api/console/heroes', {
+      method: 'POST',
+      cookie: parentACookie,
+      body: { heroName: 'Ember' },
+    });
+    expect(createRes.res.status).toBe(201);
+    const saveId = createRes.data.save.id;
+
+    // Non-owner parent is blocked
+    const forbiddenRes = await apiJson(`/api/console/saves/${saveId}/rename`, {
+      method: 'PUT',
+      cookie: parentBCookie,
+      body: { heroName: 'Hijacked' },
+    });
+    expect(forbiddenRes.res.status).toBe(403);
+
+    // Owner parent renames hero cleanly without losing state
+    const renameRes = await apiJson(`/api/console/saves/${saveId}/rename`, {
+      method: 'PUT',
+      cookie: parentACookie,
+      body: { heroName: '  Nova Flame  ' },
+    });
+    expect(renameRes.res.status).toBe(200);
+    expect(renameRes.data.ok).toBe(true);
+    expect(renameRes.data.save.heroName).toBe('Nova Flame');
+    expect(renameRes.data.save.realmId).toBe('realm-01-meadow');
+
+    // No-op rename with same name succeeds and does not emit a duplicate event
+    const noopRes = await apiJson(`/api/console/saves/${saveId}/rename`, {
+      method: 'PUT',
+      cookie: parentACookie,
+      body: { heroName: 'Nova Flame' },
+    });
+    expect(noopRes.res.status).toBe(200);
+
+    const { results: renameEvents } = await env.DB.prepare(
+      "SELECT summary FROM activity_events WHERE save_id = ? AND event_type = 'hero_renamed'"
+    )
+      .bind(saveId)
+      .all<{ summary: string }>();
+    expect(renameEvents).toHaveLength(1);
+    expect(renameEvents[0].summary).toBe('Renamed hero from Ember to Nova Flame');
+
+    // Invalid name returns 400
+    const badRes = await apiJson(`/api/console/saves/${saveId}/rename`, {
+      method: 'PUT',
+      cookie: parentACookie,
+      body: { heroName: 'X' },
+    });
+    expect(badRes.res.status).toBe(400);
+  });
+});
