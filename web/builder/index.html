@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pyria Parent &amp; Builder Console</title>
-  <link rel="stylesheet" href="/builder/builder.css?v=20261127i" />
+  <link rel="stylesheet" href="/builder/builder.css?v=20261127k" />
 </head>
 <body>
   <div id="builder-app">
@@ -13,12 +13,12 @@
       <div class="topbar-left">
         <span class="brand-badge">PYRIA</span>
         <div>
-          <h1 class="topbar-title">Parent &amp; Builder Console</h1>
-          <div class="topbar-sub">Real-time play monitor, difficulty tuning &amp; story editor</div>
+          <h1 id="topbar-title" class="topbar-title">Parent &amp; Builder Console</h1>
+          <div id="topbar-sub" class="topbar-sub">Real-time play monitor, difficulty tuning &amp; story editor</div>
         </div>
       </div>
 
-      <nav class="tab-nav" role="tablist">
+      <nav id="builder-tab-nav" class="tab-nav" role="tablist">
         <button class="tab-btn active" data-tab="live" role="tab" aria-selected="true">📡 Live Progress</button>
         <button class="tab-btn" data-tab="story" role="tab" aria-selected="false">📖 Story &amp; Trials</button>
         <button class="tab-btn" data-tab="health" role="tab" aria-selected="false">🛡️ Concept Health</button>
@@ -33,16 +33,42 @@
         </div>
         <button id="btn-toggle-live" class="btn btn-sm btn-ghost">⏸ Pause</button>
         <button id="btn-refresh-now" class="btn btn-sm btn-ghost" title="Refresh now">↻</button>
+        <button id="btn-console-signout" class="btn btn-sm btn-ghost hidden">Sign Out</button>
         <a href="/" class="btn btn-sm btn-primary">🎮 Play Game</a>
       </div>
     </header>
 
-    <!-- Optional Passcode Bar (shown only if server returns 401/403) -->
+    <!-- Optional Passcode Bar (local mode only, shown if server returns 401/403) -->
     <div id="passcode-bar" class="passcode-bar hidden">
       <span>🔒 Builder passcode required:</span>
       <input id="passcode-input" type="password" class="input input-sm" placeholder="Enter passcode..." />
       <button id="btn-passcode-submit" class="btn btn-sm btn-gold">Unlock</button>
     </div>
+
+    <!-- Cloudflare Mode Parent Sign-In Screen (shown when unauthenticated in production) -->
+    <main id="console-signin-panel" class="console-signin-panel hidden">
+      <section class="card console-signin-card">
+        <span class="pill pill-gold">PYRIA PARENT CONSOLE</span>
+        <h2>Parent &amp; Guardian Sign-In</h2>
+        <p class="muted-text">
+          Sign in with your Google account to view your children's real-time Python progress,
+          create or link <strong>Hero Codes</strong> for kids' devices, tune difficulty &amp; Pip hints,
+          and manage Trial overrides.
+        </p>
+        <div id="console-signin-actions" class="console-signin-actions">
+          <a id="btn-google-signin" href="/api/auth/google/start?next=/console" class="btn btn-primary btn-lg">
+            Sign in with Google
+          </a>
+          <a href="/" class="btn btn-ghost">← Back to Game</a>
+        </div>
+        <p id="console-oauth-disabled-msg" class="muted-text hidden" style="color:var(--accent-rose);">
+          Google Sign-In is not configured on this deployment yet. Set <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> in Cloudflare Workers secrets.
+        </p>
+        <p class="hint-sub" style="margin-top:6px;">
+          Kids never need a Google account — they play right away as guests or with a memorable Hero Code!
+        </p>
+      </section>
+    </main>
 
     <!-- ==================== TAB 1: LIVE PROGRESS (DEFAULT) ==================== -->
     <main id="tab-live" class="tab-panel active">
@@ -72,35 +98,42 @@
 
       <!-- Quick Parent Controls -->
       <section class="card parent-controls-bar">
-        <div class="control-group">
+        <div id="account-filter-group" class="control-group">
           <label for="account-filter-select" class="control-label">Account</label>
           <select id="account-filter-select" class="input input-sm">
             <option value="all">All Accounts</option>
           </select>
         </div>
 
-        <div class="control-group">
-          <span class="control-label">Global Difficulty</span>
-          <div id="global-diff-segmented" class="segmented">
-            <button type="button" class="seg-btn" data-mode="explorer">Explorer</button>
-            <button type="button" class="seg-btn active" data-mode="standard">Standard</button>
-            <button type="button" class="seg-btn" data-mode="challenge">Challenge</button>
-          </div>
+        <div id="console-hero-actions" class="control-group hidden">
+          <button id="btn-console-add-hero" type="button" class="btn btn-sm btn-primary">+ Add Child Hero</button>
+          <button id="btn-console-claim-hero" type="button" class="btn btn-sm btn-sky">🔗 Link Hero Code</button>
         </div>
 
-        <label class="control-group checkbox-control">
-          <input id="global-raw-tracebacks" type="checkbox" />
-          <span>Show Raw Python Tracebacks</span>
-        </label>
+        <div id="local-global-diff-controls" class="local-global-diff-controls">
+          <div class="control-group">
+            <span class="control-label">Global Difficulty</span>
+            <div id="global-diff-segmented" class="segmented">
+              <button type="button" class="seg-btn" data-mode="explorer">Explorer</button>
+              <button type="button" class="seg-btn active" data-mode="standard">Standard</button>
+              <button type="button" class="seg-btn" data-mode="challenge">Challenge</button>
+            </div>
+          </div>
 
-        <div class="control-group">
-          <label for="global-max-hints" class="control-label">Max Pip Hints</label>
-          <select id="global-max-hints" class="input input-sm">
-            <option value="0">0 (No hints)</option>
-            <option value="1">1 (Nudge only)</option>
-            <option value="2">2 (Nudge + Pattern)</option>
-            <option value="3" selected>3 (Full 3-Tier)</option>
-          </select>
+          <label class="control-group checkbox-control">
+            <input id="global-raw-tracebacks" type="checkbox" />
+            <span>Show Raw Python Tracebacks</span>
+          </label>
+
+          <div class="control-group">
+            <label for="global-max-hints" class="control-label">Max Pip Hints</label>
+            <select id="global-max-hints" class="input input-sm">
+              <option value="0">0 (No hints)</option>
+              <option value="1">1 (Nudge only)</option>
+              <option value="2">2 (Nudge + Pattern)</option>
+              <option value="3" selected>3 (Full 3-Tier)</option>
+            </select>
+          </div>
         </div>
 
         <div id="parent-controls-status" class="muted-text" style="margin-left:auto; font-size:12.5px;">
@@ -390,14 +423,19 @@
             ↗ Open in New Tab
           </a>
         </div>
-        <iframe id="assets-iframe" class="assets-iframe" src="/assets/world/preview.html" title="Pyria Asset Preview"></iframe>
+        <iframe id="assets-iframe" class="assets-iframe" title="Pyria Asset Preview"></iframe>
       </section>
     </main>
+
+    <!-- Console Modal Layer (Add Child Hero, Link Hero Code, Rotate Code, Assign Owner) -->
+    <div id="console-modal-backdrop" class="console-modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div id="console-modal-content" class="card console-modal-card"></div>
+    </div>
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
   </div>
 
-  <script type="module" src="/builder/builder.js?v=20261127i"></script>
+  <script type="module" src="/builder/builder.js?v=20261127k"></script>
 </body>
 </html>

@@ -1042,3 +1042,147 @@ html, body {
 .leg-chest { background: #f59e0b; border-radius: 2px; }
 .leg-vault { background: #ef4444; }
 .leg-npc { background: #a78bfa; transform: rotate(45deg); border-radius: 1px; }
+
+/* ==================== CLOUDFLARE PARENT / ADMIN CONSOLE ==================== */
+.local-global-diff-controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.console-signin-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+}
+
+.console-signin-card {
+  max-width: 480px;
+  width: 100%;
+  padding: 28px 26px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.console-signin-card h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+}
+
+.console-signin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-lg {
+  padding: 12px 20px;
+  font-size: 15px;
+}
+
+.hero-card-console-controls {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-prefs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hero-prefs-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.hero-console-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.console-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(5, 9, 20, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.console-modal-card {
+  max-width: 480px;
+  width: 100%;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.console-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.console-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.console-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.console-code-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-code);
+  border: 2px solid var(--accent-gold);
+  text-align: center;
+}
+
+.console-code-display {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--accent-gold);
+  word-break: break-all;
+}
+
+.console-error-msg {
+  color: var(--accent-rose);
+  font-size: 12.5px;
+  font-weight: 700;
+}

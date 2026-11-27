@@ -13,14 +13,23 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261127i';
+  isGuestMode,
+  listGuestSaves,
+  createGuestSave,
+  getGuestSave,
+  updateGuestSave,
+  deleteGuestSave,
+  createHeroCode,
+  redeemHeroCode,
+  logoutSession,
+} from './api.js?v=20261127k';
 import { audio } from './audio.js?v=20261127i';
 import { music, resolveRegionTheme } from './music.js?v=20261127i';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127i';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127k';
 import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 
 function escapeHtml(str) {
@@ -35,7 +44,21 @@ function escapeHtml(str) {
 const ADMIN_OWNER_STORAGE_KEY = 'pyria_admin_owner_filter';
 
 const state = {
-  me: { authenticated: false, email: null, isAdmin: false, accounts: [] },
+  me: {
+    mode: 'local',
+    auth: {
+      role: 'guest',
+      heroSaveId: null,
+      heroName: null,
+      parentEmail: null,
+      isAdmin: false,
+      googleOAuthEnabled: false,
+    },
+    authenticated: false,
+    email: null,
+    isAdmin: false,
+    accounts: [],
+  },
   adminOwnerFilter: sessionStorage.getItem(ADMIN_OWNER_STORAGE_KEY) || 'all',
   gameConfig: null,
   catalog: null,
@@ -291,6 +314,65 @@ function clearTrialDraft(save, trialId, { skipPersist = false } = {}) {
 
 // ==================== PERSISTENCE ====================
 let persistQueue = Promise.resolve();
+let sessionExpiredHandling = false;
+let lastExpiredSaveId = null;
+
+function isActiveSaveGuest(save) {
+  if (!save) return isGuestMode(state.me);
+  return Boolean(save.isGuest || String(save.id || '').startsWith('guest-') || isGuestMode(state.me));
+}
+
+function migrateLocalDrafts(oldSaveId, newSaveId) {
+  if (!oldSaveId || !newSaveId || oldSaveId === newSaveId) return;
+  try {
+    const oldDrafts = readLocalDrafts(oldSaveId);
+    if (Object.keys(oldDrafts).length > 0) {
+      const merged = { ...oldDrafts, ...readLocalDrafts(newSaveId) };
+      writeLocalDrafts(newSaveId, merged);
+    }
+    localStorage.removeItem(`pyria_drafts_${oldSaveId}`);
+  } catch {
+    // ignore storage errors
+  }
+}
+
+async function handleHeroSessionExpired(snapshot) {
+  const source = snapshot || state.activeSave;
+  if (sessionExpiredHandling) return;
+  if (source?.id && source.id === lastExpiredSaveId) return;
+  sessionExpiredHandling = true;
+  if (source?.id) lastExpiredSaveId = source.id;
+  try {
+    if (draftPersistTimer) {
+      clearTimeout(draftPersistTimer);
+      draftPersistTimer = null;
+    }
+    if (source && !source.isGuest) {
+      const oldId = source.id;
+      const backup = createGuestSave(source);
+      migrateLocalDrafts(oldId, backup.id);
+      if (state.activeSave && state.activeSave.id === oldId) {
+        state.activeSave = backup;
+        state.world?.setSave(backup);
+      }
+    }
+    state.me = await fetchMe();
+    renderAccountIdentityBar();
+    renderAdminRealmJump();
+    updateHud();
+    const modalAlreadyOpen = !$('#modal-backdrop')?.classList.contains('hidden');
+    if (state.modals && !modalAlreadyOpen) {
+      state.modals.openHeroSessionExpiredModal({
+        heroName: source?.heroName,
+        onEnterHeroCode: () => openEnterHeroCodeFlow(),
+      });
+    } else if (!modalAlreadyOpen) {
+      showToast('Your Hero Code changed — progress backed up locally. Enter your new Hero Code!');
+    }
+  } finally {
+    sessionExpiredHandling = false;
+  }
+}
 
 function persistSave() {
   if (!state.activeSave || !state.activeSave.id) return Promise.resolve();
@@ -298,6 +380,7 @@ function persistSave() {
     .catch(() => {})
     .then(async () => {
       if (!state.activeSave || !state.activeSave.id) return;
+      const snapshot = JSON.parse(JSON.stringify(state.activeSave));
       try {
         if (state.world && state.activeMap) {
           state.activeSave.position = {
@@ -305,15 +388,28 @@ function persistSave() {
             x: Math.floor(state.world.hero.x),
             y: Math.floor(state.world.hero.y),
           };
+          snapshot.position = { ...state.activeSave.position };
         }
-        // Snapshot current in-memory save and send serially; never clobber newer local mutations!
-        const snapshot = JSON.parse(JSON.stringify(state.activeSave));
+        if (isActiveSaveGuest(snapshot)) {
+          const updated = updateGuestSave(snapshot.id, snapshot);
+          if (state.activeSave && state.activeSave.id === snapshot.id && updated?.updatedAt) {
+            state.activeSave.updatedAt = updated.updatedAt;
+          }
+          return;
+        }
         const updated = await updateSave(snapshot.id, snapshot);
         if (state.activeSave && state.activeSave.id === snapshot.id && updated?.updatedAt) {
           state.activeSave.updatedAt = updated.updatedAt;
         }
       } catch (err) {
         console.warn('Could not persist save:', err);
+        if (
+          state.me?.mode === 'cloudflare' &&
+          !isActiveSaveGuest(snapshot) &&
+          (err?.status === 401 || err?.status === 403)
+        ) {
+          await handleHeroSessionExpired(snapshot);
+        }
       }
     });
   return persistQueue;
@@ -460,6 +556,12 @@ function updateHud() {
   $('#hud-shards').textContent = String(save.byteShards ?? 0);
   $('#btn-hud-mute').textContent = audio.isMuted() ? '🔇' : '🔊';
 
+  const hudHeroCodeBtn = $('#btn-hud-hero-code');
+  if (hudHeroCodeBtn) {
+    const showUpgrade = state.me?.mode === 'cloudflare' && isActiveSaveGuest(save);
+    hudHeroCodeBtn.classList.toggle('hidden', !showUpgrade);
+  }
+
   // Realm Trials progress indicator (excludes hidden isBonus Trials from main Vault count)
   const completed = getSolvedTrialsSet(save);
   const realmTrials = (state.activeRealm?.trials || []).filter((t) => !t.isBonus);
@@ -523,29 +625,85 @@ function updateHud() {
 // ==================== TITLE & SAVE PICKER ====================
 function renderAccountIdentityBar() {
   const me = state.me || {};
+  const auth = me.auth || {};
+  const isCloudflare = me.mode === 'cloudflare';
   const bar = $('#title-account-bar');
   const pill = $('#title-user-pill');
   const builderBtn = $('#btn-title-builder');
+  const heroSignOutBtn = $('#btn-hero-signout');
+  const enterCodeBtn = $('#btn-enter-hero-code');
   const adminBar = $('#admin-account-bar');
   const adminSel = $('#admin-account-select');
 
-  if (me.authenticated || me.email || me.isAdmin) {
-    bar?.classList.remove('hidden');
-    if (pill) {
-      if (me.isAdmin) {
-        pill.className = 'pill pill-gold';
-        pill.textContent = me.email ? `🛡️ Admin: ${me.email}` : '🛡️ Admin Mode';
-      } else {
-        pill.className = 'pill pill-blue';
-        pill.textContent = `👤 ${me.email}`;
-      }
-    }
-  } else {
-    bar?.classList.add('hidden');
+  if (enterCodeBtn) {
+    enterCodeBtn.classList.toggle('hidden', !isCloudflare);
   }
 
-  if (me.isAdmin) {
-    builderBtn?.classList.remove('hidden');
+  if (isCloudflare) {
+    bar?.classList.remove('hidden');
+    if (auth.role === 'admin') {
+      if (pill) {
+        pill.className = 'pill pill-gold';
+        pill.textContent = auth.parentEmail ? `🛡️ Admin: ${auth.parentEmail}` : '🛡️ Admin';
+      }
+      if (builderBtn) {
+        builderBtn.href = '/console';
+        builderBtn.textContent = '🛡️ Console';
+        builderBtn.classList.remove('hidden');
+      }
+      heroSignOutBtn?.classList.add('hidden');
+    } else if (auth.role === 'parent') {
+      if (pill) {
+        pill.className = 'pill pill-blue';
+        pill.textContent = auth.parentEmail ? `👤 Parent: ${auth.parentEmail}` : '👤 Parent';
+      }
+      if (builderBtn) {
+        builderBtn.href = '/console';
+        builderBtn.textContent = '🛡️ Parent Console';
+        builderBtn.classList.remove('hidden');
+      }
+      heroSignOutBtn?.classList.add('hidden');
+    } else if (auth.role === 'hero') {
+      if (pill) {
+        pill.className = 'pill pill-green';
+        pill.textContent = `🧙 Hero: ${auth.heroName || 'Code-Tamer'}`;
+      }
+      builderBtn?.classList.add('hidden');
+      heroSignOutBtn?.classList.remove('hidden');
+    } else {
+      if (pill) {
+        pill.className = 'pill pill-violet';
+        pill.textContent = '✨ Guest Mode (Saved on this device)';
+      }
+      builderBtn?.classList.add('hidden');
+      heroSignOutBtn?.classList.add('hidden');
+    }
+  } else {
+    heroSignOutBtn?.classList.add('hidden');
+    if (me.authenticated || me.email || me.isAdmin) {
+      bar?.classList.remove('hidden');
+      if (pill) {
+        if (me.isAdmin) {
+          pill.className = 'pill pill-gold';
+          pill.textContent = me.email ? `🛡️ Admin: ${me.email}` : '🛡️ Admin Mode';
+        } else {
+          pill.className = 'pill pill-blue';
+          pill.textContent = `👤 ${me.email}`;
+        }
+      }
+    } else {
+      bar?.classList.add('hidden');
+    }
+    if (me.isAdmin && builderBtn) {
+      builderBtn.href = '/builder';
+      builderBtn.textContent = '🛠️ Builder';
+      builderBtn.classList.remove('hidden');
+    } else {
+      builderBtn?.classList.add('hidden');
+    }
+  }
+
+  if (me.isAdmin && !isCloudflare) {
     adminBar?.classList.remove('hidden');
     if (adminSel) {
       const accounts = new Set(Array.isArray(me.accounts) ? me.accounts : []);
@@ -562,22 +720,128 @@ function renderAccountIdentityBar() {
       adminSel.value = state.adminOwnerFilter;
     }
   } else {
-    builderBtn?.classList.add('hidden');
     adminBar?.classList.add('hidden');
   }
+}
+
+let heroCodeUpgradeInFlight = false;
+
+async function upgradeGuestSaveToHeroCode(targetSave) {
+  if (!targetSave || heroCodeUpgradeInFlight) return;
+  heroCodeUpgradeInFlight = true;
+  const oldGuestId = targetSave.id;
+  if (draftPersistTimer) {
+    clearTimeout(draftPersistTimer);
+    draftPersistTimer = null;
+  }
+  await persistQueue.catch(() => {});
+  try {
+    const res = await createHeroCode(targetSave.heroName, targetSave);
+    if (!res.save || !res.heroCode) {
+      throw new Error('Server did not return a Hero Code');
+    }
+    // Swap activeSave and migrate local drafts BEFORE deleting the guest save so
+    // any concurrent persistSave() cannot write back to the old guest ID.
+    let needsPostUpgradeSync = false;
+    if (state.activeSave && state.activeSave.id === oldGuestId) {
+      // Preserve any in-memory progress made while createHeroCode() was in flight.
+      const mergedCloudSave = {
+        ...state.activeSave,
+        ...res.save,
+        byteShards: Math.max(Number(state.activeSave.byteShards) || 0, Number(res.save.byteShards) || 0),
+        solvedTrials: [...new Set([...(state.activeSave.solvedTrials || []), ...(res.save.solvedTrials || [])])],
+        completedTrials: [...new Set([...(state.activeSave.completedTrials || []), ...(res.save.completedTrials || [])])],
+        openedChests: [...new Set([...(state.activeSave.openedChests || []), ...(res.save.openedChests || [])])],
+        foundEasterEggs: [...new Set([...(state.activeSave.foundEasterEggs || []), ...(res.save.foundEasterEggs || [])])],
+        rescuedDragons: [...new Set([...(state.activeSave.rescuedDragons || []), ...(res.save.rescuedDragons || [])])],
+        ownedUnlockIds: [...new Set([...(state.activeSave.ownedUnlockIds || []), ...(res.save.ownedUnlockIds || [])])],
+        seenCutscenes: [...new Set([...(state.activeSave.seenCutscenes || []), ...(res.save.seenCutscenes || [])])],
+        position: state.activeSave.position || res.save.position || null,
+        isGuest: false,
+      };
+      state.activeSave = mergedCloudSave;
+      state.world?.setSave(mergedCloudSave);
+      needsPostUpgradeSync = true;
+    }
+    migrateLocalDrafts(oldGuestId, res.save.id);
+    if (String(oldGuestId || '').startsWith('guest-')) {
+      deleteGuestSave(oldGuestId);
+    }
+    const [freshMe, freshConfig] = await Promise.all([
+      fetchMe(),
+      fetchConfig().catch(() => null),
+    ]);
+    state.me = freshMe;
+    if (freshConfig?.game) {
+      state.gameConfig = freshConfig.game;
+      if (freshConfig.heroPreferences) {
+        state.gameConfig.heroPreferences = freshConfig.heroPreferences;
+      }
+    }
+    if (needsPostUpgradeSync) {
+      persistSave().catch(() => {});
+    }
+    updateHud();
+    renderAccountIdentityBar();
+    renderAdminRealmJump();
+    if ($('#screen-title')?.classList.contains('active')) {
+      await refreshSavesList();
+    }
+    state.modals.openHeroCodeDisplayModal({
+      heroName: res.save.heroName,
+      heroCode: res.heroCode,
+    });
+  } catch (err) {
+    audio.playError();
+    showToast(`Could not create Hero Code: ${err.detail || err.message}`);
+  } finally {
+    heroCodeUpgradeInFlight = false;
+  }
+}
+
+function openEnterHeroCodeFlow() {
+  state.modals.openEnterHeroCodeModal({
+    onRedeem: async (code) => {
+      const res = await redeemHeroCode(code);
+      if (!res.save) {
+        throw new Error('Could not load hero for that code.');
+      }
+      lastExpiredSaveId = null;
+      const [freshMe, freshConfig] = await Promise.all([
+        fetchMe(),
+        fetchConfig().catch(() => null),
+      ]);
+      state.me = freshMe;
+      if (freshConfig?.game) {
+        state.gameConfig = freshConfig.game;
+        if (freshConfig.heroPreferences) {
+          state.gameConfig.heroPreferences = freshConfig.heroPreferences;
+        }
+      }
+      renderAccountIdentityBar();
+      renderAdminRealmJump();
+      audio.playSuccess();
+      await enterOverworld(res.save);
+      showToast(`Welcome back, ${res.save.heroName}!`);
+    },
+  });
 }
 
 async function refreshSavesList() {
   const listEl = $('#saves-list');
   const countEl = $('#saves-count');
+  const isCloudflare = state.me?.mode === 'cloudflare';
+  const guest = isGuestMode(state.me);
+
   try {
-    const ownerParam = state.me?.isAdmin ? state.adminOwnerFilter || 'all' : null;
-    const saves = await listSaves(ownerParam);
-    const showingAll = Boolean(state.me?.isAdmin && ownerParam === 'all');
+    const ownerParam = !isCloudflare && state.me?.isAdmin ? state.adminOwnerFilter || 'all' : null;
+    const saves = guest ? listGuestSaves() : await listSaves(ownerParam);
+    const showingAll = Boolean(!isCloudflare && state.me?.isAdmin && ownerParam === 'all');
     countEl.textContent = `${saves.length} ${saves.length === 1 ? 'Hero' : 'Heroes'}`;
     if (saves.length === 0) {
-      listEl.innerHTML =
-        '<div class="empty-state">No saved heroes yet. Click <strong>Start New Adventure</strong> to forge your first Code-Tamer!</div>';
+      listEl.innerHTML = isCloudflare
+        ? '<div class="empty-state">No heroes yet! Click <strong>Start New Adventure</strong> to play right away, or <strong>Enter Hero Code</strong> to load a hero.</div>'
+        : '<div class="empty-state">No saved heroes yet. Click <strong>Start New Adventure</strong> to forge your first Code-Tamer!</div>';
       return;
     }
 
@@ -590,6 +854,13 @@ async function refreshSavesList() {
         showingAll && s.ownerEmail
           ? `<div class="save-owner-pill">${escapeHtml(s.ownerEmail)}</div>`
           : '';
+      const guestBadgeHtml = s.isGuest
+        ? '<div class="save-guest-pill">Local Guest Save</div>'
+        : '';
+      const upgradeBtnHtml =
+        isCloudflare && s.isGuest
+          ? '<button type="button" class="btn btn-sm btn-sky btn-card-hero-code">🔑 Get Hero Code</button>'
+          : '';
       card.innerHTML = `
         <div class="save-card-info">
           <div class="save-card-name">${escapeHtml(s.heroName)}</div>
@@ -597,14 +868,35 @@ async function refreshSavesList() {
             ${escapeHtml(realm ? realm.name : s.realmId)} · ✦ ${Number(s.byteShards) || 0} Shards · 🐉 ${(s.rescuedDragons || []).length} Dragons
           </div>
           ${ownerBadgeHtml}
+          ${guestBadgeHtml}
         </div>
-        <button class="btn btn-sm btn-primary">Continue →</button>
+        <div class="save-card-actions">
+          ${upgradeBtnHtml}
+          <button type="button" class="btn btn-sm btn-primary btn-card-continue">Continue →</button>
+        </div>
       `;
+
+      const upgradeBtn = card.querySelector('.btn-card-hero-code');
+      upgradeBtn?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        audio.playClick();
+        upgradeBtn.disabled = true;
+        upgradeBtn.textContent = 'Creating...';
+        await upgradeGuestSaveToHeroCode(s);
+        upgradeBtn.disabled = false;
+        upgradeBtn.textContent = '🔑 Get Hero Code';
+      });
+
       card.addEventListener('click', async () => {
         audio.playClick();
         try {
-          const fullSave = s.id ? await getSave(s.id) : s;
-          await enterOverworld(fullSave);
+          if (s.isGuest) {
+            const localSave = getGuestSave(s.id) || s;
+            await enterOverworld(localSave);
+          } else {
+            const fullSave = s.id ? await getSave(s.id) : s;
+            await enterOverworld(fullSave);
+          }
         } catch (err) {
           console.error(err);
           await enterOverworld(s);
@@ -735,6 +1027,30 @@ function buildVisualHeroPickers() {
   renderGroup('#cc-tunic-pills', cc.allowedValues.tunic, 'tunic', TUNIC_SWATCHES);
 }
 
+async function createHeroForCurrentAuth(newSavePayload) {
+  if (state.me?.mode === 'cloudflare' && state.me?.auth?.role === 'hero') {
+    const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
+    if (
+      !confirm(
+        `This will sign out ${activeHeroLabel} on this device. Make sure you have your Hero Code written down! Continue?`
+      )
+    ) {
+      return null;
+    }
+    // A child hero cookie is scoped to one saveId and cannot POST /api/saves.
+    // Switch cleanly to Guest Mode so a sibling can start a new adventure locally.
+    await logoutSession('hero').catch(() => {});
+    state.me = await fetchMe();
+    renderAccountIdentityBar();
+    renderAdminRealmJump();
+    return createGuestSave(newSavePayload);
+  }
+  if (isGuestMode(state.me)) {
+    return createGuestSave(newSavePayload);
+  }
+  return createSave(newSavePayload);
+}
+
 async function launchAdventureFromHeroForge(errorEl) {
   const cleanedName = String(state.ccAppearance.name || '').trim();
   if (cleanedName.length < 2 || cleanedName.length > 16) {
@@ -762,7 +1078,8 @@ async function launchAdventureFromHeroForge(errorEl) {
   }
 
   try {
-    const created = await createSave(newSavePayload);
+    const created = await createHeroForCurrentAuth(newSavePayload);
+    if (!created) return false;
     audio.playSuccess();
     await enterOverworld(created);
     showToast(`Welcome to Pyria, ${created.heroName}!`);
@@ -928,7 +1245,8 @@ async function runCharCreateCode() {
         newSavePayload.ownerEmail = state.adminOwnerFilter;
       }
       try {
-        const created = await createSave(newSavePayload);
+        const created = await createHeroForCurrentAuth(newSavePayload);
+        if (!created) return;
         await enterOverworld(created);
         showToast(`Welcome to Pyria, ${created.heroName}!`);
       } catch (err) {
@@ -963,7 +1281,12 @@ async function refreshLiveContent() {
   const eraId = state.activeSave?.eraId || state.era?.id || 'era-01-8bit';
   try {
     const [config, era] = await Promise.all([fetchConfig(), fetchEra(eraId)]);
-    if (config?.game) state.gameConfig = config.game;
+    if (config?.game) {
+      state.gameConfig = config.game;
+      if (config.heroPreferences) {
+        state.gameConfig.heroPreferences = config.heroPreferences;
+      }
+    }
     if (config?.catalog) state.catalog = config.catalog;
     if (era) {
       if (!state.eras) state.eras = new Map();
@@ -1214,7 +1537,13 @@ async function handleEntityInteract(entity) {
       onDraftFlush: (code) => updateTrialDraft(save, trial.id, code, { immediatePersist: true }),
       onDraftClear: (opts) => clearTrialDraft(save, trial.id, opts),
       onAttempt: (attempt) => {
-        logAttempt(save.id, attempt).catch((err) => console.warn('Attempt log failed:', err));
+        if (isActiveSaveGuest(save)) return;
+        logAttempt(save.id, attempt).catch((err) => {
+          console.warn('Attempt log failed:', err);
+          if (state.me?.mode === 'cloudflare' && (err?.status === 401 || err?.status === 403)) {
+            handleHeroSessionExpired(state.activeSave);
+          }
+        });
       },
       onSolved: async (solvedTrial) => {
         const solvedSet = getSolvedTrialsSet(save);
@@ -1414,6 +1743,33 @@ function wireControls() {
     openCharCreateScreen();
   });
 
+  $('#btn-enter-hero-code')?.addEventListener('click', () => {
+    audio.playClick();
+    openEnterHeroCodeFlow();
+  });
+
+  $('#btn-hero-signout')?.addEventListener('click', async () => {
+    audio.playClick();
+    const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
+    if (
+      !confirm(
+        `Sign out ${activeHeroLabel} on this device? Make sure you have your Hero Code written down so you can sign back in!`
+      )
+    ) {
+      return;
+    }
+    try {
+      await logoutSession('hero');
+    } catch (err) {
+      console.warn('Hero sign out warning:', err);
+    }
+    state.me = await fetchMe();
+    renderAccountIdentityBar();
+    renderAdminRealmJump();
+    await refreshSavesList();
+    showToast('Switched back to Guest Mode.');
+  });
+
   $('#admin-account-select')?.addEventListener('change', async (e) => {
     state.adminOwnerFilter = e.target.value || 'all';
     sessionStorage.setItem(ADMIN_OWNER_STORAGE_KEY, state.adminOwnerFilter);
@@ -1514,6 +1870,24 @@ function wireControls() {
     e.target.blur();
     if (!state.me?.isAdmin || !csId) return;
     await runStoryCutsceneById(csId, { markSeen: false });
+  });
+  $('#btn-hud-hero-code')?.addEventListener('click', async () => {
+    const btn = $('#btn-hud-hero-code');
+    if (!state.activeSave || heroCodeUpgradeInFlight) return;
+    audio.playClick();
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Creating...';
+    }
+    try {
+      await persistSave();
+      await upgradeGuestSaveToHeroCode(state.activeSave);
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '🔑 Get Hero Code';
+      }
+    }
   });
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
   $('#btn-hud-era-toggle').addEventListener('click', async () => {
@@ -1744,8 +2118,11 @@ async function init() {
       if (e && e.id) state.eras.set(e.id, e);
     }
 
-    state.me = me || { authenticated: false, email: null, isAdmin: false, accounts: [] };
+    state.me = me;
     state.gameConfig = config.game;
+    if (config.heroPreferences && state.gameConfig) {
+      state.gameConfig.heroPreferences = config.heroPreferences;
+    }
     state.catalog = config.catalog;
     state.era = state.eras.get('era-01-8bit') || [...state.eras.values()][0] || null;
     state.sprites = new SpriteManager(spriteManifest, tilesetManifest);
