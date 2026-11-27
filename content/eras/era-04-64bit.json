@@ -182,8 +182,8 @@
           "id": "trial-64-01-06",
           "trialType": "code",
           "title": "Launch Polywing Over the Valley (Boss)",
-          "storyPrompt": "Final lock before Polywing! Define `class Flyer:` with `alt=0` and `flap(self, lift)` adding `lift` to `self.alt`. Create `f = Flyer()`, call `f.flap(20)` twice; if `f.alt >= 40`, print `\"POLYWING FREE!\"`.",
-          "objective": "Define `class Flyer:` with `alt=0` and `flap(self, lift)` adding `lift` to `self.alt`. Create `f = Flyer()`, call `f.flap(20)` twice; if `f.alt >= 40`, print `\"POLYWING FREE!\"`.",
+          "storyPrompt": "Final lock before Polywing! Define `class Flyer:` with `self.alt = 0` and `def flap(self, lift): self.alt += lift`. Create `f = Flyer()`, call `f.flap(10)` then `f.flap(15)`, and if `f.alt >= 25`, print `\"POLYWING FREE!\"`.",
+          "objective": "Launch Polywing over the Valley! Create a `Flyer` class starting at altitude 0 with a `flap(lift)` method that raises altitude using `+=`. Flap twice (10, then 15) on `f`, and when altitude reaches at least 25, announce `POLYWING FREE!`.",
           "concepts": [
             "classes_intro",
             "world_scripting_3d"
@@ -191,16 +191,16 @@
           "shardReward": 200,
           "unlockId": null,
           "starterCode": {
-            "explorer": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    \n",
+            "explorer": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += lift\n\nf = Flyer()\nf.flap(10)\nf.flap(15)\nif f.alt >= 25:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")\n",
-          "testCode": "assert f.alt == 40 and OUTPUT.strip() == \"POLYWING FREE!\"",
+          "referenceSolution": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += lift\n\nf = Flyer()\nf.flap(10)\nf.flap(15)\nif f.alt >= 25:\n    print(\"POLYWING FREE!\")\n",
+          "testCode": "assert f.alt == 25 and OUTPUT.strip() == \"POLYWING FREE!\"\n_f2 = Flyer()\n_f2.flap(7)\nassert _f2.alt == 7",
           "hints": {
-            "tier1_nudge": "One last spell to free Polywing!",
-            "tier2_pattern": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")",
-            "tier3_walkthrough": "Write:\nclass Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")"
+            "tier1_nudge": "Use `self.alt += lift` inside `flap()`, call `f.flap(10)` and `f.flap(15)`, then check `if f.alt >= 25:`.",
+            "tier2_pattern": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += ___\n# flap(10), flap(15), check if f.alt >= 25",
+            "tier3_walkthrough": "Define `class Flyer:` with `__init__` setting `self.alt = 0` and `flap(self, lift)` doing `self.alt += lift`. Create `f = Flyer()`, call `f.flap(10)` and `f.flap(15)`, and `if f.alt >= 25: print(\"POLYWING FREE!\")`."
           },
           "difficultyOverride": null
         },
@@ -1065,22 +1065,19 @@
           "trialType": "code",
           "title": "Shield Against Null's Final Glitch",
           "storyPrompt": "You're right outside Aurelion's vault! Given `shards = [\"32\", \"null\", \"32\"]`, safely parse valid ints with `try/except ValueError`, sum into `crown_power`, and `print(crown_power)`.",
-          "objective": "Given `shards = [\"32\", \"null\", \"32\"]`, safely parse valid ints with `try/except ValueError`, sum into `crown_power`, and `print(crown_power)`.",
+          "objective": "Sum all valid integer strings in `shards` into `crown_power` while safely ignoring corrupted entries with `try/except`, then print `crown_power`.",
           "concepts": [
-            "classes_intro",
-            "class_inheritance",
-            "world_scripting_3d",
-            "debugging",
-            "error_handling"
+            "error_handling",
+            "for_loops"
           ],
           "shardReward": 275,
           "unlockId": null,
           "starterCode": {
             "explorer": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)\n",
+          "referenceSolution": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power += int(s)\n    except ValueError:\n        pass\nprint(crown_power)\n",
           "testCode": "assert crown_power == 64 and OUTPUT.strip() == \"64\"",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",

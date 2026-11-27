@@ -127,26 +127,27 @@
         {
           "id": "trial-32-01-04",
           "trialType": "code",
-          "title": "Measure Elevation Drop",
-          "storyPrompt": "Push deeper into Blockstone Highlands! Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.",
-          "objective": "Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.",
+          "title": "Index & Unpack Terraces with enumerate()",
+          "storyPrompt": "Tuple unpacking shines with `enumerate(items)`! `enumerate()` pairs each item with its index as `(idx, value)` tuples so you can unpack `for idx, height in enumerate(heights):` cleanly.",
+          "objective": "Loop over `heights` using `enumerate()` and tuple unpacking to find the index of the tallest terrace in `best_idx` (tracking `best_h`), then print `best_idx`.",
           "concepts": [
             "tuples",
-            "coords_3d"
+            "coords_3d",
+            "for_loops"
           ],
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\nfor idx, h in enumerate(___):\n    if h > best_h:\n        best_h = h\n        best_idx = ___\nprint(best_idx)\n",
+            "standard": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\n# Use enumerate(heights) with tuple unpacking to find the index of the tallest terrace\n",
+            "challenge": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\n"
           },
-          "referenceSolution": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)\n",
-          "testCode": "assert drop == 6 and OUTPUT.strip() == \"6\"",
+          "referenceSolution": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\nfor idx, h in enumerate(heights):\n    if h > best_h:\n        best_h = h\n        best_idx = idx\nprint(best_idx)\n",
+          "testCode": "exp = heights.index(max(heights))\nassert best_idx == exp and OUTPUT.strip() == str(exp)",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)",
-            "tier3_walkthrough": "Write:\ntop = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)"
+            "tier1_nudge": "Use `for idx, h in enumerate(heights):` to unpack both the position and height on each step.",
+            "tier2_pattern": "for idx, h in enumerate(___):\n    if h > best_h:\n        best_h = ___\n        best_idx = ___",
+            "tier3_walkthrough": "Loop `for idx, h in enumerate(heights):`, and whenever `h > best_h`, update `best_h = h` and `best_idx = idx`, then `print(best_idx)`."
           },
           "difficultyOverride": null
         },
@@ -182,7 +183,7 @@
           "trialType": "code",
           "title": "Raise Terracrest's Bridge (Boss)",
           "storyPrompt": "Final lock before Terracrest! Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.",
-          "objective": "Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.",
+          "objective": "Raise Terracrest's Bridge! Unpack every `(x, y, z)` pillar in `pillars`, sum all `z` heights into `total_h`, and when `total_h` equals 10, announce `TERRACREST FREE!`.",
           "concepts": [
             "tuples",
             "coords_3d",
@@ -193,9 +194,9 @@
           "starterCode": {
             "explorer": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
+          "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h += z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
           "testCode": "assert total_h == 10 and OUTPUT.strip() == \"TERRACREST FREE!\"",
           "hints": {
             "tier1_nudge": "One last spell to free Terracrest!",
@@ -932,44 +933,42 @@
         {
           "id": "trial-32-04-01",
           "trialType": "multiple_choice",
-          "title": "Catching Errors with try / except!",
-          "storyPrompt": "Lord Null loves planting crash traps like dividing by zero! `try / except` catches an error safely so your spell keeps running! What will the code below print?",
+          "title": "Catching Bad input() with try / except!",
+          "storyPrompt": "Remember `input()` always returns text (`str`)! If a player types `\"null\"` when your code expects a number, `int(input(...))` raises a `ValueError`. Wrapping risky code in `try:` / `except ValueError:` catches the crash safely!",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
-            "error_handling",
-            "tuples",
-            "dictionaries_nested"
+            "error_handling"
           ],
           "shardReward": 150,
           "unlockId": null,
-          "codeSnippet": "try:\n    x = 10 / 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED!\")",
+          "codeSnippet": "# Suppose the user types \"null\" at the prompt:\ntry:\n    level = int(input(\"Level: \"))\n    print(level)\nexcept ValueError:\n    print(\"SHIELDED!\")",
           "choices": [
             {
               "id": "a",
-              "label": "SHIELDED!",
-              "explanation": "Gravity-defying! `except ZeroDivisionError:` catches the crash and prints `SHIELDED!`!"
+              "label": "null",
+              "explanation": "`int(\"null\")` fails before `print(level)` ever runs."
             },
             {
               "id": "b",
-              "label": "10",
-              "explanation": "10 / 0 triggers `ZeroDivisionError`!"
+              "label": "SHIELDED!",
+              "explanation": "Yes! `input()` returns `\"null\"`, `int(\"null\")` raises `ValueError`, and the `except ValueError:` block catches it and prints `SHIELDED!`."
             },
             {
               "id": "c",
-              "label": "Crash",
-              "explanation": "`try / except` prevents the crash!"
+              "label": "0",
+              "explanation": "`int()` does not turn invalid words into 0 — it raises a `ValueError`."
             },
             {
               "id": "d",
-              "label": "Nothing",
-              "explanation": "The `except` block runs!"
+              "label": "Crashes with ValueError",
+              "explanation": "Because `try / except ValueError:` wraps the call, Python catches the error instead of crashing!"
             }
           ],
-          "correctChoiceId": "a",
+          "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "What happens when Python tries to convert `\"null\"` with `int(...)` inside a `try` block?",
+            "tier2_pattern": "Invalid `int(...)` jumps straight into the matching `except ValueError:` block.",
+            "tier3_walkthrough": "`int(\"null\")` triggers `ValueError`, so the `except` branch runs and prints `SHIELDED!`."
           },
           "difficultyOverride": null
         },
@@ -1092,20 +1091,19 @@
           "trialType": "code",
           "title": "Collapse Null's Polygon Core (Era 3 Boss)",
           "storyPrompt": "Final lock before Vortex! Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.",
-          "objective": "Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.",
+          "objective": "Collapse Null's Polygon Core! Parse every entry in `raw` as an integer and add valid numbers into `bits`, safely skipping corrupted strings with `try/except` and `pass`. When `bits` equals 32, print `64-BIT UNLOCKED!`.",
           "concepts": [
             "error_handling",
-            "tuples",
-            "dictionaries_nested"
+            "for_loops"
           ],
           "shardReward": 190,
           "unlockId": null,
           "starterCode": {
             "explorer": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
+          "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits += int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
           "testCode": "assert bits == 32 and OUTPUT.strip() == \"64-BIT UNLOCKED!\"",
           "hints": {
             "tier1_nudge": "One last spell to free Vortex!",

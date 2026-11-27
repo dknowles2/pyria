@@ -430,54 +430,56 @@
         {
           "id": "trial-02-04",
           "trialType": "code",
-          "title": "Two Boxes Together (Adding Variables)",
-          "storyPrompt": "You can add two variable boxes together and store the answer in a THIRD box! Add `left_gems` (8) and `right_gems` (5) into `total_gems`, then call `say(total_gems)`!",
-          "objective": "Set left_gems = 8 and right_gems = 5. Compute total_gems = left_gems + right_gems and call say(total_gems).",
+          "title": "Two Boxes Together (+ str())",
+          "storyPrompt": "You can add two variable boxes together and store the answer in a THIRD box! And here is a key Python trick: you can't glue text and a number directly with `+` — wrap the number in `str(...)` first (like `\"Gems: \" + str(total_gems)`) to turn it into text!",
+          "objective": "Add left_gems (8) and right_gems (5) into total_gems, then use say() with str() to output: Gems: 13",
           "concepts": [
             "variables",
             "basic_math",
+            "strings",
             "print_output"
           ],
           "shardReward": 40,
           "unlockId": null,
           "starterCode": {
-            "explorer": "left_gems = 8\nright_gems = 5\ntotal_gems = \nsay(total_gems)\n",
+            "explorer": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(???))\n",
             "standard": "left_gems = 8\nright_gems = 5\n",
             "challenge": ""
           },
-          "referenceSolution": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(total_gems)\n",
-          "testCode": "assert left_gems == 8 and right_gems == 5\nassert total_gems == 13, f'Expected 13, got {total_gems!r}'\nassert OUTPUT.strip() == '13', f'Expected 13, got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "left_gems = 8\nright_gems = 5\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(total_gems))\n",
+          "testCode": "assert left_gems == 8 and right_gems == 5\nassert total_gems == 13, f'Expected 13, got {total_gems!r}'\nassert OUTPUT.strip() == 'Gems: 13', f'Expected \"Gems: 13\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip holds up two boxes: 'Write `total_gems = left_gems + right_gems`!'",
-            "tier2_pattern": "total_gems = left_gems + right_gems\nsay(total_gems)",
-            "tier3_walkthrough": "Complete with:\ntotal_gems = left_gems + right_gems\nsay(total_gems)"
+            "tier1_nudge": "Pip holds up two boxes: 'Add left_gems + right_gems, then wrap total_gems in str(...) before gluing with +!'",
+            "tier2_pattern": "total_gems = <box1> + <box2>\nsay(\"Gems: \" + str(<total>))",
+            "tier3_walkthrough": "Complete with:\ntotal_gems = left_gems + right_gems\nsay(\"Gems: \" + str(total_gems))"
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-02-05",
           "trialType": "code",
-          "title": "Changing What's Inside a Box",
-          "storyPrompt": "Here is a variable superpower: you can UPDATE what's inside a box! `power` starts at `10`. Writing `power = power + 5` takes 10 out, adds 5, and puts `15` right back into `power`!",
-          "objective": "Start with power = 10, update it with power = power + 5, then call say(power).",
+          "title": "Changing What's Inside a Box (+ int())",
+          "storyPrompt": "Here is a variable superpower: you can UPDATE what's inside a box! Sometimes a number arrives as text in quotes (like `\"5\"`). Use `int(...)` to turn text into a whole number so you can add it to `power`!",
+          "objective": "Convert boost_text to an integer with int(), add it to power (storing the result back in power), and display the updated power.",
           "concepts": [
             "variables",
             "basic_math",
+            "strings",
             "print_output"
           ],
           "shardReward": 45,
           "unlockId": null,
           "starterCode": {
-            "explorer": "power = 10\npower = \nsay(power)\n",
-            "standard": "power = 10\n",
-            "challenge": "power = 10\n"
+            "explorer": "power = 10\nboost_text = \"5\"\npower = power + int(???)\nsay(power)\n",
+            "standard": "power = 10\nboost_text = \"5\"\n",
+            "challenge": ""
           },
-          "referenceSolution": "power = 10\npower = power + 5\nsay(power)\n",
+          "referenceSolution": "power = 10\nboost_text = \"5\"\npower = power + int(boost_text)\nsay(power)\n",
           "testCode": "assert power == 15, f'Expected 15, got {power!r}'\nassert OUTPUT.strip() == '15', f'Expected 15, got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip grins: '`=` means PUT INTO THE BOX—so `power = power + 5` puts 15 back into `power`!'",
-            "tier2_pattern": "power = 10\npower = power + 5\nsay(power)",
-            "tier3_walkthrough": "Write:\npower = power + 5"
+            "tier1_nudge": "Pip grins: 'int(boost_text) turns \"5\" into the number 5 so you can add it to power!'",
+            "tier2_pattern": "<var> = <var> + int(<text_var>)\nsay(<var>)",
+            "tier3_walkthrough": "Write:\npower = power + int(boost_text)\nsay(power)"
           },
           "difficultyOverride": null
         },
@@ -485,8 +487,8 @@
           "id": "trial-02-06",
           "trialType": "code",
           "title": "Unlock Pebble's Sanctum (Variables Capstone)",
-          "storyPrompt": "You made it to Pebble's Logic Vault! Remember: boxes can hold words (in quotes, like `guardian = \"Pebble\"`) OR numbers (no quotes!). Combine a word box and a math box to open Pebble's Vault!",
-          "objective": "Set guardian = \"Pebble\", key_a = 12, key_b = 8, and vault_code = key_a + key_b. Then shout(guardian) on line 1 and shout(vault_code) on line 2.",
+          "storyPrompt": "You made it to Pebble's Logic Vault! Combine everything from Mossy Ruins: store Pebble's name, add the two stone keys together, shout the guardian's name, and announce the vault code!",
+          "objective": "Store 'Pebble' in guardian, 12 in key_a, and 8 in key_b. Add the two keys into vault_code. On line 1, shout the guardian's name so it appears in ALL CAPS. On line 2, say 'Code: ' glued to the vault code.",
           "concepts": [
             "variables",
             "strings",
@@ -496,16 +498,16 @@
           "shardReward": 55,
           "unlockId": null,
           "starterCode": {
-            "explorer": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = \nshout(guardian)\nshout(vault_code)\n",
+            "explorer": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = \nshout(guardian)\nsay(\"Code: \" + str(vault_code))\n",
             "standard": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\n",
             "challenge": ""
           },
-          "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nshout(guardian)\nshout(vault_code)\n",
-          "testCode": "assert guardian == \"Pebble\"\nassert vault_code == 20, f'Expected 20, got {vault_code!r}'\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"PEBBLE\", \"20\"], f'Expected [\"PEBBLE\", \"20\"], got {lines!r}'\n",
+          "referenceSolution": "guardian = \"Pebble\"\nkey_a = 12\nkey_b = 8\nvault_code = key_a + key_b\nshout(guardian)\nsay(\"Code: \" + str(vault_code))\n",
+          "testCode": "assert guardian == \"Pebble\"\nassert vault_code == 20, f'Expected 20, got {vault_code!r}'\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"PEBBLE\", \"Code: 20\"], f'Expected [\"PEBBLE\", \"Code: 20\"], got {lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Add `key_a + key_b` into `vault_code`, then shout both boxes!'",
-            "tier2_pattern": "vault_code = key_a + key_b\nshout(guardian)\nshout(vault_code)",
-            "tier3_walkthrough": "Complete with:\nvault_code = key_a + key_b"
+            "tier1_nudge": "Pip cheers: 'Add key_a + key_b into vault_code, shout(guardian), and use str(vault_code) when gluing to \"Code: \"!'",
+            "tier2_pattern": "vault_code = <key1> + <key2>\nshout(<guardian>)\nsay(\"Code: \" + str(<code_var>))",
+            "tier3_walkthrough": "Complete with:\nvault_code = key_a + key_b\nshout(guardian)\nsay(\"Code: \" + str(vault_code))"
           },
           "difficultyOverride": null
         },
@@ -1960,8 +1962,8 @@
           "id": "trial-07-05",
           "trialType": "code",
           "title": "Sum the Storm Crystals",
-          "storyPrompt": "Five sky crystals hold power levels `1, 2, 3, 4, 5`. Start with `total = 0` before the loop, then add each `crystal` into `total` inside `for crystal in range(1, 6):`!",
-          "objective": "Start with `total = 0`, loop `for crystal in range(1, 6):` adding `crystal` to `total`, then print `total` after the loop.",
+          "storyPrompt": "Five sky crystals hold power levels `1, 2, 3, 4, 5`. Meet a clean Python shortcut: instead of writing `total = total + crystal`, you can write `total += crystal` to add right into `total`! Sum crystals 1 through 5 in a loop and print the final total.",
+          "objective": "Start total at 0, loop through numbers 1 to 5 adding each number to total using +=, then print total once after the loop.",
           "concepts": [
             "for_loops",
             "range_function",
@@ -1971,16 +1973,16 @@
           "shardReward": 65,
           "unlockId": null,
           "starterCode": {
-            "explorer": "total = 0\nfor crystal in range(1, 6):\n    total = total + crystal\n",
+            "explorer": "total = 0\nfor crystal in range(1, 6):\n    total += crystal\n",
             "standard": "total = 0\n",
             "challenge": ""
           },
-          "referenceSolution": "total = 0\nfor crystal in range(1, 6):\n    total = total + crystal\nprint(total)\n",
+          "referenceSolution": "total = 0\nfor crystal in range(1, 6):\n    total += crystal\nprint(total)\n",
           "testCode": "assert total == 15, f\"Expected total == 15, got {total}\"\nassert OUTPUT.strip() == \"15\", f\"Expected printed 15, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip taps the left edge: 'Put `print(total)` at 0 spaces indent AFTER the loop so it prints once at the end!'",
-            "tier2_pattern": "total = 0\nfor crystal in range(1, 6):\n    total = total + crystal\nprint(total)",
-            "tier3_walkthrough": "Add `print(total)` on the last line with 0 spaces of indent."
+            "tier1_nudge": "Pip taps the left edge: 'Use `total += crystal` inside the loop, and put `print(total)` at 0 spaces indent AFTER the loop!'",
+            "tier2_pattern": "total = 0\nfor <item> in range(1, 6):\n    total += <item>\nprint(total)",
+            "tier3_walkthrough": "Write:\ntotal = 0\nfor crystal in range(1, 6):\n    total += crystal\nprint(total)"
           },
           "difficultyOverride": null
         },
@@ -1988,8 +1990,8 @@
           "id": "trial-07-06",
           "trialType": "code",
           "title": "Charge Gale's Five Wind Turbines (Boss)",
-          "storyPrompt": "Gale's storm vault is powered by 5 wind turbines numbered 1 through 5! Loop `for power in range(1, 6):`, add `power` to `total_wind`, and print `\"Turbine ready!\"` on every step to free Gale!",
-          "objective": "Set `total_wind = 0`, loop `for power in range(1, 6):` adding `power` to `total_wind` and printing `Turbine ready!` each step.",
+          "storyPrompt": "Gale's storm vault is powered by 5 wind turbines numbered 1 through 5! Loop through all five turbines, accumulate their power into total_wind using +=, and announce each ready turbine to free Gale!",
+          "objective": "Start total_wind at 0, loop through numbers 1 to 5 adding each number to total_wind and printing 'Turbine ready!' on every step.",
           "concepts": [
             "for_loops",
             "range_function",
@@ -1999,16 +2001,16 @@
           "shardReward": 75,
           "unlockId": null,
           "starterCode": {
-            "explorer": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n",
+            "explorer": "total_wind = 0\nfor power in range(1, 6):\n    total_wind += power\n",
             "standard": "total_wind = 0\n",
             "challenge": ""
           },
-          "referenceSolution": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")\n",
+          "referenceSolution": "total_wind = 0\nfor power in range(1, 6):\n    total_wind += power\n    print(\"Turbine ready!\")\n",
           "testCode": "assert total_wind == 15, f\"Expected total_wind == 15, got {total_wind}\"\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Turbine ready!\"] * 5, f\"Expected 5 Turbine ready! lines, got {lines!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip spins in the wind: 'Put `print(\"Turbine ready!\")` indented 4 spaces INSIDE the loop!'",
-            "tier2_pattern": "for power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")",
-            "tier3_walkthrough": "Add indented:\n    print(\"Turbine ready!\")"
+            "tier2_pattern": "total_wind = 0\nfor <p> in range(1, 6):\n    total_wind += <p>\n    print(\"...\")",
+            "tier3_walkthrough": "Write:\ntotal_wind = 0\nfor power in range(1, 6):\n    total_wind += power\n    print(\"Turbine ready!\")"
           },
           "difficultyOverride": null
         },
@@ -2025,7 +2027,7 @@
           ],
           "shardReward": 55,
           "unlockId": null,
-          "codeSnippet": "gust = 0\nfor n in range(0, 10, 2):\n    gust = gust + n\nprint(gust)",
+          "codeSnippet": "gust = 0\nfor n in range(0, 10, 2):\n    gust += n\nprint(gust)",
           "choices": [
             {
               "id": "a",
@@ -2216,27 +2218,29 @@
         {
           "id": "trial-08-03",
           "trialType": "code",
-          "title": "Clean the Glitch Terminal",
-          "storyPrompt": "Lord Null scrambled the citadel override code with extra spaces and lowercase letters: `raw = \"  nova-8  \"`. Clean it with `.strip().upper()` and print it!",
-          "objective": "Given `raw = \"  nova-8  \"`, set `clean = raw.strip().upper()` and `print(clean)`.",
+          "title": "Clean & Check the Glitch Terminal (in)",
+          "storyPrompt": "Lord Null scrambled the citadel override code with extra spaces and lowercase letters: `raw = \"  nova-8  \"`. Clean it with `.strip().upper()`, then use Python's `in` keyword (`if \"NOVA\" in clean:`) to check whether `\"NOVA\"` appears inside the cleaned code!",
+          "objective": "Clean raw into clean with .strip().upper(). If 'NOVA' is in clean, set valid = True and print(clean).",
           "concepts": [
             "string_methods",
             "variables",
+            "conditionals_if",
+            "booleans",
             "print_output"
           ],
           "shardReward": 65,
           "unlockId": null,
           "starterCode": {
-            "explorer": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\n",
-            "standard": "raw = \"  nova-8  \"\n",
+            "explorer": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\nvalid = False\nif \"NOVA\" in clean:\n    valid = True\n",
+            "standard": "raw = \"  nova-8  \"\nvalid = False\n",
             "challenge": ""
           },
-          "referenceSolution": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\nprint(clean)\n",
-          "testCode": "assert clean == \"NOVA-8\", f\"Expected NOVA-8, got {clean!r}\"\nassert OUTPUT.strip() == \"NOVA-8\", f\"Expected printed NOVA-8, got {OUTPUT.strip()!r}\"\n",
+          "referenceSolution": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\nvalid = False\nif \"NOVA\" in clean:\n    valid = True\n    print(clean)\n",
+          "testCode": "assert clean == \"NOVA-8\", f\"Expected NOVA-8, got {clean!r}\"\nassert valid is True, f\"Expected valid is True, got {valid!r}\"\nassert OUTPUT.strip() == \"NOVA-8\", f\"Expected printed NOVA-8, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip polishes the rune: 'Chain `.strip()` and `.upper()` together!'",
-            "tier2_pattern": "clean = raw.strip().upper()\nprint(clean)",
-            "tier3_walkthrough": "Add `print(clean)` at the bottom."
+            "tier1_nudge": "Pip polishes the rune: 'Chain `.strip().upper()`, then check `if \"NOVA\" in clean:`!'",
+            "tier2_pattern": "clean = raw.strip().upper()\nif \"<word>\" in clean:\n    valid = True\n    print(clean)",
+            "tier3_walkthrough": "Write:\nclean = raw.strip().upper()\nif \"NOVA\" in clean:\n    valid = True\n    print(clean)"
           },
           "difficultyOverride": null
         },
@@ -2271,8 +2275,8 @@
           "id": "trial-08-05",
           "trialType": "code",
           "title": "Power the Starlight Conduits",
-          "storyPrompt": "Loop through conduits 1 to 6 (`range(1, 7)`). If the conduit number is `>= 4`, add `10` to `energy`; otherwise (`else:`), add `5` to `energy`. Print `energy` at the end!",
-          "objective": "Start with `energy = 0`. Loop `for c in range(1, 7):` adding 10 if `c >= 4` else 5, then `print(energy)`.",
+          "storyPrompt": "Loop through conduits 1 to 6 (`range(1, 7)`). If the conduit number is `>= 4`, add `10` to `energy` with `+=`; otherwise (`else:`), add `5` to `energy`. Print `energy` at the end!",
+          "objective": "Start energy at 0, loop through numbers 1 to 6 adding 10 when the number is at least 4 and 5 otherwise, then print energy.",
           "concepts": [
             "for_loops",
             "conditionals_elif_else",
@@ -2281,16 +2285,16 @@
           "shardReward": 75,
           "unlockId": null,
           "starterCode": {
-            "explorer": "energy = 0\nfor c in range(1, 7):\n    if c >= 4:\n        energy = energy + 10\n    else:\n        energy = energy + 5\n",
+            "explorer": "energy = 0\nfor c in range(1, 7):\n    if c >= 4:\n        energy += 10\n    else:\n        energy += 5\n",
             "standard": "energy = 0\n",
             "challenge": ""
           },
-          "referenceSolution": "energy = 0\nfor c in range(1, 7):\n    if c >= 4:\n        energy = energy + 10\n    else:\n        energy = energy + 5\nprint(energy)\n",
+          "referenceSolution": "energy = 0\nfor c in range(1, 7):\n    if c >= 4:\n        energy += 10\n    else:\n        energy += 5\nprint(energy)\n",
           "testCode": "assert energy == 45, f\"Expected energy == 45, got {energy}\"\nassert OUTPUT.strip() == \"45\", f\"Expected printed 45, got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip counts: '1,2,3 add 5 each (15), and 4,5,6 add 10 each (30) -> 45!'",
-            "tier2_pattern": "for c in range(1, 7):\n    if c >= 4:\n        energy = energy + 10\n    else:\n        energy = energy + 5\nprint(energy)",
-            "tier3_walkthrough": "Add `print(energy)` after the loop."
+            "tier2_pattern": "for c in range(1, 7):\n    if <condition>:\n        energy += 10\n    else:\n        energy += 5\nprint(energy)",
+            "tier3_walkthrough": "Write:\nfor c in range(1, 7):\n    if c >= 4:\n        energy += 10\n    else:\n        energy += 5\nprint(energy)"
           },
           "difficultyOverride": null
         },
@@ -2298,8 +2302,8 @@
           "id": "trial-08-06",
           "trialType": "code",
           "title": "Shatter the 8-Bit Null Barrier (Era 1 Boss)",
-          "storyPrompt": "Lord Null's barrier pulses with 8 bits (1 to 8)! Only the EVEN bits (`bit % 2 == 0`) charge your Dragon Prism. Loop through `range(1, 9)`, sum the even bits into `shield_charge`, and if `shield_charge >= 20`, set `citadel_breached = True` and print `\"8-BIT RESTORED!\"`!",
-          "objective": "Loop `for bit in range(1, 9):` summing even bits into `shield_charge`. After the loop, if `shield_charge >= 20`, set `citadel_breached = True` and print `8-BIT RESTORED!`.",
+          "storyPrompt": "Lord Null's barrier pulses with 8 bits numbered 1 through 8! Only the even bits charge your Dragon Prism. Loop through all 8 bits, sum the even ones into shield_charge, and if shield_charge reaches at least 20, breach the citadel and celebrate!",
+          "objective": "Start shield_charge at 0 and citadel_breached at False. Loop through bits 1 to 8, adding each even bit to shield_charge. After the loop, if shield_charge is at least 20, set citadel_breached to True and print '8-BIT RESTORED!'.",
           "concepts": [
             "for_loops",
             "range_function",
@@ -2309,15 +2313,15 @@
           "shardReward": 100,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n",
+            "explorer": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge += bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n",
             "standard": "shield_charge = 0\ncitadel_breached = False\n",
             "challenge": ""
           },
-          "referenceSolution": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")\n",
+          "referenceSolution": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge += bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")\n",
           "testCode": "assert shield_charge == 20, f\"Expected shield_charge == 20, got {shield_charge}\"\nassert citadel_breached is True, \"Expected citadel_breached to be True\"\nassert OUTPUT.strip() == \"8-BIT RESTORED!\", f\"Expected 8-BIT RESTORED!, got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip glows bright gold: 'A number is even when `bit % 2 == 0`!'",
-            "tier2_pattern": "if shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")",
+            "tier2_pattern": "for bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge += bit\nif shield_charge >= 20:\n    ...\n    print(\"...\")",
             "tier3_walkthrough": "Add indented:\n    print(\"8-BIT RESTORED!\")"
           },
           "difficultyOverride": null
