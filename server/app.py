@@ -130,6 +130,13 @@ _SAVE_SCALAR_STRING_KEYS: frozenset[str] = frozenset(
     }
 )
 
+_STATS_STRING_LIST_KEYS: frozenset[str] = frozenset(
+    {
+        "customItems",
+        "completedWorkshopChallenges",
+    }
+)
+
 _SERVER_MANAGED_SAVE_KEYS: frozenset[str] = frozenset(
     {
         "id",
@@ -527,7 +534,26 @@ def validate_save_payload(
                         or _has_control_chars(sk)
                     ):
                         raise SaveValidationError("Invalid stats key")
-                    if sv is not None and (
+                    if sk in _STATS_STRING_LIST_KEYS:
+                        if sv is not None:
+                            if not isinstance(sv, list):
+                                raise SaveValidationError(
+                                    f"stats.{sk} must be a list of strings or null"
+                                )
+                            if len(sv) > MAX_SAVE_LIST_ITEMS:
+                                raise SaveValidationError(
+                                    f"stats.{sk} exceeds maximum item count ({MAX_SAVE_LIST_ITEMS})"
+                                )
+                            for item in sv:
+                                if (
+                                    not isinstance(item, str)
+                                    or len(item) > MAX_SAVE_STRING_LEN
+                                    or _has_control_chars(item)
+                                ):
+                                    raise SaveValidationError(
+                                        f"stats.{sk} items must be strings up to {MAX_SAVE_STRING_LEN} characters without control characters"
+                                    )
+                    elif sv is not None and (
                         isinstance(sv, bool)
                         or not isinstance(sv, (int, float))
                         or not math.isfinite(sv)

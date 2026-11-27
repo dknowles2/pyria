@@ -61,6 +61,11 @@ const SAVE_STRING_LIST_KEYS = new Set<string>([
 
 const SAVE_SCALAR_STRING_KEYS = new Set<string>(['eraId', 'realmId', 'visualEra']);
 
+const STATS_STRING_LIST_KEYS = new Set<string>([
+  'customItems',
+  'completedWorkshopChallenges',
+]);
+
 const SERVER_MANAGED_SAVE_KEYS = new Set<string>([
   'id',
   'heroName',
@@ -308,7 +313,25 @@ export function validateSavePayload(
           if (sk.length > 64 || hasControlChars(sk)) {
             throw new ValidationError('Invalid stats key');
           }
-          if (sv !== null && (typeof sv !== 'number' || !Number.isFinite(sv))) {
+          if (STATS_STRING_LIST_KEYS.has(sk)) {
+            if (sv !== null) {
+              if (!Array.isArray(sv)) {
+                throw new ValidationError(`stats.${sk} must be a list of strings or null`);
+              }
+              if (sv.length > MAX_SAVE_LIST_ITEMS) {
+                throw new ValidationError(
+                  `stats.${sk} exceeds maximum item count (${MAX_SAVE_LIST_ITEMS})`
+                );
+              }
+              for (const item of sv) {
+                if (typeof item !== 'string' || item.length > MAX_SAVE_STRING_LEN || hasControlChars(item)) {
+                  throw new ValidationError(
+                    `stats.${sk} items must be strings up to ${MAX_SAVE_STRING_LEN} characters without control characters`
+                  );
+                }
+              }
+            }
+          } else if (sv !== null && (typeof sv !== 'number' || !Number.isFinite(sv))) {
             throw new ValidationError(`stats.${sk} must be a finite number or null`);
           }
         }
