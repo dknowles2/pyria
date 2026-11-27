@@ -524,31 +524,34 @@ def _pyria_run_charcreate(payload_json, emit_stdout=None):
         options = allowed.get("skin", [])
         if not isinstance(tone, str):
             raise TypeError('preview_skin() needs a quoted skin name, like preview_skin("warm_tan")')
-        if tone not in options:
+        key = tone.strip().lower()
+        if key not in options:
             raise ValueError(f"Unknown skin '{tone}'. Choose one of: {', '.join(options)}")
-        state["skin"] = tone
-        events.append(f"Skin tone set to {tone}")
-        print(f"Skin preview: {tone}")
+        state["skin"] = key
+        events.append(f"Skin tone set to {key}")
+        print(f"Skin preview: {key}")
 
     def preview_hair(style):
         options = allowed.get("hair", [])
         if not isinstance(style, str):
             raise TypeError('preview_hair() needs a quoted hairstyle, like preview_hair("spiky")')
-        if style not in options:
+        key = style.strip().lower()
+        if key not in options:
             raise ValueError(f"Unknown hair '{style}'. Choose one of: {', '.join(options)}")
-        state["hair"] = style
-        events.append(f"Hairstyle set to {style}")
-        print(f"Hair preview: {style}")
+        state["hair"] = key
+        events.append(f"Hairstyle set to {key}")
+        print(f"Hair preview: {key}")
 
     def preview_tunic(color):
         options = allowed.get("tunic", [])
         if not isinstance(color, str):
             raise TypeError('preview_tunic() needs a quoted color, like preview_tunic("emerald")')
-        if color not in options:
+        key = color.strip().lower()
+        if key not in options:
             raise ValueError(f"Unknown tunic '{color}'. Choose one of: {', '.join(options)}")
-        state["tunic"] = color
-        events.append(f"Tunic color set to {color}")
-        print(f"Tunic preview: {color}")
+        state["tunic"] = key
+        events.append(f"Tunic color set to {key}")
+        print(f"Tunic preview: {key}")
 
     def confirm_hero():
         confirmed["value"] = True

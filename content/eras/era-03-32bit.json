@@ -335,7 +335,7 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h += z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
-          "testCode": "assert total_h == 10 and OUTPUT.strip() == \"TERRACREST FREE!\"",
+          "testCode": "assert total_h == 10, f\"Expected total_h == 10, got {total_h!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'TERRACREST FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "One last spell to free Terracrest!",
             "tier2_pattern": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")",
@@ -755,7 +755,7 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)\n",
-          "testCode": "assert loud == [\"IRON\", \"GOLD\"] and OUTPUT.strip() == \"['IRON', 'GOLD']\"",
+          "testCode": "assert isinstance(loud, list), f\"Expected loud to be a list, got {loud!r}\"\nif loud != [\"IRON\", \"GOLD\"]:\n    if [str(x).upper() for x in loud] == [\"IRON\", \"GOLD\"]:\n        assert False, f\"Almost! Make sure every tag is ALL CAPS using .upper() (got {loud!r})!\"\n    assert False, f\"Expected loud == ['IRON', 'GOLD'], got {loud!r}\"\nassert OUTPUT.strip() == \"['IRON', 'GOLD']\", f\"Expected printed ['IRON', 'GOLD'], got {OUTPUT.strip()!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",
             "tier2_pattern": "tags = ___\nloud = ___\nprint(___)",
@@ -802,7 +802,7 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")\n",
-          "testCode": "assert forged == [50, 80] and OUTPUT.strip() == \"ANVILWING FREE!\"",
+          "testCode": "assert forged == [50, 80], f\"Expected forged == [50, 80], got {forged!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'ANVILWING FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "One last spell to free Anvilwing!",
             "tier2_pattern": "bars = ___\nforged = ___\nif ___:\n    print(___)",
@@ -1031,7 +1031,7 @@
             "challenge": "# Challenge: find and fix the bug with no hints\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n"
           },
           "referenceSolution": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])\n",
-          "testCode": "assert OUTPUT.strip() == \"OPEN\"",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'OPEN'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted line!",
             "tier2_pattern": "cavern = ___\nprint(___)",
@@ -1205,7 +1205,7 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)\n",
-          "testCode": "assert dest == \"vault\" and OUTPUT.strip() == \"vault\"",
+          "testCode": "assert dest == \"vault\", f\"Expected dest == 'vault', got {dest!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'vault'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip sparks with excitement!",
             "tier2_pattern": "rooms = ___\ndest = ___\nprint(___)",
@@ -1250,7 +1250,7 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum([n[\"power\"] for n in nodes.values()])\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
-          "testCode": "assert beam == 100 and OUTPUT.strip() == \"LUMINA FREE!\"",
+          "testCode": "assert beam == 100, f\"Expected beam == 100, got {beam!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'LUMINA FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "One last spell to free Lumina!",
             "tier2_pattern": "beam = sum([n[___] for n in nodes.___()])\nif beam == 100:\n    print(___)",
@@ -1741,7 +1741,7 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits += int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
-          "testCode": "assert bits == 32 and OUTPUT.strip() == \"64-BIT UNLOCKED!\"",
+          "testCode": "assert bits == 32, f\"Expected bits == 32, got {bits!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = '64-BIT UNLOCKED!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "One last spell to free Vortex!",
             "tier2_pattern": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")",
