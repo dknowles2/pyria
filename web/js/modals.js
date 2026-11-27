@@ -31,6 +31,14 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+export function renderSafeMarkdown(str) {
+  const escaped = escapeHtml(str);
+  return escaped.replace(/`([^`\n]+)`|\*\*([^*\n]+)\*\*/g, (_, code, bold) => {
+    if (code !== undefined) return `<code class="inline-md-code">${code}</code>`;
+    return `<strong>${bold}</strong>`;
+  });
+}
+
 const BASE_QUICK_KEYS = [
   { label: '⇥ Indent', insert: '    ', cursorOffset: 4 },
   { label: '( )', insert: '()', cursorOffset: 1 },
@@ -482,7 +490,7 @@ export class ModalManager {
             You've already mastered this Trial and claimed its <strong>${trial.shardReward} Byte Shards</strong>!
           </p>
           <p class="muted-text" style="margin:0;">
-            <strong>Objective:</strong> ${escapeHtml(trial.objective)}
+            <strong>Objective:</strong> ${renderSafeMarkdown(trial.objective)}
           </p>
         </div>
 
@@ -541,15 +549,15 @@ export class ModalManager {
                 <div class="kit-reward-card">
                   <div class="pill pill-violet">🎁 Personal Kit Reward Unlocked (FREE!)</div>
                   <strong style="font-size:16px; color:var(--accent-gold);">${escapeHtml(kit.name)}</strong>
-                  <div class="muted-text" style="margin:0;">${escapeHtml(kit.description || '')}</div>
+                  <div class="muted-text" style="margin:0;">${renderSafeMarkdown(kit.description || '')}</div>
                   <div class="pill pill-gold">✨ +1 Bonus Hint Earned!</div>
                   ${canEquipKit ? `<button id="btn-equip-kit-now" type="button" class="btn btn-gold btn-sm">✨ Equip Now!</button>` : ''}
                 </div>
               `
               : ''
           }
-          ${explanation ? `<div class="objective-box" style="width:100%; text-align:left;"><strong>🐉 Pip explains:</strong> ${escapeHtml(explanation)}</div>` : ''}
-          ${!isPractice && unlockNote ? `<div class="upgrade-callout" style="width:100%;">✨ ${escapeHtml(unlockNote)}</div>` : ''}
+          ${explanation ? `<div class="objective-box" style="width:100%; text-align:left;"><strong>🐉 Pip explains:</strong> ${renderSafeMarkdown(explanation)}</div>` : ''}
+          ${!isPractice && unlockNote ? `<div class="upgrade-callout" style="width:100%;">✨ ${renderSafeMarkdown(unlockNote)}</div>` : ''}
           ${!isPractice && unlockItem ? `<p class="muted-text" style="margin:0;">New blueprint ready in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</p>` : ''}
           ${stdout ? `<div class="console-stdout" style="width:100%; text-align:left;">Output:\n${escapeHtml(stdout)}</div>` : ''}
         </div>
@@ -600,10 +608,10 @@ export class ModalManager {
           <button class="btn btn-sm btn-ghost" data-close>✕</button>
         </div>
 
-        <p class="dialogue-text">${escapeHtml(trial.storyPrompt)}</p>
+        <p class="dialogue-text">${renderSafeMarkdown(trial.storyPrompt)}</p>
 
         <div class="objective-box">
-          <strong>Question:</strong> ${escapeHtml(trial.objective)}
+          <strong>Question:</strong> ${renderSafeMarkdown(trial.objective)}
           ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
         </div>
 
@@ -656,7 +664,7 @@ export class ModalManager {
           return `
             <div class="hint-box" style="margin-bottom:8px;">
               <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
-              <div>${escapeHtml(text)}</div>
+              <div>${renderSafeMarkdown(text)}</div>
             </div>
           `;
         });
@@ -717,7 +725,7 @@ export class ModalManager {
             outputEl.className = 'pip-console error';
             outputEl.innerHTML = `
               <div class="pip-console-header">🐉 Not quite — try another choice!</div>
-              <div class="pip-console-body">${escapeHtml(choice.explanation || 'Look closely at each line of the Python spell and try again!')}</div>
+              <div class="pip-console-body">${renderSafeMarkdown(choice.explanation || 'Look closely at each line of the Python spell and try again!')}</div>
             `;
           }
         });
@@ -777,10 +785,10 @@ export class ModalManager {
           <button class="btn btn-sm btn-ghost" data-close>✕</button>
         </div>
 
-        <p class="dialogue-text">${escapeHtml(trial.storyPrompt)}</p>
+        <p class="dialogue-text">${renderSafeMarkdown(trial.storyPrompt)}</p>
 
         <div class="objective-box">
-          <strong>Objective:</strong> ${escapeHtml(trial.objective)}
+          <strong>Objective:</strong> ${renderSafeMarkdown(trial.objective)}
           ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
         </div>
 
@@ -789,7 +797,7 @@ export class ModalManager {
             ? `
               <div class="bug-banner">
                 <div class="bug-banner-title">🐛 Fix the Bug!</div>
-                <div>${escapeHtml(trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!')}</div>
+                <div>${renderSafeMarkdown(trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!')}</div>
               </div>
             `
             : ''
@@ -945,7 +953,7 @@ export class ModalManager {
           return `
             <div class="hint-box" style="margin-bottom:8px;">
               <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
-              <div>${escapeHtml(text)}</div>
+              <div>${renderSafeMarkdown(text)}</div>
             </div>
           `;
         });
@@ -1041,7 +1049,7 @@ export class ModalManager {
           outputEl.className = 'pip-console error';
           outputEl.innerHTML = `
             <div class="pip-console-header">🐉 Pip's Clue:</div>
-            <div class="pip-console-body">${escapeHtml(result.pipMessage)}</div>
+            <div class="pip-console-body">${renderSafeMarkdown(result.pipMessage)}</div>
             ${result.stdout ? `<div class="console-stdout">Your print() output:\n${escapeHtml(result.stdout)}</div>` : ''}
             ${result.rawTraceback ? `<div class="console-traceback">${escapeHtml(result.rawTraceback)}</div>` : ''}
           `;
@@ -1176,7 +1184,7 @@ export class ModalManager {
               <div>
                 <div class="catalog-item-title">${escapeHtml(item.name)}</div>
                 <div class="catalog-item-call">${escapeHtml(item.functionCall)}</div>
-                <div class="catalog-item-desc">${escapeHtml(item.description)}</div>
+                <div class="catalog-item-desc">${renderSafeMarkdown(item.description)}</div>
               </div>
               <div class="catalog-item-badge">${badge}</div>
             </div>
@@ -1464,7 +1472,7 @@ export class ModalManager {
           outputEl.className = 'pip-console error';
           outputEl.innerHTML = `
             <div class="pip-console-header">🐉 Pip's Forge Clue:</div>
-            <div class="pip-console-body">${escapeHtml(res.pipMessage)}</div>
+            <div class="pip-console-body">${renderSafeMarkdown(res.pipMessage)}</div>
           `;
         }
       }
