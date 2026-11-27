@@ -459,6 +459,7 @@ export class ModalManager {
     const diff = resolveDifficulty(gameConfig, realm, trial, save);
     let currentMode = VALID_DIFFICULTY_MODES.has(diff.mode) ? diff.mode : 'standard';
     let hintsUsed = 0;
+    let workedExampleShown = false;
     let failedAttempts = 0;
     const CHALLENGE_BONUS_SHARDS = 10;
     let trialOpenedAt = Date.now();
@@ -509,6 +510,49 @@ export class ModalManager {
       { key: 'tier3_walkthrough', label: 'Tier 3: Step-by-Step' },
       { key: 'tier4_secret', label: "Tier 4: 🌟 Pip's Secret Solution Guide", customText: buildTier4SecretHint() },
     ];
+
+    const renderHintBoxHtml = (t) => {
+      if (t.key === 'tier4_secret' && trial.trialType !== 'multiple_choice' && trial.referenceSolution) {
+        return `
+          <div class="hint-box" style="margin-bottom:8px;">
+            <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
+            <div style="margin-bottom:6px;">Chirp! Here's a working example — read each line and try typing it into your spellbook:</div>
+            <pre class="mc-code-snippet"><code>${escapeHtml(trial.referenceSolution.trim())}</code></pre>
+          </div>
+        `;
+      }
+      const text = t.customText ?? trial.hints?.[t.key] ?? '';
+      return `
+        <div class="hint-box" style="margin-bottom:8px;">
+          <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
+          <div>${renderSafeMarkdown(text)}</div>
+        </div>
+      `;
+    };
+
+    const buildWorkedExampleHtml = () => {
+      if (trial.trialType === 'multiple_choice') {
+        const right = (trial.choices || []).find((c) => c.id === trial.correctChoiceId);
+        if (!right) return '';
+        return `
+          <div class="hint-box" style="margin-bottom:8px; border-color: var(--accent-emerald);">
+            <div class="hint-box-title">🐉 Pip's Worked Example</div>
+            <div style="margin-bottom:6px;">Chirp! All hints used — here's how to solve this one: <strong>${escapeHtml(right.label)}</strong></div>
+            ${right.code ? `<pre class="mc-code-snippet" style="margin-bottom:6px;"><code>${escapeHtml(right.code)}</code></pre>` : ''}
+            <div>${renderSafeMarkdown(right.explanation || '')}</div>
+          </div>
+        `;
+      }
+      const sol = (trial.referenceSolution || '').trim();
+      if (!sol) return '';
+      return `
+        <div class="hint-box" style="margin-bottom:8px; border-color: var(--accent-emerald);">
+          <div class="hint-box-title">🐉 Pip's Worked Example</div>
+          <div style="margin-bottom:6px;">Chirp! All hints used — here's an example of how to solve it! Read each line carefully and try typing it into your spellbook:</div>
+          <pre class="mc-code-snippet"><code>${escapeHtml(sol)}</code></pre>
+        </div>
+      `;
+    };
 
     const unlockItem = trial.unlockId
       ? (catalog.unlockables || []).find((u) => u.id === trial.unlockId)
@@ -729,7 +773,21 @@ export class ModalManager {
 
       hintBtn?.addEventListener('click', () => {
         const effMax = getEffectiveMaxHints();
-        if (hintsUsed >= effMax) return;
+        if (hintsUsed >= effMax) {
+          if (effMax > 0 && hintsUsed < 4 && !workedExampleShown) {
+            audio.playClick();
+            workedExampleShown = true;
+            const shown = hintTiers.slice(0, hintsUsed).map(renderHintBoxHtml);
+            const exampleHtml = buildWorkedExampleHtml();
+            if (exampleHtml) shown.push(exampleHtml);
+            hintsArea.classList.remove('hidden');
+            hintsArea.innerHTML = shown.join('');
+            hintBtn.textContent = "🐉 Pip's Example Shown";
+            hintBtn.disabled = true;
+            hintsArea.lastElementChild?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+          }
+          return;
+        }
         const gateMsg = getHintGateMessage(hintsUsed + 1, true);
         if (gateMsg) {
           audio.playClick();
@@ -744,20 +802,17 @@ export class ModalManager {
         hintsUsed += 1;
         hintsArea.classList.remove('hidden');
 
-        const shown = hintTiers.slice(0, hintsUsed).map((t) => {
-          const text = t.customText ?? trial.hints?.[t.key] ?? '';
-          return `
-            <div class="hint-box" style="margin-bottom:8px;">
-              <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
-              <div>${renderSafeMarkdown(text)}</div>
-            </div>
-          `;
-        });
+        const shown = hintTiers.slice(0, hintsUsed).map(renderHintBoxHtml);
         hintsArea.innerHTML = shown.join('');
 
         if (hintsUsed >= effMax) {
-          hintBtn.textContent = `💡 All ${effMax} Hint${effMax === 1 ? '' : 's'} Shown`;
-          hintBtn.disabled = true;
+          if (hintsUsed < 4 && buildWorkedExampleHtml()) {
+            hintBtn.textContent = "🐉 Still Stuck? Show Pip's Example";
+            hintBtn.disabled = false;
+          } else {
+            hintBtn.textContent = `💡 All ${effMax} Hint${effMax === 1 ? '' : 's'} Shown`;
+            hintBtn.disabled = true;
+          }
         } else {
           hintBtn.textContent = `💡 Ask Pip (Hint ${hintsUsed + 1}/${effMax})`;
         }
@@ -1112,31 +1167,38 @@ export class ModalManager {
       const renderRevealedHints = () => {
         const effMax = getEffectiveMaxHints();
         const visibleCount = Math.min(hintsUsed, effMax);
-        if (visibleCount <= 0) {
+        const canOfferWorkedExample =
+          effMax > 0 && currentMode !== 'challenge' && visibleCount < 4 && Boolean(buildWorkedExampleHtml());
+        const showWorkedExample = workedExampleShown && canOfferWorkedExample && visibleCount >= effMax;
+
+        if (visibleCount <= 0 && !showWorkedExample) {
           hintsArea.classList.add('hidden');
           hintsArea.innerHTML = '';
         } else {
           hintsArea.classList.remove('hidden');
-          const shown = hintTiers.slice(0, visibleCount).map((t) => {
-            const text = t.customText ?? trial.hints?.[t.key] ?? '';
-            return `
-              <div class="hint-box" style="margin-bottom:8px;">
-                <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
-                <div>${renderSafeMarkdown(text)}</div>
-              </div>
-            `;
-          });
+          const shown = hintTiers.slice(0, visibleCount).map(renderHintBoxHtml);
+          if (showWorkedExample) {
+            shown.push(buildWorkedExampleHtml());
+          }
           hintsArea.innerHTML = shown.join('');
         }
         if (effMax === 0) {
           hintBtn.textContent = '💡 Hints Disabled';
           hintBtn.disabled = true;
         } else if (visibleCount >= effMax) {
-          hintBtn.textContent =
-            currentMode === 'challenge'
-              ? '💡 Challenge Hint Shown (1/1)'
-              : `💡 All ${effMax} Hint${effMax === 1 ? '' : 's'} Shown`;
-          hintBtn.disabled = true;
+          if (canOfferWorkedExample && !workedExampleShown) {
+            hintBtn.textContent = "🐉 Still Stuck? Show Pip's Example";
+            hintBtn.disabled = false;
+          } else if (showWorkedExample) {
+            hintBtn.textContent = "🐉 Pip's Example Shown";
+            hintBtn.disabled = true;
+          } else {
+            hintBtn.textContent =
+              currentMode === 'challenge'
+                ? '💡 Challenge Hint Shown (1/1)'
+                : `💡 All ${effMax} Hint${effMax === 1 ? '' : 's'} Shown`;
+            hintBtn.disabled = true;
+          }
         } else {
           hintBtn.textContent = `💡 Ask Pip (Hint ${visibleCount + 1}/${effMax})`;
           hintBtn.disabled = false;
@@ -1213,7 +1275,15 @@ export class ModalManager {
       hintBtn.addEventListener('click', () => {
         const effMax = getEffectiveMaxHints();
         const visibleCount = Math.min(hintsUsed, effMax);
-        if (visibleCount >= effMax) return;
+        if (visibleCount >= effMax) {
+          if (effMax > 0 && currentMode !== 'challenge' && visibleCount < 4 && !workedExampleShown) {
+            audio.playClick();
+            workedExampleShown = true;
+            renderRevealedHints();
+            hintsArea.lastElementChild?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+          }
+          return;
+        }
         const nextTierNum = visibleCount + 1;
         const gateMsg = getHintGateMessage(nextTierNum, false);
         if (gateMsg) {
