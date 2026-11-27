@@ -19,5 +19,5 @@ npm run deploy:site
 ```
 
 - **Worker name:** `pyria-site` (configured in `../wrangler.site.jsonc`)
-- **Custom domains:** `pyria.dev` and `www.pyria.dev` (301 redirect to `pyria.dev` via `_redirects`)
+- **Custom domains:** `pyria.dev` and `www.pyria.dev` (configured in `../wrangler.site.jsonc`)
 - **Security headers:** Configured via `_headers` (strict CSP, `nosniff`, `DENY` framing)
