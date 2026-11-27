@@ -1186,8 +1186,9 @@ def render_map_canvas(
     tiles: Dict[str, Canvas],
     npcs: Dict[str, Canvas],
 ) -> Canvas:
-    w = map_data["width"] * TILE_SIZE
-    h = map_data["height"] * TILE_SIZE
+    ts = next(iter(tiles.values())).w if tiles else TILE_SIZE
+    w = map_data["width"] * ts
+    h = map_data["height"] * ts
     c = Canvas(w, h)
     ground = map_data["layers"]["ground"]
     decor = map_data["layers"]["decor"]
@@ -1195,13 +1196,13 @@ def render_map_canvas(
         for x in range(map_data["width"]):
             gt = ground[y][x]
             if gt in tiles:
-                c.blit(tiles[gt], x * TILE_SIZE, y * TILE_SIZE)
+                c.blit(tiles[gt], x * ts, y * ts)
             dt = decor[y][x]
             if dt and dt in tiles:
-                c.blit(tiles[dt], x * TILE_SIZE, y * TILE_SIZE)
+                c.blit(tiles[dt], x * ts, y * ts)
     for ent in map_data.get("entities", []):
         sk = ent.get("spriteKey")
-        ex, ey = ent["x"] * TILE_SIZE, ent["y"] * TILE_SIZE
+        ex, ey = ent["x"] * ts, ent["y"] * ts
         if sk in npcs:
             c.blit(npcs[sk], ex, ey)
         elif sk in tiles and decor[ent["y"]][ent["x"]] != sk:
@@ -1209,13 +1210,121 @@ def render_map_canvas(
     # Draw subtle golden spawn highlight marker
     sp = map_data.get("spawn")
     if sp:
-        sx, sy = sp["x"] * TILE_SIZE, sp["y"] * TILE_SIZE
-        c.rect(sx + 5, sy + 4, 6, 8, hx("#248F55"))
-        c.rect(sx + 5, sy + 2, 6, 4, hx("#C98F5D"))
-        c.rect(sx + 4, sy + 1, 8, 2, hx("#8E4F22"))
-        c.set(sx + 6, sy + 4, hx("#1E1B2E"))
-        c.set(sx + 9, sy + 4, hx("#1E1B2E"))
+        s = ts // 16
+        sx, sy = sp["x"] * ts, sp["y"] * ts
+        c.rect(sx + 5 * s, sy + 4 * s, 6 * s, 8 * s, hx("#248F55"))
+        c.rect(sx + 5 * s, sy + 2 * s, 6 * s, 4 * s, hx("#C98F5D"))
+        c.rect(sx + 4 * s, sy + 1 * s, 8 * s, 2 * s, hx("#8E4F22"))
+        c.rect(sx + 6 * s, sy + 4 * s, s, s, hx("#1E1B2E"))
+        c.rect(sx + 9 * s, sy + 4 * s, s, s, hx("#1E1B2E"))
     return c
+
+
+def upscale_to_snes32(src: Canvas, is_sprite: bool = False) -> Canvas:
+    """Upgrades a 16x16 base tile/sprite into a true 32x32 SNES 16-Bit pixel-art tile
+    with 4x pixel density, directional top-left sunlight bevels, colored outlines,
+    micro-dithered texture detail, specular highlights, and soft sprite drop shadows.
+    """
+    out = Canvas(32, 32, TRANSPARENT)
+
+    def clamp(v: int) -> int:
+        return max(0, min(255, v))
+
+    def shift_rgb(c: RGBA, dr: int, dg: int, db: int) -> RGBA:
+        if c[3] == 0:
+            return TRANSPARENT
+        return (clamp(c[0] + dr), clamp(c[1] + dg), clamp(c[2] + db), c[3])
+
+    def luma(c: RGBA) -> float:
+        return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+
+    # Soft SNES oval shadow underneath opaque sprite feet
+    if is_sprite:
+        for y in range(26, 31):
+            for x in range(7, 25):
+                dx = (x - 15.5) / 8.5
+                dy = (y - 28.0) / 2.4
+                if dx * dx + dy * dy <= 1.0:
+                    out.set(x, y, (10, 14, 28, 95))
+
+    # Detect seamless opaque tiles (ground/floor tiles whose outer border is fully opaque)
+    # so we wrap neighbor lookups instead of beveling the 32x32 tile boundary into a grid.
+    is_seamless = (
+        not is_sprite
+        and all(src.get(x, 0)[3] == 255 and src.get(x, 15)[3] == 255 for x in range(16))
+        and all(src.get(0, y)[3] == 255 and src.get(15, y)[3] == 255 for y in range(16))
+    )
+
+    def sample(x: int, y: int) -> RGBA:
+        if is_seamless:
+            return src.get(x % 16, y % 16)
+        return src.get(x, y)
+
+    for sy in range(16):
+        for sx in range(16):
+            c = src.get(sx, sy)
+            if c[3] == 0:
+                continue
+
+            up = sample(sx, sy - 1)
+            dn = sample(sx, sy + 1)
+            lt = sample(sx - 1, sy)
+            rt = sample(sx + 1, sy)
+
+            # Soften harsh pure-black NES outlines into rich SNES deep indigo/umber
+            is_dark_outline = (c[0] < 38 and c[1] < 38 and c[2] < 48)
+            if is_dark_outline:
+                # Find brightest adjacent neighbor to tint the outline
+                nbrs = [n for n in (up, dn, lt, rt) if n[3] > 0 and not (n[0] < 38 and n[1] < 38 and n[2] < 48)]
+                if nbrs:
+                    avg_r = sum(n[0] for n in nbrs) // len(nbrs)
+                    avg_g = sum(n[1] for n in nbrs) // len(nbrs)
+                    avg_b = sum(n[2] for n in nbrs) // len(nbrs)
+                    c = (clamp(avg_r // 4 + 12), clamp(avg_g // 4 + 10), clamp(avg_b // 4 + 20), c[3])
+
+            # 2x2 subpixel SNES shading: top-left gets warm sunlight, bottom-right gets cool shadow
+            for oy in (0, 1):
+                for ox in (0, 1):
+                    px = sx * 2 + ox
+                    py = sy * 2 + oy
+                    col = c
+
+                    # Bevel & edge lighting based on neighboring pixels
+                    if not is_dark_outline:
+                        if oy == 0 and (up[3] == 0 or luma(up) + 28 < luma(c)):
+                            col = shift_rgb(col, 22, 20, 14)  # sunlit top rim
+                        elif oy == 1 and (dn[3] == 0 or luma(dn) + 28 < luma(c)):
+                            col = shift_rgb(col, -20, -18, -10)  # shaded bottom edge
+                        if ox == 0 and (lt[3] == 0 or luma(lt) + 28 < luma(c)):
+                            col = shift_rgb(col, 14, 14, 10)  # sunlit left rim
+                        elif ox == 1 and (rt[3] == 0 or luma(rt) + 28 < luma(c)):
+                            col = shift_rgb(col, -16, -14, -8)  # shaded right edge
+
+                        # Subtle SNES micro-dither texture (gives rich 32x32 fabric/stone/foliage grain)
+                        h = (px * 17 + py * 31) % 11
+                        if h == 0:
+                            col = shift_rgb(col, 14, 14, 10)
+                        elif h == 5:
+                            col = shift_rgb(col, -12, -10, -6)
+
+                        # Extra specular glint on bright highlights (gems, eyes, water, ice, gold)
+                        if luma(c) > 205 and ox == 0 and oy == 0:
+                            col = shift_rgb(col, 24, 24, 20)
+
+                    # Round off staircase outer corners on sprites for smoother 16-bit silhouettes
+                    if is_sprite and is_dark_outline:
+                        if ox == 0 and oy == 0 and up[3] == 0 and lt[3] == 0:
+                            continue
+                        if ox == 1 and oy == 0 and up[3] == 0 and rt[3] == 0:
+                            continue
+                        if ox == 0 and oy == 1 and dn[3] == 0 and lt[3] == 0:
+                            continue
+                        if ox == 1 and oy == 1 and dn[3] == 0 and rt[3] == 0:
+                            continue
+
+                    out.set(px, py, col)
+
+    return out
 
 
 def main() -> None:
@@ -1225,48 +1334,44 @@ def main() -> None:
     for era in ("8bit", "16bit"):
         tiles = build_tiles(era)
         npcs = build_npcs(era)
+        ts = 32 if era == "16bit" else TILE_SIZE
+        if era == "16bit":
+            tiles = {k: upscale_to_snes32(v, is_sprite=False) for k, v in tiles.items()}
+            npcs = {k: upscale_to_snes32(v, is_sprite=True) for k, v in npcs.items()}
+
         tiles_by_era[era] = tiles
         npcs_by_era[era] = npcs
 
         rows = (len(TILE_IDS) + SHEET_COLS - 1) // SHEET_COLS
-        sheet = Canvas(SHEET_COLS * TILE_SIZE, rows * TILE_SIZE)
+        sheet = Canvas(SHEET_COLS * ts, rows * ts)
         for idx, tid in enumerate(TILE_IDS):
             col, row = idx % SHEET_COLS, idx // SHEET_COLS
-            sheet.blit(tiles[tid], col * TILE_SIZE, row * TILE_SIZE)
+            sheet.blit(tiles[tid], col * ts, row * ts)
         sheet.save(TILESETS_DIR / era / "meadow_ruins.png")
 
-        npc_sheet = Canvas(len(NPC_KEYS) * TILE_SIZE, TILE_SIZE)
+        npc_sheet = Canvas(len(NPC_KEYS) * ts, ts)
         for idx, key in enumerate(NPC_KEYS):
-            npc_sheet.blit(npcs[key], idx * TILE_SIZE, 0)
+            npc_sheet.blit(npcs[key], idx * ts, 0)
         npc_sheet.save(TILESETS_DIR / era / "npcs_and_dragons.png")
 
-    # Build manifest.json
-    tile_coords = {}
-    for idx, tid in enumerate(TILE_IDS):
-        col, row = idx % SHEET_COLS, idx // SHEET_COLS
-        tile_coords[tid] = {
-            "col": col,
-            "row": row,
-            "x": col * TILE_SIZE,
-            "y": row * TILE_SIZE,
-            "width": TILE_SIZE,
-            "height": TILE_SIZE,
-        }
-
-    npc_coords = {}
-    for idx, key in enumerate(NPC_KEYS):
-        npc_coords[key] = {
-            "col": idx,
-            "row": 0,
-            "x": idx * TILE_SIZE,
-            "y": 0,
-            "width": TILE_SIZE,
-            "height": TILE_SIZE,
-        }
-
+    # Build manifest.json with exact per-era coordinates (16x16 for 8bit, 32x32 for 16bit!)
     total_rows = (len(TILE_IDS) + SHEET_COLS - 1) // SHEET_COLS
+
+    def build_coords(ts: int):
+        tc = {}
+        for idx, tid in enumerate(TILE_IDS):
+            col, row = idx % SHEET_COLS, idx // SHEET_COLS
+            tc[tid] = {"col": col, "row": row, "x": col * ts, "y": row * ts, "width": ts, "height": ts}
+        nc = {}
+        for idx, key in enumerate(NPC_KEYS):
+            nc[key] = {"col": idx, "row": 0, "x": idx * ts, "y": 0, "width": ts, "height": ts}
+        return tc, nc
+
+    tc8, nc8 = build_coords(16)
+    tc16, nc16 = build_coords(32)
+
     manifest = {
-        "version": "1.1.0",
+        "version": "1.2.0",
         "tilesetId": "meadow_ruins",
         "tileSize": TILE_SIZE,
         "tileIds": TILE_IDS,
@@ -1274,19 +1379,19 @@ def main() -> None:
         "eras": {
             "8bit": {
                 "tilesetImage": "8bit/meadow_ruins.png",
-                "tilesetSize": {"width": SHEET_COLS * TILE_SIZE, "height": total_rows * TILE_SIZE},
+                "tilesetSize": {"width": SHEET_COLS * 16, "height": total_rows * 16},
                 "npcsImage": "8bit/npcs_and_dragons.png",
-                "npcsSize": {"width": len(NPC_KEYS) * TILE_SIZE, "height": TILE_SIZE},
-                "tiles": tile_coords,
-                "npcs": npc_coords,
+                "npcsSize": {"width": len(NPC_KEYS) * 16, "height": 16},
+                "tiles": tc8,
+                "npcs": nc8,
             },
             "16bit": {
                 "tilesetImage": "16bit/meadow_ruins.png",
-                "tilesetSize": {"width": SHEET_COLS * TILE_SIZE, "height": total_rows * TILE_SIZE},
+                "tilesetSize": {"width": SHEET_COLS * 32, "height": total_rows * 32},
                 "npcsImage": "16bit/npcs_and_dragons.png",
-                "npcsSize": {"width": len(NPC_KEYS) * TILE_SIZE, "height": TILE_SIZE},
-                "tiles": tile_coords,
-                "npcs": npc_coords,
+                "npcsSize": {"width": len(NPC_KEYS) * 32, "height": 32},
+                "tiles": tc16,
+                "npcs": nc16,
             },
         },
     }
@@ -1309,18 +1414,26 @@ def main() -> None:
 
     if "realm-01-meadow" in bundle:
         m1 = bundle["realm-01-meadow"]
-        r8 = render_map_canvas(m1, tiles_by_era["8bit"], npcs_by_era["8bit"])
+        r8_raw = render_map_canvas(m1, tiles_by_era["8bit"], npcs_by_era["8bit"])
+        # Scale 8-bit 2x so 8-bit (16px tiles) and 16-bit (32px tiles) align 1:1 side-by-side
+        r8 = Canvas(r8_raw.w * 2, r8_raw.h * 2)
+        for yy in range(r8_raw.h):
+            for xx in range(r8_raw.w):
+                col = r8_raw.get(xx, yy)
+                r8.set(xx * 2, yy * 2, col)
+                r8.set(xx * 2 + 1, yy * 2, col)
+                r8.set(xx * 2, yy * 2 + 1, col)
+                r8.set(xx * 2 + 1, yy * 2 + 1, col)
         r16 = render_map_canvas(m1, tiles_by_era["16bit"], npcs_by_era["16bit"])
-        # Side-by-side 1088x456 comparison PNG (each map is 512x384)
         pad = 20
         header_h = 56
         comp_w = pad + r8.w + pad + r16.w + pad
-        comp_h = header_h + r8.h + pad
+        comp_h = header_h + max(r8.h, r16.h) + pad
         comp = Canvas(comp_w, comp_h, hx("#0F172A"))
         comp.rect(0, 0, comp_w, header_h - 2, hx("#131C31"))
         comp.rect(0, header_h - 2, comp_w, 2, hx("#334155"))
-        draw_text(comp, 20, 12, "PYRIA REALM 1: WHISPERING MEADOW (32X24)", hx("#F8FAFC"), scale=2)
-        draw_text(comp, 20, 36, "8-BIT NES ERA (LEFT) VS 16-BIT SNES ERA (RIGHT)", hx("#38BDF8"), scale=1)
+        draw_text(comp, 20, 12, "PYRIA REALM 1: WHISPERING MEADOW", hx("#F8FAFC"), scale=2)
+        draw_text(comp, 20, 36, "8-BIT NES (16PX TILES, LEFT) VS 16-BIT SNES (32PX TILES, RIGHT)", hx("#38BDF8"), scale=1)
 
         # Borders + maps
         comp.rect(pad - 2, header_h - 2, r8.w + 4, r8.h + 4, hx("#22C55E"))
@@ -1331,7 +1444,7 @@ def main() -> None:
         comp.save(WORLD_DIR / "realm01_meadow_comparison.png")
         print(f"Rendered {WORLD_DIR / 'realm01_meadow_comparison.png'} ({comp_w}x{comp_h})")
 
-    print(f"Generated 8bit & 16bit tilesets (20 tiles + 5 NPCs/dragons) + manifest.json in {TILESETS_DIR}")
+    print(f"Generated 8bit & 16bit tilesets ({len(TILE_IDS)} tiles + {len(NPC_KEYS)} NPCs/dragons) + manifest.json in {TILESETS_DIR}")
 
 
 if __name__ == "__main__":
