@@ -11,10 +11,11 @@ description: Pedagogical and authoring rules for creating or editing Pyria lesso
 
 Follow these rules whenever creating new lessons/trials or editing existing ones in `content/eras/*.json`. Target audience: ~10-year-old beginners learning Python step by step.
 
-## 1. Teach New Concepts Through Multiple Choice First
-- Whenever a lesson introduces a **new Python concept, operator, method, data type, or syntax**, teach it via a multiple-choice question **before** asking the player to write code for it.
-- Use either:
-  - A standalone `trialType: "multiple_choice"` trial (e.g., Trial 1 of a Realm), OR
+## 1. One Concept at a Time + Repetition Before Combining
+- **Never introduce two brand-new concepts in the same trial** (e.g., never introduce `*` multiplication and `True`/`False` Booleans together, or variable addition and `str()` together). Teach each new concept in its own focused trial first.
+- **Repeat before combining**: Give players multiple low-stakes repetitions of core fundamentals (strings vs. variables, 4-space indentation, plain `if`, `==`, `<=`/`>=`, `for` loops) before combining them into multi-step or capstone trials. Aim for **8–10 main trials per Realm** in early eras.
+- Whenever a lesson introduces a **new Python concept, operator, method, data type, or syntax**, teach it via a multiple-choice question **before** asking the player to write code for it:
+  - Use either a standalone `trialType: "multiple_choice"` trial (e.g., Trial 1 of a Realm), OR
   - A Step 1 `introChoice` object on the `code` or `fix_bug` trial where the concept debuts (Step 1: Predict & Choose → Step 2: Code It in the same modal, preserving realm maps and gate chains).
 
 ## 2. Never Assume Prior Knowledge of Data Types or Jargon

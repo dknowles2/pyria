@@ -16,7 +16,7 @@
 
 ---
 
-## The 4 Playable Eras & 32 Realms (`224 Trials`)
+## The 4 Playable Eras & 32 Realms (`275 Trials`)
 
 Every single Realm follows a **slow-growth scaffolded cadence** so new concepts never feel like a cliff:
 1. **Multiple Choice (`Predict & Choose`)** — Read real Python and predict the output or spot valid syntax first.
@@ -181,7 +181,7 @@ Pushing to `main` automatically runs tests, bundles static assets, and deploys v
 Pyria tracks privacy-safe per-trial telemetry (`difficultyMode`, `isPractice`, normalized `errorType`, and elapsed `durationMs`) and rolls up daily aggregates into `trial_stats_daily` so calibration history survives attempt pruning.
 
 - **Trial Calibration Dashboard** (`/builder` locally, and Admin `/console` in Cloudflare production; strictly hidden for non-admin parents):
-  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 224 trials.
+  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 275 trials.
   - Filter by **Era**, **Realm**, **Trial Type**, **Difficulty** (`explorer` / `standard` / `challenge`), **Time Window** (`7d` / `30d` / `90d` / `all`), optional **Since** date (`YYYY-MM-DD`), **Flag status**, and **Include Practice Replays**, or click **Export CSV** (`format=csv`).
   - Click any trial row to open the **Drill-Down Modal** showing hint-tier breakdown (`tier0`–`tier3`), top failure error types / wrong multiple-choice options, daily trend with a **Before vs. After** cutoff date check, and (in local `/builder`) a direct **Edit Trial** jump into **Story & Trials**.
 - **CLI Calibration Report** (`scripts/calibration_report.py`):
