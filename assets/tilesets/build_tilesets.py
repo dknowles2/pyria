@@ -35,6 +35,9 @@ TILE_IDS = [
     "bridge_broken", "stone_floor", "stone_wall", "tree", "bush",
     "campfire", "anvil", "statue", "mossy_gate_closed", "mossy_gate_open",
     "chest_closed", "chest_open", "vault_shrine", "torch", "portal",
+    "lava", "ice_floor", "ice_wall", "sand", "coral",
+    "obsidian_floor", "obsidian_wall", "brass_floor", "gear_prop", "cloud_floor",
+    "star_tile", "crystal_pillar", "pine_tree", "column", "flower_bed",
 ]
 
 NPC_KEYS = [
@@ -637,6 +640,225 @@ def build_tiles(era: str) -> Dict[str, Canvas]:
         "................",
     ], pt_pal)
 
+    # 21. lava (glowing molten magma)
+    lv = Canvas(16, 16, hx("#DC2626") if is16 else hx("#E53935"))
+    for y in range(16):
+        for x in range(16):
+            v = (x * 5 + y * 7) % 13
+            if v in (0, 1):
+                lv.set(x, y, hx("#FACC15"))
+            elif v in (2, 3, 4):
+                lv.set(x, y, hx("#F97316"))
+            elif v == 12:
+                lv.set(x, y, hx("#7F1D1D"))
+    tiles["lava"] = lv
+
+    # 22. ice_floor (crystalline frozen ground)
+    ic = Canvas(16, 16, hx("#BAE6FD") if is16 else hx("#93C5FD"))
+    for y in range(16):
+        for x in range(16):
+            if (x + y) % 7 == 0:
+                ic.set(x, y, hx("#F0F9FF"))
+            elif (x * 3 + y * 5) % 11 == 0:
+                ic.set(x, y, hx("#7DD3FC"))
+    tiles["ice_floor"] = ic
+
+    # 23. ice_wall (jagged glacial crystal wall)
+    tiles["ice_wall"] = from_grid([
+        "....OO....OO....",
+        "...OHHO..OHHO...",
+        "..OHCCHOOHCCHO..",
+        ".OHCCCCHHCCCCHO.",
+        ".OCCCCCCCCCCCCO.",
+        "OHCCCHHCCCCHHCCO",
+        "OCCCCHCCCCCHCCCO",
+        "OCCBBCCCCCCBBCCO",
+        "OCBBBBCCCCBBBBCO",
+        "OBBBBBBBBBBBBBBO",
+        "OBBDDDDDDBBDDDBO",
+        "OBDDDDDDDDDDDDBO",
+        "OODDDDDDDDDDDDOO",
+        ".OOOOOOOOOOOOOO.",
+        "................",
+        "................",
+    ], {"O": O, "H": hx("#F0F9FF"), "C": hx("#7DD3FC"), "B": hx("#0284C7"), "D": hx("#0369A1")})
+
+    # 24. sand (warm tropical archipelago beach)
+    sd = Canvas(16, 16, hx("#FDE68A") if is16 else hx("#FCD34D"))
+    for y in range(16):
+        for x in range(16):
+            v = (x * 11 + y * 7) % 17
+            if v == 0:
+                sd.set(x, y, hx("#FEF3C7"))
+            elif v in (1, 2):
+                sd.set(x, y, hx("#D97706") if is16 else hx("#F59E0B"))
+    tiles["sand"] = sd
+
+    # 25. coral (vibrant reef coral cluster)
+    tiles["coral"] = from_grid([
+        "................",
+        "....OO....OO....",
+        "...OPPO..OTTO...",
+        "..OPPPPOOTTTTO..",
+        "..OPHHPOOTHHTO..",
+        "...OPPO..OTTO...",
+        ".OOOPPOOOOTTOOO.",
+        "OPPPPPPTTTTTTTPO",
+        "OPPHPPPTTHTTTTPO",
+        ".OOPPPTTTTTTPOO.",
+        "...OOPPTTTTPO...",
+        "....OOOPPPPO....",
+        ".....OOOOOO.....",
+        "................",
+        "................",
+        "................",
+    ], {"O": O, "P": hx("#FB7185"), "H": hx("#FECDD3"), "T": hx("#2DD4BF")})
+
+    # 26. obsidian_floor (dark volcanic citadel tile)
+    ob = Canvas(16, 16, hx("#1E1B2E"))
+    for y in range(16):
+        for x in range(16):
+            if x == 0 or y == 0:
+                ob.set(x, y, hx("#312E4A"))
+            elif (x * 7 + y * 3) % 19 == 0:
+                ob.set(x, y, hx("#6D28D9"))
+    tiles["obsidian_floor"] = ob
+
+    # 27. obsidian_wall (dark jagged fortress wall with purple runes)
+    tiles["obsidian_wall"] = from_grid([
+        "OOOOOOOOOOOOOOOO",
+        "ODDDDDDDDDDDDDDO",
+        "ODVVDDDDDDDDVVDO",
+        "ODDDDDDDDDDDDDDO",
+        "ODDDDDVVVVDDDDDO",
+        "ODDDDDVPPVDDDDDO",
+        "ODDDDDVVVVDDDDDO",
+        "ODDDDDDDDDDDDDDO",
+        "OODDDDDDDDDDDDOO",
+        "ODDDDDDDDDDDDDDO",
+        "ODVVDDDDDDDDVVDO",
+        "ODDDDDDDDDDDDDDO",
+        "ODBBBBBBBBBBBBDO",
+        "ODBBBBBBBBBBBBDO",
+        "OOOOOOOOOOOOOOOO",
+        "................",
+    ], {"O": O, "D": hx("#2E1065"), "B": hx("#1E1B4B"), "V": hx("#7C3AED"), "P": hx("#C084FC")})
+
+    # 28. brass_floor (riveted bronze clockwork decking)
+    br = Canvas(16, 16, hx("#92400E") if is16 else hx("#B45309"))
+    for y in range(16):
+        for x in range(16):
+            if x == 0 or y == 0 or x == 8 or y == 8:
+                br.set(x, y, hx("#78350F"))
+            elif x in (2, 10) and y in (2, 10):
+                br.set(x, y, hx("#FDE047"))
+            elif (x + y) % 9 == 0:
+                br.set(x, y, hx("#D97706"))
+    tiles["brass_floor"] = br
+
+    # 29. gear_prop (interlocking clockwork brass gear)
+    tiles["gear_prop"] = from_grid([
+        "......OOOO......",
+        ".....OGGGGO.....",
+        "..OO.OGGGGO.OO..",
+        ".OGGOOGHHGOOGGO.",
+        ".OGGGGOOOOGGGGO.",
+        "..OGGO....OGGO..",
+        "OOOGG..OO..GGOOO",
+        "OGGGO.OSSO.OGGGO",
+        "OGGGO.OSSO.OGGGO",
+        "OOOGG..OO..GGOOO",
+        "..OGGO....OGGO..",
+        ".OGGGGOOOOGGGGO.",
+        ".OGGOOGDDGOOGGO.",
+        "..OO.OGDDGO.OO..",
+        ".....OOOOOO.....",
+        "................",
+    ], {"O": O, "G": hx("#D97706"), "H": hx("#FDE047"), "D": hx("#78350F"), "S": hx("#94A3B8")})
+
+    # 30. cloud_floor (fluffy sunlit skyway cloud)
+    cl = Canvas(16, 16, hx("#E0F2FE"))
+    for y in range(16):
+        for x in range(16):
+            if y >= 12 or (x + y) % 9 == 0:
+                cl.set(x, y, hx("#BAE6FD"))
+            elif y <= 4 and (x * 3 + y) % 5 == 0:
+                cl.set(x, y, hx("#FFFFFF"))
+    tiles["cloud_floor"] = cl
+
+    # 31. star_tile (midnight starfield floor)
+    st = Canvas(16, 16, hx("#0B1026"))
+    for sx, sy, col in [(3, 3, "#FEF08A"), (11, 5, "#38BDF8"), (6, 12, "#F8FAFC"), (13, 11, "#C084FC"), (2, 9, "#7DD3FC")]:
+        st.set(sx, sy, hx(col))
+    tiles["star_tile"] = st
+
+    # 32. crystal_pillar (glowing cyan/magenta prism spire)
+    tiles["crystal_pillar"] = from_grid([
+        ".......OO.......",
+        "......OHHO......",
+        ".....OHCCHO.....",
+        "....OHCCCCHO....",
+        "....OCHHHCCO....",
+        "...OCCCCCCCCO...",
+        "...OCCCMMCCCO...",
+        "...OCCMMMHCCO...",
+        "...OCCCCCCCCO...",
+        "....OCCBBCCO....",
+        "....OBBBBBBO....",
+        "...OOBBBBBBOO...",
+        "..OSSSSSSSSSSO..",
+        "..OOOOOOOOOOOO..",
+        "................",
+        "................",
+    ], {"O": O, "H": hx("#F0F9FF"), "C": hx("#38BDF8"), "M": hx("#E879F9"), "B": hx("#0284C7"), "S": hx("#64748B")})
+
+    # 33. pine_tree (tall alpine evergreen pine)
+    tiles["pine_tree"] = from_grid([
+        ".......OO.......",
+        "......OGGO......",
+        ".....OGHHGO.....",
+        "....OGGGGGGO....",
+        "...OGGDDDDGGO...",
+        "....OOGGGGOO....",
+        "...OGGHHGGGGO...",
+        "..OGGGGGGGGGGO..",
+        ".OGGGDDDDDDGGGO.",
+        "..OOOGGGGGGOOO..",
+        ".OGGGGGGGGGGGGO.",
+        "OGGDDDDDDDDDDGGO",
+        ".OOOOOOTTOOOOOO.",
+        "......OTTO......",
+        "......OOOO......",
+        "................",
+    ], {"O": O, "G": hx("#15803D"), "H": hx("#4ADE80"), "D": hx("#14532D"), "T": hx("#78350F")})
+
+    # 34. column (carved stone/marble classical pillar)
+    tiles["column"] = from_grid([
+        "..OOOOOOOOOOOO..",
+        ".OHHHHHHHHHHHHO.",
+        ".OLLLLLLLLLLLL0.".replace("0", "O"),
+        "..OOLLLLLLLLOO..",
+        "...OLHLLLLDLO...",
+        "...OLHLLLLDLO...",
+        "...OLHLLLLDLO...",
+        "...OLHLLLLDLO...",
+        "...OLHLLLLDLO...",
+        "...OLHLLLLDLO...",
+        "...OLHLLLLDLO...",
+        "..OOLLLLLLLLOO..",
+        ".OLLLLLLLLLLLLO.",
+        ".ODDDDDDDDDDDDO.",
+        "..OOOOOOOOOOOO..",
+        "................",
+    ], {"O": O, "H": hx("#F8FAFC"), "L": hx("#CBD5E1"), "D": hx("#64748B")})
+
+    # 35. flower_bed (lush wildflower & mushroom patch)
+    fb = tiles["grass"].copy()
+    for fx, fy, col in [(3, 4, "#F43F5E"), (4, 4, "#FDE047"), (11, 3, "#C084FC"), (12, 3, "#F8FAFC"),
+                        (6, 10, "#38BDF8"), (7, 10, "#FDE047"), (12, 11, "#FB7185"), (2, 12, "#FACC15")]:
+        fb.set(fx, fy, hx(col))
+    tiles["flower_bed"] = fb
+
     return tiles
 
 
@@ -1042,8 +1264,9 @@ def main() -> None:
             "height": TILE_SIZE,
         }
 
+    total_rows = (len(TILE_IDS) + SHEET_COLS - 1) // SHEET_COLS
     manifest = {
-        "version": "1.0.0",
+        "version": "1.1.0",
         "tilesetId": "meadow_ruins",
         "tileSize": TILE_SIZE,
         "tileIds": TILE_IDS,
@@ -1051,7 +1274,7 @@ def main() -> None:
         "eras": {
             "8bit": {
                 "tilesetImage": "8bit/meadow_ruins.png",
-                "tilesetSize": {"width": SHEET_COLS * TILE_SIZE, "height": 4 * TILE_SIZE},
+                "tilesetSize": {"width": SHEET_COLS * TILE_SIZE, "height": total_rows * TILE_SIZE},
                 "npcsImage": "8bit/npcs_and_dragons.png",
                 "npcsSize": {"width": len(NPC_KEYS) * TILE_SIZE, "height": TILE_SIZE},
                 "tiles": tile_coords,
@@ -1059,7 +1282,7 @@ def main() -> None:
             },
             "16bit": {
                 "tilesetImage": "16bit/meadow_ruins.png",
-                "tilesetSize": {"width": SHEET_COLS * TILE_SIZE, "height": 4 * TILE_SIZE},
+                "tilesetSize": {"width": SHEET_COLS * TILE_SIZE, "height": total_rows * TILE_SIZE},
                 "npcsImage": "16bit/npcs_and_dragons.png",
                 "npcsSize": {"width": len(NPC_KEYS) * TILE_SIZE, "height": TILE_SIZE},
                 "tiles": tile_coords,
