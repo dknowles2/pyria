@@ -430,11 +430,15 @@ export function validateAttemptPayload(body: Record<string, unknown>): {
 
   const passed = Boolean(body.passed);
   const rawHints = body.hintsUsed !== undefined ? body.hintsUsed : (body.hints_used ?? 0);
-  if (typeof rawHints === 'boolean') {
-    throw new ValidationError('hintsUsed must be an integer');
-  }
-  const hintsNum = typeof rawHints === 'number' ? rawHints : Number(rawHints);
-  if (!Number.isFinite(hintsNum) || !Number.isInteger(hintsNum)) {
+  let hintsNum: number;
+  if (typeof rawHints === 'number') {
+    if (!Number.isFinite(rawHints) || !Number.isInteger(rawHints)) {
+      throw new ValidationError('hintsUsed must be an integer');
+    }
+    hintsNum = rawHints;
+  } else if (typeof rawHints === 'string' && /^-?\d+$/.test(rawHints.trim())) {
+    hintsNum = Number.parseInt(rawHints.trim(), 10);
+  } else {
     throw new ValidationError('hintsUsed must be an integer');
   }
 
@@ -505,6 +509,37 @@ export function validatePreferences(body: Record<string, unknown>): SavePreferen
   return prefs;
 }
 
+async function readBoundedBytes(request: Request, maxBytes: number): Promise<Uint8Array> {
+  if (!request.body) {
+    return new Uint8Array(0);
+  }
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!value) continue;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel().catch(() => {});
+        throw new ValidationError(`Request body exceeds limit (${maxBytes} bytes)`, 413);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return out;
+}
+
 export async function readJsonBody(
   request: Request,
   maxBytes = MAX_JSON_BODY_BYTES,
@@ -516,8 +551,8 @@ export async function readJsonBody(
     .toLowerCase();
 
   if (options?.allowEmpty && !contentType) {
-    const buf = await request.arrayBuffer();
-    if (buf.byteLength === 0) return {};
+    const bytes = await readBoundedBytes(request, maxBytes);
+    if (bytes.byteLength === 0) return {};
     throw new ValidationError('Content-Type must be application/json', 415);
   }
 
@@ -536,17 +571,14 @@ export async function readJsonBody(
     }
   }
 
-  const buf = await request.arrayBuffer();
-  if (buf.byteLength > maxBytes) {
-    throw new ValidationError(`Request body exceeds limit (${maxBytes} bytes)`, 413);
-  }
-  if (buf.byteLength === 0) {
+  const bytes = await readBoundedBytes(request, maxBytes);
+  if (bytes.byteLength === 0) {
     return {};
   }
 
   let parsed: unknown;
   try {
-    const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: false }).decode(buf);
+    const text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: false }).decode(bytes);
     parsed = JSON.parse(text);
   } catch (err) {
     throw new ValidationError(

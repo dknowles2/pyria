@@ -37,8 +37,12 @@ import {
 
 const DEFAULT_CREATE_LIMIT = 15;
 const DEFAULT_CREATE_WINDOW_SEC = 600; // 10 minutes
+const DEFAULT_DAILY_ANON_CREATES = 500;
+const DEFAULT_DAILY_WINDOW_SEC = 86400; // 24 hours
 const DEFAULT_REDEEM_LIMIT = 15;
 const DEFAULT_REDEEM_WINDOW_SEC = 300; // 5 minutes
+const DEFAULT_GLOBAL_FAIL_LIMIT = 200;
+const DEFAULT_GLOBAL_FAIL_WINDOW_SEC = 300; // 5 minutes
 
 export function getAdminEmails(env: Env): Set<string> {
   const raw = env.PYRIA_ADMIN_EMAILS || '';
@@ -89,7 +93,8 @@ export async function resolveAuthContext(
   if (cookies[PARENT_SESSION_COOKIE]) {
     const parentPayload = await verifyToken<ParentSessionPayload>(
       cookies[PARENT_SESSION_COOKIE],
-      secret
+      secret,
+      'parent'
     );
     if (parentPayload && typeof parentPayload.email === 'string') {
       parentEmail = normalizeEmail(parentPayload.email);
@@ -105,7 +110,8 @@ export async function resolveAuthContext(
   if (cookies[HERO_SESSION_COOKIE]) {
     const heroPayload = await verifyToken<HeroSessionPayload>(
       cookies[HERO_SESSION_COOKIE],
-      secret
+      secret,
+      'hero'
     );
     if (
       heroPayload &&
@@ -175,6 +181,18 @@ export async function handleHeroCodeCreate(
     return rateLimitExceededResponse(rl.retryAfterSeconds);
   }
 
+  const dailyLimit =
+    Number.parseInt(env.PYRIA_MAX_DAILY_ANON_CREATES || '', 10) || DEFAULT_DAILY_ANON_CREATES;
+  const globalDaily = await checkRateLimit(
+    env.DB,
+    'hero-create:global-daily',
+    dailyLimit,
+    DEFAULT_DAILY_WINDOW_SEC
+  );
+  if (!globalDaily.allowed) {
+    return rateLimitExceededResponse(globalDaily.retryAfterSeconds);
+  }
+
   let body: Record<string, unknown>;
   try {
     body = await readJsonBody(request, MAX_SAVE_BODY_BYTES);
@@ -220,7 +238,7 @@ export async function handleHeroCodeCreate(
 
     const exp = Math.floor(Date.now() / 1000) + HERO_SESSION_TTL_SECONDS;
     const token = await signToken(
-      { saveId: save.id, sessionVersion: 1, exp } satisfies HeroSessionPayload,
+      { typ: 'hero', saveId: save.id, sessionVersion: 1, exp } satisfies HeroSessionPayload,
       secret
     );
     const cookie = serializeCookie(HERO_SESSION_COOKIE, token, {
@@ -272,12 +290,24 @@ export async function handleHeroCodeRedeem(
   const hash = await hashHeroCode(normalized, secret);
   const row = await db.getSaveByRecoveryHash(hash);
   if (!row) {
+    const globalFailLimit =
+      Number.parseInt(env.PYRIA_RATE_LIMIT_GLOBAL_FAIL || '', 10) || DEFAULT_GLOBAL_FAIL_LIMIT;
+    const failRl = await checkRateLimit(
+      env.DB,
+      'hero-code-fail:global',
+      globalFailLimit,
+      DEFAULT_GLOBAL_FAIL_WINDOW_SEC
+    );
+    if (!failRl.allowed) {
+      return rateLimitExceededResponse(failRl.retryAfterSeconds);
+    }
     return jsonResponse({ error: 'Invalid Hero Code' }, 401);
   }
 
   const exp = Math.floor(Date.now() / 1000) + HERO_SESSION_TTL_SECONDS;
   const token = await signToken(
     {
+      typ: 'hero',
       saveId: row.id,
       sessionVersion: Number(row.session_version ?? 1),
       exp,
@@ -310,7 +340,7 @@ export async function handleGoogleStart(request: Request, env: Env): Promise<Res
   const exp = Math.floor(Date.now() / 1000) + OAUTH_STATE_TTL_SECONDS;
 
   const stateToken = await signToken(
-    { state, codeVerifier, next: nextPath, exp } satisfies OAuthStatePayload,
+    { typ: 'oauth_state', state, codeVerifier, next: nextPath, exp } satisfies OAuthStatePayload,
     secret
   );
 
@@ -362,7 +392,11 @@ export async function handleGoogleCallback(request: Request, env: Env): Promise<
   }
 
   const cookies = parseCookies(request);
-  const oauthState = await verifyToken<OAuthStatePayload>(cookies[OAUTH_STATE_COOKIE], secret);
+  const oauthState = await verifyToken<OAuthStatePayload>(
+    cookies[OAUTH_STATE_COOKIE],
+    secret,
+    'oauth_state'
+  );
   if (!oauthState || oauthState.state !== state) {
     return jsonResponse({ error: 'Invalid or expired OAuth state' }, 400);
   }
@@ -406,7 +440,10 @@ export async function handleGoogleCallback(request: Request, env: Env): Promise<
   }
 
   const exp = Math.floor(Date.now() / 1000) + PARENT_SESSION_TTL_SECONDS;
-  const sessionToken = await signToken({ email, exp } satisfies ParentSessionPayload, secret);
+  const sessionToken = await signToken(
+    { typ: 'parent', email, exp } satisfies ParentSessionPayload,
+    secret
+  );
 
   const nextPath = sanitizeNextPath(oauthState.next, '/console');
   const headers = new Headers();

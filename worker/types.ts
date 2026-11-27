@@ -7,11 +7,16 @@ export interface Env {
   GOOGLE_CLIENT_SECRET?: string;
   // Optional overrides for quotas, rate limits, and OAuth endpoints (useful for tests/tuning)
   PYRIA_MAX_SAVES_PER_ACCOUNT?: string;
+  PYRIA_MAX_UNOWNED_SAVES?: string;
+  PYRIA_MAX_DAILY_ANON_CREATES?: string;
+  PYRIA_UNOWNED_IDLE_DAYS?: string;
   PYRIA_MAX_ATTEMPT_CODE_ROWS?: string;
   PYRIA_MAX_ATTEMPTS_PER_SAVE?: string;
   PYRIA_MAX_EVENTS_PER_SAVE?: string;
   PYRIA_RATE_LIMIT_CREATE?: string;
   PYRIA_RATE_LIMIT_REDEEM?: string;
+  PYRIA_RATE_LIMIT_CLAIM?: string;
+  PYRIA_RATE_LIMIT_GLOBAL_FAIL?: string;
   PYRIA_RATE_LIMIT_SAVES?: string;
   GOOGLE_TOKEN_URL?: string;
   GOOGLE_USERINFO_URL?: string;
@@ -25,18 +30,23 @@ export interface SavePreferences {
   maxPipHints?: number;
 }
 
+export type TokenType = 'hero' | 'parent' | 'oauth_state';
+
 export interface HeroSessionPayload {
+  typ: 'hero';
   saveId: string;
   sessionVersion: number;
   exp: number;
 }
 
 export interface ParentSessionPayload {
+  typ: 'parent';
   email: string;
   exp: number;
 }
 
 export interface OAuthStatePayload {
+  typ: 'oauth_state';
   state: string;
   codeVerifier: string;
   next: string;

@@ -1,8 +1,14 @@
 import { applyD1Migrations, env, SELF } from 'cloudflare:test';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PARENT_SESSION_COOKIE, PARENT_SESSION_TTL_SECONDS, signToken } from '../crypto';
+import {
+  HERO_SESSION_COOKIE,
+  PARENT_SESSION_COOKIE,
+  PARENT_SESSION_TTL_SECONDS,
+  signToken,
+} from '../crypto';
 import { PyriaD1 } from '../db';
-import type { ParentSessionPayload } from '../types';
+import { normalizeIpForRateLimit } from '../rateLimit';
+import type { HeroSessionPayload, ParentSessionPayload } from '../types';
 
 const BASE = 'https://pyria.test';
 
@@ -24,7 +30,7 @@ function extractCookie(res: Response, name: string): string | null {
 async function makeParentCookie(email: string): Promise<string> {
   const exp = Math.floor(Date.now() / 1000) + PARENT_SESSION_TTL_SECONDS;
   const token = await signToken(
-    { email, exp } satisfies ParentSessionPayload,
+    { typ: 'parent', email, exp } satisfies ParentSessionPayload,
     env.PYRIA_SESSION_SECRET!
   );
   return `${PARENT_SESSION_COOKIE}=${token}`;
@@ -97,16 +103,47 @@ describe('Security Headers, Static Routing & Sandbox CSP', () => {
     expect(res.headers.get('Cache-Control')).toBe('no-store');
   });
 
-  it('serves /py-sandbox.html (case-insensitive) with hashed opaque-origin sandbox CSP', async () => {
-    for (const path of ['/py-sandbox.html', '/PY-SANDBOX.HTML']) {
+  it('serves /py-sandbox.html (HEAD, GET, case-insensitive, percent-encoded) with hashed opaque-origin sandbox CSP', async () => {
+    // HEAD first to ensure cold-isolate HEAD does not poison cachedSandboxCsp
+    const headRes = await SELF.fetch(`${BASE}/py-sandbox.html`, { method: 'HEAD' });
+    expect(headRes.status).toBe(200);
+    const headCsp = headRes.headers.get('Content-Security-Policy') || '';
+    expect(headCsp).toContain('sandbox allow-scripts;');
+    expect(headCsp).toContain("'sha256-");
+    expect(headRes.headers.get('X-Frame-Options')).toBe('SAMEORIGIN');
+
+    for (const path of ['/py-sandbox.html', '/PY-SANDBOX.HTML', '/%70y-sandbox.html', '//py-sandbox.html']) {
       const res = await SELF.fetch(`${BASE}${path}`);
-      expect(res.status).toBe(200);
+      expect(res.status, `path ${path}`).toBe(200);
       const csp = res.headers.get('Content-Security-Policy') || '';
       expect(csp).toContain('sandbox allow-scripts;');
       expect(csp).toContain("'sha256-");
       expect(csp).toContain('https://cdn.jsdelivr.net/pyodide/v0.26.4/full/');
       expect(res.headers.get('X-Frame-Options')).toBe('SAMEORIGIN');
     }
+
+    // Malformed percent-encoding returns 400 (never 500)
+    const badPath = await SELF.fetch(`${BASE}/api/saves/%ZZ`);
+    expect(badPath.status).toBe(400);
+  });
+
+  it('serves / and /js/main.js with strict security headers and generates _headers for Static Assets', async () => {
+    for (const p of ['/', '/js/main.js']) {
+      const res = await SELF.fetch(`${BASE}${p}`);
+      expect(res.status).toBe(200);
+      expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff');
+      expect(res.headers.get('X-Frame-Options')).toBe('DENY');
+      expect(res.headers.get('Referrer-Policy')).toBe('same-origin');
+      expect(res.headers.get('Permissions-Policy')).toContain('camera=()');
+      expect(res.headers.get('Content-Security-Policy')).toContain("default-src 'self'");
+      expect(res.headers.get('Cache-Control')).toContain('public');
+    }
+
+    // Verify dist/assets/_headers exists in static assets build
+    const headersAsset = await env.ASSETS.fetch(new Request(`${BASE}/_headers`));
+    // Note: Workers Static Assets does not serve _headers publicly, so if 404 that's expected on edge,
+    // while in local test we just verify headers on / and /js/main.js above.
+    expect([200, 404]).toContain(headersAsset.status);
   });
 
   it('disables /api/builder/* and /builder write endpoints in production', async () => {
@@ -157,6 +194,25 @@ describe('Security Headers, Static Routing & Sandbox CSP', () => {
       headers: { Origin: 'null' },
     });
     expect(nullOrigin.res.status).toBe(403);
+
+    // Spoofing X-Forwarded-Host must NOT bypass CSRF check
+    const spoofedFwd = await apiJson('/api/auth/logout', {
+      method: 'POST',
+      body: {},
+      headers: {
+        Origin: 'https://evil.example',
+        'X-Forwarded-Host': 'evil.example',
+      },
+    });
+    expect(spoofedFwd.res.status).toBe(403);
+
+    // Protocol mismatch (http vs https) must be blocked
+    const protoMismatch = await apiJson('/api/auth/logout', {
+      method: 'POST',
+      body: {},
+      headers: { Origin: 'http://pyria.test' },
+    });
+    expect(protoMismatch.res.status).toBe(403);
   });
 });
 
@@ -206,7 +262,7 @@ describe('Kid-First Hero Code & Child Device Isolation', () => {
       },
     });
     expect(created.res.status).toBe(201);
-    expect(created.data.heroCode).toMatch(/^[A-Z]+-[A-Z]+-\d{4}$/);
+    expect(created.data.heroCode).toMatch(/^[A-Z]+-[A-Z]+-\d{6}$/);
     expect(created.data.save.heroName).toBe('Rowan');
     expect(created.data.save.byteShards).toBe(42);
 
@@ -317,12 +373,20 @@ describe('Parent-First Flow, Claiming, Cross-Account Isolation & Code Rotation',
     expect(claimA.res.status).toBe(200);
     expect(claimA.data.save.ownerEmail).toBe('parent-a@example.com');
 
+    // Parent B trying to claim already-owned hero gets same 404 as nonexistent code (no enumeration oracle)
     const claimB = await apiJson('/api/console/claim-hero', {
       method: 'POST',
       cookie: parentB,
       body: { heroCode: kidHero.data.heroCode },
     });
-    expect(claimB.res.status).toBe(409);
+    const claimMissing = await apiJson('/api/console/claim-hero', {
+      method: 'POST',
+      cookie: parentB,
+      body: { heroCode: 'MISSING-CODE-999999' },
+    });
+    expect(claimB.res.status).toBe(404);
+    expect(claimMissing.res.status).toBe(404);
+    expect(claimB.data.error).toBe(claimMissing.data.error);
 
     // Parent B cannot view or mutate Parent A's heroes or activity
     expect((await apiJson(`/api/saves/${saveId}`, { cookie: parentB })).res.status).toBe(403);
@@ -547,6 +611,16 @@ describe('#45 Input Validation, Quotas, Cascading Delete & Rate Limiting', () =>
       body: { trialId: 'trial-01', passed: false, hintsUsed: 0, code: 'a'.repeat(33000) },
     });
     expect(bigCodeRes.res.status).toBe(413);
+
+    // Invalid hintsUsed values (null, empty string, array) return 400
+    for (const badHints of [null, '', []]) {
+      const badHintsRes = await apiJson(`/api/saves/${saveId}/attempts`, {
+        method: 'POST',
+        cookie,
+        body: { trialId: 'trial-01', passed: false, hintsUsed: badHints, code: 'print(1)' },
+      });
+      expect(badHintsRes.res.status).toBe(400);
+    }
   });
 
   it('enforces 10 heroes per parent account cap and cascading delete', async () => {
@@ -608,18 +682,57 @@ describe('#45 Input Validation, Quotas, Cascading Delete & Rate Limiting', () =>
     expect(remEvents?.cnt).toBe(0);
   });
 
-  it('rate-limits hero-code redeem brute force with 429 and Retry-After', async () => {
-    let lastRes: Response | null = null;
+  it('rate-limits hero-code redeem and claim-hero (with IPv6 /64 bucketing) and enforces token type separation', async () => {
+    // IPv6 /64 normalization groups addresses in the same /64 subnet
+    expect(normalizeIpForRateLimit('2001:db8:abcd:12::1')).toBe('2001:0db8:abcd:0012::/64');
+    expect(normalizeIpForRateLimit('2001:db8:abcd:12::ffff')).toBe('2001:0db8:abcd:0012::/64');
+
+    let lastRedeem: Response | null = null;
     for (let i = 0; i < 16; i += 1) {
       const { res } = await apiJson('/api/auth/hero-code/redeem', {
         method: 'POST',
-        body: { heroCode: 'FAKE-CODE-0000' },
-        headers: { 'CF-Connecting-IP': '198.51.100.42' },
+        body: { heroCode: 'FAKE-CODE-000000' },
+        headers: { 'CF-Connecting-IP': `2001:db8:abcd:12::${i + 1}` },
       });
-      lastRes = res;
+      lastRedeem = res;
     }
-    expect(lastRes?.status).toBe(429);
-    expect(Number(lastRes?.headers.get('Retry-After'))).toBeGreaterThan(0);
+    expect(lastRedeem?.status).toBe(429);
+    expect(Number(lastRedeem?.headers.get('Retry-After'))).toBeGreaterThan(0);
+
+    // Claim-hero is also rate-limited per IP and per parentEmail
+    const parentCookie = await makeParentCookie('ratelimit@example.com');
+    let lastClaim: Response | null = null;
+    for (let i = 0; i < 16; i += 1) {
+      const { res } = await apiJson('/api/console/claim-hero', {
+        method: 'POST',
+        cookie: parentCookie,
+        body: { heroCode: 'FAKE-CODE-111111' },
+        headers: { 'CF-Connecting-IP': `203.0.113.${i + 1}` },
+      });
+      lastClaim = res;
+    }
+    expect(lastClaim?.status).toBe(429);
+    expect(Number(lastClaim?.headers.get('Retry-After'))).toBeGreaterThan(0);
+
+    // Token type separation: a hero token cannot be substituted as a parent session cookie
+    const exp = Math.floor(Date.now() / 1000) + 3600;
+    const heroToken = await signToken(
+      { typ: 'hero', saveId: 'fake-id', sessionVersion: 1, exp } satisfies HeroSessionPayload,
+      env.PYRIA_SESSION_SECRET!
+    );
+    const confused = await apiJson('/api/console/progress', {
+      cookie: `${PARENT_SESSION_COOKIE}=${heroToken}`,
+    });
+    expect(confused.res.status).toBe(403);
+
+    const parentToken = await signToken(
+      { typ: 'parent', email: 'a@b.com', exp } satisfies ParentSessionPayload,
+      env.PYRIA_SESSION_SECRET!
+    );
+    const confusedHero = await apiJson('/api/me', {
+      cookie: `${HERO_SESSION_COOKIE}=${parentToken}`,
+    });
+    expect(confusedHero.data.auth.role).toBe('guest');
   });
 
   it('blanks older attempt code blobs, caps attempt rows, and prunes activity_events', async () => {

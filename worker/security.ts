@@ -113,7 +113,7 @@ function normalizeHost(host: string, protocol: string): string {
 
 /**
  * Same-origin CSRF check for mutating /api/* requests (POST, PUT, DELETE, PATCH).
- * Mirrors server/app.py's _check_same_origin.
+ * Uses authoritative request.url origin (never trusting spoofable X-Forwarded-Host).
  */
 export function checkSameOrigin(request: Request): Response | null {
   const secFetchSite = (request.headers.get('Sec-Fetch-Site') || '').trim().toLowerCase();
@@ -136,18 +136,48 @@ export function checkSameOrigin(request: Request): Response | null {
     if ((parsed.protocol !== 'http:' && parsed.protocol !== 'https:') || !parsed.host) {
       return jsonResponse({ error: 'Invalid Origin header' }, 403);
     }
-    const originHost = normalizeHost(parsed.host, parsed.protocol);
     const reqUrl = new URL(request.url);
-    const fwdHost = (request.headers.get('X-Forwarded-Host') || '').split(',')[0].trim();
-    const hostHdr = (request.headers.get('Host') || '').trim();
-    const expectedRaw = fwdHost || hostHdr || reqUrl.host;
-    const expectedHost = normalizeHost(expectedRaw, parsed.protocol);
-    if (!expectedHost || originHost !== expectedHost) {
+    const originHost = normalizeHost(parsed.host, parsed.protocol);
+    const expectedHost = normalizeHost(reqUrl.host, reqUrl.protocol);
+    if (parsed.protocol !== reqUrl.protocol || !expectedHost || originHost !== expectedHost) {
       return jsonResponse({ error: 'Cross-origin request blocked' }, 403);
     }
   }
 
   return null;
+}
+
+/**
+ * Safely decode a single URL path segment; returns null on malformed percent-encoding.
+ */
+export function safeDecodeSegment(raw: string): string | null {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Decode and normalize a URL pathname once (collapsing repeated slashes).
+ * Returns null if percent-encoding is malformed or contains traversal/NUL/backslash.
+ */
+export function normalizePathname(rawPathname: string): string | null {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(rawPathname);
+  } catch {
+    return null;
+  }
+  if (decoded.includes('\0') || decoded.includes('\\')) {
+    return null;
+  }
+  const collapsed = decoded.replace(/\/{2,}/g, '/');
+  const segments = collapsed.split('/');
+  if (segments.some((s) => s === '..')) {
+    return null;
+  }
+  return collapsed || '/';
 }
 
 /**

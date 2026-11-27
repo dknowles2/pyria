@@ -74,9 +74,10 @@ export async function signToken(payload: object, secret: string): Promise<string
   return `${data}.${base64UrlEncode(new Uint8Array(sig))}`;
 }
 
-export async function verifyToken<T extends { exp: number }>(
+export async function verifyToken<T extends { typ: string; exp: number }>(
   token: string | undefined,
-  secret: string
+  secret: string,
+  expectedTyp: T['typ']
 ): Promise<T | null> {
   if (!token || !secret) return null;
   const dot = token.indexOf('.');
@@ -102,7 +103,12 @@ export async function verifyToken<T extends { exp: number }>(
 
   try {
     const parsed = JSON.parse(decoder.decode(payloadBytes)) as T;
-    if (!parsed || typeof parsed !== 'object' || typeof parsed.exp !== 'number') {
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      parsed.typ !== expectedTyp ||
+      typeof parsed.exp !== 'number'
+    ) {
       return null;
     }
     const nowSec = Math.floor(Date.now() / 1000);
@@ -191,7 +197,8 @@ function randomIntBelow(maxExclusive: number): number {
 export function generateHeroCode(): string {
   const w1 = HERO_WORDS_FIRST[randomIntBelow(HERO_WORDS_FIRST.length)];
   const w2 = HERO_WORDS_SECOND[randomIntBelow(HERO_WORDS_SECOND.length)];
-  const num = randomIntBelow(10000).toString().padStart(4, '0');
+  // 64 * 64 * 1,000,000 = 4.096e9 (~32 bits of entropy)
+  const num = randomIntBelow(1_000_000).toString().padStart(6, '0');
   return `${w1}-${w2}-${num}`;
 }
 

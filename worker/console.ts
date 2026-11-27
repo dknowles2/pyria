@@ -1,7 +1,8 @@
 import { generateUniqueHeroCodeHash, getSessionSecret } from './auth';
 import { hashHeroCode, normalizeHeroCode } from './crypto';
 import { PyriaD1 } from './db';
-import { jsonResponse } from './security';
+import { checkRateLimit, getClientIp, rateLimitExceededResponse } from './rateLimit';
+import { jsonResponse, safeDecodeSegment } from './security';
 import type { AuthContext, Env, SavePreferences } from './types';
 import {
   MAX_SAVE_BODY_BYTES,
@@ -13,6 +14,11 @@ import {
   readJsonBody,
   validatePreferences,
 } from './validation';
+
+const DEFAULT_CLAIM_LIMIT = 15;
+const DEFAULT_CLAIM_WINDOW_SEC = 300; // 5 minutes
+const DEFAULT_GLOBAL_FAIL_LIMIT = 200;
+const DEFAULT_GLOBAL_FAIL_WINDOW_SEC = 300; // 5 minutes
 
 async function loadJsonAsset<T>(env: Env, requestUrl: string, assetPath: string): Promise<T | null> {
   try {
@@ -203,6 +209,21 @@ export async function handleConsoleRequest(
 
   // POST /api/console/claim-hero
   if (method === 'POST' && pathname === '/api/console/claim-hero') {
+    const claimLimit =
+      Number.parseInt(env.PYRIA_RATE_LIMIT_CLAIM || '', 10) || DEFAULT_CLAIM_LIMIT;
+    const ip = getClientIp(request);
+    const [ipRl, emailRl] = await Promise.all([
+      checkRateLimit(env.DB, `claim-ip:${ip}`, claimLimit, DEFAULT_CLAIM_WINDOW_SEC),
+      checkRateLimit(
+        env.DB,
+        `claim-email:${auth.parentEmail!}`,
+        claimLimit,
+        DEFAULT_CLAIM_WINDOW_SEC
+      ),
+    ]);
+    if (!ipRl.allowed) return rateLimitExceededResponse(ipRl.retryAfterSeconds);
+    if (!emailRl.allowed) return rateLimitExceededResponse(emailRl.retryAfterSeconds);
+
     let body: Record<string, unknown>;
     try {
       body = await readJsonBody(request, 8192);
@@ -222,38 +243,49 @@ export async function handleConsoleRequest(
     const secret = getSessionSecret(env);
     const hash = await hashHeroCode(normalized, secret);
     const row = await db.getSaveByRecoveryHash(hash);
-    if (!row) {
-      return jsonResponse({ error: 'Hero Code not found' }, 404);
-    }
 
-    const currentOwner = normalizeEmail(row.owner_email);
-    if (currentOwner && currentOwner !== auth.parentEmail) {
-      return jsonResponse(
-        { error: 'This hero is already linked to another parent account' },
-        409
+    const recordGlobalFail = async (): Promise<Response | null> => {
+      const globalFailLimit =
+        Number.parseInt(env.PYRIA_RATE_LIMIT_GLOBAL_FAIL || '', 10) || DEFAULT_GLOBAL_FAIL_LIMIT;
+      const failRl = await checkRateLimit(
+        env.DB,
+        'hero-code-fail:global',
+        globalFailLimit,
+        DEFAULT_GLOBAL_FAIL_WINDOW_SEC
       );
+      return failRl.allowed ? null : rateLimitExceededResponse(failRl.retryAfterSeconds);
+    };
+
+    // Return identical error for not-found and already-owned-by-other to prevent code enumeration
+    const unavailableMsg = 'Hero Code not found or unavailable';
+    if (!row) {
+      const globalErr = await recordGlobalFail();
+      if (globalErr) return globalErr;
+      return jsonResponse({ error: unavailableMsg }, 404);
     }
 
-    if (currentOwner === auth.parentEmail) {
-      return jsonResponse({ save: PyriaD1.rowToSave(row) }, 200);
+    const claimRes = await db.claimUnownedHero(row.id, auth.parentEmail!);
+    if (claimRes.status === 'claimed' || claimRes.status === 'already_owned_by_self') {
+      return jsonResponse({ save: claimRes.save }, 200);
     }
-
-    // Enforce 10 heroes per parent account cap before claiming
-    const currentCount = await db.countAccountSaves(auth.parentEmail!);
-    if (currentCount >= db.maxSavesPerAccount) {
+    if (claimRes.status === 'quota_exceeded') {
       return jsonResponse(
         { error: `Save limit reached (${db.maxSavesPerAccount} heroes per parent account)` },
         429
       );
     }
 
-    const claimed = await db.assignOwner(row.id, auth.parentEmail!);
-    return jsonResponse({ save: claimed }, 200);
+    const globalErr = await recordGlobalFail();
+    if (globalErr) return globalErr;
+    return jsonResponse({ error: unavailableMsg }, 404);
   }
 
   // Routes under /api/console/saves/:id/<action>
   if (parts.length === 5 && parts[0] === 'api' && parts[1] === 'console' && parts[2] === 'saves') {
-    const saveId = decodeURIComponent(parts[3]);
+    const saveId = safeDecodeSegment(parts[3]);
+    if (saveId === null) {
+      return jsonResponse({ error: 'Invalid URL encoding' }, 400);
+    }
     const action = parts[4];
 
     // POST /api/console/saves/:id/rotate-code

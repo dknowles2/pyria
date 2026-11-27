@@ -16,6 +16,8 @@ import {
   cacheControlForPath,
   checkSameOrigin,
   jsonResponse,
+  normalizePathname,
+  safeDecodeSegment,
 } from './security';
 import type { AuthContext, Env } from './types';
 import {
@@ -239,7 +241,8 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   // /api/saves/:id and /api/saves/:id/attempts
   const parts = pathname.split('/').filter(Boolean);
   if (parts.length === 3 && parts[0] === 'api' && parts[1] === 'saves') {
-    const saveId = decodeURIComponent(parts[2]);
+    const saveId = safeDecodeSegment(parts[2]);
+    if (saveId === null) return jsonResponse({ error: 'Invalid URL encoding' }, 400);
     const access = await canAccessSave(db, auth, saveId);
     if (access.status === 404) return jsonResponse({ error: 'Save not found' }, 404);
     if (access.status === 403) return jsonResponse({ error: 'Forbidden' }, 403);
@@ -299,7 +302,8 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
     parts[1] === 'saves' &&
     parts[3] === 'attempts'
   ) {
-    const saveId = decodeURIComponent(parts[2]);
+    const saveId = safeDecodeSegment(parts[2]);
+    if (saveId === null) return jsonResponse({ error: 'Invalid URL encoding' }, 400);
     const access = await canAccessSave(db, auth, saveId);
     if (access.status === 404) return jsonResponse({ error: 'Save not found' }, 404);
     if (access.status === 403) return jsonResponse({ error: 'Forbidden' }, 403);
@@ -343,11 +347,10 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
 async function serveStaticWithHeaders(
   request: Request,
   env: Env,
-  url: URL
+  normalizedPath: string
 ): Promise<Response> {
   const method = request.method.toUpperCase();
-  const pathname = url.pathname;
-  const lowerPath = pathname.toLowerCase();
+  const lowerPath = normalizedPath.toLowerCase();
 
   // Block any mutating requests to /builder/* in production
   if (
@@ -357,22 +360,26 @@ async function serveStaticWithHeaders(
     return jsonResponse({ error: 'Builder writes are disabled in production' }, 403);
   }
 
-  // Handle /py-sandbox.html (case-insensitive) with strict opaque-origin hashed CSP
+  // Handle /py-sandbox.html (case-insensitive & percent-decoded) with strict opaque-origin hashed CSP.
+  // Always fetch with GET when computing cachedSandboxCsp so HEAD on a cold isolate never caches an empty hash!
   if (lowerPath === '/py-sandbox.html') {
     const assetUrl = new URL('/py-sandbox.html', request.url);
-    const assetRes = await env.ASSETS.fetch(new Request(assetUrl.toString(), { method }));
+    const assetRes = await env.ASSETS.fetch(new Request(assetUrl.toString(), { method: 'GET' }));
     if (!assetRes.ok) {
       return jsonResponse({ error: 'Sandbox file not found' }, 404);
     }
     const htmlText = await assetRes.text();
     if (!cachedSandboxCsp) {
-      cachedSandboxCsp = await buildPySandboxCsp(htmlText);
+      const computed = await buildPySandboxCsp(htmlText);
+      if (computed.includes("'sha256-")) {
+        cachedSandboxCsp = computed;
+      }
     }
     const headers = new Headers(assetRes.headers);
     headers.set('Content-Type', 'text/html; charset=utf-8');
     headers.set('Cache-Control', 'public, max-age=300');
     applySecurityHeaders(headers, {
-      csp: cachedSandboxCsp,
+      csp: cachedSandboxCsp ?? (await buildPySandboxCsp(htmlText)),
       frameOptions: 'SAMEORIGIN',
     });
     return new Response(method === 'HEAD' ? null : htmlText, {
@@ -412,20 +419,20 @@ async function serveStaticWithHeaders(
     const directRes = await env.ASSETS.fetch(request);
     if (directRes.ok) {
       const headers = new Headers(directRes.headers);
-      headers.set('Cache-Control', cacheControlForPath(pathname));
+      headers.set('Cache-Control', cacheControlForPath(normalizedPath));
       applySecurityHeaders(headers);
       return new Response(method === 'HEAD' ? null : directRes.body, {
         status: directRes.status,
         headers,
       });
     }
-    const sub = pathname.replace(/^\/(console|admin)\//i, '');
+    const sub = normalizedPath.replace(/^\/(console|admin)\//i, '');
     assetReq = new Request(new URL(`/builder/${sub}`, request.url).toString(), { method });
   }
 
   const assetRes = await env.ASSETS.fetch(assetReq);
   const headers = new Headers(assetRes.headers);
-  headers.set('Cache-Control', cacheControlForPath(pathname));
+  headers.set('Cache-Control', cacheControlForPath(normalizedPath));
   applySecurityHeaders(headers);
 
   return new Response(method === 'HEAD' ? null : assetRes.body, {
@@ -437,11 +444,15 @@ async function serveStaticWithHeaders(
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    const normalizedPath = normalizePathname(url.pathname);
+    if (normalizedPath === null) {
+      return jsonResponse({ error: 'Invalid URL path' }, 400);
+    }
     try {
-      if (url.pathname.startsWith('/api/')) {
+      if (normalizedPath.startsWith('/api/')) {
         return await handleApi(request, env, url);
       }
-      return await serveStaticWithHeaders(request, env, url);
+      return await serveStaticWithHeaders(request, env, normalizedPath);
     } catch (err) {
       console.error('Unhandled worker error:', err);
       return jsonResponse({ error: 'Internal server error' }, 500);

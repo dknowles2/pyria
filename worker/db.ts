@@ -19,6 +19,8 @@ import {
 } from './validation';
 
 const DEFAULT_MAX_SAVES_PER_ACCOUNT = 10;
+const DEFAULT_MAX_UNOWNED_SAVES = 2000;
+const DEFAULT_UNOWNED_IDLE_DAYS = 90;
 const DEFAULT_MAX_ATTEMPT_CODE_ROWS = 500;
 const DEFAULT_MAX_ATTEMPTS_PER_SAVE = 5000;
 const DEFAULT_MAX_EVENTS_PER_SAVE = 500;
@@ -103,6 +105,8 @@ interface AttemptAggRow {
 export class PyriaD1 {
   readonly db: D1Database;
   readonly maxSavesPerAccount: number;
+  readonly maxUnownedSaves: number;
+  readonly unownedIdleDays: number;
   readonly maxAttemptCodeRows: number;
   readonly maxAttemptsPerSave: number;
   readonly maxEventsPerSave: number;
@@ -112,6 +116,14 @@ export class PyriaD1 {
     this.maxSavesPerAccount = parsePositiveInt(
       env.PYRIA_MAX_SAVES_PER_ACCOUNT,
       DEFAULT_MAX_SAVES_PER_ACCOUNT
+    );
+    this.maxUnownedSaves = parsePositiveInt(
+      env.PYRIA_MAX_UNOWNED_SAVES,
+      DEFAULT_MAX_UNOWNED_SAVES
+    );
+    this.unownedIdleDays = parsePositiveInt(
+      env.PYRIA_UNOWNED_IDLE_DAYS,
+      DEFAULT_UNOWNED_IDLE_DAYS
     );
     this.maxAttemptCodeRows = parsePositiveInt(
       env.PYRIA_MAX_ATTEMPT_CODE_ROWS,
@@ -292,15 +304,6 @@ export class PyriaD1 {
     }
 
     const normOwner = normalizeEmail(options?.ownerEmail ?? null);
-    if (normOwner !== null) {
-      const count = await this.countAccountSaves(normOwner);
-      if (count >= this.maxSavesPerAccount) {
-        throw new QuotaError(
-          `Save limit reached (${this.maxSavesPerAccount} heroes per parent account)`
-        );
-      }
-    }
-
     const saveId = crypto.randomUUID();
     const now = utcNowIso();
     const prefs: SavePreferences = options?.preferences ?? {};
@@ -325,23 +328,90 @@ export class PyriaD1 {
     }
 
     const prefsJson = JSON.stringify(prefs);
-    await this.db
-      .prepare(
-        `INSERT INTO saves
-         (id, hero_name, owner_email, recovery_code_hash, session_version, preferences_json, state_json, created_at, updated_at)
-         VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?)`
+
+    if (normOwner !== null) {
+      // Atomic conditional INSERT enforcing per-parent account cap without TOCTOU race
+      const res = await this.db
+        .prepare(
+          `INSERT INTO saves
+           (id, hero_name, owner_email, recovery_code_hash, session_version, preferences_json, state_json, created_at, updated_at)
+           SELECT ?, ?, ?, ?, 1, ?, ?, ?, ?
+           WHERE (SELECT COUNT(*) FROM saves WHERE LOWER(COALESCE(owner_email, '')) = ?) < ?`
+        )
+        .bind(
+          saveId,
+          heroName,
+          normOwner,
+          options?.recoveryCodeHash ?? null,
+          prefsJson,
+          stateJson,
+          now,
+          now,
+          normOwner,
+          this.maxSavesPerAccount
+        )
+        .run();
+
+      if (Number(res.meta.changes ?? 0) === 0) {
+        throw new QuotaError(
+          `Save limit reached (${this.maxSavesPerAccount} heroes per parent account)`
+        );
+      }
+    } else {
+      // Opportunistically prune idle unowned saves older than unownedIdleDays
+      const cutoffIso = new Date(
+        Date.now() - this.unownedIdleDays * 86400 * 1000
       )
-      .bind(
-        saveId,
-        heroName,
-        normOwner,
-        options?.recoveryCodeHash ?? null,
-        prefsJson,
-        stateJson,
-        now,
-        now
-      )
-      .run();
+        .toISOString()
+        .replace(/\.\d{3}Z$/, 'Z');
+      await this.db.batch([
+        this.db
+          .prepare(
+            `DELETE FROM trial_attempts WHERE save_id IN (
+               SELECT id FROM saves WHERE (owner_email IS NULL OR TRIM(owner_email) = '') AND updated_at < ?
+             )`
+          )
+          .bind(cutoffIso),
+        this.db
+          .prepare(
+            `DELETE FROM activity_events WHERE save_id IN (
+               SELECT id FROM saves WHERE (owner_email IS NULL OR TRIM(owner_email) = '') AND updated_at < ?
+             )`
+          )
+          .bind(cutoffIso),
+        this.db
+          .prepare(
+            `DELETE FROM saves WHERE (owner_email IS NULL OR TRIM(owner_email) = '') AND updated_at < ?`
+          )
+          .bind(cutoffIso),
+      ]);
+
+      // Atomic conditional INSERT enforcing global unowned save cap
+      const res = await this.db
+        .prepare(
+          `INSERT INTO saves
+           (id, hero_name, owner_email, recovery_code_hash, session_version, preferences_json, state_json, created_at, updated_at)
+           SELECT ?, ?, NULL, ?, 1, ?, ?, ?, ?
+           WHERE (SELECT COUNT(*) FROM saves WHERE owner_email IS NULL OR TRIM(owner_email) = '') < ?`
+        )
+        .bind(
+          saveId,
+          heroName,
+          options?.recoveryCodeHash ?? null,
+          prefsJson,
+          stateJson,
+          now,
+          now,
+          this.maxUnownedSaves
+        )
+        .run();
+
+      if (Number(res.meta.changes ?? 0) === 0) {
+        throw new QuotaError(
+          'Anonymous hero storage limit reached. Please sign in to the Parent Console to create a hero.'
+        );
+      }
+    }
 
     const realmId =
       typeof state.realmId === 'string' && state.realmId ? state.realmId : 'realm-01-meadow';
@@ -713,13 +783,26 @@ export class PyriaD1 {
            FROM saves ORDER BY updated_at DESC, created_at DESC`
         );
 
-    const attemptsQuery = this.db.prepare(
-      `SELECT save_id, COUNT(*) AS attempt_count,
-              SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS pass_count,
-              SUM(hints_used) AS total_hints,
-              MAX(created_at) AS last_attempt_at
-       FROM trial_attempts GROUP BY save_id`
-    );
+    const attemptsQuery = normFilter
+      ? this.db
+          .prepare(
+            `SELECT ta.save_id, COUNT(*) AS attempt_count,
+                    SUM(CASE WHEN ta.passed = 1 THEN 1 ELSE 0 END) AS pass_count,
+                    SUM(ta.hints_used) AS total_hints,
+                    MAX(ta.created_at) AS last_attempt_at
+             FROM trial_attempts ta
+             INNER JOIN saves s ON s.id = ta.save_id
+             WHERE LOWER(COALESCE(s.owner_email, '')) = ?
+             GROUP BY ta.save_id`
+          )
+          .bind(normFilter)
+      : this.db.prepare(
+          `SELECT save_id, COUNT(*) AS attempt_count,
+                  SUM(CASE WHEN passed = 1 THEN 1 ELSE 0 END) AS pass_count,
+                  SUM(hints_used) AS total_hints,
+                  MAX(created_at) AS last_attempt_at
+           FROM trial_attempts GROUP BY save_id`
+        );
 
     const eventsQuery = normFilter
       ? this.db
@@ -999,5 +1082,68 @@ export class PyriaD1 {
       .run();
 
     return state;
+  }
+
+  /**
+   * Atomically claim an unowned hero save for a parent account, enforcing both
+   * `owner_email IS NULL` and the per-account 10-hero cap in a single SQL UPDATE.
+   */
+  async claimUnownedHero(
+    saveId: string,
+    ownerEmail: string
+  ): Promise<
+    | { status: 'claimed'; save: SaveRecord }
+    | { status: 'already_owned_by_self'; save: SaveRecord }
+    | { status: 'already_owned_by_other' }
+    | { status: 'quota_exceeded' }
+    | { status: 'not_found' }
+  > {
+    const normOwner = normalizeEmail(ownerEmail);
+    if (!normOwner) return { status: 'not_found' };
+
+    const row = await this.getSaveRow(saveId);
+    if (!row) return { status: 'not_found' };
+
+    const existingOwner = normalizeEmail(row.owner_email);
+    if (existingOwner === normOwner) {
+      return { status: 'already_owned_by_self', save: PyriaD1.rowToSave(row) };
+    }
+    if (existingOwner && existingOwner !== normOwner) {
+      return { status: 'already_owned_by_other' };
+    }
+
+    const now = utcNowIso();
+    const state = PyriaD1.rowToSave(row);
+    state.ownerEmail = normOwner;
+    state.updatedAt = now;
+    const stateToStore = { ...state };
+    delete stateToStore.preferences;
+
+    const res = await this.db
+      .prepare(
+        `UPDATE saves
+         SET owner_email = ?, state_json = ?, updated_at = ?
+         WHERE id = ?
+           AND (owner_email IS NULL OR TRIM(owner_email) = '')
+           AND (SELECT COUNT(*) FROM saves WHERE LOWER(COALESCE(owner_email, '')) = ?) < ?`
+      )
+      .bind(normOwner, JSON.stringify(stateToStore), now, saveId, normOwner, this.maxSavesPerAccount)
+      .run();
+
+    if (Number(res.meta.changes ?? 0) === 1) {
+      return { status: 'claimed', save: state };
+    }
+
+    // Re-check why the atomic UPDATE affected 0 rows
+    const latest = await this.getSaveRow(saveId);
+    if (!latest) return { status: 'not_found' };
+    const latestOwner = normalizeEmail(latest.owner_email);
+    if (latestOwner === normOwner) {
+      return { status: 'already_owned_by_self', save: PyriaD1.rowToSave(latest) };
+    }
+    if (latestOwner && latestOwner !== normOwner) {
+      return { status: 'already_owned_by_other' };
+    }
+    return { status: 'quota_exceeded' };
   }
 }
