@@ -11,7 +11,7 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <title>Pyria: Return of the Bits</title>
-  <link rel="stylesheet" href="/css/style.css?v=20261126z" />
+  <link rel="stylesheet" href="/css/style.css?v=20261127a" />
 </head>
 <body>
   <div id="app">
@@ -156,7 +156,19 @@
 
             <!-- Advanced Mode Python Editor Panel (Hidden by default) -->
             <div id="charcreate-advanced-panel" class="advanced-forge-panel hidden">
-              <textarea id="charcreate-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text"></textarea>
+              <div class="code-editor-shell">
+                <div class="code-editor-bar">
+                  <span class="code-editor-cta">⌨️ HERO FORGE PYTHON CODE</span>
+                  <span class="code-editor-sub">Click or tap inside the box to type</span>
+                </div>
+                <div class="code-editor-body">
+                  <div id="charcreate-code-gutter" class="code-gutter" aria-hidden="true"></div>
+                  <div class="code-textarea-wrap">
+                    <div id="charcreate-code-highlights" class="code-line-highlights" aria-hidden="true"></div>
+                    <textarea id="charcreate-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Type Python hero calls like set_name(&quot;Rowan&quot;)..."></textarea>
+                  </div>
+                </div>
+              </div>
 
               <div class="editor-actions">
                 <button id="btn-charcreate-run" class="btn btn-primary">▶ Run Python</button>
@@ -281,6 +293,6 @@
     </div>
   </div>
 
-  <script type="module" src="/js/main.js?v=20261126z"></script>
+  <script type="module" src="/js/main.js?v=20261127a"></script>
 </body>
 </html>

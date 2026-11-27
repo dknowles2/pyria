@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261126z';
-import { music } from './music.js?v=20261126z';
-import { pyRunner } from './pyRunner.js?v=20261126z';
+import { audio } from './audio.js?v=20261127a';
+import { music } from './music.js?v=20261127a';
+import { pyRunner } from './pyRunner.js?v=20261127a';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126z';
+} from './autocomplete.js?v=20261127a';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -93,9 +93,9 @@ export function attachCodeEditorKeys(textarea, onRun) {
   });
 }
 
-function attachCodeGutter(textarea, gutterEl, highlightsEl) {
+export function attachCodeGutter(textarea, gutterEl, highlightsEl) {
   if (!textarea || !gutterEl || !highlightsEl) {
-    return { setMarks: () => {}, update: () => {} };
+    return { setMarks: () => {}, update: () => {}, scrollToLine: () => {} };
   }
   let lineMarks = new Map();
 
@@ -106,7 +106,11 @@ function attachCodeGutter(textarea, gutterEl, highlightsEl) {
 
   const render = () => {
     const lines = String(textarea.value || '').split('\n');
-    const count = Math.max(lines.length, 6);
+    let maxMarked = 0;
+    for (const ln of lineMarks.keys()) {
+      if (Number(ln) > maxMarked) maxMarked = Number(ln);
+    }
+    const count = Math.max(lines.length, maxMarked, 6);
     const gutterHtml = [];
     const hlHtml = [];
     for (let i = 1; i <= count; i += 1) {
@@ -122,6 +126,16 @@ function attachCodeGutter(textarea, gutterEl, highlightsEl) {
     syncScroll();
   };
 
+  const scrollToLine = (lineNum) => {
+    const n = Number(lineNum);
+    if (!n || n < 1) return;
+    const targetTop = Math.max(0, (n - 3) * 22);
+    if (textarea.scrollHeight > textarea.clientHeight) {
+      textarea.scrollTop = targetTop;
+      syncScroll();
+    }
+  };
+
   textarea.addEventListener('input', render);
   textarea.addEventListener('scroll', syncScroll);
   render();
@@ -132,6 +146,7 @@ function attachCodeGutter(textarea, gutterEl, highlightsEl) {
       render();
     },
     update: render,
+    scrollToLine,
   };
 }
 
@@ -892,9 +907,11 @@ export class ModalManager {
           renderCelebrationView({ stdout: result.stdout, isPractice });
         } else {
           if (result.errorLine) {
+            const errLn = Number(result.errorLine);
             trialGutter.setMarks(
-              new Map([[Number(result.errorLine), { kind: 'hl-error', icon: '⚠️', badge: 'check this line' }]])
+              new Map([[errLn, { kind: 'hl-error', icon: '⚠️', badge: 'check this line' }]])
             );
+            trialGutter.scrollToLine(errLn);
           } else {
             trialGutter.setMarks(new Map());
           }
@@ -1296,6 +1313,13 @@ export class ModalManager {
           const spentEarlier = Math.max(0, startShards - leftAtFailure);
           const missing = Math.max(1, neededCost - leftAtFailure);
           const lineTag = res.errorLine ? ` on <strong>Line ${Number(res.errorLine)}</strong>` : '';
+          if (res.errorLine) {
+            const errLn = Number(res.errorLine);
+            wsGutter.setMarks(
+              new Map([[errLn, { kind: 'hl-error', icon: '⚠️', badge: `⚠️ OVER BUDGET (need ${missing} more 💎)` }]])
+            );
+            wsGutter.scrollToLine(errLn);
+          }
           outputEl.className = 'pip-console error ws-insufficient-alert';
           outputEl.innerHTML = `
             <div class="pip-console-header">🔒 Over budget${lineTag} — nothing was spent!</div>
@@ -1308,6 +1332,13 @@ export class ModalManager {
             </div>
           `;
         } else {
+          if (res.errorLine) {
+            const errLn = Number(res.errorLine);
+            wsGutter.setMarks(
+              new Map([[errLn, { kind: 'hl-error', icon: '⚠️', badge: 'check this line' }]])
+            );
+            wsGutter.scrollToLine(errLn);
+          }
           outputEl.className = 'pip-console error';
           outputEl.innerHTML = `
             <div class="pip-console-header">🐉 Pip's Forge Clue:</div>
