@@ -62,8 +62,8 @@ export function isGuestMode(me) {
   return me?.mode === 'cloudflare' && me?.auth?.role === 'guest';
 }
 
-export function createDefaultSaveState(heroName = 'Rowan', appearance = {}) {
-  return {
+export function createDefaultSaveState(heroName = 'Rowan', appearance = {}, preferences = null) {
+  const base = {
     heroName,
     appearance: {
       skin: appearance.skin || 'warm_tan',
@@ -95,6 +95,10 @@ export function createDefaultSaveState(heroName = 'Rowan', appearance = {}) {
     ownedUnlockIds: [],
     position: null,
   };
+  if (preferences && typeof preferences === 'object' && !Array.isArray(preferences)) {
+    base.preferences = { ...preferences };
+  }
+  return base;
 }
 
 /**
@@ -328,6 +332,14 @@ export async function listSaves(ownerFilter = null) {
 
 export async function createSave(saveData) {
   const payload = buildCleanSavePayload(saveData, { includeHeroName: true, includeOwnerEmail: true });
+  if (
+    saveData?.preferences &&
+    typeof saveData.preferences === 'object' &&
+    !Array.isArray(saveData.preferences) &&
+    Object.keys(saveData.preferences).length > 0
+  ) {
+    payload.preferences = { ...saveData.preferences };
+  }
   const data = await requestJson('/api/saves', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -367,6 +379,14 @@ export async function createHeroCode(heroName, saveState = null) {
   const body = { heroName: String(heroName || '').trim() };
   if (saveState && typeof saveState === 'object') {
     body.state = buildCleanSavePayload(saveState, { includeHeroName: false, includeOwnerEmail: false });
+    if (
+      saveState.preferences &&
+      typeof saveState.preferences === 'object' &&
+      !Array.isArray(saveState.preferences) &&
+      Object.keys(saveState.preferences).length > 0
+    ) {
+      body.preferences = { ...saveState.preferences };
+    }
   }
   const data = await requestJson('/api/auth/hero-code/create', {
     method: 'POST',

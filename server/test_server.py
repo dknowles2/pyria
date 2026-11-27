@@ -1471,6 +1471,49 @@ class PyriaServerTestCase(unittest.TestCase):
         st, _, _ = self._request("GET", "/console", extra_headers=kid_hdr)
         self.assertEqual(st, 403)
 
+    def test_save_onboarding_preferences_validation_and_persistence(self) -> None:
+        # 1. Creating a hero with calibrated onboarding preferences persists them
+        prefs = {
+            "difficulty": "explorer",
+            "showRawTracebacks": False,
+            "maxPipHints": 3,
+        }
+        st, _, raw = self._request(
+            "POST",
+            "/api/saves",
+            {"heroName": "NewCoder", "preferences": prefs},
+        )
+        self.assertEqual(st, 201)
+        created = json.loads(raw)["save"]
+        self.assertEqual(created["preferences"], prefs)
+        save_id = created["id"]
+
+        # 2. Gameplay PUT without preferences preserves the existing onboarding preferences
+        st, _, raw = self._request(
+            "PUT",
+            f"/api/saves/{save_id}",
+            {"heroName": "NewCoder", "byteShards": 50},
+        )
+        self.assertEqual(st, 200)
+        updated = json.loads(raw)["save"]
+        self.assertEqual(updated["byteShards"], 50)
+        self.assertEqual(updated["preferences"], prefs)
+
+        # 3. Invalid preferences are rejected with 400
+        for bad_prefs in (
+            "explorer",
+            {"difficulty": "expert"},
+            {"showRawTracebacks": "yes"},
+            {"maxPipHints": True},
+            {"maxPipHints": 99},
+        ):
+            st, _, _ = self._request(
+                "POST",
+                "/api/saves",
+                {"heroName": "BadPrefHero", "preferences": bad_prefs},
+            )
+            self.assertEqual(st, 400, f"Expected 400 for preferences={bad_prefs!r}")
+
 
 if __name__ == "__main__":
     unittest.main()
