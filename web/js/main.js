@@ -33,7 +33,7 @@ import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.j
 import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
 import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127o';
-import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
+import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 import { AppRouter } from './router.js?v=20261127l';
 
 function escapeHtml(str) {
@@ -532,6 +532,7 @@ function renderAdminRealmJump() {
 }
 
 async function runStoryCutsceneById(cutsceneId, { markSeen = false } = {}) {
+  if (isCutsceneActive()) return;
   const cs = STORY_CUTSCENES[cutsceneId];
   if (!cs) return;
   const save = state.activeSave;
@@ -548,6 +549,7 @@ async function runStoryCutsceneById(cutsceneId, { markSeen = false } = {}) {
     audio.playDragonRescue();
   }
   await playCutscene({
+    id: cutsceneId,
     title: cs.title,
     subtitle: cs.subtitle,
     beats: cs.beats,
@@ -1485,8 +1487,24 @@ async function enterOverworld(save) {
 }
 
 // ==================== ENTITY INTERACTIONS ====================
+let interactionInFlight = false;
+
 async function handleEntityInteract(entity) {
+  if (!entity || interactionInFlight || isCutsceneActive()) return;
+  const modalOpen = !$('#modal-backdrop')?.classList.contains('hidden');
+  if (modalOpen) return;
+
+  interactionInFlight = true;
+  try {
+    await handleEntityInteractInner(entity);
+  } finally {
+    interactionInFlight = false;
+  }
+}
+
+async function handleEntityInteractInner(entity) {
   const save = state.activeSave;
+  if (!save) return;
   const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
   const completed = getSolvedTrialsSet(save);
   const rescued = new Set(save.rescuedDragons || []);
@@ -1599,10 +1617,13 @@ async function handleEntityInteract(entity) {
       preBossBeats.length > 0 &&
       !(save.seenCutscenes || []).includes(preBossKey)
     ) {
+      if (!Array.isArray(save.seenCutscenes)) save.seenCutscenes = [];
+      save.seenCutscenes.push(preBossKey);
       state.world.setPaused(true);
       music.setTheme('vault');
       audio.playBossIntro();
       await playCutscene({
+        id: preBossKey,
         title: '⚔️ BOSS ENCOUNTER',
         subtitle: `${realm.name} — ${trial.title}`,
         beats: preBossBeats,
@@ -1612,10 +1633,6 @@ async function handleEntityInteract(entity) {
         realmId: realm.id,
         finalButtonLabel: '⚔️ Face the Boss Trial!',
       });
-      if (!Array.isArray(save.seenCutscenes)) save.seenCutscenes = [];
-      if (!save.seenCutscenes.includes(preBossKey)) {
-        save.seenCutscenes.push(preBossKey);
-      }
       await persistSave();
     }
 
@@ -1720,6 +1737,7 @@ async function handleEntityInteract(entity) {
       const upgradeNote = realm?.miniVisualUpgrade || 'Portal unlocked!';
 
       await playCutscene({
+        id: `${realm.id}:postBoss`,
         title: `✨ BIT ${bitNum} RESTORED`,
         subtitle: `${dragonName} — ${dragonTitle}`,
         beats: postBossBeats,
