@@ -147,7 +147,22 @@
             "tier2_pattern": "crystals = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ncrystals = [\"aqua\", \"pearl\", \"coral\"]\nprint(len(crystals))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list",
+            "call:len"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "crystals": [
+                  "ruby",
+                  "jade"
+                ]
+              },
+              "expectOutput": "2"
+            }
+          ]
         },
         {
           "id": "trial-16-01-03",
@@ -173,7 +188,29 @@
             "tier2_pattern": "first = crystals[___]\nlast = crystals[___]\nsigil = code[___]\nprint(first, last, sigil)",
             "tier3_walkthrough": "Set `first = crystals[0]`, `last = crystals[-1]`, and `sigil = code[0]`, then call `print(first, last, sigil)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "subscript",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "crystals": [
+                  "ruby",
+                  "jade",
+                  "onyx"
+                ],
+                "code": "WAVE"
+              },
+              "expectOutput": "ruby onyx W",
+              "expectVars": {
+                "first": "ruby",
+                "last": "onyx",
+                "sigil": "W"
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-01-04",
@@ -199,7 +236,24 @@
             "tier2_pattern": "bag = ___\n___\nprint(___)",
             "tier3_walkthrough": "Write:\nbag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list",
+            "call:len",
+            "method_call:append"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "bag": [
+                  "a",
+                  "b",
+                  "c"
+                ]
+              },
+              "expectOutput": "4"
+            }
+          ]
         },
         {
           "id": "trial-16-01-05",
@@ -225,7 +279,30 @@
             "tier2_pattern": "tiles = ___\ntiles[1] = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\nprint(tiles[1])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "subscript",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "tiles": [
+                  "rock",
+                  "broken",
+                  "rock"
+                ]
+              },
+              "expectOutput": "coral",
+              "expectVars": {
+                "tiles": [
+                  "rock",
+                  "coral",
+                  "rock"
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-01-06",
@@ -251,7 +328,29 @@
             "tier2_pattern": "crystals = ___\nfirst_crystal = ___\nlast_crystal = ___\ncrystal_count = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncrystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\nprint(crystal_count)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "subscript",
+            "list",
+            "call:len"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "crystals": [
+                  "ruby",
+                  "jade",
+                  "onyx"
+                ]
+              },
+              "expectOutput": "3",
+              "expectVars": {
+                "first_crystal": "ruby",
+                "last_crystal": "onyx",
+                "crystal_count": 3
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-01-bonus",
@@ -447,7 +546,22 @@
             "tier2_pattern": "crates = ___\nfor ___ in ___:\n    print(___)",
             "tier3_walkthrough": "Update the code to:\ncrates = [\"rope\", \"sail\", \"map\"]\nfor item in crates:\n    print(item)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "crates": [
+                  "wood",
+                  "iron"
+                ]
+              },
+              "expectOutput": "wood\niron"
+            }
+          ]
         },
         {
           "id": "trial-16-02-03",
@@ -473,7 +587,27 @@
             "tier2_pattern": "for item in weights:\n    total += ___\nprint(total)",
             "tier3_walkthrough": "Inside `for w in weights:`, write `total += w`. After the loop, call `print(total)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "aug_assign",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "weights": [
+                  10,
+                  20,
+                  5
+                ]
+              },
+              "expectOutput": "35",
+              "expectVars": {
+                "total": 35
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-02-04",
@@ -500,7 +634,29 @@
             "tier2_pattern": "for c in crates:\n    if ___ in ___:\n        found += 1\nprint(found)",
             "tier3_walkthrough": "Loop `for c in crates:`, check `if c in rare:`, increment `found += 1`, and `print(found)` at the end."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "aug_assign",
+            "list",
+            "in_op"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "crates": [
+                  "gold",
+                  "gold",
+                  "salt"
+                ]
+              },
+              "expectOutput": "2",
+              "expectVars": {
+                "found": 2
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-02-05",
@@ -526,7 +682,19 @@
             "tier2_pattern": "for ch in ___:\n    print(___.upper())",
             "tier3_walkthrough": "Write `for ch in banner:` and indent `print(ch.upper())` inside the loop."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "method_call:upper"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "banner": "hi"
+              },
+              "expectOutput": "H\nI"
+            }
+          ]
         },
         {
           "id": "trial-16-02-06",
@@ -552,7 +720,38 @@
             "tier2_pattern": "gold_bags = ___\nharbor_gold = ___\nfor ___ in ___:\n    harbor_gold = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ngold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    print(\"GULLWING FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "gold_bags": [
+                  50,
+                  40
+                ]
+              },
+              "expectOutput": "GULLWING FREE!",
+              "expectVars": {
+                "harbor_gold": 90
+              }
+            },
+            {
+              "overrides": {
+                "gold_bags": [
+                  10,
+                  20
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "harbor_gold": 30
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-02-bonus",
@@ -751,7 +950,30 @@
             "tier2_pattern": "pearls = ___\nordered = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\npearls = [30, 10, 20]\nordered = sorted(pearls)\nprint(ordered)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list",
+            "call:sorted"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pearls": [
+                  9,
+                  2,
+                  5
+                ]
+              },
+              "expectOutput": "[2, 5, 9]",
+              "expectVars": {
+                "ordered": [
+                  2,
+                  5,
+                  9
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-03-03",
@@ -777,7 +999,31 @@
             "tier2_pattern": "top_two = gems[:___]\nmid = code[___:___]\nprint(top_two, mid)",
             "tier3_walkthrough": "Set `top_two = gems[:2]` and `mid = code[1:4]`, then `print(top_two, mid)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "slice",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "gems": [
+                  "a",
+                  "b",
+                  "c"
+                ],
+                "code": "SHELL"
+              },
+              "expectOutput": "['a', 'b'] HEL",
+              "expectVars": {
+                "top_two": [
+                  "a",
+                  "b"
+                ],
+                "mid": "HEL"
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-03-04",
@@ -802,7 +1048,32 @@
             "tier2_pattern": "total = sum(___) + float(___)\nbest = max(___)\nlow = min(___)\nprint(total, best, low)",
             "tier3_walkthrough": "Set `total = sum(scores) + float(bonus_text)`, `best = max(scores)`, `low = min(scores)`, then `print(total, best, low)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list",
+            "call:sum",
+            "call:max",
+            "call:min",
+            "float_call"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "scores": [
+                  10,
+                  30,
+                  20
+                ],
+                "bonus_text": "1.5"
+              },
+              "expectOutput": "61.5 30 10",
+              "expectVars": {
+                "total": 61.5,
+                "best": 30,
+                "low": 10
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-03-05",
@@ -830,7 +1101,32 @@
             "tier2_pattern": "shells = ___\nbig_shells = ___\nfor ___ in ___:\n    if ___:\n        ___\nprint(___)",
             "tier3_walkthrough": "Write:\nshells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "list",
+            "method_call:append"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "shells": [
+                  20,
+                  5,
+                  15,
+                  2
+                ]
+              },
+              "expectOutput": "[20, 15]",
+              "expectVars": {
+                "big_shells": [
+                  20,
+                  15
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-03-06",
@@ -857,7 +1153,41 @@
             "tier2_pattern": "lumens = ___\npeak = ___\ntotal = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\nlumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    print(\"NACRE FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "list",
+            "call:sum",
+            "call:max"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "lumens": [
+                  50,
+                  40
+                ]
+              },
+              "expectOutput": "NACRE FREE!",
+              "expectVars": {
+                "peak": 50,
+                "total": 90
+              }
+            },
+            {
+              "overrides": {
+                "lumens": [
+                  10,
+                  20
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "peak": 20,
+                "total": 30
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-03-bonus",
@@ -1057,7 +1387,31 @@
             "tier2_pattern": "beacons = ___\nstrong = ___\nfor ___ in ___:\n    if ___:\n        ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nbeacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.append(b)\nprint(strong)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "list",
+            "method_call:append"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "beacons": [
+                  55,
+                  10,
+                  70
+                ]
+              },
+              "expectOutput": "[55, 70]",
+              "expectVars": {
+                "strong": [
+                  55,
+                  70
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-04-03",
@@ -1084,7 +1438,29 @@
             "tier2_pattern": "signals = ___\nboosted = ___\nfor ___ in ___:\n    ___\nprint(___)",
             "tier3_walkthrough": "Write:\nsignals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "list",
+            "method_call:append"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "signals": [
+                  2,
+                  10
+                ]
+              },
+              "expectOutput": "[4, 20]",
+              "expectVars": {
+                "boosted": [
+                  4,
+                  20
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-04-04",
@@ -1111,7 +1487,29 @@
             "tier2_pattern": "waves = ___\nrough = ___\ncalm = ___\nfor ___ in ___:\n    if ___:\n        rough = ___",
             "tier3_walkthrough": "Write:\nwaves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "else",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "waves": [
+                  6,
+                  7,
+                  1
+                ]
+              },
+              "expectOutput": "2 1",
+              "expectVars": {
+                "rough": 2,
+                "calm": 1
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-04-05",
@@ -1136,7 +1534,25 @@
             "tier2_pattern": "clean = raw.replace(___, ___)\nparts = clean.split(___)\nprint(parts)",
             "tier3_walkthrough": "Set `clean = raw.replace(\"_\", \"-\")`, then `parts = clean.split(\"-\")`, then `print(parts)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "method_call:replace",
+            "method_call:split"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": "NORTH_EAST"
+              },
+              "expectOutput": "['NORTH', 'EAST']",
+              "expectVars": {
+                "parts": [
+                  "NORTH",
+                  "EAST"
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-04-06",
@@ -1163,7 +1579,44 @@
             "tier2_pattern": "lamps = ___\nactive = ___\nfor ___ in ___:\n    if ___:\n        ___\nif ___:",
             "tier3_walkthrough": "Write:\nlamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    print(\"TEMPEST FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "list",
+            "call:sum",
+            "method_call:append"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "lamps": [
+                  40,
+                  50,
+                  10
+                ]
+              },
+              "expectOutput": "TEMPEST FREE!",
+              "expectVars": {
+                "active": [
+                  40,
+                  50
+                ]
+              }
+            },
+            {
+              "overrides": {
+                "lamps": [
+                  10,
+                  20
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "active": []
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-04-bonus",
@@ -1357,7 +1810,10 @@
             "tier2_pattern": "turns = ___\nwhile ___:\n    turns = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nturns = 0\nwhile turns < 3:\n    turns = turns + 1\nprint(turns)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while"
+          ]
         },
         {
           "id": "trial-16-05-03",
@@ -1382,7 +1838,11 @@
             "tier2_pattern": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\nprint(tension)",
             "tier3_walkthrough": "Write:\ntension = 0\nwhile tension < 20:\n    tension = tension + 5\nprint(tension)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while",
+            "aug_assign"
+          ]
         },
         {
           "id": "trial-16-05-04",
@@ -1407,7 +1867,19 @@
             "tier2_pattern": "while sec > ___:\n    print(___)\n    sec -= ___",
             "tier3_walkthrough": "Write `while sec > 0:` with indented `print(sec)` and `sec -= 1`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while",
+            "aug_assign"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "sec": 2
+              },
+              "expectOutput": "2\n1"
+            }
+          ]
         },
         {
           "id": "trial-16-05-05",
@@ -1432,7 +1904,21 @@
             "tier2_pattern": "charge = ___\nsteps = ___\nwhile ___:\n    charge = ___\n    steps = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncharge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "charge": 30
+              },
+              "expectOutput": "2",
+              "expectVars": {
+                "steps": 2
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-05-06",
@@ -1457,7 +1943,11 @@
             "tier2_pattern": "gears = ___\npower = ___\nwhile ___:\n    gears = ___\n    power = ___\nif ___:",
             "tier3_walkthrough": "Write:\ngears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    print(\"SPROCKET FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while",
+            "if"
+          ]
         },
         {
           "id": "trial-16-05-bonus",
@@ -1653,7 +2143,10 @@
             "tier2_pattern": "ticks = ___\nwhile ___:\n    ticks = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\nprint(ticks)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while"
+          ]
         },
         {
           "id": "trial-16-06-03",
@@ -1680,7 +2173,13 @@
             "tier2_pattern": "found = ___\nfor ___ in ___:\n    if ___:\n        found = ___\n        ___\nprint(___)",
             "tier3_walkthrough": "Write:\nfound = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "break",
+            "if",
+            "list"
+          ]
         },
         {
           "id": "trial-16-06-04",
@@ -1707,7 +2206,13 @@
             "tier2_pattern": "total = ___\nfor ___ in ___:\n    if ___:\n        ___\n    total = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ntotal = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "continue",
+            "if",
+            "list"
+          ]
         },
         {
           "id": "trial-16-06-05",
@@ -1734,7 +2239,30 @@
             "tier2_pattern": "while True:\n    cmd = input()\n    if cmd == ___:\n        break\n    done += ___",
             "tier3_walkthrough": "Start with `done = 0`, write `while True:`, set `cmd = input(\"Command: \")`, `if cmd == \"STOP\": break`, `done += 1`, then `print(done)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while_true",
+            "break",
+            "if",
+            "aug_assign",
+            "list",
+            "call:input",
+            "method_call:pop"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "commands": [
+                  "WIND",
+                  "STOP"
+                ]
+              },
+              "expectOutput": "1",
+              "expectVars": {
+                "done": 1
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-06-06",
@@ -1760,7 +2288,11 @@
             "tier2_pattern": "beats = ___\nchime = ___\nwhile ___:\n    beats = ___\n    chime = ___\nif ___:",
             "tier3_walkthrough": "Write:\nbeats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    print(\"TOCK FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "while",
+            "if"
+          ]
         },
         {
           "id": "trial-16-06-bonus",
@@ -1948,13 +2480,16 @@
             "challenge": "# Challenge: find and fix the bug with no hints\ndef vent_steam()\n    print(\"HISS!\")\n\nvent_steam()\n"
           },
           "referenceSolution": "def vent_steam():\n    print(\"HISS!\")\n\nvent_steam()\n",
-          "testCode": "assert OUTPUT.strip() == \"HISS!\"",
+          "testCode": "import io, contextlib\n_b = io.StringIO()\nwith contextlib.redirect_stdout(_b):\n    vent_steam()\nassert _b.getvalue().strip() == \"HISS!\" and OUTPUT.strip() == \"HISS!\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
             "tier2_pattern": "def vent_steam():\n    print(___)\n___",
             "tier3_walkthrough": "Update the code to:\ndef vent_steam():\n    print(\"HISS!\")\n\nvent_steam()"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def"
+          ]
         },
         {
           "id": "trial-16-07-03",
@@ -1973,13 +2508,16 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()\n",
-          "testCode": "assert OUTPUT.strip().splitlines() == [\"STEAM ON!\", \"STEAM ON!\"]",
+          "testCode": "import io, contextlib\n_b = io.StringIO()\nwith contextlib.redirect_stdout(_b):\n    blast()\nassert _b.getvalue().strip() == \"STEAM ON!\" and OUTPUT.strip().splitlines() == [\"STEAM ON!\", \"STEAM ON!\"]",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
             "tier2_pattern": "def blast():\n    print(___)\n___\n___",
             "tier3_walkthrough": "Write:\ndef blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def"
+          ]
         },
         {
           "id": "trial-16-07-04",
@@ -2004,7 +2542,10 @@
             "tier2_pattern": "def heat_up(___):\n    print(___)\n___",
             "tier3_walkthrough": "Write:\ndef heat_up(level):\n    print(level * 2)\n\nheat_up(15)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def"
+          ]
         },
         {
           "id": "trial-16-07-05",
@@ -2030,7 +2571,11 @@
             "tier2_pattern": "def double(___):\n    return ___\nans = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef double(n):\n    return n * 2\n\nans = double(12)\nprint(ans)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-16-07-06",
@@ -2050,13 +2595,18 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")\n",
-          "testCode": "assert total == 80 and OUTPUT.strip() == \"PISTON FREE!\"",
+          "testCode": "assert calc_pressure(35, 45) == 80 and calc_pressure(10, 20) == 30 and total == 80 and OUTPUT.strip() == \"PISTON FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Piston!'",
             "tier2_pattern": "def calc_pressure(___):\n    return ___\ntotal = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ndef calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "if"
+          ]
         },
         {
           "id": "trial-16-07-bonus",
@@ -2246,13 +2796,17 @@
             "challenge": "# Challenge: find and fix the bug with no hints\ndef triple(n):\n    n * 3\n\nprint(triple(7))\n"
           },
           "referenceSolution": "def triple(n):\n    return n * 3\n\nprint(triple(7))\n",
-          "testCode": "assert triple(7) == 21 and OUTPUT.strip() == \"21\"",
+          "testCode": "assert triple(7) == 21 and triple(4) == 12 and OUTPUT.strip() == \"21\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
             "tier2_pattern": "def triple(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ndef triple(n):\n    return n * 3\n\nprint(triple(7))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-16-08-03",
@@ -2272,13 +2826,17 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))\n",
-          "testCode": "assert add_two(8) == 10 and OUTPUT.strip() == \"10\"",
+          "testCode": "assert add_one(4) == 5 and add_two(8) == 10 and add_two(1) == 3 and OUTPUT.strip() == \"10\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
             "tier2_pattern": "def add_one(___):\n    return ___\ndef add_two(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-16-08-04",
@@ -2305,7 +2863,14 @@
             "tier2_pattern": "def find_gear(gears, target):\n    if ___ in ___:\n        return ___\n    return None\n\nif result is None:\n    print(\"MISSING\")",
             "tier3_walkthrough": "Return `target` when `target in gears`, else `return None`. Call `result = find_gear([4, 6, 10], 99)` and print `\"MISSING\"` if `result is None`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "if",
+            "none",
+            "in_op"
+          ]
         },
         {
           "id": "trial-16-08-05",
@@ -2331,7 +2896,11 @@
             "tier2_pattern": "def is_even(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-16-08-06",
@@ -2351,13 +2920,18 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")\n",
-          "testCode": "assert mins == 150 and OUTPUT.strip() == \"AETHER FREE!\"",
+          "testCode": "assert sync_clock(2) == 150 and sync_clock(1, 15) == 75 and mins == 150 and OUTPUT.strip() == \"AETHER FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Aether!'",
             "tier2_pattern": "def sync_clock(___):\n    return ___\nmins = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ndef sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "if"
+          ]
         },
         {
           "id": "trial-16-08-bonus",
@@ -2551,7 +3125,21 @@
             "tier2_pattern": "herbs = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\nherbs = {\"fire\": 10, \"ash\": 5}\nprint(herbs[\"fire\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "herbs": {
+                  "fire": 25,
+                  "ash": 1
+                }
+              },
+              "expectOutput": "25"
+            }
+          ]
         },
         {
           "id": "trial-16-09-03",
@@ -2576,7 +3164,26 @@
             "tier2_pattern": "vial = ___\nvial[\"glow\"] = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nvial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "vial": {
+                  "heat": 5
+                }
+              },
+              "expectOutput": "15",
+              "expectVars": {
+                "vial": {
+                  "heat": 5,
+                  "glow": 15
+                }
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-09-04",
@@ -2602,7 +3209,28 @@
             "tier2_pattern": "if ___ in stock:\n    stock[___] += ___\nprint(stock[\"sulfur\"])",
             "tier3_walkthrough": "Write `if \"sulfur\" in stock:` with indented `stock[\"sulfur\"] += 6`, then `print(stock[\"sulfur\"])`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "aug_assign",
+            "dict",
+            "in_op"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "stock": {
+                  "sulfur": 10
+                }
+              },
+              "expectOutput": "16",
+              "expectVars": {
+                "stock": {
+                  "sulfur": 16
+                }
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-09-05",
@@ -2629,7 +3257,13 @@
             "tier2_pattern": "def lookup_herb(bag, name):\n    return bag.get(___, ___)\n\nval = lookup_herb(bag, ___)",
             "tier3_walkthrough": "Define `def lookup_herb(bag, name): return bag.get(name, 0)`, then set `val = lookup_herb(bag, \"ice\")` and `print(val)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "dict",
+            "method_call:get"
+          ]
         },
         {
           "id": "trial-16-09-06",
@@ -2654,7 +3288,37 @@
             "tier2_pattern": "tonic = ___\ntotal = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\ntonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    print(\"CINDEREL FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "if",
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "tonic": {
+                  "ember": 25,
+                  "ash": 25
+                }
+              },
+              "expectOutput": "CINDEREL FREE!",
+              "expectVars": {
+                "total": 50
+              }
+            },
+            {
+              "overrides": {
+                "tonic": {
+                  "ember": 10,
+                  "ash": 10
+                }
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "total": 20
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-09-bonus",
@@ -2848,7 +3512,18 @@
             "tier2_pattern": "power = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\npower = 42\nprint(f\"Crystal power: {power}\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "fstring"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "power": 99
+              },
+              "expectOutput": "Crystal power: 99"
+            }
+          ]
         },
         {
           "id": "trial-16-10-03",
@@ -2873,7 +3548,22 @@
             "tier2_pattern": "gem = ___\nrank = ___\nlabel = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ngem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "fstring"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "gem": "Opal",
+                "rank": 9
+              },
+              "expectOutput": "Opal Lv.9",
+              "expectVars": {
+                "label": "Opal Lv.9"
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-10-04",
@@ -2898,7 +3588,26 @@
             "tier2_pattern": "total = sum(___.values())\nprint(total)",
             "tier3_walkthrough": "Write `total = sum(gems.values())` and then `print(total)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict",
+            "call:sum",
+            "method_call:values"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "gems": {
+                  "a": 10,
+                  "b": 15
+                }
+              },
+              "expectOutput": "25",
+              "expectVars": {
+                "total": 25
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-10-05",
@@ -2926,7 +3635,13 @@
             "tier2_pattern": "def format_item(item):\n    return f\"{___}: {___}\"\n\nprint(format_item(item))",
             "tier3_walkthrough": "Return `f\"{item['name']}: {item['qty']}\"` inside `format_item(item)`, then `print(format_item(item))`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "fstring",
+            "dict"
+          ]
         },
         {
           "id": "trial-16-10-06",
@@ -2952,7 +3667,27 @@
             "tier2_pattern": "colors = ___\nlight = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ncolors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\nprint(f\"PRISM {light}!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "fstring",
+            "dict",
+            "call:sum",
+            "method_call:values"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "colors": {
+                  "red": 10,
+                  "blue": 25
+                }
+              },
+              "expectOutput": "PRISM 35!",
+              "expectVars": {
+                "light": 35
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-10-bonus",
@@ -3145,7 +3880,25 @@
             "tier2_pattern": "potions = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\npotions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[1][\"hp\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "potions": [
+                  {
+                    "hp": 5
+                  },
+                  {
+                    "hp": 40
+                  }
+                ]
+              },
+              "expectOutput": "40"
+            }
+          ]
         },
         {
           "id": "trial-16-11-03",
@@ -3170,7 +3923,29 @@
             "tier2_pattern": "potions = ___\ntotal_hp = ___\nfor ___ in ___:\n    total_hp = ___\nprint(___)",
             "tier3_walkthrough": "Write:\npotions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "potions": [
+                  {
+                    "hp": 5
+                  },
+                  {
+                    "hp": 7
+                  }
+                ]
+              },
+              "expectOutput": "12",
+              "expectVars": {
+                "total_hp": 12
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-11-04",
@@ -3195,7 +3970,30 @@
             "tier2_pattern": "brews = ___\nbest = ___\nfor ___ in ___:\n    if ___:\n        best = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nbrews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "brews": [
+                  {
+                    "hp": 50
+                  },
+                  {
+                    "hp": 12
+                  }
+                ]
+              },
+              "expectOutput": "50",
+              "expectVars": {
+                "best": 50
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-11-05",
@@ -3222,7 +4020,15 @@
             "tier2_pattern": "def count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[___]:\n            total += 1\n    return total",
             "tier3_walkthrough": "Loop over `shelf`, add 1 to `total` whenever `item[\"rare\"]` is True, `return total`, then set `rares = count_rare(shelf)` and `print(rares)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "for",
+            "if",
+            "aug_assign",
+            "dict"
+          ]
         },
         {
           "id": "trial-16-11-06",
@@ -3247,7 +4053,46 @@
             "tier2_pattern": "vials = ___\ntotal_ml = ___\nfor ___ in ___:\n    total_ml = ___\nif ___:\n    print(___)",
             "tier3_walkthrough": "Write:\nvials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    print(\"ELIXIR FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "vials": [
+                  {
+                    "name": "X",
+                    "ml": 40
+                  },
+                  {
+                    "name": "Y",
+                    "ml": 20
+                  }
+                ]
+              },
+              "expectOutput": "ELIXIR FREE!",
+              "expectVars": {
+                "total_ml": 60
+              }
+            },
+            {
+              "overrides": {
+                "vials": [
+                  {
+                    "name": "X",
+                    "ml": 10
+                  }
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "total_ml": 10
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-11-bonus",
@@ -3442,7 +4287,20 @@
             "tier2_pattern": "core = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ncore = {\"temp\": 900}\nprint(core[\"temp\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "core": {
+                  "temp": 450
+                }
+              },
+              "expectOutput": "450"
+            }
+          ]
         },
         {
           "id": "trial-16-12-03",
@@ -3462,13 +4320,18 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))\n",
-          "testCode": "assert brew_power({\"fire\": 25}) == 50 and OUTPUT.strip() == \"50\"",
+          "testCode": "assert brew_power({\"fire\": 25}) == 50 and brew_power({\"fire\": 7}) == 14 and OUTPUT.strip() == \"50\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
             "tier2_pattern": "def brew_power(___):\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "dict"
+          ]
         },
         {
           "id": "trial-16-12-04",
@@ -3494,7 +4357,24 @@
             "tier2_pattern": "ore = ___\ncounts = ___\nfor ___ in ___:\n    counts[x] = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "dict",
+            "method_call:get"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "ore": [
+                  "gold",
+                  "gold",
+                  "gold"
+                ]
+              },
+              "expectOutput": "3"
+            }
+          ]
         },
         {
           "id": "trial-16-12-05",
@@ -3520,7 +4400,27 @@
             "tier2_pattern": "a = ___\nb = ___\nc = ___\n___\nprint(___)",
             "tier3_walkthrough": "Copy `a` with `c = dict(a)`, merge `b` with `c.update(b)`, and print `len(c.keys())`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict",
+            "call:len",
+            "method_call:update",
+            "method_call:keys"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "a": {
+                  "x": 1,
+                  "z": 3
+                },
+                "b": {
+                  "y": 2
+                }
+              },
+              "expectOutput": "3"
+            }
+          ]
         },
         {
           "id": "trial-16-12-06",
@@ -3540,13 +4440,19 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))\n",
-          "testCode": "assert core_status({\"temp\": 300}) == \"SAFE\" and OUTPUT.strip() == \"SAFE\"",
+          "testCode": "assert core_status({\"temp\": 300}) == \"SAFE\" and core_status({\"temp\": 600}) == \"HOT\" and OUTPUT.strip() == \"SAFE\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Crucible!'",
             "tier2_pattern": "def core_status(___):\n    if ___:\n        return ___\n    return ___\nprint(___)",
             "tier3_walkthrough": "Write:\ndef core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "if",
+            "dict"
+          ]
         },
         {
           "id": "trial-16-12-bonus",
@@ -3740,7 +4646,10 @@
             "tier2_pattern": "total = ___\nfor ___ in ___:\n    for ___ in ___:\n        total = ___\nprint(___)",
             "tier3_walkthrough": "Update the code to:\ntotal = 0\nfor r in range(2):\n    for c in range(3):\n        total = total + 1\nprint(total)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for"
+          ]
         },
         {
           "id": "trial-16-13-03",
@@ -3765,7 +4674,31 @@
             "tier2_pattern": "grid = ___\ntotal = ___\nfor ___ in ___:\n    for ___ in ___:\n        total = ___\nprint(___)",
             "tier3_walkthrough": "Write:\ngrid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "grid": [
+                  [
+                    5,
+                    5
+                  ],
+                  [
+                    2,
+                    3
+                  ]
+                ]
+              },
+              "expectOutput": "15",
+              "expectVars": {
+                "total": 15
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-13-04",
@@ -3790,7 +4723,12 @@
             "tier2_pattern": "sums = ___\nfor ___ in ___:\n    for ___ in ___:\n        ___\nprint(___)",
             "tier3_walkthrough": "Write:\nsums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "list",
+            "method_call:append"
+          ]
         },
         {
           "id": "trial-16-13-05",
@@ -3817,7 +4755,13 @@
             "tier2_pattern": "def find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if ___ > ___:\n                best = ___\n    return best",
             "tier3_walkthrough": "Inside `find_highest(grid)`, track `best = 0`, loop `for row in grid:` and `for n in row:`, set `best = n` when `n > best`, `return best`, then set `highest = find_highest(sky)` and `print(highest)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "for",
+            "if"
+          ]
         },
         {
           "id": "trial-16-13-06",
@@ -3842,7 +4786,50 @@
             "tier2_pattern": "deck = ___\nlit = ___\nfor ___ in ___:\n    for ___ in ___:\n        if ___:\n            lit = ___",
             "tier3_walkthrough": "Write:\ndeck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    print(\"NIMBUS FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "deck": [
+                  [
+                    1,
+                    1
+                  ],
+                  [
+                    1,
+                    1
+                  ]
+                ]
+              },
+              "expectOutput": "NIMBUS FREE!",
+              "expectVars": {
+                "lit": 4
+              }
+            },
+            {
+              "overrides": {
+                "deck": [
+                  [
+                    1,
+                    0
+                  ],
+                  [
+                    0,
+                    0
+                  ]
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "lit": 1
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-13-bonus",
@@ -4035,7 +5022,12 @@
             "tier2_pattern": "class Dragon:\n    def __init__(___, name):\n        self.name = name",
             "tier3_walkthrough": "Change `def __init__(name):` to `def __init__(self, name):` so Python can pass the new object as `self`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def"
+          ]
         },
         {
           "id": "trial-16-14-03",
@@ -4054,13 +5046,18 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)\n",
-          "testCode": "assert s.brightness == 99 and OUTPUT.strip() == \"99\"",
+          "testCode": "assert s.brightness == 99 and Star(42).brightness == 42 and OUTPUT.strip() == \"99\"",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
             "tier2_pattern": "class Star:\n    def __init__(___):\n        self.brightness = ___\ns = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nclass Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def"
+          ]
         },
         {
           "id": "trial-16-14-04",
@@ -4080,13 +5077,20 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())\n",
-          "testCode": "assert d.roar() == \"Comet ROARS!\" and OUTPUT.strip() == \"Comet ROARS!\"",
+          "testCode": "assert d.roar() == \"Comet ROARS!\" and Dragon(\"Pip\").roar() == \"Pip ROARS!\" and OUTPUT.strip() == \"Comet ROARS!\"",
           "hints": {
             "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
             "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.name = ___\n    def roar(___):\n        return ___\nd = ___",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return",
+            "fstring"
+          ]
         },
         {
           "id": "trial-16-14-05",
@@ -4111,7 +5115,13 @@
             "tier2_pattern": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "aug_assign"
+          ]
         },
         {
           "id": "trial-16-14-06",
@@ -4131,13 +5141,20 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")\n",
-          "testCode": "assert b.is_ready() is True and OUTPUT.strip() == \"COMET FREE!\"",
+          "testCode": "assert b.is_ready() is True and Bridge(3).is_ready() is False and OUTPUT.strip() == \"COMET FREE!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Comet!'",
             "tier2_pattern": "class Bridge:\n    def __init__(___):\n        self.spans = ___\n    def is_ready(___):\n        return ___\nb = ___",
             "tier3_walkthrough": "Write:\nclass Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return",
+            "if"
+          ]
         },
         {
           "id": "trial-16-14-bonus",
@@ -4325,13 +5342,18 @@
             "challenge": "# Challenge: find and fix the bug with no hints\nclass Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        volts = volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n"
           },
           "referenceSolution": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        self.volts = self.volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
-          "testCode": "assert t.volts == 30 and OUTPUT.strip() == \"30\"",
+          "testCode": "assert t.volts == 30 and OUTPUT.strip() == \"30\"\n_t2 = Tower(5)\n_t2.charge()\nassert _t2.volts == 15",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
             "tier2_pattern": "class Tower:\n    def __init__(___):\n        self.volts = ___\n    def charge(___):\n        self.volts = ___\nt = ___",
             "tier3_walkthrough": "Update the code to:\nclass Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        self.volts = self.volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def"
+          ]
         },
         {
           "id": "trial-16-15-03",
@@ -4357,7 +5379,13 @@
             "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.p = ___\nsquad = ___\ntotal = ___\nfor ___ in ___:",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "for"
+          ]
         },
         {
           "id": "trial-16-15-04",
@@ -4383,7 +5411,14 @@
             "tier2_pattern": "class Coil:\n    def __init__(___):\n        self.power = ___\ncoils = ___\nready = ___\nfor ___ in ___:",
             "tier3_walkthrough": "Write:\nclass Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "for",
+            "if"
+          ]
         },
         {
           "id": "trial-16-15-05",
@@ -4402,13 +5437,20 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())\n",
-          "testCode": "assert OUTPUT.strip() == \"Storm:50\"",
+          "testCode": "assert Shield(\"Storm\", 50).info() == \"Storm:50\" and Shield(\"Oak\", 12).info() == \"Oak:12\" and OUTPUT.strip() == \"Storm:50\"",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
             "tier2_pattern": "class Shield:\n    def __init__(___):\n        self.name = ___\n        self.hp = ___\n    def info(___):\n        return ___",
             "tier3_walkthrough": "Write:\nclass Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return",
+            "fstring"
+          ]
         },
         {
           "id": "trial-16-15-06",
@@ -4434,7 +5476,14 @@
             "tier2_pattern": "class Bolt:\n    def __init__(___):\n        self.power = ___\nbolts = ___\nsurge = ___\nfor ___ in ___:",
             "tier3_walkthrough": "Write:\nclass Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    print(\"FULMIN FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "for",
+            "if"
+          ]
         },
         {
           "id": "trial-16-15-bonus",
@@ -4629,13 +5678,19 @@
             "challenge": "# Challenge: find and fix the bug with no hints\nclass ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n"
           },
           "referenceSolution": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        return self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
-          "testCode": "assert lock.is_open() is True and OUTPUT.strip() == \"True\"",
+          "testCode": "assert lock.is_open() is True and ThroneLock(8).is_open() is False and OUTPUT.strip() == \"True\"",
           "hints": {
             "tier1_nudge": "Pip points at the highlighted error line!",
             "tier2_pattern": "class ThroneLock:\n    def __init__(___):\n        self.bits = ___\n    def is_open(___):\n        return ___\nlock = ___",
             "tier3_walkthrough": "Update the code to:\nclass ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        return self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return"
+          ]
         },
         {
           "id": "trial-16-16-03",
@@ -4663,7 +5718,26 @@
             "tier2_pattern": "acts = ___\ntotal_dragons = ___\nprint(___)",
             "tier3_walkthrough": "Write:\nacts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict",
+            "call:sum",
+            "method_call:values"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "acts": {
+                  "a": 3,
+                  "b": 7
+                }
+              },
+              "expectOutput": "10",
+              "expectVars": {
+                "total_dragons": 10
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-16-04",
@@ -4691,7 +5765,32 @@
             "tier2_pattern": "matrix = ___\neven_sum = ___\nfor ___ in ___:\n    for ___ in ___:\n        if ___:\n            even_sum = ___",
             "tier3_walkthrough": "Write:\nmatrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "list"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "matrix": [
+                  [
+                    2,
+                    1
+                  ],
+                  [
+                    4,
+                    3
+                  ]
+                ]
+              },
+              "expectOutput": "6",
+              "expectVars": {
+                "even_sum": 6
+              }
+            }
+          ]
         },
         {
           "id": "trial-16-16-05",
@@ -4713,13 +5812,18 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)\n",
-          "testCode": "assert p.power == 16 and OUTPUT.strip() == \"16\"",
+          "testCode": "assert p.power == 16 and OUTPUT.strip() == \"16\"\n_p2 = Prism(5)\n_p2.upgrade()\nassert _p2.power == 10",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
             "tier2_pattern": "class Prism:\n    def __init__(___):\n        self.power = ___\n    def upgrade(___):\n        self.power = ___\np = ___",
             "tier3_walkthrough": "Write:\nclass Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def"
+          ]
         },
         {
           "id": "trial-16-16-06",
@@ -4741,13 +5845,20 @@
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())\n",
-          "testCode": "assert EraCore(16).restore() == \"32-BIT UNLOCKED!\" and OUTPUT.strip() == \"32-BIT UNLOCKED!\"",
+          "testCode": "assert EraCore(16).restore() == \"32-BIT UNLOCKED!\" and EraCore(8).restore() != \"32-BIT UNLOCKED!\" and OUTPUT.strip() == \"32-BIT UNLOCKED!\"",
           "hints": {
             "tier1_nudge": "Pip roars: 'One final Python spell to free Zenith!'",
             "tier2_pattern": "class EraCore:\n    def __init__(___):\n        self.bits = ___\n    def restore(___):\n        if ___:\n            return ___",
             "tier3_walkthrough": "Write:\nclass EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "class",
+            "self_attr",
+            "def",
+            "return",
+            "if"
+          ]
         },
         {
           "id": "trial-16-16-bonus",

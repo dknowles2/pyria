@@ -15,7 +15,27 @@ const ROOT = path.resolve(__dirname, '..');
 const CONTENT_DIR = path.join(ROOT, 'content');
 
 const VALID_TRIAL_TYPES = new Set(['code', 'multiple_choice', 'fix_bug']);
+const VALID_SIMPLE_CONSTRUCTS = new Set([
+  'if', 'elif', 'else', 'for', 'while', 'while_true', 'break', 'continue',
+  'def', 'return', 'class', 'try', 'except', 'with', 'list_comp', 'lambda',
+  'str_concat', 'aug_assign', 'assign', 'compare', 'bool_op', 'in_op',
+  'math_op', 'fstring', 'self_attr',
+  'list', 'dict', 'tuple', 'set', 'slice', 'subscript', 'none', 'bool',
+  'str_call', 'int_call', 'float_call',
+]);
+const CHECK_CHEATS = process.argv.includes('--check-cheats');
 const errors = [];
+
+function isValidConstructToken(token) {
+  if (typeof token !== 'string' || !token.trim()) return false;
+  return token.split('|').every((part) => {
+    const p = part.trim();
+    if (VALID_SIMPLE_CONSTRUCTS.has(p)) return true;
+    if (p.startsWith('call:') && p.length > 5) return true;
+    if (p.startsWith('method_call:') && p.length > 12) return true;
+    return false;
+  });
+}
 
 function check(condition, message) {
   if (!condition) {
@@ -205,6 +225,33 @@ function main() {
           );
         }
 
+        if (trial.requiredConstructs !== undefined) {
+          check(
+            Array.isArray(trial.requiredConstructs),
+            `Trial "${trial.id}" requiredConstructs must be an array`
+          );
+          if (Array.isArray(trial.requiredConstructs)) {
+            for (const tok of trial.requiredConstructs) {
+              check(
+                isValidConstructToken(tok),
+                `Trial "${trial.id}" has invalid requiredConstructs token "${tok}"`
+              );
+            }
+          }
+        }
+
+        if (trial.variants !== undefined) {
+          check(Array.isArray(trial.variants), `Trial "${trial.id}" variants must be an array`);
+          if (Array.isArray(trial.variants)) {
+            trial.variants.forEach((v, idx) => {
+              check(
+                isPlainObject(v) && isPlainObject(v.overrides),
+                `Trial "${trial.id}" variants[${idx}] must have an overrides object`
+              );
+            });
+          }
+        }
+
         allTrials.push({
           eraId,
           id: trial.id,
@@ -215,6 +262,8 @@ function main() {
           codeSnippet: typeof trial.codeSnippet === 'string' ? trial.codeSnippet : '',
           referenceSolution: typeof trial.referenceSolution === 'string' ? trial.referenceSolution : '',
           testCode: typeof trial.testCode === 'string' ? trial.testCode : '',
+          requiredConstructs: Array.isArray(trial.requiredConstructs) ? trial.requiredConstructs : [],
+          variants: Array.isArray(trial.variants) ? trial.variants : [],
         });
       }
     }
@@ -312,16 +361,20 @@ function main() {
     }
   }
 
-  // 6. Execute coding trial referenceSolutions against testCode, cross-check AST concepts, and check boss/bonus debuts in python3
+  // 6. Execute coding trial referenceSolutions against testCode + requiredConstructs + variants, cross-check AST concepts, and check boss/bonus debuts in python3
   let passedCoding = 0;
   let totalCoding = 0;
+  let cheatPassed = [];
   if (allTrials.length > 0) {
     const pyScript = `
-import ast, contextlib, io, json, sys
-trials = json.loads(sys.stdin.read())
+import ast, contextlib, copy, io, json, math, sys
+payload = json.loads(sys.stdin.read())
+trials = payload["trials"]
+check_cheats = payload.get("checkCheats", False)
 errs = []
 passed = 0
 coding = 0
+cheat_passed = []
 seen_features = set()
 
 def extract_features(code):
@@ -357,6 +410,113 @@ def extract_features(code):
 def shout_fn(*args, **kwargs):
     print(*(a.upper() if isinstance(a, str) else a for a in args), **kwargs)
 
+def has_single_construct(tree, token):
+    if token.startswith("call:"):
+        target = token[5:]
+        return any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == target for n in ast.walk(tree))
+    if token.startswith("method_call:"):
+        target = token[12:]
+        return any(isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == target for n in ast.walk(tree))
+    if token == "str_call": return has_single_construct(tree, "call:str")
+    if token == "int_call": return has_single_construct(tree, "call:int")
+    if token == "float_call": return has_single_construct(tree, "call:float")
+    for n in ast.walk(tree):
+        if token == "if" and isinstance(n, ast.If): return True
+        elif token == "elif" and isinstance(n, ast.If) and len(n.orelse) == 1 and isinstance(n.orelse[0], ast.If): return True
+        elif token == "else" and isinstance(n, ast.If) and n.orelse and not (len(n.orelse) == 1 and isinstance(n.orelse[0], ast.If)): return True
+        elif token == "for" and isinstance(n, ast.For): return True
+        elif token == "while" and isinstance(n, ast.While): return True
+        elif token == "while_true" and isinstance(n, ast.While) and isinstance(n.test, ast.Constant) and n.test.value is True: return True
+        elif token == "break" and isinstance(n, ast.Break): return True
+        elif token == "continue" and isinstance(n, ast.Continue): return True
+        elif token == "def" and isinstance(n, ast.FunctionDef): return True
+        elif token == "return" and isinstance(n, ast.Return): return True
+        elif token == "class" and isinstance(n, ast.ClassDef): return True
+        elif token == "try" and isinstance(n, ast.Try): return True
+        elif token == "except" and isinstance(n, ast.ExceptHandler): return True
+        elif token == "with" and isinstance(n, ast.With): return True
+        elif token == "list_comp" and isinstance(n, ast.ListComp): return True
+        elif token == "lambda" and isinstance(n, ast.Lambda): return True
+        elif token == "str_concat" and ((isinstance(n, ast.BinOp) and isinstance(n.op, ast.Add)) or (isinstance(n, ast.AugAssign) and isinstance(n.op, ast.Add))): return True
+        elif token == "aug_assign" and isinstance(n, ast.AugAssign): return True
+        elif token == "assign" and isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)): return True
+        elif token == "compare" and isinstance(n, ast.Compare): return True
+        elif token == "bool_op" and (isinstance(n, ast.BoolOp) or (isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not))): return True
+        elif token == "in_op" and isinstance(n, ast.Compare) and any(isinstance(op, (ast.In, ast.NotIn)) for op in n.ops): return True
+        elif token == "math_op" and ((isinstance(n, ast.BinOp) and isinstance(n.op, (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow))) or (isinstance(n, ast.AugAssign) and isinstance(n.op, (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow)))): return True
+        elif token == "fstring" and isinstance(n, ast.JoinedStr): return True
+        elif token == "self_attr" and isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name) and n.value.id == "self": return True
+        elif token == "list" and (isinstance(n, (ast.List, ast.ListComp)) or (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "list")): return True
+        elif token == "dict" and (isinstance(n, (ast.Dict, ast.DictComp)) or (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "dict")): return True
+        elif token == "tuple" and (isinstance(n, ast.Tuple) or (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "tuple")): return True
+        elif token == "set" and (isinstance(n, (ast.Set, ast.SetComp)) or (isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "set")): return True
+        elif token == "slice" and isinstance(n, ast.Subscript) and isinstance(n.slice, ast.Slice): return True
+        elif token == "subscript" and isinstance(n, ast.Subscript): return True
+        elif token == "none" and isinstance(n, ast.Constant) and n.value is None: return True
+        elif token == "bool" and isinstance(n, ast.Constant) and isinstance(n.value, bool): return True
+    return False
+
+def check_constructs(code, required):
+    if not required:
+        return []
+    tree = ast.parse(code)
+    missing = []
+    for req in required:
+        parts = [p.strip() for p in req.split("|") if p.strip()]
+        if parts and not any(has_single_construct(tree, p) for p in parts):
+            missing.append(req)
+    return missing
+
+def rewrite_overrides(code, overrides):
+    tree = ast.parse(code)
+    replaced = set()
+    for stmt in tree.body:
+        if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name):
+            var_name = stmt.targets[0].id
+            if var_name in overrides and var_name not in replaced:
+                stmt.value = ast.parse(repr(overrides[var_name]), mode="eval").body
+                replaced.add(var_name)
+    ast.fix_missing_locations(tree)
+    return compile(tree, "<variant>", "exec")
+
+def values_match(actual, expected):
+    if isinstance(actual, float) and isinstance(expected, (int, float)) and not isinstance(expected, bool):
+        return math.isclose(actual, float(expected), rel_tol=1e-6, abs_tol=1e-6)
+    if isinstance(expected, float) and isinstance(actual, (int, float)) and not isinstance(actual, bool):
+        return math.isclose(float(actual), expected, rel_tol=1e-6, abs_tol=1e-6)
+    return actual == expected
+
+def run_trial_code(code, test_code, required, variants):
+    missing = check_constructs(code, required)
+    if missing:
+        return False, f"Missing required constructs: {missing}", {}
+    ns = {"say": print, "shout": shout_fn}
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        exec(compile(code, "<student>", "exec"), ns)
+    ns["OUTPUT"] = buf.getvalue()
+    exec(compile(test_code, "<test>", "exec"), ns)
+    for idx, v in enumerate(variants or []):
+        overrides = v.get("overrides", {})
+        v_ns = {"say": print, "shout": shout_fn}
+        v_ns.update(copy.deepcopy(overrides))
+        v_buf = io.StringIO()
+        compiled = rewrite_overrides(code, overrides)
+        with contextlib.redirect_stdout(v_buf):
+            exec(compiled, v_ns)
+        v_out = v_buf.getvalue().strip()
+        v_ns["OUTPUT"] = v_buf.getvalue()
+        if "expectOutput" in v and v["expectOutput"] is not None:
+            if v_out != str(v["expectOutput"]).strip():
+                return False, f"Variant[{idx}] output mismatch: expected {v['expectOutput']!r}, got {v_out!r}", ns
+        if "expectVars" in v and v["expectVars"]:
+            for k, expected_val in v["expectVars"].items():
+                if k not in v_ns or not values_match(v_ns[k], expected_val):
+                    return False, f"Variant[{idx}] var {k!r} mismatch: expected {expected_val!r}, got {v_ns.get(k)!r}", ns
+        if v.get("testCode"):
+            exec(compile(v["testCode"], f"<variant_{idx}>", "exec"), v_ns)
+    return True, None, ns
+
 for t in trials:
     tid = f"{t['eraId']}/{t['id']}"
     code = t["referenceSolution"]
@@ -390,19 +550,39 @@ for t in trials:
     if "try" in feats and "error_handling" not in concepts:
         errs.append(f"Trial {tid}: uses 'try' in referenceSolution but concepts={sorted(concepts)}")
     try:
-        ns = {"say": print, "shout": shout_fn}
-        buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            exec(compile(code, "<student>", "exec"), ns)
-        ns["OUTPUT"] = buf.getvalue()
-        exec(compile(t["testCode"], "<test>", "exec"), ns)
-        passed += 1
+        ok, msg, ns = run_trial_code(code, t["testCode"], t.get("requiredConstructs") or [], t.get("variants") or [])
+        if ok:
+            passed += 1
+        else:
+            errs.append(f"Trial {tid} referenceSolution failed: {msg}")
+            continue
     except Exception as e:
         errs.append(f"Trial {tid} referenceSolution failed: {type(e).__name__}: {e}")
-print(json.dumps({"passed": passed, "coding": coding, "errors": errs}))
+        continue
+
+    if check_cheats:
+        cheat_lines = []
+        for k, v in ns.items():
+            if k in ("__builtins__", "say", "shout", "OUTPUT"):
+                continue
+            if isinstance(v, (int, float, str, bool, type(None), list, dict, tuple)):
+                cheat_lines.append(f"{k} = {v!r}")
+        out_val = ns.get("OUTPUT", "")
+        if out_val:
+            for line in out_val.rstrip("\\n").splitlines():
+                cheat_lines.append(f"print({line!r})")
+        cheat_code = "\\n".join(cheat_lines) + "\\n"
+        try:
+            c_ok, _, _ = run_trial_code(cheat_code, t["testCode"], t.get("requiredConstructs") or [], t.get("variants") or [])
+            if c_ok:
+                cheat_passed.append(tid)
+        except Exception:
+            pass
+
+print(json.dumps({"passed": passed, "coding": coding, "errors": errs, "cheatPassed": cheat_passed}))
 `;
     const pyRes = spawnSync('python3', ['-c', pyScript], {
-      input: JSON.stringify(allTrials),
+      input: JSON.stringify({ trials: allTrials, checkCheats: CHECK_CHEATS }),
       encoding: 'utf-8',
       maxBuffer: 20 * 1024 * 1024,
     });
@@ -412,13 +592,21 @@ print(json.dumps({"passed": passed, "coding": coding, "errors": errs}))
       const pyOut = JSON.parse(pyRes.stdout);
       passedCoding = pyOut.passed;
       totalCoding = pyOut.coding;
+      cheatPassed = pyOut.cheatPassed || [];
       for (const e of pyOut.errors) errors.push(e);
+    }
+  }
+
+  if (CHECK_CHEATS) {
+    console.log(`Anti-cheat check: ${cheatPassed.length}/${totalCoding} hard-coded cheat solutions passed.`);
+    if (cheatPassed.length > 0) {
+      console.log(`  Cheatable trials: ${cheatPassed.join(', ')}`);
     }
   }
 
   if (errors.length === 0) {
     console.log(
-      `Content validation passed: ${(eraOrder || []).length} eras, ${totalRealms} realms, ${totalTrials} trials (${passedCoding}/${totalCoding} referenceSolutions passed), ${mapFiles.length} maps, ${unlockIds.size} unlockables.`
+      `Content validation passed: ${(eraOrder || []).length} eras, ${totalRealms} realms, ${totalTrials} trials (${passedCoding}/${totalCoding} referenceSolutions + constructs + variants passed), ${mapFiles.length} maps, ${unlockIds.size} unlockables.`
     );
   }
   reportAndExit();

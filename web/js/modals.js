@@ -1127,7 +1127,10 @@ export class ModalManager {
         runBtn.textContent = 'Running...';
         audio.playCodeRun();
 
-        const result = await pyRunner.runTrial(code, trial.testCode, diff.showRawTracebacks);
+        const result = await pyRunner.runTrial(code, trial.testCode, diff.showRawTracebacks, {
+          requiredConstructs: trial.requiredConstructs,
+          variants: trial.variants,
+        });
         if (!result.passed) {
           runBtn.disabled = false;
           runBtn.textContent = '▶ Run Python Spell';
