@@ -349,7 +349,9 @@ for t in trials:
     if "try" in feats and "error_handling" not in concepts:
         errs.append(f"Trial {tid}: uses 'try' in referenceSolution but concepts={sorted(concepts)}")
     try:
-        ns = {"say": print, "shout": print}
+        def shout_fn(*args, **kwargs):
+            print(*(a.upper() if isinstance(a, str) else a for a in args), **kwargs)
+        ns = {"say": print, "shout": shout_fn}
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             exec(compile(code, "<student>", "exec"), ns)

@@ -1046,11 +1046,12 @@ export class ModalManager {
             trialGutter.setMarks(new Map());
           }
           audio.playError();
+          const outputLabel = useTrainingSpells ? "Your spell's output:" : 'Your print() output:';
           outputEl.className = 'pip-console error';
           outputEl.innerHTML = `
             <div class="pip-console-header">🐉 Pip's Clue:</div>
             <div class="pip-console-body">${renderSafeMarkdown(result.pipMessage)}</div>
-            ${result.stdout ? `<div class="console-stdout">Your print() output:\n${escapeHtml(result.stdout)}</div>` : ''}
+            ${result.stdout ? `<div class="console-stdout">${outputLabel}\n${escapeHtml(result.stdout)}</div>` : ''}
             ${result.rawTraceback ? `<div class="console-traceback">${escapeHtml(result.rawTraceback)}</div>` : ''}
           `;
         }
