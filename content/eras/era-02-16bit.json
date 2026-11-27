@@ -2414,7 +2414,7 @@
           "trialType": "code",
           "title": "Stop at the Golden Pendulum",
           "storyPrompt": "In Pendulum Halls, put your new skill into action! Loop `for p in [\"brass\", \"iron\", \"gold\", \"lead\"]:`. If `p == \"gold\"`, set `found = True` and `break`. Print `found`.",
-          "objective": "Loop `for p in [\"brass\", \"iron\", \"gold\", \"lead\"]:`. If `p == \"gold\"`, set `found = True` and `break`. Print `found`.",
+          "objective": "Loop through each pendulum `p` in `[\"brass\", \"iron\", \"gold\", \"lead\"]`: if `p` equals 'gold', update the variable `found` to True and stop the loop with `break`. Print `found` after the loop.",
           "concepts": [
             "while_loops",
             "conditionals_if",
@@ -3220,7 +3220,7 @@
           "trialType": "code",
           "title": "Return None When Nothing Matches",
           "storyPrompt": "Returning `None` on purpose is also useful! It's Python's way of saying 'not found'. You can check for it using `is None`.",
-          "objective": "Write a function `find_gear(gears, target)` that returns `target` if it is in `gears`, or returns `None` otherwise. Test it with `result = find_gear([4, 6, 10], 99)` and print `\"MISSING\"` if `result is None`.",
+          "objective": "Write a function `find_gear(gears, target)`: if `target` is in `gears`, return `target`; otherwise, return `None`. Store `find_gear([4, 6, 10], 99)` in the variable `result`, and if `result` is `None`, print 'MISSING'.",
           "concepts": [
             "functions_def",
             "functions_return",
@@ -3254,7 +3254,7 @@
           "trialType": "code",
           "title": "Is It Even? Function",
           "storyPrompt": "Almost at Aether's Logic Vault! Define `def is_even(n): return n % 2 == 0`, then `print(is_even(8))`.",
-          "objective": "Write a function `is_even(n)` that returns `True` if `n` is divisible by 2 and `False` otherwise, then print the result for 8.",
+          "objective": "Write a function `is_even(n)`: if `n` is divisible by 2, return True; otherwise, return False. Then print the result for 8.",
           "concepts": [
             "functions_def",
             "functions_return"
@@ -3994,7 +3994,7 @@
           "trialType": "code",
           "title": "Label a Crystal",
           "storyPrompt": "In Crystal Alembic, put your new skill into action! Given `gem = \"Ruby\"` and `rank = 5`, set `label = f\"{gem} Lv.{rank}\"` and `print(label)`.",
-          "objective": "Given `gem = \"Ruby\"` and `rank = 5`, set `label = f\"{gem} Lv.{rank}\"` and `print(label)`.",
+          "objective": "Using `gem` ('Ruby') and `rank` (5), create the variable `label` formatted as 'Ruby Lv.5' using an f-string, then print `label`.",
           "concepts": [
             "f_strings"
           ],
@@ -6335,7 +6335,7 @@
           "trialType": "code",
           "title": "Rally the Four Acts",
           "storyPrompt": "In Null's 16-Bit Throne, put your new skill into action! Given `acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}`, set `total_dragons = sum(acts.values())` and `print(total_dragons)`.",
-          "objective": "Given `acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}`, set `total_dragons = sum(acts.values())` and `print(total_dragons)`.",
+          "objective": "Using `acts`, create the variable `total_dragons` holding the sum of all dictionary values, then print `total_dragons`.",
           "concepts": [
             "functions_return",
             "dictionaries",

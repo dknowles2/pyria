@@ -1088,7 +1088,7 @@
           "trialType": "code",
           "title": "Deduplicate Crystal Shards",
           "storyPrompt": "In Prism Caverns, try this new power! Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.",
-          "objective": "Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.",
+          "objective": "Using `found`, create the variable `unique_count` holding the number of unique crystal colors (using `set` and `len`), then print `unique_count`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
