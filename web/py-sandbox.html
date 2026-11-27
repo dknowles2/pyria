@@ -64,6 +64,84 @@ def _pyria_exit_sandbox():
     if _pyria_saved_modules is not None:
         sys.modules.update(_pyria_saved_modules)
         _pyria_saved_modules = None
+
+import time as _pyria_time
+
+class _PyriaStreamingBuffer:
+    MAX_BYTES = 16384
+    MAX_LINES = 200
+    FLUSH_INTERVAL_SEC = 0.05
+    FLUSH_CHUNK_BYTES = 512
+    TRUNCATED_NOTICE = "\\n... (output truncated)"
+
+    def __init__(self, emit_cb=None):
+        self._emit = emit_cb
+        self._parts = []
+        self._pending = []
+        self._total_bytes = 0
+        self._total_lines = 0
+        self._pending_bytes = 0
+        self._truncated = False
+        self._last_flush = 0.0
+
+    def writable(self):
+        return True
+
+    def isatty(self):
+        return False
+
+    def write(self, s):
+        if not isinstance(s, str):
+            s = str(s)
+        n = len(s)
+        if n == 0 or self._truncated:
+            return n
+
+        remaining_bytes = self.MAX_BYTES - self._total_bytes
+        remaining_lines = self.MAX_LINES - self._total_lines
+        new_lines = s.count("\\n")
+
+        if n > remaining_bytes or new_lines > remaining_lines:
+            chunk = s[:max(0, remaining_bytes)]
+            if chunk.count("\\n") > remaining_lines:
+                kept = chunk.split("\\n")[:max(0, remaining_lines)]
+                chunk = "\\n".join(kept)
+            if chunk:
+                self._parts.append(chunk)
+                self._pending.append(chunk)
+                self._total_bytes += len(chunk)
+                self._total_lines += chunk.count("\\n")
+                self._pending_bytes += len(chunk)
+            self._parts.append(self.TRUNCATED_NOTICE)
+            self._pending.append(self.TRUNCATED_NOTICE)
+            self._truncated = True
+            self.flush()
+            return n
+
+        self._parts.append(s)
+        self._pending.append(s)
+        self._total_bytes += n
+        self._total_lines += new_lines
+        self._pending_bytes += n
+
+        now = _pyria_time.monotonic()
+        if self._pending_bytes >= self.FLUSH_CHUNK_BYTES or (now - self._last_flush) >= self.FLUSH_INTERVAL_SEC:
+            self.flush()
+        return n
+
+    def flush(self):
+        if self._pending and self._emit is not None:
+            chunk = "".join(self._pending)
+            self._pending.clear()
+            self._pending_bytes = 0
+            self._last_flush = _pyria_time.monotonic()
+            try:
+                self._emit(chunk)
+            except Exception:
+                pass
+
+    def getvalue(self):
+        return "".join(self._parts)
 `;
 
   const TRIAL_HARNESS_PY = `
@@ -72,7 +150,7 @@ import json
 import contextlib
 import traceback
 
-def _pyria_run_trial(payload_json):
+def _pyria_run_trial(payload_json, emit_stdout=None):
     payload = json.loads(payload_json)
     student_code = payload.get("studentCode", "")
     test_code = payload.get("testCode", "")
@@ -81,12 +159,13 @@ def _pyria_run_trial(payload_json):
         "say": print,
         "shout": print,
     }
-    buf = io.StringIO()
+    buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
     stage = "student"
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(student_code, "<your_spell>", "exec"), ns)
+        buf.flush()
         ns["OUTPUT"] = buf.getvalue()
         stage = "test"
         if test_code:
@@ -103,6 +182,7 @@ def _pyria_run_trial(payload_json):
             "stage": "done",
         })
     except SyntaxError as e:
+        buf.flush()
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
@@ -114,6 +194,7 @@ def _pyria_run_trial(payload_json):
             "stage": stage,
         })
     except Exception as e:
+        buf.flush()
         tb = e.__traceback__
         line_no = None
         while tb is not None:
@@ -138,7 +219,7 @@ import json
 import contextlib
 import traceback
 
-def _pyria_run_charcreate(payload_json):
+def _pyria_run_charcreate(payload_json, emit_stdout=None):
     payload = json.loads(payload_json)
     code = payload.get("code", "")
     state = dict(payload.get("currentAppearance", {}))
@@ -198,11 +279,12 @@ def _pyria_run_charcreate(payload_json):
         "preview_tunic": preview_tunic,
         "confirm_hero": confirm_hero,
     }
-    buf = io.StringIO()
+    buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(code, "<hero_forge>", "exec"), ns)
+        buf.flush()
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
@@ -255,7 +337,7 @@ import json
 import contextlib
 import traceback
 
-def _pyria_run_workshop(payload_json):
+def _pyria_run_workshop(payload_json, emit_stdout=None):
     payload = json.loads(payload_json)
     code = payload.get("code", "")
     unlockables = payload.get("unlockables", [])
@@ -439,11 +521,12 @@ def _pyria_run_workshop(payload_json):
         "add_courage": add_courage,
         "equip_pip_scarf": equip_pip_scarf,
     }
-    buf = io.StringIO()
+    buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(code, "<bram_workshop>", "exec"), ns)
+        buf.flush()
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
@@ -549,6 +632,12 @@ self.onmessage = async (event) => {
 
     const payloadJson = JSON.stringify(msg.payload || {});
     py.globals.set('_pyria_payload_json', payloadJson);
+    const emitStdout = (chunk) => {
+      if (typeof chunk === 'string' && chunk.length > 0) {
+        self.postMessage({ type: 'stdout', id: msg.id, chunk });
+      }
+    };
+    py.globals.set('_pyria_emit_stdout', emitStdout);
 
     let fnName = '_pyria_run_trial';
     if (msg.mode === 'charcreate') fnName = '_pyria_run_charcreate';
@@ -557,10 +646,11 @@ self.onmessage = async (event) => {
     let resultJson;
     py.runPython('_pyria_enter_sandbox()');
     try {
-      resultJson = py.runPython(fnName + '(_pyria_payload_json)');
+      resultJson = py.runPython(fnName + '(_pyria_payload_json, _pyria_emit_stdout)');
     } finally {
       py.runPython('_pyria_exit_sandbox()');
       py.globals.delete('_pyria_payload_json');
+      py.globals.delete('_pyria_emit_stdout');
     }
 
     self.postMessage({
@@ -633,7 +723,12 @@ self.onmessage = async (event) => {
         revokeBlobUrl();
         const data = event.data;
         if (!data || typeof data.type !== 'string') return;
-        if (data.type === 'ready' || data.type === 'init_error' || data.type === 'result') {
+        if (
+          data.type === 'ready' ||
+          data.type === 'init_error' ||
+          data.type === 'result' ||
+          data.type === 'stdout'
+        ) {
           sendToParent(data);
         }
       };

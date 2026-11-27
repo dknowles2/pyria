@@ -4,7 +4,32 @@
 
 const EXECUTION_TIMEOUT_MS = 3000;
 const BOOT_TIMEOUT_MS = 20000;
-const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127j';
+const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127k';
+const MAX_PARTIAL_STDOUT_BYTES = 16384;
+const MAX_PARTIAL_STDOUT_LINES = 200;
+const STDOUT_TRUNCATED_NOTICE = '\n... (output truncated)';
+
+const TIMEOUT_PIP_MESSAGE =
+  "Whoa! Your spell got stuck in an endless loop (like a 'while' loop that never stops)! " +
+  "I hit the emergency stop after 3 seconds so Pyria didn't freeze. " +
+  "Check that your 'while' loop updates its counter (like count += 1) or reaches a stopping condition, then try again!";
+
+function appendCappedStdout(current, chunk) {
+  if (!chunk || typeof chunk !== 'string') return current;
+  if (current.endsWith(STDOUT_TRUNCATED_NOTICE)) return current;
+  let combined = current + chunk;
+  const lines = combined.split('\n');
+  let truncated = false;
+  if (lines.length > MAX_PARTIAL_STDOUT_LINES + 1) {
+    combined = lines.slice(0, MAX_PARTIAL_STDOUT_LINES).join('\n');
+    truncated = true;
+  }
+  if (combined.length > MAX_PARTIAL_STDOUT_BYTES) {
+    combined = combined.slice(0, MAX_PARTIAL_STDOUT_BYTES);
+    truncated = true;
+  }
+  return truncated ? combined + STDOUT_TRUNCATED_NOTICE : combined;
+}
 
 /**
  * Translates raw Python errors into warm, encouraging, kid-readable Pip messages.
@@ -19,10 +44,7 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
 
   if (result.timedOut) {
     return {
-      pipMessage:
-        "Whoa! Your spell got stuck in an endless loop (like 'while True:')! " +
-        "I hit the emergency stop after 3 seconds so Pyria didn't freeze. " +
-        'Check your loop and try again!',
+      pipMessage: TIMEOUT_PIP_MESSAGE,
       rawTraceback: null,
     };
   }
@@ -34,6 +56,10 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
   let pipMessage = '';
 
   switch (type) {
+    case 'TimeoutError':
+      pipMessage = TIMEOUT_PIP_MESSAGE;
+      break;
+
     case 'SyntaxError':
       if (msg.includes('unterminated string') || msg.includes('EOL while scanning')) {
         pipMessage = `Oops${linePart}! It looks like a quote mark (" or ') was opened but never closed. Wrap your text in matching quotes!`;
@@ -336,7 +362,7 @@ export class PyRunner {
         sanitizeSandboxResult(req.mode, {
           passed: false,
           timedOut: true,
-          stdout: '',
+          stdout: req.partialStdout || '',
           stderr: '',
           errorType: 'TimeoutError',
           errorMessage: 'Execution exceeded 3 seconds',
@@ -399,6 +425,12 @@ export class PyRunner {
       this._abortPending('SandboxError', this.initError);
       return;
     }
+    if (msg.type === 'stdout' && this.pending.has(msg.id)) {
+      const req = this.pending.get(msg.id);
+      if (!req.sent || typeof msg.chunk !== 'string' || !msg.chunk) return;
+      req.partialStdout = appendCappedStdout(req.partialStdout || '', msg.chunk);
+      return;
+    }
     if (msg.type === 'result' && this.pending.has(msg.id)) {
       const req = this.pending.get(msg.id);
       if (!req.sent) return;
@@ -416,11 +448,11 @@ export class PyRunner {
       const id = this.nextId++;
       if (this.ready) {
         const timer = this._scheduleExecutionTimeout(id);
-        this.pending.set(id, { resolve, timer, mode, sent: true });
+        this.pending.set(id, { resolve, timer, mode, sent: true, partialStdout: '' });
         this.port.postMessage({ type: 'run', id, mode, payload });
       } else {
         const timer = this._scheduleBootTimeout(id);
-        this.pending.set(id, { resolve, timer, mode, sent: false });
+        this.pending.set(id, { resolve, timer, mode, sent: false, partialStdout: '' });
         this.bootQueue.push({ id, mode, payload });
       }
     });

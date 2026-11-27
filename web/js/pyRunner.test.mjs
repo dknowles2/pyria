@@ -1,5 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 // Minimal DOM & MessageChannel harness to test PyRunner lifecycle, queueing,
 // timeout respawn, stale-generation filtering, and untrusted-result sanitization.
@@ -78,7 +82,7 @@ function installMockDom() {
 }
 
 // Import before installing mock document so the module singleton does not spawn an extra channel.
-const { PyRunner } = await import('./pyRunner.js');
+const { PyRunner, translateErrorForPip } = await import('./pyRunner.js');
 const { iframes } = installMockDom();
 
 async function flushMicrotasks() {
@@ -236,4 +240,99 @@ test('sanitizes untrusted/malformed sandbox results without throwing', async () 
   assert.deepEqual(res.stats, { charisma: 0, courage: 3 });
 
   runner._teardownSandbox();
+});
+
+test('#94: preserves streamed partial stdout on timeout and enforces cap', async () => {
+  const runner = new PyRunner({ executionTimeoutMs: 70, bootTimeoutMs: 200 });
+  await flushMicrotasks();
+
+  const iframe = iframes.at(-1);
+  const port = iframe.receivedPorts[0];
+  port.postMessage({ type: 'ready' });
+  await flushMicrotasks();
+
+  port.onmessage = (ev) => {
+    if (ev.data.type !== 'run') return;
+    port.postMessage({ type: 'stdout', id: ev.data.id, chunk: 'tick 0\ntick 1\n' });
+    port.postMessage({ type: 'stdout', id: ev.data.id, chunk: 'tick 2\n' });
+    // Never sends 'result' -> triggers execution timeout
+  };
+
+  const res = await runner.runTrial('while True:\n  print("tick")', '');
+  assert.equal(res.passed, false);
+  assert.equal(res.timedOut, true);
+  assert.equal(res.errorType, 'TimeoutError');
+  assert.equal(res.stdout, 'tick 0\ntick 1\ntick 2\n');
+  assert.match(res.pipMessage, /while/i);
+  assert.match(res.pipMessage, /endless loop/i);
+
+  // Test cap truncation on huge streamed output
+  await flushMicrotasks();
+  const port2 = iframes.at(-1).receivedPorts[0];
+  port2.postMessage({ type: 'ready' });
+  await flushMicrotasks();
+  port2.onmessage = (ev) => {
+    if (ev.data.type !== 'run') return;
+    const manyLines = Array.from({ length: 260 }, (_, i) => `line ${i}`).join('\n') + '\n';
+    port2.postMessage({ type: 'stdout', id: ev.data.id, chunk: manyLines });
+  };
+  const capped = await runner.runTrial('while True:\n  print("x")', '');
+  assert.equal(capped.timedOut, true);
+  assert.ok(capped.stdout.includes('... (output truncated)'));
+  assert.ok(capped.stdout.split('\n').length <= 205);
+
+  runner._teardownSandbox();
+});
+
+test('#94: translateErrorForPip handles TimeoutError even without timedOut flag', () => {
+  const timeoutRes = translateErrorForPip({
+    passed: false,
+    timedOut: false,
+    errorType: 'TimeoutError',
+    errorMessage: 'Execution exceeded 3 seconds',
+  });
+  assert.match(timeoutRes.pipMessage, /endless loop/i);
+  assert.match(timeoutRes.pipMessage, /while/i);
+});
+
+function extractSandboxPythonConstants() {
+  const dir = path.dirname(fileURLToPath(import.meta.url));
+  const html = fs.readFileSync(path.join(dir, '..', 'py-sandbox.html'), 'utf8');
+  const extract = (name) => {
+    const marker = `const ${name} = \``;
+    const start = html.indexOf(marker);
+    assert.notEqual(start, -1, `Could not find ${name} in py-sandbox.html`);
+    let i = start + marker.length;
+    let raw = '';
+    while (i < html.length) {
+      if (html[i] === '`' && html[i - 1] !== '\\') break;
+      raw += html[i];
+      i += 1;
+    }
+    return raw.replace(/\\\\/g, '\\');
+  };
+  return {
+    guard: extract('SANDBOX_GUARD_PY'),
+    trial: extract('TRIAL_HARNESS_PY'),
+  };
+}
+
+test('#94: embedded Python streaming buffer emits chunks and caps huge output', () => {
+  const { guard, trial } = extractSandboxPythonConstants();
+  const pyTestScript = `
+${guard}
+${trial}
+
+chunks = []
+r_stream = json.loads(_pyria_run_trial(json.dumps({
+    "studentCode": "for i in range(250):\\n    print('line', i)",
+    "testCode": "",
+}), emit_stdout=lambda c: chunks.append(c)))
+assert r_stream["passed"], r_stream
+assert len(chunks) > 0
+assert "... (output truncated)" in r_stream["stdout"]
+print("STREAMING_BUFFER_OK")
+`;
+  const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });
+  assert.ok(out.includes('STREAMING_BUFFER_OK'));
 });
