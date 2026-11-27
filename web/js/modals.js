@@ -813,6 +813,7 @@ export class ModalManager {
               <div class="pip-console-header">🐉 Not quite — try another choice!</div>
               <div class="pip-console-body">${renderSafeMarkdown(choice.explanation || 'Look closely at each line of the Python spell and try again!')}</div>
             `;
+            outputEl.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
           }
         });
       });
@@ -916,6 +917,7 @@ export class ModalManager {
               <div class="pip-console-header">🐉 Not quite — try another choice!</div>
               <div class="pip-console-body">${renderSafeMarkdown(choice.explanation || 'Look closely at the Python example and try again!')}</div>
             `;
+            outputEl.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
           }
         });
       });
