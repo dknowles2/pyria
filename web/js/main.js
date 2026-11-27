@@ -315,6 +315,7 @@ function clearTrialDraft(save, trialId, { skipPersist = false } = {}) {
 // ==================== PERSISTENCE ====================
 let persistQueue = Promise.resolve();
 let sessionExpiredHandling = false;
+let lastExpiredSaveId = null;
 
 function isActiveSaveGuest(save) {
   if (!save) return isGuestMode(state.me);
@@ -336,10 +337,12 @@ function migrateLocalDrafts(oldSaveId, newSaveId) {
 }
 
 async function handleHeroSessionExpired(snapshot) {
+  const source = snapshot || state.activeSave;
   if (sessionExpiredHandling) return;
+  if (source?.id && source.id === lastExpiredSaveId) return;
   sessionExpiredHandling = true;
+  if (source?.id) lastExpiredSaveId = source.id;
   try {
-    const source = snapshot || state.activeSave;
     if (draftPersistTimer) {
       clearTimeout(draftPersistTimer);
       draftPersistTimer = null;
@@ -357,12 +360,13 @@ async function handleHeroSessionExpired(snapshot) {
     renderAccountIdentityBar();
     renderAdminRealmJump();
     updateHud();
-    if (state.modals) {
+    const modalAlreadyOpen = !$('#modal-backdrop')?.classList.contains('hidden');
+    if (state.modals && !modalAlreadyOpen) {
       state.modals.openHeroSessionExpiredModal({
         heroName: source?.heroName,
         onEnterHeroCode: () => openEnterHeroCodeFlow(),
       });
-    } else {
+    } else if (!modalAlreadyOpen) {
       showToast('Your Hero Code changed — progress backed up locally. Enter your new Hero Code!');
     }
   } finally {
@@ -738,9 +742,26 @@ async function upgradeGuestSaveToHeroCode(targetSave) {
     }
     // Swap activeSave and migrate local drafts BEFORE deleting the guest save so
     // any concurrent persistSave() cannot write back to the old guest ID.
+    let needsPostUpgradeSync = false;
     if (state.activeSave && state.activeSave.id === oldGuestId) {
-      state.activeSave = res.save;
-      state.world?.setSave(res.save);
+      // Preserve any in-memory progress made while createHeroCode() was in flight.
+      const mergedCloudSave = {
+        ...state.activeSave,
+        ...res.save,
+        byteShards: Math.max(Number(state.activeSave.byteShards) || 0, Number(res.save.byteShards) || 0),
+        solvedTrials: [...new Set([...(state.activeSave.solvedTrials || []), ...(res.save.solvedTrials || [])])],
+        completedTrials: [...new Set([...(state.activeSave.completedTrials || []), ...(res.save.completedTrials || [])])],
+        openedChests: [...new Set([...(state.activeSave.openedChests || []), ...(res.save.openedChests || [])])],
+        foundEasterEggs: [...new Set([...(state.activeSave.foundEasterEggs || []), ...(res.save.foundEasterEggs || [])])],
+        rescuedDragons: [...new Set([...(state.activeSave.rescuedDragons || []), ...(res.save.rescuedDragons || [])])],
+        ownedUnlockIds: [...new Set([...(state.activeSave.ownedUnlockIds || []), ...(res.save.ownedUnlockIds || [])])],
+        seenCutscenes: [...new Set([...(state.activeSave.seenCutscenes || []), ...(res.save.seenCutscenes || [])])],
+        position: state.activeSave.position || res.save.position || null,
+        isGuest: false,
+      };
+      state.activeSave = mergedCloudSave;
+      state.world?.setSave(mergedCloudSave);
+      needsPostUpgradeSync = true;
     }
     migrateLocalDrafts(oldGuestId, res.save.id);
     if (String(oldGuestId || '').startsWith('guest-')) {
@@ -756,6 +777,9 @@ async function upgradeGuestSaveToHeroCode(targetSave) {
       if (freshConfig.heroPreferences) {
         state.gameConfig.heroPreferences = freshConfig.heroPreferences;
       }
+    }
+    if (needsPostUpgradeSync) {
+      persistSave().catch(() => {});
     }
     updateHud();
     renderAccountIdentityBar();
@@ -782,6 +806,7 @@ function openEnterHeroCodeFlow() {
       if (!res.save) {
         throw new Error('Could not load hero for that code.');
       }
+      lastExpiredSaveId = null;
       const [freshMe, freshConfig] = await Promise.all([
         fetchMe(),
         fetchConfig().catch(() => null),
@@ -1004,6 +1029,14 @@ function buildVisualHeroPickers() {
 
 async function createHeroForCurrentAuth(newSavePayload) {
   if (state.me?.mode === 'cloudflare' && state.me?.auth?.role === 'hero') {
+    const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
+    if (
+      !confirm(
+        `This will sign out ${activeHeroLabel} on this device. Make sure you have your Hero Code written down! Continue?`
+      )
+    ) {
+      return null;
+    }
     // A child hero cookie is scoped to one saveId and cannot POST /api/saves.
     // Switch cleanly to Guest Mode so a sibling can start a new adventure locally.
     await logoutSession('hero').catch(() => {});
@@ -1046,6 +1079,7 @@ async function launchAdventureFromHeroForge(errorEl) {
 
   try {
     const created = await createHeroForCurrentAuth(newSavePayload);
+    if (!created) return false;
     audio.playSuccess();
     await enterOverworld(created);
     showToast(`Welcome to Pyria, ${created.heroName}!`);
@@ -1212,6 +1246,7 @@ async function runCharCreateCode() {
       }
       try {
         const created = await createHeroForCurrentAuth(newSavePayload);
+        if (!created) return;
         await enterOverworld(created);
         showToast(`Welcome to Pyria, ${created.heroName}!`);
       } catch (err) {
@@ -1715,6 +1750,14 @@ function wireControls() {
 
   $('#btn-hero-signout')?.addEventListener('click', async () => {
     audio.playClick();
+    const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
+    if (
+      !confirm(
+        `Sign out ${activeHeroLabel} on this device? Make sure you have your Hero Code written down so you can sign back in!`
+      )
+    ) {
+      return;
+    }
     try {
       await logoutSession('hero');
     } catch (err) {
