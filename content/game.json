@@ -14,7 +14,9 @@
   },
   "eraOrder": [
     "era-01-8bit",
-    "era-02-16bit"
+    "era-02-16bit",
+    "era-03-32bit",
+    "era-04-64bit"
   ],
   "npcs": [
     {
@@ -200,6 +202,83 @@
       "minEra": "era-02-16bit",
       "maxBasicRealm": 16,
       "description": "Modeling dragons and gear with simple Python classes and __init__."
+    },
+    {
+      "id": "f_strings",
+      "label": "f-Strings",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 12,
+      "description": "Formatting strings cleanly with f\"...{var}...\"."
+    },
+    {
+      "id": "tuples",
+      "label": "Tuples",
+      "minEra": "era-03-32bit",
+      "maxBasicRealm": 2,
+      "description": "Immutable ordered collections like (x, y, z) and tuple unpacking."
+    },
+    {
+      "id": "coords_3d",
+      "label": "3D Coordinates (x, y, z)",
+      "minEra": "era-03-32bit",
+      "maxBasicRealm": 2,
+      "description": "Working with 3D positions and elevation math in isometric and 3D worlds."
+    },
+    {
+      "id": "list_comprehensions",
+      "label": "List Comprehensions",
+      "minEra": "era-03-32bit",
+      "maxBasicRealm": 3,
+      "description": "Building transformed or filtered lists in a single clean Python expression."
+    },
+    {
+      "id": "dictionaries_nested",
+      "label": "Nested Dictionaries",
+      "minEra": "era-03-32bit",
+      "maxBasicRealm": 4,
+      "description": "Storing structured rooms, graphs, and entities inside nested dicts."
+    },
+    {
+      "id": "sets",
+      "label": "Sets",
+      "minEra": "era-03-32bit",
+      "maxBasicRealm": 4,
+      "description": "Deduplicating values and computing set intersections/unions."
+    },
+    {
+      "id": "error_handling",
+      "label": "Try / Except",
+      "minEra": "era-03-32bit",
+      "maxBasicRealm": 4,
+      "description": "Catching runtime exceptions safely with try and except blocks."
+    },
+    {
+      "id": "class_inheritance",
+      "label": "Class Inheritance",
+      "minEra": "era-04-64bit",
+      "maxBasicRealm": 3,
+      "description": "Creating specialized subclasses with super() and method overrides."
+    },
+    {
+      "id": "world_scripting_3d",
+      "label": "3D World Scripting",
+      "minEra": "era-04-64bit",
+      "maxBasicRealm": 4,
+      "description": "Scripting 3D entities, cameras, and movement using Python classes."
+    },
+    {
+      "id": "debugging",
+      "label": "Debugging & Assertions",
+      "minEra": "era-04-64bit",
+      "maxBasicRealm": 4,
+      "description": "Finding off-by-one bugs and verifying invariants with assert."
+    },
+    {
+      "id": "sorting_lambdas",
+      "label": "Sorting & Lambdas",
+      "minEra": "era-04-64bit",
+      "maxBasicRealm": 4,
+      "description": "Sorting objects and 3D polygons with sorted(..., key=lambda ...)."
     }
   ]
 }

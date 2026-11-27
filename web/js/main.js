@@ -13,15 +13,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261127b';
-import { audio } from './audio.js?v=20261127b';
-import { music, resolveRegionTheme } from './music.js?v=20261127b';
-import { pyRunner } from './pyRunner.js?v=20261127b';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127b';
-import { SpriteManager } from './sprites.js?v=20261127b';
-import { WorldEngine } from './world.js?v=20261127b';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127b';
-import { playCutscene } from './cutscene.js?v=20261127b';
+} from './api.js?v=20261127c';
+import { audio } from './audio.js?v=20261127c';
+import { music, resolveRegionTheme } from './music.js?v=20261127c';
+import { pyRunner } from './pyRunner.js?v=20261127c';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127c';
+import { SpriteManager } from './sprites.js?v=20261127c';
+import { WorldEngine } from './world.js?v=20261127c';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127c';
+import { playCutscene } from './cutscene.js?v=20261127c';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -148,16 +148,60 @@ function getNpc(npcId) {
   );
 }
 
+const VISUAL_ERAS = ['8bit', '16bit', '32bit', '64bit'];
+const VISUAL_ERA_LABELS = {
+  '8bit': '8-Bit NES',
+  '16bit': '16-Bit SNES',
+  '32bit': '32-Bit Isometric',
+  '64bit': '64-Bit N64 3D',
+};
+const VISUAL_ERA_SHORT = {
+  '8bit': '8-Bit',
+  '16bit': '16-Bit',
+  '32bit': '32-Bit',
+  '64bit': '64-Bit',
+};
+const ERA_TO_VISUAL = {
+  'era-01-8bit': '8bit',
+  'era-02-16bit': '16bit',
+  'era-03-32bit': '32bit',
+  'era-04-64bit': '64bit',
+};
+
+function normalizeVisualEra(v) {
+  return VISUAL_ERAS.includes(v) ? v : '8bit';
+}
+
+function getAllLoadedEras() {
+  if (state.eras && state.eras.size > 0) return [...state.eras.values()];
+  return state.era ? [state.era] : [];
+}
+
+function getEraAndRealm(realmId) {
+  for (const era of getAllLoadedEras()) {
+    const found = (era.realms || []).find((r) => r.id === realmId);
+    if (found) return { era, realm: found };
+  }
+  const fallbackEra = state.era || getAllLoadedEras()[0] || null;
+  return { era: fallbackEra, realm: fallbackEra?.realms?.[0] || null };
+}
+
 function getRealm(realmId) {
-  return (state.era?.realms || []).find((r) => r.id === realmId) || state.era?.realms?.[0];
+  for (const era of getAllLoadedEras()) {
+    const found = (era.realms || []).find((r) => r.id === realmId);
+    if (found) return found;
+  }
+  return state.era?.realms?.[0] || null;
 }
 
 function getTrial(trialId) {
-  for (const realm of state.era?.realms || []) {
-    const found = (realm.trials || []).find((t) => t.id === trialId);
-    if (found) return { trial: found, realm };
+  for (const era of getAllLoadedEras()) {
+    for (const realm of era.realms || []) {
+      const found = (realm.trials || []).find((t) => t.id === trialId);
+      if (found) return { trial: found, realm, era };
+    }
   }
-  return { trial: null, realm: null };
+  return { trial: null, realm: null, era: null };
 }
 
 // ==================== TRIAL DRAFT AUTO-SAVE ====================
@@ -340,9 +384,9 @@ function updateHud() {
   if (!save) return;
 
   $('#hud-hero-name').textContent = save.heroName || 'Code-Tamer';
-  const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
-  $('#hud-era-badge').textContent = eraKey === '16bit' ? '16-Bit View' : '8-Bit Era';
-  $('#btn-hud-era-toggle').textContent = eraKey === '16bit' ? '16-Bit' : '8-Bit';
+  const eraKey = normalizeVisualEra(save.visualEra);
+  $('#hud-era-badge').textContent = VISUAL_ERA_LABELS[eraKey] || '8-Bit NES';
+  $('#btn-hud-era-toggle').textContent = VISUAL_ERA_SHORT[eraKey] || '8-Bit';
   $('#hud-realm-name').textContent = state.activeRealm?.name || 'Whispering Meadow';
   $('#hud-shards').textContent = String(save.byteShards ?? 0);
   $('#btn-hud-mute').textContent = audio.isMuted() ? '🔇' : '🔊';
@@ -853,6 +897,8 @@ async function refreshLiveContent() {
     if (config?.game) state.gameConfig = config.game;
     if (config?.catalog) state.catalog = config.catalog;
     if (era) {
+      if (!state.eras) state.eras = new Map();
+      state.eras.set(era.id, era);
       state.era = era;
       if (state.activeRealm) {
         const refreshedRealm = (era.realms || []).find((r) => r.id === state.activeRealm.id);
@@ -865,8 +911,20 @@ async function refreshLiveContent() {
 }
 
 async function loadRealm(realmId, spawnOverride = null) {
+  const { era: targetEra, realm: foundRealm } = getEraAndRealm(realmId);
+  if (targetEra && state.activeSave) {
+    const prevEraId = state.activeSave.eraId;
+    state.era = targetEra;
+    state.activeSave.eraId = targetEra.id;
+    if (prevEraId && prevEraId !== targetEra.id) {
+      const upgradedVisual = ERA_TO_VISUAL[targetEra.id];
+      if (upgradedVisual) {
+        state.activeSave.visualEra = upgradedVisual;
+      }
+    }
+  }
   await refreshLiveContent();
-  const realm = getRealm(realmId);
+  const realm = getRealm(realmId) || foundRealm;
   if (!realm) return;
   state.activeRealm = realm;
   state.activeSave.realmId = realm.id;
@@ -877,6 +935,8 @@ async function loadRealm(realmId, spawnOverride = null) {
     state.mapsCache.set(realm.id, mapData);
   }
   state.activeMap = mapData;
+  const visualEra = normalizeVisualEra(state.activeSave.visualEra);
+  state.world.setEraKey(visualEra);
   state.world.loadMap(mapData, state.activeSave, spawnOverride);
   const startX = Math.floor(state.world.hero.x);
   const startY = Math.floor(state.world.hero.y);
@@ -884,9 +944,9 @@ async function loadRealm(realmId, spawnOverride = null) {
     (r) => startX >= r.x && startX < r.x + r.width && startY >= r.y && startY < r.y + r.height
   );
   music.setTheme(resolveRegionTheme(startRegion?.id, realm.id), { immediate: true });
-  music.setEra(state.activeSave.visualEra === '16bit' ? '16bit' : '8bit');
+  music.setEra(visualEra);
   updateHud();
-  showToast(`Entered ${realm.name}!`);
+  showToast(`Entered ${realm.name} (${VISUAL_ERA_LABELS[visualEra]})!`);
 }
 
 async function enterOverworld(save) {
@@ -1199,8 +1259,8 @@ async function handleEntityInteract(entity) {
     const currentRealm = state.activeRealm;
     const targetRealm = getRealm(entity.refId);
     const isForwardPortal =
-      Boolean(entity.requiredTrialId) ||
-      (targetRealm && currentRealm && Number(targetRealm.number) > Number(currentRealm.number));
+      !String(entity.id || '').startsWith('portal-back-') &&
+      Boolean(entity.requiredTrialId);
 
     if (isForwardPortal && currentRealm?.dragon?.id && !rescued.has(currentRealm.dragon.id)) {
       audio.playError();
@@ -1351,11 +1411,13 @@ function wireControls() {
   $('#btn-hud-era-toggle').addEventListener('click', async () => {
     if (!state.activeSave) return;
     audio.playClick();
-    state.activeSave.visualEra = state.activeSave.visualEra === '16bit' ? '8bit' : '16bit';
-    state.world.setEraKey(state.activeSave.visualEra);
-    music.setEra(state.activeSave.visualEra);
+    const curr = normalizeVisualEra(state.activeSave.visualEra);
+    const next = VISUAL_ERAS[(VISUAL_ERAS.indexOf(curr) + 1) % VISUAL_ERAS.length];
+    state.activeSave.visualEra = next;
+    state.world.setEraKey(next);
+    music.setEra(next);
     updateHud();
-    showToast(`Switched graphics & music to ${state.activeSave.visualEra === '16bit' ? '16-Bit SNES' : '8-Bit NES'} style!`);
+    showToast(`Switched graphics & music to ${VISUAL_ERA_LABELS[next]}!`);
     await persistSave();
   });
 
@@ -1558,20 +1620,29 @@ function wireControls() {
 // ==================== BOOTSTRAP ====================
 async function init() {
   try {
-    const [me, config, era, spriteManifest, tilesetManifest] = await Promise.all([
+    const [me, config, spriteManifest, tilesetManifest] = await Promise.all([
       fetchMe(),
       fetchConfig(),
-      fetchEra('era-01-8bit'),
       fetchSpriteManifest(),
       fetchTilesetManifest(),
     ]);
 
+    const eraOrder = config.game?.eraOrder || ['era-01-8bit', 'era-02-16bit', 'era-03-32bit', 'era-04-64bit'];
+    const loadedEras = await Promise.all(
+      eraOrder.map((eid) => fetchEra(eid).catch(() => null))
+    );
+    state.eras = new Map();
+    for (const e of loadedEras) {
+      if (e && e.id) state.eras.set(e.id, e);
+    }
+
     state.me = me || { authenticated: false, email: null, isAdmin: false, accounts: [] };
     state.gameConfig = config.game;
     state.catalog = config.catalog;
-    state.era = era;
+    state.era = state.eras.get('era-01-8bit') || [...state.eras.values()][0] || null;
     state.sprites = new SpriteManager(spriteManifest, tilesetManifest);
     state.sprites.preloadCore('8bit');
+    state.sprites.preloadCore('16bit');
     renderAccountIdentityBar();
 
     state.modals = new ModalManager($('#modal-backdrop'), $('#modal-content'), {

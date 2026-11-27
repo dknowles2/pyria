@@ -1,6 +1,7 @@
-// Crisp HTML5 Canvas Overworld Engine for Pyria
+// Crisp HTML5 Canvas Overworld Engine for Pyria (8-Bit, 16-Bit, 32-Bit Isometric 2.5D, 64-Bit N64 3D)
 
-import { audio } from './audio.js';
+import { audio } from './audio.js?v=20261127c';
+import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127c';
 
 const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
@@ -263,21 +264,25 @@ export class WorldEngine {
     this.setVirtualDirection(dir);
   }
 
+  normalizeEraKey(eraKey) {
+    return ['8bit', '16bit', '32bit', '64bit'].includes(eraKey) ? eraKey : '8bit';
+  }
+
   setEraKey(eraKey) {
-    this.eraKey = eraKey === '16bit' ? '16bit' : '8bit';
+    this.eraKey = this.normalizeEraKey(eraKey);
     this.sprites.preloadCore(this.eraKey);
   }
 
   setSave(save) {
     this.save = save;
-    this.eraKey = save?.visualEra === '16bit' ? '16bit' : '8bit';
+    this.eraKey = this.normalizeEraKey(save?.visualEra);
     this.sprites.preloadCore(this.eraKey);
   }
 
   loadMap(mapData, save, spawnOverride = null) {
     this.map = mapData;
     this.save = save;
-    this.eraKey = save?.visualEra === '16bit' ? '16bit' : '8bit';
+    this.eraKey = this.normalizeEraKey(save?.visualEra);
     this.sprites.preloadCore(this.eraKey);
 
     const startX = (spawnOverride?.x ?? mapData.spawn.x) + 0.5;
@@ -592,6 +597,18 @@ export class WorldEngine {
 
     const camX = Math.round(this.camera.x);
     const camY = Math.round(this.camera.y);
+
+    // 32-Bit Isometric 2.5D & 64-Bit Nintendo 64 3D Era renderers
+    if (this.eraKey === '32bit') {
+      renderIsometric32Bit(this, ctx, dynamicOverrides, completed, openedChests, rescued);
+      this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
+      return;
+    }
+    if (this.eraKey === '64bit') {
+      renderN643D(this, ctx, dynamicOverrides, completed, openedChests, rescued);
+      this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
+      return;
+    }
 
     const startCol = Math.max(0, Math.floor(camX / TILE_PX) - 1);
     const endCol = Math.min(this.map.width - 1, Math.ceil((camX + this.canvas.width) / TILE_PX) + 1);

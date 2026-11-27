@@ -1,0 +1,1221 @@
+{
+  "id": "era-04-64bit",
+  "name": "The 64-Bit Era",
+  "subtitle": "The Nintendo 64 Realm of Polygons",
+  "bitCount": 64,
+  "visualStyle": "64-bit Nintendo 64 chunky Gouraud-shaded 3D",
+  "realms": [
+    {
+      "id": "realm-64-01-valley",
+      "number": 1,
+      "name": "Polygon Valley",
+      "dragon": {
+        "id": "dragon-polywing",
+        "name": "Polywing",
+        "title": "Soarer of Low-Poly Skies",
+        "element": "Sky",
+        "rescueDialogue": "WOOHOO! Welcome to full 64-Bit 3D! Your Dragon objects fly free over Polygon Valley!"
+      },
+      "miniVisualUpgrade": "Bits 33\u201340 Restored: Chunky Gouraud-shaded emerald hills, cobalt skies, and rotating 3D gems.",
+      "storyIntro": "Pyria bursts into classic Nintendo 64 3D! Rolling green low-poly hills stretch toward a distant castle \u2014 master Python Classes & 3D entity objects in Polygon Valley!",
+      "storyOutro": "Polywing glides across the valley and opens the massive stone gates to Gouraud Courtyard!",
+      "primaryConcepts": [
+        "classes_intro",
+        "world_scripting_3d"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-64-01-01",
+          "trialType": "multiple_choice",
+          "title": "3D Entity Objects!",
+          "storyPrompt": "In 64-Bit 3D games, every hero, dragon, and castle tower is a Python **object** with `(x, y, z)` position attributes! What will `h.y` be after `h.jump()`?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 160,
+          "unlockId": null,
+          "codeSnippet": "class Hero3D:\n    def __init__(self, x, y, z):\n        self.x, self.y, self.z = x, y, z\n    def jump(self):\n        self.z = self.z + 5\n\nh = Hero3D(1, 2, 0)\nh.jump()\nprint(h.z)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "5",
+              "explanation": "Super Mario 64 style! `h.jump()` raises `self.z` from `0` to `5`!"
+            },
+            {
+              "id": "b",
+              "label": "0",
+              "explanation": "`h.jump()` adds 5 to `self.z`!"
+            },
+            {
+              "id": "c",
+              "label": "2",
+              "explanation": "2 is `h.y`, not `h.z`!"
+            },
+            {
+              "id": "d",
+              "label": "Error",
+              "explanation": "That's clean 3D OOP!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-01-02",
+          "trialType": "fix_bug",
+          "title": "Fix the 3D Move Method!",
+          "storyPrompt": "Lord Null forgot `self` in `def move(dx, dy):`! Add `self` as the first parameter.",
+          "objective": "Change `def move(dx, dy):` to `def move(self, dx, dy):` so `p.x` becomes `5`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 170,
+          "unlockId": null,
+          "bugSummary": "Change `def move(dx, dy):` to `def move(self, dx, dy):` so `p.x` becomes `5`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\nclass Player:\n    def __init__(self, x):\n        self.x = x\n    def move(dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)\n",
+            "standard": "class Player:\n    def __init__(self, x):\n        self.x = x\n    def move(dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)\n",
+            "challenge": "class Player:\n    def __init__(self, x):\n        self.x = x\n    def move(dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)\n"
+          },
+          "referenceSolution": "class Player:\n    def __init__(self, x):\n        self.x = x\n    def move(self, dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)\n",
+          "testCode": "assert p.x == 5 and OUTPUT.strip() == \"5\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "class Player:\n    def __init__(self, x):\n        self.x = x\n    def move(self, dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)",
+            "tier3_walkthrough": "Update to:\nclass Player:\n    def __init__(self, x):\n        self.x = x\n    def move(self, dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-01-03",
+          "trialType": "code",
+          "title": "Build a 3D Gem Class",
+          "storyPrompt": "In Polygon Valley, try this new power! Define `class Gem3D:` with `__init__(self, x, y, z, value)` and `coords(self)` returning `(self.x, self.y, self.z)`. Print `Gem3D(2, 4, 6, 10).coords()`.",
+          "objective": "Define `class Gem3D:` with `__init__(self, x, y, z, value)` and `coords(self)` returning `(self.x, self.y, self.z)`. Print `Gem3D(2, 4, 6, 10).coords()`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 175,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\n# Print Gem3D(2, 4, 6, 10).coords()\n",
+            "standard": "# Define `class Gem3D:` with `__init__(self, x, y, z, value)` and `coords(self)` returning `(self.x, self.y, self.z)`. Print `Gem3D(2, 4, 6, 10).coords()`.\n\n",
+            "challenge": "# Build a 3D Gem Class\n\n"
+          },
+          "referenceSolution": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())\n",
+          "testCode": "assert Gem3D(2, 4, 6, 10).coords() == (2, 4, 6) and OUTPUT.strip() == \"(2, 4, 6)\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())",
+            "tier3_walkthrough": "Write:\nclass Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-01-04",
+          "trialType": "code",
+          "title": "Add a __str__ Display Method",
+          "storyPrompt": "Push deeper into Polygon Valley! `__str__` controls how an object prints! Give `Dragon(name, elem)` a `__str__` returning `f\"{self.name} ({self.elem})\"`, then `print(Dragon(\"Polywing\", \"Sky\"))`.",
+          "objective": "`__str__` controls how an object prints! Give `Dragon(name, elem)` a `__str__` returning `f\"{self.name} ({self.elem})\"`, then `print(Dragon(\"Polywing\", \"Sky\"))`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 180,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\n# Print Dragon(\"Polywing\", \"Sky\")\n",
+            "standard": "# `__str__` controls how an object prints! Give `Dragon(name, elem)` a `__str__` returning `f\"{self.name} ({self.elem})\"`, then `print(Dragon(\"Polywing\", \"Sky\"))`.\n\n",
+            "challenge": "# Add a __str__ Display Method\n\n"
+          },
+          "referenceSolution": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))\n",
+          "testCode": "assert str(Dragon(\"Polywing\", \"Sky\")) == \"Polywing (Sky)\" and OUTPUT.strip() == \"Polywing (Sky)\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))",
+            "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-01-05",
+          "trialType": "code",
+          "title": "Move a 3D Camera",
+          "storyPrompt": "You're right outside Polywing's vault! Define `class Camera:` with `z=10` and `zoom(self, delta)` updating `self.z += delta`. Create `cam = Camera()`, call `cam.zoom(-4)`, and `print(cam.z)`.",
+          "objective": "Define `class Camera:` with `z=10` and `zoom(self, delta)` updating `self.z += delta`. Create `cam = Camera()`, call `cam.zoom(-4)`, and `print(cam.z)`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 185,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\n# Print cam.z\n",
+            "standard": "# Define `class Camera:` with `z=10` and `zoom(self, delta)` updating `self.z += delta`. Create `cam = Camera()`, call `cam.zoom(-4)`, and `print(cam.z)`.\n\n",
+            "challenge": "# Move a 3D Camera\n\n"
+          },
+          "referenceSolution": "class Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\nprint(cam.z)\n",
+          "testCode": "assert cam.z == 6 and OUTPUT.strip() == \"6\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "class Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\nprint(cam.z)",
+            "tier3_walkthrough": "Write:\nclass Camera:\n    def __init__(self, z=10):\n        self.z = z\n    def zoom(self, delta):\n        self.z = self.z + delta\n\ncam = Camera()\ncam.zoom(-4)\nprint(cam.z)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-01-06",
+          "trialType": "code",
+          "title": "Launch Polywing Over the Valley (Boss)",
+          "storyPrompt": "Final lock before Polywing! Define `class Flyer:` with `alt=0` and `flap(self, lift)` adding `lift` to `self.alt`. Create `f = Flyer()`, call `f.flap(20)` twice; if `f.alt >= 40`, print `\"POLYWING FREE!\"`.",
+          "objective": "Define `class Flyer:` with `alt=0` and `flap(self, lift)` adding `lift` to `self.alt`. Create `f = Flyer()`, call `f.flap(20)` twice; if `f.alt >= 40`, print `\"POLYWING FREE!\"`.",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 200,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    # Print \"POLYWING FREE!\"\n    \n",
+            "standard": "# Define `class Flyer:` with `alt=0` and `flap(self, lift)` adding `lift` to `self.alt`. Create `f = Flyer()`, call `f.flap(20)` twice; if `f.alt >= 40`, print `\"POLYWING FREE!\"`.\n\n",
+            "challenge": "# Launch Polywing Over the Valley (Boss)\n\n"
+          },
+          "referenceSolution": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")\n",
+          "testCode": "assert f.alt == 40 and OUTPUT.strip() == \"POLYWING FREE!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Polywing!",
+            "tier2_pattern": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")",
+            "tier3_walkthrough": "Write:\nclass Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt = self.alt + lift\n\nf = Flyer()\nf.flap(20)\nf.flap(20)\nif f.alt >= 40:\n    print(\"POLYWING FREE!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-01-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Polywing's __str__ Riddle!",
+          "storyPrompt": "Hidden Rune in Polygon Valley! Which special method controls what `print(obj)` displays?",
+          "objective": "Which special method controls what `print(obj)` displays?",
+          "concepts": [
+            "classes_intro",
+            "world_scripting_3d"
+          ],
+          "shardReward": 180,
+          "unlockId": null,
+          "codeSnippet": "class Hero:\n    def __str__(self):\n        return \"Code-Tamer\"",
+          "choices": [
+            {
+              "id": "a",
+              "label": "__str__",
+              "explanation": "Low-poly perfection! `__str__` returns the human-readable text for `print()`!"
+            },
+            {
+              "id": "b",
+              "label": "__init__",
+              "explanation": "`__init__` runs when creating the object!"
+            },
+            {
+              "id": "c",
+              "label": "__print__",
+              "explanation": "Python uses `__str__`!"
+            },
+            {
+              "id": "d",
+              "label": "__len__",
+              "explanation": "`__len__` is for `len()`!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Polywing's 64-Bit Wings (+1 Hint)",
+            "description": "Hidden treasure from Polygon Valley!",
+            "unlockId": "bonus-trial-64-01",
+            "equipLayer": "tunic",
+            "equipKey": "violet"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-64-01-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Polygon Valley, {heroName}! My dimensional vault will keep Polywing sealed forever!"
+          },
+          {
+            "speaker": "Polywing",
+            "spriteKey": "bramble",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Polygon Valley to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Polywing!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Gah! Outcoded in Polygon Valley?! Wait until you face Gouraud Courtyard, {heroName}!"
+          },
+          {
+            "speaker": "Polywing",
+            "spriteKey": "bramble",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Polywing is free! Head through the portal to Gouraud Courtyard!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-64-02-courtyard",
+      "number": 2,
+      "name": "Gouraud Courtyard",
+      "dragon": {
+        "id": "dragon-vertex",
+        "name": "Vertex",
+        "title": "Architect of Castle Geometry",
+        "element": "Stone",
+        "rescueDialogue": "CRISP SHADING! Inheritance lets you reuse powers across whole families of dragons! Take Bits 41\u201348!"
+      },
+      "miniVisualUpgrade": "Bits 41\u201348 Restored: Smooth Gouraud-shaded castle arches, vertex-lit torches, and 3D fountain.",
+      "storyIntro": "Inside the grand 64-Bit castle courtyard, stone dragon Vertex teaches **Class Inheritance** \u2014 building specialized subclasses from a shared parent class!",
+      "storyOutro": "Vertex opens the spiral staircase up to Star-Mesh Observatory!",
+      "primaryConcepts": [
+        "class_inheritance",
+        "world_scripting_3d"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-64-02-01",
+          "trialType": "multiple_choice",
+          "title": "Class Inheritance!",
+          "storyPrompt": "When `class FireDragon(Dragon):` inherits from `Dragon`, it automatically gets all of `Dragon`'s methods AND can add its own! What will the code below print?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 175,
+          "unlockId": null,
+          "codeSnippet": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass FireDragon(Dragon):\n    def breath(self):\n        return f\"{self.name}: FIRE!\"\n\nprint(FireDragon(\"Vertex\").breath())",
+          "choices": [
+            {
+              "id": "a",
+              "label": "Vertex: FIRE!",
+              "explanation": "Vertex-perfect! `FireDragon` inherited `__init__` from `Dragon` and added `breath()`!"
+            },
+            {
+              "id": "b",
+              "label": "Dragon: FIRE!",
+              "explanation": "`self.name` is `\"Vertex\"`!"
+            },
+            {
+              "id": "c",
+              "label": "Error",
+              "explanation": "Subclasses inherit `__init__` automatically!"
+            },
+            {
+              "id": "d",
+              "label": "FIRE!",
+              "explanation": "It includes `self.name` too!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-02-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Subclass Parentheses!",
+          "storyPrompt": "Lord Null forgot `(Dragon)` after `class IceDragon` so it didn't inherit `roar()`!",
+          "objective": "Change `class IceDragon:` to `class IceDragon(Dragon):` so `IceDragon().roar()` prints `ROAR!`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 185,
+          "unlockId": null,
+          "bugSummary": "Change `class IceDragon:` to `class IceDragon(Dragon):` so `IceDragon().roar()` prints `ROAR!`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\nclass Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon:\n    pass\n\nprint(IceDragon().roar())\n",
+            "standard": "class Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon:\n    pass\n\nprint(IceDragon().roar())\n",
+            "challenge": "class Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon:\n    pass\n\nprint(IceDragon().roar())\n"
+          },
+          "referenceSolution": "class Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon(Dragon):\n    pass\n\nprint(IceDragon().roar())\n",
+          "testCode": "assert OUTPUT.strip() == \"ROAR!\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "class Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon(Dragon):\n    pass\n\nprint(IceDragon().roar())",
+            "tier3_walkthrough": "Update to:\nclass Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon(Dragon):\n    pass\n\nprint(IceDragon().roar())"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-02-03",
+          "trialType": "code",
+          "title": "Override a Method",
+          "storyPrompt": "In Gouraud Courtyard, try this new power! Subclass `class BossDragon(Dragon):` overriding `power(self)` to return `100` (while `Dragon.power` returns `20`). Print `BossDragon().power()`.",
+          "objective": "Subclass `class BossDragon(Dragon):` overriding `power(self)` to return `100` (while `Dragon.power` returns `20`). Print `BossDragon().power()`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 190,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\n# Print BossDragon().power()\n",
+            "standard": "# Subclass `class BossDragon(Dragon):` overriding `power(self)` to return `100` (while `Dragon.power` returns `20`). Print `BossDragon().power()`.\n\n",
+            "challenge": "# Override a Method\n\n"
+          },
+          "referenceSolution": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())\n",
+          "testCode": "assert Dragon().power() == 20 and BossDragon().power() == 100 and OUTPUT.strip() == \"100\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())",
+            "tier3_walkthrough": "Write:\nclass Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-02-04",
+          "trialType": "code",
+          "title": "Use super().__init__()",
+          "storyPrompt": "Push deeper into Gouraud Courtyard! Use `super().__init__(name)` inside `SkyDragon(Dragon)` to also store `self.altitude = altitude`. Print `SkyDragon(\"Gale\", 50).altitude`.",
+          "objective": "Use `super().__init__(name)` inside `SkyDragon(Dragon)` to also store `self.altitude = altitude`. Print `SkyDragon(\"Gale\", 50).altitude`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 195,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\n# Print SkyDragon(\"Gale\", 50).altitude\n",
+            "standard": "# Use `super().__init__(name)` inside `SkyDragon(Dragon)` to also store `self.altitude = altitude`. Print `SkyDragon(\"Gale\", 50).altitude`.\n\n",
+            "challenge": "# Use super().__init__()\n\n"
+          },
+          "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)\n",
+          "testCode": "assert SkyDragon(\"Gale\", 50).name == \"Gale\" and OUTPUT.strip() == \"50\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)",
+            "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-02-05",
+          "trialType": "code",
+          "title": "Polymorphic 3D World Tick",
+          "storyPrompt": "You're right outside Vertex's vault! Loop over `objs = [Torch(), Fountain()]` calling `o.tick()` and collecting results into `out`, then `print(out)`.",
+          "objective": "Loop over `objs = [Torch(), Fountain()]` calling `o.tick()` and collecting results into `out`, then `print(out)`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 200,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\n# Print out\n",
+            "standard": "# Loop over `objs = [Torch(), Fountain()]` calling `o.tick()` and collecting results into `out`, then `print(out)`.\n\n",
+            "challenge": "# Polymorphic 3D World Tick\n\n"
+          },
+          "referenceSolution": "class Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)\n",
+          "testCode": "assert out == [\"flicker\", \"splash\"] and OUTPUT.strip() == \"['flicker', 'splash']\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "class Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)",
+            "tier3_walkthrough": "Write:\nclass Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-02-06",
+          "trialType": "code",
+          "title": "Unlock Gouraud Courtyard (Vertex Boss)",
+          "storyPrompt": "Final lock before Vertex! Create `class Mesh:` with `verts` and subclass `class CastleMesh(Mesh):` with `double_verts(self)` returning `self.verts * 2`. If `CastleMesh(32).double_verts() == 64`, print `\"VERTEX FREE!\"`.",
+          "objective": "Create `class Mesh:` with `verts` and subclass `class CastleMesh(Mesh):` with `double_verts(self)` returning `self.verts * 2`. If `CastleMesh(32).double_verts() == 64`, print `\"VERTEX FREE!\"`.",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 215,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    # Print \"VERTEX FREE!\"\n    \n",
+            "standard": "# Create `class Mesh:` with `verts` and subclass `class CastleMesh(Mesh):` with `double_verts(self)` returning `self.verts * 2`. If `CastleMesh(32).double_verts() == 64`, print `\"VERTEX FREE!\"`.\n\n",
+            "challenge": "# Unlock Gouraud Courtyard (Vertex Boss)\n\n"
+          },
+          "referenceSolution": "class Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    print(\"VERTEX FREE!\")\n",
+          "testCode": "assert CastleMesh(32).double_verts() == 64 and OUTPUT.strip() == \"VERTEX FREE!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Vertex!",
+            "tier2_pattern": "class Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    print(\"VERTEX FREE!\")",
+            "tier3_walkthrough": "Write:\nclass Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    print(\"VERTEX FREE!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-02-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Vertex's super() Riddle!",
+          "storyPrompt": "Hidden Rune in Gouraud Courtyard! What does `super()` let a subclass do?",
+          "objective": "What does `super()` let a subclass do?",
+          "concepts": [
+            "class_inheritance",
+            "world_scripting_3d"
+          ],
+          "shardReward": 195,
+          "unlockId": null,
+          "codeSnippet": "super().__init__(name)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "Call a method from its parent class",
+              "explanation": "Gouraud gold! `super()` cleanly reuses the parent class's setup!"
+            },
+            {
+              "id": "b",
+              "label": "Delete the parent class",
+              "explanation": "It calls, never deletes!"
+            },
+            {
+              "id": "c",
+              "label": "Make the program faster",
+              "explanation": "It's for clean inheritance!"
+            },
+            {
+              "id": "d",
+              "label": "Create a loop",
+              "explanation": "No loop involved!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Vertex's Gouraud Shield (+1 Hint)",
+            "description": "Hidden treasure from Gouraud Courtyard!",
+            "unlockId": "bonus-trial-64-02",
+            "equipLayer": "tunic",
+            "equipKey": "amber"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-64-02-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Gouraud Courtyard, {heroName}! My dimensional vault will keep Vertex sealed forever!"
+          },
+          {
+            "speaker": "Vertex",
+            "spriteKey": "pebble",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Gouraud Courtyard to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Vertex!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Gah! Outcoded in Gouraud Courtyard?! Wait until you face Star-Mesh Observatory, {heroName}!"
+          },
+          {
+            "speaker": "Vertex",
+            "spriteKey": "pebble",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Vertex is free! Head through the portal to Star-Mesh Observatory!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-64-03-observatory",
+      "number": 3,
+      "name": "Star-Mesh Observatory",
+      "dragon": {
+        "id": "dragon-quasar",
+        "name": "Quasar",
+        "title": "Navigator of the Star-Mesh",
+        "element": "Starlight",
+        "rescueDialogue": "COSMIC! Sorting with `lambda` and verifying with `assert` makes you a true Code-Tamer! Take Bits 49\u201356!"
+      },
+      "miniVisualUpgrade": "Bits 49\u201356 Restored: Rotating 3D star dome and glowing constellation beams.",
+      "storyIntro": "At the top of the castle sits Star-Mesh Observatory! Sort 3D stars by depth (`z`) with `lambda` keys and squash Lord Null's stealthiest bugs with `assert`!",
+      "storyOutro": "Quasar aligns the observatory telescope straight onto Null's 64-Bit Sanctum!",
+      "primaryConcepts": [
+        "debugging",
+        "sorting_lambdas"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-64-03-01",
+          "trialType": "multiple_choice",
+          "title": "Sorting with lambda!",
+          "storyPrompt": "In 3D graphics, you sort objects back-to-front by depth `z` using `sorted(items, key=lambda x: x[\"z\"])`! Which star comes FIRST?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "debugging",
+            "sorting_lambdas"
+          ],
+          "shardReward": 190,
+          "unlockId": null,
+          "codeSnippet": "stars = [{\"n\": \"A\", \"z\": 9}, {\"n\": \"B\", \"z\": 2}]\nordered = sorted(stars, key=lambda s: s[\"z\"])\nprint(ordered[0][\"n\"])",
+          "choices": [
+            {
+              "id": "a",
+              "label": "B",
+              "explanation": "Painter's algorithm! `B` has the smallest `z` (2), so it sorts first!"
+            },
+            {
+              "id": "b",
+              "label": "A",
+              "explanation": "`A` has `z=9`, which is bigger than 2!"
+            },
+            {
+              "id": "c",
+              "label": "2",
+              "explanation": "`ordered[0][\"n\"]` prints the name!"
+            },
+            {
+              "id": "d",
+              "label": "Error",
+              "explanation": "`lambda` is a mini one-line function!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-03-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Off-by-One Bug!",
+          "storyPrompt": "Lord Null wrote `range(1, 5)` when we need to sum `1` through `5` (inclusive)! Fix `5` to `6` so `assert total == 15` passes.",
+          "objective": "Change `range(1, 5)` to `range(1, 6)` so `total` equals `15`.",
+          "concepts": [
+            "debugging",
+            "sorting_lambdas"
+          ],
+          "shardReward": 200,
+          "unlockId": null,
+          "bugSummary": "Change `range(1, 5)` to `range(1, 6)` so `total` equals `15`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\ntotal = sum(range(1, 5))\nassert total == 15\nprint(total)\n",
+            "standard": "total = sum(range(1, 5))\nassert total == 15\nprint(total)\n",
+            "challenge": "total = sum(range(1, 5))\nassert total == 15\nprint(total)\n"
+          },
+          "referenceSolution": "total = sum(range(1, 6))\nassert total == 15\nprint(total)\n",
+          "testCode": "assert total == 15 and OUTPUT.strip() == \"15\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "total = sum(range(1, 6))\nassert total == 15\nprint(total)",
+            "tier3_walkthrough": "Update to:\ntotal = sum(range(1, 6))\nassert total == 15\nprint(total)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-03-03",
+          "trialType": "code",
+          "title": "Sort Dragons by Power",
+          "storyPrompt": "In Star-Mesh Observatory, try this new power! Sort `dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]` by power descending (`key=lambda d: d[1], reverse=True`) into `ranked` and `print(ranked[0][0])`.",
+          "objective": "Sort `dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]` by power descending (`key=lambda d: d[1], reverse=True`) into `ranked` and `print(ranked[0][0])`.",
+          "concepts": [
+            "debugging",
+            "sorting_lambdas"
+          ],
+          "shardReward": 205,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\n# Print ranked[0][0]\n",
+            "standard": "# Sort `dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]` by power descending (`key=lambda d: d[1], reverse=True`) into `ranked` and `print(ranked[0][0])`.\n\n",
+            "challenge": "# Sort Dragons by Power\n\n"
+          },
+          "referenceSolution": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])\n",
+          "testCode": "assert ranked[0][0] == \"Nova\" and OUTPUT.strip() == \"Nova\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])",
+            "tier3_walkthrough": "Write:\ndragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-03-04",
+          "trialType": "code",
+          "title": "Write Your Own Self-Test",
+          "storyPrompt": "Push deeper into Star-Mesh Observatory! Define `def clamp(n, lo, hi): return max(lo, min(hi, n))`. Verify `clamp(15, 0, 10) == 10` and `print(clamp(15, 0, 10))`.",
+          "objective": "Define `def clamp(n, lo, hi): return max(lo, min(hi, n))`. Verify `clamp(15, 0, 10) == 10` and `print(clamp(15, 0, 10))`.",
+          "concepts": [
+            "debugging",
+            "sorting_lambdas"
+          ],
+          "shardReward": 210,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\n# Print clamp(15, 0, 10)\n",
+            "standard": "# Define `def clamp(n, lo, hi): return max(lo, min(hi, n))`. Verify `clamp(15, 0, 10) == 10` and `print(clamp(15, 0, 10))`.\n\n",
+            "challenge": "# Write Your Own Self-Test\n\n"
+          },
+          "referenceSolution": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))\n",
+          "testCode": "assert clamp(-5, 0, 10) == 0 and clamp(15, 0, 10) == 10 and OUTPUT.strip() == \"10\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))",
+            "tier3_walkthrough": "Write:\ndef clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-03-05",
+          "trialType": "code",
+          "title": "Back-to-Front Painter's Sort",
+          "storyPrompt": "You're right outside Quasar's vault! Sort `polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]` from FARTHEST to NEAREST (`reverse=True`) into `draw_order` and `print(draw_order[0][\"id\"])`.",
+          "objective": "Sort `polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]` from FARTHEST to NEAREST (`reverse=True`) into `draw_order` and `print(draw_order[0][\"id\"])`.",
+          "concepts": [
+            "debugging",
+            "sorting_lambdas"
+          ],
+          "shardReward": 215,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\n# Print draw_order[0][\"id\"]\n",
+            "standard": "# Sort `polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]` from FARTHEST to NEAREST (`reverse=True`) into `draw_order` and `print(draw_order[0][\"id\"])`.\n\n",
+            "challenge": "# Back-to-Front Painter's Sort\n\n"
+          },
+          "referenceSolution": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])\n",
+          "testCode": "assert draw_order[0][\"id\"] == \"far\" and OUTPUT.strip() == \"far\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])",
+            "tier3_walkthrough": "Write:\npolys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-03-06",
+          "trialType": "code",
+          "title": "Align Quasar's Star-Mesh (Boss)",
+          "storyPrompt": "Final lock before Quasar! Given `stars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]`, sort by `z` descending into `order`, assert `order[0][\"name\"] == \"Alpha\"`, and print `\"QUASAR FREE!\"`.",
+          "objective": "Given `stars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]`, sort by `z` descending into `order`, assert `order[0][\"name\"] == \"Alpha\"`, and print `\"QUASAR FREE!\"`.",
+          "concepts": [
+            "debugging",
+            "sorting_lambdas"
+          ],
+          "shardReward": 230,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "stars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]\norder = sorted(stars, key=lambda s: s[\"z\"], reverse=True)\nassert order[0][\"name\"] == \"Alpha\"\n# Print \"QUASAR FREE!\"\n",
+            "standard": "# Given `stars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]`, sort by `z` descending into `order`, assert `order[0][\"name\"] == \"Alpha\"`, and print `\"QUASAR FREE!\"`.\n\n",
+            "challenge": "# Align Quasar's Star-Mesh (Boss)\n\n"
+          },
+          "referenceSolution": "stars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]\norder = sorted(stars, key=lambda s: s[\"z\"], reverse=True)\nassert order[0][\"name\"] == \"Alpha\"\nprint(\"QUASAR FREE!\")\n",
+          "testCode": "assert order[0][\"name\"] == \"Alpha\" and OUTPUT.strip() == \"QUASAR FREE!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Quasar!",
+            "tier2_pattern": "stars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]\norder = sorted(stars, key=lambda s: s[\"z\"], reverse=True)\nassert order[0][\"name\"] == \"Alpha\"\nprint(\"QUASAR FREE!\")",
+            "tier3_walkthrough": "Write:\nstars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]\norder = sorted(stars, key=lambda s: s[\"z\"], reverse=True)\nassert order[0][\"name\"] == \"Alpha\"\nprint(\"QUASAR FREE!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-03-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Quasar's Lambda Riddle!",
+          "storyPrompt": "Hidden Rune in Star-Mesh Observatory! What does `(lambda x: x + 5)(10)` return?",
+          "objective": "What does `(lambda x: x + 5)(10)` return?",
+          "concepts": [
+            "debugging",
+            "sorting_lambdas"
+          ],
+          "shardReward": 210,
+          "unlockId": null,
+          "codeSnippet": "print((lambda x: x + 5)(10))",
+          "choices": [
+            {
+              "id": "a",
+              "label": "15",
+              "explanation": "Starlight! A `lambda` is a tiny anonymous function: 10 + 5 = 15!"
+            },
+            {
+              "id": "b",
+              "label": "5",
+              "explanation": "It adds 10 and 5!"
+            },
+            {
+              "id": "c",
+              "label": "50",
+              "explanation": "It uses `+`, not `*`!"
+            },
+            {
+              "id": "d",
+              "label": "Error",
+              "explanation": "Totally valid Python!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Quasar's Starlight Lens (+1 Hint)",
+            "description": "Hidden treasure from Star-Mesh Observatory!",
+            "unlockId": "bonus-trial-64-03",
+            "equipLayer": "tunic",
+            "equipKey": "navy"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-64-03-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Star-Mesh Observatory, {heroName}! My dimensional vault will keep Quasar sealed forever!"
+          },
+          {
+            "speaker": "Quasar",
+            "spriteKey": "glacier",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Star-Mesh Observatory to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Quasar!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Gah! Outcoded in Star-Mesh Observatory?! Wait until you face Null's 64-Bit Sanctum, {heroName}!"
+          },
+          {
+            "speaker": "Quasar",
+            "spriteKey": "glacier",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO! Quasar is free! Head through the portal to Null's 64-Bit Sanctum!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-64-04-sanctum",
+      "number": 4,
+      "name": "Null's 64-Bit Sanctum",
+      "dragon": {
+        "id": "dragon-aurelion",
+        "name": "Aurelion",
+        "title": "Sovereign of the 64th Bit",
+        "element": "Crown",
+        "rescueDialogue": "ALL 64 BITS RESTORED!! You defeated Lord Null across 8-Bit, 16-Bit, 32-Bit, and 64-Bit N64 3D! Hail the Grand Code-Tamer of Pyria!"
+      },
+      "miniVisualUpgrade": "Bit 64 Restored \u2014 GRAND 64-BIT VICTORY! Golden crown aura and sparkling sky fireworks across all of Pyria!",
+      "storyIntro": "At the summit of the 64-Bit Sanctum stands Lord Null's final low-poly fortress! Combine Classes, Inheritance, 3D Coordinates, Error Shields, and Sorting to free Aurelion!",
+      "storyOutro": "Aurelion's golden roar echoes across all four eras! Lord Null's Glitch Storm is defeated and the 64-Bit Crown is yours!",
+      "primaryConcepts": [
+        "classes_intro",
+        "class_inheritance",
+        "world_scripting_3d",
+        "debugging"
+      ],
+      "difficultyOverride": {
+        "mode": "standard",
+        "showRawTracebacks": true
+      },
+      "trials": [
+        {
+          "id": "trial-64-04-01",
+          "trialType": "multiple_choice",
+          "title": "64-Bit Grand Finale Check!",
+          "storyPrompt": "You've mastered 8-Bit, 16-Bit, 32-Bit, and 64-Bit Python! What will this combined class + comprehension print?",
+          "objective": "Read the Python snippet and tap the correct prediction.",
+          "concepts": [
+            "classes_intro",
+            "class_inheritance",
+            "world_scripting_3d",
+            "debugging"
+          ],
+          "shardReward": 250,
+          "unlockId": null,
+          "codeSnippet": "class Bit:\n    def __init__(self, v):\n        self.v = v\nbits = [Bit(16), Bit(48)]\nprint(sum(b.v for b in bits))",
+          "choices": [
+            {
+              "id": "a",
+              "label": "64",
+              "explanation": "ALL 64 BITS! `16 + 48 = 64`!"
+            },
+            {
+              "id": "b",
+              "label": "32",
+              "explanation": "Add 16 + 48!"
+            },
+            {
+              "id": "c",
+              "label": "2",
+              "explanation": "It sums `b.v`, not counts!"
+            },
+            {
+              "id": "d",
+              "label": "Error",
+              "explanation": "Clean generator sum!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip traces each line carefully!",
+            "tier2_pattern": "Check the values step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-04-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Sanctum Shield!",
+          "storyPrompt": "Lord Null broke `SanctumCore` by forgetting `self.` on `self.bits` inside `is_complete()`!",
+          "objective": "Change `return bits == 64` to `return self.bits == 64` so it prints `True`.",
+          "concepts": [
+            "classes_intro",
+            "class_inheritance",
+            "world_scripting_3d",
+            "debugging"
+          ],
+          "shardReward": 260,
+          "unlockId": null,
+          "bugSummary": "Change `return bits == 64` to `return self.bits == 64` so it prints `True`.",
+          "starterCode": {
+            "explorer": "# Fix the bug below:\nclass SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return bits == 64\n\nprint(SanctumCore(64).is_complete())\n",
+            "standard": "class SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return bits == 64\n\nprint(SanctumCore(64).is_complete())\n",
+            "challenge": "class SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return bits == 64\n\nprint(SanctumCore(64).is_complete())\n"
+          },
+          "referenceSolution": "class SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return self.bits == 64\n\nprint(SanctumCore(64).is_complete())\n",
+          "testCode": "assert SanctumCore(64).is_complete() is True and OUTPUT.strip() == \"True\"",
+          "hints": {
+            "tier1_nudge": "Pip points at the highlighted line!",
+            "tier2_pattern": "class SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return self.bits == 64\n\nprint(SanctumCore(64).is_complete())",
+            "tier3_walkthrough": "Update to:\nclass SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return self.bits == 64\n\nprint(SanctumCore(64).is_complete())"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-04-03",
+          "trialType": "code",
+          "title": "Script a 3D Spell Path",
+          "storyPrompt": "In Null's 64-Bit Sanctum, try this new power! Create `class Spell3D:` with `pos=(0, 0, 0)` and `step(self, dx, dy, dz)` updating `self.pos`. Start at `(1, 1, 1)`, step `(2, 3, 4)`, and `print(s.pos)`.",
+          "objective": "Create `class Spell3D:` with `pos=(0, 0, 0)` and `step(self, dx, dy, dz)` updating `self.pos`. Start at `(1, 1, 1)`, step `(2, 3, 4)`, and `print(s.pos)`.",
+          "concepts": [
+            "classes_intro",
+            "class_inheritance",
+            "world_scripting_3d",
+            "debugging"
+          ],
+          "shardReward": 265,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\n# Print s.pos\n",
+            "standard": "# Create `class Spell3D:` with `pos=(0, 0, 0)` and `step(self, dx, dy, dz)` updating `self.pos`. Start at `(1, 1, 1)`, step `(2, 3, 4)`, and `print(s.pos)`.\n\n",
+            "challenge": "# Script a 3D Spell Path\n\n"
+          },
+          "referenceSolution": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)\n",
+          "testCode": "assert s.pos == (3, 4, 5) and OUTPUT.strip() == \"(3, 4, 5)\"",
+          "hints": {
+            "tier1_nudge": "Pip cheers you on!",
+            "tier2_pattern": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)",
+            "tier3_walkthrough": "Write:\nclass Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-04-04",
+          "trialType": "code",
+          "title": "Filter & Sort the Dragon Council",
+          "storyPrompt": "Push deeper into Null's 64-Bit Sanctum! Given `council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]`, sort descending by `\"p\"` into `leaders` and `print(leaders[0][\"n\"])`.",
+          "objective": "Given `council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]`, sort descending by `\"p\"` into `leaders` and `print(leaders[0][\"n\"])`.",
+          "concepts": [
+            "classes_intro",
+            "class_inheritance",
+            "world_scripting_3d",
+            "debugging"
+          ],
+          "shardReward": 270,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\n# Print leaders[0][\"n\"]\n",
+            "standard": "# Given `council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]`, sort descending by `\"p\"` into `leaders` and `print(leaders[0][\"n\"])`.\n\n",
+            "challenge": "# Filter & Sort the Dragon Council\n\n"
+          },
+          "referenceSolution": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])\n",
+          "testCode": "assert leaders[0][\"n\"] == \"Aurelion\" and OUTPUT.strip() == \"Aurelion\"",
+          "hints": {
+            "tier1_nudge": "Pip double-checks your logic!",
+            "tier2_pattern": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])",
+            "tier3_walkthrough": "Write:\ncouncil = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-04-05",
+          "trialType": "code",
+          "title": "Shield Against Null's Final Glitch",
+          "storyPrompt": "You're right outside Aurelion's vault! Given `shards = [\"32\", \"null\", \"32\"]`, safely parse valid ints with `try/except ValueError`, sum into `crown_power`, and `print(crown_power)`.",
+          "objective": "Given `shards = [\"32\", \"null\", \"32\"]`, safely parse valid ints with `try/except ValueError`, sum into `crown_power`, and `print(crown_power)`.",
+          "concepts": [
+            "classes_intro",
+            "class_inheritance",
+            "world_scripting_3d",
+            "debugging"
+          ],
+          "shardReward": 275,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\n# Print crown_power\n",
+            "standard": "# Given `shards = [\"32\", \"null\", \"32\"]`, safely parse valid ints with `try/except ValueError`, sum into `crown_power`, and `print(crown_power)`.\n\n",
+            "challenge": "# Shield Against Null's Final Glitch\n\n"
+          },
+          "referenceSolution": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)\n",
+          "testCode": "assert crown_power == 64 and OUTPUT.strip() == \"64\"",
+          "hints": {
+            "tier1_nudge": "Pip sparks with excitement!",
+            "tier2_pattern": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)",
+            "tier3_walkthrough": "Write:\nshards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-04-06",
+          "trialType": "code",
+          "title": "Defeat Lord Null & Claim the 64-Bit Crown! (Grand Boss)",
+          "storyPrompt": "Final lock before Aurelion! Define `class PyriaCrown:` with `era_bits = [8, 16, 32, 8]` and `total(self)` returning `sum(self.era_bits)`. Create `c = PyriaCrown()`, assert `c.total() == 64`, and print `\"64-BIT PYRIA RESTORED!\"`!",
+          "objective": "Define `class PyriaCrown:` with `era_bits = [8, 16, 32, 8]` and `total(self)` returning `sum(self.era_bits)`. Create `c = PyriaCrown()`, assert `c.total() == 64`, and print `\"64-BIT PYRIA RESTORED!\"`!",
+          "concepts": [
+            "classes_intro",
+            "class_inheritance",
+            "world_scripting_3d",
+            "debugging"
+          ],
+          "shardReward": 290,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "class PyriaCrown:\n    def __init__(self):\n        self.era_bits = [8, 16, 32, 8]\n    def total(self):\n        return sum(self.era_bits)\n\nc = PyriaCrown()\nassert c.total() == 64\n# Print \"64-BIT PYRIA RESTORED!\"\n",
+            "standard": "# Define `class PyriaCrown:` with `era_bits = [8, 16, 32, 8]` and `total(self)` returning `sum(self.era_bits)`. Create `c = PyriaCrown()`, assert `c.total() == 64`, and print `\"64-BIT PYRIA RESTORED!\"`!\n\n",
+            "challenge": "# Defeat Lord Null & Claim the 64-Bit Crown! (Grand Boss)\n\n"
+          },
+          "referenceSolution": "class PyriaCrown:\n    def __init__(self):\n        self.era_bits = [8, 16, 32, 8]\n    def total(self):\n        return sum(self.era_bits)\n\nc = PyriaCrown()\nassert c.total() == 64\nprint(\"64-BIT PYRIA RESTORED!\")\n",
+          "testCode": "assert c.total() == 64 and OUTPUT.strip() == \"64-BIT PYRIA RESTORED!\"",
+          "hints": {
+            "tier1_nudge": "One last spell to free Aurelion!",
+            "tier2_pattern": "class PyriaCrown:\n    def __init__(self):\n        self.era_bits = [8, 16, 32, 8]\n    def total(self):\n        return sum(self.era_bits)\n\nc = PyriaCrown()\nassert c.total() == 64\nprint(\"64-BIT PYRIA RESTORED!\")",
+            "tier3_walkthrough": "Write:\nclass PyriaCrown:\n    def __init__(self):\n        self.era_bits = [8, 16, 32, 8]\n    def total(self):\n        return sum(self.era_bits)\n\nc = PyriaCrown()\nassert c.total() == 64\nprint(\"64-BIT PYRIA RESTORED!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-64-04-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Aurelion's 64-Bit Legend Riddle!",
+          "storyPrompt": "Hidden Rune in Null's 64-Bit Sanctum! What does `2 ** 6` equal?",
+          "objective": "What does `2 ** 6` equal?",
+          "concepts": [
+            "classes_intro",
+            "class_inheritance",
+            "world_scripting_3d",
+            "debugging"
+          ],
+          "shardReward": 270,
+          "unlockId": null,
+          "codeSnippet": "print(2 ** 6)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "64",
+              "explanation": "GRAND CODE-TAMER!! 2^6 = 64 \u2014 you conquered the Nintendo 64 Era!"
+            },
+            {
+              "id": "b",
+              "label": "32",
+              "explanation": "That's `2 ** 5`!"
+            },
+            {
+              "id": "c",
+              "label": "128",
+              "explanation": "That's `2 ** 7` \u2014 the 128-Bit GameCube/PS2 Era!"
+            },
+            {
+              "id": "d",
+              "label": "12",
+              "explanation": "`**` is exponent!"
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
+            "tier2_pattern": "Evaluate step by step.",
+            "tier3_walkthrough": "Tap Option A!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Aurelion's 64-Bit Crown (+1 Hint)",
+            "description": "Hidden treasure from Null's 64-Bit Sanctum!",
+            "unlockId": "bonus-trial-64-04",
+            "equipLayer": "tunic",
+            "equipKey": "emerald"
+          }
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-64-04-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Welcome to Null's 64-Bit Sanctum, {heroName}! My dimensional vault will keep Aurelion sealed forever!"
+          },
+          {
+            "speaker": "Aurelion",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Stay sharp, {heroName}! Use everything you mastered in Null's 64-Bit Sanctum to break Null's lock!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Aurelion!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "IMPOSSIBLE!! You broke through Null's 64-Bit Sanctum?! Retreating to 64-Bit Victory & Beyond!!"
+          },
+          {
+            "speaker": "Aurelion",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO!! ERA COMPLETE! Step through the portal into 64-Bit Victory & Beyond!!"
+          }
+        ]
+      }
+    }
+  ]
+}

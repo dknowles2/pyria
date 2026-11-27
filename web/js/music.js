@@ -444,7 +444,11 @@ class MusicEngine {
   }
 
   setEra(eraKey) {
-    this.era = eraKey === '16bit' ? '16bit' : '8bit';
+    if (['8bit', '16bit', '32bit', '64bit'].includes(eraKey)) {
+      this.era = eraKey;
+    } else {
+      this.era = '8bit';
+    }
   }
 
   setDucked(isDucked) {
@@ -531,10 +535,22 @@ class MusicEngine {
     const arpNote = theme.arp[step];
     const padChord = theme.pad[step];
     const is16Bit = this.era === '16bit';
+    const is32Bit = this.era === '32bit';
+    const is64Bit = this.era === '64bit';
+    const isRich = is16Bit || is32Bit || is64Bit;
 
     if (leadNote !== null) {
       const freq = midiToFreq(leadNote);
-      if (is16Bit) {
+      if (is64Bit) {
+        // Lush N64 orchestral brass + octave shimmer lead
+        this.playVoice({ freq, time, duration: stepDur * 1.65, type: 'sawtooth', volume: 0.13, cutoff: 2800, attack: 0.03, detune: -6 });
+        this.playVoice({ freq, time, duration: stepDur * 1.65, type: 'sawtooth', volume: 0.12, cutoff: 2600, attack: 0.03, detune: 6 });
+        this.playVoice({ freq: freq * 2, time, duration: stepDur * 1.3, type: 'sine', volume: 0.07, cutoff: 3400, attack: 0.04 });
+      } else if (is32Bit) {
+        // Crisp PS1/GBA crystalline synth lead
+        this.playVoice({ freq, time, duration: stepDur * 1.5, type: 'triangle', volume: 0.2, cutoff: 3200, attack: 0.015, detune: -4 });
+        this.playVoice({ freq: freq * 2, time, duration: stepDur * 0.9, type: 'sine', volume: 0.08, cutoff: 3600, attack: 0.01 });
+      } else if (is16Bit) {
         // Richer SNES dual-oscillator detuned lead
         this.playVoice({ freq, time, duration: stepDur * 1.45, type: 'sawtooth', volume: 0.14, cutoff: 2300, attack: 0.02, detune: -5 });
         this.playVoice({ freq, time, duration: stepDur * 1.45, type: 'triangle', volume: 0.2, cutoff: 2600, attack: 0.02, detune: 5 });
@@ -546,9 +562,9 @@ class MusicEngine {
 
     if (bassNote !== null) {
       const freq = midiToFreq(bassNote);
-      if (is16Bit) {
-        this.playVoice({ freq, time, duration: stepDur * 1.8, type: 'triangle', volume: 0.34, cutoff: 950, attack: 0.015 });
-        this.playVoice({ freq: freq * 0.5, time, duration: stepDur * 1.8, type: 'sine', volume: 0.22, cutoff: 500, attack: 0.02 });
+      if (isRich) {
+        this.playVoice({ freq, time, duration: stepDur * 1.85, type: 'triangle', volume: 0.34, cutoff: is64Bit ? 1150 : 950, attack: 0.015 });
+        this.playVoice({ freq: freq * 0.5, time, duration: stepDur * 1.85, type: 'sine', volume: 0.24, cutoff: 520, attack: 0.02 });
       } else {
         this.playVoice({ freq, time, duration: stepDur * 1.5, type: 'triangle', volume: 0.32, cutoff: 900, attack: 0.01 });
       }
@@ -556,28 +572,28 @@ class MusicEngine {
 
     if (arpNote !== null) {
       const freq = midiToFreq(arpNote);
-      if (is16Bit) {
-        this.playVoice({ freq, time, duration: stepDur * 0.85, type: 'triangle', volume: 0.11, cutoff: 2600, attack: 0.01 });
+      if (isRich) {
+        this.playVoice({ freq, time, duration: stepDur * 0.85, type: is32Bit ? 'sine' : 'triangle', volume: 0.11, cutoff: is64Bit ? 3100 : 2600, attack: 0.01 });
       } else {
         this.playVoice({ freq, time, duration: stepDur * 0.65, type: 'square', volume: 0.065, cutoff: 1400, attack: 0.008 });
       }
     }
 
-    if (is16Bit && padChord) {
+    if (isRich && padChord) {
       for (const note of padChord) {
         this.playVoice({
           freq: midiToFreq(note),
           time,
           duration: stepDur * 7.5,
-          type: 'sine',
-          volume: 0.075,
-          cutoff: 1600,
+          type: is64Bit ? 'triangle' : 'sine',
+          volume: is64Bit ? 0.065 : 0.075,
+          cutoff: is64Bit ? 1900 : 1600,
           attack: 0.18,
         });
       }
     }
 
-    if (is16Bit && step % 2 === 1) {
+    if (isRich && step % 2 === 1) {
       this.playShimmerTick(time, step % 4 === 3);
     }
   }

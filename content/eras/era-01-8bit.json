@@ -698,7 +698,7 @@
           "id": "trial-03-03",
           "trialType": "fix_bug",
           "title": "Fix the Indentation!",
-          "storyPrompt": "Look closely after the colon `:`! Python uses **indentation** (4 spaces pushed in from the left edge) to know which lines belong INSIDE an `if` block. Lord Null squished lines 4 and 5 back against the left edge! Tap **⇥ Indent** (or type 4 spaces) at the start of both lines under `if gems == 7:`!",
+          "storyPrompt": "Look closely after the colon `:`! Python uses **indentation** (4 spaces pushed in from the left edge) to know which lines belong INSIDE an `if` block. Lord Null squished lines 4 and 5 back against the left edge! Tap **\u21e5 Indent** (or type 4 spaces) at the start of both lines under `if gems == 7:`!",
           "objective": "Indent both lines inside `if gems == 7:` by 4 spaces so `door` becomes \"OPEN\" and Python shouts \"Click!\".",
           "concepts": [
             "variables",
@@ -708,7 +708,7 @@
           ],
           "shardReward": 40,
           "unlockId": null,
-          "bugSummary": "Lord Null removed the 4-space indentation under `if gems == 7:`! Push both lines inside the `if` over by 4 spaces (tap ⇥ Indent).",
+          "bugSummary": "Lord Null removed the 4-space indentation under `if gems == 7:`! Push both lines inside the `if` over by 4 spaces (tap \u21e5 Indent).",
           "starterCode": {
             "explorer": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n# Push the next two lines over by 4 spaces so they are INSIDE the if!\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
             "standard": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\ndoor = \"OPEN\"\nshout(\"Click!\")\n",
@@ -717,7 +717,7 @@
           "referenceSolution": "gems = 7\ndoor = \"SHUT\"\nif gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")\n",
           "testCode": "assert door == \"OPEN\", f'Expected door == \"OPEN\", got {door!r}'\nassert OUTPUT.strip() == \"Click!\", f'Expected \"Click!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip hops 4 steps to the right: 'Put your cursor before `door = \"OPEN\"` and tap ⇥ Indent (or 4 spaces), then do the same for `shout(\"Click!\")`!'",
+            "tier1_nudge": "Pip hops 4 steps to the right: 'Put your cursor before `door = \"OPEN\"` and tap \u21e5 Indent (or 4 spaces), then do the same for `shout(\"Click!\")`!'",
             "tier2_pattern": "if gems == 7:\n    door = \"OPEN\"\n    shout(\"Click!\")",
             "tier3_walkthrough": "Make sure BOTH lines under `if gems == 7:` start with 4 spaces:\n    door = \"OPEN\"\n    shout(\"Click!\")"
           },
@@ -1811,31 +1811,288 @@
       "trials": [
         {
           "id": "trial-07-01",
-          "title": "Charge the Five Wind Turbines",
-          "storyPrompt": "Obsidian Keep has 5 wind turbines numbered 1 through 5. Spin them all up in a loop, adding their power numbers into total_wind!",
-          "objective": "Set total_wind = 0, then use a for loop with range(1, 6) to add each number to total_wind and print \"Turbine ready!\" on every step.",
+          "trialType": "multiple_choice",
+          "title": "Predict the Wind Loop!",
+          "storyPrompt": "Welcome to Obsidian Keep! Instead of writing `print()` five times, a `for` loop repeats an indented block automatically. `range(4)` gives the numbers `0, 1, 2, 3` (4 steps!). How many times will the code below print `WHOOSH!`?",
+          "objective": "Predict how many lines `for i in range(4):` will print.",
           "concepts": [
             "for_loops",
             "range_function",
-            "variables"
+            "print_output"
           ],
-          "shardReward": 65,
+          "shardReward": 50,
           "unlockId": "stat-courage-1",
-          "starterCode": {
-            "explorer": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    # Print \"Turbine ready!\" inside the loop\n    \n",
-            "standard": "total_wind = 0\n# Use for power in range(1, 6): to add power to total_wind and print \"Turbine ready!\"\n",
-            "challenge": "# Sum 1 through 5 into total_wind using a for loop and print \"Turbine ready!\" each iteration.\n"
-          },
-          "referenceSolution": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")\n",
-          "testCode": "assert total_wind == 15, f'Expected total_wind == 15, got {total_wind}'\nlines = [line.strip() for line in OUTPUT.strip().splitlines()]\nassert lines == [\"Turbine ready!\"] * 5, f'Expected 5 \"Turbine ready!\" lines, got {lines!r}'\n",
+          "codeSnippet": "for i in range(4):\n    print(\"WHOOSH!\")",
+          "choices": [
+            {
+              "id": "a",
+              "label": "3 times",
+              "explanation": "Close! `range(4)` counts 0, 1, 2, 3 \u2014 that's 4 numbers total!"
+            },
+            {
+              "id": "b",
+              "label": "4 times",
+              "explanation": "Spot on! `range(4)` runs 4 times (for 0, 1, 2, and 3)!"
+            },
+            {
+              "id": "c",
+              "label": "5 times",
+              "explanation": "Careful! `range(4)` stops right BEFORE 4, so it runs 4 times total."
+            },
+            {
+              "id": "d",
+              "label": "1 time",
+              "explanation": "A `for` loop repeats the indented line once for EVERY number in `range(4)`!"
+            }
+          ],
+          "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip spins in a circle: 'range(1, 6) gives you 1, 2, 3, 4, 5\u2014remember it stops right before 6!'",
-            "tier2_pattern": "for power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")",
-            "tier3_walkthrough": "Inside the loop, indent and add:\n    print(\"Turbine ready!\")"
+            "tier1_nudge": "Pip counts on four claws: 'range(4) gives 0, 1, 2, 3 \u2014 count how many numbers that is!'",
+            "tier2_pattern": "range(N) always repeats exactly N times.",
+            "tier3_walkthrough": "Tap Option B (4 times)!"
           },
           "difficultyOverride": null
+        },
+        {
+          "id": "trial-07-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Broken Wind Loop!",
+          "storyPrompt": "Lord Null sabotaged the keep's first wind turbine by stealing the colon `:` at the end of the `for` line! Just like `if`, every `for` line MUST end with `:`.",
+          "objective": "Fix the missing colon `:` on the `for` line so Python prints `Spin!` 3 times.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "print_output"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "bugSummary": "Lord Null stole the colon `:` at the end of `for step in range(3)`! Add `:` back.",
+          "starterCode": {
+            "explorer": "# Add the missing colon : at the end of the for line:\nfor step in range(3)\n    print(\"Spin!\")\n",
+            "standard": "for step in range(3)\n    print(\"Spin!\")\n",
+            "challenge": "for step in range(3)\n    print(\"Spin!\")\n"
+          },
+          "referenceSolution": "for step in range(3):\n    print(\"Spin!\")\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Spin!\"] * 3, f\"Expected 3 Spin! lines, got {lines!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the end of the `for` line: 'Every `for` line needs a colon `:`!'",
+            "tier2_pattern": "for step in range(3):\n    print(\"Spin!\")",
+            "tier3_walkthrough": "Add `:` right after `range(3)` so it reads `for step in range(3):`"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-07-03",
+          "trialType": "code",
+          "title": "Sound the Four Gale Horns",
+          "storyPrompt": "Four brass horns line the ramparts of Obsidian Keep. Use `for i in range(4):` to print `\"GALE!\"` four times without copying and pasting!",
+          "objective": "Write a `for` loop with `range(4)` that prints `GALE!` 4 times.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "print_output"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "for i in range(4):\n    # Print \"GALE!\" here (4 spaces indent!)\n    \n",
+            "standard": "# Use for i in range(4): to print \"GALE!\" 4 times\n\n",
+            "challenge": "# Print \"GALE!\" 4 times using a for loop.\n\n"
+          },
+          "referenceSolution": "for i in range(4):\n    print(\"GALE!\")\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"GALE!\"] * 4, f\"Expected 4 GALE! lines, got {lines!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip blows a tiny horn: 'Indent `print(\"GALE!\")` 4 spaces inside `for i in range(4):`!'",
+            "tier2_pattern": "for i in range(4):\n    print(\"GALE!\")",
+            "tier3_walkthrough": "Write:\nfor i in range(4):\n    print(\"GALE!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-07-04",
+          "trialType": "code",
+          "title": "Count the Sky Towers (range(1, 6))",
+          "storyPrompt": "Want to start counting at 1 instead of 0? `range(1, 6)` gives `1, 2, 3, 4, 5` (it stops right before 6!). Print each tower number from 1 to 5!",
+          "objective": "Use `for num in range(1, 6):` to print the numbers 1, 2, 3, 4, 5 (one per line).",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "print_output"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "for num in range(1, 6):\n    # Print num here (no quotes around num!)\n    \n",
+            "standard": "# Use for num in range(1, 6): and print(num)\n\n",
+            "challenge": "# Print the numbers 1 through 5 using range(1, 6).\n\n"
+          },
+          "referenceSolution": "for num in range(1, 6):\n    print(num)\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"1\", \"2\", \"3\", \"4\", \"5\"], f\"Expected 1..5, got {lines!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip cheers: 'Pass `num` (no quotes!) to `print(num)` inside the loop!'",
+            "tier2_pattern": "for num in range(1, 6):\n    print(num)",
+            "tier3_walkthrough": "Write:\nfor num in range(1, 6):\n    print(num)"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-07-05",
+          "trialType": "code",
+          "title": "Sum the Storm Crystals",
+          "storyPrompt": "Five sky crystals hold power levels `1, 2, 3, 4, 5`. Start with `total = 0` before the loop, then add each `crystal` into `total` inside `for crystal in range(1, 6):`!",
+          "objective": "Start with `total = 0`, loop `for crystal in range(1, 6):` adding `crystal` to `total`, then print `total` after the loop.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "variables",
+            "basic_math"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "total = 0\nfor crystal in range(1, 6):\n    total = total + crystal\n# Print total AFTER the loop (0 spaces indent!)\n",
+            "standard": "total = 0\n# Loop crystal in range(1, 6), add to total, then print(total)\n\n",
+            "challenge": "# Sum 1..5 into total using a for loop and print(total).\n\n"
+          },
+          "referenceSolution": "total = 0\nfor crystal in range(1, 6):\n    total = total + crystal\nprint(total)\n",
+          "testCode": "assert total == 15, f\"Expected total == 15, got {total}\"\nassert OUTPUT.strip() == \"15\", f\"Expected printed 15, got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip taps the left edge: 'Put `print(total)` at 0 spaces indent AFTER the loop so it prints once at the end!'",
+            "tier2_pattern": "total = 0\nfor crystal in range(1, 6):\n    total = total + crystal\nprint(total)",
+            "tier3_walkthrough": "Add `print(total)` on the last line with 0 spaces of indent."
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-07-06",
+          "trialType": "code",
+          "title": "Charge Gale's Five Wind Turbines (Boss)",
+          "storyPrompt": "Gale's storm vault is powered by 5 wind turbines numbered 1 through 5! Loop `for power in range(1, 6):`, add `power` to `total_wind`, and print `\"Turbine ready!\"` on every step to free Gale!",
+          "objective": "Set `total_wind = 0`, loop `for power in range(1, 6):` adding `power` to `total_wind` and printing `Turbine ready!` each step.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "variables",
+            "basic_math"
+          ],
+          "shardReward": 75,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    # Print \"Turbine ready!\" inside the loop\n    \n",
+            "standard": "total_wind = 0\n# Loop power in range(1, 6), add to total_wind, and print \"Turbine ready!\"\n\n",
+            "challenge": "# Sum 1..5 into total_wind and print \"Turbine ready!\" each step.\n\n"
+          },
+          "referenceSolution": "total_wind = 0\nfor power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")\n",
+          "testCode": "assert total_wind == 15, f\"Expected total_wind == 15, got {total_wind}\"\nlines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == [\"Turbine ready!\"] * 5, f\"Expected 5 Turbine ready! lines, got {lines!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip spins in the wind: 'Put `print(\"Turbine ready!\")` indented 4 spaces INSIDE the loop!'",
+            "tier2_pattern": "for power in range(1, 6):\n    total_wind = total_wind + power\n    print(\"Turbine ready!\")",
+            "tier3_walkthrough": "Add indented:\n    print(\"Turbine ready!\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-07-bonus",
+          "trialType": "multiple_choice",
+          "title": "Secret Rune: Gale's Step-Size Riddle!",
+          "storyPrompt": "You found a hidden Sky Rune! `range(0, 10, 2)` counts from 0 up to (not including) 10 by **2s**: `0, 2, 4, 6, 8`. What will the code below print?",
+          "objective": "Predict the final value printed when summing `range(0, 10, 2)`.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "basic_math"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "codeSnippet": "gust = 0\nfor n in range(0, 10, 2):\n    gust = gust + n\nprint(gust)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "10",
+              "explanation": "Keep adding! 0 + 2 + 4 + 6 + 8 is bigger than 10."
+            },
+            {
+              "id": "b",
+              "label": "20",
+              "explanation": "WHOOOSH! 0 + 2 + 4 + 6 + 8 = 20! Secret Windrunner Tunic unlocked!"
+            },
+            {
+              "id": "c",
+              "label": "30",
+              "explanation": "Careful! `range(0, 10, 2)` stops BEFORE 10, so 10 is not included!"
+            },
+            {
+              "id": "d",
+              "label": "8",
+              "explanation": "8 is the last value of `n`, but `gust` adds ALL of them together!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip adds on his wings: '0 + 2 + 4 + 6 + 8 = ?'",
+            "tier2_pattern": "2 + 4 = 6, + 6 = 12, + 8 = 20!",
+            "tier3_walkthrough": "Tap Option B (20)!"
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Gale's Tailwind Charm (+1 Hint)",
+            "description": "A whistling obsidian wind-charm that boosts Pip's hint insight!",
+            "unlockId": "bonus-gale-charm",
+            "equipLayer": "tunic",
+            "equipKey": "emerald"
+          }
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-07-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Halt, {heroName}! You think you can conquer Obsidian Keep? My Logic Vault will hold Gale forever!"
+          },
+          {
+            "speaker": "Gale",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Whoooosh! Spin up all five turbines with a `for` loop, {heroName}\u2014don't let Null ground me!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Show Lord Null what real Python can do, {heroName}! Let's free Gale!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "Tch! Loops?! Fine\u2014come face me inside Null's Pixel Citadel, {heroName}! You'll never restore the 8th Bit!"
+          },
+          {
+            "speaker": "Gale",
+            "spriteKey": "spark",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "WHOOOOSH! I'm free! Take Bit 7, {heroName}\u2014feel the sky-winds clear the clouds!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "Seven Dragons rescued! Only ONE Bit left before Pyria evolves to 16-Bit! Step through to Null's Pixel Citadel!"
+          }
+        ]
+      }
     },
     {
       "id": "realm-08-citadel",
@@ -1865,9 +2122,163 @@
       "trials": [
         {
           "id": "trial-08-01",
-          "title": "Shatter the Null Barrier",
-          "storyPrompt": "Lord Null's barrier pulses with 8 bits (1 to 8). Only the EVEN bits (2, 4, 6, 8) charge your Dragon Prism. Loop through all 8 bits, sum the even ones, and breach the citadel!",
-          "objective": "Start with shield_charge = 0 and citadel_breached = False. Loop for bit in range(1, 9): if bit % 2 == 0, add bit to shield_charge. After the loop, if shield_charge >= 20, set citadel_breached = True and print \"8-BIT RESTORED!\".",
+          "trialType": "multiple_choice",
+          "title": "Predict the Even-Bit Scanner!",
+          "storyPrompt": "Welcome to Lord Null's Pixel Citadel! The remainder operator `%` gives what's left over after dividing. `n % 2 == 0` is `True` for **even** numbers (`2, 4, 6, 8`)! How many numbers will the loop below print?",
+          "objective": "Predict which numbers `if bit % 2 == 0:` prints from `range(1, 7)`.",
+          "concepts": [
+            "for_loops",
+            "conditionals_if",
+            "basic_math"
+          ],
+          "shardReward": 60,
+          "unlockId": "pip-scarf-ember",
+          "codeSnippet": "for bit in range(1, 7):\n    if bit % 2 == 0:\n        print(bit)",
+          "choices": [
+            {
+              "id": "a",
+              "label": "1, 3, 5",
+              "explanation": "Those are the ODD numbers (remainder 1 when divided by 2)!"
+            },
+            {
+              "id": "b",
+              "label": "2, 4, 6",
+              "explanation": "BOOM! 2, 4, and 6 all divide evenly by 2 (`bit % 2 == 0`)!"
+            },
+            {
+              "id": "c",
+              "label": "2, 4",
+              "explanation": "Remember `range(1, 7)` goes up to 6, and 6 is even too!"
+            },
+            {
+              "id": "d",
+              "label": "0, 2, 4, 6",
+              "explanation": "`range(1, 7)` starts at 1, not 0!"
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip checks remainders: 'range(1, 7) is 1, 2, 3, 4, 5, 6. Which ones are even?'",
+            "tier2_pattern": "Even numbers in 1..6 are 2, 4, and 6.",
+            "tier3_walkthrough": "Tap Option B (2, 4, 6)!"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-08-02",
+          "trialType": "fix_bug",
+          "title": "Fix the Citadel Indentation Trap!",
+          "storyPrompt": "Lord Null stacked an `if` INSIDE a `for` loop \u2014 that needs **8 spaces** (two indents!) for lines inside the `if`. Lord Null deleted the indent on `count = count + 1`!",
+          "objective": "Fix the indentation of `count = count + 1` (8 spaces, inside the `if`) so `count` equals 3 and prints `3`.",
+          "concepts": [
+            "for_loops",
+            "conditionals_if",
+            "variables"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "bugSummary": "Lord Null broke the double-indent inside `if n > 3:`! Indent `count = count + 1` by 8 spaces.",
+          "starterCode": {
+            "explorer": "count = 0\nfor n in range(1, 7):\n    if n > 3:\n# Indent the next line 8 spaces (twice!) so it is inside the if:\ncount = count + 1\nprint(count)\n",
+            "standard": "count = 0\nfor n in range(1, 7):\n    if n > 3:\ncount = count + 1\nprint(count)\n",
+            "challenge": "count = 0\nfor n in range(1, 7):\n    if n > 3:\ncount = count + 1\nprint(count)\n"
+          },
+          "referenceSolution": "count = 0\nfor n in range(1, 7):\n    if n > 3:\n        count = count + 1\nprint(count)\n",
+          "testCode": "assert count == 3, f\"Expected count == 3, got {count}\"\nassert OUTPUT.strip() == \"3\", f\"Expected printed 3, got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip taps \u21e5 Indent twice: '4 spaces for `for`, plus 4 more spaces for `if` = 8 spaces!'",
+            "tier2_pattern": "for n in range(1, 7):\n    if n > 3:\n        count = count + 1",
+            "tier3_walkthrough": "Put 8 spaces before `count = count + 1`."
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-08-03",
+          "trialType": "code",
+          "title": "Clean the Glitch Terminal",
+          "storyPrompt": "Lord Null scrambled the citadel override code with extra spaces and lowercase letters: `raw = \"  nova-8  \"`. Clean it with `.strip().upper()` and print it!",
+          "objective": "Given `raw = \"  nova-8  \"`, set `clean = raw.strip().upper()` and `print(clean)`.",
+          "concepts": [
+            "string_methods",
+            "variables",
+            "print_output"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\n# Print clean\n",
+            "standard": "raw = \"  nova-8  \"\n# Clean raw with .strip().upper() into clean and print(clean)\n\n",
+            "challenge": "# Strip spaces and uppercase raw into clean, then print(clean).\n\n"
+          },
+          "referenceSolution": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\nprint(clean)\n",
+          "testCode": "assert clean == \"NOVA-8\", f\"Expected NOVA-8, got {clean!r}\"\nassert OUTPUT.strip() == \"NOVA-8\", f\"Expected printed NOVA-8, got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip polishes the rune: 'Chain `.strip()` and `.upper()` together!'",
+            "tier2_pattern": "clean = raw.strip().upper()\nprint(clean)",
+            "tier3_walkthrough": "Add `print(clean)` at the bottom."
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-08-04",
+          "trialType": "code",
+          "title": "Dual-Key Security Lock (and / or)",
+          "storyPrompt": "The Inner Sanctum door requires BOTH `bits_ready == 7` AND `has_key == True`. Write an `if` check using `and` to set `door = \"OPEN\"` and print `\"ACCESS GRANTED\"`!",
+          "objective": "Given `bits_ready = 7` and `has_key = True`, use `if bits_ready == 7 and has_key:` to set `door = \"OPEN\"` and print `ACCESS GRANTED`.",
+          "concepts": [
+            "boolean_logic",
+            "conditionals_if",
+            "booleans"
+          ],
+          "shardReward": 70,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "bits_ready = 7\nhas_key = True\ndoor = \"LOCKED\"\nif bits_ready == 7 and has_key:\n    door = \"OPEN\"\n    # Print \"ACCESS GRANTED\"\n    \n",
+            "standard": "bits_ready = 7\nhas_key = True\ndoor = \"LOCKED\"\n# Check bits_ready == 7 and has_key to set door = \"OPEN\" and print \"ACCESS GRANTED\"\n\n",
+            "challenge": "# Unlock door and print \"ACCESS GRANTED\" when both conditions are True.\n\n"
+          },
+          "referenceSolution": "bits_ready = 7\nhas_key = True\ndoor = \"LOCKED\"\nif bits_ready == 7 and has_key:\n    door = \"OPEN\"\n    print(\"ACCESS GRANTED\")\n",
+          "testCode": "assert door == \"OPEN\", f\"Expected OPEN, got {door!r}\"\nassert OUTPUT.strip() == \"ACCESS GRANTED\", f\"Expected ACCESS GRANTED, got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip holds up two keys: '`and` checks that BOTH sides are True!'",
+            "tier2_pattern": "if bits_ready == 7 and has_key:\n    door = \"OPEN\"\n    print(\"ACCESS GRANTED\")",
+            "tier3_walkthrough": "Add indented:\n    print(\"ACCESS GRANTED\")"
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-08-05",
+          "trialType": "code",
+          "title": "Power the Starlight Conduits",
+          "storyPrompt": "Loop through conduits 1 to 6 (`range(1, 7)`). If the conduit number is `>= 4`, add `10` to `energy`; otherwise (`else:`), add `5` to `energy`. Print `energy` at the end!",
+          "objective": "Start with `energy = 0`. Loop `for c in range(1, 7):` adding 10 if `c >= 4` else 5, then `print(energy)`.",
+          "concepts": [
+            "for_loops",
+            "conditionals_elif_else",
+            "basic_math"
+          ],
+          "shardReward": 75,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "energy = 0\nfor c in range(1, 7):\n    if c >= 4:\n        energy = energy + 10\n    else:\n        energy = energy + 5\n# Print energy after the loop\n",
+            "standard": "energy = 0\n# Loop c in range(1, 7): if c >= 4 add 10 else add 5, then print(energy)\n\n",
+            "challenge": "# Accumulate energy over conduits 1..6 (10 if >=4 else 5) and print(energy).\n\n"
+          },
+          "referenceSolution": "energy = 0\nfor c in range(1, 7):\n    if c >= 4:\n        energy = energy + 10\n    else:\n        energy = energy + 5\nprint(energy)\n",
+          "testCode": "assert energy == 45, f\"Expected energy == 45, got {energy}\"\nassert OUTPUT.strip() == \"45\", f\"Expected printed 45, got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip counts: '1,2,3 add 5 each (15), and 4,5,6 add 10 each (30) -> 45!'",
+            "tier2_pattern": "for c in range(1, 7):\n    if c >= 4:\n        energy = energy + 10\n    else:\n        energy = energy + 5\nprint(energy)",
+            "tier3_walkthrough": "Add `print(energy)` after the loop."
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-08-06",
+          "trialType": "code",
+          "title": "Shatter the 8-Bit Null Barrier (Era 1 Boss)",
+          "storyPrompt": "Lord Null's barrier pulses with 8 bits (1 to 8)! Only the EVEN bits (`bit % 2 == 0`) charge your Dragon Prism. Loop through `range(1, 9)`, sum the even bits into `shield_charge`, and if `shield_charge >= 20`, set `citadel_breached = True` and print `\"8-BIT RESTORED!\"`!",
+          "objective": "Loop `for bit in range(1, 9):` summing even bits into `shield_charge`. After the loop, if `shield_charge >= 20`, set `citadel_breached = True` and print `8-BIT RESTORED!`.",
           "concepts": [
             "for_loops",
             "range_function",
@@ -1875,22 +2286,106 @@
             "conditionals_if"
           ],
           "shardReward": 100,
-          "unlockId": "pip-scarf-ember",
+          "unlockId": null,
           "starterCode": {
             "explorer": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n    # Print \"8-BIT RESTORED!\"\n    \n",
-            "standard": "shield_charge = 0\ncitadel_breached = False\n# Loop bits 1..8, sum even bits into shield_charge, then breach if shield_charge >= 20\n",
-            "challenge": "# Sum even numbers in 1..8 into shield_charge; if >= 20, set citadel_breached = True and print \"8-BIT RESTORED!\".\n"
+            "standard": "shield_charge = 0\ncitadel_breached = False\n# Sum even bits in range(1, 9), then breach if shield_charge >= 20\n\n",
+            "challenge": "# Sum even bits 1..8 into shield_charge; if >= 20, set citadel_breached = True and print \"8-BIT RESTORED!\".\n\n"
           },
           "referenceSolution": "shield_charge = 0\ncitadel_breached = False\nfor bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\n\nif shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")\n",
-          "testCode": "assert shield_charge == 20, f'Expected shield_charge == 20, got {shield_charge}'\nassert citadel_breached is True, 'Expected citadel_breached to be True'\nassert OUTPUT.strip() == \"8-BIT RESTORED!\", f'Expected \"8-BIT RESTORED!\", got {OUTPUT.strip()!r}'\n",
+          "testCode": "assert shield_charge == 20, f\"Expected shield_charge == 20, got {shield_charge}\"\nassert citadel_breached is True, \"Expected citadel_breached to be True\"\nassert OUTPUT.strip() == \"8-BIT RESTORED!\", f\"Expected 8-BIT RESTORED!, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip glows bright gold: 'A number is even when bit % 2 == 0! Check that inside your for loop.'",
-            "tier2_pattern": "for bit in range(1, 9):\n    if bit % 2 == 0:\n        shield_charge = shield_charge + bit\nif shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")",
-            "tier3_walkthrough": "Add print(\"8-BIT RESTORED!\") indented inside the final if block."
+            "tier1_nudge": "Pip glows bright gold: 'A number is even when `bit % 2 == 0`!'",
+            "tier2_pattern": "if shield_charge >= 20:\n    citadel_breached = True\n    print(\"8-BIT RESTORED!\")",
+            "tier3_walkthrough": "Add indented:\n    print(\"8-BIT RESTORED!\")"
           },
           "difficultyOverride": null
+        },
+        {
+          "id": "trial-08-bonus",
+          "trialType": "code",
+          "title": "Secret Rune: Nova's Starlight Multiplier",
+          "storyPrompt": "You found Nova's hidden Starlight Prism! Loop `for star in range(1, 5):` and multiply `power` by `2` each step (`power = power * 2`) starting from `power = 1`, then print `power`!",
+          "objective": "Start with `power = 1`, double it 4 times in a `for` loop (`range(4)`), and `print(power)`.",
+          "concepts": [
+            "for_loops",
+            "range_function",
+            "basic_math"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "power = 1\nfor star in range(4):\n    power = power * 2\n# Print power\n",
+            "standard": "power = 1\n# Double power 4 times in a for loop and print(power)\n\n",
+            "challenge": "# Compute 2**4 using a for loop starting from power = 1 and print(power).\n\n"
+          },
+          "referenceSolution": "power = 1\nfor star in range(4):\n    power = power * 2\nprint(power)\n",
+          "testCode": "assert power == 16, f\"Expected 16, got {power}\"\nassert OUTPUT.strip() == \"16\", f\"Expected 16, got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip sparkles: '1 -> 2 -> 4 -> 8 -> 16! That's 16-Bit power!'",
+            "tier2_pattern": "power = 1\nfor star in range(4):\n    power = power * 2\nprint(power)",
+            "tier3_walkthrough": "Add `print(power)` at the bottom."
+          },
+          "difficultyOverride": null,
+          "isBonus": true,
+          "bonusKitReward": {
+            "name": "Nova's 8-Bit Crown Charm (+1 Hint)",
+            "description": "A radiant starlight charm marking mastery of all 8 Bits of Pyria!",
+            "unlockId": "bonus-nova-crown",
+            "equipLayer": "tunic",
+            "equipKey": "violet"
+          }
         }
-      ]
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-08-06",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Halt, {heroName}! You think you can conquer Null's Pixel Citadel? My Logic Vault will hold Nova forever!"
+          },
+          {
+            "speaker": "Nova",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "Starlight shines bright, {heroName}! Sum the even bits 1 through 8 to shatter Null's 8-Bit Barrier!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! Show Lord Null what real Python can do, {heroName}! Let's free Nova!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "NOOOOO! ALL EIGHT BITS?! My flat pixels are melting into... 16-BIT COLOR?! Retreat to the Sunken Isles!"
+          },
+          {
+            "speaker": "Nova",
+            "spriteKey": "emberwing",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "ALL EIGHT BITS ARE WHOLE! Hold tight, {heroName}\u2014Pyria is evolving into the 16-Bit SNES Era!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "WOOHOO!! 8-BIT ERA COMPLETE! Step through the Golden Era Portal to sail into Coral Shallows in lush 16-Bit!"
+          }
+        ]
+      }
     }
   ]
 }
