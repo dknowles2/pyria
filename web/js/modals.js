@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261126v';
-import { music } from './music.js?v=20261126v';
-import { pyRunner } from './pyRunner.js?v=20261126v';
+import { audio } from './audio.js?v=20261126w';
+import { music } from './music.js?v=20261126w';
+import { pyRunner } from './pyRunner.js?v=20261126w';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126v';
+} from './autocomplete.js?v=20261126w';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -656,7 +656,7 @@ export class ModalManager {
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <span class="muted-text">Tab indents 4 spaces · Ctrl/Cmd+Enter runs:</span>
+          <span class="muted-text">Quick symbol buttons (tap to insert):</span>
           <div style="display:flex; gap:6px; align-items:center;">
             <span class="muted-text" style="font-size:12px;">Starter:</span>
             <button class="btn btn-sm btn-ghost" data-mode="explorer">Explorer</button>

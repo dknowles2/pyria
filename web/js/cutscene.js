@@ -1,6 +1,6 @@
 // Retro RPG Letterbox Cinematic Cut-Scene Player for Pyria
 
-import { audio } from './audio.js?v=20261126v';
+import { audio } from './audio.js?v=20261126w';
 
 function escapeHtml(str) {
   return String(str ?? '')
