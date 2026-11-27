@@ -152,9 +152,9 @@
         {
           "id": "trial-16-01-03",
           "trialType": "code",
-          "title": "Grab First & Last Crystal",
-          "storyPrompt": "In Coral Shallows, put your new skill into action! Given `crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]`, set `first = crystals[0]` and `last = crystals[-1]`, then `print(first, last)`.",
-          "objective": "Given `crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]`, set `first = crystals[0]` and `last = crystals[-1]`, then `print(first, last)`.",
+          "title": "Grab First & Last Crystal (and Rune Letter!)",
+          "storyPrompt": "Strings work with indexing just like lists! Grab the first and last crystal from the list, plus the first letter of the reef code string.",
+          "objective": "Using `crystals` and `code`, store the first crystal in `first`, the last crystal in `last`, and the first letter of `code` in `sigil`, then print all three.",
           "concepts": [
             "lists",
             "list_indexing"
@@ -162,16 +162,16 @@
           "shardReward": 70,
           "unlockId": null,
           "starterCode": {
-            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst = crystals[0]\nlast = crystals[-1]\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\ncode = \"REEF\"\nfirst = crystals[___]\nlast = crystals[___]\nsigil = code[___]\nprint(first, last, sigil)\n",
+            "standard": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\ncode = \"REEF\"\n# Grab first and last crystal, plus the first letter of code\n",
+            "challenge": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\ncode = \"REEF\"\n"
           },
-          "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst = crystals[0]\nlast = crystals[-1]\nprint(first, last)\n",
-          "testCode": "assert first == \"aqua\" and last == \"amber\" and OUTPUT.strip() == \"aqua amber\"",
+          "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\ncode = \"REEF\"\nfirst = crystals[0]\nlast = crystals[-1]\nsigil = code[0]\nprint(first, last, sigil)\n",
+          "testCode": "assert first == crystals[0] and last == crystals[-1] and sigil == code[0] and OUTPUT.strip() == f\"{crystals[0]} {crystals[-1]} {code[0]}\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst = crystals[0]\nlast = crystals[-1]\nprint(first, last)",
-            "tier3_walkthrough": "Write:\ncrystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst = crystals[0]\nlast = crystals[-1]\nprint(first, last)"
+            "tier1_nudge": "Both lists and strings start at index 0, and index -1 grabs the very last item.",
+            "tier2_pattern": "first = crystals[___]\nlast = crystals[___]\nsigil = code[___]\nprint(first, last, sigil)",
+            "tier3_walkthrough": "Set `first = crystals[0]`, `last = crystals[-1]`, and `sigil = code[0]`, then call `print(first, last, sigil)`."
           },
           "difficultyOverride": null
         },
@@ -453,77 +453,78 @@
           "id": "trial-16-02-03",
           "trialType": "code",
           "title": "Count Cargo Weight",
-          "storyPrompt": "In Driftwood Market, put your new skill into action! Loop over `weights = [4, 6, 5]` and add each weight to `total` (starting at `0`), then `print(total)`.",
-          "objective": "Loop over `weights = [4, 6, 5]` and add each weight to `total` (starting at `0`), then `print(total)`.",
+          "storyPrompt": "Instead of writing `total = total + w`, Python gives you a clean shortcut: `total += w` adds `w` right onto `total`!",
+          "objective": "Loop over `weights` and add each weight into `total` using `+=`, then print `total`.",
           "concepts": [
-            "lists",
-            "list_iteration"
+            "list_iteration",
+            "lists"
           ],
           "shardReward": 75,
           "unlockId": null,
           "starterCode": {
-            "explorer": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total = total + w\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total += ___\nprint(total)\n",
+            "standard": "weights = [4, 6, 5]\ntotal = 0\n# Loop through weights and accumulate with +=\n",
+            "challenge": "weights = [4, 6, 5]\ntotal = 0\n"
           },
-          "referenceSolution": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total = total + w\nprint(total)\n",
-          "testCode": "assert total == 15 and OUTPUT.strip() == \"15\"",
+          "referenceSolution": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total += w\nprint(total)\n",
+          "testCode": "assert total == sum(weights) and OUTPUT.strip() == str(sum(weights))",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "weights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total = total + w\nprint(total)",
-            "tier3_walkthrough": "Write:\nweights = [4, 6, 5]\ntotal = 0\nfor w in weights:\n    total = total + w\nprint(total)"
+            "tier1_nudge": "Use `for w in weights:` and update `total` using the `+=` operator.",
+            "tier2_pattern": "for item in weights:\n    total += ___\nprint(total)",
+            "tier3_walkthrough": "Inside `for w in weights:`, write `total += w`. After the loop, call `print(total)`."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-16-02-04",
           "trialType": "code",
-          "title": "Count Heavy Crates",
-          "storyPrompt": "Keep pushing deeper into Driftwood Market! Loop over `crates = [3, 12, 8, 15]` and count how many are `>= 10` into `heavy` (starting at `0`), then `print(heavy)`.",
-          "objective": "Loop over `crates = [3, 12, 8, 15]` and count how many are `>= 10` into `heavy` (starting at `0`), then `print(heavy)`.",
+          "title": "Spot Rare Cargo with `in`",
+          "storyPrompt": "Use the `in` operator inside an `if` statement (`if item in rare:`) to test whether an item belongs to a list!",
+          "objective": "Loop over `crates`, count how many items are in `rare` using `if ... in ...:` and `+=`, store the count in `found`, and print `found`.",
           "concepts": [
+            "list_iteration",
             "lists",
-            "list_iteration"
+            "conditionals_if"
           ],
           "shardReward": 80,
           "unlockId": null,
           "starterCode": {
-            "explorer": "crates = [3, 12, 8, 15]\nheavy = 0\nfor c in crates:\n    if c >= 10:\n        heavy = heavy + 1\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "crates = [\"fish\", \"gold\", \"salt\", \"pearl\"]\nrare = [\"gold\", \"pearl\"]\nfound = 0\nfor c in crates:\n    if c in ___:\n        found += ___\nprint(found)\n",
+            "standard": "crates = [\"fish\", \"gold\", \"salt\", \"pearl\"]\nrare = [\"gold\", \"pearl\"]\nfound = 0\n# Count items from crates that appear in rare\n",
+            "challenge": "crates = [\"fish\", \"gold\", \"salt\", \"pearl\"]\nrare = [\"gold\", \"pearl\"]\nfound = 0\n"
           },
-          "referenceSolution": "crates = [3, 12, 8, 15]\nheavy = 0\nfor c in crates:\n    if c >= 10:\n        heavy = heavy + 1\nprint(heavy)\n",
-          "testCode": "assert heavy == 2 and OUTPUT.strip() == \"2\"",
+          "referenceSolution": "crates = [\"fish\", \"gold\", \"salt\", \"pearl\"]\nrare = [\"gold\", \"pearl\"]\nfound = 0\nfor c in crates:\n    if c in rare:\n        found += 1\nprint(found)\n",
+          "testCode": "expected = sum(1 for c in crates if c in rare)\nassert found == expected and OUTPUT.strip() == str(expected)",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "crates = [3, 12, 8, 15]\nheavy = 0\nfor c in crates:\n    if c >= 10:\n        heavy = heavy + 1\nprint(heavy)",
-            "tier3_walkthrough": "Write:\ncrates = [3, 12, 8, 15]\nheavy = 0\nfor c in crates:\n    if c >= 10:\n        heavy = heavy + 1\nprint(heavy)"
+            "tier1_nudge": "Check membership with `if c in rare:` inside your `for` loop, then add 1 to `found`.",
+            "tier2_pattern": "for c in crates:\n    if ___ in ___:\n        found += 1\nprint(found)",
+            "tier3_walkthrough": "Loop `for c in crates:`, check `if c in rare:`, increment `found += 1`, and `print(found)` at the end."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-16-02-05",
           "trialType": "code",
-          "title": "Shout Every Banner",
-          "storyPrompt": "Almost at Gullwing's Logic Vault! Loop over `flags = [\"red\", \"gold\"]` and print each flag in ALL CAPS using `.upper()`.",
-          "objective": "Loop over `flags = [\"red\", \"gold\"]` and print each flag in ALL CAPS using `.upper()`.",
+          "title": "Spell Out the Harbor Banner",
+          "storyPrompt": "You can loop over a string character by character just like a list! Spell out each letter of the harbor banner in uppercase.",
+          "objective": "Loop through every character in `banner` and print each letter in uppercase on its own line.",
           "concepts": [
-            "lists",
-            "list_iteration"
+            "list_iteration",
+            "string_methods"
           ],
           "shardReward": 85,
           "unlockId": null,
           "starterCode": {
-            "explorer": "flags = [\"red\", \"gold\"]\nfor f in flags:\n    \n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "banner = \"tide\"\nfor ch in ___:\n    print(ch.___())\n",
+            "standard": "banner = \"tide\"\n# Loop over every character in banner and print it uppercase\n",
+            "challenge": "banner = \"tide\"\n"
           },
-          "referenceSolution": "flags = [\"red\", \"gold\"]\nfor f in flags:\n    print(f.upper())\n",
-          "testCode": "assert OUTPUT.strip().splitlines() == [\"RED\", \"GOLD\"]",
+          "referenceSolution": "banner = \"tide\"\nfor ch in banner:\n    print(ch.upper())\n",
+          "testCode": "assert OUTPUT.strip().splitlines() == [c.upper() for c in banner]",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "flags = [\"red\", \"gold\"]\nfor f in flags:\n    print(f.upper())",
-            "tier3_walkthrough": "Write:\nflags = [\"red\", \"gold\"]\nfor f in flags:\n    print(f.upper())"
+            "tier1_nudge": "A `for` loop over a string visits one letter at a time, and `.upper()` capitalizes each letter.",
+            "tier2_pattern": "for ch in ___:\n    print(___.upper())",
+            "tier3_walkthrough": "Write `for ch in banner:` and indent `print(ch.upper())` inside the loop."
           },
           "difficultyOverride": null
         },
@@ -755,54 +756,51 @@
         {
           "id": "trial-16-03-03",
           "trialType": "code",
-          "title": "Slice the Top Two Pearls",
-          "storyPrompt": "In Pearl Grotto, put your new skill into action! List slicing `items[:2]` grabs the first 2 items! Given `gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]`, set `top_two = gems[:2]` and `print(top_two)`.",
-          "objective": "List slicing `items[:2]` grabs the first 2 items! Given `gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]`, set `top_two = gems[:2]` and `print(top_two)`.",
+          "title": "Slice Pearls & Shell Codes",
+          "storyPrompt": "Slicing (`[start:stop]`) works on BOTH lists and strings! Slice the first two gems from the list and the middle letters from the code string.",
+          "objective": "Slice the first 2 items of `gems` into `top_two` and slice characters at index 1 through 3 of `code` into `mid`, then print both.",
           "concepts": [
             "lists",
-            "list_indexing",
-            "basic_math"
+            "list_indexing"
           ],
           "shardReward": 80,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ncode = \"PEARL\"\ntop_two = gems[:___]\nmid = code[___:___]\nprint(top_two, mid)\n",
+            "standard": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ncode = \"PEARL\"\n# Slice the first 2 gems and characters 1..3 of code\n",
+            "challenge": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ncode = \"PEARL\"\n"
           },
-          "referenceSolution": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\nprint(top_two)\n",
-          "testCode": "assert top_two == [\"opal\", \"jade\"] and OUTPUT.strip() == \"['opal', 'jade']\"",
+          "referenceSolution": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ncode = \"PEARL\"\ntop_two = gems[:2]\nmid = code[1:4]\nprint(top_two, mid)\n",
+          "testCode": "assert top_two == gems[:2] and mid == code[1:4] and OUTPUT.strip() == f\"{gems[:2]} {code[1:4]}\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\nprint(top_two)",
-            "tier3_walkthrough": "Write:\ngems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\nprint(top_two)"
+            "tier1_nudge": "Remember slice stop index is exclusive: `[:2]` grabs indices 0 and 1, and `[1:4]` grabs indices 1, 2, and 3.",
+            "tier2_pattern": "top_two = gems[:___]\nmid = code[___:___]\nprint(top_two, mid)",
+            "tier3_walkthrough": "Set `top_two = gems[:2]` and `mid = code[1:4]`, then `print(top_two, mid)`."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-16-03-04",
           "trialType": "code",
-          "title": "Sum and Max Together",
-          "storyPrompt": "Keep pushing deeper into Pearl Grotto! Given `scores = [15, 40, 25]`, set `total = sum(scores)` and `best = max(scores)`, then `print(total, best)`.",
-          "objective": "Given `scores = [15, 40, 25]`, set `total = sum(scores)` and `best = max(scores)`, then `print(total, best)`.",
+          "title": "Weigh Pearls with float(), max(), and min()",
+          "storyPrompt": "When a decimal number arrives as text like `\"2.5\"`, `float()` turns it into a decimal number you can add! You can also find the biggest and smallest values in a list with `max()` and `min()`.",
+          "objective": "Convert `bonus_text` with `float()`, add it to the sum of `scores` in `total`, find `best` and `low` from `scores`, and print `total`, `best`, and `low`.",
           "concepts": [
-            "lists",
-            "list_indexing",
-            "basic_math"
+            "lists"
           ],
           "shardReward": 85,
           "unlockId": null,
           "starterCode": {
-            "explorer": "scores = [15, 40, 25]\ntotal = sum(scores)\nbest = max(scores)\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "scores = [15, 40, 25]\nbonus_text = \"2.5\"\ntotal = sum(scores) + float(___)\nbest = max(___)\nlow = min(___)\nprint(total, best, low)\n",
+            "standard": "scores = [15, 40, 25]\nbonus_text = \"2.5\"\n# Compute total (with float(bonus_text)), best (max), and low (min)\n",
+            "challenge": "scores = [15, 40, 25]\nbonus_text = \"2.5\"\n"
           },
-          "referenceSolution": "scores = [15, 40, 25]\ntotal = sum(scores)\nbest = max(scores)\nprint(total, best)\n",
-          "testCode": "assert total == 80 and best == 40 and OUTPUT.strip() == \"80 40\"",
+          "referenceSolution": "scores = [15, 40, 25]\nbonus_text = \"2.5\"\ntotal = sum(scores) + float(bonus_text)\nbest = max(scores)\nlow = min(scores)\nprint(total, best, low)\n",
+          "testCode": "exp_total = sum(scores) + float(bonus_text)\nassert total == exp_total and best == max(scores) and low == min(scores) and OUTPUT.strip() == f\"{exp_total} {max(scores)} {min(scores)}\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "scores = [15, 40, 25]\ntotal = sum(scores)\nbest = max(scores)\nprint(total, best)",
-            "tier3_walkthrough": "Write:\nscores = [15, 40, 25]\ntotal = sum(scores)\nbest = max(scores)\nprint(total, best)"
+            "tier1_nudge": "Use `float(bonus_text)` to turn the decimal string into a number, plus `sum()`, `max()`, and `min()` on `scores`.",
+            "tier2_pattern": "total = sum(___) + float(___)\nbest = max(___)\nlow = min(___)\nprint(total, best, low)",
+            "tier3_walkthrough": "Set `total = sum(scores) + float(bonus_text)`, `best = max(scores)`, `low = min(scores)`, then `print(total, best, low)`."
           },
           "difficultyOverride": null
         },
@@ -1118,27 +1116,25 @@
         {
           "id": "trial-16-04-05",
           "trialType": "code",
-          "title": "Join Beacon Words",
-          "storyPrompt": "Almost at Tempest's Logic Vault! `\" - \".join([\"NORTH\", \"LIT\"])` glues a list of strings with `\" - \"`! Set `msg = \"-\".join([\"STORM\", \"CLEAR\"])` and `print(msg)`.",
-          "objective": "`\" - \".join([\"NORTH\", \"LIT\"])` glues a list of strings with `\" - \"`! Set `msg = \"-\".join([\"STORM\", \"CLEAR\"])` and `print(msg)`.",
+          "title": "Decode & Clean the Beacon Signal",
+          "storyPrompt": "Maelstrom's beacon message arrived scrambled with underscores! Use `.replace()` to swap characters and `.split()` to break text into a list of words.",
+          "objective": "Clean `raw` by replacing every underscore with a hyphen, split the cleaned string on hyphens into a list named `parts`, and print `parts`.",
           "concepts": [
-            "lists",
-            "list_iteration",
-            "conditionals_elif_else"
+            "string_methods"
           ],
           "shardReward": 95,
           "unlockId": null,
           "starterCode": {
-            "explorer": "parts = [\"STORM\", \"CLEAR\"]\nmsg = \"-\".join(parts)\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "raw = \"STORM_CLEAR_NOW\"\nclean = raw.replace(\"_\", \"___\")\nparts = clean.split(\"___\")\nprint(parts)\n",
+            "standard": "raw = \"STORM_CLEAR_NOW\"\n# Replace \"_\" with \"-\" and split into a list named parts\n",
+            "challenge": "raw = \"STORM_CLEAR_NOW\"\n"
           },
-          "referenceSolution": "parts = [\"STORM\", \"CLEAR\"]\nmsg = \"-\".join(parts)\nprint(msg)\n",
-          "testCode": "assert msg == \"STORM-CLEAR\" and OUTPUT.strip() == \"STORM-CLEAR\"",
+          "referenceSolution": "raw = \"STORM_CLEAR_NOW\"\nclean = raw.replace(\"_\", \"-\")\nparts = clean.split(\"-\")\nprint(parts)\n",
+          "testCode": "expected = raw.replace(\"_\", \"-\").split(\"-\")\nassert clean == raw.replace(\"_\", \"-\") and parts == expected and OUTPUT.strip() == str(expected)",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "parts = [\"STORM\", \"CLEAR\"]\nmsg = \"-\".join(parts)\nprint(msg)",
-            "tier3_walkthrough": "Write:\nparts = [\"STORM\", \"CLEAR\"]\nmsg = \"-\".join(parts)\nprint(msg)"
+            "tier1_nudge": "First call `.replace(\"_\", \"-\")` on `raw`, then call `.split(\"-\")` on the result.",
+            "tier2_pattern": "clean = raw.replace(___, ___)\nparts = clean.split(___)\nprint(parts)",
+            "tier3_walkthrough": "Set `clean = raw.replace(\"_\", \"-\")`, then `parts = clean.split(\"-\")`, then `print(parts)`."
           },
           "difficultyOverride": null
         },
@@ -1367,20 +1363,20 @@
           "id": "trial-16-05-03",
           "trialType": "code",
           "title": "Wind the Brass Spring",
-          "storyPrompt": "In Brass Courtyard, put your new skill into action! Start with `tension = 0`. Use `while tension < 20:` to add `5` to `tension` each turn, then `print(tension)`.",
-          "objective": "Start with `tension = 0`. Use `while tension < 20:` to add `5` to `tension` each turn, then `print(tension)`.",
+          "storyPrompt": "Wind Sprocket's brass spring in steps of 5 using `while` and `+=`!",
+          "objective": "Starting from `tension = 0`, loop while `tension < 20` and increase `tension` by 5 each turn with `+=`, then print `tension`.",
           "concepts": [
             "while_loops"
           ],
           "shardReward": 90,
           "unlockId": null,
           "starterCode": {
-            "explorer": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "tension = 0\nwhile tension < 20:\n    tension += ___\nprint(tension)\n",
+            "standard": "tension = 0\n# Loop while tension < 20 and add 5 each turn with +=\n",
+            "challenge": "tension = 0\n"
           },
-          "referenceSolution": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\nprint(tension)\n",
-          "testCode": "assert tension == 20 and OUTPUT.strip() == \"20\"",
+          "referenceSolution": "tension = 0\nwhile tension < 20:\n    tension += 5\nprint(tension)\n",
+          "testCode": "assert tension == 20 and OUTPUT.strip() == '20'",
           "hints": {
             "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
             "tier2_pattern": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\nprint(tension)",
@@ -1392,24 +1388,24 @@
           "id": "trial-16-05-04",
           "trialType": "code",
           "title": "Countdown Timer",
-          "storyPrompt": "Keep pushing deeper into Brass Courtyard! Start with `sec = 3`. Use `while sec > 0:` to `print(sec)` and subtract 1 (`sec = sec - 1`).",
-          "objective": "Start with `sec = 3`. Use `while sec > 0:` to `print(sec)` and subtract 1 (`sec = sec - 1`).",
+          "storyPrompt": "Just like `+=` adds to a variable, `-=` subtracts from it! Count down the clockwork timer to zero.",
+          "objective": "Starting from `sec`, loop while `sec > 0`, print `sec`, and decrease `sec` by 1 each turn using `-=`.",
           "concepts": [
             "while_loops"
           ],
           "shardReward": 95,
           "unlockId": null,
           "starterCode": {
-            "explorer": "sec = 3\nwhile sec > 0:\n    \n    sec = sec - 1\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "sec = 3\nwhile sec > 0:\n    print(___)\n    sec -= ___\n",
+            "standard": "sec = 3\n# Print sec and decrease it by 1 with -= until it reaches 0\n",
+            "challenge": "sec = 3\n"
           },
-          "referenceSolution": "sec = 3\nwhile sec > 0:\n    print(sec)\n    sec = sec - 1\n",
-          "testCode": "assert OUTPUT.strip().splitlines() == [\"3\", \"2\", \"1\"]",
+          "referenceSolution": "sec = 3\nwhile sec > 0:\n    print(sec)\n    sec -= 1\n",
+          "testCode": "assert sec == 0 and OUTPUT.strip().splitlines() == ['3', '2', '1']",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "sec = 3\nwhile sec > 0:\n    print(sec)\n    sec = sec - 1",
-            "tier3_walkthrough": "Write:\nsec = 3\nwhile sec > 0:\n    print(sec)\n    sec = sec - 1"
+            "tier1_nudge": "Inside the `while sec > 0:` loop, print `sec` first, then write `sec -= 1`.",
+            "tier2_pattern": "while sec > ___:\n    print(___)\n    sec -= ___",
+            "tier3_walkthrough": "Write `while sec > 0:` with indented `print(sec)` and `sec -= 1`."
           },
           "difficultyOverride": null
         },
@@ -1716,26 +1712,27 @@
         {
           "id": "trial-16-06-05",
           "trialType": "code",
-          "title": "Pop From a Queue",
-          "storyPrompt": "Almost at Tock's Logic Vault! Start with `queue = [\"a\", \"b\", \"c\"]` and `done = 0`. While `len(queue) > 0:`, call `queue.pop()` and add 1 to `done`. Print `done`.",
-          "objective": "Start with `queue = [\"a\", \"b\", \"c\"]` and `done = 0`. While `len(queue) > 0:`, call `queue.pop()` and add 1 to `done`. Print `done`.",
+          "title": "Listen for Commands with while True & input()",
+          "storyPrompt": "Sometimes you want a loop to keep reading commands with `input()` until a stop word arrives. `while True:` loops forever until `break` exits! (We pre-loaded the pendulum's command tape so `input()` returns the next command automatically.)",
+          "objective": "Use an infinite `while True:` loop that reads a command via `input()`, stops with `break` when the command is `\"STOP\"`, and counts how many non-stop commands ran in `done`. Print `done` afterward.",
           "concepts": [
             "while_loops",
+            "lists",
             "conditionals_if"
           ],
           "shardReward": 105,
           "unlockId": null,
           "starterCode": {
-            "explorer": "queue = [\"a\", \"b\", \"c\"]\ndone = 0\nwhile len(queue) > 0:\n    queue.pop()\n    done = done + 1\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "commands = [\"WIND\", \"WIND\", \"WIND\", \"STOP\"]\ninput = lambda p=\"\": commands.pop(0)\ndone = 0\nwhile True:\n    cmd = input(\"Command: \")\n    if cmd == \"___\":\n        ___\n    done += 1\nprint(done)\n",
+            "standard": "commands = [\"WIND\", \"WIND\", \"WIND\", \"STOP\"]\ninput = lambda p=\"\": commands.pop(0)\ndone = 0\n# Use while True:, call input(), break on \"STOP\", and count into done\n",
+            "challenge": "commands = [\"WIND\", \"WIND\", \"WIND\", \"STOP\"]\ninput = lambda p=\"\": commands.pop(0)\ndone = 0\n"
           },
-          "referenceSolution": "queue = [\"a\", \"b\", \"c\"]\ndone = 0\nwhile len(queue) > 0:\n    queue.pop()\n    done = done + 1\nprint(done)\n",
-          "testCode": "assert done == 3 and len(queue) == 0 and OUTPUT.strip() == \"3\"",
+          "referenceSolution": "commands = [\"WIND\", \"WIND\", \"WIND\", \"STOP\"]\ninput = lambda p=\"\": commands.pop(0)\ndone = 0\nwhile True:\n    cmd = input(\"Command: \")\n    if cmd == \"STOP\":\n        break\n    done += 1\nprint(done)\n",
+          "testCode": "assert done == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "queue = [\"a\", \"b\", \"c\"]\ndone = 0\nwhile len(queue) > 0:\n    queue.pop()\n    done = done + 1\nprint(done)",
-            "tier3_walkthrough": "Write:\nqueue = [\"a\", \"b\", \"c\"]\ndone = 0\nwhile len(queue) > 0:\n    queue.pop()\n    done = done + 1\nprint(done)"
+            "tier1_nudge": "Inside `while True:`, grab `cmd = input()`, check `if cmd == \"STOP\": break`, and otherwise add 1 to `done`.",
+            "tier2_pattern": "while True:\n    cmd = input()\n    if cmd == ___:\n        break\n    done += ___",
+            "tier3_walkthrough": "Start with `done = 0`, write `while True:`, set `cmd = input(\"Command: \")`, `if cmd == \"STOP\": break`, `done += 1`, then `print(done)`."
           },
           "difficultyOverride": null
         },
@@ -2286,27 +2283,27 @@
         {
           "id": "trial-16-08-04",
           "trialType": "code",
-          "title": "Function Over a List",
-          "storyPrompt": "Keep pushing deeper into Grand Chronometer! Write `def total_gears(lst): return sum(lst)` and print `total_gears([4, 6, 10])`.",
-          "objective": "Write `def total_gears(lst): return sum(lst)` and print `total_gears([4, 6, 10])`.",
+          "title": "Return None When Nothing Matches",
+          "storyPrompt": "Returning `None` on purpose is also useful! It's Python's way of saying 'not found'. You can check for it using `is None`.",
+          "objective": "Write a function `find_gear(gears, target)` that returns `target` if it is in `gears`, or returns `None` otherwise. Test it with `result = find_gear([4, 6, 10], 99)` and print `\"MISSING\"` if `result is None`.",
           "concepts": [
             "functions_def",
             "functions_return",
-            "list_iteration"
+            "lists"
           ],
           "shardReward": 110,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def total_gears(lst):\n    return sum(lst)\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "def find_gear(gears, target):\n    if target in gears:\n        return target\n    return ___\n\nresult = find_gear([4, 6, 10], 99)\nif result is ___:\n    print(\"MISSING\")\n",
+            "standard": "def find_gear(gears, target):\n    # Return target if it is in gears, otherwise return None\n    pass\n\nresult = find_gear([4, 6, 10], 99)\n# Print \"MISSING\" if result is None\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "def total_gears(lst):\n    return sum(lst)\n\nprint(total_gears([4, 6, 10]))\n",
-          "testCode": "assert total_gears([4, 6, 10]) == 20 and OUTPUT.strip() == \"20\"",
+          "referenceSolution": "def find_gear(gears, target):\n    if target in gears:\n        return target\n    return None\n\nresult = find_gear([4, 6, 10], 99)\nif result is None:\n    print(\"MISSING\")\n",
+          "testCode": "assert find_gear([4, 6, 10], 6) == 6 and find_gear([4, 6, 10], 99) is None and result is None and OUTPUT.strip() == \"MISSING\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "def total_gears(lst):\n    return sum(lst)\n\nprint(total_gears([4, 6, 10]))",
-            "tier3_walkthrough": "Write:\ndef total_gears(lst):\n    return sum(lst)\n\nprint(total_gears([4, 6, 10]))"
+            "tier1_nudge": "Check `if target in gears:` to return `target`, otherwise `return None`. Then test `if result is None:`.",
+            "tier2_pattern": "def find_gear(gears, target):\n    if ___ in ___:\n        return ___\n    return None\n\nif result is None:\n    print(\"MISSING\")",
+            "tier3_walkthrough": "Return `target` when `target in gears`, else `return None`. Call `result = find_gear([4, 6, 10], 99)` and print `\"MISSING\"` if `result is None`."
           },
           "difficultyOverride": null
         },
@@ -2584,25 +2581,26 @@
         {
           "id": "trial-16-09-04",
           "trialType": "code",
-          "title": "Update a Dict Value",
-          "storyPrompt": "Keep pushing deeper into Sulfur Terrace! Given `stock = {\"sulfur\": 4}`, increase `stock[\"sulfur\"]` by 6 and `print(stock[\"sulfur\"])`.",
-          "objective": "Given `stock = {\"sulfur\": 4}`, increase `stock[\"sulfur\"]` by 6 and `print(stock[\"sulfur\"])`.",
+          "title": "Check & Update a Dict Key",
+          "storyPrompt": "Just like lists, `in` checks if a key exists in a dictionary! Verify `\"sulfur\"` is in `stock` before adding 6 with `+=`.",
+          "objective": "If `\"sulfur\"` is a key in `stock`, increase its value by 6 using `+=`, then print `stock[\"sulfur\"]`.",
           "concepts": [
-            "dictionaries"
+            "dictionaries",
+            "conditionals_if"
           ],
           "shardReward": 115,
           "unlockId": null,
           "starterCode": {
-            "explorer": "stock = {\"sulfur\": 4}\nstock[\"sulfur\"] = stock[\"sulfur\"] + 6\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "stock = {\"sulfur\": 4}\nif \"sulfur\" in ___:\n    stock[\"sulfur\"] += ___\nprint(stock[\"sulfur\"])\n",
+            "standard": "stock = {\"sulfur\": 4}\n# Check if \"sulfur\" is in stock, add 6 with +=, and print the new value\n",
+            "challenge": "stock = {\"sulfur\": 4}\n"
           },
-          "referenceSolution": "stock = {\"sulfur\": 4}\nstock[\"sulfur\"] = stock[\"sulfur\"] + 6\nprint(stock[\"sulfur\"])\n",
+          "referenceSolution": "stock = {\"sulfur\": 4}\nif \"sulfur\" in stock:\n    stock[\"sulfur\"] += 6\nprint(stock[\"sulfur\"])\n",
           "testCode": "assert stock[\"sulfur\"] == 10 and OUTPUT.strip() == \"10\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "stock = {\"sulfur\": 4}\nstock[\"sulfur\"] = stock[\"sulfur\"] + 6\nprint(stock[\"sulfur\"])",
-            "tier3_walkthrough": "Write:\nstock = {\"sulfur\": 4}\nstock[\"sulfur\"] = stock[\"sulfur\"] + 6\nprint(stock[\"sulfur\"])"
+            "tier1_nudge": "Use `if \"sulfur\" in stock:` and update the entry with `stock[\"sulfur\"] += 6`.",
+            "tier2_pattern": "if ___ in stock:\n    stock[___] += ___\nprint(stock[\"sulfur\"])",
+            "tier3_walkthrough": "Write `if \"sulfur\" in stock:` with indented `stock[\"sulfur\"] += 6`, then `print(stock[\"sulfur\"])`."
           },
           "difficultyOverride": null
         },
@@ -3206,9 +3204,9 @@
           "storyPrompt": "Let's wrap your list-of-dictionaries loop inside a reusable function so Elixir can inspect any potion shelf!",
           "objective": "Write a function `count_rare(shelf)` that counts how many potion dictionaries have a truthy `\"rare\"` value. Store the result for `shelf` in `rares` and print `rares`.",
           "concepts": [
-            "dictionaries",
             "functions_def",
-            "functions_return"
+            "functions_return",
+            "dictionaries"
           ],
           "shardReward": 130,
           "unlockId": null,
@@ -3217,7 +3215,7 @@
             "standard": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\n# Define count_rare(shelf), store count_rare(shelf) in rares, and print rares\n",
             "challenge": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\n"
           },
-          "referenceSolution": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\ndef count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[\"rare\"]:\n            total = total + 1\n    return total\n\nrares = count_rare(shelf)\nprint(rares)\n",
+          "referenceSolution": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\ndef count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[\"rare\"]:\n            total += 1\n    return total\n\nrares = count_rare(shelf)\nprint(rares)\n",
           "testCode": "assert count_rare([{\"rare\": True}]) == 1 and count_rare([{\"rare\": False}]) == 0 and rares == sum(1 for i in shelf if i[\"rare\"]) and OUTPUT.strip() == str(rares)",
           "hints": {
             "tier1_nudge": "Start a counter at 0 inside `count_rare(shelf)`, loop over `shelf`, increment when `item[\"rare\"]` is True, and `return` the count.",
@@ -4093,9 +4091,9 @@
         {
           "id": "trial-16-14-05",
           "trialType": "code",
-          "title": "Update an Object Attribute",
-          "storyPrompt": "Almost at Comet's Logic Vault! Give `Dragon` a `power` attribute and a `boost(self, amt)` method that adds `amt` to `self.power`. Create `d = Dragon(10)`, call `d.boost(15)`, and `print(d.power)`.",
-          "objective": "Give `Dragon` a `power` attribute and a `boost(self, amt)` method that adds `amt` to `self.power`. Create `d = Dragon(10)`, call `d.boost(15)`, and `print(d.power)`.",
+          "title": "Update an Object Attribute with a Method",
+          "storyPrompt": "Methods can also change an object's own attributes by updating `self.<attr>` (like `self.power += amt`).",
+          "objective": "Build a `Dragon` class that stores `power` in `__init__` and has a `boost` method that adds an amount to `self.power` using `+=`. Create a dragon with power 10, boost it by 15, and print its new power.",
           "concepts": [
             "classes_intro"
           ],
@@ -4104,10 +4102,10 @@
           "starterCode": {
             "explorer": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)\n",
-          "testCode": "assert d.power == 25 and OUTPUT.strip() == \"25\"",
+          "referenceSolution": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power += amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)\n",
+          "testCode": "assert d.power == 25 and OUTPUT.strip() == \"25\"\n_d2 = Dragon(5)\n_d2.boost(7)\nassert _d2.power == 12",
           "hints": {
             "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
             "tier2_pattern": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)",
