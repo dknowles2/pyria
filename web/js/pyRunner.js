@@ -1,6 +1,10 @@
-// Main-thread Pyodide runner with 3-second hard timeout & Pip's Kid-Friendly Error Translator
+// Main-thread Pyodide runner backed by an opaque-origin sandboxed iframe
+// (<iframe sandbox="allow-scripts">, NO allow-same-origin) with 3-second hard timeout
+// & Pip's Kid-Friendly Error Translator.
 
 const EXECUTION_TIMEOUT_MS = 3000;
+const BOOT_TIMEOUT_MS = 20000;
+const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127j';
 
 /**
  * Translates raw Python errors into warm, encouraging, kid-readable Pip messages.
@@ -90,6 +94,11 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
         : 'Your code ran cleanly, but the output or variable value did not quite match the Trial objective yet. Check the exact spelling, numbers, and capitalization!';
       break;
 
+    case 'BootTimeoutError':
+      pipMessage =
+        "Hold tight! Pip is still warming up the Python spellbook — tap Run again in a few seconds!";
+      break;
+
     default:
       pipMessage = `Pip spotted a ${type}${linePart}: ${msg || 'Something unexpected happened. Try tweaking your spell!'}`;
       break;
@@ -101,15 +110,87 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
   };
 }
 
-class PyRunner {
-  constructor() {
-    this.worker = null;
+function sanitizePlainObject(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return {};
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
+    if (typeof v === 'string' || typeof v === 'boolean' || v === null) {
+      out[k] = v;
+    } else if (typeof v === 'number' && Number.isFinite(v)) {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+function sanitizeStringArray(val) {
+  if (!Array.isArray(val)) return [];
+  return val.filter((item) => typeof item === 'string');
+}
+
+function sanitizeSandboxResult(mode, raw) {
+  const src = raw && typeof raw === 'object' ? raw : {};
+  const base = {
+    passed: Boolean(src.passed),
+    timedOut: Boolean(src.timedOut),
+    stdout: typeof src.stdout === 'string' ? src.stdout : '',
+    stderr: typeof src.stderr === 'string' ? src.stderr : '',
+    errorType: typeof src.errorType === 'string' ? src.errorType : null,
+    errorMessage: typeof src.errorMessage === 'string' ? src.errorMessage : null,
+    errorLine:
+      typeof src.errorLine === 'number' && Number.isFinite(src.errorLine)
+        ? Math.trunc(src.errorLine)
+        : null,
+    rawTraceback: typeof src.rawTraceback === 'string' ? src.rawTraceback : null,
+  };
+  if (typeof src.stage === 'string') {
+    base.stage = src.stage;
+  }
+  if (mode === 'charcreate') {
+    base.appearance = sanitizePlainObject(src.appearance);
+    base.confirmed = Boolean(src.confirmed);
+    base.events = sanitizeStringArray(src.events);
+  } else if (mode === 'workshop') {
+    base.appearance = sanitizePlainObject(src.appearance);
+    const statsRaw = sanitizePlainObject(src.stats);
+    base.stats = {
+      charisma: typeof statsRaw.charisma === 'number' ? Math.max(0, Math.trunc(statsRaw.charisma)) : 0,
+      courage: typeof statsRaw.courage === 'number' ? Math.max(0, Math.trunc(statsRaw.courage)) : 0,
+    };
+    base.ownedUnlockIds = sanitizeStringArray(src.ownedUnlockIds);
+    base.byteShards =
+      typeof src.byteShards === 'number' && Number.isFinite(src.byteShards)
+        ? Math.max(0, Math.trunc(src.byteShards))
+        : 0;
+    base.purchased = sanitizeStringArray(src.purchased);
+    base.equipped = sanitizeStringArray(src.equipped);
+  }
+  return base;
+}
+
+export class PyRunner {
+  constructor(options = {}) {
+    this.executionTimeoutMs =
+      typeof options.executionTimeoutMs === 'number'
+        ? options.executionTimeoutMs
+        : EXECUTION_TIMEOUT_MS;
+    this.bootTimeoutMs =
+      typeof options.bootTimeoutMs === 'number'
+        ? options.bootTimeoutMs
+        : BOOT_TIMEOUT_MS;
+    this.iframe = null;
+    this.port = null;
+    this.generation = 0;
     this.ready = false;
     this.initError = null;
     this.nextId = 1;
     this.pending = new Map();
+    this.bootQueue = [];
     this.statusListeners = new Set();
-    this.spawnWorker();
+    if (typeof document !== 'undefined' && options.autoSpawn !== false) {
+      this.spawnSandbox();
+    }
   }
 
   onStatusChange(listener) {
@@ -131,83 +212,217 @@ class PyRunner {
     }
   }
 
-  spawnWorker() {
-    if (this.worker) {
+  _abortPending(errorType, errorMessage) {
+    this.bootQueue = [];
+    for (const [, req] of this.pending) {
+      clearTimeout(req.timer);
+      req.resolve(
+        sanitizeSandboxResult(req.mode, {
+          passed: false,
+          stdout: '',
+          stderr: '',
+          errorType,
+          errorMessage,
+          rawTraceback: null,
+        })
+      );
+    }
+    this.pending.clear();
+  }
+
+  _teardownSandbox() {
+    this.generation += 1;
+    if (this.port) {
       try {
-        this.worker.terminate();
+        this.port.postMessage({ type: 'terminate' });
       } catch {
         // ignore
       }
+      try {
+        this.port.onmessage = null;
+        this.port.close();
+      } catch {
+        // ignore
+      }
+      this.port = null;
     }
+    if (this.iframe) {
+      try {
+        this.iframe.remove();
+      } catch {
+        // ignore
+      }
+      this.iframe = null;
+    }
+  }
+
+  spawnSandbox() {
+    this._teardownSandbox();
+    this._abortPending('SandboxResetError', 'Python sandbox was reset');
+
     this.ready = false;
     this.initError = null;
-    this.worker = new Worker('/js/pyWorker.js?v=20261127i');
-    this.worker.onmessage = (event) => this.handleMessage(event.data);
-    this.worker.onerror = (err) => {
-      this.initError = err.message || 'Worker failed';
-      this.emitStatus();
-      for (const [, req] of this.pending) {
-        clearTimeout(req.timer);
-        req.resolve({
-          passed: false,
-          stdout: '',
-          errorType: 'WorkerError',
-          errorMessage: this.initError,
-        });
-      }
-      this.pending.clear();
+
+    const gen = this.generation;
+    const channel = new MessageChannel();
+    this.port = channel.port1;
+    this.port.onmessage = (event) => {
+      if (gen !== this.generation) return;
+      this.handleMessage(event.data);
     };
+
+    const iframe = document.createElement('iframe');
+    // Strictly opaque origin: allow-scripts ONLY (NEVER allow-same-origin).
+    iframe.setAttribute('sandbox', 'allow-scripts');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.setAttribute('tabindex', '-1');
+    iframe.title = 'Pyria Python Sandbox';
+    iframe.style.display = 'none';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+
+    iframe.addEventListener(
+      'load',
+      () => {
+        if (gen !== this.generation || !iframe.contentWindow) return;
+        try {
+          // Opaque-origin sandboxed iframes require '*' targetOrigin; we transfer a
+          // dedicated MessagePort so all subsequent messages travel on a private channel.
+          iframe.contentWindow.postMessage({ type: 'pyria:init' }, '*', [channel.port2]);
+        } catch (err) {
+          this.initError = (err && err.message) || 'Failed to initialize Python sandbox';
+          this.emitStatus();
+          this._abortPending('SandboxError', this.initError);
+        }
+      },
+      { once: true }
+    );
+
+    iframe.addEventListener('error', () => {
+      if (gen !== this.generation) return;
+      this.initError = 'Python sandbox failed to load';
+      this.emitStatus();
+      this._abortPending('SandboxError', this.initError);
+    });
+
+    iframe.src = SANDBOX_IFRAME_URL;
+    this.iframe = iframe;
+
+    const mount = () => {
+      if (gen !== this.generation) return;
+      if (document.body) {
+        document.body.appendChild(iframe);
+      }
+    };
+    if (document.body) {
+      mount();
+    } else {
+      document.addEventListener('DOMContentLoaded', mount, { once: true });
+    }
+
     this.emitStatus();
   }
 
+  _scheduleExecutionTimeout(id) {
+    return setTimeout(() => {
+      if (!this.pending.has(id)) return;
+      const req = this.pending.get(id);
+      this.pending.delete(id);
+      // Destroy and recreate the sandboxed iframe to immediately terminate
+      // infinite loops (like while True:) and discard any tainted sandbox state.
+      this.spawnSandbox();
+      req.resolve(
+        sanitizeSandboxResult(req.mode, {
+          passed: false,
+          timedOut: true,
+          stdout: '',
+          stderr: '',
+          errorType: 'TimeoutError',
+          errorMessage: 'Execution exceeded 3 seconds',
+          rawTraceback: null,
+        })
+      );
+    }, this.executionTimeoutMs);
+  }
+
+  _scheduleBootTimeout(id) {
+    return setTimeout(() => {
+      if (!this.pending.has(id)) return;
+      const req = this.pending.get(id);
+      this.pending.delete(id);
+      this.bootQueue = this.bootQueue.filter((item) => item.id !== id);
+      // Do NOT tear down the sandbox on boot timeout: allow the in-progress
+      // Pyodide download to finish rather than restarting it from scratch.
+      req.resolve(
+        sanitizeSandboxResult(req.mode, {
+          passed: false,
+          timedOut: false,
+          stdout: '',
+          stderr: '',
+          errorType: 'BootTimeoutError',
+          errorMessage: 'Python is still warming up — please try again in a moment!',
+          rawTraceback: null,
+        })
+      );
+    }, this.bootTimeoutMs);
+  }
+
   handleMessage(msg) {
-    if (!msg) return;
+    if (!msg || typeof msg !== 'object') return;
     if (msg.type === 'ready') {
       this.ready = true;
       this.initError = null;
       this.emitStatus();
+      // Flush any runs that were queued while Pyodide was booting, switching
+      // each one to the strict 3-second execution timeout now that user code is sent.
+      const queued = this.bootQueue;
+      this.bootQueue = [];
+      for (const item of queued) {
+        const req = this.pending.get(item.id);
+        if (!req) continue;
+        clearTimeout(req.timer);
+        req.sent = true;
+        req.timer = this._scheduleExecutionTimeout(item.id);
+        this.port.postMessage({
+          type: 'run',
+          id: item.id,
+          mode: item.mode,
+          payload: item.payload,
+        });
+      }
       return;
     }
     if (msg.type === 'init_error') {
-      this.initError = msg.error || 'Could not load Pyodide';
+      this.initError = typeof msg.error === 'string' && msg.error ? msg.error : 'Could not load Pyodide';
       this.emitStatus();
+      this._abortPending('SandboxError', this.initError);
       return;
     }
     if (msg.type === 'result' && this.pending.has(msg.id)) {
       const req = this.pending.get(msg.id);
+      if (!req.sent) return;
       this.pending.delete(msg.id);
       clearTimeout(req.timer);
-      req.resolve(msg.result);
+      req.resolve(sanitizeSandboxResult(req.mode, msg.result));
     }
   }
 
   execute(mode, payload) {
+    if (!this.iframe || !this.port || this.initError) {
+      this.spawnSandbox();
+    }
     return new Promise((resolve) => {
       const id = this.nextId++;
-
-      // If Pyodide is still booting on first run, allow extra boot time before enforcing
-      // the 3-second execution timeout once ready; if already ready, strict 3-second timeout!
-      const startTimer = () => {
-        const timeoutMs = this.ready ? EXECUTION_TIMEOUT_MS : 20000;
-        return setTimeout(() => {
-          if (!this.pending.has(id)) return;
-          this.pending.delete(id);
-          // Hard kill worker to break infinite while True: loops and spin up a fresh worker
-          this.spawnWorker();
-          resolve({
-            passed: false,
-            timedOut: true,
-            stdout: '',
-            errorType: 'TimeoutError',
-            errorMessage: 'Execution exceeded 3 seconds',
-            rawTraceback: null,
-          });
-        }, timeoutMs);
-      };
-
-      const timer = startTimer();
-      this.pending.set(id, { resolve, timer });
-      this.worker.postMessage({ id, mode, payload });
+      if (this.ready) {
+        const timer = this._scheduleExecutionTimeout(id);
+        this.pending.set(id, { resolve, timer, mode, sent: true });
+        this.port.postMessage({ type: 'run', id, mode, payload });
+      } else {
+        const timer = this._scheduleBootTimeout(id);
+        this.pending.set(id, { resolve, timer, mode, sent: false });
+        this.bootQueue.push({ id, mode, payload });
+      }
     });
   }
 
