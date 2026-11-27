@@ -306,7 +306,7 @@ function openAddChildHeroModal() {
   const submitBtn = $('#btn-submit-add-hero');
   setTimeout(() => nameEl?.focus(), 30);
 
-  submitBtn?.addEventListener('click', async () => {
+  const submitAddHero = async () => {
     const heroName = String(nameEl?.value || '').trim();
     if (heroName.length < 2 || heroName.length > 24) {
       if (errEl) {
@@ -344,6 +344,14 @@ function openAddChildHeroModal() {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Create Hero & Code';
     }
+  };
+
+  submitBtn?.addEventListener('click', submitAddHero);
+  nameEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitAddHero();
+    }
   });
 }
 
@@ -358,7 +366,8 @@ function openClaimHeroModal() {
     </p>
     <div class="field">
       <label for="claim-hero-code">Hero Code</label>
-      <input id="claim-hero-code" type="text" class="input input-mono" maxlength="40" placeholder="EMBER-DRAGON-4821" autocomplete="off" />
+      <input id="claim-hero-code" type="text" class="input input-mono" maxlength="40" placeholder="EMBER-DRAGON-482103" autocomplete="off" />
+      <div class="muted-text" style="font-size:12px; margin-top:4px;">Dashes optional — spaces or no dashes work too.</div>
     </div>
     <div id="claim-hero-error" class="console-error-msg hidden"></div>
     <div class="console-modal-footer">
@@ -372,7 +381,7 @@ function openClaimHeroModal() {
   const submitBtn = $('#btn-submit-claim-hero');
   setTimeout(() => codeEl?.focus(), 30);
 
-  submitBtn?.addEventListener('click', async () => {
+  const submitClaim = async () => {
     const heroCode = String(codeEl?.value || '').trim().toUpperCase();
     if (!heroCode) {
       if (errEl) {
@@ -399,6 +408,14 @@ function openClaimHeroModal() {
       }
       submitBtn.disabled = false;
       submitBtn.textContent = 'Link Hero';
+    }
+  };
+
+  submitBtn?.addEventListener('click', submitClaim);
+  codeEl?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitClaim();
     }
   });
 }
@@ -703,35 +720,55 @@ function renderHeroCards() {
   });
 
   listEl.querySelectorAll('.btn-rotate-hero-code').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', (e) => {
       e.stopPropagation();
       const saveId = btn.dataset.saveId;
       const save = state.saves.find((s) => s.id === saveId);
       if (!save) return;
-      if (
-        !confirm(
-          `Rotate Hero Code for "${save.heroName}"? This will immediately sign out any child device using the old code.`
-        )
-      ) {
-        return;
-      }
-      btn.disabled = true;
-      try {
-        const res = await apiFetch(`/api/console/saves/${encodeURIComponent(saveId)}/rotate-code`, {
-          method: 'POST',
-          body: JSON.stringify({}),
-        });
-        openOneTimeHeroCodeModal({
-          heroName: save.heroName,
-          heroCode: res.heroCode,
-          title: '🔄 New Hero Code Generated',
-          note: 'Old child-device sessions have been revoked. Share this new one-time code to sign back in.',
-        });
-      } catch (err) {
-        showToast(`Could not rotate code: ${err.message}`, true);
-      } finally {
-        btn.disabled = false;
-      }
+      openConsoleModal(`
+        <div class="console-modal-header">
+          <h2>🔄 Rotate Hero Code?</h2>
+          <button type="button" class="btn btn-sm btn-ghost" data-close-modal>✕</button>
+        </div>
+        <p class="muted-text" style="margin:0;">
+          Generate a new Hero Code for <strong style="color:var(--text-main);">${escapeHtml(save.heroName)}</strong>?
+        </p>
+        <p class="muted-text" style="margin:0;">
+          This will immediately sign out any child device using the old code. Their progress stays safe in the cloud.
+        </p>
+        <div id="rotate-code-error" class="console-error-msg hidden"></div>
+        <div class="console-modal-footer">
+          <button type="button" class="btn btn-ghost" data-close-modal>Cancel</button>
+          <button id="btn-confirm-rotate-code" type="button" class="btn btn-primary">Generate New Code</button>
+        </div>
+      `);
+      const confirmBtn = $('#btn-confirm-rotate-code');
+      const errEl = $('#rotate-code-error');
+      confirmBtn?.addEventListener('click', async () => {
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Generating...';
+        if (errEl) errEl.classList.add('hidden');
+        try {
+          const res = await apiFetch(`/api/console/saves/${encodeURIComponent(saveId)}/rotate-code`, {
+            method: 'POST',
+            body: JSON.stringify({}),
+          });
+          openOneTimeHeroCodeModal({
+            heroName: save.heroName,
+            heroCode: res.heroCode,
+            playToken: res.playToken,
+            title: '🔄 New Hero Code Generated',
+            note: 'Old child-device sessions have been signed out. Scan on your child’s device or share this code — you can generate a new one anytime.',
+          });
+        } catch (err) {
+          if (errEl) {
+            errEl.textContent = err.message || 'Could not rotate code.';
+            errEl.classList.remove('hidden');
+          }
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Generate New Code';
+        }
+      });
     });
   });
 

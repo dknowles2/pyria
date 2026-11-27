@@ -1631,12 +1631,13 @@ export class ModalManager {
           id="input-hero-code"
           type="text"
           class="hero-code-input"
-          placeholder="EMBER-DRAGON-4821"
+          placeholder="EMBER-DRAGON-482103"
           autocomplete="off"
           autocapitalize="characters"
           spellcheck="false"
           maxlength="40"
         />
+        <div class="hero-code-hint">Dashes optional — spaces or no dashes work too!</div>
         <div id="hero-code-error" class="forge-error hidden"></div>
       </div>
 
@@ -1787,7 +1788,7 @@ export class ModalManager {
         </button>
         ${
           isGuestCloudflare
-            ? '<button id="btn-menu-hero-code" type="button" class="btn btn-sky">🔑 Get Hero Code (Save to Cloud)</button>'
+            ? '<button id="btn-menu-hero-code" type="button" class="btn btn-sky">☁️ Save to Cloud (Get Hero Code)</button>'
             : ''
         }
         <button id="btn-menu-save" type="button" class="btn btn-ghost">
@@ -1877,6 +1878,60 @@ export class ModalManager {
       btn.addEventListener('click', () => {
         audio.playClick();
         this.close();
+      });
+    });
+  }
+
+  // ==================== STYLED CONFIRMATION MODAL ====================
+  confirmDialog({
+    title = 'Are you sure?',
+    badge = '',
+    message = '',
+    subtext = '',
+    confirmLabel = 'Continue',
+    confirmClass = 'btn-primary',
+    cancelLabel = 'Cancel',
+  } = {}) {
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (val) => {
+        if (settled) return;
+        settled = true;
+        resolve(Boolean(val));
+      };
+
+      this.open(
+        `
+        <div class="modal-header">
+          <div>
+            <h2>${escapeHtml(title)}</h2>
+            ${badge ? `<div class="modal-badges"><span class="pill pill-gold">${escapeHtml(badge)}</span></div>` : ''}
+          </div>
+          <button type="button" class="btn btn-sm btn-ghost" data-cancel aria-label="Close">✕</button>
+        </div>
+        ${message ? `<p class="dialogue-text">${escapeHtml(message)}</p>` : ''}
+        ${subtext ? `<p class="muted-text" style="margin-top:0;">${escapeHtml(subtext)}</p>` : ''}
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-cancel>${escapeHtml(cancelLabel)}</button>
+          <button id="btn-confirm-ok" type="button" class="btn ${escapeHtml(confirmClass)}">${escapeHtml(confirmLabel)}</button>
+        </div>
+        `,
+        'modal-compact'
+      );
+
+      this.addCleanup(() => finish(false));
+
+      this.content.querySelector('#btn-confirm-ok')?.addEventListener('click', () => {
+        audio.playClick();
+        finish(true);
+        this.close();
+      });
+      this.content.querySelectorAll('[data-cancel]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          audio.playClick();
+          finish(false);
+          this.close();
+        });
       });
     });
   }

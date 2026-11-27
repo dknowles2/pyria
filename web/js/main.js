@@ -649,6 +649,7 @@ function renderAccountIdentityBar() {
   const bar = $('#title-account-bar');
   const pill = $('#title-user-pill');
   const builderBtn = $('#btn-title-builder');
+  const parentsBtn = $('#btn-title-parents');
   const heroSignOutBtn = $('#btn-hero-signout');
   const enterCodeBtn = $('#btn-enter-hero-code');
   const adminBar = $('#admin-account-bar');
@@ -670,6 +671,7 @@ function renderAccountIdentityBar() {
         builderBtn.textContent = '🛡️ Console';
         builderBtn.classList.remove('hidden');
       }
+      parentsBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
     } else if (auth.role === 'parent') {
       if (pill) {
@@ -681,6 +683,7 @@ function renderAccountIdentityBar() {
         builderBtn.textContent = '🛡️ Parent Console';
         builderBtn.classList.remove('hidden');
       }
+      parentsBtn?.classList.add('hidden');
       heroSignOutBtn?.classList.add('hidden');
     } else if (auth.role === 'hero') {
       if (pill) {
@@ -688,6 +691,7 @@ function renderAccountIdentityBar() {
         pill.textContent = `🧙 Hero: ${auth.heroName || 'Code-Tamer'}`;
       }
       builderBtn?.classList.add('hidden');
+      parentsBtn?.classList.remove('hidden');
       heroSignOutBtn?.classList.remove('hidden');
     } else {
       if (pill) {
@@ -695,9 +699,11 @@ function renderAccountIdentityBar() {
         pill.textContent = '✨ Guest Mode (Saved on this device)';
       }
       builderBtn?.classList.add('hidden');
+      parentsBtn?.classList.remove('hidden');
       heroSignOutBtn?.classList.add('hidden');
     }
   } else {
+    parentsBtn?.classList.add('hidden');
     heroSignOutBtn?.classList.add('hidden');
     if (me.authenticated || me.email || me.isAdmin) {
       bar?.classList.remove('hidden');
@@ -744,6 +750,21 @@ function renderAccountIdentityBar() {
 }
 
 let heroCodeUpgradeInFlight = false;
+const GUEST_CLOUD_NUDGE_KEY = 'pyria_guest_cloud_nudge_shown';
+
+function maybeShowGuestCloudNudge(save) {
+  if (state.me?.mode !== 'cloudflare' || !isActiveSaveGuest(save)) return;
+  if (!Array.isArray(save?.rescuedDragons) || save.rescuedDragons.length !== 1) return;
+  try {
+    if (localStorage.getItem(GUEST_CLOUD_NUDGE_KEY)) return;
+    localStorage.setItem(GUEST_CLOUD_NUDGE_KEY, '1');
+  } catch {
+    return;
+  }
+  setTimeout(() => {
+    showToast('☁️ Tip: Tap Save to Cloud anytime to back up your hero and link a parent!');
+  }, 2400);
+}
 
 async function upgradeGuestSaveToHeroCode(targetSave) {
   if (!targetSave || heroCodeUpgradeInFlight) return;
@@ -879,7 +900,7 @@ async function refreshSavesList() {
         : '';
       const upgradeBtnHtml =
         isCloudflare && s.isGuest
-          ? '<button type="button" class="btn btn-sm btn-sky btn-card-hero-code">🔑 Get Hero Code</button>'
+          ? '<button type="button" class="btn btn-sm btn-sky btn-card-hero-code">☁️ Save to Cloud</button>'
           : '';
       card.innerHTML = `
         <div class="save-card-info">
@@ -904,7 +925,7 @@ async function refreshSavesList() {
         upgradeBtn.textContent = 'Creating...';
         await upgradeGuestSaveToHeroCode(s);
         upgradeBtn.disabled = false;
-        upgradeBtn.textContent = '🔑 Get Hero Code';
+        upgradeBtn.textContent = '☁️ Save to Cloud';
       });
 
       card.addEventListener('click', async () => {
@@ -1043,11 +1064,19 @@ function buildVisualHeroPickers() {
 async function createHeroForCurrentAuth(newSavePayload) {
   if (state.me?.mode === 'cloudflare' && state.me?.auth?.role === 'hero') {
     const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
-    if (
-      !confirm(
-        `This will sign out ${activeHeroLabel} on this device. Make sure you have your Hero Code written down! Continue?`
-      )
-    ) {
+    const linked = Boolean(state.me?.auth?.linkedToParent);
+    const ok = await state.modals.confirmDialog({
+      title: 'Start a New Hero?',
+      badge: `Current: ${activeHeroLabel}`,
+      message: `This will sign out ${activeHeroLabel} on this device so a new adventure can begin.`,
+      subtext: linked
+        ? `${activeHeroLabel} is safely linked to a Parent Console — a parent can always share a fresh Hero Code anytime!`
+        : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later.`,
+      confirmLabel: 'Start New Hero',
+      confirmClass: 'btn-primary',
+      cancelLabel: 'Keep Playing Current Hero',
+    });
+    if (!ok) {
       return null;
     }
     // A child hero cookie is scoped to one saveId and cannot POST /api/saves.
@@ -1640,6 +1669,7 @@ async function handleEntityInteract(entity) {
         save.seenCutscenes.push(postBossKey);
       }
       showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
+      maybeShowGuestCloudNudge(save);
       await refreshLiveContent();
       updateHud();
       await persistSave();
@@ -1659,6 +1689,7 @@ async function handleEntityInteract(entity) {
           const dragonName = realm?.dragon?.name || 'the Dragon';
           const upgradeNote = realm?.miniVisualUpgrade || 'Portal unlocked!';
           showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
+          maybeShowGuestCloudNudge(save);
           await refreshLiveContent();
           updateHud();
           await persistSave();
@@ -1946,11 +1977,19 @@ function wireControls() {
   $('#btn-hero-signout')?.addEventListener('click', async () => {
     audio.playClick();
     const activeHeroLabel = state.me?.auth?.heroName || 'your current hero';
-    if (
-      !confirm(
-        `Sign out ${activeHeroLabel} on this device? Make sure you have your Hero Code written down so you can sign back in!`
-      )
-    ) {
+    const linked = Boolean(state.me?.auth?.linkedToParent);
+    const ok = await state.modals.confirmDialog({
+      title: 'Switch Hero?',
+      badge: `Signed in as ${activeHeroLabel}`,
+      message: `Sign out ${activeHeroLabel} on this device?`,
+      subtext: linked
+        ? `${activeHeroLabel}'s cloud progress is safe and linked to a Parent Console — a parent can always generate a fresh Hero Code if needed.`
+        : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later!`,
+      confirmLabel: 'Switch Hero',
+      confirmClass: 'btn-sky',
+      cancelLabel: 'Stay Signed In',
+    });
+    if (!ok) {
       return;
     }
     try {
@@ -2074,7 +2113,7 @@ function wireControls() {
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = '🔑 Get Hero Code';
+        btn.textContent = '☁️ Save to Cloud';
       }
     }
   });

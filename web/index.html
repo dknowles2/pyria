@@ -22,6 +22,7 @@
           <span id="title-user-pill" class="pill pill-blue">👤 Signed In</span>
           <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <button id="btn-hero-signout" type="button" class="btn btn-sm btn-ghost hidden">Switch Hero</button>
+            <a id="btn-title-parents" href="/console" class="btn btn-sm btn-ghost hidden">🛡️ Parents</a>
             <a id="btn-title-builder" href="/builder" class="btn btn-sm btn-gold hidden">🛠️ Builder</a>
           </div>
         </div>
@@ -69,7 +70,17 @@
         </section>
 
         <footer class="title-footer">
-          <a id="link-parent-console" href="/console" class="title-footer-link">Parent Console</a>
+          <div class="parent-discover-card">
+            <div class="parent-discover-copy">
+              <div class="parent-discover-title">🛡️ Parents &amp; Guardians</div>
+              <div class="parent-discover-sub">
+                Track live Python progress, adjust difficulty &amp; Pip hints, and back up heroes across devices.
+              </div>
+            </div>
+            <a id="link-parent-console" href="/console" class="btn btn-sm btn-ghost parent-discover-btn">
+              Open Parent Console →
+            </a>
+          </div>
         </footer>
       </div>
     </section>
@@ -239,7 +250,7 @@
           <select id="hud-admin-realm-jump" class="hud-admin-jump hidden" title="Admin: Jump to any Era / Realm" aria-label="Admin Jump to Era or Realm"></select>
           <select id="hud-admin-cutscene-preview" class="hud-admin-jump hidden" title="Admin: Preview Story &amp; Era-Transition Cutscenes" aria-label="Admin Preview Cutscene"></select>
           <button id="btn-hud-hero-code" class="btn btn-sm btn-sky hidden" title="Save your hero to the cloud with a Hero Code">
-            🔑 Get Hero Code
+            ☁️ Save to Cloud
           </button>
           <button id="btn-hud-workshop" class="btn btn-sm btn-gold" title="Open Bram's Workshop">
             ⚒ Workshop
