@@ -886,7 +886,7 @@
           "id": "trial-03-01",
           "trialType": "multiple_choice",
           "title": "Spot the Right if Spell!",
-          "storyPrompt": "Welcome to Cinder Cavern! In Python, a **Boolean** (`bool` for short) is a yes/no truth value—it can ONLY be `True` or `False` (always capitalized, no quotes!). An `if` statement checks whether a condition is `True` and runs the indented code underneath. Two golden rules: (1) put a colon `:` at the end of the `if` line, and (2) indent lines inside by 4 spaces. Tap the ONE valid Python `if` spell below!",
+          "storyPrompt": "Welcome to Cinder Cavern! In Python, a **Boolean** (`bool` for short) is a yes/no truth value—it can ONLY be `True` or `False` (always capitalized, no quotes!). An `if` statement checks whether a condition like `heat > 50` (is `heat` greater than `50`?) is `True` and runs the indented code underneath. Two golden rules: (1) put a colon `:` at the end of the `if` line, and (2) indent lines inside by 4 spaces. Tap the ONE valid Python `if` spell below!",
           "objective": "Choose the valid Python `if` statement that has both a colon `:` and 4-space indentation.",
           "concepts": [
             "variables",
@@ -918,8 +918,8 @@
             {
               "id": "d",
               "label": "Option D",
-              "code": "if heat = 50:\n    shout(\"Shield up!\")",
-              "explanation": "Tricky! One `=` puts a value into a box—it can't compare inside an `if`! Use `>`, `<`, or `==` to compare."
+              "code": "if heat > 50\nshout(\"Shield up!\")",
+              "explanation": "Not quite! This one is missing BOTH golden rules: there's no colon `:` at the end of `if heat > 50` AND `shout(\"Shield up!\")` isn't indented 4 spaces!"
             }
           ],
           "correctChoiceId": "b",
@@ -980,7 +980,7 @@
           "id": "trial-03-03",
           "trialType": "fix_bug",
           "title": "The Jammed Cavern Door",
-          "storyPrompt": "The cavern door lock crashes with an indentation error when you run it! Remember: lines that belong INSIDE an `if` block must be indented 4 spaces (tap **⇥ Indent**). Fix the lock!",
+          "storyPrompt": "The cavern door lock crashes with an indentation error when you run it! Remember: lines that belong INSIDE an `if` block must be indented 4 spaces (tap **⇥ Indent**). (Notice `==` checks whether `gems` equals `7`!) Fix the lock!",
           "objective": "Fix the broken if-block so door becomes 'OPEN' and Python shouts CLICK!.",
           "concepts": [
             "variables",
