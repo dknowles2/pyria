@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261126w';
-import { music } from './music.js?v=20261126w';
-import { pyRunner } from './pyRunner.js?v=20261126w';
+import { audio } from './audio.js?v=20261126x';
+import { music } from './music.js?v=20261126x';
+import { pyRunner } from './pyRunner.js?v=20261126x';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126w';
+} from './autocomplete.js?v=20261126x';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -870,21 +870,81 @@ export class ModalManager {
     const dirs = ['down', 'right', 'up', 'left'];
     let previewFrame = 0;
 
-    const renderCatalogHtml = () => {
+    const normalizeCall = (line) =>
+      String(line || '')
+        .trim()
+        .replace(/'/g, '"')
+        .replace(/\s+/g, '');
+
+    const matchUnlockableForLine = (line) => {
+      const norm = normalizeCall(line);
+      if (!norm || norm.startsWith('#')) return null;
+      const unlockables = catalog.unlockables || [];
+      const exact = unlockables.find((u) => normalizeCall(u.functionCall) === norm);
+      if (exact) return exact;
+      if (/^add_charisma\(\d+\)$/.test(norm)) {
+        return unlockables.find((u) => u.id === 'stat-charisma-1') || null;
+      }
+      if (/^add_courage\(\d+\)$/.test(norm)) {
+        return unlockables.find((u) => u.id === 'stat-courage-1') || null;
+      }
+      return null;
+    };
+
+    const estimateCart = (codeText) => {
+      const seenOwned = new Set(workingSave.ownedUnlockIds || []);
+      const queuedIds = new Set();
+      let totalCost = 0;
+      const lines = String(codeText || '').split('\n');
+      const items = [];
+      for (const rawLine of lines) {
+        const item = matchUnlockableForLine(rawLine);
+        if (!item) continue;
+        queuedIds.add(item.id);
+        const alreadyOwned = seenOwned.has(item.id);
+        const cost = alreadyOwned ? 0 : Number(item.shardCost) || 0;
+        if (!alreadyOwned) {
+          seenOwned.add(item.id);
+          totalCost += cost;
+        }
+        items.push({ id: item.id, name: item.name, cost, alreadyOwned });
+      }
+      const currentShards = Number(workingSave.byteShards) || 0;
+      return {
+        currentShards,
+        totalCost,
+        remaining: currentShards - totalCost,
+        items,
+        queuedIds,
+      };
+    };
+
+    const renderCatalogHtml = (cart = null) => {
       const owned = new Set(workingSave.ownedUnlockIds || []);
       const currentShards = Number(workingSave.byteShards) || 0;
+      const effectiveBudget = cart ? Math.max(0, cart.remaining) : currentShards;
+      const queuedIds = cart ? cart.queuedIds : new Set();
       return (catalog.unlockables || [])
         .map((item) => {
           const isOwned = owned.has(item.id);
+          const isQueued = !isOwned && queuedIds.has(item.id);
           const cost = Number(item.shardCost) || 0;
-          const canAfford = currentShards >= cost;
-          const missing = Math.max(0, cost - currentShards);
-          const stateClass = isOwned ? 'owned' : canAfford ? 'affordable' : 'unaffordable';
+          const canAfford = effectiveBudget >= cost;
+          const missing = Math.max(0, cost - effectiveBudget);
+          const stateClass = isOwned
+            ? 'owned'
+            : isQueued
+              ? 'queued'
+              : canAfford
+                ? 'affordable'
+                : 'unaffordable';
           const badge = isOwned
             ? '<span class="pill pill-green">✓ Owned (Free to Equip)</span>'
-            : canAfford
-              ? `<span class="pill pill-gold">💎 ${cost} Shards · Ready to Forge!</span>`
-              : `<span class="pill pill-rose">${cost} 💎 · 🔒 Need ${missing} more</span>`;
+            : isQueued
+              ? `<span class="pill pill-sky">🛒 In Code (${cost} 💎)</span>`
+              : canAfford
+                ? `<span class="pill pill-gold">💎 ${cost} Shards · Ready to Forge!</span>`
+                : `<span class="pill pill-rose">${cost} 💎 · 🔒 Need ${missing} more</span>`;
           return `
             <div class="catalog-item ${stateClass}" data-call="${escapeHtml(item.functionCall)}">
               <div>
@@ -915,7 +975,7 @@ export class ModalManager {
       </div>
 
       <p class="muted-text" style="margin-top:-6px;">
-        "No buttons in my shop, kid! Click any blueprint below to insert its Python call, then press <strong>Run Forge Code</strong>!"
+        "No buttons in my shop, kid! Click any blueprint below to add its Python call, watch your live shard budget, then press <strong>Run Forge Code</strong>!"
       </p>
 
       <div class="workshop-grid">
@@ -935,18 +995,22 @@ export class ModalManager {
         </div>
 
         <div style="display:flex; flex-direction:column; gap:12px;">
+          <div id="ws-cart-bar" class="ws-cart-bar"></div>
           ${renderQuickKeysHtml('ws-quick-keys', wsQuickKeys)}
-          <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text"># Click any item on the left or type Python calls here!
-# Example:
-# wear_hat("explorer")
-</textarea>
+          <div class="code-editor-shell">
+            <div class="code-editor-bar">
+              <span class="code-editor-cta">⚒ FORGE CODE BOX</span>
+              <span class="code-editor-sub">Click items on the left or type below</span>
+            </div>
+            <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click any blueprint on the left or type wear_hat(&quot;explorer&quot;)..."></textarea>
+          </div>
           <div class="editor-actions">
             <button id="ws-run-btn" class="btn btn-gold">⚒ Run Forge Code</button>
             <button id="ws-clear-btn" class="btn btn-ghost">Clear</button>
           </div>
           <div id="ws-output" class="pip-console">
             <div class="pip-console-header">⚒ Bram says:</div>
-            <div class="pip-console-body">Write a function call like <code>wear_hat("explorer")</code> and run it to forge & equip gear!</div>
+            <div class="pip-console-body">Click a blueprint on the left (or type a call like <code>wear_hat("explorer")</code>) and press <strong>Run Forge Code</strong>!</div>
           </div>
         </div>
       </div>
@@ -956,6 +1020,7 @@ export class ModalManager {
 
     const previewCanvas = this.content.querySelector('#ws-preview-canvas');
     const catalogEl = this.content.querySelector('#ws-catalog');
+    const cartBarEl = this.content.querySelector('#ws-cart-bar');
     const codeEl = this.content.querySelector('#ws-code');
     const runBtn = this.content.querySelector('#ws-run-btn');
     const clearBtn = this.content.querySelector('#ws-clear-btn');
@@ -988,30 +1053,67 @@ export class ModalManager {
       audio.playClick();
     });
 
+    const refreshCartAndCatalog = () => {
+      const cart = estimateCart(codeEl.value);
+      if (cartBarEl) {
+        if (cart.items.length === 0) {
+          cartBarEl.className = 'ws-cart-bar';
+          cartBarEl.innerHTML = `
+            <span>💎 Have: <strong>${cart.currentShards}</strong></span>
+            <span class="muted-text">Add blueprints on the left to preview your total cost</span>
+          `;
+        } else if (cart.remaining >= 0) {
+          cartBarEl.className = 'ws-cart-bar ok';
+          cartBarEl.innerHTML = `
+            <span>💎 Have: <strong>${cart.currentShards}</strong></span>
+            <span>− 🛒 Order (${cart.items.length}): <strong>${cart.totalCost}</strong></span>
+            <span>= ✨ Left After: <strong>${cart.remaining}</strong></span>
+          `;
+        } else {
+          const shortBy = Math.abs(cart.remaining);
+          cartBarEl.className = 'ws-cart-bar over';
+          cartBarEl.innerHTML = `
+            <span>💎 Have: <strong>${cart.currentShards}</strong></span>
+            <span>− 🛒 Order (${cart.items.length}): <strong>${cart.totalCost}</strong></span>
+            <span>= 🔒 <strong>Short by ${shortBy} 💎!</strong> Remove a line before running.</span>
+          `;
+        }
+      }
+      catalogEl.innerHTML = renderCatalogHtml(cart);
+      wireCatalogClicks();
+    };
+
     const wireCatalogClicks = () => {
       catalogEl.querySelectorAll('.catalog-item').forEach((el) => {
         el.addEventListener('click', () => {
           const call = el.dataset.call;
           const current = codeEl.value.trim();
-          const lines = current ? current.split('\n').filter((l) => !l.trim().startsWith('#')) : [];
-          lines.push(call);
+          const lines = current ? current.split('\n').filter((l) => l.trim() && !l.trim().startsWith('#')) : [];
+          if (!lines.some((l) => normalizeCall(l) === normalizeCall(call))) {
+            lines.push(call);
+          }
           codeEl.value = lines.join('\n') + '\n';
           codeEl.focus();
+          refreshCartAndCatalog();
           audio.playClick();
         });
       });
     };
-    wireCatalogClicks();
+
+    codeEl.addEventListener('input', refreshCartAndCatalog);
+    refreshCartAndCatalog();
 
     clearBtn.addEventListener('click', () => {
       codeEl.value = '';
       codeEl.focus();
+      refreshCartAndCatalog();
       audio.playClick();
     });
 
     const runForge = async () => {
       const code = codeEl.value.trim();
       if (!code) return;
+      const startShards = Number(workingSave.byteShards) || 0;
       runBtn.disabled = true;
       runBtn.textContent = 'Forging...';
       audio.playCodeRun();
@@ -1029,14 +1131,14 @@ export class ModalManager {
         shardsPill.textContent = `💎 ${workingSave.byteShards} Byte Shards`;
         if (balanceVal) balanceVal.textContent = String(workingSave.byteShards);
         statsPill.textContent = `Charisma: ${workingSave.stats.charisma} · Courage: ${workingSave.stats.courage}`;
-        catalogEl.innerHTML = renderCatalogHtml();
-        wireCatalogClicks();
+        codeEl.value = '';
+        refreshCartAndCatalog();
 
         audio.playForge();
         outputEl.className = 'pip-console success';
         outputEl.innerHTML = `
           <div class="pip-console-header">⚒ Bram cheers!</div>
-          <div class="pip-console-body">${escapeHtml(res.stdout.trim() || 'Gear forged and equipped!')}</div>
+          <div class="pip-console-body" style="white-space:pre-line;">${escapeHtml(res.stdout.trim() || 'Gear forged and equipped!')}</div>
         `;
 
         if (onSaveUpdated) {
@@ -1050,14 +1152,18 @@ export class ModalManager {
         if (shardMatch) {
           const itemName = shardMatch[1];
           const neededCost = Number(shardMatch[2]);
-          const haveShards = Number(shardMatch[3]);
-          const missing = Math.max(1, neededCost - haveShards);
+          const leftAtFailure = Number(shardMatch[3]);
+          const spentEarlier = Math.max(0, startShards - leftAtFailure);
+          const missing = Math.max(1, neededCost - leftAtFailure);
           outputEl.className = 'pip-console error ws-insufficient-alert';
           outputEl.innerHTML = `
-            <div class="pip-console-header">🔒 Not enough Byte Shards!</div>
+            <div class="pip-console-header">🔒 Not enough Byte Shards — nothing was spent!</div>
             <div class="pip-console-body">
-              You have <strong>${haveShards} 💎</strong>, and <strong>${escapeHtml(itemName)}</strong> costs
-              <strong>${neededCost} 💎</strong> — earn <strong>${missing} more Byte Shards</strong> from Trials or hidden chests!
+              ${
+                spentEarlier > 0
+                  ? `You have <strong>${startShards} 💎</strong> total. Earlier lines in your code used <strong>${spentEarlier} 💎</strong> (leaving <strong>${leftAtFailure} 💎</strong>), so <strong>${escapeHtml(itemName)}</strong> (<strong>${neededCost} 💎</strong>) is short by <strong>${missing} 💎</strong>. Remove a line or forge one item at a time!`
+                  : `You have <strong>${startShards} 💎</strong>, and <strong>${escapeHtml(itemName)}</strong> costs <strong>${neededCost} 💎</strong> — earn <strong>${missing} more Byte Shards</strong> from Trials or hidden chests!`
+              }
             </div>
           `;
         } else {
