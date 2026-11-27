@@ -13,15 +13,15 @@ import {
   updateSave,
   logAttempt,
   createDefaultSaveState,
-} from './api.js?v=20261126v';
-import { audio } from './audio.js?v=20261126v';
-import { music, resolveRegionTheme } from './music.js?v=20261126v';
-import { pyRunner } from './pyRunner.js?v=20261126v';
-import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126v';
-import { SpriteManager } from './sprites.js?v=20261126v';
-import { WorldEngine } from './world.js?v=20261126v';
-import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126v';
-import { playCutscene } from './cutscene.js?v=20261126v';
+} from './api.js?v=20261126w';
+import { audio } from './audio.js?v=20261126w';
+import { music, resolveRegionTheme } from './music.js?v=20261126w';
+import { pyRunner } from './pyRunner.js?v=20261126w';
+import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261126w';
+import { SpriteManager } from './sprites.js?v=20261126w';
+import { WorldEngine } from './world.js?v=20261126w';
+import { ModalManager, attachCodeEditorKeys } from './modals.js?v=20261126w';
+import { playCutscene } from './cutscene.js?v=20261126w';
 
 function escapeHtml(str) {
   return String(str ?? '')
