@@ -13,6 +13,27 @@ Visual direction, concept art catalog, and modular sprite specifications for **P
 | `era_comparison_8bit_16bit.png` | `1376×768` | **8-Bit vs. 16-Bit Split-Screen Visual Target** | Side-by-side benchmark of the same fantasy meadow, river bridge, hero + Pip, and cavern entrance: crisp 8-bit NES *Zelda*-style top-down pixel art (left) vs. lush 16-bit SNES *A Link to the Past* / *Chrono Trigger*-style top-down pixel art (right). |
 | `modular_hero_sheet.png` | `1376×768` | **Modular Hero Customization Sheet** | Top-down pixel-art hero base sprites (front, side, back) alongside swappable gear pieces driven by Python calls (`wear_hat()`, `set_tunic_color()`, `equip_boots()`, etc.): explorer hat, dragon helm, wizard cap, emerald/crimson/navy tunics, tide cloak, winged swift boots, oak shield, and rune spellbook. |
 
+### 7-Era Dragon Valley Progression (`eras/`)
+
+| File | Era / Console Vibe | Visual Style |
+| --- | --- | --- |
+| `eras/era-01-8bit-nes.jpg` | **8-Bit (NES)** | Retro 2D top-down pixel tiles |
+| `eras/era-02-16bit-snes.jpg` | **16-Bit (SNES)** | Lush 2D pixel art & lighting |
+| `eras/era-03-32bit-ps1-isometric.jpg` | **32-Bit (PS1 / GBA)** | Isometric 2.5D diorama introducing `(x, y, z)` elevation |
+| `eras/era-04-64bit-n64.jpg` | **64-Bit (Nintendo 64)** | Free-roam chunky Gouraud-shaded 3D (*Super Mario 64* / *Ocarina of Time* / *Banjo-Kazooie*) |
+| `eras/era-05-128bit-gamecube-ps2.jpg` | **128-Bit (GameCube / PS2)** | Smooth cel-shaded stylized 3D (*Wind Waker* / *Kingdom Hearts*) |
+| `eras/era-06-hd-era.jpg` | **HD Era (PS3 / Xbox 360 / Wii U)** | Dynamic lighting, shaders, and physics |
+| `eras/era-07-modern-4k-sandbox.jpg` | **Modern / 4K (Switch / PS5 / PC)** | Volumetric open-world Creator Sandbox (*Breath of the Wild* × *How to Train Your Dragon*) |
+
+### Early-3D Biome Concepts (`biomes/`, 32-Bit → 64-Bit)
+
+| File | Biome |
+| --- | --- |
+| `biomes/32bit-blockstone-highlands.jpg` | **Blockstone Highlands** |
+| `biomes/32bit-skyforge-foundry.jpg` | **Sky-Forge Foundry** |
+| `biomes/32bit-prism-caverns.jpg` | **Prism Caverns** |
+| `biomes/32bit-polygon-citadel.jpg` | **Null's Polygon Citadel** |
+
 ---
 
 ## Era Sprite Dimensions & Grid Specs
