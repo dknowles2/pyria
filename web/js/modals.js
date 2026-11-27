@@ -2102,4 +2102,111 @@ export class ModalManager {
       });
     });
   }
+
+  // ==================== SCAN-TO-PLAY CONFIRMATION MODAL ====================
+  openPlayLinkConfirmModal({ heroName, currentHeroName = '', onConfirm }) {
+    audio.playClick();
+    const isSwitching = Boolean(currentHeroName && currentHeroName !== heroName);
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>${isSwitching ? '🔄 Switch Hero?' : '🔑 Ready to Play!'}</h2>
+          <div class="modal-badges">
+            <span class="pill pill-gold">🧙 ${escapeHtml(heroName || 'Hero')}</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-ghost" data-close aria-label="Close">✕</button>
+      </div>
+
+      <p class="dialogue-text">
+        ${
+          isSwitching
+            ? `Switch from <strong>${escapeHtml(currentHeroName)}</strong> to <strong>${escapeHtml(heroName || 'Hero')}</strong> on this device?`
+            : `Ready to play as <strong>${escapeHtml(heroName || 'Hero')}</strong> on this device?`
+        }
+      </p>
+      <p class="muted-text" style="margin-top:0;">
+        ${
+          isSwitching
+            ? `${escapeHtml(currentHeroName)}'s cloud progress stays completely safe.`
+            : 'Your progress will save automatically to the cloud!'
+        }
+      </p>
+      <div id="play-link-error" class="forge-error hidden"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button id="btn-confirm-play-link" type="button" class="btn btn-primary">
+          ${isSwitching ? '✦ Switch Hero' : '✦ Play Now!'}
+        </button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    const confirmBtn = this.content.querySelector('#btn-confirm-play-link');
+    const errEl = this.content.querySelector('#play-link-error');
+    confirmBtn?.addEventListener('click', async () => {
+      audio.playClick();
+      if (errEl) errEl.classList.add('hidden');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Loading Hero...';
+      try {
+        if (onConfirm) await onConfirm();
+        this.close();
+      } catch (err) {
+        audio.playError();
+        if (errEl) {
+          errEl.textContent = err?.detail || err?.message || 'Could not load hero. Try entering the Hero Code instead.';
+          errEl.classList.remove('hidden');
+        }
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = isSwitching ? '✦ Switch Hero' : '✦ Play Now!';
+      }
+    });
+
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
+  }
+
+  // ==================== SCAN-TO-PLAY EXPIRED / INVALID MODAL ====================
+  openPlayLinkInvalidModal({ message, onEnterHeroCode }) {
+    audio.playError();
+    this.open(
+      `
+      <div class="modal-header">
+        <div>
+          <h2>🐉 Play Link Expired</h2>
+          <div class="modal-badges">
+            <span class="pill pill-rose">Link Unavailable</span>
+          </div>
+        </div>
+        <button type="button" class="btn btn-sm btn-ghost" data-close aria-label="Close">✕</button>
+      </div>
+
+      <p class="dialogue-text">
+        ${escapeHtml(message || 'That play link has expired or was replaced by a newer Hero Code.')}
+      </p>
+      <p class="muted-text" style="margin-top:0;">
+        Ask your parent to generate a fresh QR code in the Parent Console, or type your Hero Code below!
+      </p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close>Close</button>
+        <button id="btn-invalid-enter-code" type="button" class="btn btn-sky">🔑 Enter Hero Code Instead</button>
+      </div>
+      `,
+      'modal-compact'
+    );
+
+    this.content.querySelector('#btn-invalid-enter-code')?.addEventListener('click', () => {
+      this.close();
+      if (onEnterHeroCode) onEnterHeroCode();
+    });
+    this.content.querySelectorAll('[data-close]').forEach((btn) => {
+      btn.addEventListener('click', () => this.close());
+    });
+  }
 }

@@ -442,6 +442,28 @@ export async function redeemHeroCode(heroCode) {
   };
 }
 
+export async function previewHeroPlayToken(playToken) {
+  const data = await requestJson('/api/auth/play-preview', {
+    method: 'POST',
+    body: JSON.stringify({ playToken: String(playToken || '').trim() }),
+  });
+  return {
+    valid: Boolean(data.valid),
+    saveId: data.saveId || null,
+    heroName: data.heroName || '',
+  };
+}
+
+export async function redeemHeroPlayToken(playToken) {
+  const data = await requestJson('/api/auth/hero-code/redeem', {
+    method: 'POST',
+    body: JSON.stringify({ playToken: String(playToken || '').trim() }),
+  });
+  return {
+    save: data.save ? { ...normalizeSave(data.save), isGuest: false } : null,
+  };
+}
+
 export async function logoutSession(scope = 'all') {
   return requestJson('/api/auth/logout', {
     method: 'POST',

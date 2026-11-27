@@ -1,5 +1,7 @@
 // Pyria Parent & Builder Console — Live Progress Stream, Difficulty Tuning & Story Editor
 
+import { renderQrSvg } from '/js/qr.js?v=20261127n';
+
 const POLL_INTERVAL_MS = 2500;
 const PASSCODE_STORAGE_KEY = 'pyria_builder_passcode';
 
@@ -210,7 +212,23 @@ function openConsoleModal(html, extraClass = '') {
   });
 }
 
-function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
+function openOneTimeHeroCodeModal({ heroName, heroCode, playToken = '', title, note }) {
+  const playUrl = playToken
+    ? `${window.location.origin}/?play=${encodeURIComponent(playToken)}`
+    : '';
+  let qrSvg = '';
+  if (playUrl) {
+    try {
+      qrSvg = renderQrSvg(playUrl, {
+        size: 180,
+        quietZone: 4,
+        label: `Scan on your child's device to play as ${heroName || 'Hero'}`,
+      });
+    } catch {
+      qrSvg = '';
+    }
+  }
+
   openConsoleModal(`
     <div class="console-modal-header">
       <h2>${escapeHtml(title || '🔑 Hero Code Created')}</h2>
@@ -219,14 +237,36 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
     <p class="muted-text" style="margin:0;">
       Hero: <strong style="color:var(--text-main);">${escapeHtml(heroName || 'Hero')}</strong>
     </p>
+    ${
+      playUrl && qrSvg
+        ? `
+        <div style="display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; border-radius:12px; background:rgba(56,189,248,0.08); border:1.5px solid rgba(56,189,248,0.38); text-align:center;">
+          <div style="font-size:12px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent-sky);">
+            📱 Scan on Kid's Tablet or Phone to Play
+          </div>
+          <div class="console-qr-card">${qrSvg}</div>
+          <div class="muted-text" style="font-size:12px; margin:0;">
+            Quick-play QR valid for 15 minutes
+          </div>
+        </div>
+        `
+        : ''
+    }
     <div class="console-code-box">
       <div id="console-onetime-code" class="console-code-display"></div>
-      <button id="btn-console-copy-code" type="button" class="btn btn-sm btn-gold">📋 Copy Hero Code</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+        <button id="btn-console-copy-code" type="button" class="btn btn-sm btn-gold">📋 Copy Code</button>
+        ${
+          playUrl
+            ? '<button id="btn-console-copy-play-link" type="button" class="btn btn-sm btn-sky">🔗 Copy Play Link</button>'
+            : ''
+        }
+      </div>
     </div>
     <p class="muted-text" style="margin:0;">
       ${escapeHtml(
         note ||
-          'Give this one-time Hero Code to your child. On their tablet or computer, click "Enter Hero Code" on the title screen to play!'
+          'Shown once — scan on your child’s device or save the code to type under "Enter Hero Code". You can generate a new code anytime.'
       )}
     </p>
     <div class="console-modal-footer">
@@ -237,12 +277,10 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
   const codeEl = $('#console-onetime-code');
   if (codeEl) codeEl.textContent = String(heroCode || '');
 
-  const copyBtn = $('#btn-console-copy-code');
-  copyBtn?.addEventListener('click', async () => {
-    const text = String(heroCode || '');
+  const copyTextWithFeedback = async (btn, text, successLabel) => {
     try {
       await navigator.clipboard.writeText(text);
-      copyBtn.textContent = '✓ Copied!';
+      btn.textContent = successLabel;
     } catch {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -252,12 +290,22 @@ function openOneTimeHeroCodeModal({ heroName, heroCode, title, note }) {
       ta.select();
       try {
         document.execCommand('copy');
-        copyBtn.textContent = '✓ Copied!';
+        btn.textContent = successLabel;
       } catch {
-        copyBtn.textContent = 'Select & Copy Above';
+        btn.textContent = 'Select & Copy Above';
       }
       ta.remove();
     }
+  };
+
+  const copyBtn = $('#btn-console-copy-code');
+  copyBtn?.addEventListener('click', () => {
+    copyTextWithFeedback(copyBtn, String(heroCode || ''), '✓ Code Copied!');
+  });
+
+  const copyLinkBtn = $('#btn-console-copy-play-link');
+  copyLinkBtn?.addEventListener('click', () => {
+    copyTextWithFeedback(copyLinkBtn, playUrl, '✓ Link Copied!');
   });
 }
 
@@ -334,6 +382,7 @@ function openAddChildHeroModal() {
       openOneTimeHeroCodeModal({
         heroName: res.save?.heroName || heroName,
         heroCode: res.heroCode,
+        playToken: res.playToken || '',
         title: '🔑 Child Hero Created!',
       });
     } catch (err) {
