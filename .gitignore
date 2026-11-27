@@ -18,3 +18,8 @@ data/
 *.sqlite3
 *.sqlite3-wal
 *.sqlite3-shm
+
+# Cloudflare Workers & build output
+dist/
+.wrangler/
+.dev.vars
