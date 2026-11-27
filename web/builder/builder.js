@@ -52,6 +52,7 @@ const state = {
   calData: null,
   calLoading: false,
   calLoadedOnce: false,
+  calReqSeq: 0,
   bootstrapped: false,
   activateTabFn: null,
 };
@@ -2297,7 +2298,8 @@ function openTrialCalibrationDrillDown(trial) {
 
   const dailyTrend = Array.isArray(trial.dailyTrend) ? trial.dailyTrend : [];
   const maxDailyAttempts = Math.max(1, ...dailyTrend.map((d) => Number(d.attempts) || 0));
-  const initialCutoff = state.calFilters.since || '';
+  const activeSince = state.calFilters.since || '';
+  const initialCutoff = '';
   const canEditInBuilder = state.mode !== 'cloudflare';
 
   openConsoleModal(
@@ -2415,6 +2417,11 @@ function openTrialCalibrationDrillDown(trial) {
           <input id="cal-drill-cutoff" type="date" class="input input-sm" value="${escapeHtml(initialCutoff)}" />
         </label>
       </div>
+      ${
+        activeSince
+          ? `<div class="hint-sub" style="color:var(--accent-amber);">Note: active <strong>Since (${escapeHtml(activeSince)})</strong> filter excludes earlier days. Clear <strong>Since</strong> and widen the Time Window to compare before vs. after.</div>`
+          : ''
+      }
       <div id="cal-drill-before-after">${renderBeforeAfterSummary(dailyTrend, initialCutoff)}</div>
       ${
         dailyTrend.length
@@ -2484,22 +2491,31 @@ function openTrialCalibrationDrillDown(trial) {
 
 async function loadTrialCalibration() {
   if (!canAccessCalibration()) return;
+  const seq = ++state.calReqSeq;
   state.calLoading = true;
   renderCalibrationTable();
   try {
     const data = await apiFetch(getCalibrationEndpoint('json'));
+    if (seq !== state.calReqSeq) return;
     state.calData = data;
     state.calLoadedOnce = true;
     renderCalibrationKpis();
     renderCalibrationTable();
   } catch (err) {
+    if (seq !== state.calReqSeq) return;
+    state.calData = null;
+    renderCalibrationKpis();
     const tbody = $('#cal-metrics-tbody');
     if (tbody) {
       tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">Could not load calibration metrics: ${escapeHtml(err.message)}</div></td></tr>`;
     }
+    const countPill = $('#cal-table-count-pill');
+    if (countPill) countPill.textContent = '0 trials';
     showToast(`Calibration load failed: ${err.message}`, true);
   } finally {
-    state.calLoading = false;
+    if (seq === state.calReqSeq) {
+      state.calLoading = false;
+    }
   }
 }
 
@@ -2531,7 +2547,11 @@ async function exportTrialCalibrationCsv() {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast('Exported pyria-trial-metrics.csv');
+    showToast(
+      state.calFilters.flag && state.calFilters.flag !== 'all'
+        ? 'Exported pyria-trial-metrics.csv (includes all flag statuses for current server filters)'
+        : 'Exported pyria-trial-metrics.csv'
+    );
   } catch (err) {
     showToast(`CSV export failed: ${err.message}`, true);
   } finally {
@@ -2629,7 +2649,7 @@ function wireEvents() {
         iframe.src = '/assets/world/preview.html';
       }
     }
-    if (tab === 'calibration' && state.bootstrapped && canAccessCalibration() && !state.calLoadedOnce) {
+    if (tab === 'calibration' && state.bootstrapped && canAccessCalibration() && !state.calLoading && !state.calLoadedOnce) {
       loadTrialCalibration();
     }
     try {
@@ -2925,7 +2945,12 @@ async function init() {
 
   try {
     const initialLoads = [loadOverview(), loadProgressFull()];
-    if ($('#tab-calibration')?.classList.contains('active') && canAccessCalibration() && !state.calLoadedOnce) {
+    if (
+      $('#tab-calibration')?.classList.contains('active') &&
+      canAccessCalibration() &&
+      !state.calLoading &&
+      !state.calLoadedOnce
+    ) {
       initialLoads.push(loadTrialCalibration());
     }
     await Promise.all(initialLoads);

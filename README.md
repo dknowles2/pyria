@@ -194,7 +194,7 @@ Pyria tracks privacy-safe per-trial telemetry (`difficultyMode`, `isPractice`, n
 - **Recommended Review Cadence**:
   - Run a calibration review **monthly** or **after each content push or new player cohort**.
   - Prioritize 🟣 **Possible Bug** and 🔴 **Too Hard** trials (high Tier-3 hint usage, elevated parent overrides, or `AssertionError` spikes), then check 🟡 **Too Easy** trials.
-  - Adjust prompts, starter code, hints, or tests in local `/builder`, commit & push to `main`, and compare before vs. after using the **Cutoff Date / Since** filter 2–4 weeks later.
+  - Adjust prompts, starter code, hints, or tests in local `/builder`, commit & push to `main`, and compare before vs. after using the drill-down **Cutoff Date** (with **Since** cleared and a wide enough Time Window) 2–4 weeks later.
 
 ### 4. Run Tests
 ```bash

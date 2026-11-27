@@ -664,7 +664,7 @@ export class ModalManager {
       let solvedInView = false;
       this.content.querySelectorAll('.mc-choice-card').forEach((card) => {
         card.addEventListener('click', async () => {
-          if (solvedInView) return;
+          if (solvedInView || card.classList.contains('wrong')) return;
           const choiceId = card.dataset.choiceId;
           const choice = choices.find((c) => c.id === choiceId);
           if (!choice) return;
