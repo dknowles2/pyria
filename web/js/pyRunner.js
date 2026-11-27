@@ -1,6 +1,10 @@
-// Main-thread Pyodide runner with 3-second hard timeout & Pip's Kid-Friendly Error Translator
+// Main-thread Pyodide runner backed by an opaque-origin sandboxed iframe
+// (<iframe sandbox="allow-scripts">, NO allow-same-origin) with 3-second hard timeout
+// & Pip's Kid-Friendly Error Translator.
 
 const EXECUTION_TIMEOUT_MS = 3000;
+const BOOT_TIMEOUT_MS = 20000;
+const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127j';
 
 /**
  * Translates raw Python errors into warm, encouraging, kid-readable Pip messages.
@@ -101,15 +105,19 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
   };
 }
 
-class PyRunner {
+export class PyRunner {
   constructor() {
-    this.worker = null;
+    this.iframe = null;
+    this.port = null;
+    this.generation = 0;
     this.ready = false;
     this.initError = null;
     this.nextId = 1;
     this.pending = new Map();
     this.statusListeners = new Set();
-    this.spawnWorker();
+    if (typeof document !== 'undefined') {
+      this.spawnSandbox();
+    }
   }
 
   onStatusChange(listener) {
@@ -131,46 +139,147 @@ class PyRunner {
     }
   }
 
-  spawnWorker() {
-    if (this.worker) {
+  _abortPending(errorType, errorMessage) {
+    for (const [, req] of this.pending) {
+      clearTimeout(req.timer);
+      req.resolve({
+        passed: false,
+        stdout: '',
+        stderr: '',
+        errorType,
+        errorMessage,
+        rawTraceback: null,
+      });
+    }
+    this.pending.clear();
+  }
+
+  _teardownSandbox() {
+    this.generation += 1;
+    if (this.port) {
       try {
-        this.worker.terminate();
+        this.port.onmessage = null;
+        this.port.close();
       } catch {
         // ignore
       }
+      this.port = null;
     }
+    if (this.iframe) {
+      try {
+        this.iframe.remove();
+      } catch {
+        // ignore
+      }
+      this.iframe = null;
+    }
+  }
+
+  spawnSandbox() {
+    this._teardownSandbox();
+    this._abortPending('SandboxResetError', 'Python sandbox was reset');
+
     this.ready = false;
     this.initError = null;
-    this.worker = new Worker('/js/pyWorker.js?v=20261127i');
-    this.worker.onmessage = (event) => this.handleMessage(event.data);
-    this.worker.onerror = (err) => {
-      this.initError = err.message || 'Worker failed';
-      this.emitStatus();
-      for (const [, req] of this.pending) {
-        clearTimeout(req.timer);
-        req.resolve({
-          passed: false,
-          stdout: '',
-          errorType: 'WorkerError',
-          errorMessage: this.initError,
-        });
-      }
-      this.pending.clear();
+
+    const gen = this.generation;
+    const channel = new MessageChannel();
+    this.port = channel.port1;
+    this.port.onmessage = (event) => {
+      if (gen !== this.generation) return;
+      this.handleMessage(event.data);
     };
+
+    const iframe = document.createElement('iframe');
+    // Strictly opaque origin: allow-scripts ONLY (NEVER allow-same-origin).
+    iframe.setAttribute('sandbox', 'allow-scripts');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.setAttribute('tabindex', '-1');
+    iframe.title = 'Pyria Python Sandbox';
+    iframe.style.display = 'none';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+
+    iframe.addEventListener('load', () => {
+      if (gen !== this.generation || !iframe.contentWindow) return;
+      try {
+        // Opaque-origin sandboxed iframes require '*' targetOrigin; we transfer a
+        // dedicated MessagePort so all subsequent messages travel on a private channel.
+        iframe.contentWindow.postMessage({ type: 'pyria:init' }, '*', [channel.port2]);
+      } catch (err) {
+        this.initError = (err && err.message) || 'Failed to initialize Python sandbox';
+        this.emitStatus();
+        this._abortPending('SandboxError', this.initError);
+      }
+    });
+
+    iframe.addEventListener('error', () => {
+      if (gen !== this.generation) return;
+      this.initError = 'Python sandbox failed to load';
+      this.emitStatus();
+      this._abortPending('SandboxError', this.initError);
+    });
+
+    iframe.src = SANDBOX_IFRAME_URL;
+    this.iframe = iframe;
+
+    const mount = () => {
+      if (gen !== this.generation) return;
+      if (document.body) {
+        document.body.appendChild(iframe);
+      }
+    };
+    if (document.body) {
+      mount();
+    } else {
+      document.addEventListener('DOMContentLoaded', mount, { once: true });
+    }
+
     this.emitStatus();
   }
 
+  _scheduleTimeout(id, timeoutMs) {
+    return setTimeout(() => {
+      if (!this.pending.has(id)) return;
+      const req = this.pending.get(id);
+      this.pending.delete(id);
+      // Destroy and recreate the sandboxed iframe to immediately terminate
+      // infinite loops (like while True:) and discard any tainted sandbox state.
+      this.spawnSandbox();
+      req.resolve({
+        passed: false,
+        timedOut: true,
+        stdout: '',
+        stderr: '',
+        errorType: 'TimeoutError',
+        errorMessage: 'Execution exceeded 3 seconds',
+        rawTraceback: null,
+      });
+    }, timeoutMs);
+  }
+
   handleMessage(msg) {
-    if (!msg) return;
+    if (!msg || typeof msg !== 'object') return;
     if (msg.type === 'ready') {
       this.ready = true;
       this.initError = null;
       this.emitStatus();
+      // Tighten any requests that started while Pyodide was still warming up
+      // so they now get the strict 3-second execution timeout.
+      for (const [id, req] of this.pending) {
+        if (req.waitingForBoot) {
+          clearTimeout(req.timer);
+          req.waitingForBoot = false;
+          req.timer = this._scheduleTimeout(id, EXECUTION_TIMEOUT_MS);
+        }
+      }
       return;
     }
     if (msg.type === 'init_error') {
       this.initError = msg.error || 'Could not load Pyodide';
       this.emitStatus();
+      this._abortPending('SandboxError', this.initError);
       return;
     }
     if (msg.type === 'result' && this.pending.has(msg.id)) {
@@ -182,32 +291,16 @@ class PyRunner {
   }
 
   execute(mode, payload) {
+    if (!this.iframe || !this.port || this.initError) {
+      this.spawnSandbox();
+    }
     return new Promise((resolve) => {
       const id = this.nextId++;
-
-      // If Pyodide is still booting on first run, allow extra boot time before enforcing
-      // the 3-second execution timeout once ready; if already ready, strict 3-second timeout!
-      const startTimer = () => {
-        const timeoutMs = this.ready ? EXECUTION_TIMEOUT_MS : 20000;
-        return setTimeout(() => {
-          if (!this.pending.has(id)) return;
-          this.pending.delete(id);
-          // Hard kill worker to break infinite while True: loops and spin up a fresh worker
-          this.spawnWorker();
-          resolve({
-            passed: false,
-            timedOut: true,
-            stdout: '',
-            errorType: 'TimeoutError',
-            errorMessage: 'Execution exceeded 3 seconds',
-            rawTraceback: null,
-          });
-        }, timeoutMs);
-      };
-
-      const timer = startTimer();
-      this.pending.set(id, { resolve, timer });
-      this.worker.postMessage({ id, mode, payload });
+      const waitingForBoot = !this.ready;
+      const timeoutMs = waitingForBoot ? BOOT_TIMEOUT_MS : EXECUTION_TIMEOUT_MS;
+      const timer = this._scheduleTimeout(id, timeoutMs);
+      this.pending.set(id, { resolve, timer, waitingForBoot });
+      this.port.postMessage({ type: 'run', id, mode, payload });
     });
   }
 

@@ -771,10 +771,11 @@ class PyriaServerTestCase(unittest.TestCase):
             if path == "/assets/world/preview.html":
                 self.assertIn("'unsafe-inline'", csp)
             else:
-                self.assertIn("'wasm-unsafe-eval'", csp)
-                self.assertIn("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/", csp)
-                self.assertNotIn("https://cdn.jsdelivr.net;", csp)
-                self.assertNotIn("https://cdn.jsdelivr.net ", csp)
+                self.assertIn("script-src 'self'", csp)
+                self.assertIn("frame-src 'self'", csp)
+                self.assertIn("worker-src 'none'", csp)
+                self.assertNotIn("'wasm-unsafe-eval'", csp)
+                self.assertNotIn("https://cdn.jsdelivr.net", csp)
 
         # 2. CSRF / Same-Origin protection on POST / PUT / DELETE
         same_origin = f"http://{self.host}:{self.port}"
@@ -870,6 +871,60 @@ class PyriaServerTestCase(unittest.TestCase):
         resp.read()
         conn.close()
         self.assertEqual(resp.status, 415)
+
+    def test_pyodide_sandbox_isolation_headers_and_assets(self) -> None:
+        # 1. /py-sandbox.html is served with strict opaque-origin sandbox CSP
+        for sandbox_path in (
+            "/py-sandbox.html",
+            "/py-sandbox.html?v=test",
+            "/./py-sandbox.html",
+            "//py-sandbox.html",
+        ):
+            status, headers, raw = self._request("GET", sandbox_path)
+            self.assertEqual(status, 200, f"Expected 200 for {sandbox_path}")
+            self.assertIn("text/html", headers.get("content-type", ""))
+            self.assertEqual(headers.get("x-frame-options"), "SAMEORIGIN")
+            self.assertEqual(headers.get("x-content-type-options"), "nosniff")
+
+            csp = headers.get("content-security-policy", "")
+            self.assertIn("sandbox allow-scripts;", csp)
+            self.assertNotIn("allow-same-origin", csp)
+            self.assertIn("default-src 'none';", csp)
+            self.assertIn("'sha256-", csp)
+            self.assertNotIn("'unsafe-inline'", csp)
+            self.assertIn("'wasm-unsafe-eval'", csp)
+            self.assertIn("worker-src blob:;", csp)
+            self.assertIn(
+                "connect-src https://cdn.jsdelivr.net/pyodide/v0.26.4/full/;",
+                csp,
+            )
+            self.assertNotIn("connect-src 'self'", csp)
+            self.assertNotIn("https://cdn.jsdelivr.net;", csp)
+            self.assertNotIn("https://cdn.jsdelivr.net ", csp)
+            self.assertIn("object-src 'none';", csp)
+            self.assertIn("base-uri 'none';", csp)
+            self.assertIn("form-action 'none';", csp)
+            self.assertIn("frame-ancestors 'self'", csp)
+            self.assertEqual(csp, pyria_app.build_py_sandbox_csp(raw))
+
+        # 2. Legacy same-origin pyWorker.js has been removed
+        self.assertEqual(self._request("GET", "/js/pyWorker.js")[0], 404)
+
+        # 3. pyRunner.js uses sandbox="allow-scripts" (never allow-same-origin)
+        py_runner_src = (REPO_ROOT / "web" / "js" / "pyRunner.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("'sandbox', 'allow-scripts'", py_runner_src)
+        self.assertNotIn("new Worker(", py_runner_src)
+        self.assertNotIn("pyWorker.js", py_runner_src)
+
+        # 4. py-sandbox.html fails closed unless loaded in an opaque origin
+        sandbox_src = (REPO_ROOT / "web" / "py-sandbox.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("window.origin !== 'null'", sandbox_src)
+        self.assertIn("_PYRIA_BLOCKED_MODULES", sandbox_src)
+        self.assertIn("redirect_stderr", sandbox_src)
 
     def test_fail_closed_when_not_dev_mode(self) -> None:
         # Spin up a production-mode (dev_mode=False) server with PYRIA_ADMIN_EMAILS unset

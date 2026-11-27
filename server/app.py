@@ -8,12 +8,15 @@ third-party dependencies.
 from __future__ import annotations
 
 import argparse
+import base64
 from contextlib import contextmanager
+import hashlib
 import hmac
 import json
 import math
 import mimetypes
 import os
+import re
 import sqlite3
 import threading
 import uuid
@@ -46,10 +49,11 @@ PYODIDE_CDN_ORIGIN_PATH = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
 
 CSP_DEFAULT = (
     "default-src 'self'; "
-    f"script-src 'self' {PYODIDE_CDN_ORIGIN_PATH} 'wasm-unsafe-eval'; "
+    "script-src 'self'; "
     "style-src 'self' 'unsafe-inline'; "
-    f"worker-src 'self' blob: {PYODIDE_CDN_ORIGIN_PATH}; "
-    f"connect-src 'self' {PYODIDE_CDN_ORIGIN_PATH}; "
+    "worker-src 'none'; "
+    "frame-src 'self'; "
+    "connect-src 'self'; "
     "img-src 'self' data: blob:; "
     "font-src 'self' data:; "
     "object-src 'none'; "
@@ -67,6 +71,33 @@ CSP_ASSET_PREVIEW = (
     "base-uri 'self'; "
     "frame-ancestors 'self'"
 )
+
+
+def build_py_sandbox_csp(html_bytes: bytes) -> str:
+    """Build strict opaque-origin CSP for /py-sandbox.html using inline script SHA-256 hashes."""
+    html_text = html_bytes.decode("utf-8", errors="replace")
+    hashes: list[str] = []
+    for match in re.finditer(
+        r"<script(?:\s[^>]*)?>(.*?)</script>", html_text, re.DOTALL | re.IGNORECASE
+    ):
+        digest = base64.b64encode(
+            hashlib.sha256(match.group(1).encode("utf-8")).digest()
+        ).decode("ascii")
+        hashes.append(f"'sha256-{digest}'")
+    script_sources = " ".join(
+        [*hashes, "blob:", PYODIDE_CDN_ORIGIN_PATH, "'wasm-unsafe-eval'"]
+    )
+    return (
+        "sandbox allow-scripts; "
+        "default-src 'none'; "
+        f"script-src {script_sources}; "
+        "worker-src blob:; "
+        f"connect-src {PYODIDE_CDN_ORIGIN_PATH}; "
+        "object-src 'none'; "
+        "base-uri 'none'; "
+        "form-action 'none'; "
+        "frame-ancestors 'self'"
+    )
 
 
 def _reject_json_constant(value: str) -> Any:
@@ -1001,17 +1032,23 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return
         super().log_message(format, *args)
 
-    def _send_security_headers(self, allow_inline_script: bool = False) -> None:
+    def _send_security_headers(
+        self,
+        allow_inline_script: bool = False,
+        csp_override: str | None = None,
+    ) -> None:
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("X-Frame-Options", "SAMEORIGIN")
         self.send_header("Referrer-Policy", "same-origin")
         self.send_header(
             "Permissions-Policy", "camera=(), microphone=(), geolocation=()"
         )
-        self.send_header(
-            "Content-Security-Policy",
-            CSP_ASSET_PREVIEW if allow_inline_script else CSP_DEFAULT,
+        csp = (
+            csp_override
+            if csp_override is not None
+            else (CSP_ASSET_PREVIEW if allow_inline_script else CSP_DEFAULT)
         )
+        self.send_header("Content-Security-Policy", csp)
         self._sec_headers_sent = True
 
     def end_headers(self) -> None:
@@ -1270,7 +1307,15 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         is_asset_preview = (
             decoded.startswith("/assets/") and target.name == "preview.html"
         )
-        self._send_security_headers(allow_inline_script=is_asset_preview)
+        is_py_sandbox = (
+            base_dir == self.server.web_dir
+            and target.relative_to(self.server.web_dir).parts == ("py-sandbox.html",)
+        )
+        csp_override = build_py_sandbox_csp(data) if is_py_sandbox else None
+        self._send_security_headers(
+            allow_inline_script=is_asset_preview,
+            csp_override=csp_override,
+        )
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(data)

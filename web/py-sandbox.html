@@ -1,38 +1,23 @@
-/* eslint-disable no-restricted-globals */
-// Dedicated Web Worker running Pyodide v0.26.4 for real Python 3 execution.
-// Classic worker (not module) so importScripts works across all browsers.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pyria Python Sandbox</title>
+</head>
+<body>
+<script>
+(() => {
+  'use strict';
 
-const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
-const PYODIDE_INDEX = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
-
-let pyodide = null;
-let initPromise = null;
-
-async function ensurePyodide() {
-  if (pyodide) return pyodide;
-  if (!initPromise) {
-    initPromise = (async () => {
-      importScripts(PYODIDE_URL);
-      const instance = await self.loadPyodide({ indexURL: PYODIDE_INDEX });
-      pyodide = instance;
-      self.postMessage({ type: 'ready' });
-      return instance;
-    })().catch((err) => {
-      initPromise = null;
-      self.postMessage({
-        type: 'init_error',
-        error: err && err.message ? err.message : String(err),
-      });
-      throw err;
-    });
+  // Fail closed: refuse to run untrusted student Python unless isolated in an opaque origin.
+  if (window.origin !== 'null') {
+    return;
   }
-  return initPromise;
-}
 
-// Start warming up Pyodide immediately on worker boot.
-ensurePyodide().catch(() => {});
+  const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+  const PYODIDE_INDEX = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
 
-const SANDBOX_GUARD_PY = `
+  const SANDBOX_GUARD_PY = `
 import sys
 
 _PYRIA_BLOCKED_MODULES = frozenset({
@@ -81,7 +66,7 @@ def _pyria_exit_sandbox():
         _pyria_saved_modules = None
 `;
 
-const TRIAL_HARNESS_PY = `
+  const TRIAL_HARNESS_PY = `
 import io
 import json
 import contextlib
@@ -97,17 +82,20 @@ def _pyria_run_trial(payload_json):
         "shout": print,
     }
     buf = io.StringIO()
+    err_buf = io.StringIO()
     stage = "student"
     try:
-        with contextlib.redirect_stdout(buf):
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(student_code, "<your_spell>", "exec"), ns)
         ns["OUTPUT"] = buf.getvalue()
         stage = "test"
         if test_code:
-            exec(compile(test_code, "<trial_check>", "exec"), ns)
+            with contextlib.redirect_stderr(err_buf):
+                exec(compile(test_code, "<trial_check>", "exec"), ns)
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "errorType": None,
             "errorMessage": None,
             "errorLine": None,
@@ -118,6 +106,7 @@ def _pyria_run_trial(payload_json):
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "errorType": type(e).__name__,
             "errorMessage": e.msg or str(e),
             "errorLine": e.lineno,
@@ -134,6 +123,7 @@ def _pyria_run_trial(payload_json):
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "errorType": type(e).__name__,
             "errorMessage": str(e),
             "errorLine": line_no,
@@ -142,7 +132,7 @@ def _pyria_run_trial(payload_json):
         })
 `;
 
-const CHARCREATE_HARNESS_PY = `
+  const CHARCREATE_HARNESS_PY = `
 import io
 import json
 import contextlib
@@ -158,7 +148,7 @@ def _pyria_run_charcreate(payload_json):
 
     def set_name(hero_name):
         if not isinstance(hero_name, str):
-            raise TypeError("set_name() needs text inside quotes, like set_name(\\"Rowan\\")")
+            raise TypeError('set_name() needs text inside quotes, like set_name("Rowan")')
         cleaned = hero_name.strip()
         if len(cleaned) < 2 or len(cleaned) > 16:
             raise ValueError("Hero name must be between 2 and 16 characters long!")
@@ -169,7 +159,7 @@ def _pyria_run_charcreate(payload_json):
     def preview_skin(tone):
         options = allowed.get("skin", [])
         if not isinstance(tone, str):
-            raise TypeError("preview_skin() needs a quoted skin name, like preview_skin(\\"warm_tan\\")")
+            raise TypeError('preview_skin() needs a quoted skin name, like preview_skin("warm_tan")')
         if tone not in options:
             raise ValueError(f"Unknown skin '{tone}'. Choose one of: {', '.join(options)}")
         state["skin"] = tone
@@ -179,7 +169,7 @@ def _pyria_run_charcreate(payload_json):
     def preview_hair(style):
         options = allowed.get("hair", [])
         if not isinstance(style, str):
-            raise TypeError("preview_hair() needs a quoted hairstyle, like preview_hair(\\"spiky\\")")
+            raise TypeError('preview_hair() needs a quoted hairstyle, like preview_hair("spiky")')
         if style not in options:
             raise ValueError(f"Unknown hair '{style}'. Choose one of: {', '.join(options)}")
         state["hair"] = style
@@ -189,7 +179,7 @@ def _pyria_run_charcreate(payload_json):
     def preview_tunic(color):
         options = allowed.get("tunic", [])
         if not isinstance(color, str):
-            raise TypeError("preview_tunic() needs a quoted color, like preview_tunic(\\"emerald\\")")
+            raise TypeError('preview_tunic() needs a quoted color, like preview_tunic("emerald")')
         if color not in options:
             raise ValueError(f"Unknown tunic '{color}'. Choose one of: {', '.join(options)}")
         state["tunic"] = color
@@ -209,12 +199,14 @@ def _pyria_run_charcreate(payload_json):
         "confirm_hero": confirm_hero,
     }
     buf = io.StringIO()
+    err_buf = io.StringIO()
     try:
-        with contextlib.redirect_stdout(buf):
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(code, "<hero_forge>", "exec"), ns)
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "appearance": state,
             "confirmed": confirmed["value"],
             "events": events,
@@ -227,6 +219,7 @@ def _pyria_run_charcreate(payload_json):
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "appearance": state,
             "confirmed": False,
             "events": events,
@@ -245,6 +238,7 @@ def _pyria_run_charcreate(payload_json):
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "appearance": state,
             "confirmed": False,
             "events": events,
@@ -255,7 +249,7 @@ def _pyria_run_charcreate(payload_json):
         })
 `;
 
-const WORKSHOP_HARNESS_PY = `
+  const WORKSHOP_HARNESS_PY = `
 import io
 import json
 import contextlib
@@ -446,12 +440,14 @@ def _pyria_run_workshop(payload_json):
         "equip_pip_scarf": equip_pip_scarf,
     }
     buf = io.StringIO()
+    err_buf = io.StringIO()
     try:
-        with contextlib.redirect_stdout(buf):
+        with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(code, "<bram_workshop>", "exec"), ns)
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "appearance": appearance,
             "stats": stats,
             "ownedUnlockIds": owned,
@@ -467,6 +463,7 @@ def _pyria_run_workshop(payload_json):
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "errorType": type(e).__name__,
             "errorMessage": e.msg or str(e),
             "errorLine": e.lineno,
@@ -482,6 +479,7 @@ def _pyria_run_workshop(payload_json):
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
+            "stderr": err_buf.getvalue(),
             "errorType": type(e).__name__,
             "errorMessage": str(e),
             "errorLine": line_no,
@@ -489,7 +487,40 @@ def _pyria_run_workshop(payload_json):
         })
 `;
 
+  function buildWorkerSource() {
+    return [
+      `'use strict';`,
+      `const PYODIDE_URL = ${JSON.stringify(PYODIDE_URL)};`,
+      `const PYODIDE_INDEX = ${JSON.stringify(PYODIDE_INDEX)};`,
+      `const SANDBOX_GUARD_PY = ${JSON.stringify(SANDBOX_GUARD_PY)};`,
+      `const TRIAL_HARNESS_PY = ${JSON.stringify(TRIAL_HARNESS_PY)};`,
+      `const CHARCREATE_HARNESS_PY = ${JSON.stringify(CHARCREATE_HARNESS_PY)};`,
+      `const WORKSHOP_HARNESS_PY = ${JSON.stringify(WORKSHOP_HARNESS_PY)};`,
+      `
+let pyodide = null;
+let initPromise = null;
 let harnessesLoaded = false;
+
+async function ensurePyodide() {
+  if (pyodide) return pyodide;
+  if (!initPromise) {
+    initPromise = (async () => {
+      importScripts(PYODIDE_URL);
+      const instance = await self.loadPyodide({ indexURL: PYODIDE_INDEX });
+      pyodide = instance;
+      self.postMessage({ type: 'ready' });
+      return instance;
+    })().catch((err) => {
+      initPromise = null;
+      self.postMessage({
+        type: 'init_error',
+        error: err && err.message ? err.message : String(err),
+      });
+      throw err;
+    });
+  }
+  return initPromise;
+}
 
 async function loadHarnesses(py) {
   if (harnessesLoaded) return;
@@ -500,9 +531,11 @@ async function loadHarnesses(py) {
   harnessesLoaded = true;
 }
 
+ensurePyodide().catch(() => {});
+
 self.onmessage = async (event) => {
   const msg = event.data;
-  if (!msg || !msg.id) return;
+  if (!msg || typeof msg.id !== 'number') return;
 
   try {
     const py = await ensurePyodide();
@@ -518,7 +551,7 @@ self.onmessage = async (event) => {
     let resultJson;
     py.runPython('_pyria_enter_sandbox()');
     try {
-      resultJson = py.runPython(`${fnName}(_pyria_payload_json)`);
+      resultJson = py.runPython(fnName + '(_pyria_payload_json)');
     } finally {
       py.runPython('_pyria_exit_sandbox()');
       py.globals.delete('_pyria_payload_json');
@@ -536,6 +569,7 @@ self.onmessage = async (event) => {
       result: {
         passed: false,
         stdout: '',
+        stderr: '',
         errorType: 'RuntimeError',
         errorMessage: err && err.message ? err.message : String(err),
         errorLine: null,
@@ -544,3 +578,176 @@ self.onmessage = async (event) => {
     });
   }
 };
+`,
+    ].join('\n');
+  }
+
+  let port = null;
+  let worker = null;
+  let workerBlobUrl = null;
+  const pendingOutbox = [];
+
+  function sendToParent(msg) {
+    if (port) {
+      port.postMessage(msg);
+    } else {
+      pendingOutbox.push(msg);
+    }
+  }
+
+  function revokeBlobUrl() {
+    if (workerBlobUrl) {
+      try {
+        URL.revokeObjectURL(workerBlobUrl);
+      } catch {
+        // ignore
+      }
+      workerBlobUrl = null;
+    }
+  }
+
+  // Fallback in case a restricted WebView disallows blob: Workers inside sandboxed iframes.
+  let directPyodide = null;
+  let directInitPromise = null;
+  let directHarnessesLoaded = false;
+
+  async function ensureDirectPyodide() {
+    if (directPyodide) return directPyodide;
+    if (!directInitPromise) {
+      directInitPromise = (async () => {
+        if (typeof window.loadPyodide !== 'function') {
+          await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = PYODIDE_URL;
+            s.onload = () => resolve();
+            s.onerror = () => reject(new Error('Failed to load Pyodide script'));
+            document.head.appendChild(s);
+          });
+        }
+        const instance = await window.loadPyodide({ indexURL: PYODIDE_INDEX });
+        directPyodide = instance;
+        sendToParent({ type: 'ready' });
+        return instance;
+      })().catch((err) => {
+        directInitPromise = null;
+        sendToParent({
+          type: 'init_error',
+          error: err && err.message ? err.message : String(err),
+        });
+        throw err;
+      });
+    }
+    return directInitPromise;
+  }
+
+  async function runDirectly(msg) {
+    try {
+      const py = await ensureDirectPyodide();
+      if (!directHarnessesLoaded) {
+        await py.runPythonAsync(SANDBOX_GUARD_PY);
+        await py.runPythonAsync(TRIAL_HARNESS_PY);
+        await py.runPythonAsync(CHARCREATE_HARNESS_PY);
+        await py.runPythonAsync(WORKSHOP_HARNESS_PY);
+        directHarnessesLoaded = true;
+      }
+      const payloadJson = JSON.stringify(msg.payload || {});
+      py.globals.set('_pyria_payload_json', payloadJson);
+
+      let fnName = '_pyria_run_trial';
+      if (msg.mode === 'charcreate') fnName = '_pyria_run_charcreate';
+      else if (msg.mode === 'workshop') fnName = '_pyria_run_workshop';
+
+      let resultJson;
+      py.runPython('_pyria_enter_sandbox()');
+      try {
+        resultJson = py.runPython(fnName + '(_pyria_payload_json)');
+      } finally {
+        py.runPython('_pyria_exit_sandbox()');
+        py.globals.delete('_pyria_payload_json');
+      }
+
+      sendToParent({
+        type: 'result',
+        id: msg.id,
+        result: JSON.parse(resultJson),
+      });
+    } catch (err) {
+      sendToParent({
+        type: 'result',
+        id: msg.id,
+        result: {
+          passed: false,
+          stdout: '',
+          stderr: '',
+          errorType: 'RuntimeError',
+          errorMessage: err && err.message ? err.message : String(err),
+          errorLine: null,
+          rawTraceback: String(err),
+        },
+      });
+    }
+  }
+
+  function startRuntime() {
+    try {
+      const blob = new Blob([buildWorkerSource()], { type: 'application/javascript' });
+      workerBlobUrl = URL.createObjectURL(blob);
+      const w = new Worker(workerBlobUrl);
+      w.onmessage = (event) => {
+        revokeBlobUrl();
+        const data = event.data;
+        if (!data || typeof data.type !== 'string') return;
+        if (data.type === 'ready' || data.type === 'init_error' || data.type === 'result') {
+          sendToParent(data);
+        }
+      };
+      w.onerror = (err) => {
+        revokeBlobUrl();
+        sendToParent({
+          type: 'init_error',
+          error: (err && err.message) || 'Sandbox worker failed',
+        });
+      };
+      worker = w;
+    } catch {
+      revokeBlobUrl();
+      worker = null;
+      ensureDirectPyodide().catch(() => {});
+    }
+  }
+
+  startRuntime();
+
+  function onInitMessage(event) {
+    if (event.source !== window.parent) return;
+    const data = event.data;
+    if (!data || data.type !== 'pyria:init') return;
+    if (!event.ports || event.ports.length !== 1) return;
+
+    window.removeEventListener('message', onInitMessage);
+    port = event.ports[0];
+
+    port.onmessage = (portEvent) => {
+      const msg = portEvent.data;
+      if (!msg || msg.type !== 'run' || typeof msg.id !== 'number') return;
+      if (worker) {
+        worker.postMessage({
+          id: msg.id,
+          mode: msg.mode,
+          payload: msg.payload,
+        });
+      } else {
+        runDirectly(msg);
+      }
+    };
+
+    while (pendingOutbox.length > 0) {
+      port.postMessage(pendingOutbox.shift());
+    }
+  }
+
+  window.addEventListener('message', onInitMessage);
+})();
+</script>
+</body>
+</html>
