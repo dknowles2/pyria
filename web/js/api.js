@@ -87,6 +87,10 @@ export function createDefaultSaveState(heroName = 'Rowan', appearance = {}) {
     stats: {
       charisma: 0,
       courage: 0,
+      arrows: 0,
+      potions: 0,
+      customItems: [],
+      completedWorkshopChallenges: [],
     },
     solvedTrials: [],
     completedTrials: [],
@@ -143,6 +147,12 @@ export function normalizeSave(raw) {
     stats: {
       charisma: merged.stats?.charisma ?? 0,
       courage: merged.stats?.courage ?? 0,
+      arrows: merged.stats?.arrows ?? 0,
+      potions: merged.stats?.potions ?? 0,
+      customItems: Array.isArray(merged.stats?.customItems) ? [...merged.stats.customItems] : [],
+      completedWorkshopChallenges: Array.isArray(merged.stats?.completedWorkshopChallenges)
+        ? [...merged.stats.completedWorkshopChallenges]
+        : [],
     },
     solvedTrials,
     completedTrials: [...solvedTrials],

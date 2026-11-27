@@ -1078,15 +1078,68 @@ export class ModalManager {
     audio.playClick();
     music.setDucked(true);
     let workingSave = structuredClone(save);
+    if (!workingSave.stats || typeof workingSave.stats !== 'object') {
+      workingSave.stats = { charisma: 0, courage: 0 };
+    }
+    workingSave.stats.arrows = Number(workingSave.stats.arrows) || 0;
+    workingSave.stats.potions = Number(workingSave.stats.potions) || 0;
+    if (!Array.isArray(workingSave.stats.customItems)) {
+      workingSave.stats.customItems = [];
+    }
+    if (!Array.isArray(workingSave.stats.completedWorkshopChallenges)) {
+      workingSave.stats.completedWorkshopChallenges = [];
+    }
+
     let previewDirIndex = 0;
     const dirs = ['down', 'right', 'up', 'left'];
     let previewFrame = 0;
+    let activeTab = 'gear'; // 'gear' | 'recipes' | 'challenges'
+    let activeChallenge = null;
+
+    const consumables = Array.isArray(catalog.consumables) ? catalog.consumables : [];
+    const recipes = Array.isArray(catalog.workshopRecipes) ? catalog.workshopRecipes : [];
+    const challenges = Array.isArray(catalog.workshopChallenges) ? catalog.workshopChallenges : [];
+    const solvedCount = Array.isArray(workingSave.solvedTrials) ? workingSave.solvedTrials.length : 0;
 
     const normalizeCall = (line) =>
       String(line || '')
         .trim()
         .replace(/'/g, '"')
         .replace(/\s+/g, '');
+
+    const matchConsumableForLine = (line) => {
+      const norm = normalizeCall(line);
+      if (!norm || norm.startsWith('#')) return null;
+      const arrowMatch = norm.match(/^forge_arrows\((\d*)\)$/);
+      if (arrowMatch) {
+        const qty = Math.max(1, Math.min(50, arrowMatch[1] ? Number(arrowMatch[1]) : 1));
+        return {
+          id: 'consumable-arrows',
+          name: `Rune Arrows ×${qty}`,
+          shardCost: 5 * qty,
+          stackable: true,
+        };
+      }
+      const potionMatch = norm.match(/^brew_potion\((\d*)\)$/);
+      if (potionMatch) {
+        const qty = Math.max(1, Math.min(50, potionMatch[1] ? Number(potionMatch[1]) : 1));
+        return {
+          id: 'consumable-potions',
+          name: `Starlight Potion ×${qty}`,
+          shardCost: 10 * qty,
+          stackable: true,
+        };
+      }
+      if (/^forge_custom\(/.test(norm)) {
+        return {
+          id: 'consumable-custom',
+          name: 'Custom Relic',
+          shardCost: 15,
+          stackable: true,
+        };
+      }
+      return null;
+    };
 
     const matchUnlockableForLine = (line) => {
       const norm = normalizeCall(line);
@@ -1100,7 +1153,7 @@ export class ModalManager {
       if (/^add_courage\(\d+\)$/.test(norm)) {
         return unlockables.find((u) => u.id === 'stat-courage-1') || null;
       }
-      return null;
+      return matchConsumableForLine(line);
     };
 
     const estimateCart = (codeText) => {
@@ -1117,11 +1170,11 @@ export class ModalManager {
         if (!item) return;
         const lineNumber = idx + 1;
         queuedIds.add(item.id);
-        const alreadyOwned = seenOwned.has(item.id);
+        const alreadyOwned = !item.stackable && seenOwned.has(item.id);
         const cost = alreadyOwned ? 0 : Number(item.shardCost) || 0;
         const shardsBefore = runningShards;
         if (!alreadyOwned) {
-          seenOwned.add(item.id);
+          if (!item.stackable) seenOwned.add(item.id);
           totalCost += cost;
           runningShards -= cost;
         }
@@ -1154,12 +1207,56 @@ export class ModalManager {
       };
     };
 
-    const renderCatalogHtml = (cart = null) => {
+    const renderInventoryHtml = () => {
+      const arrows = Number(workingSave.stats?.arrows) || 0;
+      const potions = Number(workingSave.stats?.potions) || 0;
+      const customCount = Array.isArray(workingSave.stats?.customItems)
+        ? workingSave.stats.customItems.length
+        : 0;
+      const customPreview =
+        customCount > 0
+          ? ` (${escapeHtml(workingSave.stats.customItems[customCount - 1])})`
+          : '';
+      return `
+        <span>🎒 <strong>Pack:</strong></span>
+        <span class="pill pill-muted">🏹 ${arrows} Arrows</span>
+        <span class="pill pill-muted">🧪 ${potions} Potions</span>
+        <span class="pill pill-violet">✨ ${customCount} Relic${customCount === 1 ? '' : 's'}${customPreview}</span>
+      `;
+    };
+
+    const renderGearCatalogHtml = (cart = null) => {
       const owned = new Set(workingSave.ownedUnlockIds || []);
       const currentShards = Number(workingSave.byteShards) || 0;
       const effectiveBudget = cart ? Math.max(0, cart.remaining) : currentShards;
       const queuedIds = cart ? cart.queuedIds : new Set();
-      return (catalog.unlockables || [])
+
+      const consumableHtml = consumables
+        .map((item) => {
+          const cost = Number(item.shardCost) || 0;
+          const canAfford = effectiveBudget >= cost;
+          const count =
+            item.inventoryKey === 'customItems'
+              ? (workingSave.stats.customItems || []).length
+              : Number(workingSave.stats[item.inventoryKey]) || 0;
+          const stateClass = canAfford ? 'affordable' : 'unaffordable';
+          const badge = canAfford
+            ? `<span class="pill pill-gold">💎 ${cost} each · Owned: ${count}</span>`
+            : `<span class="pill pill-rose">💎 ${cost} each · Owned: ${count}</span>`;
+          return `
+            <div class="catalog-item ${stateClass}" data-call="${escapeHtml(item.functionCall)}" data-stackable="1">
+              <div>
+                <div class="catalog-item-title">${escapeHtml(item.name)}</div>
+                <div class="catalog-item-call">${escapeHtml(item.functionCall)}</div>
+                <div class="catalog-item-desc">${renderSafeMarkdown(item.description)}</div>
+              </div>
+              <div class="catalog-item-badge">${badge}</div>
+            </div>
+          `;
+        })
+        .join('');
+
+      const gearHtml = (catalog.unlockables || [])
         .map((item) => {
           const isOwned = owned.has(item.id);
           const isQueued = !isOwned && queuedIds.has(item.id);
@@ -1192,6 +1289,70 @@ export class ModalManager {
           `;
         })
         .join('');
+
+      return `${consumableHtml}${gearHtml}`;
+    };
+
+    const renderRecipesHtml = () => {
+      if (recipes.length === 0) {
+        return '<div class="muted-text">No recipes available yet.</div>';
+      }
+      return recipes
+        .map((r) => {
+          const unlocked = solvedCount >= (Number(r.minSolvedTrials) || 0);
+          return `
+            <div class="ws-recipe-card">
+              <div class="ws-card-top">
+                <strong style="font-size:14px;">${escapeHtml(r.title)}</strong>
+                <span class="pill ${unlocked ? 'pill-violet' : 'pill-muted'}">${renderSafeMarkdown(r.concept)}</span>
+              </div>
+              <div class="catalog-item-desc">${renderSafeMarkdown(r.description)}</div>
+              <pre class="ws-card-code">${escapeHtml(r.starterCode.trim())}</pre>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                <span class="muted-text" style="font-size:12px; margin:0;">
+                  ${unlocked ? '✨ Ready to tinker!' : `💡 Preview (recommended after ${r.minSolvedTrials} trials)`}
+                </span>
+                <button type="button" class="btn btn-sm btn-sky" data-load-recipe="${escapeHtml(r.id)}">
+                  Load Recipe →
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    };
+
+    const renderChallengesHtml = () => {
+      const doneSet = new Set(workingSave.stats.completedWorkshopChallenges || []);
+      if (challenges.length === 0) {
+        return '<div class="muted-text">No review challenges available yet.</div>';
+      }
+      return challenges
+        .map((c) => {
+          const isDone = doneSet.has(c.id);
+          const isSelected = activeChallenge?.id === c.id;
+          return `
+            <div class="ws-challenge-card ${isDone ? 'completed' : ''}">
+              <div class="ws-card-top">
+                <strong style="font-size:14px;">${isDone ? '✓ ' : '🎯 '}${escapeHtml(c.title)}</strong>
+                <span class="pill ${isDone ? 'pill-green' : 'pill-gold'}">
+                  ${isDone ? '✓ Cleared' : `+${c.shardReward} 💎`}
+                </span>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <span class="pill pill-blue">${escapeHtml(c.realmHint || 'Spaced Review')}</span>
+                <span class="pill pill-muted">${renderSafeMarkdown(c.concept)}</span>
+              </div>
+              <div class="catalog-item-desc">${renderSafeMarkdown(c.prompt)}</div>
+              <div style="display:flex; justify-content:flex-end;">
+                <button type="button" class="btn btn-sm ${isSelected ? 'btn-gold' : 'btn-primary'}" data-load-challenge="${escapeHtml(c.id)}">
+                  ${isSelected ? 'Active in Editor' : isDone ? 'Practice Again →' : 'Try Challenge →'}
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
     };
 
     const wsQuickKeys = getQuickKeysForContext({ useTrainingSpells: false });
@@ -1210,11 +1371,11 @@ export class ModalManager {
       </div>
 
       <p class="muted-text" style="margin-top:-6px;">
-        "No buttons in my shop, kid! Click any blueprint below to add its Python call, watch your live shard budget, then press <strong>Run Forge Code</strong>!"
+        "No buttons in my shop, kid! Write real Python — loops, <code>if</code> checks, functions, or classes — to forge gear, stock stackable items, or try spaced-review challenges!"
       </p>
 
       <div class="workshop-grid">
-        <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
           <div class="preview-stage" style="padding:10px;">
             <canvas id="ws-preview-canvas" width="160" height="104" class="pixel-canvas" style="width:200px; height:130px;"></canvas>
             <div class="preview-controls">
@@ -1224,34 +1385,44 @@ export class ModalManager {
           <div id="ws-balance-banner" class="ws-balance-banner">
             💎 Your Byte Shards: <strong id="ws-balance-value">${Number(workingSave.byteShards) || 0}</strong>
           </div>
+          <div id="ws-inventory-bar" class="ws-inventory-bar">
+            ${renderInventoryHtml()}
+          </div>
+          <div class="ws-tabs" role="tablist">
+            <button type="button" class="ws-tab-btn active" data-ws-tab="gear">⚒ Gear &amp; Items</button>
+            <button type="button" class="ws-tab-btn" data-ws-tab="recipes">📜 Recipes (${recipes.length})</button>
+            <button type="button" class="ws-tab-btn" data-ws-tab="challenges">🎯 Challenges (${challenges.length})</button>
+          </div>
           <div id="ws-catalog" class="catalog-list">
-            ${renderCatalogHtml()}
+            ${renderGearCatalogHtml()}
           </div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:12px;">
+          <div id="ws-challenge-banner" class="challenge-banner hidden"></div>
           <div id="ws-cart-bar" class="ws-cart-bar"></div>
           ${renderQuickKeysHtml('ws-quick-keys', wsQuickKeys)}
           <div class="code-editor-shell">
             <div class="code-editor-bar">
-              <span class="code-editor-cta">⚒ FORGE CODE BOX</span>
-              <span class="code-editor-sub">Click items on the left or type below</span>
+              <span id="ws-editor-cta" class="code-editor-cta">⚒ FORGE CODE BOX</span>
+              <span class="code-editor-sub">Click items on the left or write Python below</span>
             </div>
             <div class="code-editor-body">
               <div id="ws-code-gutter" class="code-gutter" aria-hidden="true"></div>
               <div class="code-textarea-wrap">
                 <div id="ws-code-highlights" class="code-line-highlights" aria-hidden="true"></div>
-                <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click any blueprint on the left or type wear_hat(&quot;explorer&quot;)..."></textarea>
+                <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click a blueprint, load a recipe, or write Python (loops, if, def, class)..."></textarea>
               </div>
             </div>
           </div>
           <div class="editor-actions">
             <button id="ws-run-btn" class="btn btn-gold">⚒ Run Forge Code</button>
+            <button id="ws-exit-challenge-btn" class="btn btn-ghost hidden">← Back to Free Forge</button>
             <button id="ws-clear-btn" class="btn btn-ghost">Clear</button>
           </div>
           <div id="ws-output" class="pip-console">
             <div class="pip-console-header">⚒ Bram says:</div>
-            <div class="pip-console-body">Click a blueprint on the left (or type a call like <code>wear_hat("explorer")</code>) and press <strong>Run Forge Code</strong>!</div>
+            <div class="pip-console-body">Click a blueprint, try a <strong>📜 Concept Recipe</strong> (like a <code>for</code> loop with <code>forge_arrows(1)</code>), or earn extra shards in <strong>🎯 Challenges</strong>!</div>
           </div>
         </div>
       </div>
@@ -1262,6 +1433,10 @@ export class ModalManager {
     const previewCanvas = this.content.querySelector('#ws-preview-canvas');
     const catalogEl = this.content.querySelector('#ws-catalog');
     const cartBarEl = this.content.querySelector('#ws-cart-bar');
+    const inventoryBarEl = this.content.querySelector('#ws-inventory-bar');
+    const challengeBannerEl = this.content.querySelector('#ws-challenge-banner');
+    const editorCtaEl = this.content.querySelector('#ws-editor-cta');
+    const exitChallengeBtn = this.content.querySelector('#ws-exit-challenge-btn');
     const codeEl = this.content.querySelector('#ws-code');
     const wsGutter = attachCodeGutter(
       codeEl,
@@ -1299,37 +1474,103 @@ export class ModalManager {
       audio.playClick();
     });
 
+    const syncChallengeModeUi = () => {
+      if (activeChallenge) {
+        challengeBannerEl.classList.remove('hidden');
+        challengeBannerEl.innerHTML = `
+          <div>
+            <strong>🎯 Review Challenge: ${escapeHtml(activeChallenge.title)}</strong>
+            <div style="margin-top:3px;">${renderSafeMarkdown(activeChallenge.prompt)}</div>
+          </div>
+          <span class="pill pill-gold">+${activeChallenge.shardReward} 💎 Reward</span>
+        `;
+        cartBarEl.classList.add('hidden');
+        editorCtaEl.textContent = `🎯 CHALLENGE: ${activeChallenge.title.toUpperCase()}`;
+        runBtn.textContent = '▶ Check Challenge Code';
+        runBtn.className = 'btn btn-primary';
+        exitChallengeBtn.classList.remove('hidden');
+      } else {
+        challengeBannerEl.classList.add('hidden');
+        cartBarEl.classList.remove('hidden');
+        editorCtaEl.textContent = '⚒ FORGE CODE BOX';
+        runBtn.textContent = '⚒ Run Forge Code';
+        runBtn.className = 'btn btn-gold';
+        exitChallengeBtn.classList.add('hidden');
+      }
+    };
+
+    const renderActiveTabList = (cart = null) => {
+      if (activeTab === 'recipes') {
+        catalogEl.innerHTML = renderRecipesHtml();
+        catalogEl.querySelectorAll('[data-load-recipe]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const recipe = recipes.find((r) => r.id === btn.dataset.loadRecipe);
+            if (!recipe) return;
+            activeChallenge = null;
+            syncChallengeModeUi();
+            codeEl.value = recipe.starterCode;
+            codeEl.focus();
+            refreshCartAndCatalog();
+            audio.playClick();
+          });
+        });
+      } else if (activeTab === 'challenges') {
+        catalogEl.innerHTML = renderChallengesHtml();
+        catalogEl.querySelectorAll('[data-load-challenge]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const chal = challenges.find((c) => c.id === btn.dataset.loadChallenge);
+            if (!chal) return;
+            activeChallenge = chal;
+            syncChallengeModeUi();
+            codeEl.value = chal.starterCode || '';
+            codeEl.focus();
+            wsGutter.setMarks(new Map());
+            renderActiveTabList();
+            audio.playClick();
+          });
+        });
+      } else {
+        catalogEl.innerHTML = renderGearCatalogHtml(cart);
+        wireCatalogClicks();
+      }
+    };
+
     const refreshCartAndCatalog = () => {
-      const cart = estimateCart(codeEl.value);
+      if (inventoryBarEl) {
+        inventoryBarEl.innerHTML = renderInventoryHtml();
+      }
+      const cart = activeChallenge ? null : estimateCart(codeEl.value);
       const marks = new Map();
-      for (const it of cart.items) {
-        if (it.wentOverHere) {
-          const need = Math.max(1, it.cost - Math.max(0, it.shardsBefore));
-          marks.set(it.lineNumber, {
-            kind: 'hl-error',
-            icon: '⚠️',
-            badge: `⚠️ OVER BUDGET (need ${need} more 💎)`,
-          });
-        } else if (it.overBudget) {
-          marks.set(it.lineNumber, {
-            kind: 'hl-over-after',
-            icon: '🔒',
-            badge: 'over budget',
-          });
-        } else if (cart.remaining < 0) {
-          marks.set(it.lineNumber, {
-            kind: 'hl-ok',
-            badge: `✓ ${it.shardsAfter} 💎 left`,
-          });
+      if (cart) {
+        for (const it of cart.items) {
+          if (it.wentOverHere) {
+            const need = Math.max(1, it.cost - Math.max(0, it.shardsBefore));
+            marks.set(it.lineNumber, {
+              kind: 'hl-error',
+              icon: '⚠️',
+              badge: `⚠️ OVER BUDGET (need ${need} more 💎)`,
+            });
+          } else if (it.overBudget) {
+            marks.set(it.lineNumber, {
+              kind: 'hl-over-after',
+              icon: '🔒',
+              badge: 'over budget',
+            });
+          } else if (cart.remaining < 0) {
+            marks.set(it.lineNumber, {
+              kind: 'hl-ok',
+              badge: `✓ ${it.shardsAfter} 💎 left`,
+            });
+          }
         }
       }
       wsGutter.setMarks(marks);
-      if (cartBarEl) {
+      if (cartBarEl && cart) {
         if (cart.items.length === 0) {
           cartBarEl.className = 'ws-cart-bar';
           cartBarEl.innerHTML = `
             <span>💎 Have: <strong>${cart.currentShards}</strong></span>
-            <span class="muted-text">Add blueprints on the left to preview your total cost</span>
+            <span class="muted-text">Add blueprints or run loops, <code>if</code>, <code>def</code>, or <code>class</code> code!</span>
           `;
         } else if (cart.remaining >= 0) {
           cartBarEl.className = 'ws-cart-bar ok';
@@ -1367,17 +1608,19 @@ export class ModalManager {
           `;
         }
       }
-      catalogEl.innerHTML = renderCatalogHtml(cart);
-      wireCatalogClicks();
+      renderActiveTabList(cart);
     };
 
     const wireCatalogClicks = () => {
       catalogEl.querySelectorAll('.catalog-item').forEach((el) => {
         el.addEventListener('click', () => {
+          activeChallenge = null;
+          syncChallengeModeUi();
           const call = el.dataset.call;
+          const isStackable = el.dataset.stackable === '1';
           const current = codeEl.value.trim();
-          const lines = current ? current.split('\n').filter((l) => l.trim() && !l.trim().startsWith('#')) : [];
-          if (!lines.some((l) => normalizeCall(l) === normalizeCall(call))) {
+          const lines = current ? current.split('\n').filter((l) => l.trim()) : [];
+          if (isStackable || !lines.some((l) => normalizeCall(l) === normalizeCall(call))) {
             lines.push(call);
           }
           codeEl.value = lines.join('\n') + '\n';
@@ -1388,7 +1631,27 @@ export class ModalManager {
       });
     };
 
+    this.content.querySelectorAll('[data-ws-tab]').forEach((tabBtn) => {
+      tabBtn.addEventListener('click', () => {
+        activeTab = tabBtn.dataset.wsTab;
+        this.content.querySelectorAll('[data-ws-tab]').forEach((b) => {
+          b.classList.toggle('active', b.dataset.wsTab === activeTab);
+        });
+        renderActiveTabList(activeChallenge ? null : estimateCart(codeEl.value));
+        audio.playClick();
+      });
+    });
+
+    exitChallengeBtn.addEventListener('click', () => {
+      activeChallenge = null;
+      syncChallengeModeUi();
+      codeEl.value = '';
+      refreshCartAndCatalog();
+      audio.playClick();
+    });
+
     codeEl.addEventListener('input', refreshCartAndCatalog);
+    syncChallengeModeUi();
     refreshCartAndCatalog();
 
     clearBtn.addEventListener('click', () => {
@@ -1401,18 +1664,101 @@ export class ModalManager {
     const runForge = async () => {
       const code = codeEl.value.trim();
       if (!code) return;
+
+      if (activeChallenge) {
+        const chal = activeChallenge;
+        runBtn.disabled = true;
+        runBtn.textContent = 'Checking...';
+        audio.playCodeRun();
+
+        const res = await pyRunner.runTrial(code, chal.testCode, false, {
+          requiredConstructs: chal.requiredConstructs,
+        });
+        runBtn.disabled = false;
+        runBtn.textContent = '▶ Check Challenge Code';
+
+        if (res.passed) {
+          audio.playSuccess();
+          const doneList = workingSave.stats.completedWorkshopChallenges || [];
+          const firstTime = !doneList.includes(chal.id);
+          if (firstTime) {
+            doneList.push(chal.id);
+            workingSave.stats.completedWorkshopChallenges = doneList;
+            workingSave.byteShards = (Number(workingSave.byteShards) || 0) + (Number(chal.shardReward) || 0);
+            shardsPill.textContent = `💎 ${workingSave.byteShards} Byte Shards`;
+            if (balanceVal) balanceVal.textContent = String(workingSave.byteShards);
+            if (onSaveUpdated) {
+              onSaveUpdated(workingSave);
+            }
+          }
+          wsGutter.setMarks(new Map());
+          renderActiveTabList();
+          outputEl.className = 'pip-console success';
+          outputEl.innerHTML = `
+            <div class="pip-console-header">🎯 Challenge Cleared!</div>
+            <div class="pip-console-body">
+              ${
+                firstTime
+                  ? `Bram rings the anvil! You earned <strong style="color:var(--accent-gold);">+${chal.shardReward} Byte Shards</strong> for completing <strong>${escapeHtml(chal.title)}</strong>!`
+                  : `Spot-on practice run on <strong>${escapeHtml(chal.title)}</strong>! (Bonus shards already claimed.)`
+              }
+              ${res.stdout ? `<div class="console-stdout" style="margin-top:6px;">Output:\n${escapeHtml(res.stdout)}</div>` : ''}
+            </div>
+          `;
+        } else {
+          if (res.errorLine) {
+            const errLn = Number(res.errorLine);
+            wsGutter.setMarks(
+              new Map([[errLn, { kind: 'hl-error', icon: '⚠️', badge: 'check this line' }]])
+            );
+            wsGutter.scrollToLine(errLn);
+          }
+          audio.playError();
+          outputEl.className = 'pip-console error';
+          outputEl.innerHTML = `
+            <div class="pip-console-header">🐉 Pip's Challenge Clue:</div>
+            <div class="pip-console-body">${renderSafeMarkdown(res.pipMessage)}</div>
+            ${res.stdout ? `<div class="console-stdout">Output:\n${escapeHtml(res.stdout)}</div>` : ''}
+          `;
+        }
+        return;
+      }
+
       const startShards = Number(workingSave.byteShards) || 0;
       runBtn.disabled = true;
       runBtn.textContent = 'Forging...';
       audio.playCodeRun();
 
-      const res = await pyRunner.runWorkshop(code, catalog.unlockables || [], workingSave);
+      const workshopSaveInput = {
+        ...workingSave,
+        inventory: {
+          arrows: Number(workingSave.stats?.arrows) || 0,
+          potions: Number(workingSave.stats?.potions) || 0,
+        },
+        customItems: Array.isArray(workingSave.stats?.customItems)
+          ? [...workingSave.stats.customItems]
+          : [],
+      };
+      const res = await pyRunner.runWorkshop(code, catalog.unlockables || [], workshopSaveInput);
       runBtn.disabled = false;
       runBtn.textContent = '⚒ Run Forge Code';
 
       if (res.passed) {
         workingSave.appearance = { ...workingSave.appearance, ...res.appearance };
-        workingSave.stats = { ...workingSave.stats, ...res.stats };
+        workingSave.stats = {
+          ...workingSave.stats,
+          ...res.stats,
+          arrows: Number(res.inventory?.arrows ?? workingSave.stats?.arrows) || 0,
+          potions: Number(res.inventory?.potions ?? workingSave.stats?.potions) || 0,
+          customItems: Array.isArray(res.customItems)
+            ? [...res.customItems]
+            : Array.isArray(workingSave.stats?.customItems)
+              ? [...workingSave.stats.customItems]
+              : [],
+          completedWorkshopChallenges: Array.isArray(workingSave.stats?.completedWorkshopChallenges)
+            ? [...workingSave.stats.completedWorkshopChallenges]
+            : [],
+        };
         workingSave.ownedUnlockIds = [...res.ownedUnlockIds];
         workingSave.byteShards = res.byteShards;
 
