@@ -96,7 +96,7 @@ function main() {
   const seenRealmIds = new Set();
   const seenDragonIds = new Set();
   const seenTrialIds = new Set();
-  const codingTrials = [];
+  const allTrials = [];
   let totalRealms = 0;
   let totalTrials = 0;
 
@@ -203,21 +203,19 @@ function main() {
             typeof trial.testCode === 'string' && trial.testCode.trim().length > 0,
             `Trial "${trial.id}" missing testCode`
           );
-          if (
-            typeof trial.referenceSolution === 'string' &&
-            trial.referenceSolution.trim().length > 0 &&
-            typeof trial.testCode === 'string' &&
-            trial.testCode.trim().length > 0
-          ) {
-            codingTrials.push({
-              eraId,
-              id: trial.id,
-              concepts: trialConcepts || [],
-              referenceSolution: trial.referenceSolution,
-              testCode: trial.testCode,
-            });
-          }
         }
+
+        allTrials.push({
+          eraId,
+          id: trial.id,
+          trialType,
+          isBoss: trial.id.endsWith('-06'),
+          isBonus: Boolean(trial.isBonus || trial.id.endsWith('-bonus')),
+          concepts: trialConcepts || [],
+          codeSnippet: typeof trial.codeSnippet === 'string' ? trial.codeSnippet : '',
+          referenceSolution: typeof trial.referenceSolution === 'string' ? trial.referenceSolution : '',
+          testCode: typeof trial.testCode === 'string' ? trial.testCode : '',
+        });
       }
     }
   }
@@ -314,30 +312,73 @@ function main() {
     }
   }
 
-  // 6. Execute coding trial referenceSolutions against testCode and cross-check AST concepts in python3
+  // 6. Execute coding trial referenceSolutions against testCode, cross-check AST concepts, and check boss/bonus debuts in python3
   let passedCoding = 0;
-  if (codingTrials.length > 0) {
+  let totalCoding = 0;
+  if (allTrials.length > 0) {
     const pyScript = `
 import ast, contextlib, io, json, sys
 trials = json.loads(sys.stdin.read())
 errs = []
 passed = 0
+coding = 0
+seen_features = set()
+
+def extract_features(code):
+    feats = set()
+    if not code.strip():
+        return feats
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return feats
+    for n in ast.walk(tree):
+        if isinstance(n, ast.If):
+            feats.add("if")
+            if n.orelse:
+                if len(n.orelse) == 1 and isinstance(n.orelse[0], ast.If):
+                    feats.add("elif")
+                else:
+                    feats.add("else")
+        elif isinstance(n, ast.For): feats.add("for")
+        elif isinstance(n, ast.While): feats.add("while")
+        elif isinstance(n, ast.FunctionDef): feats.add("def")
+        elif isinstance(n, ast.ClassDef): feats.add("class")
+        elif isinstance(n, ast.Try): feats.add("try")
+        elif isinstance(n, ast.Pass): feats.add("pass")
+        elif isinstance(n, ast.Constant) and isinstance(n.value, bool): feats.add("bool_literal")
+        elif isinstance(n, ast.Call):
+            if isinstance(n.func, ast.Name) and n.func.id in ("len", "range", "str", "int", "float", "print", "say", "shout", "enumerate", "input"):
+                feats.add(f"builtin:{n.func.id}")
+            elif isinstance(n.func, ast.Attribute) and n.func.attr in ("upper", "lower", "strip", "values", "items", "keys", "split", "replace", "append", "get"):
+                feats.add(f"method:.{n.func.attr}()")
+    return feats
+
+def shout_fn(*args, **kwargs):
+    print(*(a.upper() if isinstance(a, str) else a for a in args), **kwargs)
+
 for t in trials:
     tid = f"{t['eraId']}/{t['id']}"
     code = t["referenceSolution"]
+    code_for_feats = code or t["codeSnippet"]
+    feats = extract_features(code_for_feats)
+    if t["isBoss"] or t["isBonus"]:
+        new_feats = sorted(feats - seen_features)
+        if new_feats:
+            kind = "bonus" if t["isBonus"] else "boss"
+            errs.append(f"Trial {tid}: debuts features in {kind} trial: {', '.join(new_feats)}")
+    else:
+        seen_features |= feats
+
+    if t["trialType"] not in ("code", "fix_bug") or not code.strip() or not t["testCode"].strip():
+        continue
+    coding += 1
     concepts = set(t.get("concepts", []))
     try:
-        tree = ast.parse(code)
+        ast.parse(code)
     except SyntaxError as e:
         errs.append(f"Trial {tid} referenceSolution SyntaxError: {e}")
         continue
-    feats = set()
-    for n in ast.walk(tree):
-        if isinstance(n, ast.FunctionDef): feats.add("def")
-        elif isinstance(n, ast.ClassDef): feats.add("class")
-        elif isinstance(n, ast.For): feats.add("for")
-        elif isinstance(n, ast.While): feats.add("while")
-        elif isinstance(n, ast.Try): feats.add("try")
     if "def" in feats and not (concepts & {"functions_def", "functions_return", "classes_intro", "class_inheritance", "world_scripting_3d", "debugging"}):
         errs.append(f"Trial {tid}: uses 'def' in referenceSolution but concepts={sorted(concepts)}")
     if "class" in feats and not (concepts & {"classes_intro", "class_inheritance", "world_scripting_3d"}):
@@ -349,8 +390,6 @@ for t in trials:
     if "try" in feats and "error_handling" not in concepts:
         errs.append(f"Trial {tid}: uses 'try' in referenceSolution but concepts={sorted(concepts)}")
     try:
-        def shout_fn(*args, **kwargs):
-            print(*(a.upper() if isinstance(a, str) else a for a in args), **kwargs)
         ns = {"say": print, "shout": shout_fn}
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
@@ -360,10 +399,10 @@ for t in trials:
         passed += 1
     except Exception as e:
         errs.append(f"Trial {tid} referenceSolution failed: {type(e).__name__}: {e}")
-print(json.dumps({"passed": passed, "errors": errs}))
+print(json.dumps({"passed": passed, "coding": coding, "errors": errs}))
 `;
     const pyRes = spawnSync('python3', ['-c', pyScript], {
-      input: JSON.stringify(codingTrials),
+      input: JSON.stringify(allTrials),
       encoding: 'utf-8',
       maxBuffer: 20 * 1024 * 1024,
     });
@@ -372,13 +411,14 @@ print(json.dumps({"passed": passed, "errors": errs}))
     } else {
       const pyOut = JSON.parse(pyRes.stdout);
       passedCoding = pyOut.passed;
+      totalCoding = pyOut.coding;
       for (const e of pyOut.errors) errors.push(e);
     }
   }
 
   if (errors.length === 0) {
     console.log(
-      `Content validation passed: ${(eraOrder || []).length} eras, ${totalRealms} realms, ${totalTrials} trials (${passedCoding}/${codingTrials.length} referenceSolutions passed), ${mapFiles.length} maps, ${unlockIds.size} unlockables.`
+      `Content validation passed: ${(eraOrder || []).length} eras, ${totalRealms} realms, ${totalTrials} trials (${passedCoding}/${totalCoding} referenceSolutions passed), ${mapFiles.length} maps, ${unlockIds.size} unlockables.`
     );
   }
   reportAndExit();

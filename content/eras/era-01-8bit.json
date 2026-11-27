@@ -668,9 +668,9 @@
         {
           "id": "trial-03-02",
           "trialType": "fix_bug",
-          "title": "Fix the Missing Colon!",
-          "storyPrompt": "Now it's your turn to fix a real `if` spell! Lord Null snuck into Cinder Cavern and stole ONE tiny symbol from the `if` line. Spot what's missing, add it back, and run the spell!",
-          "objective": "Fix the syntax bug in the `if heat > 50` line so `alarm` becomes \"ON\" and Python shouts \"Shield up!\".",
+          "title": "The Broken Magma Alarm",
+          "storyPrompt": "Lord Null tampered with Cinder Cavern's magma alarm! Pressing Run gives a syntax error instead of setting the Boolean `alarm_on` to `True` and sounding the alert. Find the problem and fix it!",
+          "objective": "Repair the broken if-statement so alarm_on becomes True and Python shouts SHIELD UP!.",
           "concepts": [
             "variables",
             "comparisons",
@@ -679,18 +679,18 @@
           ],
           "shardReward": 35,
           "unlockId": null,
-          "bugSummary": "Lord Null stole the colon (:) from the end of the `if` line! Put `:` back and run the spell.",
+          "bugSummary": "The magma alarm crashes with a syntax error on the if-statement.",
           "starterCode": {
-            "explorer": "heat = 80\nalarm = \"OFF\"\nif heat > 50\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
-            "standard": "heat = 80\nalarm = \"OFF\"\nif heat > 50\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
-            "challenge": "heat = 80\nalarm = \"OFF\"\nif heat > 50\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n"
+            "explorer": "# Check the end of the if line!\nheat = 80\nalarm_on = False\nif heat > 50\n    alarm_on = True\n    shout(\"Shield up!\")\n",
+            "standard": "# Fix the syntax error so the alarm fires\nheat = 80\nalarm_on = False\nif heat > 50\n    alarm_on = True\n    shout(\"Shield up!\")\n",
+            "challenge": "heat = 80\nalarm_on = False\nif heat > 50\n    alarm_on = True\n    shout(\"Shield up!\")\n"
           },
-          "referenceSolution": "heat = 80\nalarm = \"OFF\"\nif heat > 50:\n    alarm = \"ON\"\n    shout(\"Shield up!\")\n",
-          "testCode": "assert alarm == \"ON\", f'Expected alarm == \"ON\", got {alarm!r}'\nassert OUTPUT.strip() == \"SHIELD UP!\", f'Expected \"SHIELD UP!\", got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "heat = 80\nalarm_on = False\nif heat > 50:\n    alarm_on = True\n    shout(\"Shield up!\")\n",
+          "testCode": "assert alarm_on is True, f'Expected alarm_on is True, got {alarm_on!r}'\nassert OUTPUT.strip() == \"SHIELD UP!\", f'Expected \"SHIELD UP!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps line 3: 'Every `if` line in Python MUST end with a colon `:`!'",
-            "tier2_pattern": "Change `if heat > 50` to `if heat > 50:`",
-            "tier3_walkthrough": "Add `:` right after `50` so line 3 reads:\nif heat > 50:"
+            "tier2_pattern": "if <condition>:\n    <indented action>",
+            "tier3_walkthrough": "Add `:` right after `50` so the line reads:\nif heat > 50:"
           },
           "difficultyOverride": null
         },
@@ -756,9 +756,9 @@
         {
           "id": "trial-03-05",
           "trialType": "code",
-          "title": "The Secret Word Lock (== with Strings)",
-          "storyPrompt": "You can use `==` with words (strings) too! Just make sure the spelling and capital letters match inside the quotes. Check whether `password == \"EMBER\"` to crack the magma seal!",
-          "objective": "Start with password = \"EMBER\" and seal = \"INTACT\". Write an if statement checking if password == \"EMBER\": set seal = \"BROKEN\" and shout(\"Seal broken!\").",
+          "title": "The Secret Word Lock (if / else)",
+          "storyPrompt": "New superpower: adding `else:` gives Python a backup plan that runs whenever the `if` check is `False`! Check whether `password` matches `\"EMBER\"` — if it does, break the seal and shout `\"Seal broken!\"`; otherwise (`else:`), keep `seal` as `\"INTACT\"`.",
+          "objective": "Check if password equals 'EMBER'. If so, set seal to 'BROKEN' and shout 'Seal broken!'; otherwise set seal to 'INTACT'.",
           "concepts": [
             "variables",
             "strings",
@@ -769,16 +769,16 @@
           "shardReward": 45,
           "unlockId": null,
           "starterCode": {
-            "explorer": "password = \"EMBER\"\nseal = \"INTACT\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n",
-            "standard": "password = \"EMBER\"\nseal = \"INTACT\"\n",
-            "challenge": "password = \"EMBER\"\nseal = \"INTACT\"\n"
+            "explorer": "password = \"EMBER\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    \n",
+            "standard": "password = \"EMBER\"\n",
+            "challenge": ""
           },
-          "referenceSolution": "password = \"EMBER\"\nseal = \"INTACT\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\n",
+          "referenceSolution": "password = \"EMBER\"\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    seal = \"INTACT\"\n",
           "testCode": "assert seal == \"BROKEN\", f'Expected seal == \"BROKEN\", got {seal!r}'\nassert OUTPUT.strip() == \"SEAL BROKEN!\", f'Expected \"SEAL BROKEN!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Remember quotes around \"EMBER\" and two equals signs == to compare!'",
-            "tier2_pattern": "if password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")",
-            "tier3_walkthrough": "Add:\n    shout(\"Seal broken!\")"
+            "tier1_nudge": "Pip cheers: 'Use == to check \"EMBER\", and put the backup line indented 4 spaces under else:!'",
+            "tier2_pattern": "if <var> == \"<word>\":\n    <if actions>\nelse:\n    <backup action>",
+            "tier3_walkthrough": "Write:\nif password == \"EMBER\":\n    seal = \"BROKEN\"\n    shout(\"Seal broken!\")\nelse:\n    seal = \"INTACT\""
           },
           "difficultyOverride": null
         },
@@ -786,7 +786,7 @@
           "id": "trial-03-06",
           "trialType": "code",
           "title": "Unchain Emberwing (Conditionals Capstone)",
-          "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds `ember_power = 75`, and the lock has `lock_power = 60`. New superpower: adding `else:` gives Python a backup plan that runs whenever the `if` check is False! Use `if / else` to compare the two boxes and set Emberwing free!",
+          "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds 75 ember power, and the lock has 60 lock power. Combine variables, comparisons, and an if/else decision to shatter the lock and set Emberwing free!",
           "objective": "Given ember_power = 75 and lock_power = 60, write an if / else: if ember_power > lock_power, set gate_status = \"OPEN\" and shout(\"Emberwing is free!\"); else, set gate_status = \"LOCKED\".",
           "concepts": [
             "variables",
@@ -1308,9 +1308,9 @@
         {
           "id": "trial-05-03",
           "trialType": "code",
-          "title": "Both Must Be True: and",
-          "storyPrompt": "Sometimes a dungeon door needs TWO things to be True at once! Python's `and` keyword checks BOTH sides: `has_key and has_torch` is only `True` if you have the key AND the torch.",
-          "objective": "Given has_key = True and has_torch = True, set can_enter = has_key and has_torch, then if can_enter: print(\"Enter!\").",
+          "title": "Both Must Be True: and + .upper()",
+          "storyPrompt": "Sometimes a dungeon door needs TWO things to be True at once! Python's `and` keyword checks BOTH sides, and `.upper()` turns text into ALL CAPS (just like `shout()` used to!). Uppercase `raw_key` into `key`, then check `key == \"GOLD\" and has_torch`!",
+          "objective": "Given raw_key = 'gold' and has_torch = True, set key = raw_key.upper(), set can_enter = (key == 'GOLD') and has_torch, and if can_enter is True, print 'Enter!'.",
           "concepts": [
             "boolean_logic",
             "booleans",
@@ -1320,25 +1320,25 @@
           "shardReward": 50,
           "unlockId": null,
           "starterCode": {
-            "explorer": "has_key = True\nhas_torch = True\ncan_enter = has_key and \nif can_enter:\n    print(\"Enter!\")\n",
-            "standard": "has_key = True\nhas_torch = True\n",
-            "challenge": "has_key = True\nhas_torch = True\n"
+            "explorer": "raw_key = \"gold\"\nhas_torch = True\nkey = raw_key.upper()\ncan_enter = (key == \"GOLD\") and \nif can_enter:\n    print(\"Enter!\")\n",
+            "standard": "raw_key = \"gold\"\nhas_torch = True\n",
+            "challenge": ""
           },
-          "referenceSolution": "has_key = True\nhas_torch = True\ncan_enter = has_key and has_torch\nif can_enter:\n    print(\"Enter!\")\n",
-          "testCode": "assert can_enter is True, f'Expected can_enter is True, got {can_enter!r}'\nassert OUTPUT.strip() == \"Enter!\", f'Expected \"Enter!\", got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "raw_key = \"gold\"\nhas_torch = True\nkey = raw_key.upper()\ncan_enter = (key == \"GOLD\") and has_torch\nif can_enter:\n    print(\"Enter!\")\n",
+          "testCode": "assert key == \"GOLD\", f'Expected key == \"GOLD\", got {key!r}'\nassert can_enter is True, f'Expected can_enter is True, got {can_enter!r}'\nassert OUTPUT.strip() == \"Enter!\", f'Expected \"Enter!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip holds up a key and a torch: 'Write has_key and has_torch—lowercase and!'",
-            "tier2_pattern": "can_enter = has_key and has_torch\nif can_enter:\n    print(\"Enter!\")",
-            "tier3_walkthrough": "Complete the line with:\ncan_enter = has_key and has_torch"
+            "tier1_nudge": "Pip holds up a key and a torch: 'Call raw_key.upper(), then combine both checks with lowercase and!'",
+            "tier2_pattern": "key = raw_key.upper()\ncan_enter = (key == \"...\") and <bool_var>\nif can_enter:\n    print(\"...\")",
+            "tier3_walkthrough": "Write:\nkey = raw_key.upper()\ncan_enter = (key == \"GOLD\") and has_torch\nif can_enter:\n    print(\"Enter!\")"
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-05-04",
           "trialType": "code",
-          "title": "Either One Works: or",
-          "storyPrompt": "A fallen ravine blocks the forest path! You can cross if you have a rope OR if you have wings. Python's `or` keyword is `True` as long as AT LEAST ONE side is `True`!",
-          "objective": "Given has_rope = False and has_wings = True, set can_cross = has_rope or has_wings, then if can_cross: print(\"Crossed!\").",
+          "title": "Either One Works: or + len()",
+          "storyPrompt": "A fallen ravine blocks the forest path! Meet `len(word)` — Python's built-in letter counter (for example, `len(\"bridge\")` is `6`). You can cross if `len(bridge_word) > 4` OR if `has_wings` is `True`! Python's `or` is `True` when AT LEAST ONE side is `True`.",
+          "objective": "Set can_cross using or to check whether bridge_word has more than 4 letters or has_wings is True; if can_cross is True, print 'Crossed!'.",
           "concepts": [
             "boolean_logic",
             "booleans",
@@ -1348,16 +1348,16 @@
           "shardReward": 50,
           "unlockId": null,
           "starterCode": {
-            "explorer": "has_rope = False\nhas_wings = True\ncan_cross = has_rope or \nif can_cross:\n    print(\"Crossed!\")\n",
-            "standard": "has_rope = False\nhas_wings = True\n",
-            "challenge": "has_rope = False\nhas_wings = True\n"
+            "explorer": "bridge_word = \"oak\"\nhas_wings = True\ncan_cross = (len(bridge_word) > 4) or \nif can_cross:\n    print(\"Crossed!\")\n",
+            "standard": "bridge_word = \"oak\"\nhas_wings = True\n",
+            "challenge": ""
           },
-          "referenceSolution": "has_rope = False\nhas_wings = True\ncan_cross = has_rope or has_wings\nif can_cross:\n    print(\"Crossed!\")\n",
+          "referenceSolution": "bridge_word = \"oak\"\nhas_wings = True\ncan_cross = (len(bridge_word) > 4) or has_wings\nif can_cross:\n    print(\"Crossed!\")\n",
           "testCode": "assert can_cross is True, f'Expected can_cross is True, got {can_cross!r}'\nassert OUTPUT.strip() == \"Crossed!\", f'Expected \"Crossed!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip flaps his tiny wings: 'With or, only ONE side needs to be True!'",
-            "tier2_pattern": "can_cross = has_rope or has_wings\nif can_cross:\n    print(\"Crossed!\")",
-            "tier3_walkthrough": "Complete with:\ncan_cross = has_rope or has_wings"
+            "tier1_nudge": "Pip flaps his tiny wings: 'Use len(bridge_word) > 4 and combine it with has_wings using or!'",
+            "tier2_pattern": "can_cross = (len(<word>) > 4) or <bool_var>\nif can_cross:\n    print(\"...\")",
+            "tier3_walkthrough": "Write:\ncan_cross = (len(bridge_word) > 4) or has_wings\nif can_cross:\n    print(\"Crossed!\")"
           },
           "difficultyOverride": null
         },
