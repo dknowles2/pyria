@@ -11,7 +11,7 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <title>Pyria: Return of the Bits</title>
-  <link rel="stylesheet" href="/css/style.css?v=20261127k" />
+  <link rel="stylesheet" href="/css/style.css?v=20261127l" />
 </head>
 <body>
   <div id="app">
@@ -203,6 +203,9 @@
       <!-- Top HUD -->
       <header class="hud-bar">
         <div class="hud-left">
+          <button id="btn-hud-title" class="btn btn-sm btn-ghost hud-back-btn" title="Save &amp; Return to Main Title Screen">
+            ← Title
+          </button>
           <div class="hud-portrait-wrap">
             <canvas id="hud-portrait" width="32" height="32" class="pixel-canvas"></canvas>
           </div>
@@ -250,8 +253,8 @@
           <button id="btn-hud-mute" class="btn btn-sm btn-ghost" title="Toggle Sound Effects">
             🔊
           </button>
-          <button id="btn-hud-menu" class="btn btn-sm btn-ghost" title="Return to Save Picker">
-            Saves
+          <button id="btn-hud-menu" class="btn btn-sm btn-ghost" title="Game Menu (Esc)">
+            ☰ Menu
           </button>
         </div>
       </header>

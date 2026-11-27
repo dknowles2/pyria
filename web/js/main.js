@@ -31,6 +31,7 @@ import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
 import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127m';
 import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
+import { AppRouter } from './router.js?v=20261127l';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -66,6 +67,8 @@ const state = {
   sprites: null,
   world: null,
   modals: null,
+  router: null,
+  pendingSaveForRoute: null,
   mapsCache: new Map(),
   activeSave: null,
   activeRealm: null,
@@ -354,6 +357,7 @@ async function handleHeroSessionExpired(snapshot) {
       if (state.activeSave && state.activeSave.id === oldId) {
         state.activeSave = backup;
         state.world?.setSave(backup);
+        state.router?.replace({ name: 'game', saveId: backup.id }, { silent: true });
       }
     }
     state.me = await fetchMe();
@@ -374,22 +378,37 @@ async function handleHeroSessionExpired(snapshot) {
   }
 }
 
+function syncHeroPositionToSave() {
+  if (state.activeSave && state.world && state.activeMap) {
+    state.activeSave.position = {
+      realmId: state.activeMap.realmId,
+      x: Math.floor(state.world.hero.x),
+      y: Math.floor(state.world.hero.y),
+    };
+  }
+}
+
+function persistPositionOnPageHide() {
+  if (!$('#screen-game')?.classList.contains('active')) return;
+  if (!state.activeSave || !state.activeSave.id) return;
+  syncHeroPositionToSave();
+  const snapshot = JSON.parse(JSON.stringify(state.activeSave));
+  if (isActiveSaveGuest(snapshot)) {
+    updateGuestSave(snapshot.id, snapshot);
+  } else {
+    updateSave(snapshot.id, snapshot, { keepalive: true }).catch(() => {});
+  }
+}
+
 function persistSave() {
   if (!state.activeSave || !state.activeSave.id) return Promise.resolve();
   persistQueue = persistQueue
     .catch(() => {})
     .then(async () => {
       if (!state.activeSave || !state.activeSave.id) return;
+      syncHeroPositionToSave();
       const snapshot = JSON.parse(JSON.stringify(state.activeSave));
       try {
-        if (state.world && state.activeMap) {
-          state.activeSave.position = {
-            realmId: state.activeMap.realmId,
-            x: Math.floor(state.world.hero.x),
-            y: Math.floor(state.world.hero.y),
-          };
-          snapshot.position = { ...state.activeSave.position };
-        }
         if (isActiveSaveGuest(snapshot)) {
           const updated = updateGuestSave(snapshot.id, snapshot);
           if (state.activeSave && state.activeSave.id === snapshot.id && updated?.updatedAt) {
@@ -761,6 +780,7 @@ async function upgradeGuestSaveToHeroCode(targetSave) {
       };
       state.activeSave = mergedCloudSave;
       state.world?.setSave(mergedCloudSave);
+      state.router?.replace({ name: 'game', saveId: mergedCloudSave.id }, { silent: true });
       needsPostUpgradeSync = true;
     }
     migrateLocalDrafts(oldGuestId, res.save.id);
@@ -821,7 +841,7 @@ function openEnterHeroCodeFlow() {
       renderAccountIdentityBar();
       renderAdminRealmJump();
       audio.playSuccess();
-      await enterOverworld(res.save);
+      await navigateToGame(res.save);
       showToast(`Welcome back, ${res.save.heroName}!`);
     },
   });
@@ -889,16 +909,9 @@ async function refreshSavesList() {
 
       card.addEventListener('click', async () => {
         audio.playClick();
-        try {
-          if (s.isGuest) {
-            const localSave = getGuestSave(s.id) || s;
-            await enterOverworld(localSave);
-          } else {
-            const fullSave = s.id ? await getSave(s.id) : s;
-            await enterOverworld(fullSave);
-          }
-        } catch (err) {
-          console.error(err);
+        if (s.id) {
+          await navigateToGame(s);
+        } else {
           await enterOverworld(s);
         }
       });
@@ -1081,7 +1094,7 @@ async function launchAdventureFromHeroForge(errorEl) {
     const created = await createHeroForCurrentAuth(newSavePayload);
     if (!created) return false;
     audio.playSuccess();
-    await enterOverworld(created);
+    await navigateToGame(created, { replace: true });
     showToast(`Welcome to Pyria, ${created.heroName}!`);
     return true;
   } catch (err) {
@@ -1247,7 +1260,7 @@ async function runCharCreateCode() {
       try {
         const created = await createHeroForCurrentAuth(newSavePayload);
         if (!created) return;
-        await enterOverworld(created);
+        await navigateToGame(created, { replace: true });
         showToast(`Welcome to Pyria, ${created.heroName}!`);
       } catch (err) {
         outEl.className = 'pip-console error';
@@ -1338,6 +1351,9 @@ async function loadRealm(realmId, spawnOverride = null) {
   music.setTheme(resolveRegionTheme(startRegion?.id, realm.id), { immediate: true });
   music.setEra(visualEra);
   updateHud();
+  if (state.activeSave?.heroName) {
+    document.title = `${state.activeSave.heroName} · ${realm.name} — Pyria`;
+  }
   showToast(`Entered ${realm.name} (${VISUAL_ERA_LABELS[visualEra]})!`);
 }
 
@@ -1735,12 +1751,191 @@ function openWorkshop() {
   });
 }
 
+// ==================== FORMAL NAVIGATION & GAME MENU ====================
+async function resolveSaveById(saveId) {
+  if (!saveId) return null;
+
+  const isGuestId = String(saveId).startsWith('guest-');
+  if (isGuestId) {
+    const local = getGuestSave(saveId);
+    if (local) return local;
+  } else {
+    try {
+      const remote = await getSave(saveId);
+      if (remote) return remote;
+    } catch (err) {
+      // Fall back to pending save or local guest save if applicable
+      console.warn(`Could not fetch save ${saveId} from server:`, err);
+    }
+  }
+
+  if (state.pendingSaveForRoute && state.pendingSaveForRoute.id === saveId) {
+    return state.pendingSaveForRoute;
+  }
+
+  return getGuestSave(saveId);
+}
+
+async function navigateToGame(save, { replace = false } = {}) {
+  if (!save) return;
+  if (!save.id || !state.router) {
+    await enterOverworld(save);
+    return;
+  }
+  state.pendingSaveForRoute = save;
+  await state.router.navigate({ name: 'game', saveId: save.id }, { replace });
+}
+
+async function returnToTitle() {
+  if (state.modals?.isOpen()) {
+    state.modals.close();
+  }
+  if (state.activeSave) {
+    await persistSave();
+  }
+  if (state.router) {
+    await state.router.navigate({ name: 'title' });
+  } else {
+    showScreen('screen-title');
+    startTitlePreview();
+    await refreshSavesList();
+  }
+}
+
+async function handleRoute(ctx) {
+  const { route, isCurrent } = ctx;
+
+  // Cleanly tear down active screen state when navigating away
+  if (route.name !== 'game') {
+    if (state.modals?.isOpen()) {
+      state.modals.close();
+    }
+    if ($('#screen-game')?.classList.contains('active') && state.activeSave) {
+      await persistSave();
+      if (!isCurrent()) return;
+    }
+  }
+  if (route.name !== 'charcreate' && state.ccAnimTimer) {
+    clearInterval(state.ccAnimTimer);
+    state.ccAnimTimer = null;
+  }
+
+  if (route.name === 'title') {
+    document.title = 'Pyria: Return of the Bits';
+    showScreen('screen-title');
+    startTitlePreview();
+    await refreshSavesList();
+    return;
+  }
+
+  if (route.name === 'charcreate') {
+    document.title = 'Forge Your Hero — Pyria';
+    openCharCreateScreen();
+    return;
+  }
+
+  if (route.name === 'game') {
+    const saveId = route.saveId;
+    const preloaded =
+      state.pendingSaveForRoute && state.pendingSaveForRoute.id === saveId
+        ? state.pendingSaveForRoute
+        : null;
+    state.pendingSaveForRoute = null;
+
+    // If already playing this exact save and screen is active, no need to reload
+    if (
+      state.activeSave &&
+      state.activeSave.id === saveId &&
+      $('#screen-game')?.classList.contains('active')
+    ) {
+      return;
+    }
+
+    let save = null;
+    if (preloaded && preloaded.isGuest) {
+      save = getGuestSave(saveId) || preloaded;
+    } else if (preloaded && ctx.source === 'replace') {
+      // Newly forged hero — already fresh from POST /api/saves
+      save = preloaded;
+    } else {
+      // Always fetch latest server state when loading from Save Picker, refresh, or browser history
+      save = await resolveSaveById(saveId);
+      if (!save && preloaded) save = preloaded;
+    }
+
+    if (!isCurrent()) return;
+
+    if (!save) {
+      await state.router.navigate({ name: 'title' }, { replace: true });
+      showToast('Could not load that hero save — returned to Main Title.');
+      return;
+    }
+
+    document.title = `${save.heroName || 'Code-Tamer'} — Pyria`;
+    await enterOverworld(save);
+  }
+}
+
+async function cycleVisualEra() {
+  if (!state.activeSave) return null;
+  audio.playClick();
+  const curr = normalizeVisualEra(state.activeSave.visualEra);
+  const next = VISUAL_ERAS[(VISUAL_ERAS.indexOf(curr) + 1) % VISUAL_ERAS.length];
+  state.activeSave.visualEra = next;
+  state.world.setEraKey(next);
+  music.setEra(next);
+  updateHud();
+  const label = VISUAL_ERA_LABELS[next] || next;
+  showToast(`Switched graphics & music to ${label}!`);
+  await persistSave();
+  return label;
+}
+
+function openGameMenu() {
+  if (!state.activeSave || !state.modals) return;
+  audio.playClick();
+  const eraKey = normalizeVisualEra(state.activeSave.visualEra);
+  state.modals.openGameMenuModal({
+    save: state.activeSave,
+    realm: state.activeRealm,
+    eraLabel: VISUAL_ERA_LABELS[eraKey] || '8-Bit NES',
+    isGuestCloudflare: state.me?.mode === 'cloudflare' && isActiveSaveGuest(state.activeSave),
+    musicEnabled: music.isEnabled(),
+    muted: audio.isMuted(),
+    onOpenWorkshop: () => openWorkshop(),
+    onSaveNow: async () => {
+      await persistSave();
+      showToast('Progress saved!');
+    },
+    onReturnToTitle: async () => {
+      await returnToTitle();
+    },
+    onToggleMusic: () => {
+      music.toggle();
+      audio.playClick();
+      syncMusicButtons();
+      return music.isEnabled();
+    },
+    onToggleMute: () => {
+      audio.toggleMute();
+      updateHud();
+      return audio.isMuted();
+    },
+    onCycleEra: async () => cycleVisualEra(),
+    onGetHeroCode: async () => {
+      if (!state.activeSave || heroCodeUpgradeInFlight) return;
+      await persistSave();
+      await upgradeGuestSaveToHeroCode(state.activeSave);
+    },
+  });
+}
+
 // ==================== WIRE UI EVENTS ====================
 function wireControls() {
   // Title
   $('#btn-new-adventure').addEventListener('click', () => {
     audio.playClick();
-    openCharCreateScreen();
+    state.router.navigate({ name: 'charcreate' });
   });
 
   $('#btn-enter-hero-code')?.addEventListener('click', () => {
@@ -1780,13 +1975,7 @@ function wireControls() {
   // Character Creation
   $('#btn-charcreate-back').addEventListener('click', async () => {
     audio.playClick();
-    if (state.ccAnimTimer) {
-      clearInterval(state.ccAnimTimer);
-      state.ccAnimTimer = null;
-    }
-    showScreen('screen-title');
-    startTitlePreview();
-    await refreshSavesList();
+    await state.router.navigate({ name: 'title' });
   });
 
   $('#btn-preview-turn').addEventListener('click', () => {
@@ -1891,16 +2080,7 @@ function wireControls() {
   });
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
   $('#btn-hud-era-toggle').addEventListener('click', async () => {
-    if (!state.activeSave) return;
-    audio.playClick();
-    const curr = normalizeVisualEra(state.activeSave.visualEra);
-    const next = VISUAL_ERAS[(VISUAL_ERAS.indexOf(curr) + 1) % VISUAL_ERAS.length];
-    state.activeSave.visualEra = next;
-    state.world.setEraKey(next);
-    music.setEra(next);
-    updateHud();
-    showToast(`Switched graphics & music to ${VISUAL_ERA_LABELS[next]}!`);
-    await persistSave();
+    await cycleVisualEra();
   });
 
   for (const sel of ['#btn-hud-music', '#btn-title-music', '#btn-charcreate-music']) {
@@ -1918,12 +2098,31 @@ function wireControls() {
     updateHud();
   });
 
-  $('#btn-hud-menu').addEventListener('click', async () => {
+  $('#btn-hud-title')?.addEventListener('click', async () => {
     audio.playClick();
-    await persistSave();
-    showScreen('screen-title');
-    startTitlePreview();
-    await refreshSavesList();
+    await returnToTitle();
+  });
+
+  $('#btn-hud-menu').addEventListener('click', () => {
+    openGameMenu();
+  });
+
+  // Escape opens the Game Menu when in the overworld with no modal or cutscene active
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    if (!$('#screen-game')?.classList.contains('active')) return;
+    if (state.modals?.isOpen()) return;
+    if (document.querySelector('.cutscene-overlay')) return;
+    e.preventDefault();
+    openGameMenu();
+  });
+
+  // Persist current hero position on refresh / tab hide so reloading resumes right where you stood
+  window.addEventListener('pagehide', persistPositionOnPageHide);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      persistPositionOnPageHide();
+    }
   });
 
   // Prevent iPadOS Safari text selection across the overworld screen (never blocking inputs/textareas)
@@ -2158,8 +2357,8 @@ async function init() {
     wireControls();
     buildVisualHeroPickers();
     buildCharCreateSpellbook();
-    startTitlePreview();
-    await refreshSavesList();
+    state.router = new AppRouter({ onRoute: handleRoute });
+    await state.router.start();
   } catch (err) {
     console.error('Pyria boot failed:', err);
     const listEl = $('#saves-list');

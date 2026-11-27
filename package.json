@@ -3,18 +3,30 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.8.0"
+  },
   "scripts": {
     "build:assets": "node scripts/build-assets.mjs",
     "dev": "npm run build:assets && wrangler dev",
     "deploy": "npm run build:assets && wrangler deploy",
+    "deploy:site": "wrangler deploy -c wrangler.site.jsonc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:web": "node --test web/js/*.test.mjs",
+    "test:web:coverage": "node --test --experimental-test-coverage --test-coverage-lines=70 --test-coverage-branches=55 --test-coverage-functions=80 web/js/*.test.mjs",
+    "test:content": "node scripts/validate-content.mjs",
+    "test:python": "python3 -m unittest discover -s server -p 'test_*.py' -v",
+    "test:all": "npm run build:assets && npm run typecheck && npm run test:coverage && npm run test:web:coverage && npm run test:content && npm run test:python",
+    "calibration-report": "python3 scripts/calibration_report.py",
     "db:migrate:local": "wrangler d1 migrations apply pyria-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply pyria-db --remote"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.23.0",
     "@cloudflare/workers-types": "^5.20261127.1",
+    "@vitest/coverage-istanbul": "^4.1.12",
     "typescript": "^5.8.2",
     "vitest": "^4.1.0",
     "wrangler": "^4.169.0"

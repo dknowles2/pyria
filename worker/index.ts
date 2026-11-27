@@ -1,3 +1,4 @@
+import { handleAdminTrialMetrics } from './analytics';
 import {
   handleGetMe,
   handleGoogleCallback,
@@ -154,6 +155,11 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   // GET /api/config
   if ((method === 'GET' || method === 'HEAD') && pathname === '/api/config') {
     return handleApiConfig(request, env, auth);
+  }
+
+  // Admin-only Trial Calibration Metrics API
+  if ((method === 'GET' || method === 'HEAD') && pathname === '/api/admin/trial-metrics') {
+    return handleAdminTrialMetrics(request, env, auth, url);
   }
 
   // Parent & Admin Console API (/api/console/*)
@@ -384,6 +390,25 @@ async function serveStaticWithHeaders(
     });
     return new Response(method === 'HEAD' ? null : htmlText, {
       status: assetRes.status,
+      headers,
+    });
+  }
+
+  // Route SPA game screens (/new, /play/:saveId) cleanly to /index.html so page refreshes stay in-app
+  if (
+    lowerPath === '/new' ||
+    lowerPath === '/new/' ||
+    lowerPath === '/play' ||
+    lowerPath.startsWith('/play/')
+  ) {
+    const indexRes = await env.ASSETS.fetch(
+      new Request(new URL('/index.html', request.url).toString(), { method })
+    );
+    const headers = new Headers(indexRes.headers);
+    headers.set('Cache-Control', 'no-cache');
+    applySecurityHeaders(headers);
+    return new Response(method === 'HEAD' ? null : indexRes.body, {
+      status: indexRes.status,
       headers,
     });
   }

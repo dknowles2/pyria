@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pyria: Return of the Bits — Learn Python Through a Retro-to-3D RPG</title>
+  <meta
+    name="description"
+    content="Pyria is a free, kid-safe browser RPG where adventurers ages 10 and up write real Python 3 to rescue 32 Dragon Guardians and evolve the world from 8-Bit NES to 64-Bit 3D."
+  />
+  <meta name="theme-color" content="#0b1020" />
+  <link rel="canonical" href="https://pyria.dev/" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://pyria.dev/" />
+  <meta property="og:title" content="Pyria: Return of the Bits — Python Learning Adventure RPG" />
+  <meta
+    property="og:description"
+    content="Write real Python 3 in your browser to rescue 32 Dragon Guardians and watch Pyria evolve from 8-Bit NES to 64-Bit N64 3D. Kid-safe, ad-free, no account required."
+  />
+  <meta property="og:image" content="https://pyria.dev/assets/gameplay-16bit.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ==================== STICKY NAVIGATION ==================== -->
+  <header class="site-header">
+    <div class="container nav-inner">
+      <a href="#top" class="brand" aria-label="Pyria Home">
+        <img src="favicon.png" alt="" class="brand-icon" width="36" height="36" />
+        <span class="brand-text">
+          <span class="brand-name">PYRIA</span>
+          <span class="brand-sub">Return of the Bits</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <a href="#gameplay">Screenshots</a>
+        <a href="#challenges">Challenges</a>
+        <a href="#eras">4 Eras</a>
+        <a href="#safety">Child Safety</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://play.pyria.dev" class="btn btn-primary btn-nav">
+          <span aria-hidden="true">▶</span> Play Now
+        </a>
+        <button
+          id="nav-toggle"
+          class="nav-toggle"
+          type="button"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-menu" class="mobile-menu" hidden>
+      <a href="#gameplay">Screenshots</a>
+      <a href="#challenges">Challenges</a>
+      <a href="#eras">4 Playable Eras</a>
+      <a href="#safety">Child Safety</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://play.pyria.dev" class="btn btn-primary btn-block">▶ Start Playing on play.pyria.dev</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ==================== HERO SECTION ==================== -->
+    <section id="top" class="hero">
+      <div class="container hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="pill pill-gold">FREE BROWSER PYTHON RPG · AGES 10+</span>
+          </div>
+          <h1 class="hero-title">
+            <span class="title-glow">PYRIA</span>
+            <span class="title-sub">Return of the Bits</span>
+          </h1>
+          <p class="hero-lead">
+            Lord Null drained the magical world of Pyria down to flat 8-bit pixels and locked its
+            guardian dragons inside <strong>Logic Vaults</strong>. Team up with your tiny
+            glitch-dragon sidekick <strong>Pip</strong>, write real <strong>Python 3</strong> right
+            in your browser, and watch the entire game evolve across video game history—from
+            <strong>8-Bit NES</strong> to <strong>64-Bit 3D</strong>.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="https://play.pyria.dev" class="btn btn-primary btn-xl hero-play-btn">
+              <span class="cta-spark" aria-hidden="true">✦</span>
+              <span>Start Playing Now</span>
+              <span class="cta-arrow" aria-hidden="true">→</span>
+            </a>
+            <a href="#gameplay" class="btn btn-ghost btn-xl">
+              See Gameplay &amp; Eras
+            </a>
+          </div>
+
+          <p class="hero-domain-note">
+            Launches directly at <a href="https://play.pyria.dev">play.pyria.dev</a> — no downloads, no installs, no credit card.
+          </p>
+
+          <ul class="trust-strip" aria-label="Key safety and access highlights">
+            <li><span class="trust-dot dot-green" aria-hidden="true"></span> No account or email required to play</li>
+            <li><span class="trust-dot dot-sky" aria-hidden="true"></span> Real Python 3 sandboxed in your browser</li>
+            <li><span class="trust-dot dot-gold" aria-hidden="true"></span> Zero ads, zero chat, zero tracking</li>
+            <li><span class="trust-dot dot-violet" aria-hidden="true"></span> Desktop &amp; iPad touch-ready</li>
+          </ul>
+        </div>
+
+        <!-- Interactive Hero Era Preview -->
+        <div class="hero-stage card">
+          <div class="stage-topbar">
+            <div class="stage-tabs" role="tablist" aria-label="Preview Pyria's 4 visual eras">
+              <button type="button" class="stage-tab active" role="tab" aria-selected="true" data-era="8bit">
+                8-Bit NES
+              </button>
+              <button type="button" class="stage-tab" role="tab" aria-selected="false" data-era="16bit">
+                16-Bit SNES
+              </button>
+              <button type="button" class="stage-tab" role="tab" aria-selected="false" data-era="32bit">
+                32-Bit 2.5D
+              </button>
+              <button type="button" class="stage-tab" role="tab" aria-selected="false" data-era="64bit">
+                64-Bit N64 3D
+              </button>
+            </div>
+            <span id="stage-era-pill" class="pill pill-green">Playable Now</span>
+          </div>
+
+          <button
+            type="button"
+            id="stage-zoom-btn"
+            class="stage-image-wrap"
+            aria-label="Open full-size screenshot"
+          >
+            <img
+              id="stage-image"
+              src="assets/gameplay-8bit.png"
+              alt="Pyria 8-Bit NES gameplay in Whispering Meadow showing the hero, Pip the dragon sidekick, minimap, and virtual thumbstick"
+              width="1024"
+              height="608"
+            />
+            <span class="zoom-hint">Click to zoom</span>
+          </button>
+
+          <div class="stage-caption">
+            <div>
+              <strong id="stage-title">Era 1: 8-Bit NES — Whispering Meadow</strong>
+              <p id="stage-desc">
+                Start with flat 8-bit pixels, chiptune music, and friendly Python spells like
+                <code>say()</code>, variables, and loops.
+              </p>
+            </div>
+            <a href="https://play.pyria.dev" class="btn btn-gold btn-sm">Play This World →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats Bar -->
+      <div class="container">
+        <div class="stats-bar">
+          <div class="stat-item">
+            <span class="stat-num">4+</span>
+            <span class="stat-label">Playable Eras (+ More Coming)</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">32</span>
+            <span class="stat-label">Realms &amp; Dragon Guardians</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">224</span>
+            <span class="stat-label">Scaffolded Python Trials</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">In-Browser &amp; Kid-Safe</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SCREENSHOTS GALLERY ==================== -->
+    <section id="gameplay" class="section">
+      <div class="container">
+        <div class="section-header">
+          <span class="pill pill-sky">LIVE GAMEPLAY SCREENSHOTS</span>
+          <h2>Watch the World Level Up as Your Python Skills Grow</h2>
+          <p>
+            Every Dragon Guardian you rescue restores lost bits to Pyria. Finish an era and the
+            entire game—sprites, tiles, camera perspective, and procedural synth soundtrack—upgrades
+            before your eyes.
+          </p>
+        </div>
+
+        <div class="gallery-grid">
+          <figure class="shot-card card">
+            <button type="button" class="shot-trigger" data-lightbox-src="assets/gameplay-8bit.png" data-lightbox-caption="Era 1 (8-Bit NES): Whispering Meadow — crisp 8-bit pixels, chiptune music, and your first Python spells.">
+              <img src="assets/gameplay-8bit.png" alt="8-Bit NES gameplay in Whispering Meadow" loading="lazy" width="1024" height="608" />
+            </button>
+            <figcaption>
+              <div class="shot-meta">
+                <span class="pill pill-gold">Era 1 · 8-Bit NES</span>
+                <span class="shot-realm">Whispering Meadow</span>
+              </div>
+              <p>Classic top-down 2D pixels and NES chiptunes while mastering strings, variables, branching, and <code>for</code> loops.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-card card">
+            <button type="button" class="shot-trigger" data-lightbox-src="assets/gameplay-16bit.png" data-lightbox-caption="Era 2 (16-Bit SNES): Coral Shallows — upgraded 32x32 SNES pixel art and multi-voice synth music.">
+              <img src="assets/gameplay-16bit.png" alt="16-Bit SNES gameplay in Coral Shallows" loading="lazy" width="1024" height="608" />
+            </button>
+            <figcaption>
+              <div class="shot-meta">
+                <span class="pill pill-green">Era 2 · 16-Bit SNES</span>
+                <span class="shot-realm">Coral Shallows</span>
+              </div>
+              <p>Rich 32×32 SNES sprites, 4 themed Acts, and lush synth soundtracks covering lists, functions, dictionaries, and intro classes.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-card card">
+            <button type="button" class="shot-trigger" data-lightbox-src="assets/gameplay-32bit-iso.png" data-lightbox-caption="Era 3 (32-Bit Isometric 2.5D): Blockstone Highlands — tilted diorama perspective with elevated 3D terrain terraces.">
+              <img src="assets/gameplay-32bit-iso.png" alt="32-Bit Isometric 2.5D gameplay in Blockstone Highlands" loading="lazy" width="1024" height="608" />
+            </button>
+            <figcaption>
+              <div class="shot-meta">
+                <span class="pill pill-sky">Era 3 · 32-Bit 2.5D</span>
+                <span class="shot-realm">Blockstone Highlands</span>
+              </div>
+              <p>Pyria tilts into an isometric PS1/GBA diorama with heightmap terraces while you learn tuples, comprehensions, sets, and <code>try/except</code>.</p>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-card card">
+            <button type="button" class="shot-trigger" data-lightbox-src="assets/gameplay-64bit-n64.png" data-lightbox-caption="Era 4 (64-Bit N64 3D): Polygon Valley — Gouraud-shaded 3D perspective with a third-person follow camera and distant mountains.">
+              <img src="assets/gameplay-64bit-n64.png" alt="64-Bit Nintendo 64 3D gameplay in Polygon Valley" loading="lazy" width="1024" height="608" />
+            </button>
+            <figcaption>
+              <div class="shot-meta">
+                <span class="pill pill-violet">Era 4 · 64-Bit N64 3D</span>
+                <span class="shot-realm">Polygon Valley</span>
+              </div>
+              <p>Chunky N64-style perspective 3D, cobalt skies, and orchestral synth as you build 3D entity classes, inheritance, and self-tests.</p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <!-- Hero Forge & Workshop Feature Banner -->
+        <div class="feature-split card">
+          <div class="feature-split-copy">
+            <span class="pill pill-gold">HERO FORGE &amp; WORKSHOP</span>
+            <h3>Customize Your Code-Tamer—Visually or With Python</h3>
+            <p>
+              Pick your hero's name, skin, hair, and tunic with visual buttons—or flip on
+              <strong>Advanced Python Mode</strong> to forge your character using real commands.
+              As you solve trials and find treasure chests, spend <strong>Byte Shards</strong> at
+              <strong>Bram's Tinkerer Workshop</strong> by writing Python spells like:
+            </p>
+            <pre class="code-snippet"><code>wear_hat("explorer")
+set_tunic_color("crimson")
+equip_boots("swift")
+add_charisma(1)</code></pre>
+            <p class="muted-note">
+              Every hero outfit automatically upgrades from 16×16 8-bit sprites to detailed 32×32 16-bit SNES art alongside Pip!
+            </p>
+          </div>
+          <button
+            type="button"
+            class="feature-split-media shot-trigger"
+            data-lightbox-src="assets/hero_showcase.png"
+            data-lightbox-caption="Modular Code-Tamer hero sprites and Pip sidekick upgrading from 8-Bit (16x16) to 16-Bit (32x32)."
+          >
+            <img
+              src="assets/hero_showcase.png"
+              alt="Pyria modular hero sprites comparing 8-Bit and 16-Bit styles alongside Pip"
+              loading="lazy"
+              width="960"
+              height="560"
+            />
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== HOW THE CHALLENGES WORK ==================== -->
+    <section id="challenges" class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <span class="pill pill-green">SLOW-GROWTH CHALLENGE CADENCE</span>
+          <h2>Real Python 3—Never a Steep Cliff</h2>
+          <p>
+            Every one of Pyria's 32 Realms follows a gentle, confidence-building progression so
+            learners of any age can read, debug, and write real code without feeling stuck.
+          </p>
+        </div>
+
+        <div class="steps-grid">
+          <article class="step-card card">
+            <div class="step-num">01</div>
+            <h3>Predict &amp; Choose</h3>
+            <p>
+              Each new concept starts with multiple-choice challenges. Players read real Python
+              snippets and predict the output or spot valid syntax before typing a single line.
+            </p>
+          </article>
+
+          <article class="step-card card">
+            <div class="step-num">02</div>
+            <h3>Fix the Bug</h3>
+            <p>
+              Lord Null sabotages a working spell! Players hunt down one clear bug—like a missing
+              quote, colon <code>:</code>, 4-space indent, or <code>=</code> vs <code>==</code>—with
+              inline red line highlights.
+            </p>
+          </article>
+
+          <article class="step-card card">
+            <div class="step-num">03</div>
+            <h3>Guided Coding Trials</h3>
+            <p>
+              Four step-by-step puzzles let players pick Explorer, Standard, or Challenge starter
+              code. Quick symbol buttons (<code>⇥ Indent</code>, <code>( )</code>, <code>" "</code>,
+              <code>:</code>, <code>==</code>) and autocomplete make typing smooth on laptops and iPads.
+            </p>
+          </article>
+
+          <article class="step-card card">
+            <div class="step-num">04</div>
+            <h3>Boss Trials &amp; Hidden Secrets</h3>
+            <p>
+              Combine everything you learned in a Realm Boss Trial with story cutscenes to free the
+              Dragon Guardian—then explore off the beaten path for hidden bonus trials, free gear,
+              and Easter eggs.
+            </p>
+          </article>
+        </div>
+
+        <div class="pip-callout card">
+          <div class="pip-badge" aria-hidden="true">🐉</div>
+          <div>
+            <h3>Stuck on a Puzzle? Pip Has Your Back.</h3>
+            <p>
+              Every Trial includes <strong>Pip's 3-Tier Hint System</strong> (plus a secret Tier 4
+              Solution Guide unlocked by finding bonus secrets) and warm, plain-English translations
+              of Python error messages—so a <code>SyntaxError</code> feels like a helpful clue, not a
+              brick wall.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== THE 4 PLAYABLE ERAS ==================== -->
+    <section id="eras" class="section">
+      <div class="container">
+        <div class="section-header">
+          <span class="pill pill-violet">CURRICULUM ROADMAP</span>
+          <h2>32 Realms Across 4 Playable Eras</h2>
+          <p>
+            From your very first <code>say("Hello, Pyria!")</code> spell all the way to 3D object
+            inheritance and automated <code>assert</code> self-tests.
+          </p>
+        </div>
+
+        <div class="eras-grid">
+          <article class="era-card card era-1">
+            <div class="era-card-top">
+              <span class="pill pill-gold">Era 1 · 8-Bit NES</span>
+              <span class="era-count">8 Realms · 56 Trials</span>
+            </div>
+            <h3>The Flatlands of Pixels</h3>
+            <p class="era-summary">
+              Starts gently with <code>say()</code> and <code>shout()</code> training spells before
+              graduating to real <code>print()</code> in Realm 4.
+            </p>
+            <ul class="topic-list">
+              <li>Strings &amp; string joining (<code>+</code>)</li>
+              <li>Variables &amp; basic math (<code>+</code>, <code>*</code>, <code>%</code>)</li>
+              <li>Booleans, colons <code>:</code>, 4-space indentation</li>
+              <li><code>if</code> / <code>elif</code> / <code>else</code> &amp; <code>and</code> / <code>or</code> / <code>not</code></li>
+              <li><code>for</code> loops &amp; <code>range()</code></li>
+            </ul>
+            <p class="era-reward"><strong>Reward:</strong> Rescue 8 Dragons → Upgrade to 16-Bit SNES!</p>
+          </article>
+
+          <article class="era-card card era-2">
+            <div class="era-card-top">
+              <span class="pill pill-green">Era 2 · 16-Bit SNES</span>
+              <span class="era-count">16 Realms · 112 Trials</span>
+            </div>
+            <h3>The Sunken Isles &amp; Beyond</h3>
+            <p class="era-summary">
+              Four themed Acts—Tideglass Archipelago, Clockwork Spire, Alchemist's Caldera, and
+              Shattered Skyway.
+            </p>
+            <ul class="topic-list">
+              <li>Lists, indexing, slicing, <code>.append()</code> &amp; filtering</li>
+              <li><code>while</code> loops, <code>break</code> &amp; <code>continue</code></li>
+              <li>Defining functions (<code>def</code>), parameters &amp; <code>return</code></li>
+              <li>Dictionaries (<code>{...}</code>), <code>.get()</code>, <code>.items()</code> &amp; f-strings</li>
+              <li>Nested loops, 2D grids &amp; intro Classes</li>
+            </ul>
+            <p class="era-reward"><strong>Reward:</strong> Rescue 16 Dragons → Upgrade to 32-Bit 2.5D!</p>
+          </article>
+
+          <article class="era-card card era-3">
+            <div class="era-card-top">
+              <span class="pill pill-sky">Era 3 · 32-Bit PS1 / GBA</span>
+              <span class="era-count">4 Realms · 28 Trials</span>
+            </div>
+            <h3>The Isometric Frontier</h3>
+            <p class="era-summary">
+              Navigate elevated 3D stone terraces across Blockstone Highlands, Sky-Forge Foundry,
+              Prism Caverns, and Polygon Citadel.
+            </p>
+            <ul class="topic-list">
+              <li>Tuples <code>(x, y, z)</code>, unpacking &amp; 3D elevation math</li>
+              <li>List comprehensions &amp; coordinate grids</li>
+              <li>Sets (<code>&amp;</code> intersection, <code>|</code> union) &amp; nested maps</li>
+              <li>Error handling with <code>try</code> / <code>except</code> &amp; safe parsers</li>
+            </ul>
+            <p class="era-reward"><strong>Reward:</strong> Rescue 4 Dragons → Upgrade to 64-Bit N64 3D!</p>
+          </article>
+
+          <article class="era-card card era-4">
+            <div class="era-card-top">
+              <span class="pill pill-violet">Era 4 · 64-Bit N64 3D</span>
+              <span class="era-count">4 Realms · 28 Trials</span>
+            </div>
+            <h3>The Realm of Polygons</h3>
+            <p class="era-summary">
+              Explore Gouraud-shaded 3D landscapes from Polygon Valley to Null's 64-Bit Sanctum to
+              claim the 64-Bit Crown.
+            </p>
+            <ul class="topic-list">
+              <li>3D Entity Classes (<code>class Hero3D</code>, <code>__str__</code>)</li>
+              <li>Class inheritance, <code>super()</code> &amp; polymorphism</li>
+              <li>Debugging off-by-one bugs &amp; <code>assert</code> self-tests</li>
+              <li><code>sorted(..., key=lambda ...)</code> Painter's Algorithm</li>
+            </ul>
+            <p class="era-reward"><strong>Reward:</strong> Defeat Null's Gauntlet &amp; claim the 64-Bit Crown!</p>
+          </article>
+        </div>
+
+        <div class="future-eras-callout card">
+          <div class="future-eras-copy">
+            <span class="pill pill-violet">ON THE HORIZON</span>
+            <h3>New Eras &amp; Challenges Coming in Future Updates</h3>
+            <p>
+              The 64-Bit N64 Era is just the beginning. Pyria's long-term roadmap continues across
+              video game history—with new realms, deeper Python challenges, and upgraded visual eras
+              planned for future releases:
+            </p>
+          </div>
+          <div class="future-eras-pills" aria-label="Planned future eras">
+            <span class="future-era-chip"><strong>Era 5</strong> · 128-Bit (GameCube / PS2)</span>
+            <span class="future-era-chip"><strong>Era 6</strong> · HD Era</span>
+            <span class="future-era-chip"><strong>Era 7</strong> · Modern 4K Sandbox</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CHILD SAFETY & PARENTS ==================== -->
+    <section id="safety" class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <span class="pill pill-rose">BUILT FOR KIDS &amp; PEACE OF MIND</span>
+          <h2>Privacy-First &amp; Kid-Safe by Architecture</h2>
+          <p>
+            Pyria is built for ages 10 and up—from first-time young coders to adults picking up
+            Python. Safety isn't an afterthought or a toggle—it's built into how the game runs.
+          </p>
+        </div>
+
+        <div class="safety-grid">
+          <article class="safety-card card">
+            <div class="safety-icon" aria-hidden="true">🛡️</div>
+            <h3>No Child Accounts Required</h3>
+            <p>
+              Kids jump straight into Guest Play with zero sign-up wall, zero email collection, and
+              zero passwords. Optional anonymous <strong>Hero Codes</strong> let families sync saves
+              across devices without sharing personal info.
+            </p>
+          </article>
+
+          <article class="safety-card card">
+            <div class="safety-icon" aria-hidden="true">🔒</div>
+            <h3>Sandboxed In-Browser Python</h3>
+            <p>
+              Player code executes 100% locally inside the browser via <strong>Pyodide WebAssembly</strong>
+              in an isolated, opaque-origin sandboxed iframe with strict CSP rules—never on our
+              servers and never with access to local files.
+            </p>
+          </article>
+
+          <article class="safety-card card">
+            <div class="safety-icon" aria-hidden="true">🚫</div>
+            <h3>No Ads, Chat, or Trackers</h3>
+            <p>
+              Pyria is a calm, single-player RPG. There are no ads, no behavioral analytics, no
+              in-app purchases, no public leaderboards, and no chat or messaging with strangers.
+            </p>
+          </article>
+        </div>
+
+        <div class="feature-split feature-split-reverse card">
+          <div class="feature-split-copy">
+            <span class="pill pill-sky">OPTIONAL PARENT CONSOLE</span>
+            <h3>Track Progress Without Looking Over Their Shoulder</h3>
+            <p>
+              Parents can optionally view rescued dragons, completed realms, and Python trial
+              attempts from the built-in Parent Console—or delete saved hero data anytime. Kids
+              stay focused on the adventure, while parents stay informed and in control.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="feature-split-media shot-trigger"
+            data-lightbox-src="assets/builder-console.png"
+            data-lightbox-caption="Pyria's optional Parent & Builder Console for tracking realm progress and trial attempts."
+          >
+            <img
+              src="assets/builder-console.png"
+              alt="Pyria Parent and Builder Console showing realm progress and trial tracking"
+              loading="lazy"
+              width="1024"
+              height="608"
+            />
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CHILD SAFETY & COMPLIANCE FAQ ==================== -->
+    <section id="faq" class="section">
+      <div class="container faq-container">
+        <div class="section-header">
+          <span class="pill pill-gold">CHILD SAFETY &amp; COMPLIANCE FAQ</span>
+          <h2>Questions From Parents &amp; Educators</h2>
+          <p>
+            Straightforward answers about privacy, COPPA alignment, sandbox security, and classroom
+            or home use.
+          </p>
+        </div>
+
+        <div class="faq-list">
+          <details class="faq-item card" open>
+            <summary>Does my child need an account or email address to play Pyria?</summary>
+            <div class="faq-answer">
+              <p>
+                <strong>No.</strong> Kids can start playing immediately at
+                <a href="https://play.pyria.dev">play.pyria.dev</a> in Guest Mode without creating
+                an account, entering an email address, or sharing a real name. Progress saves
+                automatically in the browser, and families who want to play across multiple devices
+                (like a laptop and an iPad) can use an anonymous, randomly generated
+                <strong>Hero Code</strong>—still with zero personal information required from the child.
+              </p>
+            </div>
+          </details>
+
+          <details class="faq-item card">
+            <summary>How does Pyria handle COPPA and children's privacy compliance?</summary>
+            <div class="faq-answer">
+              <p>
+                Pyria follows strict <strong>data minimization</strong> principles aligned with
+                COPPA (the U.S. Children's Online Privacy Protection Act) and GDPR-K best practices:
+              </p>
+              <ul>
+                <li>We do not knowingly collect personal information (real names, email addresses, birthdays, photos, or precise locations) from children under 13.</li>
+                <li>Hero names are fictional in-game character names and are never displayed publicly to other players.</li>
+                <li>We do not run third-party advertising networks, cross-site tracking pixels, or behavioral profiling scripts.</li>
+                <li>Any optional account sign-in for the Parent Console is intended strictly for parents or adult educators, not children.</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="faq-item card">
+            <summary>Is it safe for my child to run real Python code in the browser?</summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Yes.</strong> Pyria runs Python 3 entirely inside your own browser using
+                <strong>Pyodide (WebAssembly)</strong>—nothing your child types is ever executed on
+                a remote server. Even better, the Python runtime is isolated inside a dedicated
+                <strong>opaque-origin sandboxed iframe</strong> with strict Content Security Policy
+                (CSP) headers. Player code cannot read files on your computer, inspect browser
+                cookies, or make unauthorized network requests.
+              </p>
+            </div>
+          </details>
+
+          <details class="faq-item card">
+            <summary>Are there ads, in-app purchases, loot boxes, or external links inside the game?</summary>
+            <div class="faq-answer">
+              <p>
+                <strong>Never.</strong> Pyria has zero advertisements, zero sponsored content, zero
+                microtransactions, and zero pay-to-win mechanics. Every hat, tunic color, boot
+                upgrade, and charisma boost in Bram's Tinkerer Workshop is earned purely through
+                solving Python trials and exploring realms.
+              </p>
+            </div>
+          </details>
+
+          <details class="faq-item card">
+            <summary>Can my child chat with strangers or see user-generated content?</summary>
+            <div class="faq-answer">
+              <p>
+                <strong>No.</strong> Pyria is a 100% single-player adventure RPG. There is no text
+                chat, no voice chat, no friend lists, no public profiles, and no user-generated
+                content shared between players. All dialogue and story cutscenes are curated and
+                family-friendly.
+              </p>
+            </div>
+          </details>
+
+          <details class="faq-item card">
+            <summary>What data is stored, and how can a parent review or delete it?</summary>
+            <div class="faq-answer">
+              <p>
+                Only gameplay state is stored—such as the hero's chosen pixel appearance, current
+                realm, Byte Shards, unlocked gear, and Python trial attempts so players don't lose
+                their progress. Parents can review progress or delete any saved hero and its
+                associated attempt history directly from the Saved Heroes screen or Parent Console
+                at any time.
+              </p>
+            </div>
+          </details>
+
+          <details class="faq-item card">
+            <summary>What age range and experience level is Pyria built for?</summary>
+            <div class="faq-answer">
+              <p>
+                Pyria is targeted for ages <strong>10 and up</strong>—great for kids, teens, and
+                adults alike—and no prior coding experience is needed. Early realms start
+                with multiple-choice code reading, gentle bug-fixing, and kid-friendly
+                <code>say()</code> / <code>shout()</code> spells before smoothly ramping up to real
+                Python 3 functions, dictionaries, and 3D classes.
+              </p>
+            </div>
+          </details>
+
+          <details class="faq-item card">
+            <summary>What devices does Pyria work on? Does it work on iPad or Chromebooks?</summary>
+            <div class="faq-answer">
+              <p>
+                Pyria runs directly in modern web browsers (Chrome, Safari, Firefox, and Edge) on
+                Mac, Windows, Linux, Chromebooks, and <strong>iPads / tablets</strong>. On touch
+                devices, Pyria includes an on-screen 360° analog thumbstick, touch-friendly action
+                buttons, and quick-insert Python symbol buttons—and can even be added to the iPad
+                Home Screen like an app.
+              </p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FINAL CTA BANNER ==================== -->
+    <section class="section cta-section">
+      <div class="container">
+        <div class="cta-banner card">
+          <span class="pill pill-green">READY FOR ADVENTURE?</span>
+          <h2>Help Pip Restore the Bits</h2>
+          <p>
+            Jump straight into Whispering Meadow, cast your first Python spell in under a minute,
+            and start rescuing Pyria's 32 Dragon Guardians.
+          </p>
+          <a href="https://play.pyria.dev" class="btn btn-primary btn-xl hero-play-btn">
+            <span class="cta-spark" aria-hidden="true">✦</span>
+            <span>Play Pyria Free at play.pyria.dev</span>
+            <span class="cta-arrow" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <img src="favicon.png" alt="" width="28" height="28" />
+        <span><strong>PYRIA</strong> · Return of the Bits</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://play.pyria.dev">Play the Game</a>
+        <a href="#gameplay">Screenshots</a>
+        <a href="#challenges">Challenges</a>
+        <a href="#faq">Child Safety FAQ</a>
+      </div>
+      <p class="footer-note">
+        pyria.dev · Hosted game at <a href="https://play.pyria.dev">play.pyria.dev</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- ==================== SCREENSHOT LIGHTBOX ==================== -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Full-size screenshot preview" hidden>
+    <div class="lightbox-backdrop" data-lightbox-close></div>
+    <div class="lightbox-dialog">
+      <button type="button" class="lightbox-close" data-lightbox-close aria-label="Close preview">✕</button>
+      <img id="lightbox-img" src="" alt="" />
+      <p id="lightbox-caption" class="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
