@@ -37,6 +37,7 @@ import type {
   OAuthStatePayload,
   ParentLinkTokenPayload,
   ParentSessionPayload,
+  SavePreferences,
 } from './types';
 import {
   MAX_SAVE_BODY_BYTES,
@@ -44,6 +45,7 @@ import {
   ValidationError,
   normalizeEmail,
   readJsonBody,
+  validatePreferences,
 } from './validation';
 
 const DEFAULT_CREATE_LIMIT = 15;
@@ -275,12 +277,30 @@ export async function handleHeroCodeCreate(
   delete savePayload.ownerEmail;
   delete savePayload.owner_email;
 
+  let preferences: SavePreferences = {};
+  const rawPrefs = body.preferences !== undefined ? body.preferences : savePayload.preferences;
+  delete savePayload.preferences;
+  if (rawPrefs !== undefined && rawPrefs !== null) {
+    if (typeof rawPrefs !== 'object' || Array.isArray(rawPrefs)) {
+      return jsonResponse({ error: 'preferences must be an object' }, 400);
+    }
+    try {
+      preferences = validatePreferences(rawPrefs as Record<string, unknown>);
+    } catch (err) {
+      if (err instanceof ValidationError) {
+        return jsonResponse({ error: err.message }, err.status);
+      }
+      return jsonResponse({ error: 'Invalid preferences' }, 400);
+    }
+  }
+
   const secret = getSessionSecret(env);
   try {
     const { heroCode, hash } = await generateUniqueHeroCodeHash(db, secret);
     const save = await db.createSave(savePayload, {
       ownerEmail: null,
       recoveryCodeHash: hash,
+      preferences,
     });
 
     const exp = Math.floor(Date.now() / 1000) + HERO_SESSION_TTL_SECONDS;

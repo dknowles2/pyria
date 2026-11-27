@@ -104,6 +104,7 @@ ALLOWED_SAVE_KEYS: frozenset[str] = frozenset(
         "unlockedItems",
         "unlockedIds",
         "position",
+        "preferences",
     }
 )
 
@@ -647,6 +648,40 @@ def validate_save_payload(
                 sanitized[key] = cleaned_drafts
             else:
                 sanitized[key] = val
+            continue
+
+        if key == "preferences":
+            if val is not None:
+                if not isinstance(val, dict):
+                    raise SaveValidationError("preferences must be an object")
+                cleaned_prefs: dict[str, Any] = {}
+                if "difficulty" in val and val["difficulty"] is not None:
+                    if val["difficulty"] not in ("explorer", "standard", "challenge"):
+                        raise SaveValidationError(
+                            "difficulty must be 'explorer', 'standard', or 'challenge'"
+                        )
+                    cleaned_prefs["difficulty"] = val["difficulty"]
+                if "showRawTracebacks" in val and val["showRawTracebacks"] is not None:
+                    if not isinstance(val["showRawTracebacks"], bool):
+                        raise SaveValidationError(
+                            "showRawTracebacks must be a boolean"
+                        )
+                    cleaned_prefs["showRawTracebacks"] = val["showRawTracebacks"]
+                if "maxPipHints" in val and val["maxPipHints"] is not None:
+                    max_hints = val["maxPipHints"]
+                    if (
+                        isinstance(max_hints, bool)
+                        or not isinstance(max_hints, int)
+                        or max_hints < 0
+                        or max_hints > 10
+                    ):
+                        raise SaveValidationError(
+                            "maxPipHints must be an integer between 0 and 10"
+                        )
+                    cleaned_prefs["maxPipHints"] = max_hints
+                sanitized[key] = cleaned_prefs
+            else:
+                sanitized[key] = None
             continue
 
         # byteShards is coerced safely in create_save/update_save
@@ -1804,6 +1839,10 @@ class PyriaDatabase:
                 "createdAt": existing["created_at"],
                 "updatedAt": now,
             }
+            if "preferences" not in sanitized and isinstance(
+                prev_state.get("preferences"), dict
+            ):
+                state["preferences"] = prev_state["preferences"]
             if "byteShards" in state:
                 prev_shards = _coerce_byte_shards(prev_state.get("byteShards"), 0)
                 state["byteShards"] = _coerce_byte_shards(

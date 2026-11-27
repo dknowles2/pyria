@@ -25,7 +25,7 @@ import {
   previewHeroPlayToken,
   redeemHeroPlayToken,
   logoutSession,
-} from './api.js?v=20261127n';
+} from './api.js?v=20261127o';
 import { audio } from './audio.js?v=20261127i';
 import { music, resolveRegionTheme } from './music.js?v=20261127j';
 import { pyRunner } from './pyRunner.js?v=20261127j';
@@ -35,6 +35,12 @@ import { WorldEngine } from './world.js?v=20261127i';
 import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127p';
 import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 import { AppRouter } from './router.js?v=20261127l';
+import {
+  DEFAULT_FAMILIARITY_ID,
+  PYTHON_FAMILIARITY_LEVELS,
+  buildPreferencesForFamiliarity,
+  getFamiliarityOption,
+} from './onboarding.js?v=20261127r';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -85,6 +91,7 @@ const state = {
   },
   ccDirIndex: 0,
   ccEraKey: '8bit',
+  ccFamiliarity: DEFAULT_FAMILIARITY_ID,
   ccAdvancedMode: false,
   ccAnimTimer: null,
   titleAnimTimer: null,
@@ -1123,11 +1130,13 @@ function setCharCreateMode(advanced) {
     if (toggleBtn) {
       toggleBtn.textContent = '✨ Switch to Visual Mode';
       toggleBtn.classList.add('active');
+      toggleBtn.classList.remove('recommended');
       toggleBtn.setAttribute('aria-pressed', 'true');
     }
     if (titleEl) titleEl.textContent = 'Hero Forge (Python)';
   } else {
     syncVisualPickerSelection();
+    syncFamiliaritySelection();
     updateCharCreateSummary();
     advancedPanel?.classList.add('hidden');
     spellbookBox?.classList.add('hidden');
@@ -1141,6 +1150,49 @@ function setCharCreateMode(advanced) {
     }
     if (titleEl) titleEl.textContent = 'Hero Forge';
   }
+}
+
+function syncFamiliaritySelection() {
+  const selected = getFamiliarityOption(state.ccFamiliarity);
+  state.ccFamiliarity = selected.id;
+  document.querySelectorAll('#cc-familiarity-options .familiarity-card').forEach((btn) => {
+    const active = btn.dataset.value === selected.id;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-checked', active ? 'true' : 'false');
+  });
+  const summaryEl = $('#cc-familiarity-summary');
+  if (summaryEl) {
+    summaryEl.textContent = selected.calibrationSummary;
+  }
+  const toggleBtn = $('#btn-charcreate-advanced');
+  if (toggleBtn) {
+    toggleBtn.classList.toggle('recommended', selected.id === 'comfortable' && !state.ccAdvancedMode);
+  }
+}
+
+function buildFamiliarityPicker() {
+  const container = $('#cc-familiarity-options');
+  if (!container) return;
+  container.innerHTML = '';
+  for (const level of PYTHON_FAMILIARITY_LEVELS) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'familiarity-card';
+    btn.dataset.value = level.id;
+    btn.setAttribute('role', 'radio');
+    btn.setAttribute('aria-checked', 'false');
+    btn.innerHTML = `
+      <span class="familiarity-card-title"><span>${escapeHtml(level.badge)}</span><span>${escapeHtml(level.label)}</span></span>
+      <span class="familiarity-card-desc">${escapeHtml(level.description)}</span>
+    `;
+    btn.addEventListener('click', () => {
+      audio.playClick();
+      state.ccFamiliarity = level.id;
+      syncFamiliaritySelection();
+    });
+    container.appendChild(btn);
+  }
+  syncFamiliaritySelection();
 }
 
 function buildVisualHeroPickers() {
@@ -1229,11 +1281,15 @@ async function launchAdventureFromHeroForge(errorEl) {
     state.ccAnimTimer = null;
   }
 
-  const newSavePayload = createDefaultSaveState(cleanedName, {
-    skin: state.ccAppearance.skin,
-    hair: state.ccAppearance.hair,
-    tunic: state.ccAppearance.tunic,
-  });
+  const newSavePayload = createDefaultSaveState(
+    cleanedName,
+    {
+      skin: state.ccAppearance.skin,
+      hair: state.ccAppearance.hair,
+      tunic: state.ccAppearance.tunic,
+    },
+    buildPreferencesForFamiliarity(state.ccFamiliarity)
+  );
   if (state.me?.isAdmin && state.adminOwnerFilter && state.adminOwnerFilter !== 'all') {
     newSavePayload.ownerEmail = state.adminOwnerFilter;
   }
@@ -1331,12 +1387,14 @@ function openCharCreateScreen() {
   };
   state.ccDirIndex = 0;
   state.ccEraKey = '8bit';
+  state.ccFamiliarity = DEFAULT_FAMILIARITY_ID;
   $('#btn-preview-era').textContent = '8-Bit View';
   $('#charcreate-code').value = cc.starterCode || buildHeroForgePython(state.ccAppearance);
   state.ccGutter?.setMarks(new Map());
   $('#cc-visual-error')?.classList.add('hidden');
   setCharCreateMode(false);
   syncVisualPickerSelection();
+  syncFamiliaritySelection();
   updateCharCreateSummary();
 
   const outEl = $('#charcreate-output');
@@ -1397,11 +1455,15 @@ async function runCharCreateCode() {
         clearInterval(state.ccAnimTimer);
         state.ccAnimTimer = null;
       }
-      const newSavePayload = createDefaultSaveState(state.ccAppearance.name || 'Rowan', {
-        skin: state.ccAppearance.skin,
-        hair: state.ccAppearance.hair,
-        tunic: state.ccAppearance.tunic,
-      });
+      const newSavePayload = createDefaultSaveState(
+        state.ccAppearance.name || 'Rowan',
+        {
+          skin: state.ccAppearance.skin,
+          hair: state.ccAppearance.hair,
+          tunic: state.ccAppearance.tunic,
+        },
+        buildPreferencesForFamiliarity(state.ccFamiliarity)
+      );
       if (state.me?.isAdmin && state.adminOwnerFilter && state.adminOwnerFilter !== 'all') {
         newSavePayload.ownerEmail = state.adminOwnerFilter;
       }
@@ -2687,6 +2749,7 @@ async function init() {
     });
 
     wireControls();
+    buildFamiliarityPicker();
     buildVisualHeroPickers();
     buildCharCreateSpellbook();
     state.router = new AppRouter({ onRoute: handleRoute });

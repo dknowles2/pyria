@@ -31,7 +31,7 @@ import {
   normalizePathname,
   safeDecodeSegment,
 } from './security';
-import type { AuthContext, Env } from './types';
+import type { AuthContext, Env, SavePreferences } from './types';
 import {
   MAX_ATTEMPT_BODY_BYTES,
   MAX_SAVE_BODY_BYTES,
@@ -40,6 +40,7 @@ import {
   normalizeEmail,
   readJsonBody,
   validateAttemptPayload,
+  validatePreferences,
 } from './validation';
 
 const DEFAULT_SAVES_RATE_LIMIT = 20;
@@ -265,8 +266,28 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
       const requestedOwner = normalizeEmail(body.ownerEmail);
       const ownerEmail = auth.isAdmin && requestedOwner ? requestedOwner : auth.parentEmail;
 
+      let preferences: SavePreferences = {};
+      const saveBody: Record<string, unknown> = { ...body };
+      if ('preferences' in saveBody) {
+        const rawPrefs = saveBody.preferences;
+        delete saveBody.preferences;
+        if (rawPrefs !== null && rawPrefs !== undefined) {
+          if (typeof rawPrefs !== 'object' || Array.isArray(rawPrefs)) {
+            return jsonResponse({ error: 'preferences must be an object' }, 400);
+          }
+          try {
+            preferences = validatePreferences(rawPrefs as Record<string, unknown>);
+          } catch (err) {
+            if (err instanceof ValidationError) {
+              return jsonResponse({ error: err.message }, err.status);
+            }
+            return jsonResponse({ error: 'Invalid preferences' }, 400);
+          }
+        }
+      }
+
       try {
-        const save = await db.createSave(body, { ownerEmail });
+        const save = await db.createSave(saveBody, { ownerEmail, preferences });
         return jsonResponse({ save }, 201);
       } catch (err) {
         if (err instanceof ValidationError || err instanceof QuotaError) {

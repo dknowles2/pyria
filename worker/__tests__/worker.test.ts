@@ -855,6 +855,110 @@ describe('#45 Input Validation, Quotas, Cascading Delete & Rate Limiting', () =>
   });
 });
 
+describe('Onboarding Python Familiarity Preferences', () => {
+  it('persists onboarding preferences on hero-code create and merges them into /api/config without breaking legacy saves', async () => {
+    // 1. Legacy hero-code create without preferences still works with empty preferences
+    const legacy = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: { heroName: 'LegacyKid', state: { byteShards: 15 } },
+    });
+    expect(legacy.res.status).toBe(201);
+    expect(legacy.data.save.preferences).toEqual({});
+
+    // 2. New hero-code create with calibrated preferences persists them
+    const onboarded = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: {
+        heroName: 'PyPro',
+        state: { realmId: 'realm-01-meadow' },
+        preferences: {
+          difficulty: 'challenge',
+          showRawTracebacks: true,
+          maxPipHints: 2,
+        },
+      },
+    });
+    expect(onboarded.res.status).toBe(201);
+    expect(onboarded.data.save.preferences).toEqual({
+      difficulty: 'challenge',
+      showRawTracebacks: true,
+      maxPipHints: 2,
+    });
+
+    const heroCookie = extractCookie(onboarded.res, HERO_SESSION_COOKIE);
+    expect(heroCookie).toBeTruthy();
+
+    // /api/config merges the hero's calibrated preferences
+    const cfg = await apiJson('/api/config', { cookie: heroCookie });
+    expect(cfg.res.status).toBe(200);
+    expect(cfg.data.heroPreferences).toEqual({
+      difficulty: 'challenge',
+      showRawTracebacks: true,
+      maxPipHints: 2,
+    });
+    expect(cfg.data.game.globalDifficultyOverride.mode).toBe('challenge');
+    expect(cfg.data.game.globalDifficultyOverride.showRawTracebacks).toBe(true);
+    expect(cfg.data.game.globalDifficultyOverride.maxHintsAllowed).toBe(2);
+
+    // Normal gameplay PUT /api/saves/:id does not overwrite persisted preferences
+    const saveUpdate = await apiJson(`/api/saves/${onboarded.data.save.id}`, {
+      method: 'PUT',
+      cookie: heroCookie,
+      body: { byteShards: 40 },
+    });
+    expect(saveUpdate.res.status).toBe(200);
+    expect(saveUpdate.data.save.byteShards).toBe(40);
+    expect(saveUpdate.data.save.preferences).toEqual({
+      difficulty: 'challenge',
+      showRawTracebacks: true,
+      maxPipHints: 2,
+    });
+
+    // 3. Invalid preferences are rejected cleanly with 400
+    const badPrefs = await apiJson('/api/auth/hero-code/create', {
+      method: 'POST',
+      body: {
+        heroName: 'BadPrefs',
+        preferences: { difficulty: 'impossible' },
+      },
+    });
+    expect(badPrefs.res.status).toBe(400);
+  });
+
+  it('persists onboarding preferences on parent POST /api/saves and validates them', async () => {
+    const parentCookie = await makeParentCookie('parent@example.com');
+
+    const created = await apiJson('/api/saves', {
+      method: 'POST',
+      cookie: parentCookie,
+      body: {
+        heroName: 'BrandNew',
+        preferences: {
+          difficulty: 'explorer',
+          showRawTracebacks: false,
+          maxPipHints: 3,
+        },
+      },
+    });
+    expect(created.res.status).toBe(201);
+    expect(created.data.save.preferences).toEqual({
+      difficulty: 'explorer',
+      showRawTracebacks: false,
+      maxPipHints: 3,
+    });
+
+    const bad = await apiJson('/api/saves', {
+      method: 'POST',
+      cookie: parentCookie,
+      body: {
+        heroName: 'BadHints',
+        preferences: { maxPipHints: 99 },
+      },
+    });
+    expect(bad.res.status).toBe(400);
+  });
+});
+
 describe('#70 Trial Analytics, Durable Rollups & Admin Calibration Metrics', () => {
   it('validates enriched attempt payloads and stores defaults for legacy clients', async () => {
     const created = await apiJson('/api/auth/hero-code/create', {
