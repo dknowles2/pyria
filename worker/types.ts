@@ -1,12 +1,23 @@
+export interface SendEmailBinding {
+  send(message: unknown): Promise<void>;
+}
+
 export interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  SEND_EMAIL?: SendEmailBinding;
   PYRIA_SESSION_SECRET?: string;
   PYRIA_ADMIN_EMAILS?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   RESEND_API_KEY?: string;
   MAGIC_LINK_FROM_EMAIL?: string;
+  // Weekly progress digest email configuration
+  PYRIA_BASE_URL?: string;
+  EMAIL_FROM?: string;
+  EMAIL_API_KEY?: string;
+  EMAIL_API_URL?: string;
+  PYRIA_DIGEST_BATCH_SIZE?: string;
   // Optional overrides for quotas, rate limits, and OAuth/email endpoints (useful for tests/tuning)
   PYRIA_MAX_SAVES_PER_ACCOUNT?: string;
   PYRIA_MAX_UNOWNED_SAVES?: string;
@@ -40,7 +51,85 @@ export type TokenType =
   | 'oauth_state'
   | 'magic_link'
   | 'parent_link'
-  | 'hero_play';
+  | 'hero_play'
+  | 'weekly_digest_unsub';
+
+export interface WeeklyDigestUnsubPayload {
+  typ: 'weekly_digest_unsub';
+  email: string;
+  exp: number;
+}
+
+export interface ParentPreferencesRecord {
+  ownerEmail: string;
+  weeklyDigestEnabled: boolean;
+  unsubscribedAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface DigestDeliveryRecord {
+  id: number;
+  ownerEmail: string;
+  weekKey: string;
+  heroCount: number;
+  trialsSolved: number;
+  status: 'sent' | 'failed';
+  providerMessageId: string | null;
+  errorMessage: string | null;
+  sentAt: string;
+}
+
+export interface HeroWeeklyDigest {
+  saveId: string;
+  heroName: string;
+  eraId: string;
+  eraName: string;
+  realmId: string;
+  realmName: string;
+  byteShards: number;
+  overallSolvedCount: number;
+  totalTrials: number;
+  rescuedDragonsCount: number;
+  trialsSolvedThisWeek: number;
+  notableTrialsSolved: string[];
+  conceptsProgressed: string[];
+  realmsProgressed: string[];
+  dragonsRescuedThisWeek: number;
+  activeDaysThisWeek: number;
+  coachingTip: string | null;
+}
+
+export interface ParentWeeklyDigest {
+  ownerEmail: string;
+  weekKey: string;
+  windowStart: string;
+  windowEnd: string;
+  activeHeroes: HeroWeeklyDigest[];
+  inactiveHeroNames: string[];
+  totalTrialsSolved: number;
+}
+
+export interface RenderedDigestEmail {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  unsubscribeUrl: string;
+  consoleUrl: string;
+  headers: Record<string, string>;
+}
+
+export interface DigestRunSummary {
+  weekKey: string;
+  evaluatedParents: number;
+  eligibleParents: number;
+  skippedNoProgress: number;
+  skippedDisabled: number;
+  skippedAlreadySent: number;
+  sentCount: number;
+  failedCount: number;
+  errors: Array<{ ownerEmail: string; error: string }>;
+}
 
 export interface HeroSessionPayload {
   typ: 'hero';
