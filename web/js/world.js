@@ -105,9 +105,19 @@ export class WorldEngine {
     this.bindEvents();
   }
 
+  isInputLocked() {
+    if (this.paused) return true;
+    if (typeof document !== 'undefined') {
+      if (document.querySelector('.cutscene-overlay')) return true;
+      const modal = document.getElementById('modal-backdrop');
+      if (modal && !modal.classList.contains('hidden')) return true;
+    }
+    return false;
+  }
+
   bindEvents() {
     this._onKeyDown = (e) => {
-      if (this.paused) return;
+      if (this.isInputLocked()) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
 
       const key = e.key.toLowerCase();
@@ -116,6 +126,7 @@ export class WorldEngine {
         this.keys.add(key);
       } else if (key === 'e' || key === ' ' || key === 'enter') {
         e.preventDefault();
+        if (e.repeat) return;
         this.triggerInteract();
       }
     };
@@ -132,7 +143,7 @@ export class WorldEngine {
     };
 
     const handleCanvasTap = (clientX, clientY) => {
-      if (this.paused || !this.map) return;
+      if (this.isInputLocked() || !this.map) return;
       const rect = this.canvas.getBoundingClientRect();
       const cx = (clientX - rect.left) * (this.canvas.width / rect.width);
       const cy = (clientY - rect.top) * (this.canvas.height / rect.height);
@@ -181,6 +192,7 @@ export class WorldEngine {
 
     let canvasTouchStart = null;
     this._onCanvasTouchStart = (e) => {
+      if (this.isInputLocked()) return;
       e.preventDefault();
       if (e.changedTouches.length > 0) {
         const t = e.changedTouches[0];
@@ -188,9 +200,14 @@ export class WorldEngine {
       }
     };
     this._onCanvasTouchMove = (e) => {
+      if (this.isInputLocked()) return;
       e.preventDefault();
     };
     this._onCanvasTouchEnd = (e) => {
+      if (this.isInputLocked()) {
+        canvasTouchStart = null;
+        return;
+      }
       e.preventDefault();
       if (!canvasTouchStart) return;
       for (const t of e.changedTouches) {
@@ -456,7 +473,7 @@ export class WorldEngine {
 
     const dynamicOverrides = this.getDynamicStateMap();
 
-    if (!this.paused) {
+    if (!this.isInputLocked()) {
       const { dx, dy } = this.getMovementVector();
       const hasSwiftBoots = this.save.appearance?.boots === 'boots_swift';
       const speed = hasSwiftBoots ? 6.2 : 4.4; // tiles per second
@@ -593,6 +610,7 @@ export class WorldEngine {
   }
 
   triggerInteract() {
+    if (this.isInputLocked()) return;
     if (this.nearestEntity && this.callbacks.onInteract) {
       this.callbacks.onInteract(this.nearestEntity);
     }
