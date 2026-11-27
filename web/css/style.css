@@ -761,6 +761,120 @@ textarea, input, pre, code {
   box-shadow: none;
 }
 
+.code-editor-body {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  background: var(--bg-code);
+}
+
+.code-gutter {
+  flex: 0 0 46px;
+  padding: 14px 6px 14px 4px;
+  background: rgba(8, 13, 26, 0.92);
+  border-right: 1px solid rgba(56, 189, 248, 0.22);
+  color: #64748b;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 22px;
+  text-align: right;
+  user-select: none;
+  overflow: hidden;
+}
+
+.code-gutter-line {
+  height: 22px;
+  padding-right: 2px;
+  white-space: nowrap;
+}
+
+.code-gutter-line.hl-error {
+  color: #fff1f2;
+  background: rgba(244, 63, 94, 0.55);
+  border-radius: 4px;
+  font-weight: 800;
+}
+
+.code-gutter-line.hl-over-after {
+  color: #fda4af;
+  background: rgba(244, 63, 94, 0.22);
+  border-radius: 4px;
+}
+
+.code-gutter-line.hl-ok {
+  color: #6ee7b7;
+}
+
+.code-textarea-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.code-line-highlights {
+  position: absolute;
+  inset: 0;
+  padding: 14px 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.code-hl-line {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+}
+
+.code-hl-line.hl-error {
+  background: rgba(244, 63, 94, 0.24);
+  box-shadow: inset 3px 0 0 #fb7185;
+}
+
+.code-hl-line.hl-over-after {
+  background: rgba(244, 63, 94, 0.1);
+  box-shadow: inset 3px 0 0 rgba(251, 113, 133, 0.5);
+}
+
+.code-hl-line.hl-ok {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.code-hl-badge {
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.code-hl-line.hl-error .code-hl-badge {
+  background: rgba(244, 63, 94, 0.9);
+  color: #fff;
+}
+
+.code-hl-line.hl-over-after .code-hl-badge {
+  background: rgba(244, 63, 94, 0.35);
+  color: #fecdd3;
+}
+
+.code-hl-line.hl-ok .code-hl-badge {
+  background: rgba(16, 185, 129, 0.22);
+  color: #a7f3d0;
+}
+
+.code-textarea-wrap .code-editor {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  line-height: 22px;
+  white-space: pre;
+  overflow-x: auto;
+}
+
 .code-editor:focus {
   border-color: var(--accent-sky);
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);

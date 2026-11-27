@@ -1,13 +1,13 @@
 // Interactive Modals: NPC Dialogue, Chest Pickup, Python Trial, Bram's Workshop, Dragon Rescue
 
-import { audio } from './audio.js?v=20261126y';
-import { music } from './music.js?v=20261126y';
-import { pyRunner } from './pyRunner.js?v=20261126y';
+import { audio } from './audio.js?v=20261126z';
+import { music } from './music.js?v=20261126z';
+import { pyRunner } from './pyRunner.js?v=20261126z';
 import {
   attachAutocomplete,
   buildTrialSuggestions,
   buildWorkshopSuggestions,
-} from './autocomplete.js?v=20261126y';
+} from './autocomplete.js?v=20261126z';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -85,11 +85,54 @@ export function attachCodeEditorKeys(textarea, onRun) {
       const val = textarea.value;
       textarea.value = val.substring(0, start) + '    ' + val.substring(end);
       textarea.selectionStart = textarea.selectionEnd = start + 4;
+      textarea.dispatchEvent(new Event('input', { bubbles: true }));
     } else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
       if (onRun) onRun();
     }
   });
+}
+
+function attachCodeGutter(textarea, gutterEl, highlightsEl) {
+  if (!textarea || !gutterEl || !highlightsEl) {
+    return { setMarks: () => {}, update: () => {} };
+  }
+  let lineMarks = new Map();
+
+  const syncScroll = () => {
+    gutterEl.scrollTop = textarea.scrollTop;
+    highlightsEl.scrollTop = textarea.scrollTop;
+  };
+
+  const render = () => {
+    const lines = String(textarea.value || '').split('\n');
+    const count = Math.max(lines.length, 6);
+    const gutterHtml = [];
+    const hlHtml = [];
+    for (let i = 1; i <= count; i += 1) {
+      const mark = lineMarks.get(i);
+      const cls = mark ? ` ${mark.kind}` : '';
+      const numLabel = mark?.icon ? `${mark.icon}${i}` : String(i);
+      gutterHtml.push(`<div class="code-gutter-line${cls}">${escapeHtml(numLabel)}</div>`);
+      const badge = mark?.badge ? `<span class="code-hl-badge">${escapeHtml(mark.badge)}</span>` : '';
+      hlHtml.push(`<div class="code-hl-line${cls}">${badge}</div>`);
+    }
+    gutterEl.innerHTML = gutterHtml.join('');
+    highlightsEl.innerHTML = hlHtml.join('');
+    syncScroll();
+  };
+
+  textarea.addEventListener('input', render);
+  textarea.addEventListener('scroll', syncScroll);
+  render();
+
+  return {
+    setMarks(marksMap) {
+      lineMarks = marksMap instanceof Map ? marksMap : new Map();
+      render();
+    },
+    update: render,
+  };
 }
 
 export function resolveDifficulty(gameConfig, realm, trial) {
@@ -672,7 +715,13 @@ export class ModalManager {
             <span class="code-editor-cta">${isFixBug ? '🐛 EDIT &amp; FIX YOUR PYTHON CODE BELOW' : '⌨️ TYPE YOUR PYTHON CODE BELOW'}</span>
             <span class="code-editor-sub">Click or tap inside the box to type</span>
           </div>
-          <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click or tap here and type your Python spell...">${escapeHtml(editableInitialCode)}</textarea>
+          <div class="code-editor-body">
+            <div id="trial-code-gutter" class="code-gutter" aria-hidden="true"></div>
+            <div class="code-textarea-wrap">
+              <div id="trial-code-highlights" class="code-line-highlights" aria-hidden="true"></div>
+              <textarea id="trial-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click or tap here and type your Python spell...">${escapeHtml(editableInitialCode)}</textarea>
+            </div>
+          </div>
         </div>
 
         <div class="editor-actions">
@@ -702,6 +751,12 @@ export class ModalManager {
       const diffBadge = this.content.querySelector('#trial-diff-badge');
       const draftBadge = this.content.querySelector('#trial-draft-badge');
       const commentTipEl = this.content.querySelector('#trial-comment-tip');
+      const trialGutter = attachCodeGutter(
+        codeEl,
+        this.content.querySelector('#trial-code-gutter'),
+        this.content.querySelector('#trial-code-highlights')
+      );
+      codeEl.addEventListener('input', () => trialGutter.setMarks(new Map()));
 
       const syncCommentTip = (code) => {
         if (!commentTipEl) return;
@@ -749,6 +804,7 @@ export class ModalManager {
           currentMode = btn.dataset.mode;
           codeEl.value = ensureTrailingEditableLine(trial.starterCode[currentMode] || '');
           syncCommentTip(codeEl.value);
+          trialGutter.setMarks(new Map());
           draftBadge?.classList.add('hidden');
           if (!isPractice && onDraftClear) onDraftClear();
           updateModeButtons();
@@ -759,6 +815,7 @@ export class ModalManager {
       resetBtn.addEventListener('click', () => {
         codeEl.value = ensureTrailingEditableLine(trial.starterCode[currentMode] || '');
         syncCommentTip(codeEl.value);
+        trialGutter.setMarks(new Map());
         draftBadge?.classList.add('hidden');
         if (!isPractice && onDraftClear) onDraftClear();
         audio.playClick();
@@ -834,6 +891,13 @@ export class ModalManager {
           }
           renderCelebrationView({ stdout: result.stdout, isPractice });
         } else {
+          if (result.errorLine) {
+            trialGutter.setMarks(
+              new Map([[Number(result.errorLine), { kind: 'hl-error', icon: '⚠️', badge: 'check this line' }]])
+            );
+          } else {
+            trialGutter.setMarks(new Map());
+          }
           audio.playError();
           outputEl.className = 'pip-console error';
           outputEl.innerHTML = `
@@ -1025,7 +1089,13 @@ export class ModalManager {
               <span class="code-editor-cta">⚒ FORGE CODE BOX</span>
               <span class="code-editor-sub">Click items on the left or type below</span>
             </div>
-            <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click any blueprint on the left or type wear_hat(&quot;explorer&quot;)..."></textarea>
+            <div class="code-editor-body">
+              <div id="ws-code-gutter" class="code-gutter" aria-hidden="true"></div>
+              <div class="code-textarea-wrap">
+                <div id="ws-code-highlights" class="code-line-highlights" aria-hidden="true"></div>
+                <textarea id="ws-code" class="code-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" inputmode="text" placeholder="Click any blueprint on the left or type wear_hat(&quot;explorer&quot;)..."></textarea>
+              </div>
+            </div>
           </div>
           <div class="editor-actions">
             <button id="ws-run-btn" class="btn btn-gold">⚒ Run Forge Code</button>
@@ -1045,6 +1115,11 @@ export class ModalManager {
     const catalogEl = this.content.querySelector('#ws-catalog');
     const cartBarEl = this.content.querySelector('#ws-cart-bar');
     const codeEl = this.content.querySelector('#ws-code');
+    const wsGutter = attachCodeGutter(
+      codeEl,
+      this.content.querySelector('#ws-code-gutter'),
+      this.content.querySelector('#ws-code-highlights')
+    );
     const runBtn = this.content.querySelector('#ws-run-btn');
     const clearBtn = this.content.querySelector('#ws-clear-btn');
     const outputEl = this.content.querySelector('#ws-output');
@@ -1078,6 +1153,29 @@ export class ModalManager {
 
     const refreshCartAndCatalog = () => {
       const cart = estimateCart(codeEl.value);
+      const marks = new Map();
+      for (const it of cart.items) {
+        if (it.wentOverHere) {
+          const need = Math.max(1, it.cost - Math.max(0, it.shardsBefore));
+          marks.set(it.lineNumber, {
+            kind: 'hl-error',
+            icon: '⚠️',
+            badge: `⚠️ OVER BUDGET (need ${need} more 💎)`,
+          });
+        } else if (it.overBudget) {
+          marks.set(it.lineNumber, {
+            kind: 'hl-over-after',
+            icon: '🔒',
+            badge: 'over budget',
+          });
+        } else if (cart.remaining < 0) {
+          marks.set(it.lineNumber, {
+            kind: 'hl-ok',
+            badge: `✓ ${it.shardsAfter} 💎 left`,
+          });
+        }
+      }
+      wsGutter.setMarks(marks);
       if (cartBarEl) {
         if (cart.items.length === 0) {
           cartBarEl.className = 'ws-cart-bar';
