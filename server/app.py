@@ -16,6 +16,7 @@ import mimetypes
 import os
 import sqlite3
 import threading
+import unicodedata
 import uuid
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -41,6 +42,92 @@ MIME_TYPES: dict[str, str] = {
 }
 
 MAX_JSON_BODY_BYTES = 512 * 1024  # 512 KiB
+MAX_SAVE_BODY_BYTES = 128 * 1024  # 128 KiB raw request body cap for save endpoints
+MAX_SAVE_STATE_BYTES = 128 * 1024  # 128 KiB serialized state_json cap per save
+MAX_ATTEMPT_BODY_BYTES = 64 * 1024  # 64 KiB raw request body cap for attempt logging
+MAX_ATTEMPT_CODE_BYTES = 32 * 1024  # 32 KiB max code payload per trial attempt
+
+HERO_NAME_MIN_LEN = 2
+HERO_NAME_MAX_LEN = 24
+MAX_TRIAL_ID_LEN = 128
+MAX_SAVE_STRING_LEN = 128
+MAX_SAVE_LIST_ITEMS = 1000
+MAX_TRIAL_DRAFTS = 200
+MAX_APPEARANCE_KEYS = 32
+
+DEFAULT_MAX_SAVES_PER_ACCOUNT = 10
+DEFAULT_MAX_TOTAL_SAVES = 100
+DEFAULT_MAX_ATTEMPTS_PER_SAVE = 500
+DEFAULT_MAX_EVENTS_PER_SAVE = 500
+
+ALLOWED_SAVE_KEYS: frozenset[str] = frozenset(
+    {
+        "id",
+        "heroName",
+        "hero_name",
+        "ownerEmail",
+        "owner_email",
+        "createdAt",
+        "created_at",
+        "updatedAt",
+        "updated_at",
+        "appearance",
+        "eraId",
+        "realmId",
+        "visualEra",
+        "byteShards",
+        "stats",
+        "solvedTrials",
+        "completedTrials",
+        "trialDrafts",
+        "seenCutscenes",
+        "foundEasterEggs",
+        "unlockedSpells",
+        "rescuedDragons",
+        "openedChests",
+        "ownedUnlockIds",
+        "unlockedItems",
+        "unlockedIds",
+        "position",
+    }
+)
+
+_SAVE_STRING_LIST_KEYS: frozenset[str] = frozenset(
+    {
+        "solvedTrials",
+        "completedTrials",
+        "seenCutscenes",
+        "foundEasterEggs",
+        "unlockedSpells",
+        "rescuedDragons",
+        "openedChests",
+        "ownedUnlockIds",
+        "unlockedItems",
+        "unlockedIds",
+    }
+)
+
+_SAVE_SCALAR_STRING_KEYS: frozenset[str] = frozenset(
+    {
+        "eraId",
+        "realmId",
+        "visualEra",
+    }
+)
+
+_SERVER_MANAGED_SAVE_KEYS: frozenset[str] = frozenset(
+    {
+        "id",
+        "heroName",
+        "hero_name",
+        "ownerEmail",
+        "owner_email",
+        "createdAt",
+        "created_at",
+        "updatedAt",
+        "updated_at",
+    }
+)
 
 PYODIDE_CDN_ORIGIN_PATH = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/"
 
@@ -198,6 +285,244 @@ def compute_concept_warnings(
     return warnings
 
 
+class SaveValidationError(Exception):
+    """Raised when save or attempt input validation fails."""
+
+    def __init__(
+        self, message: str, status: HTTPStatus = HTTPStatus.BAD_REQUEST
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.status = status
+
+
+class SaveQuotaError(Exception):
+    """Raised when a per-account or global save quota limit is exceeded."""
+
+    def __init__(
+        self, message: str, status: HTTPStatus = HTTPStatus.TOO_MANY_REQUESTS
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.status = status
+
+
+def _env_positive_int(env_name: str, default: int) -> int:
+    raw = os.environ.get(env_name, "").strip()
+    if not raw:
+        return default
+    try:
+        val = int(raw)
+        return val if val >= 1 else default
+    except ValueError:
+        return default
+
+
+def _has_control_chars(value: str) -> bool:
+    return any(
+        ord(ch) < 0x20
+        or 0x7F <= ord(ch) <= 0x9F
+        or unicodedata.category(ch) in ("Cc", "Cf", "Cs")
+        for ch in value
+    )
+
+
+def validate_hero_name(raw: Any) -> str:
+    if not isinstance(raw, str):
+        raise SaveValidationError("heroName must be a string")
+    if _has_control_chars(raw):
+        raise SaveValidationError("heroName must not contain control characters")
+    cleaned = raw.strip()
+    if len(cleaned) < HERO_NAME_MIN_LEN or len(cleaned) > HERO_NAME_MAX_LEN:
+        raise SaveValidationError(
+            f"heroName must be between {HERO_NAME_MIN_LEN} and {HERO_NAME_MAX_LEN} characters"
+        )
+    return cleaned
+
+
+def validate_save_payload(
+    payload: dict[str, Any], *, require_hero_name: bool
+) -> tuple[dict[str, Any], str | None]:
+    unknown_keys = sorted(k for k in payload.keys() if k not in ALLOWED_SAVE_KEYS)
+    if unknown_keys:
+        preview = ", ".join(unknown_keys[:8])
+        if len(unknown_keys) > 8:
+            preview += f" (+{len(unknown_keys) - 8} more)"
+        raise SaveValidationError(f"Disallowed save field(s): {preview}")
+
+    hero_name: str | None = None
+    if "heroName" in payload:
+        hero_name = validate_hero_name(payload["heroName"])
+    elif "hero_name" in payload:
+        hero_name = validate_hero_name(payload["hero_name"])
+    elif require_hero_name:
+        raise SaveValidationError("heroName is required")
+
+    for email_key in ("ownerEmail", "owner_email"):
+        if email_key in payload and payload[email_key] is not None:
+            val = payload[email_key]
+            if not isinstance(val, str) or len(val) > 254 or _has_control_chars(val):
+                raise SaveValidationError(f"{email_key} must be a valid string or null")
+
+    sanitized: dict[str, Any] = {}
+    for key, val in payload.items():
+        if key in _SERVER_MANAGED_SAVE_KEYS:
+            continue
+
+        if key in _SAVE_SCALAR_STRING_KEYS:
+            if val is not None:
+                if (
+                    not isinstance(val, str)
+                    or len(val) > MAX_SAVE_STRING_LEN
+                    or _has_control_chars(val)
+                ):
+                    raise SaveValidationError(
+                        f"{key} must be a string up to {MAX_SAVE_STRING_LEN} characters without control characters"
+                    )
+            sanitized[key] = val
+            continue
+
+        if key in _SAVE_STRING_LIST_KEYS:
+            if val is not None:
+                if not isinstance(val, list):
+                    raise SaveValidationError(f"{key} must be a list of strings")
+                if len(val) > MAX_SAVE_LIST_ITEMS:
+                    raise SaveValidationError(
+                        f"{key} exceeds maximum item count ({MAX_SAVE_LIST_ITEMS})"
+                    )
+                for item in val:
+                    if (
+                        not isinstance(item, str)
+                        or len(item) > MAX_SAVE_STRING_LEN
+                        or _has_control_chars(item)
+                    ):
+                        raise SaveValidationError(
+                            f"{key} items must be strings up to {MAX_SAVE_STRING_LEN} characters without control characters"
+                        )
+            sanitized[key] = val
+            continue
+
+        if key == "appearance":
+            if val is not None:
+                if not isinstance(val, dict):
+                    raise SaveValidationError("appearance must be an object")
+                if len(val) > MAX_APPEARANCE_KEYS:
+                    raise SaveValidationError(
+                        f"appearance exceeds maximum key count ({MAX_APPEARANCE_KEYS})"
+                    )
+                for ak, av in val.items():
+                    if (
+                        not isinstance(ak, str)
+                        or len(ak) > 64
+                        or _has_control_chars(ak)
+                    ):
+                        raise SaveValidationError("Invalid appearance key")
+                    if av is not None and not isinstance(av, (str, bool, int, float)):
+                        raise SaveValidationError(
+                            f"appearance.{ak} must be a scalar value or null"
+                        )
+                    if isinstance(av, str) and (
+                        len(av) > MAX_SAVE_STRING_LEN or _has_control_chars(av)
+                    ):
+                        raise SaveValidationError(
+                            f"appearance.{ak} must be a string up to {MAX_SAVE_STRING_LEN} characters without control characters"
+                        )
+            sanitized[key] = val
+            continue
+
+        if key == "stats":
+            if val is not None:
+                if not isinstance(val, dict):
+                    raise SaveValidationError("stats must be an object")
+                if len(val) > 32:
+                    raise SaveValidationError("stats exceeds maximum key count (32)")
+                for sk, sv in val.items():
+                    if (
+                        not isinstance(sk, str)
+                        or len(sk) > 64
+                        or _has_control_chars(sk)
+                    ):
+                        raise SaveValidationError("Invalid stats key")
+                    if sv is not None and (
+                        isinstance(sv, bool)
+                        or not isinstance(sv, (int, float))
+                        or not math.isfinite(sv)
+                    ):
+                        raise SaveValidationError(
+                            f"stats.{sk} must be a finite number or null"
+                        )
+            sanitized[key] = val
+            continue
+
+        if key == "position":
+            if val is not None:
+                if not isinstance(val, dict):
+                    raise SaveValidationError("position must be an object or null")
+                if len(val) > 16:
+                    raise SaveValidationError(
+                        "position exceeds maximum key count (16)"
+                    )
+                for pk, pv in val.items():
+                    if (
+                        not isinstance(pk, str)
+                        or len(pk) > 64
+                        or _has_control_chars(pk)
+                    ):
+                        raise SaveValidationError("Invalid position key")
+                    if pv is not None:
+                        if isinstance(pv, bool):
+                            raise SaveValidationError(
+                                f"position.{pk} must be a string, number, or null"
+                            )
+                        if isinstance(pv, str):
+                            if (
+                                len(pv) > MAX_SAVE_STRING_LEN
+                                or _has_control_chars(pv)
+                            ):
+                                raise SaveValidationError(
+                                    f"position.{pk} must be a valid string"
+                                )
+                        elif not isinstance(pv, (int, float)) or not math.isfinite(pv):
+                            raise SaveValidationError(
+                                f"position.{pk} must be a finite number"
+                            )
+            sanitized[key] = val
+            continue
+
+        if key == "trialDrafts":
+            if val is not None:
+                if not isinstance(val, dict):
+                    raise SaveValidationError("trialDrafts must be an object")
+                if len(val) > MAX_TRIAL_DRAFTS:
+                    raise SaveValidationError(
+                        f"trialDrafts exceeds maximum entry count ({MAX_TRIAL_DRAFTS})"
+                    )
+                for dk, dv in val.items():
+                    if (
+                        not isinstance(dk, str)
+                        or not dk.strip()
+                        or len(dk) > MAX_TRIAL_ID_LEN
+                        or _has_control_chars(dk)
+                    ):
+                        raise SaveValidationError("Invalid trialDrafts key")
+                    if not isinstance(dv, str):
+                        raise SaveValidationError(
+                            f"trialDrafts.{dk} must be a string"
+                        )
+                    if len(dv.encode("utf-8")) > MAX_ATTEMPT_CODE_BYTES:
+                        raise SaveValidationError(
+                            f"trialDrafts.{dk} exceeds maximum length ({MAX_ATTEMPT_CODE_BYTES} bytes)",
+                            status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                        )
+            sanitized[key] = val
+            continue
+
+        # byteShards is coerced safely in create_save/update_save
+        sanitized[key] = val
+
+    return sanitized, hero_name
+
+
 def _extract_string_set(state: dict[str, Any], *keys: str) -> set[str]:
     out: set[str] = set()
     for key in keys:
@@ -212,9 +537,47 @@ def _extract_string_set(state: dict[str, Any], *keys: str) -> set[str]:
 class PyriaDatabase:
     """Thread-safe SQLite storage for hero saves, trial attempts, and activity events."""
 
-    def __init__(self, db_path: Path) -> None:
+    def __init__(
+        self,
+        db_path: Path,
+        *,
+        max_saves_per_account: int | None = None,
+        max_total_saves: int | None = None,
+        max_attempts_per_save: int | None = None,
+        max_events_per_save: int | None = None,
+    ) -> None:
         self.db_path = db_path.resolve()
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.max_saves_per_account = max(
+            1,
+            max_saves_per_account
+            if max_saves_per_account is not None
+            else _env_positive_int(
+                "PYRIA_MAX_SAVES_PER_ACCOUNT", DEFAULT_MAX_SAVES_PER_ACCOUNT
+            ),
+        )
+        self.max_total_saves = max(
+            1,
+            max_total_saves
+            if max_total_saves is not None
+            else _env_positive_int("PYRIA_MAX_TOTAL_SAVES", DEFAULT_MAX_TOTAL_SAVES),
+        )
+        self.max_attempts_per_save = max(
+            1,
+            max_attempts_per_save
+            if max_attempts_per_save is not None
+            else _env_positive_int(
+                "PYRIA_MAX_ATTEMPTS_PER_SAVE", DEFAULT_MAX_ATTEMPTS_PER_SAVE
+            ),
+        )
+        self.max_events_per_save = max(
+            1,
+            max_events_per_save
+            if max_events_per_save is not None
+            else _env_positive_int(
+                "PYRIA_MAX_EVENTS_PER_SAVE", DEFAULT_MAX_EVENTS_PER_SAVE
+            ),
+        )
         self._lock = threading.Lock()
         self._init_schema()
 
@@ -324,8 +687,8 @@ class PyriaDatabase:
             "createdAt": row["created_at"],
         }
 
-    @staticmethod
     def _insert_event(
+        self,
         conn: sqlite3.Connection,
         save_id: str,
         hero_name: str,
@@ -352,7 +715,15 @@ class PyriaDatabase:
                 ts,
             ),
         )
-        return int(cur.lastrowid)
+        event_id = int(cur.lastrowid)
+        conn.execute(
+            "DELETE FROM activity_events "
+            "WHERE save_id = ? AND id NOT IN ("
+            "SELECT id FROM activity_events WHERE save_id = ? ORDER BY id DESC LIMIT ?"
+            ")",
+            (save_id, save_id, self.max_events_per_save),
+        )
+        return event_id
 
     def count_saves(self) -> int:
         with self._lock, self._connect() as conn:
@@ -411,14 +782,16 @@ class PyriaDatabase:
     def create_save(
         self, payload: dict[str, Any], owner_email: str | None = None
     ) -> dict[str, Any]:
+        sanitized, validated_name = validate_save_payload(
+            payload, require_hero_name=True
+        )
+        assert validated_name is not None
         save_id = str(uuid.uuid4())
-        hero_name = str(
-            payload.get("heroName") or payload.get("hero_name") or "Code-Tamer"
-        ).strip() or "Code-Tamer"
+        hero_name = validated_name
         norm_owner = normalize_email(owner_email)
         now = utc_now_iso()
         state = {
-            **payload,
+            **sanitized,
             "id": save_id,
             "heroName": hero_name,
             "ownerEmail": norm_owner,
@@ -431,8 +804,36 @@ class PyriaDatabase:
             except (TypeError, ValueError, OverflowError):
                 state["byteShards"] = 0
         state_json = json.dumps(state, ensure_ascii=False, allow_nan=False)
+        if len(state_json.encode("utf-8")) > MAX_SAVE_STATE_BYTES:
+            raise SaveValidationError(
+                f"Save state exceeds maximum size ({MAX_SAVE_STATE_BYTES} bytes)",
+                status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+            )
         realm_id = str(state.get("realmId") or "realm-01-meadow")
         with self._lock, self._connect() as conn:
+            if norm_owner is not None:
+                acct_row = conn.execute(
+                    "SELECT COUNT(*) AS cnt FROM saves "
+                    "WHERE LOWER(COALESCE(owner_email, '')) = ?",
+                    (norm_owner,),
+                ).fetchone()
+            else:
+                acct_row = conn.execute(
+                    "SELECT COUNT(*) AS cnt FROM saves "
+                    "WHERE owner_email IS NULL OR TRIM(owner_email) = ''"
+                ).fetchone()
+            acct_count = int(acct_row["cnt"]) if acct_row else 0
+            if acct_count >= self.max_saves_per_account:
+                raise SaveQuotaError(
+                    f"Save limit reached ({self.max_saves_per_account} saves per account)"
+                )
+            total_row = conn.execute("SELECT COUNT(*) AS cnt FROM saves").fetchone()
+            total_count = int(total_row["cnt"]) if total_row else 0
+            if total_count >= self.max_total_saves:
+                raise SaveQuotaError(
+                    f"Server save limit reached ({self.max_total_saves} total saves)"
+                )
+
             conn.execute(
                 "INSERT INTO saves (id, hero_name, owner_email, state_json, created_at, updated_at) "
                 "VALUES (?, ?, ?, ?, ?, ?)",
@@ -480,6 +881,9 @@ class PyriaDatabase:
     def update_save(
         self, save_id: str, payload: dict[str, Any]
     ) -> dict[str, Any] | None:
+        sanitized, validated_name = validate_save_payload(
+            payload, require_hero_name=False
+        )
         with self._lock, self._connect() as conn:
             existing = conn.execute(
                 "SELECT id, hero_name, owner_email, state_json, created_at, updated_at "
@@ -496,14 +900,14 @@ class PyriaDatabase:
             except json.JSONDecodeError:
                 prev_state = {}
 
-            hero_name = str(
-                payload.get("heroName")
-                or payload.get("hero_name")
-                or existing["hero_name"]
-            ).strip() or existing["hero_name"]
+            hero_name = (
+                validated_name
+                if validated_name is not None
+                else str(existing["hero_name"])
+            )
             now = utc_now_iso()
             state = {
-                **payload,
+                **sanitized,
                 "id": save_id,
                 "heroName": hero_name,
                 "ownerEmail": existing["owner_email"],
@@ -516,6 +920,11 @@ class PyriaDatabase:
                 except (TypeError, ValueError, OverflowError):
                     state["byteShards"] = int(prev_state.get("byteShards") or 0)
             state_json = json.dumps(state, ensure_ascii=False, allow_nan=False)
+            if len(state_json.encode("utf-8")) > MAX_SAVE_STATE_BYTES:
+                raise SaveValidationError(
+                    f"Save state exceeds maximum size ({MAX_SAVE_STATE_BYTES} bytes)",
+                    status=HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                )
             conn.execute(
                 "UPDATE saves SET hero_name = ?, state_json = ?, updated_at = ? "
                 "WHERE id = ?",
@@ -635,6 +1044,13 @@ class PyriaDatabase:
                 (save_id, trial_id, 1 if passed else 0, hints_used, code, now),
             )
             attempt_id = int(cur.lastrowid)
+            conn.execute(
+                "DELETE FROM trial_attempts "
+                "WHERE save_id = ? AND id NOT IN ("
+                "SELECT id FROM trial_attempts WHERE save_id = ? ORDER BY id DESC LIMIT ?"
+                ")",
+                (save_id, save_id, self.max_attempts_per_save),
+            )
 
             self._insert_event(
                 conn,
@@ -1076,6 +1492,7 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
 
     def _read_json_body(
         self,
+        max_bytes: int = MAX_JSON_BODY_BYTES,
     ) -> tuple[dict[str, Any] | None, str | None, HTTPStatus]:
         content_type = (
             (self.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
@@ -1095,10 +1512,10 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
             return None, "Invalid Content-Length header", HTTPStatus.BAD_REQUEST
         if length < 0:
             return None, "Invalid Content-Length header", HTTPStatus.BAD_REQUEST
-        if length > MAX_JSON_BODY_BYTES:
+        if length > max_bytes:
             return (
                 None,
-                f"Request body exceeds limit ({MAX_JSON_BODY_BYTES} bytes)",
+                f"Request body exceeds limit ({max_bytes} bytes)",
                 HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
             )
         raw = self.rfile.read(length)
@@ -1560,7 +1977,9 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                     {"error": "Authentication required"},
                 )
                 return
-            body, err, err_status = self._read_json_body()
+            body, err, err_status = self._read_json_body(
+                max_bytes=MAX_SAVE_BODY_BYTES
+            )
             if err is not None or body is None:
                 self._send_json(err_status, {"error": err})
                 return
@@ -1572,7 +1991,11 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                 body = body["save"]
             requested_owner = normalize_email(body.get("ownerEmail"))
             owner_email = requested_owner if (is_admin and requested_owner) else email
-            save = self.server.db.create_save(body, owner_email=owner_email)
+            try:
+                save = self.server.db.create_save(body, owner_email=owner_email)
+            except (SaveValidationError, SaveQuotaError) as exc:
+                self._send_json(exc.status, {"error": exc.message})
+                return
             self._send_json(HTTPStatus.CREATED, {"save": save})
             return
 
@@ -1584,35 +2007,69 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         ):
             if not self._require_save_access(parts[2]):
                 return
-            body, err, err_status = self._read_json_body()
+            body, err, err_status = self._read_json_body(
+                max_bytes=MAX_ATTEMPT_BODY_BYTES
+            )
             if err is not None or body is None:
                 self._send_json(err_status, {"error": err})
                 return
-            trial_id = str(
-                body.get("trialId") or body.get("trial_id") or ""
-            ).strip()
-            if not trial_id:
+            raw_trial_id = body.get("trialId")
+            if raw_trial_id is None and "trial_id" in body:
+                raw_trial_id = body.get("trial_id")
+            if not isinstance(raw_trial_id, str) or _has_control_chars(raw_trial_id):
                 self._send_json(
-                    HTTPStatus.BAD_REQUEST, {"error": "trialId is required"}
+                    HTTPStatus.BAD_REQUEST,
+                    {"error": "trialId is required and must be a valid string"},
+                )
+                return
+            trial_id = raw_trial_id.strip()
+            if not trial_id or len(trial_id) > MAX_TRIAL_ID_LEN:
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST,
+                    {
+                        "error": f"trialId must be between 1 and {MAX_TRIAL_ID_LEN} characters"
+                    },
                 )
                 return
             passed = bool(body.get("passed", False))
-            try:
-                hints_used = int(
-                    body.get("hintsUsed", body.get("hints_used", 0))
+            raw_hints = body.get("hintsUsed", body.get("hints_used", 0))
+            if isinstance(raw_hints, bool):
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST,
+                    {"error": "hintsUsed must be an integer"},
                 )
+                return
+            try:
+                hints_used = int(raw_hints)
             except (TypeError, ValueError):
                 self._send_json(
                     HTTPStatus.BAD_REQUEST,
                     {"error": "hintsUsed must be an integer"},
                 )
                 return
-            code = str(body.get("code", ""))
+            raw_code = body.get("code", "")
+            if raw_code is None:
+                code = ""
+            elif isinstance(raw_code, str):
+                code = raw_code
+            else:
+                self._send_json(
+                    HTTPStatus.BAD_REQUEST, {"error": "code must be a string"}
+                )
+                return
+            if len(code.encode("utf-8")) > MAX_ATTEMPT_CODE_BYTES:
+                self._send_json(
+                    HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                    {
+                        "error": f"Attempt code exceeds maximum length ({MAX_ATTEMPT_CODE_BYTES} bytes)"
+                    },
+                )
+                return
             attempt_id = self.server.db.log_attempt(
                 save_id=parts[2],
                 trial_id=trial_id,
                 passed=passed,
-                hints_used=max(0, hints_used),
+                hints_used=max(0, min(hints_used, 1000)),
                 code=code,
             )
             if attempt_id is None:
@@ -1811,7 +2268,9 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
         if len(parts) == 3 and parts[0] == "api" and parts[1] == "saves":
             if not self._require_save_access(parts[2]):
                 return
-            body, err, err_status = self._read_json_body()
+            body, err, err_status = self._read_json_body(
+                max_bytes=MAX_SAVE_BODY_BYTES
+            )
             if err is not None or body is None:
                 self._send_json(err_status, {"error": err})
                 return
@@ -1821,7 +2280,11 @@ class PyriaRequestHandler(BaseHTTPRequestHandler):
                 and isinstance(body["save"], dict)
             ):
                 body = body["save"]
-            updated = self.server.db.update_save(parts[2], body)
+            try:
+                updated = self.server.db.update_save(parts[2], body)
+            except SaveValidationError as exc:
+                self._send_json(exc.status, {"error": exc.message})
+                return
             if updated is None:
                 self._send_json(
                     HTTPStatus.NOT_FOUND, {"error": "Save not found"}
@@ -1896,8 +2359,19 @@ def create_server(
     db_path: Path,
     quiet: bool = False,
     dev_mode: bool = False,
+    *,
+    max_saves_per_account: int | None = None,
+    max_total_saves: int | None = None,
+    max_attempts_per_save: int | None = None,
+    max_events_per_save: int | None = None,
 ) -> PyriaHTTPServer:
-    db = PyriaDatabase(db_path)
+    db = PyriaDatabase(
+        db_path,
+        max_saves_per_account=max_saves_per_account,
+        max_total_saves=max_total_saves,
+        max_attempts_per_save=max_attempts_per_save,
+        max_events_per_save=max_events_per_save,
+    )
     srv = PyriaHTTPServer((host, port), root_dir, db, dev_mode=dev_mode)
     setattr(srv, "quiet", quiet)
     return srv
