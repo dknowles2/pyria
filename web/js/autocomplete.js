@@ -406,33 +406,20 @@ export function buildTrialSuggestions({ realm, era, trial }) {
     );
   }
 
-  // Parse puzzle-specific helpers & starter variables from current Trial
+  // Parse puzzle-specific starter variables & helpers from current Trial.
+  // Extract variables first so starter variable names can never be misclassified as functions.
   const seen = new Set(list.map((i) => i.matchText));
-  const sources = [
+  const starterSources = [
     trial?.starterCode?.explorer || '',
     trial?.starterCode?.standard || '',
     trial?.starterCode?.challenge || '',
-    trial?.objective || '',
   ].join('\n');
+  const allSources = [starterSources, trial?.objective || ''].join('\n');
 
-  const fnMatches = sources.matchAll(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g);
-  for (const m of fnMatches) {
-    const name = m[1];
-    if (seen.has(name) || ['if', 'elif', 'while', 'for', 'return', 'assert'].includes(name)) continue;
-    seen.add(name);
-    list.push({
-      label: `${name}()`,
-      matchText: name,
-      snippet: `${name}($0)`,
-      category: 'fn',
-      description: 'Function mentioned in this Trial',
-    });
-  }
-
-  const varMatches = sources.matchAll(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=/gm);
+  const varMatches = starterSources.matchAll(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=(?!=)/gm);
   for (const m of varMatches) {
     const name = m[1];
-    if (seen.has(name)) continue;
+    if (seen.has(name) || /^_+$/.test(name)) continue;
     seen.add(name);
     list.push({
       label: name,
@@ -440,6 +427,27 @@ export function buildTrialSuggestions({ realm, era, trial }) {
       snippet: name,
       category: 'keyword',
       description: 'Variable in this Trial',
+    });
+  }
+
+  // Require `(` immediately after the identifier (no whitespace) and not preceded by `.`
+  // so prose parentheticals like `left_gems (8)` and dot-methods like `.strip()` are not
+  // suggested as standalone function calls.
+  const ignoredFnNames = new Set([
+    'if', 'elif', 'while', 'for', 'return', 'assert',
+    'and', 'or', 'not', 'in', 'is', 'del', 'yield', 'lambda', 'with', 'except', 'raise',
+  ]);
+  const fnMatches = allSources.matchAll(/(?<![.\w])([a-zA-Z_][a-zA-Z0-9_]*)\(/g);
+  for (const m of fnMatches) {
+    const name = m[1];
+    if (seen.has(name) || /^_+$/.test(name) || ignoredFnNames.has(name.toLowerCase())) continue;
+    seen.add(name);
+    list.push({
+      label: `${name}()`,
+      matchText: name,
+      snippet: `${name}($0)`,
+      category: 'fn',
+      description: 'Function mentioned in this Trial',
     });
   }
 
