@@ -295,6 +295,88 @@ test('#94: translateErrorForPip handles TimeoutError even without timedOut flag'
   assert.match(timeoutRes.pipMessage, /while/i);
 });
 
+test('#95: translateErrorForPip covers later Python concepts (colons, indentation, self, AttributeError, arg-count TypeError)', () => {
+  // SyntaxError colon hint includes all later keywords
+  const colonRes = translateErrorForPip({
+    passed: false,
+    errorType: 'SyntaxError',
+    errorMessage: "expected ':'",
+    errorLine: 3,
+  });
+  for (const kw of ['if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', 'with']) {
+    assert.ok(colonRes.pipMessage.includes(`'${kw}'`), `colon hint missing ${kw}`);
+  }
+
+  // IndentationError includes later keywords
+  const indentRes = translateErrorForPip({
+    passed: false,
+    errorType: 'IndentationError',
+    errorMessage: 'expected an indented block after function definition',
+    errorLine: 2,
+  });
+  assert.match(indentRes.pipMessage, /def/);
+  assert.match(indentRes.pipMessage, /class/);
+  assert.match(indentRes.pipMessage, /while/);
+  assert.match(indentRes.pipMessage, /try/);
+
+  // NameError special-case for self
+  const selfNameRes = translateErrorForPip({
+    passed: false,
+    errorType: 'NameError',
+    errorMessage: "name 'self' is not defined",
+    errorLine: 4,
+  });
+  assert.match(selfNameRes.pipMessage, /class method/i);
+  assert.match(selfNameRes.pipMessage, /def method\(self/);
+
+  // Normal NameError still gives variable hint
+  const normalNameRes = translateErrorForPip({
+    passed: false,
+    errorType: 'NameError',
+    errorMessage: "name 'drago' is not defined",
+    errorLine: 1,
+  });
+  assert.match(normalNameRes.pipMessage, /drago/);
+
+  // AttributeError for class/method typo
+  const attrRes = translateErrorForPip({
+    passed: false,
+    errorType: 'AttributeError',
+    errorMessage: "'Dragon' object has no attribute 'fly'",
+    errorLine: 8,
+  });
+  assert.match(attrRes.pipMessage, /Dragon/);
+  assert.match(attrRes.pipMessage, /self\.fly/);
+
+  // AttributeError for NoneType
+  const noneAttrRes = translateErrorForPip({
+    passed: false,
+    errorType: 'AttributeError',
+    errorMessage: "'NoneType' object has no attribute 'append'",
+    errorLine: 5,
+  });
+  assert.match(noneAttrRes.pipMessage, /None/);
+  assert.match(noneAttrRes.pipMessage, /\.append/);
+
+  // TypeError argument-count cases
+  const missingArgRes = translateErrorForPip({
+    passed: false,
+    errorType: 'TypeError',
+    errorMessage: "greet() missing 1 required positional argument: 'name'",
+    errorLine: 6,
+  });
+  assert.match(missingArgRes.pipMessage, /without enough inputs/i);
+
+  const tooManyArgsRes = translateErrorForPip({
+    passed: false,
+    errorType: 'TypeError',
+    errorMessage: 'Dragon.roar() takes 1 positional argument but 2 were given',
+    errorLine: 7,
+  });
+  assert.match(tooManyArgsRes.pipMessage, /different number of inputs/i);
+  assert.match(tooManyArgsRes.pipMessage, /self/);
+});
+
 function extractSandboxPythonConstants() {
   const dir = path.dirname(fileURLToPath(import.meta.url));
   const html = fs.readFileSync(path.join(dir, '..', 'py-sandbox.html'), 'utf8');
