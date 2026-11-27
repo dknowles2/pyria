@@ -22,6 +22,8 @@ import {
   createHeroCode,
   createHeroLinkToken,
   redeemHeroCode,
+  previewHeroPlayToken,
+  redeemHeroPlayToken,
   logoutSession,
 } from './api.js?v=20261127n';
 import { audio } from './audio.js?v=20261127i';
@@ -2423,7 +2425,65 @@ function wireControls() {
 }
 
 // ==================== BOOTSTRAP ====================
+function capturePendingPlayToken() {
+  try {
+    const url = new URL(window.location.href);
+    const token = (url.searchParams.get('play') || '').trim();
+    if (!token) return '';
+    url.searchParams.delete('play');
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    return token;
+  } catch {
+    return '';
+  }
+}
+
+async function handlePendingPlayToken(playToken) {
+  if (!playToken || state.me?.mode !== 'cloudflare') return;
+  try {
+    const preview = await previewHeroPlayToken(playToken);
+    if (!preview.valid || !preview.heroName) {
+      throw new Error('This play link has expired or is no longer valid.');
+    }
+    const currentHeroName =
+      state.me?.auth?.role === 'hero' ? state.me?.auth?.heroName || '' : '';
+    state.modals.openPlayLinkConfirmModal({
+      heroName: preview.heroName,
+      currentHeroName,
+      onConfirm: async () => {
+        const res = await redeemHeroPlayToken(playToken);
+        if (!res.save) {
+          throw new Error('Could not load hero for that play link.');
+        }
+        lastExpiredSaveId = null;
+        const [freshMe, freshConfig] = await Promise.all([
+          fetchMe(),
+          fetchConfig().catch(() => null),
+        ]);
+        state.me = freshMe;
+        if (freshConfig?.game) {
+          state.gameConfig = freshConfig.game;
+          if (freshConfig.heroPreferences) {
+            state.gameConfig.heroPreferences = freshConfig.heroPreferences;
+          }
+        }
+        renderAccountIdentityBar();
+        renderAdminRealmJump();
+        audio.playSuccess();
+        await navigateToGame(res.save);
+        showToast(`Welcome back, ${res.save.heroName}!`);
+      },
+    });
+  } catch (err) {
+    state.modals.openPlayLinkInvalidModal({
+      message: err?.detail || err?.message,
+      onEnterHeroCode: () => openEnterHeroCodeFlow(),
+    });
+  }
+}
+
 async function init() {
+  const pendingPlayToken = capturePendingPlayToken();
   try {
     const [me, config, spriteManifest, tilesetManifest] = await Promise.all([
       fetchMe(),
@@ -2483,6 +2543,9 @@ async function init() {
     buildCharCreateSpellbook();
     state.router = new AppRouter({ onRoute: handleRoute });
     await state.router.start();
+    if (pendingPlayToken) {
+      await handlePendingPlayToken(pendingPlayToken);
+    }
   } catch (err) {
     console.error('Pyria boot failed:', err);
     const listEl = $('#saves-list');
