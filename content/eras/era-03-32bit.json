@@ -32,7 +32,7 @@
           "id": "trial-32-01-01",
           "trialType": "multiple_choice",
           "title": "Meet 3D Coordinate Tuples (x, y, z)!",
-          "storyPrompt": "Welcome to the 32-Bit Isometric Frontier! A **tuple** like `pos = (4, 7, 2)` holds locked `(x, y, z)` coordinates in parentheses. What does `x, y, z = pos; print(z)` output?",
+          "storyPrompt": "Welcome to 32-Bit Blockstone Highlands! A **tuple** like `(4, 7, 2)` is like a locked list from Era 2 — it can't be accidentally modified, making it ideal for 3D coordinates `(x, y, z)`. You can unpack all three values in one line: `x, y, z = pos`!",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "tuples",
