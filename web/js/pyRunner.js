@@ -219,7 +219,9 @@ function sanitizeSandboxResult(mode, raw) {
       arrows: typeof invRaw.arrows === 'number' ? Math.max(0, Math.trunc(invRaw.arrows)) : 0,
       potions: typeof invRaw.potions === 'number' ? Math.max(0, Math.trunc(invRaw.potions)) : 0,
     };
-    base.customItems = sanitizeStringArray(src.customItems).slice(0, 20);
+    base.customItems = sanitizeStringArray(src.customItems)
+      .map((item) => item.slice(0, 80))
+      .slice(0, 20);
   }
   return base;
 }

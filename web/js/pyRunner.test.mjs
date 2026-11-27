@@ -480,6 +480,21 @@ assert w_res["passed"], w_res
 assert w_res["byteShards"] == 100 - 15 - 20 - 15 - 15, w_res
 assert w_res["inventory"] == {"arrows": 5, "potions": 3}, w_res
 assert w_res["customItems"] == ["Star Dagger (Power 4)", "Sunblade (Fire, Power 9)"], w_res
+
+# Rejects overly long .element without spending shards
+w_bad = json.loads(_pyria_run_workshop(json.dumps({
+    "code": '''
+class Huge:
+    def __init__(self):
+        self.name = "Orb"
+        self.power = 5
+        self.element = "X" * 30
+forge_custom(Huge())
+''',
+    "unlockables": [],
+    "saveState": {"byteShards": 50, "inventory": {"arrows": 0, "potions": 0}, "customItems": []},
+})))
+assert not w_bad["passed"] and w_bad["errorType"] == "ValueError" and "24 characters" in w_bad["errorMessage"], w_bad
 print("WORKSHOP_BUILTINS_OK")
 `;
   const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });

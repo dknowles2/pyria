@@ -565,6 +565,9 @@ def _pyria_run_workshop(payload_json, emit_stdout=None):
             raise ValueError("Custom item name must be between 1 and 40 characters!")
         if not isinstance(pwr, int) or isinstance(pwr, bool) or pwr < 1:
             raise ValueError("Custom item power must be a positive whole number, like 5!")
+        elem_clean = str(elem).strip() if elem is not None and str(elem).strip() else None
+        if elem_clean is not None and len(elem_clean) > 24:
+            raise ValueError("Custom item element must be 24 characters or fewer!")
         if len(custom_items) >= 20:
             raise ValueError("Bram's trophy shelf is full (max 20 custom forged items)!")
         cost = 15
@@ -573,7 +576,6 @@ def _pyria_run_workshop(payload_json, emit_stdout=None):
                 f"Not enough Byte Shards to forge '{name}'! You need {cost} Shards, but you have {shards[0]}."
             )
         shards[0] -= cost
-        elem_clean = str(elem).strip() if elem is not None and str(elem).strip() else None
         label = f"{name} ({elem_clean}, Power {pwr})" if elem_clean else f"{name} (Power {pwr})"
         custom_items.append(label)
         purchased.append(label)
