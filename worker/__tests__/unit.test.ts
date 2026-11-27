@@ -180,6 +180,34 @@ describe('worker/validation.ts unit tests', () => {
     ).toThrow(ValidationError);
 
     // Stats
+    const validStats = validateSavePayload(
+      {
+        heroName: 'Rowan',
+        stats: {
+          charisma: 2,
+          courage: 3,
+          arrows: 10,
+          potions: 1,
+          customItems: ['Flame Blade (Power 5)'],
+          completedWorkshopChallenges: ['ws-chal-01'],
+        },
+      },
+      { requireHeroName: true }
+    );
+    expect(validStats.sanitized.stats).toEqual({
+      charisma: 2,
+      courage: 3,
+      arrows: 10,
+      potions: 1,
+      customItems: ['Flame Blade (Power 5)'],
+      completedWorkshopChallenges: ['ws-chal-01'],
+    });
+    expect(() =>
+      validateSavePayload(
+        { heroName: 'Rowan', stats: { customItems: null, completedWorkshopChallenges: null } },
+        { requireHeroName: true }
+      )
+    ).not.toThrow();
     expect(() =>
       validateSavePayload({ heroName: 'Rowan', stats: 'bad' }, { requireHeroName: true })
     ).toThrow(ValidationError);
@@ -193,6 +221,27 @@ describe('worker/validation.ts unit tests', () => {
     ).toThrow(ValidationError);
     expect(() =>
       validateSavePayload({ heroName: 'Rowan', stats: { power: '99' } }, { requireHeroName: true })
+    ).toThrow(ValidationError);
+    expect(() =>
+      validateSavePayload({ heroName: 'Rowan', stats: { customItems: 'not-a-list' } }, { requireHeroName: true })
+    ).toThrow(ValidationError);
+    expect(() =>
+      validateSavePayload({ heroName: 'Rowan', stats: { customItems: [123] } }, { requireHeroName: true })
+    ).toThrow(ValidationError);
+    expect(() =>
+      validateSavePayload({ heroName: 'Rowan', stats: { customItems: ['bad\x00item'] } }, { requireHeroName: true })
+    ).toThrow(ValidationError);
+    expect(() =>
+      validateSavePayload(
+        { heroName: 'Rowan', stats: { customItems: new Array(1001).fill('x') } },
+        { requireHeroName: true }
+      )
+    ).toThrow(ValidationError);
+    expect(() =>
+      validateSavePayload(
+        { heroName: 'Rowan', stats: { completedWorkshopChallenges: 42 } },
+        { requireHeroName: true }
+      )
     ).toThrow(ValidationError);
 
     // Position
