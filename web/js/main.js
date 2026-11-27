@@ -32,7 +32,7 @@ import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
 import { WorldEngine } from './world.js?v=20261127i';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127o';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127p';
 import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 import { AppRouter } from './router.js?v=20261127l';
 

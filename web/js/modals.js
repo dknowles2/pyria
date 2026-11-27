@@ -374,7 +374,7 @@ export class ModalManager {
             <span class="pill pill-gold">${escapeHtml(label)}</span>
           </div>
         </div>
-        <button class="btn btn-sm btn-ghost" data-close>✕</button>
+        <button type="button" class="btn btn-sm btn-ghost" data-close>✕</button>
       </div>
       <div class="dragon-rescue-banner">
         <p class="dialogue-text">
@@ -383,7 +383,7 @@ export class ModalManager {
         <p class="muted-text">You now have <strong>${Number(totalShards) || 0} Byte Shards</strong> to spend at Bram's Workshop.</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" data-close>Awesome!</button>
+        <button type="button" class="btn btn-primary" data-close>Awesome!</button>
       </div>
       `,
       'modal-compact'
@@ -392,6 +392,9 @@ export class ModalManager {
     this.content.querySelectorAll('[data-close]').forEach((btn) => {
       btn.addEventListener('click', () => this.close());
     });
+
+    const dismissBtn = this.content.querySelector('.modal-footer [data-close]');
+    dismissBtn?.focus();
   }
 
   // ==================== EASTER EGG DISCOVERY MODAL ====================
