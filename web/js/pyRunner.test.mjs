@@ -238,6 +238,8 @@ test('sanitizes untrusted/malformed sandbox results without throwing', async () 
   assert.deepEqual(res.equipped, []);
   assert.deepEqual(res.appearance, {});
   assert.deepEqual(res.stats, { charisma: 0, courage: 3 });
+  assert.deepEqual(res.inventory, { arrows: 0, potions: 0 });
+  assert.deepEqual(res.customItems, []);
 
   runner._teardownSandbox();
 });
@@ -396,8 +398,40 @@ function extractSandboxPythonConstants() {
   return {
     guard: extract('SANDBOX_GUARD_PY'),
     trial: extract('TRIAL_HARNESS_PY'),
+    workshop: extract('WORKSHOP_HARNESS_PY'),
   };
 }
+
+test('#98: sanitizes workshop inventory and customItems fields', async () => {
+  const runner = new PyRunner({ executionTimeoutMs: 200, bootTimeoutMs: 200 });
+  await flushMicrotasks();
+
+  const port = iframes.at(-1).receivedPorts[0];
+  port.postMessage({ type: 'ready' });
+  await flushMicrotasks();
+
+  port.onmessage = (ev) => {
+    port.postMessage({
+      type: 'result',
+      id: ev.data.id,
+      result: {
+        passed: true,
+        stdout: 'Forged!\n',
+        stderr: '',
+        byteShards: 40,
+        inventory: { arrows: 10.7, potions: -2 },
+        customItems: ['Flame Blade (Power 5)', 999, 'Frost Staff (Power 8)'],
+      },
+    });
+  };
+
+  const res = await runner.runWorkshop('forge_arrows(10)', [], { byteShards: 90 });
+  assert.equal(res.passed, true);
+  assert.deepEqual(res.inventory, { arrows: 10, potions: 0 });
+  assert.deepEqual(res.customItems, ['Flame Blade (Power 5)', 'Frost Staff (Power 8)']);
+
+  runner._teardownSandbox();
+});
 
 test('#94: embedded Python streaming buffer emits chunks and caps huge output', () => {
   const { guard, trial } = extractSandboxPythonConstants();
@@ -417,6 +451,54 @@ print("STREAMING_BUFFER_OK")
 `;
   const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });
   assert.ok(out.includes('STREAMING_BUFFER_OK'));
+});
+
+test('#98: embedded Python workshop builtins (get_shards, forge_arrows, brew_potion, forge_custom)', () => {
+  const { guard, workshop } = extractSandboxPythonConstants();
+  const pyTestScript = `
+${guard}
+${workshop}
+
+w_res = json.loads(_pyria_run_workshop(json.dumps({
+    "code": '''
+class Blade:
+    def __init__(self, name, power, element):
+        self.name = name
+        self.power = power
+        self.element = element
+
+if get_shards() >= 50:
+    forge_arrows(3)
+    brew_potion(2)
+    forge_custom("Star Dagger", 4)
+    forge_custom(Blade("Sunblade", 9, "Fire"))
+''',
+    "unlockables": [],
+    "saveState": {"byteShards": 100, "inventory": {"arrows": 2, "potions": 1}, "customItems": []},
+})))
+assert w_res["passed"], w_res
+assert w_res["byteShards"] == 100 - 15 - 20 - 15 - 15, w_res
+assert w_res["inventory"] == {"arrows": 5, "potions": 3}, w_res
+assert w_res["customItems"] == ["Star Dagger (Power 4)", "Sunblade (Fire, Power 9)"], w_res
+
+# Rejects overly long .element without spending shards
+w_bad = json.loads(_pyria_run_workshop(json.dumps({
+    "code": '''
+class Huge:
+    def __init__(self):
+        self.name = "Orb"
+        self.power = 5
+        self.element = "X" * 30
+forge_custom(Huge())
+''',
+    "unlockables": [],
+    "saveState": {"byteShards": 50, "inventory": {"arrows": 0, "potions": 0}, "customItems": []},
+})))
+assert not w_bad["passed"] and w_bad["errorType"] == "ValueError" and "24 characters" in w_bad["errorMessage"], w_bad
+print("WORKSHOP_BUILTINS_OK")
+`;
+  const out = execFileSync('python3', ['-c', pyTestScript], { encoding: 'utf8' });
+  assert.ok(out.includes('WORKSHOP_BUILTINS_OK'));
 });
 
 test('#89: shout() uppercases string arguments and preserves non-strings', () => {

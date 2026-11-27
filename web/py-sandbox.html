@@ -350,6 +350,13 @@ def _pyria_run_workshop(payload_json, emit_stdout=None):
     stats = dict(save.get("stats", {"charisma": 0, "courage": 0}))
     owned = list(save.get("ownedUnlockIds", []))
     shards = [int(save.get("byteShards", 0))]
+    inv_raw = save.get("inventory") if isinstance(save.get("inventory"), dict) else {}
+    inventory = {
+        "arrows": max(0, int(inv_raw.get("arrows", 0))),
+        "potions": max(0, int(inv_raw.get("potions", 0))),
+    }
+    raw_custom = save.get("customItems") if isinstance(save.get("customItems"), list) else []
+    custom_items = [x for x in raw_custom if isinstance(x, str)][:20]
     purchased = []
     equipped = []
 
@@ -514,6 +521,66 @@ def _pyria_run_workshop(payload_json, emit_stdout=None):
         verb = "Stitched and equipped" if bought else "Equipped"
         print(f"{verb} {item['name']}! Pip chirps happily! ({shards[0]} Shards left)")
 
+    def get_shards():
+        return shards[0]
+
+    def forge_arrows(count=1):
+        if not isinstance(count, int) or isinstance(count, bool) or count < 1 or count > 50:
+            raise ValueError("forge_arrows() needs a whole number from 1 to 50, like forge_arrows(5)")
+        cost = 5 * count
+        if shards[0] < cost:
+            raise ValueError(
+                f"Not enough Byte Shards for {count} Dragon Arrow(s)! You need {cost} Shards, but you have {shards[0]}."
+            )
+        shards[0] -= cost
+        inventory["arrows"] = int(inventory.get("arrows", 0)) + count
+        purchased.append(f"{count}x Dragon Arrows")
+        print(f"Forged {count} Dragon Arrow(s)! Total arrows: {inventory['arrows']}. ({shards[0]} Shards left)")
+
+    def brew_potion(count=1):
+        if not isinstance(count, int) or isinstance(count, bool) or count < 1 or count > 50:
+            raise ValueError("brew_potion() needs a whole number from 1 to 50, like brew_potion(2)")
+        cost = 10 * count
+        if shards[0] < cost:
+            raise ValueError(
+                f"Not enough Byte Shards for {count} Starlight Potion(s)! You need {cost} Shards, but you have {shards[0]}."
+            )
+        shards[0] -= cost
+        inventory["potions"] = int(inventory.get("potions", 0)) + count
+        purchased.append(f"{count}x Starlight Potions")
+        print(f"Brewed {count} Starlight Potion(s)! Total potions: {inventory['potions']}. ({shards[0]} Shards left)")
+
+    def forge_custom(item_or_name, power=1):
+        if isinstance(item_or_name, str):
+            name = item_or_name.strip()
+            pwr = power
+            elem = None
+        elif hasattr(item_or_name, "name"):
+            name = str(getattr(item_or_name, "name", "")).strip()
+            pwr = getattr(item_or_name, "power", power)
+            elem = getattr(item_or_name, "element", None)
+        else:
+            raise TypeError('forge_custom() needs an item name (like forge_custom("Flame Blade", 5)) or an object with a .name attribute!')
+        if not name or len(name) > 40:
+            raise ValueError("Custom item name must be between 1 and 40 characters!")
+        if not isinstance(pwr, int) or isinstance(pwr, bool) or pwr < 1:
+            raise ValueError("Custom item power must be a positive whole number, like 5!")
+        elem_clean = str(elem).strip() if elem is not None and str(elem).strip() else None
+        if elem_clean is not None and len(elem_clean) > 24:
+            raise ValueError("Custom item element must be 24 characters or fewer!")
+        if len(custom_items) >= 20:
+            raise ValueError("Bram's trophy shelf is full (max 20 custom forged items)!")
+        cost = 15
+        if shards[0] < cost:
+            raise ValueError(
+                f"Not enough Byte Shards to forge '{name}'! You need {cost} Shards, but you have {shards[0]}."
+            )
+        shards[0] -= cost
+        label = f"{name} ({elem_clean}, Power {pwr})" if elem_clean else f"{name} (Power {pwr})"
+        custom_items.append(label)
+        purchased.append(label)
+        print(f"Bram cheers: Magnificent craft! Forged {label}! ({shards[0]} Shards left)")
+
     ns = {
         "wear_hat": wear_hat,
         "set_tunic_color": set_tunic_color,
@@ -523,6 +590,10 @@ def _pyria_run_workshop(payload_json, emit_stdout=None):
         "add_charisma": add_charisma,
         "add_courage": add_courage,
         "equip_pip_scarf": equip_pip_scarf,
+        "get_shards": get_shards,
+        "forge_arrows": forge_arrows,
+        "brew_potion": brew_potion,
+        "forge_custom": forge_custom,
     }
     buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
@@ -540,6 +611,8 @@ def _pyria_run_workshop(payload_json, emit_stdout=None):
             "byteShards": shards[0],
             "purchased": purchased,
             "equipped": equipped,
+            "inventory": inventory,
+            "customItems": custom_items,
             "errorType": None,
             "errorMessage": None,
             "errorLine": None,

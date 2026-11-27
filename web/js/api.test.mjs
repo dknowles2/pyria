@@ -119,7 +119,14 @@ test('normalizeSave and buildCleanSavePayload merge nested state, dedupe trials,
   assert.equal(norm.appearance.tunic, 'emerald'); // default preserved
   assert.deepEqual(norm.solvedTrials, ['t1', 't2', 't3']);
   assert.deepEqual(norm.completedTrials, ['t1', 't2', 't3']);
-  assert.deepEqual(norm.stats, { charisma: 3, courage: 0 });
+  assert.deepEqual(norm.stats, {
+    charisma: 3,
+    courage: 0,
+    arrows: 0,
+    potions: 0,
+    customItems: [],
+    completedWorkshopChallenges: [],
+  });
   assert.equal(norm.isGuest, true);
   assert.equal(norm.createdAt, '2026-01-01T00:00:00Z');
   assert.equal(norm.updatedAt, '2026-01-02T00:00:00Z');

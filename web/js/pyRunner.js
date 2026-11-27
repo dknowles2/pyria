@@ -4,7 +4,7 @@
 
 const EXECUTION_TIMEOUT_MS = 3000;
 const BOOT_TIMEOUT_MS = 20000;
-const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127k';
+const SANDBOX_IFRAME_URL = '/py-sandbox.html?v=20261127l';
 const MAX_PARTIAL_STDOUT_BYTES = 16384;
 const MAX_PARTIAL_STDOUT_LINES = 200;
 const STDOUT_TRUNCATED_NOTICE = '\n... (output truncated)';
@@ -214,6 +214,14 @@ function sanitizeSandboxResult(mode, raw) {
         : 0;
     base.purchased = sanitizeStringArray(src.purchased);
     base.equipped = sanitizeStringArray(src.equipped);
+    const invRaw = sanitizePlainObject(src.inventory);
+    base.inventory = {
+      arrows: typeof invRaw.arrows === 'number' ? Math.max(0, Math.trunc(invRaw.arrows)) : 0,
+      potions: typeof invRaw.potions === 'number' ? Math.max(0, Math.trunc(invRaw.potions)) : 0,
+    };
+    base.customItems = sanitizeStringArray(src.customItems)
+      .map((item) => item.slice(0, 80))
+      .slice(0, 20);
   }
   return base;
 }
