@@ -105,7 +105,7 @@
           "id": "trial-01-03",
           "trialType": "code",
           "title": "Your First say() Spell",
-          "storyPrompt": "Now it's your turn to type a Python spell from scratch! Tip: lines starting with `#` in the coding box are comments (notes that Python ignores). Click the coding box below on a new line without `#`, type `say(\"Hello, Pyria!\")`, and press Run!",
+          "storyPrompt": "Now it's your turn to type a Python spell from scratch! Click the coding box below, type `say(\"Hello, Pyria!\")`, and press Run!",
           "objective": "Use say() to display the exact message: Hello, Pyria!",
           "concepts": [
             "function_calls",
@@ -755,6 +755,7 @@
         },
         {
           "id": "trial-03-05",
+          "trialType": "code",
           "title": "The Secret Word Lock (== with Strings)",
           "storyPrompt": "You can use `==` with words (strings) too! Just make sure the spelling and capital letters match inside the quotes. Check whether `password == \"EMBER\"` to crack the magma seal!",
           "objective": "Start with password = \"EMBER\" and seal = \"INTACT\". Write an if statement checking if password == \"EMBER\": set seal = \"BROKEN\" and shout(\"Seal broken!\").",
@@ -783,6 +784,7 @@
         },
         {
           "id": "trial-03-06",
+          "trialType": "code",
           "title": "Unchain Emberwing (Conditionals Capstone)",
           "storyPrompt": "Emberwing's magma lock stands before you! Your dragon-key holds `ember_power = 75`, and the lock has `lock_power = 60`. New superpower: adding `else:` gives Python a backup plan that runs whenever the `if` check is False! Use `if / else` to compare the two boxes and set Emberwing free!",
           "objective": "Given ember_power = 75 and lock_power = 60, write an if / else: if ember_power > lock_power, set gate_status = \"OPEN\" and shout(\"Emberwing is free!\"); else, set gate_status = \"LOCKED\".",
@@ -990,6 +992,7 @@
         },
         {
           "id": "trial-04-03",
+          "trialType": "code",
           "title": "Snowstorm Wind Gauge",
           "storyPrompt": "Icy winds howl across the canyon! Let's practice `if / elif / else` again, this time checking from highest to lowest using `>=`.",
           "objective": "Given wind = 45, set weather to \"BLIZZARD\" if wind >= 60, \"GUSTY\" if wind >= 30, or \"CALM\" otherwise. Then print(weather).",
@@ -1016,6 +1019,7 @@
         },
         {
           "id": "trial-04-04",
+          "trialType": "code",
           "title": "Four-Tier Explorer Badge",
           "storyPrompt": "You can stack MORE than one `elif`! An ancient frost-pedestal awards a badge based on how many Byte Shards you carry: GOLD (`>= 80`), SILVER (`>= 40`), BRONZE (`>= 10`), or STARTER.",
           "objective": "Given shards = 55, use if / elif / elif / else to set badge to \"GOLD\" (>=80), \"SILVER\" (>=40), \"BRONZE\" (>=10), or \"STARTER\", then print(badge).",
@@ -1042,6 +1046,7 @@
         },
         {
           "id": "trial-04-05",
+          "trialType": "code",
           "title": "Matching Rune Words with elif",
           "storyPrompt": "Just like numbers, `elif` works great with string `==` checks! The Crystal Obelisk reacts differently to `\"FIRE\"`, `\"ICE\"`, or any other word.",
           "objective": "Given rune = \"ICE\", use if / elif / else: if rune == \"FIRE\" set action = \"MELT\", elif rune == \"ICE\" set action = \"GLOW\", else set action = \"WAIT\". Then print(action).",
@@ -1069,6 +1074,7 @@
         },
         {
           "id": "trial-04-06",
+          "trialType": "code",
           "title": "Free Glacier (Multi-Branch Capstone)",
           "storyPrompt": "Glacier's crystal vault needs at least 20 frost crystals! In Python, the star symbol `*` multiplies numbers—you found 4 clusters with 5 crystals each (`4 * 5`). Calculate `crystals`, then use `if / elif / else` to open Glacier's Vault!",
           "objective": "Set crystals = 4 * 5. If crystals >= 20, set vault_open = True and print(\"Glacier is free!\"); elif crystals >= 10, set vault_open = False; else, set vault_open = False.",
@@ -1294,6 +1300,7 @@
         },
         {
           "id": "trial-05-03",
+          "trialType": "code",
           "title": "Both Must Be True: and",
           "storyPrompt": "Sometimes a dungeon door needs TWO things to be True at once! Python's `and` keyword checks BOTH sides: `has_key and has_torch` is only `True` if you have the key AND the torch.",
           "objective": "Given has_key = True and has_torch = True, set can_enter = has_key and has_torch, then if can_enter: print(\"Enter!\").",
@@ -1321,6 +1328,7 @@
         },
         {
           "id": "trial-05-04",
+          "trialType": "code",
           "title": "Either One Works: or",
           "storyPrompt": "A fallen ravine blocks the forest path! You can cross if you have a rope OR if you have wings. Python's `or` keyword is `True` as long as AT LEAST ONE side is `True`!",
           "objective": "Given has_rope = False and has_wings = True, set can_cross = has_rope or has_wings, then if can_cross: print(\"Crossed!\").",
@@ -1348,6 +1356,7 @@
         },
         {
           "id": "trial-05-05",
+          "trialType": "code",
           "title": "Flip It Around: not",
           "storyPrompt": "Python's `not` keyword flips a Boolean upside down: `not False` becomes `True`, and `not True` becomes `False`! Check if Bramble is `not is_asleep` so you can talk to him.",
           "objective": "Given is_asleep = False and status = \"QUIET\", write: if not is_asleep:, set status = \"AWAKE\" and print(\"Bramble hears you!\").",
@@ -1375,6 +1384,7 @@
         },
         {
           "id": "trial-05-06",
+          "trialType": "code",
           "title": "Awaken Bramble (Logic & Strings Capstone)",
           "storyPrompt": "Bramble's canopy vault captured a messy whisper: `\"  bramble wake  \"`. Clean it with `.strip().upper()`, and use `len(chant)` (Python's built-in letter counter!) with `and` to check BOTH that it equals `\"BRAMBLE WAKE\"` AND has more than 5 letters!",
           "objective": "Clean raw_chant = \"  bramble wake  \" into chant = raw_chant.strip().upper(). If (chant == \"BRAMBLE WAKE\") and (len(chant) > 5), set gate_open = True and print(\"Bramble is free!\").",
@@ -1585,6 +1595,7 @@
         },
         {
           "id": "trial-06-03",
+          "trialType": "code",
           "title": "Twin Pressure Valves (and + Comparisons)",
           "storyPrompt": "Two underwater pressure gauges guard the flooded bridge. BOTH `left_psi` and `right_psi` must be at least 30 for the seal to balance!",
           "objective": "Given left_psi = 40, right_psi = 40, and seal = \"UNBALANCED\", if (left_psi >= 30) and (right_psi >= 30), set seal = \"BALANCED\" and print(seal).",
@@ -1613,6 +1624,7 @@
         },
         {
           "id": "trial-06-04",
+          "trialType": "code",
           "title": "Flood Pump Emergency (or + Math)",
           "storyPrompt": "Water is rising in the Lower Cistern! Add the two depth readings (`18 + 7`). If `depth > 20` OR `leak` is True, switch on the emergency pumps!",
           "objective": "Set depth = 18 + 7, leak = False, and pump_on = False. If (depth > 20) or leak, set pump_on = True and print(\"Pumps active!\").",
@@ -1641,6 +1653,7 @@
         },
         {
           "id": "trial-06-05",
+          "trialType": "code",
           "title": "Crypt Ferry Weight Check",
           "storyPrompt": "A wooden skiff carries 3 stone chests weighing 15 units each across the marsh. Multiply to find `total_weight`, then use `if / else` to make sure it is `<= 50`!",
           "objective": "Set chests = 3, weight_each = 15, total_weight = chests * weight_each. If total_weight <= 50, set boat = \"SAFE\"; else set boat = \"TOO HEAVY\". Print(boat).",
@@ -1669,6 +1682,7 @@
         },
         {
           "id": "trial-06-06",
+          "trialType": "code",
           "title": "Release Mire (Sunken Crypt Capstone)",
           "storyPrompt": "Mire's underwater bell-chamber needs BOTH enough bubble power (`5 * 6`) AND Mire's name cleaned into uppercase! Combine math, `.strip().upper()`, and `and` to free Mire!",
           "objective": "Set bubbles = 5 * 6, call = \"  mire  \".strip().upper(), and mire_free = False. If (bubbles >= 25) and (call == \"MIRE\"), set mire_free = True and print(\"Mire is free!\").",
