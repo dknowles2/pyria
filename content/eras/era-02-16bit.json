@@ -763,7 +763,7 @@
           "referenceSolution": "crates = [\"fish\", \"gold\", \"salt\", \"pearl\"]\nrare = [\"gold\", \"pearl\"]\nfound = 0\nfor c in crates:\n    if c in rare:\n        found += 1\nprint(found)\n",
           "testCode": "expected = sum(1 for c in crates if c in rare)\nassert found == expected and OUTPUT.strip() == str(expected)",
           "hints": {
-            "tier1_nudge": "Check membership with `if c in rare:` inside your `for` loop, then add 1 to `found`.",
+            "tier1_nudge": "Pip checks the manifest: 'Use `in` to ask whether each crate appears in the rare list, and add one to `found` only on the turns where the answer is yes.'",
             "tier2_pattern": "for <item> in <crates>:\n    if <item> in <rare_list>:\n        found += 1\nprint(found)",
             "tier3_walkthrough": "Loop `for c in crates:`, check `if c in rare:`, increment `found += 1`, and `print(found)` at the end."
           },
@@ -2383,7 +2383,7 @@
           "referenceSolution": "sec = 3\nwhile sec > 0:\n    print(sec)\n    sec -= 1\n",
           "testCode": "assert sec == 0 and OUTPUT.strip().splitlines() == ['3', '2', '1']",
           "hints": {
-            "tier1_nudge": "Inside the `while sec > 0:` loop, print `sec` first, then write `sec -= 1`.",
+            "tier1_nudge": "Pip counts down with the clock: 'Loop while `sec` is still above zero, print it FIRST, then count down by one with `-=`.'",
             "tier2_pattern": "while sec > <stop_value>:\n    print(sec)\n    sec -= <step>",
             "tier3_walkthrough": "Write `while sec > 0:` with indented `print(sec)` and `sec -= 1`."
           },
@@ -2893,7 +2893,7 @@
           "referenceSolution": "commands = [\"WIND\", \"WIND\", \"WIND\", \"STOP\"]\ninput = lambda p=\"\": commands.pop(0)\ndone = 0\nwhile True:\n    cmd = input(\"Command: \")\n    if cmd == \"STOP\":\n        break\n    done += 1\nprint(done)\n",
           "testCode": "assert done == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Inside `while True:`, grab `cmd = input()`, check `if cmd == \"STOP\": break`, and otherwise add 1 to `done`.",
+            "tier1_nudge": "Pip waits by the command tape: 'A `while True:` loop never stops on its own, so it needs a `break` inside — compare each command against the stop word FIRST, then count the ones that are not it.'",
             "tier2_pattern": "while True:\n    cmd = input(\"<prompt>\")\n    if cmd == \"<stop_word>\":\n        break\n    done += 1\nprint(done)",
             "tier3_walkthrough": "Start with `done = 0`, write `while True:`, set `cmd = input(\"Command: \")`, `if cmd == \"STOP\": break`, `done += 1`, then `print(done)`."
           },
@@ -3766,7 +3766,7 @@
           "referenceSolution": "def find_gear(gears, target):\n    if target in gears:\n        return target\n    return None\n\nresult = find_gear([4, 6, 10], 99)\nif result is None:\n    print(\"MISSING\")\n",
           "testCode": "assert find_gear([4, 6, 10], 6) == 6, \"Expected find_gear([4, 6, 10], 6) == 6\"\nassert find_gear([4, 6, 10], 99) is None, \"Expected find_gear([4, 6, 10], 99) is None\"\nassert result is None, f\"Expected result is None, got {result!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'MISSING'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Check `if target in gears:` to return `target`, otherwise `return None`. Then test `if result is None:`.",
+            "tier1_nudge": "Pip searches the gear box: 'Return the target when `in` finds it; when the function falls past that check instead, hand back Python's nothing-at-all value — then test the result with `is`.'",
             "tier2_pattern": "def find_gear(<list>, <target>):\n    if <target> in <list>:\n        return <target>\n    return <nothing_value>\n\nif result is <nothing_value>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Return `target` when `target in gears`, else `return None`. Call `result = find_gear([4, 6, 10], 99)` and print `\"MISSING\"` if `result is None`."
           },
