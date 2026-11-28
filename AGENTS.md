@@ -20,7 +20,7 @@ Pyria is primarily for **kids around 10 years old**. All player-facing text—in
 - **No Claude-style mannered prose**: No em-dashes (`—`) in player-facing text, no purple prose (*sabotaged*, *diorama*, *isometric*, *Gouraud-shaded*, *shimmering*, *woven from*), no cheesy sound-effect openers or all-caps hype (*"Splash-sparkle!"*, *"RUMBLE-CRUNCH!"*, *"WOOHOO!"*, *"IMPOSSIBLE!!"*), and no canned template openers.
 - **No unexplained coding jargon**: Avoid *syntax*, *snippet*, *parameter*, *argument*, *attribute*, *method*, *override*, *subclass*, *superclass*, *iterate*, *concatenate*, *invoke*, *negate*, *immutable*, *deduplicate*, *invariant*, *runtime exception*, *zero-based index*, *expression*, *comprehension*, *data structures*. Always introduce real Python concepts in concrete, everyday words.
 - Follow all detailed authoring and verification rules in `.agents/rules/lesson-authoring.md` whenever editing lesson or curriculum content.
-- `npm run test:text` enforces the rules above over `content/eras/*.json`, `content/game.json`, `web/js/*.js` and `web/index.html`. `content/maps/*.json` is not covered yet (it still has 26 violations, mostly entity labels left stale by an earlier retitling pass).
+- `npm run test:text` enforces the rules above over `content/eras/*.json`, `content/game.json`, `content/maps/*.json`, `web/js/*.js` and `web/index.html`. Map entity labels are player-visible, so when you retitle a trial, update its map marker too (`content/maps/<realm>.json`).
 
 ## Keep the Main Website (`site/`) Accurate
 

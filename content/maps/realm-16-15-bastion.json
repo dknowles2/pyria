@@ -187,7 +187,7 @@
     {"id": "chest-realm-16-15-bastion-4", "type": "chest", "x": 31, "y": 24, "label": "Storm Bastion Chest #4", "refId": null, "spriteKey": "chest_closed", "shardReward": 40, "requiredTrialId": "trial-16-15-03"},
     {"id": "chest-realm-16-15-bastion-5", "type": "chest", "x": 58, "y": 42, "label": "Storm Bastion Chest #5", "refId": null, "spriteKey": "chest_closed", "shardReward": 45, "requiredTrialId": "trial-16-15-04"},
     {"id": "chest-realm-16-15-bastion-6", "type": "chest", "x": 58, "y": 8, "label": "Storm Bastion Chest #6", "refId": null, "spriteKey": "chest_closed", "shardReward": 50, "requiredTrialId": "trial-16-15-05"},
-    {"id": "bonus-realm-16-15-bastion", "type": "bonus_trial", "x": 22, "y": 43, "label": "Secret Rune: Fulmin's Method Riddle!", "refId": "trial-16-15-bonus", "spriteKey": "torch"},
+    {"id": "bonus-realm-16-15-bastion", "type": "bonus_trial", "x": 22, "y": 43, "label": "Secret Rune: Fulmin's Self Riddle", "refId": "trial-16-15-bonus", "spriteKey": "torch"},
     {"id": "egg-realm-16-15-bastion-a", "type": "easter_egg", "x": 15, "y": 8, "label": "Glitch Plaque", "refId": null, "spriteKey": "statue", "title": "Null's Storm Bastion Memo", "message": "Lord Null scribbled: 'How did the Code-Tamer get past Storm Bastion?!'", "shardReward": 20},
     {"id": "egg-realm-16-15-bastion-b", "type": "easter_egg", "x": 48, "y": 42, "label": "Glowing Bit Crystal", "refId": null, "spriteKey": "torch", "title": "Hidden Storm Bastion Bit!", "message": "Pip dances around a crystal humming with Lightning magic!", "shardReward": 20}
   ]

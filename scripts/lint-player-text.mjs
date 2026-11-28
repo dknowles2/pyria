@@ -9,16 +9,17 @@
  *
  * Scanned:
  *   content/eras/*.json, content/game.json  player-facing fields
+ *   content/maps/*.json                     region names, entity labels,
+ *                                           easter-egg titles and messages
  *   web/js/*.js                             prose string literals
  *   web/index.html                          visible text + a11y attributes
  *
  * Not scanned, deliberately:
- *   content/maps/*.json  26 known violations, mostly entity labels left stale
- *                        by #153's trial retitling. Wants a content pass of
- *                        its own; extend DIRS once that lands.
  *   site/                the parent-facing website, which AGENTS.md governs
  *                        separately and where terms like "Gouraud-shaded" are
  *                        correct.
+ *   assets/world/maps_bundle.js  a dev-preview copy of content/maps read only
+ *                        by assets/world/preview.html, and already stale.
  *   docs/, assets/, scripts/, worker/   not read by children.
  */
 import fs from 'node:fs';
@@ -115,6 +116,10 @@ const contentFiles = [
   'content/game.json',
   ...fs.readdirSync(path.join(ROOT, 'content/eras')).filter((f) => f.endsWith('.json')).sort()
     .map((f) => `content/eras/${f}`),
+  // Map labels are player-visible: they name the markers on the overworld.
+  // schema.json is the JSON Schema, not content.
+  ...fs.readdirSync(path.join(ROOT, 'content/maps')).filter((f) => f.endsWith('.json') && f !== 'schema.json').sort()
+    .map((f) => `content/maps/${f}`),
 ];
 for (const rel of contentFiles) {
   const data = JSON.parse(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
