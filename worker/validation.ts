@@ -61,6 +61,11 @@ const SAVE_STRING_LIST_KEYS = new Set<string>([
 
 const SAVE_SCALAR_STRING_KEYS = new Set<string>(['eraId', 'realmId', 'visualEra']);
 
+const STATS_STRING_LIST_KEYS = new Set<string>([
+  'customItems',
+  'completedWorkshopChallenges',
+]);
+
 const SERVER_MANAGED_SAVE_KEYS = new Set<string>([
   'id',
   'heroName',
@@ -308,7 +313,25 @@ export function validateSavePayload(
           if (sk.length > 64 || hasControlChars(sk)) {
             throw new ValidationError('Invalid stats key');
           }
-          if (sv !== null && (typeof sv !== 'number' || !Number.isFinite(sv))) {
+          if (STATS_STRING_LIST_KEYS.has(sk)) {
+            if (sv !== null) {
+              if (!Array.isArray(sv)) {
+                throw new ValidationError(`stats.${sk} must be a list of strings or null`);
+              }
+              if (sv.length > MAX_SAVE_LIST_ITEMS) {
+                throw new ValidationError(
+                  `stats.${sk} exceeds maximum item count (${MAX_SAVE_LIST_ITEMS})`
+                );
+              }
+              for (const item of sv) {
+                if (typeof item !== 'string' || item.length > MAX_SAVE_STRING_LEN || hasControlChars(item)) {
+                  throw new ValidationError(
+                    `stats.${sk} items must be strings up to ${MAX_SAVE_STRING_LEN} characters without control characters`
+                  );
+                }
+              }
+            }
+          } else if (sv !== null && (typeof sv !== 'number' || !Number.isFinite(sv))) {
             throw new ValidationError(`stats.${sk} must be a finite number or null`);
           }
         }
@@ -413,11 +436,19 @@ export function validateSavePayload(
   return { sanitized, heroName };
 }
 
+export const MAX_ERROR_TYPE_LEN = 64;
+export const MAX_DURATION_MS = 86_400_000;
+const ERROR_TYPE_RE = /^[A-Za-z0-9_.:-]+$/;
+
 export function validateAttemptPayload(body: Record<string, unknown>): {
   trialId: string;
   passed: boolean;
   hintsUsed: number;
   code: string;
+  difficultyMode: DifficultyMode;
+  isPractice: boolean;
+  errorType: string | null;
+  durationMs: number | null;
 } {
   const rawTrialId = body.trialId !== undefined ? body.trialId : body.trial_id;
   if (typeof rawTrialId !== 'string' || hasControlChars(rawTrialId)) {
@@ -462,11 +493,70 @@ export function validateAttemptPayload(body: Record<string, unknown>): {
     );
   }
 
+  const rawDifficulty =
+    body.difficultyMode !== undefined ? body.difficultyMode : body.difficulty_mode;
+  let difficultyMode: DifficultyMode = 'standard';
+  if (rawDifficulty !== undefined && rawDifficulty !== null) {
+    if (
+      typeof rawDifficulty !== 'string' ||
+      !VALID_DIFFICULTIES.has(rawDifficulty as DifficultyMode)
+    ) {
+      throw new ValidationError("difficultyMode must be 'explorer', 'standard', or 'challenge'");
+    }
+    difficultyMode = rawDifficulty as DifficultyMode;
+  }
+
+  const rawIsPractice = body.isPractice !== undefined ? body.isPractice : body.is_practice;
+  let isPractice = false;
+  if (rawIsPractice !== undefined && rawIsPractice !== null) {
+    if (typeof rawIsPractice !== 'boolean') {
+      throw new ValidationError('isPractice must be a boolean');
+    }
+    isPractice = rawIsPractice;
+  }
+
+  const rawErrorType = body.errorType !== undefined ? body.errorType : body.error_type;
+  let errorType: string | null = null;
+  if (rawErrorType !== undefined && rawErrorType !== null && rawErrorType !== '') {
+    if (
+      typeof rawErrorType !== 'string' ||
+      rawErrorType.length > MAX_ERROR_TYPE_LEN ||
+      !ERROR_TYPE_RE.test(rawErrorType)
+    ) {
+      throw new ValidationError(
+        `errorType must be a string up to ${MAX_ERROR_TYPE_LEN} characters matching /^[A-Za-z0-9_.:-]+$/`
+      );
+    }
+    errorType = rawErrorType;
+  }
+  if (passed) {
+    errorType = null;
+  }
+
+  const rawDuration = body.durationMs !== undefined ? body.durationMs : body.duration_ms;
+  let durationMs: number | null = null;
+  if (rawDuration !== undefined && rawDuration !== null) {
+    if (
+      typeof rawDuration !== 'number' ||
+      !Number.isFinite(rawDuration) ||
+      !Number.isInteger(rawDuration) ||
+      rawDuration < 0 ||
+      rawDuration > MAX_DURATION_MS
+    ) {
+      throw new ValidationError(`durationMs must be an integer between 0 and ${MAX_DURATION_MS}`);
+    }
+    durationMs = rawDuration;
+  }
+
   return {
     trialId,
     passed,
     hintsUsed: Math.max(0, Math.min(hintsNum, 1000)),
     code,
+    difficultyMode,
+    isPractice,
+    errorType,
+    durationMs,
   };
 }
 

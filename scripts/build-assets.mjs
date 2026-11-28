@@ -47,14 +47,14 @@ function copyRecursive(srcDir, dstDir, filterFn = () => true, relPrefix = '') {
   return count;
 }
 
-function main() {
-  fs.rmSync(DIST, { recursive: true, force: true });
-  fs.mkdirSync(DIST, { recursive: true });
+export function buildAssets({ rootDir = ROOT, distDir = DIST, quiet = false } = {}) {
+  fs.rmSync(distDir, { recursive: true, force: true });
+  fs.mkdirSync(distDir, { recursive: true });
 
   let total = 0;
 
   // 1. Copy web/ -> dist/assets/ (excluding test files)
-  total += copyRecursive(path.join(ROOT, 'web'), DIST, (relPath, entry) => {
+  total += copyRecursive(path.join(rootDir, 'web'), distDir, (relPath, entry) => {
     if (entry.isFile() && /\.test\.(m?js|ts)$/i.test(entry.name)) {
       return false;
     }
@@ -63,8 +63,8 @@ function main() {
 
   // 2. Copy content/ -> dist/assets/content/
   total += copyRecursive(
-    path.join(ROOT, 'content'),
-    path.join(DIST, 'content')
+    path.join(rootDir, 'content'),
+    path.join(distDir, 'content')
   );
 
   // 3. Copy gameplay sprites & tilesets (exclude preview.html, *.py, and direct-child *.png showcase files)
@@ -78,21 +78,21 @@ function main() {
   };
 
   total += copyRecursive(
-    path.join(ROOT, 'assets', 'sprites'),
-    path.join(DIST, 'assets', 'sprites'),
+    path.join(rootDir, 'assets', 'sprites'),
+    path.join(distDir, 'assets', 'sprites'),
     gameplayAssetFilter
   );
 
   total += copyRecursive(
-    path.join(ROOT, 'assets', 'tilesets'),
-    path.join(DIST, 'assets', 'tilesets'),
+    path.join(rootDir, 'assets', 'tilesets'),
+    path.join(distDir, 'assets', 'tilesets'),
     gameplayAssetFilter
   );
 
   // 4. Copy assets/world/maps_bundle.js only
-  const mapsBundleSrc = path.join(ROOT, 'assets', 'world', 'maps_bundle.js');
+  const mapsBundleSrc = path.join(rootDir, 'assets', 'world', 'maps_bundle.js');
   if (fs.existsSync(mapsBundleSrc)) {
-    const worldDstDir = path.join(DIST, 'assets', 'world');
+    const worldDstDir = path.join(distDir, 'assets', 'world');
     fs.mkdirSync(worldDstDir, { recursive: true });
     fs.copyFileSync(mapsBundleSrc, path.join(worldDstDir, 'maps_bundle.js'));
     total += 1;
@@ -116,7 +116,7 @@ function main() {
 
   const pyodideCdn = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/';
   let sandboxCsp = null;
-  const sandboxPath = path.join(DIST, 'py-sandbox.html');
+  const sandboxPath = path.join(distDir, 'py-sandbox.html');
   if (fs.existsSync(sandboxPath)) {
     const html = fs.readFileSync(sandboxPath, 'utf-8');
     const hashes = [];
@@ -179,10 +179,15 @@ function main() {
     );
   }
 
-  fs.writeFileSync(path.join(DIST, '_headers'), headersLines.join('\n'), 'utf-8');
+  fs.writeFileSync(path.join(distDir, '_headers'), headersLines.join('\n'), 'utf-8');
   total += 1;
 
-  console.log(`Built ${total} static asset files into ${path.relative(ROOT, DIST)}/`);
+  if (!quiet) {
+    console.log(`Built ${total} static asset files into ${path.relative(rootDir, distDir)}/`);
+  }
+  return total;
 }
 
-main();
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  buildAssets();
+}

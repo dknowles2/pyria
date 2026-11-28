@@ -5,6 +5,8 @@ export const OAUTH_STATE_COOKIE = 'pyria_oauth_state';
 export const HERO_SESSION_TTL_SECONDS = 60 * 60 * 24 * 90; // 90 days
 export const PARENT_SESSION_TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
 export const OAUTH_STATE_TTL_SECONDS = 60 * 10; // 10 minutes
+export const PARENT_LINK_TTL_SECONDS = 60 * 15; // 15 minutes
+export const HERO_PLAY_TTL_SECONDS = 60 * 15; // 15 minutes
 
 const HERO_WORDS_FIRST = [
   'AMBER', 'AZURE', 'BLAZE', 'BRIGHT', 'CEDAR', 'COBALT', 'COMET', 'CORAL',
@@ -202,12 +204,34 @@ export function generateHeroCode(): string {
   return `${w1}-${w2}-${num}`;
 }
 
+const HERO_WORDS_FIRST_SET = new Set<string>(HERO_WORDS_FIRST);
+const HERO_WORDS_SECOND_SET = new Set<string>(HERO_WORDS_SECOND);
+
 export function normalizeHeroCode(raw: string): string {
-  return raw
+  const basic = raw
     .trim()
     .toUpperCase()
     .replace(/[\s_–—]+/g, '-')
     .replace(/-+/g, '-');
+
+  // Also accept dashless codes like "EMBERDRAGON482103" by matching known word lists
+  if (!basic.includes('-')) {
+    const m = basic.match(/^([A-Z]+)(\d{6})$/);
+    if (m) {
+      const letters = m[1];
+      const digits = m[2];
+      for (const w1 of HERO_WORDS_FIRST_SET) {
+        if (letters.startsWith(w1)) {
+          const rest = letters.slice(w1.length);
+          if (HERO_WORDS_SECOND_SET.has(rest)) {
+            return `${w1}-${rest}-${digits}`;
+          }
+        }
+      }
+    }
+  }
+
+  return basic;
 }
 
 export async function hashHeroCode(normalizedCode: string, secret: string): Promise<string> {
