@@ -338,7 +338,7 @@
           "testCode": "assert OUTPUT.strip() == 'Pyria Rocks', f'Expected \"Pyria Rocks\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps between the quotes: 'Put a space right after Pyria (\"Pyria \") or right before Rocks (\" Rocks\")!'",
-            "tier2_pattern": "say(\"Pyria \" + \"Rocks\")",
+            "tier2_pattern": "say(\"<first_part> \" + \"<second_part>\")    # the space goes inside one pair of quotes",
             "tier3_walkthrough": "Change the line to:\nsay(\"Pyria \" + \"Rocks\")"
           },
           "difficultyOverride": null,
@@ -426,8 +426,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip grins: '`+` glues two strings right next to each other with no extra spaces!'",
-            "tier2_pattern": "\"Pyria\" + \"!\" becomes \"Pyria!\"",
-            "tier3_walkthrough": "Tap Option B (`Pyria!`)!"
+            "tier2_pattern": "`+` joins two strings with nothing at all between them, so no extra character appears.",
+            "tier3_walkthrough": "Tap Option B (`Pyria!`) — `+` glues the two strings with no space, giving `Pyria!`."
           },
           "difficultyOverride": null
         }
@@ -540,8 +540,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip points at `say(stones)`: 'No quotes around `stones` means Python opens the box and says what is inside!'",
-            "tier2_pattern": "The box `stones` holds `6`, so `say(stones)` outputs `6`.",
-            "tier3_walkthrough": "Tap Option B (`6`)!"
+            "tier2_pattern": "No quotes tells Python to open the box; quotes would make it a plain word instead.",
+            "tier3_walkthrough": "Tap Option B (`6`) — without quotes, `say(stones)` opens the box and says what is inside it."
           },
           "difficultyOverride": null
         },
@@ -608,7 +608,7 @@
           "referenceSolution": "hero = \"Pip\"\nsay(hero)\n",
           "testCode": "assert hero == 'Pip', f'Expected hero == \"Pip\", got {hero!r}'\nassert OUTPUT.strip() == 'Pip', f'Expected \"Pip\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at the quotes: 'Put quotes around \"Pip\" on line 1, and NO quotes around hero inside say(hero) on line 2!'",
+            "tier1_nudge": "Pip points at the quotes: 'The TEXT needs quotes when you store it; the BOX NAME never does when you pass it along.'",
             "tier2_pattern": "<variable> = \"<text>\"\nsay(<variable>)",
             "tier3_walkthrough": "Write:\nhero = \"Pip\"\nsay(hero)"
           },
@@ -722,8 +722,8 @@
           "referenceSolution": "dragon = \"Pebble\"\nsay(\"Dragon:\")\nsay(dragon)\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['Dragon:', 'Pebble'], f'Expected [\"Dragon:\", \"Pebble\"], got {lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'First `say(\"Dragon:\")` WITH quotes, then `say(dragon)` with NO quotes!'",
-            "tier2_pattern": "say(\"Dragon:\")\nsay(dragon)",
+            "tier1_nudge": "Pip cheers: 'Line 1 says an exact label, so it needs quotes. Line 2 opens a box, so it must not have them.'",
+            "tier2_pattern": "say(\"<label>\")\nsay(<variable>)",
             "tier3_walkthrough": "Add:\nsay(\"Dragon:\")\nsay(dragon)"
           },
           "difficultyOverride": null,
@@ -763,7 +763,7 @@
           "referenceSolution": "gems = 10\nsay(gems)\n",
           "testCode": "assert gems == 10, f'Expected gems == 10, got {gems!r}'\nassert OUTPUT.strip() == '10', f'Expected 10, got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Numbers don't wear quotes! Write `gems = 10` on line 1.'",
+            "tier1_nudge": "Pip says: 'Numbers never wear quotes — put the number straight into the box with `=`, then open the box to say it.'",
             "tier2_pattern": "<variable> = <number>\nsay(<variable>)",
             "tier3_walkthrough": "Write:\ngems = 10\nsay(gems)"
           },
@@ -910,7 +910,7 @@
           "referenceSolution": "part_a = \"Mossy \"\npart_b = \"Ruins\"\nplace = part_a + part_b\nsay(place)\n",
           "testCode": "assert place == 'Mossy Ruins', f'Expected \"Mossy Ruins\", got {place!r}'\nassert OUTPUT.strip() == 'Mossy Ruins', f'Expected \"Mossy Ruins\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip holds up both boxes: 'Write `place = part_a + part_b` (no quotes around the variable names!), then `say(place)`!'",
+            "tier1_nudge": "Pip holds up both boxes: 'Glue the two string boxes together with `+` and store the result in a THIRD box — no quotes around any box name.'",
             "tier2_pattern": "place = <var1> + <var2>\nsay(place)",
             "tier3_walkthrough": "Add:\nplace = part_a + part_b\nsay(place)"
           },
@@ -983,7 +983,7 @@
           "referenceSolution": "power = 10\npower = power + 5\nsay(power)\n",
           "testCode": "assert power == 15, f'Expected 15, got {power!r}'\nassert OUTPUT.strip() == '15', f'Expected \"15\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Write `power = power + 5` on line 2, then `say(power)` on line 3!'",
+            "tier1_nudge": "Pip cheers: 'Put the box's OWN old value on the right of the `=`, add to it, and the box keeps the new total.'",
             "tier2_pattern": "<var> = <var> + <amount>\nsay(<var>)",
             "tier3_walkthrough": "Add:\npower = power + 5\nsay(power)"
           },
@@ -1055,7 +1055,7 @@
           "referenceSolution": "gems = 12\ngems = gems - 4\nsay(gems)\n",
           "testCode": "assert gems == 8, f'Expected 8, got {gems!r}'\nassert OUTPUT.strip() == '8', f'Expected \"8\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at `-`: 'Write `gems = gems - 4` on line 2, then `say(gems)` on line 3!'",
+            "tier1_nudge": "Pip points at `-`: 'Same trick as adding, but with a minus — the box's own value on the right, lowered by an amount.'",
             "tier2_pattern": "<var> = <var> - <amount>\nsay(<var>)",
             "tier3_walkthrough": "Add:\ngems = gems - 4\nsay(gems)"
           },
@@ -1501,7 +1501,7 @@
           "referenceSolution": "lava = 90\nif lava > 50:\n    shout(\"Too hot!\")\n",
           "testCode": "assert OUTPUT.strip() == 'TOO HOT!', f'Expected \"TOO HOT!\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Write `if lava > 50:` on line 2, then press Enter and indent 4 spaces for `shout(\"Too hot!\")`!'",
+            "tier1_nudge": "Pip cheers: 'Two golden rules — a colon at the end of the `if` line, and 4 spaces of indent on the line underneath it.'",
             "tier2_pattern": "if <var> > <number>:\n    shout(\"<message>\")",
             "tier3_walkthrough": "Add:\nif lava > 50:\n    shout(\"Too hot!\")"
           },
@@ -2101,7 +2101,7 @@
           "testCode": "assert ice_state == 'slush', f'Expected \"slush\", got {ice_state!r}'\nassert OUTPUT.strip() == 'slush', f'Expected \"slush\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip points at `ice_state = \"slush\"`: 'Give it 4 spaces (or tap ⇥ Indent) so it sits INSIDE the `elif` block!'",
-            "tier2_pattern": "elif temp <= 10:\n    ice_state = \"slush\"",
+            "tier2_pattern": "elif <condition>:\n    <action indented 4 spaces>",
             "tier3_walkthrough": "Add 4 spaces before `ice_state = \"slush\"`."
           },
           "difficultyOverride": null,
@@ -2153,7 +2153,7 @@
           "referenceSolution": "wind = 45\nif wind >= 60:\n    weather = \"BLIZZARD\"\nelif wind >= 30:\n    weather = \"GUSTY\"\nelse:\n    weather = \"CALM\"\nprint(weather)\n",
           "testCode": "assert isinstance(weather, str) and weather.strip().upper() == 'GUSTY', f\"Expected weather to be 'GUSTY', got {weather!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('GUSTY'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('GUSTY')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'GUSTY', got {_got!r} (check your spelling!)\"\n",
           "hints": {
-            "tier1_nudge": "Pip points between `if` and `else:`: 'Add `elif wind >= 30:` with 0 spaces, then indent `weather = \"GUSTY\"` 4 spaces underneath!'",
+            "tier1_nudge": "Pip points between `if` and `else:`: 'The new branch header sits at 0 spaces like the others, and its action is indented 4 spaces underneath it.'",
             "tier2_pattern": "elif wind >= 30:\n    weather = \"<label>\"",
             "tier3_walkthrough": "Insert these two lines between `if` and `else:`:\nelif wind >= 30:\n    weather = \"GUSTY\""
           },
@@ -2378,8 +2378,8 @@
           "id": "trial-04-06",
           "trialType": "code",
           "title": "Free Glacier (Multi-Branch Capstone)",
-          "storyPrompt": "Glacier's crystal vault needs at least 20 frost crystals! You found 4 clusters with 5 crystals each. Calculate the total crystals, then use a three-way branch to unlock Glacier's Vault!",
-          "objective": "Create the variable `crystals` storing 4 * 5. Then write an if / elif / else chain: if `crystals` is at least 20, store True in the variable `vault_open` and print 'Glacier is free!'; else if `crystals` is at least 10, store False in `vault_open`; otherwise, store False in `vault_open`.",
+          "storyPrompt": "Glacier's crystal vault needs at least 20 frost crystals! You found 4 clusters with 5 crystals each. Calculate the total, then use a three-way branch where each path does something different — the vault opens, or it warns you that you are short, or it stays silent.",
+          "objective": "Create the variable `crystals` storing 4 * 5. Then write an if / elif / else chain: if `crystals` is at least 20, store True in the variable `vault_open` and print 'Glacier is free!'; else if `crystals` is at least 10, store False in `vault_open` and print 'Not enough crystals!'; otherwise, just store False in `vault_open`.",
           "concepts": [
             "variables",
             "basic_math",
@@ -2390,16 +2390,16 @@
           "shardReward": 60,
           "unlockId": null,
           "starterCode": {
-            "explorer": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    \nelif crystals >= 10:\n    vault_open = False\nelse:\n    vault_open = False\n",
+            "explorer": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    \nelif crystals >= 10:\n    vault_open = False\n    \nelse:\n    vault_open = False\n",
             "standard": "crystals = 4 * 5\n",
             "challenge": ""
           },
-          "referenceSolution": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")\nelif crystals >= 10:\n    vault_open = False\nelse:\n    vault_open = False\n",
+          "referenceSolution": "crystals = 4 * 5\nif crystals >= 20:\n    vault_open = True\n    print(\"Glacier is free!\")\nelif crystals >= 10:\n    vault_open = False\n    print(\"Not enough crystals!\")\nelse:\n    vault_open = False\n",
           "testCode": "assert crystals == 20, f\"Expected crystals == 20, got {crystals!r}\"\nassert vault_open is True, f\"Expected vault_open is True, got {vault_open!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('Glacier is free!'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('Glacier is free!')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'Glacier is free!', got {_got!r} (check your spelling!)\"\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: '4 * 5 is 20, which matches >= 20! Keep print() indented 4 spaces.'",
-            "tier2_pattern": "if crystals >= 20:\n    vault_open = True\n    print(\"<message>\")\nelif crystals >= 10:\n    ...\nelse:\n    ...",
-            "tier3_walkthrough": "Add:\n    print(\"Glacier is free!\")"
+            "tier1_nudge": "Pip glows blue: '4 * 5 is 20, which matches the first branch — but each of the three paths must do its own thing.'",
+            "tier2_pattern": "if <crystals> >= <open_limit>:\n    vault_open = True\n    print(\"<free_message>\")\nelif <crystals> >= <warn_limit>:\n    vault_open = False\n    print(\"<short_message>\")\nelse:\n    vault_open = False",
+            "tier3_walkthrough": "Complete with:\n    print(\"Glacier is free!\")\nelif crystals >= 10:\n    vault_open = False\n    print(\"Not enough crystals!\")\nelse:\n    vault_open = False"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
@@ -2416,7 +2416,7 @@
               "overrides": {
                 "crystals": 12
               },
-              "expectOutput": "",
+              "expectOutput": "Not enough crystals!",
               "expectVars": {
                 "vault_open": false
               }
@@ -2480,8 +2480,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip tosses a snowball: 'Is 10 strictly GREATER than 10? Nope! Check the `elif` next!'",
-            "tier2_pattern": "`snowballs == 10` is True when `snowballs` is `10`.",
-            "tier3_walkthrough": "Tap Option B (`PERFECT TEN`)!"
+            "tier2_pattern": "`>` means STRICTLY greater, so a value equal to the limit fails it and falls through to the `elif`.",
+            "tier3_walkthrough": "Tap Option B (`PERFECT TEN`) — `10 > 10` is False, so the `elif snowballs == 10` branch runs instead."
           },
           "difficultyOverride": null
         }
@@ -2559,45 +2559,43 @@
         {
           "id": "trial-05-01",
           "trialType": "multiple_choice",
-          "title": "Predict .lower() & and!",
-          "storyPrompt": "Welcome to Echo Woods! Two new tools appear here: `.lower()` turns a string into lowercase letters, and `and` requires BOTH sides of an `if` check to be True. Read the spell below—what will Python `print()`?",
-          "objective": "Trace `.lower()` and `and` in the snippet below and pick the exact output.",
+          "title": "Clean It Up With .lower()!",
+          "storyPrompt": "Welcome to Echo Woods, where the gnarled trees scramble every password into messy capitals! Your first tool here is `.lower()`, which hands back a copy of a string with every letter turned into lowercase. Read the spell below — what will Python `print()`?",
+          "objective": "Predict what `print(word)` displays after `.lower()` is called on `\"ECHO\"`.",
           "concepts": [
             "string_methods",
-            "boolean_logic",
-            "conditionals_if",
             "print_output"
           ],
           "shardReward": 45,
           "unlockId": "hat-wizard-cap",
-          "codeSnippet": "word = \"ECHO\".lower()\nhas_key = True\nif word == \"echo\" and has_key:\n    print(\"OPEN\")\nelse:\n    print(\"LOCKED\")",
+          "codeSnippet": "word = \"ECHO\".lower()\nprint(word)",
           "choices": [
             {
               "id": "a",
-              "label": "OPEN",
-              "explanation": "Awesome! `\"ECHO\".lower()` becomes `\"echo\"`, so `word == \"echo\"` is True AND `has_key` is True—both sides of `and` are True, so it prints `OPEN`!"
+              "label": "ECHO",
+              "explanation": "That is the string before `.lower()` runs — the method hands back a changed copy."
             },
             {
               "id": "b",
-              "label": "LOCKED",
-              "explanation": "Not quite! Look at line 1: `\"ECHO\".lower()` turns `\"ECHO\"` into lowercase `\"echo\"`, so BOTH sides of `and` are True!"
+              "label": "echo",
+              "explanation": "Spot on! `.lower()` turns every letter of `\"ECHO\"` into lowercase, giving `echo`."
             },
             {
               "id": "c",
-              "label": "ECHO",
-              "explanation": "Look at the `print(...)` lines—the spell only prints either `\"OPEN\"` or `\"LOCKED\"`!"
+              "label": "Echo",
+              "explanation": "Close — but `.lower()` lowercases EVERY letter, not just the ones after the first."
             },
             {
               "id": "d",
-              "label": "Nothing prints",
-              "explanation": "Because there is an `else:`, one of the two branches ALWAYS runs!"
+              "label": "4",
+              "explanation": "`.lower()` hands back the lowercased text itself, not a count of its letters."
             }
           ],
-          "correctChoiceId": "a",
+          "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip whispers: 'First figure out what \"ECHO\".lower() turns into—all lowercase letters!'",
-            "tier2_pattern": "word becomes \"echo\", so (\"echo\" == \"echo\") and True -> True!",
-            "tier3_walkthrough": "Tap Option A (`OPEN`) because both sides of `and` are True!"
+            "tier1_nudge": "Pip whispers: 'Read `.lower()` as a question — what does it do to each letter of the word it is called on?'",
+            "tier2_pattern": "`.lower()` returns a copy of the string with every uppercase letter turned down to lowercase.",
+            "tier3_walkthrough": "Tap Option B (`echo`) — `.lower()` lowercases every letter of `\"ECHO\"`."
           },
           "difficultyOverride": null
         },
@@ -2695,13 +2693,14 @@
           "referenceSolution": "raw_key = \"gold\"\nkey = raw_key.upper()\nprint(key)\n",
           "testCode": "assert key == 'GOLD', f'Expected \"GOLD\", got {key!r}'\nassert OUTPUT.strip() == 'GOLD', f'Expected \"GOLD\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Call `raw_key.upper()` (with parentheses!) and store it in `key`.'",
-            "tier2_pattern": "key = raw_key.upper()\nprint(key)",
+            "tier1_nudge": "Pip chirps: 'There is a string method that turns every letter into capitals — call it with parentheses and store the result in `key`.'",
+            "tier2_pattern": "key = <variable>.<method>()\nprint(key)",
             "tier3_walkthrough": "Add:\nkey = raw_key.upper()\nprint(key)"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
             "assign",
+            "method_call:upper",
             "call:print"
           ],
           "variants": [
@@ -2799,7 +2798,36 @@
                 "can_enter": false
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Both Must Be True: and",
+            "prompt": "Some doors need TWO things at once. Python's `and` keyword joins two checks and is only `True` when BOTH sides are `True` — if either side is `False`, the whole thing is `False`.",
+            "question": "What does `can_enter` hold below?",
+            "codeSnippet": "has_key = True\nhas_torch = False\ncan_enter = has_key and has_torch\nprint(can_enter)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "True",
+                "explanation": "`and` needs BOTH sides to be True, and `has_torch` is False here."
+              },
+              {
+                "id": "b",
+                "label": "False",
+                "explanation": "Spot on! One side is False, so `and` makes the whole check False."
+              },
+              {
+                "id": "c",
+                "label": "has_key",
+                "explanation": "`and` compares the two Booleans and hands back a Boolean, not a variable name."
+              },
+              {
+                "id": "d",
+                "label": "Nothing — it causes an error",
+                "explanation": "Joining two Booleans with `and` is perfectly valid Python."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-05-03b",
@@ -3051,7 +3079,7 @@
           "testCode": "assert path == 'CLEAR', f'Expected \"CLEAR\", got {path!r}'\nassert OUTPUT.strip() == 'CLEAR', f'Expected \"CLEAR\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps ⇥ Indent: 'Indent both `path = \"CLEAR\"` and `print(path)` by 4 spaces!'",
-            "tier2_pattern": "if not is_locked:\n    path = \"CLEAR\"\n    print(path)",
+            "tier2_pattern": "if not <flag>:\n    <action indented 4 spaces>\n    <action indented 4 spaces>",
             "tier3_walkthrough": "Add 4 spaces before both lines under `if not is_locked:`."
           },
           "difficultyOverride": null,
@@ -3285,9 +3313,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip counts bubbles: 'First do `12 * 3 = 36`, then `60 - 36 = 24`!'",
-            "tier2_pattern": "24 is not < 15, but 24 IS < 30 -> `elif` runs!",
-            "tier3_walkthrough": "Tap Option B (`CAUTION`)!"
+            "tier1_nudge": "Pip counts bubbles: 'Work out the multiplication inside the brackets FIRST, then subtract that from the starting air.'",
+            "tier2_pattern": "Work out the arithmetic first, then read the branches top to bottom and stop at the first True one.",
+            "tier3_walkthrough": "Tap Option B (`CAUTION`) — the air works out to 24, which fails `< 15` but passes `< 30`."
           },
           "difficultyOverride": null
         },
@@ -3313,7 +3341,7 @@
           "referenceSolution": "raw_rune = \"  TIDE  \"\nrune = raw_rune.strip().lower()\nif rune == \"tide\":\n    valve = \"OPEN\"\nelif rune == \"stone\":\n    valve = \"SHUT\"\nelse:\n    valve = \"WAIT\"\nprint(valve)\n",
           "testCode": "assert not callable(rune), \"Don't forget the parentheses () at the end of .lower() so Python actually runs it!\"\nassert isinstance(rune, str), f\"Expected rune to be a string, got {rune!r}\"\nif rune != 'tide':\n    if rune != rune.strip():\n        assert False, f\"Almost! rune still has extra spaces at the edges ({rune!r}) — make sure you called .strip()!\"\n    if rune.lower() == 'tide':\n        assert False, f\"Almost! Check the capitalization of rune ({rune!r}) — make sure you called .lower()!\"\n    assert False, f\"Expected rune == 'tide', got {rune!r}\"\nassert isinstance(valve, str) and valve.strip().upper() == 'OPEN', f\"Expected valve to be 'OPEN', got {valve!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('OPEN'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('OPEN')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'OPEN', got {_got!r} (check your spelling!)\"\n",
           "hints": {
-            "tier1_nudge": "Pip splashes: 'Without `.strip()`, `rune` is `\"  tide  \"` with spaces, which doesn't equal `\"tide\"`!'",
+            "tier1_nudge": "Pip splashes: 'Lowercasing fixed the capitals, but the raw rune still carries spaces at both ends — and a word with spaces is not equal to the same word without them.'",
             "tier2_pattern": "rune = raw_rune.<trim_spaces>().lower()",
             "tier3_walkthrough": "Line 2 should read:\nrune = raw_rune.strip().lower()"
           },
@@ -3356,8 +3384,8 @@
           "referenceSolution": "start_air = 60\nused_air = 25\nair_left = start_air - used_air\nprint(air_left)\n",
           "testCode": "assert air_left == 35, f'Expected 35, got {air_left!r}'\nassert OUTPUT.strip() == '35', f'Expected \"35\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip taps the minus sign `-`: 'Write `air_left = start_air - used_air` and then `print(air_left)`!'",
-            "tier2_pattern": "air_left = start_air - used_air\nprint(air_left)",
+            "tier1_nudge": "Pip taps the minus sign `-`: 'Subtract the used air from the starting air, store the result in its own box, then print what is inside it.'",
+            "tier2_pattern": "air_left = <start> - <used>\nprint(air_left)",
             "tier3_walkthrough": "Add:\nair_left = start_air - used_air\nprint(air_left)"
           },
           "difficultyOverride": null,
@@ -3447,8 +3475,8 @@
           "referenceSolution": "left_depth = 10\nright_depth = 25\nalert = \"OFF\"\nif (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)\n",
           "testCode": "assert alert == 'ON', f'Expected \"ON\", got {alert!r}'\nassert OUTPUT.strip() == 'ON', f'Expected \"ON\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip blinks: 'With `or`, only ONE side needs to be True — check `(left_depth > 20) or (right_depth > 20)`!'",
-            "tier2_pattern": "if (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)",
+            "tier1_nudge": "Pip blinks: 'With `or`, only ONE side needs to be True — compare each depth against the limit and join the two checks.'",
+            "tier2_pattern": "if (<left> > <limit>) or (<right> > <limit>):\n    alert = \"<on_value>\"\n    print(alert)",
             "tier3_walkthrough": "Add:\nif (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)"
           },
           "difficultyOverride": null,
@@ -3550,8 +3578,8 @@
           "referenceSolution": "chests = 4\nweight_each = 12\ntotal_weight = chests * weight_each\nprint(total_weight)\n",
           "testCode": "assert total_weight == 48, f'Expected 48, got {total_weight!r}'\nassert OUTPUT.strip() == '48', f'Expected \"48\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at `*`: 'Multiply the two variables: `total_weight = chests * weight_each`!'",
-            "tier2_pattern": "total_weight = chests * weight_each\nprint(total_weight)",
+            "tier1_nudge": "Pip points at `*`: 'Multiply the two boxes together with `*` and store the answer in a third box.'",
+            "tier2_pattern": "total_weight = <count> * <each>\nprint(total_weight)",
             "tier3_walkthrough": "Add:\ntotal_weight = chests * weight_each\nprint(total_weight)"
           },
           "difficultyOverride": null,
@@ -3914,8 +3942,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip counts on four claws: 'range(4) gives 0, 1, 2, 3 — count how many numbers that is!'",
-            "tier2_pattern": "range(N) always repeats exactly N times.",
-            "tier3_walkthrough": "Tap Option B (4 times)!"
+            "tier2_pattern": "`range(N)` counts from 0 and stops before N, so it yields exactly N numbers.",
+            "tier3_walkthrough": "Tap Option B (4 times) — `range(4)` yields 0, 1, 2 and 3, so the body runs four times."
           },
           "difficultyOverride": null
         },
@@ -3975,7 +4003,7 @@
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['Wind!', 'Wind!', 'Wind!'], f'Expected 3 lines of Wind!, got {lines!r}'\n",
           "hints": {
             "tier1_nudge": "Pip hops 4 spaces right: 'Put 4 spaces before `print(\"Wind!\")` so it runs inside the `for` loop!'",
-            "tier2_pattern": "for i in range(3):\n    print(\"Wind!\")",
+            "tier2_pattern": "for <var> in range(<count>):\n    <line indented 4 spaces>",
             "tier3_walkthrough": "Indent line 2 by 4 spaces:\n    print(\"Wind!\")"
           },
           "difficultyOverride": null,
@@ -4006,7 +4034,7 @@
           "referenceSolution": "for i in range(4):\n    print(\"GALE!\")\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call print(...) inside your loop.\"\nassert len(_lines) == 4, f\"Expected 4 lines of output, got {len(_lines)}: {_lines!r}\"\nfor _i, _line in enumerate(_lines, 1):\n    if _norm(_line) != _norm('GALE!'):\n        if \"\".join(_norm(_line)) == \"\".join(_norm('GALE!')):\n            assert False, f\"Almost on line {_i}! Some words got squished together (got {_line!r}). Check your spaces!\"\n        assert False, f\"Line {_i}: expected 'GALE!', got {_line!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip blows a tiny horn: 'Indent `print(\"GALE!\")` 4 spaces inside `for i in range(4):`!'",
+            "tier1_nudge": "Pip blows a tiny horn: 'Write the `for` line with the right count, then indent the printing line 4 spaces so it repeats.'",
             "tier2_pattern": "for i in range(<count>):\n    print(\"...\")",
             "tier3_walkthrough": "Write:\nfor i in range(4):\n    print(\"GALE!\")"
           },
@@ -4039,7 +4067,7 @@
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['0', '1', '2'], f'Expected [\"0\", \"1\", \"2\"], got {lines!r}'\n",
           "hints": {
             "tier1_nudge": "Pip chirps: 'Indent 4 spaces and write `print(i)` — no quotes around `i`!'",
-            "tier2_pattern": "for i in range(3):\n    print(i)",
+            "tier2_pattern": "for <var> in range(<count>):\n    print(<var>)",
             "tier3_walkthrough": "Add the indented line:\n    print(i)"
           },
           "difficultyOverride": null,
@@ -4162,8 +4190,8 @@
           "referenceSolution": "charge = 0\nfor i in range(4):\n    charge += 5\nprint(charge)\n",
           "testCode": "assert charge == 20, f'Expected 20, got {charge!r}'\nassert OUTPUT.strip() == '20', f'Expected \"20\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at the indent: 'Indent `charge += 5` 4 spaces INSIDE the loop, and put `print(charge)` at 0 spaces AFTER the loop!'",
-            "tier2_pattern": "charge = 0\nfor i in range(4):\n    charge += 5\nprint(charge)",
+            "tier1_nudge": "Pip points at the indent: 'The adding line goes 4 spaces in so it repeats, and the printing line sits at 0 spaces so it runs once AFTER the loop.'",
+            "tier2_pattern": "charge = 0\nfor <var> in range(<count>):\n    charge += <amount>\nprint(charge)",
             "tier3_walkthrough": "Complete with:\n    charge += 5\nprint(charge)"
           },
           "difficultyOverride": null,
@@ -4224,7 +4252,7 @@
           "referenceSolution": "total = 0\nfor crystal in range(1, 6):\n    total += crystal\nprint(total)\n",
           "testCode": "assert total == 15, f\"Expected total == 15, got {total}\"\nassert OUTPUT.strip() == \"15\", f\"Expected printed 15, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip taps the left edge: 'Use `total += crystal` inside the loop, and put `print(total)` at 0 spaces indent AFTER the loop!'",
+            "tier1_nudge": "Pip taps the left edge: 'Add the loop variable into the running total INSIDE the loop, and print the total at 0 spaces AFTER it.'",
             "tier2_pattern": "total = 0\nfor <item> in range(1, 6):\n    total += <item>\nprint(total)",
             "tier3_walkthrough": "Write:\ntotal = 0\nfor crystal in range(1, 6):\n    total += crystal\nprint(total)"
           },
@@ -4338,8 +4366,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip adds on his wings: '0 + 2 + 4 + 6 + 8 = ?'",
-            "tier2_pattern": "2 + 4 = 6, + 6 = 12, + 8 = 20!",
-            "tier3_walkthrough": "Tap Option B (20)!"
+            "tier2_pattern": "`range(0, 10, 2)` steps by 2 from 0 and stops before 10 — add up every value it yields.",
+            "tier3_walkthrough": "Tap Option B (20) — the loop adds 0, 2, 4, 6 and 8, which total 20."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -4467,8 +4495,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip checks remainders: 'range(1, 7) is 1, 2, 3, 4, 5, 6. Which ones are even?'",
-            "tier2_pattern": "Even numbers in 1..6 are 2, 4, and 6.",
-            "tier3_walkthrough": "Tap Option B (2, 4, 6)!"
+            "tier2_pattern": "`% 2` leaves 0 for an even number and 1 for an odd one, so only the even ones pass the `if`.",
+            "tier3_walkthrough": "Tap Option B (2, 4, 6) — those are the even numbers inside `range(1, 7)`."
           },
           "difficultyOverride": null
         },
@@ -4494,8 +4522,8 @@
           "referenceSolution": "num = 6\nif num % 2 == 0:\n    print(\"EVEN\")\n",
           "testCode": "assert OUTPUT.strip() == 'EVEN', f'Expected \"EVEN\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check `if num % 2 == 0:` and indent `print(\"EVEN\")` 4 spaces!'",
-            "tier2_pattern": "if num % 2 == 0:\n    print(\"EVEN\")",
+            "tier1_nudge": "Pip cheers: 'Ask whether the remainder after dividing by 2 is nothing left over, then indent the print 4 spaces under the `if`.'",
+            "tier2_pattern": "if <num> % 2 == <remainder>:\n    print(\"<word>\")",
             "tier3_walkthrough": "Add:\nif num % 2 == 0:\n    print(\"EVEN\")"
           },
           "difficultyOverride": null,
@@ -4598,7 +4626,7 @@
           "referenceSolution": "code = \"NOVA-8\"\nif \"NOVA\" in code:\n    print(\"MATCH\")\n",
           "testCode": "assert OUTPUT.strip() == 'MATCH', f'Expected \"MATCH\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points: 'Write `if \"NOVA\" in code:` and indent `print(\"MATCH\")` 4 spaces!'",
+            "tier1_nudge": "Pip points: 'Ask with `in` whether the short word appears inside the longer one, then indent the print 4 spaces under the `if`.'",
             "tier2_pattern": "if \"<part>\" in <var>:\n    print(\"<word>\")",
             "tier3_walkthrough": "Add:\nif \"NOVA\" in code:\n    print(\"MATCH\")"
           },
@@ -4668,7 +4696,7 @@
           "referenceSolution": "raw = \"  nova-8  \"\nclean = raw.strip().upper()\nvalid = False\nif \"NOVA\" in clean:\n    valid = True\n    print(clean)\n",
           "testCode": "assert not callable(clean), \"Don't forget the parentheses () at the end of .upper() so Python actually runs it!\"\nassert isinstance(clean, str), f\"Expected clean to be a string, got {clean!r}\"\nif clean != 'NOVA-8':\n    if clean != clean.strip():\n        assert False, f\"Almost! clean still has extra spaces at the edges ({clean!r}) — make sure you called .strip()!\"\n    if clean.lower() == 'nova-8':\n        assert False, f\"Almost! Check the capitalization of clean ({clean!r}) — make sure you called .upper()!\"\n    assert False, f\"Expected clean == 'NOVA-8', got {clean!r}\"\nassert valid is True, f\"Expected valid is True, got {valid!r}\"\nassert OUTPUT.strip() == \"NOVA-8\", f\"Expected printed 'NOVA-8', got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip polishes the rune: 'Chain `.strip().upper()`, then check `if \"NOVA\" in clean:`!'",
+            "tier1_nudge": "Pip polishes the rune: 'Chain the two string methods first, then use `in` to check the cleaned-up code.'",
             "tier2_pattern": "clean = raw.strip().upper()\nif \"<word>\" in clean:\n    valid = True\n    print(clean)",
             "tier3_walkthrough": "Write:\nclean = raw.strip().upper()\nif \"NOVA\" in clean:\n    valid = True\n    print(clean)"
           },
@@ -4766,8 +4794,8 @@
           "referenceSolution": "high = 0\nfor n in range(1, 7):\n    if n >= 4:\n        high += 1\nprint(high)\n",
           "testCode": "assert high == 3, f'Expected 3, got {high!r}'\nassert OUTPUT.strip() == '3', f'Expected \"3\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip counts spaces: '4 spaces before `if n >= 4:`, 8 spaces before `high += 1`, and 0 spaces before `print(high)`!'",
-            "tier2_pattern": "for n in range(1, 7):\n    if n >= 4:\n        high += 1\nprint(high)",
+            "tier1_nudge": "Pip counts spaces: '4 spaces for the `if` inside the loop, 8 for the counting line inside the `if`, and 0 for the print after both.'",
+            "tier2_pattern": "for <n> in range(<start>, <stop>):\n    if <n> >= <threshold>:\n        high += 1\nprint(high)",
             "tier3_walkthrough": "Complete with:\n    if n >= 4:\n        high += 1\nprint(high)"
           },
           "difficultyOverride": null,
