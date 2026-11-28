@@ -685,8 +685,9 @@
           "storyPrompt": "Torches and fountains are different classes, but both have a `tick()` action. That means one short loop can run `tick()` on both of them in a single list!",
           "objective": "With `Torch` (returning `\"flicker\"`) and `Fountain` (returning `\"splash\"`), create `objs = [Torch(), Fountain()]`, collect `o.tick()` for each `o` in `objs` into `out` using a one-line list loop `[... for ... in ...]`, and print `out`.",
           "concepts": [
-            "class_inheritance",
-            "world_scripting_3d"
+            "world_scripting_3d",
+            "classes_intro",
+            "list_comprehensions"
           ],
           "shardReward": 200,
           "unlockId": null,
@@ -1657,8 +1658,7 @@
           "storyPrompt": "Quasar's self-test stops with an `AssertionError` because `total` is `10` instead of `15`. Remember where `range(1, 5)` stops!",
           "objective": "Fix the `range(...)` call so `total` equals `15` and `assert total == 15` passes.",
           "concepts": [
-            "debugging",
-            "sorting_lambdas"
+            "debugging"
           ],
           "shardReward": 200,
           "unlockId": null,
@@ -1852,7 +1852,8 @@
           "objective": "Define `clamp(n, lo, hi)` returning `max(lo, min(hi, n))`. Check `assert clamp(15, 0, 10) == 10`, then print `clamp(15, 0, 10)`.",
           "concepts": [
             "debugging",
-            "sorting_lambdas"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 210,
           "unlockId": null,
@@ -2180,7 +2181,6 @@
           "objective": "Fix `is_complete` so it checks `self.bits` and prints `True`.",
           "concepts": [
             "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
             "debugging"
           ],
@@ -2215,7 +2215,6 @@
           "objective": "Create `class Spell3D:` saving `self.pos`, with `step(self, dx, dy, dz)` updating `self.pos` to `(x + dx, y + dy, z + dz)`. Create `s = Spell3D((1, 1, 1))`, call `s.step(2, 3, 4)`, and print `s.pos`.",
           "concepts": [
             "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
             "debugging"
           ],
@@ -2247,10 +2246,10 @@
           "storyPrompt": "The Dragon Council is gathering for the final showdown! Sort the council from strongest to weakest so the top leader leads the charge.",
           "objective": "Create `council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]`, sort it from biggest to smallest `\"p\"` into `leaders` using `sorted()` and a `lambda`, then print `leaders[0][\"n\"]`.",
           "concepts": [
-            "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
-            "debugging"
+            "debugging",
+            "sorting_lambdas",
+            "dictionaries"
           ],
           "shardReward": 270,
           "unlockId": null,
@@ -2346,7 +2345,6 @@
           "objective": "Create `class PyriaCrown:` saving `self.era_bits = [8, 16, 32, 8]` and a `total(self)` action returning `sum(self.era_bits)`. Create `c = PyriaCrown()`, check `assert c.total() == 64`, and print `\"64-BIT PYRIA RESTORED!\"`.",
           "concepts": [
             "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
             "debugging"
           ],

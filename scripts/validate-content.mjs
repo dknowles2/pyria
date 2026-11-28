@@ -377,6 +377,66 @@ coding = 0
 cheat_passed = []
 seen_features = set()
 
+def _calls(tree, names):
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Call):
+            f = n.func
+            if isinstance(f, ast.Name) and f.id in names: return True
+            if isinstance(f, ast.Attribute) and f.attr in names: return True
+    return False
+
+def _has(tree, types):
+    return any(isinstance(n, types) for n in ast.walk(tree))
+
+def _nested_loop(tree):
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.For, ast.While)):
+            for d in ast.walk(n):
+                if d is not n and isinstance(d, (ast.For, ast.While)): return True
+    return False
+
+def _nested_dict(tree):
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Dict) and any(isinstance(v, ast.Dict) for v in n.values): return True
+        if isinstance(n, ast.Subscript) and isinstance(n.value, ast.Subscript): return True
+    return False
+
+CONCEPT_SIGNATURES = {
+    "while_loops":            lambda t: _has(t, ast.While),
+    "for_loops":              lambda t: _has(t, (ast.For, ast.comprehension)),
+    "list_iteration":         lambda t: _has(t, (ast.For, ast.comprehension)),
+    "nested_loops":           _nested_loop,
+    "functions_def":          lambda t: _has(t, ast.FunctionDef),
+    "functions_return":       lambda t: any(isinstance(n, ast.Return) and n.value is not None for n in ast.walk(t)),
+    "classes_intro":          lambda t: _has(t, ast.ClassDef),
+    "class_inheritance":      lambda t: any(isinstance(n, ast.ClassDef) and n.bases for n in ast.walk(t)),
+    "lists":                  lambda t: _has(t, (ast.List, ast.ListComp)) or _calls(t, {"list", "sorted", "split"}),
+    "list_comprehensions":    lambda t: _has(t, ast.ListComp),
+    "generator_expressions":  lambda t: _has(t, ast.GeneratorExp),
+    "dictionaries":           lambda t: _has(t, (ast.Dict, ast.DictComp)) or _calls(t, {"dict"}),
+    "dict_iteration":         lambda t: _calls(t, {"items", "keys", "values"}),
+    "dictionaries_nested":    _nested_dict,
+    "sets":                   lambda t: _has(t, (ast.Set, ast.SetComp)) or _calls(t, {"set", "frozenset"}),
+    "tuples":                 lambda t: _has(t, ast.Tuple) or _calls(t, {"tuple", "zip", "enumerate", "divmod"}),
+    "error_handling":         lambda t: _has(t, (ast.Try, ast.Raise, ast.Assert)),
+    "f_strings":              lambda t: _has(t, ast.JoinedStr),
+    "range_function":         lambda t: _calls(t, {"range"}),
+    "conditionals_if":        lambda t: _has(t, (ast.If, ast.IfExp)),
+    "conditionals_elif_else": lambda t: any(isinstance(n, ast.If) and n.orelse for n in ast.walk(t)),
+    "sorting_lambdas":        lambda t: _has(t, ast.Lambda) or _calls(t, {"sorted", "sort"}),
+    "type_conversion":        lambda t: _calls(t, {"int", "str", "float", "bool"}),
+}
+
+def concept_backed(concept, code):
+    sig = CONCEPT_SIGNATURES.get(concept)
+    if sig is None or not (code or "").strip():
+        return True
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return True
+    return bool(sig(tree))
+
 def extract_features(code):
     feats = set()
     if not code.strip():
@@ -550,6 +610,19 @@ for t in trials:
         errs.append(f"Trial {tid}: uses 'while' in referenceSolution but concepts={sorted(concepts)}")
     if "try" in feats and "error_handling" not in concepts:
         errs.append(f"Trial {tid}: uses 'try' in referenceSolution but concepts={sorted(concepts)}")
+
+    # Reverse of the checks above: a declared concept the code never demonstrates.
+    # The checks above only catch a MISSING tag; without this one, a tag claiming
+    # something the trial does not contain is silent, and the concepts a player
+    # sees as pills (and a parent sees in the weekly digest) drift from the lesson.
+    # Only concepts with an unambiguous AST signature are checked.
+    unbacked = sorted(c for c in concepts if c in CONCEPT_SIGNATURES
+                      and not concept_backed(c, code_for_feats))
+    if unbacked:
+        errs.append(
+            f"Trial {tid}: concepts {unbacked} are not demonstrated by its code "
+            f"(concepts={sorted(concepts)})"
+        )
     try:
         ok, msg, ns = run_trial_code(code, t["testCode"], t.get("requiredConstructs") or [], t.get("variants") or [])
         if ok:

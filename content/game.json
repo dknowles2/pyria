@@ -246,6 +246,13 @@
       "description": "Building a new or filtered list in one short line of Python."
     },
     {
+      "id": "generator_expressions",
+      "label": "Loops Without Brackets",
+      "minEra": "era-03-32bit",
+      "maxBasicRealm": 2,
+      "description": "Putting a loop straight inside sum() or max() with no square brackets."
+    },
+    {
       "id": "dictionaries_nested",
       "label": "Nested Dictionaries",
       "minEra": "era-03-32bit",
