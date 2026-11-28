@@ -6325,7 +6325,7 @@
           "referenceSolution": "class Gem:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)\n",
           "testCode": "assert g.color == 'blue'\nassert Gem('gold').color == 'gold'\nassert OUTPUT.strip() == 'blue', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Remember `self` comes first in the parentheses, before the colour parameter — then attach the value onto the object with a dot.'",
+            "tier1_nudge": "Pip chirps: 'Remember `self` comes first in the parentheses, before the color parameter — then attach the value onto the object with a dot.'",
             "tier2_pattern": "class Gem:\n    def __init__(self, <value>):\n        self.<attribute> = <value>\n\ng = Gem(\"<value>\")\nprint(g.<attribute>)",
             "tier3_walkthrough": "Complete with:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)"
           },
