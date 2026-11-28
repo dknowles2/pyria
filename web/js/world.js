@@ -1059,7 +1059,8 @@ export class WorldEngine {
         const sx = x * TILE_PX - camX;
         const sy = y * TILE_PX - camY;
         const groundTile = this.getEffectiveGroundTile(x, y, dynamicOverrides);
-        this.sprites.drawTile(ctx, groundTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
+        const renderGroundId = is16Bit ? this.sprites.getTileVariantId(groundTile, this.eraKey, x, y) : groundTile;
+        this.sprites.drawTile(ctx, renderGroundId, this.eraKey, sx, sy, TILE_PX, TILE_PX);
 
         // Animated water, lava & starfield shimmer (before SNES shoreline banks so glints stay in water)
         if (groundTile === 'water') {
@@ -1073,12 +1074,13 @@ export class WorldEngine {
             }
           }
         } else if (groundTile === 'lava') {
-          const pulse = Math.sin(this.time * 4 + x * 1.1 + y * 0.8);
-          if (pulse > 0.4) {
-            ctx.fillStyle = is16Bit ? 'rgba(254, 240, 138, 0.52)' : 'rgba(253, 224, 71, 0.42)';
-            ctx.fillRect(sx + 10, sy + 16, 14, 5);
-          }
-          if (is16Bit && x % 2 === 0 && y % 2 === 0) {
+          if (!is16Bit) {
+            const pulse = Math.sin(this.time * 4 + x * 1.1 + y * 0.8);
+            if (pulse > 0.4) {
+              ctx.fillStyle = 'rgba(253, 224, 71, 0.42)';
+              ctx.fillRect(sx + 10, sy + 16, 14, 5);
+            }
+          } else if (x % 2 === 0 && y % 2 === 0) {
             lightSources.push({ x: sx + TILE_PX * 0.5, y: sy + TILE_PX * 0.5, r: TILE_PX * 1.5, rgb: '249, 115, 22', alpha: 0.11 });
           }
         } else if (groundTile === 'star_tile') {
@@ -1113,11 +1115,22 @@ export class WorldEngine {
 
         if (is16Bit) {
           this.drawSnesDecorShadow(ctx, x, y, sx, sy, decorTile, dynamicOverrides);
-          if (decorTile === 'tree' || decorTile === 'pine_tree') {
-            // Fuller overhanging SNES canopy anchored at base
-            const h = Math.round(TILE_PX * 1.16);
-            const w = Math.round(TILE_PX * 1.1);
-            this.sprites.drawTile(ctx, decorTile, this.eraKey, sx - Math.round((w - TILE_PX) / 2), sy - (h - TILE_PX), w, h);
+          if (decorTile === 'stone_wall' || decorTile === 'ice_wall' || decorTile === 'obsidian_wall') {
+            const wallTileId = this.resolveSnesWallTileId(x, y, decorTile, dynamicOverrides);
+            this.sprites.drawTile(ctx, wallTileId, this.eraKey, sx, sy, TILE_PX, TILE_PX);
+            // Crisp left/right edge trim on exposed vertical wall faces so 1-tile walls stay framed
+            const wSame = x > 0 && this.getEffectiveDecorTile(x - 1, y, dynamicOverrides) === decorTile;
+            const eSame = x + 1 < this.map.width && this.getEffectiveDecorTile(x + 1, y, dynamicOverrides) === decorTile;
+            if (!wSame) {
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+              ctx.fillRect(sx + 1, sy, 2, TILE_PX);
+              ctx.fillStyle = 'rgba(15, 23, 42, 0.55)';
+              ctx.fillRect(sx, sy, 1, TILE_PX);
+            }
+            if (!eSame) {
+              ctx.fillStyle = 'rgba(15, 23, 42, 0.55)';
+              ctx.fillRect(sx + TILE_PX - 2, sy, 2, TILE_PX);
+            }
           } else {
             this.sprites.drawTile(ctx, decorTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
           }
@@ -1304,6 +1317,27 @@ export class WorldEngine {
   }
 
   /**
+   * N/S/E/W wall autotiling for 16-bit SNES (distinct top cap, solid interior roof mass,
+   * and front masonry/cliff face with sparse 1-in-6 accent variants).
+   */
+  resolveSnesWallTileId(x, y, wallTile, dynamicOverrides) {
+    const nSame = y > 0 && this.getEffectiveDecorTile(x, y - 1, dynamicOverrides) === wallTile;
+    const sSame = y + 1 < this.map.height && this.getEffectiveDecorTile(x, y + 1, dynamicOverrides) === wallTile;
+    if (nSame && sSame && this.sprites.hasTile(`${wallTile}_mid`, this.eraKey)) {
+      return `${wallTile}_mid`;
+    }
+    if (!nSame && sSame && this.sprites.hasTile(`${wallTile}_top`, this.eraKey)) {
+      return `${wallTile}_top`;
+    }
+    // Front cliff/masonry face: sparse 1-in-6 accent (hanging ivy, ice spire, carved rune)
+    const hash = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+    if (hash % 6 === 0 && this.sprites.hasTile(`${wallTile}_accent`, this.eraKey)) {
+      return `${wallTile}_accent`;
+    }
+    return wallTile;
+  }
+
+  /**
    * 16-Bit SNES auto-tiled organic shorelines, feathered grass-over-dirt borders,
    * stone curbs, and non-repeating world micro-variation.
    */
@@ -1409,11 +1443,11 @@ export class WorldEngine {
       }
     }
 
-    // 3. Organic Feathered Grass-over-Dirt / Grass-over-Sand Path Edges
+    // 3. Organic Feathered Grass-over-Dirt / Grass-over-Sand Path Edges (matched to RAMP["grass"])
     if (groundTile === 'dirt_path' || groundTile === 'sand') {
-      const grassEdge = '#3ea647';
-      const grassDark = '#236b33';
-      const dirtRim = 'rgba(120, 74, 34, 0.35)';
+      const grassEdge = '#3c8d3b';
+      const grassDark = '#1e5c35';
+      const dirtRim = 'rgba(99, 61, 43, 0.35)';
       const step = 6;
 
       if (isGrass(n)) {
@@ -2288,9 +2322,15 @@ export class WorldEngine {
       const unlocked = !ent.requiredTrialId || completed.has(ent.requiredTrialId);
       this.sprites.drawTile(ctx, 'portal', this.eraKey, sx, sy, TILE_PX, TILE_PX);
       if (unlocked) {
-        ctx.strokeStyle = `rgba(56, 189, 248, ${(0.5 + 0.4 * Math.sin(this.time * 5)).toFixed(2)})`;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(sx + 4, sy + 4, TILE_PX - 8, TILE_PX - 8);
+        ctx.strokeStyle = `rgba(140, 232, 255, ${(0.5 + 0.4 * Math.sin(this.time * 5)).toFixed(2)})`;
+        ctx.lineWidth = 2.5;
+        if (this.eraKey === '16bit') {
+          ctx.beginPath();
+          ctx.ellipse(sx + TILE_PX * 0.5, sy + TILE_PX * 0.52, TILE_PX * 0.44, TILE_PX * 0.34, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        } else {
+          ctx.strokeRect(sx + 4, sy + 4, TILE_PX - 8, TILE_PX - 8);
+        }
       }
     } else if (ent.type === 'workshop') {
       // Anvil is usually already in decor, draw only if decor empty

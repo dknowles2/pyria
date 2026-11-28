@@ -339,7 +339,7 @@ export async function fetchSpriteManifest() {
 }
 
 export async function fetchTilesetManifest() {
-  return requestJson('/assets/tilesets/manifest.json?v=20261127i');
+  return requestJson('/assets/tilesets/manifest.json?v=20261128a');
 }
 
 export async function listSaves(ownerFilter = null) {

@@ -1185,6 +1185,7 @@ def render_map_canvas(
     map_data: dict,
     tiles: Dict[str, Canvas],
     npcs: Dict[str, Canvas],
+    variants: Optional[Dict[str, List[str]]] = None,
 ) -> Canvas:
     ts = next(iter(tiles.values())).w if tiles else TILE_SIZE
     w = map_data["width"] * ts
@@ -1192,14 +1193,27 @@ def render_map_canvas(
     c = Canvas(w, h)
     ground = map_data["layers"]["ground"]
     decor = map_data["layers"]["decor"]
-    for y in range(map_data["height"]):
+    mh = map_data["height"]
+    for y in range(mh):
         for x in range(map_data["width"]):
             gt = ground[y][x]
+            if variants and gt in variants and len(variants[gt]) >= 4:
+                gt = variants[gt][((y & 1) << 1) | (x & 1)]
             if gt in tiles:
                 c.blit(tiles[gt], x * ts, y * ts)
             dt = decor[y][x]
-            if dt and dt in tiles:
-                c.blit(tiles[dt], x * ts, y * ts)
+            if dt:
+                if dt in ("stone_wall", "ice_wall", "obsidian_wall"):
+                    n_same = y > 0 and decor[y - 1][x] == dt
+                    s_same = y + 1 < mh and decor[y + 1][x] == dt
+                    if n_same and s_same and f"{dt}_mid" in tiles:
+                        dt = f"{dt}_mid"
+                    elif not n_same and s_same and f"{dt}_top" in tiles:
+                        dt = f"{dt}_top"
+                    elif (((x * 73856093) ^ (y * 19349663)) & 0xFFFFFFFF) % 6 == 0 and f"{dt}_accent" in tiles:
+                        dt = f"{dt}_accent"
+                if dt in tiles:
+                    c.blit(tiles[dt], x * ts, y * ts)
     for ent in map_data.get("entities", []):
         sk = ent.get("spriteKey")
         ex, ey = ent["x"] * ts, ent["y"] * ts
@@ -2370,24 +2384,34 @@ def build_snes_npcs_32() -> Dict[str, Canvas]:
 
 
 def main() -> None:
+    from snes_tiles import build_all_snes_tiles
+
     tiles_by_era: Dict[str, Dict[str, Canvas]] = {}
     npcs_by_era: Dict[str, Dict[str, Canvas]] = {}
+    snes_tile_ids: List[str] = list(TILE_IDS)
+    snes_variants: Dict[str, List[str]] = {}
 
     for era in ("8bit", "16bit"):
         tiles = build_tiles(era)
         npcs = build_npcs(era)
         ts = 32 if era == "16bit" else TILE_SIZE
+        era_tile_ids = list(TILE_IDS)
         if era == "16bit":
-            tiles = build_snes_tiles_32(tiles)
+            tiles, snes_variants = build_all_snes_tiles(Canvas)
+            # Keep base TILE_IDS first in exact canonical order, then append variants & wall autotiles
+            extra_ids = [tid for tid in tiles.keys() if tid not in TILE_IDS]
+            snes_tile_ids = list(TILE_IDS) + extra_ids
+            era_tile_ids = snes_tile_ids
             npcs = build_snes_npcs_32()
 
         tiles_by_era[era] = tiles
         npcs_by_era[era] = npcs
 
-        rows = (len(TILE_IDS) + SHEET_COLS - 1) // SHEET_COLS
-        sheet = Canvas(SHEET_COLS * ts, rows * ts)
-        for idx, tid in enumerate(TILE_IDS):
-            col, row = idx % SHEET_COLS, idx // SHEET_COLS
+        cols = 8 if era == "16bit" else SHEET_COLS
+        rows = (len(era_tile_ids) + cols - 1) // cols
+        sheet = Canvas(cols * ts, rows * ts)
+        for idx, tid in enumerate(era_tile_ids):
+            col, row = idx % cols, idx // cols
             sheet.blit(tiles[tid], col * ts, row * ts)
         sheet.save(TILESETS_DIR / era / "meadow_ruins.png")
 
@@ -2396,24 +2420,26 @@ def main() -> None:
             npc_sheet.blit(npcs[key], idx * ts, 0)
         npc_sheet.save(TILESETS_DIR / era / "npcs_and_dragons.png")
 
-    # Build manifest.json with exact per-era coordinates (16x16 for 8bit, 32x32 for 16bit!)
-    total_rows = (len(TILE_IDS) + SHEET_COLS - 1) // SHEET_COLS
+    # Build manifest.json with exact per-era coordinates (16x16 for 8bit, 32x32 + variants/autotiles for 16bit!)
+    rows8 = (len(TILE_IDS) + SHEET_COLS - 1) // SHEET_COLS
+    cols16 = 8
+    rows16 = (len(snes_tile_ids) + cols16 - 1) // cols16
 
-    def build_coords(ts: int):
+    def build_coords(tile_ids: List[str], cols: int, ts: int):
         tc = {}
-        for idx, tid in enumerate(TILE_IDS):
-            col, row = idx % SHEET_COLS, idx // SHEET_COLS
+        for idx, tid in enumerate(tile_ids):
+            col, row = idx % cols, idx // cols
             tc[tid] = {"col": col, "row": row, "x": col * ts, "y": row * ts, "width": ts, "height": ts}
         nc = {}
         for idx, key in enumerate(NPC_KEYS):
             nc[key] = {"col": idx, "row": 0, "x": idx * ts, "y": 0, "width": ts, "height": ts}
         return tc, nc
 
-    tc8, nc8 = build_coords(16)
-    tc16, nc16 = build_coords(32)
+    tc8, nc8 = build_coords(TILE_IDS, SHEET_COLS, 16)
+    tc16, nc16 = build_coords(snes_tile_ids, cols16, 32)
 
     manifest = {
-        "version": "1.2.0",
+        "version": "1.3.0",
         "tilesetId": "meadow_ruins",
         "tileSize": TILE_SIZE,
         "tileIds": TILE_IDS,
@@ -2421,7 +2447,7 @@ def main() -> None:
         "eras": {
             "8bit": {
                 "tilesetImage": "8bit/meadow_ruins.png",
-                "tilesetSize": {"width": SHEET_COLS * 16, "height": total_rows * 16},
+                "tilesetSize": {"width": SHEET_COLS * 16, "height": rows8 * 16},
                 "npcsImage": "8bit/npcs_and_dragons.png",
                 "npcsSize": {"width": len(NPC_KEYS) * 16, "height": 16},
                 "tiles": tc8,
@@ -2429,9 +2455,10 @@ def main() -> None:
             },
             "16bit": {
                 "tilesetImage": "16bit/meadow_ruins.png",
-                "tilesetSize": {"width": SHEET_COLS * 32, "height": total_rows * 32},
+                "tilesetSize": {"width": cols16 * 32, "height": rows16 * 32},
                 "npcsImage": "16bit/npcs_and_dragons.png",
                 "npcsSize": {"width": len(NPC_KEYS) * 32, "height": 32},
+                "variants": snes_variants,
                 "tiles": tc16,
                 "npcs": nc16,
             },
@@ -2466,7 +2493,7 @@ def main() -> None:
                 r8.set(xx * 2 + 1, yy * 2, col)
                 r8.set(xx * 2, yy * 2 + 1, col)
                 r8.set(xx * 2 + 1, yy * 2 + 1, col)
-        r16 = render_map_canvas(m1, tiles_by_era["16bit"], npcs_by_era["16bit"])
+        r16 = render_map_canvas(m1, tiles_by_era["16bit"], npcs_by_era["16bit"], snes_variants)
         pad = 20
         header_h = 56
         comp_w = pad + r8.w + pad + r16.w + pad
