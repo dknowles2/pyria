@@ -7043,7 +7043,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\n",
-            "standard": "# Build the acts dictionary, total its values into total_dragons, then print it\n",
+            "standard": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\n# Total the values into total_dragons, then print it\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)\n",
