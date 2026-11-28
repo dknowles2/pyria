@@ -53,7 +53,7 @@ export class SpriteManager {
   getTilesetImage(eraKey = '8bit') {
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
-    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261127m`);
+    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261127z`);
     return entry.loaded ? entry.img : null;
   }
 
