@@ -418,9 +418,16 @@ export class ModalManager {
 
     const npcCanvas = this.content.querySelector('#modal-npc-canvas');
     if (npcCanvas) {
+      const is64 = eraKey === '64bit';
+      if (is64) {
+        npcCanvas.width = 96;
+        npcCanvas.height = 96;
+        npcCanvas.classList.remove('pixel-canvas');
+      }
       const ctx = npcCanvas.getContext('2d');
-      ctx.imageSmoothingEnabled = false;
-      this.sprites.drawNpc(ctx, spriteKey, eraKey, 4, 4, 40, 40);
+      ctx.imageSmoothingEnabled = is64;
+      const pad = is64 ? 4 : 4;
+      this.sprites.drawNpc(ctx, spriteKey, eraKey, pad, pad, npcCanvas.width - pad * 2, npcCanvas.height - pad * 2);
     }
 
     this.content.querySelectorAll('[data-close]').forEach((btn) => {
@@ -1862,6 +1869,11 @@ export class ModalManager {
     );
 
     const previewCanvas = this.content.querySelector('#ws-preview-canvas');
+    if (previewCanvas && eraKey === '64bit') {
+      previewCanvas.width = 320;
+      previewCanvas.height = 208;
+      previewCanvas.classList.remove('pixel-canvas');
+    }
     const catalogEl = this.content.querySelector('#ws-catalog');
     const cartBarEl = this.content.querySelector('#ws-cart-bar');
     const inventoryBarEl = this.content.querySelector('#ws-inventory-bar');
@@ -2302,13 +2314,20 @@ export class ModalManager {
 
     const canvas = this.content.querySelector('#dragon-rescue-canvas');
     if (canvas) {
+      const is64 = eraKey === '64bit';
+      if (is64) {
+        canvas.width = 128;
+        canvas.height = 128;
+        canvas.classList.remove('pixel-canvas');
+      }
       let tick = 0;
       const drawDragon = () => {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.imageSmoothingEnabled = false;
-        const bob = Math.round(Math.sin(tick * 0.45) * 3);
-        this.sprites.drawNpc(ctx, spriteKey, eraKey, 8, 8 + bob, 48, 48);
+        ctx.imageSmoothingEnabled = is64;
+        const scale = is64 ? 2 : 1;
+        const bob = Math.round(Math.sin(tick * 0.45) * 3 * scale);
+        this.sprites.drawNpc(ctx, spriteKey, eraKey, 8 * scale, 8 * scale + bob, 48 * scale, 48 * scale);
         tick += 1;
       };
       drawDragon();

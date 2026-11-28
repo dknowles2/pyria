@@ -30,10 +30,10 @@ import { audio } from './audio.js?v=20261127i';
 import { music, resolveRegionTheme } from './music.js?v=20261127j';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
-import { SpriteManager } from './sprites.js?v=20261127i';
-import { WorldEngine } from './world.js?v=20261127u';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127r';
-import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
+import { SpriteManager } from './sprites.js?v=20261127v';
+import { WorldEngine } from './world.js?v=20261127v';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127v';
+import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127v';
 import { AppRouter } from './router.js?v=20261127l';
 import {
   DEFAULT_FAMILIARITY_ID,
@@ -649,9 +649,16 @@ function updateHud() {
   // Hero mini portrait
   const portraitCanvas = $('#hud-portrait');
   if (portraitCanvas && state.sprites) {
+    const is64 = eraKey === '64bit';
+    const targetSz = is64 ? 64 : 32;
+    if (portraitCanvas.width !== targetSz || portraitCanvas.height !== targetSz) {
+      portraitCanvas.width = targetSz;
+      portraitCanvas.height = targetSz;
+    }
+    portraitCanvas.classList.toggle('pixel-canvas', !is64);
     const ctx = portraitCanvas.getContext('2d');
-    ctx.clearRect(0, 0, portraitCanvas.width, portraitCanvas.height);
-    state.sprites.drawHero(ctx, save.appearance, eraKey, 'down', 0, 0, 0, 32, 32);
+    ctx.clearRect(0, 0, targetSz, targetSz);
+    state.sprites.drawHero(ctx, save.appearance, eraKey, 'down', 0, 0, 0, targetSz, targetSz);
   }
 
   // Rescued dragons summary (data-driven across all Realms in the current Era)

@@ -27,7 +27,7 @@ import {
   buildNpc3D,
   buildPip3D,
   dirToYaw,
-} from './n64Characters.js?v=20261127u';
+} from './n64Characters.js?v=20261127v';
 
 function lerpAngle(current, target, t) {
   let diff = ((target - current + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
