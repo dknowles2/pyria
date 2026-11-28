@@ -23,3 +23,8 @@ data/
 dist/
 .wrangler/
 .dev.vars
+
+# Coverage reports
+reports/
+coverage/
+.coverage

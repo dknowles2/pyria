@@ -1,7 +1,7 @@
 {
   "id": "era-03-32bit",
   "name": "The 32-Bit Era",
-  "subtitle": "The Isometric Frontier (PS1 / GBA 2.5D)",
+  "subtitle": "The 3D Block Frontier (PS1 / GBA 2.5D)",
   "bitCount": 32,
   "visualStyle": "32-bit PS1/GBA Isometric 2.5D",
   "realms": [
@@ -12,13 +12,13 @@
       "dragon": {
         "id": "dragon-terracrest",
         "name": "Terracrest",
-        "title": "Sculptor of Elevated Stone",
+        "title": "Builder of Stone Steps",
         "element": "Earth",
-        "rescueDialogue": "RUMBLE-CRUNCH! You mastered (x, y, z) coordinates! Take Bit 17—watch the isometric terraces rise!"
+        "rescueDialogue": "Great work! You learned how (x, y, z) coordinates work. Take Bit 17 and watch the stone terraces rise!"
       },
-      "miniVisualUpgrade": "Bit 17–20 Restored: Raised isometric highland cliffs and cascading 2.5D waterfalls.",
-      "storyIntro": "Pyria tilts into a lush 32-Bit Isometric 2.5D diorama! Now every tile has height `z` in addition to `(x, y)` — welcome to Blockstone Highlands!",
-      "storyOutro": "Terracrest lifts the highland drawbridge, opening the skyway to Sky-Forge Foundry!",
+      "miniVisualUpgrade": "Bits 17-20 Restored: Tall stone cliffs and flowing 3D waterfalls.",
+      "storyIntro": "Pyria shifts into a bright 3D block world! Now every spot on the map has a height `z` along with `(x, y)`. Welcome to Blockstone Highlands!",
+      "storyOutro": "Terracrest lifts the stone drawbridge, opening the sky road to Sky-Forge Foundry!",
       "primaryConcepts": [
         "tuples",
         "coords_3d"
@@ -31,9 +31,9 @@
         {
           "id": "trial-32-01-01",
           "trialType": "multiple_choice",
-          "title": "Meet 3D Coordinate Tuples (x, y, z)!",
-          "storyPrompt": "Welcome to the 32-Bit Isometric Frontier! A **tuple** like `pos = (4, 7, 2)` holds locked `(x, y, z)` coordinates in parentheses. What does `x, y, z = pos; print(z)` output?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "title": "Meet 3D Coordinate Tuples (x, y, z)",
+          "storyPrompt": "Welcome to Blockstone Highlands! A **tuple** like `(4, 7, 2)` is a locked list wrapped in parentheses `(...)`. Once you make a tuple, its values cannot be changed, which makes it great for 3D map spots `(x, y, z)`. You can split all three numbers into separate variables in one line: `x, y, z = pos`.",
+          "objective": "Predict what `print(z)` shows after `x, y, z = pos` splits the tuple `(4, 7, 2)`.",
           "concepts": [
             "tuples",
             "coords_3d"
@@ -45,65 +45,80 @@
             {
               "id": "a",
               "label": "2",
-              "explanation": "Elevated! Unpacking `(4, 7, 2)` sets `x=4`, `y=7`, and height `z=2`!"
+              "explanation": "Right! Splitting `(4, 7, 2)` puts `4` in `x`, `7` in `y`, and `2` in `z`."
             },
             {
               "id": "b",
               "label": "4",
-              "explanation": "4 is `x`!"
+              "explanation": "`4` is the first number, so it goes into `x`, not `z`."
             },
             {
               "id": "c",
               "label": "7",
-              "explanation": "7 is `y`!"
+              "explanation": "`7` is the second number, so it goes into `y`, not `z`."
             },
             {
               "id": "d",
               "label": "(4, 7, 2)",
-              "explanation": "`z` is the third value!"
+              "explanation": "`pos` holds the whole tuple `(4, 7, 2)`, while `z` gets just the third number."
             }
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip lines up the three slots: 'Unpacking hands out the tuple's values from left to right. Which variable name gets the third number?'",
+            "tier2_pattern": "`x, y, z = pos` gives the first value to `x`, the second to `y`, and the third to `z`.",
+            "tier3_walkthrough": "Tap Option A (`2`): `z` gets the third number from `(4, 7, 2)`."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-32-01-02",
           "trialType": "fix_bug",
-          "title": "Fix the Tuple Unpack!",
-          "storyPrompt": "Lord Null tried to unpack 3 coordinates into only 2 variables (`ValueError`)! Add `, z` so all 3 unpack cleanly.",
-          "objective": "Unpack `pos` into `x, y, z = pos` and print `z`.",
+          "title": "The Coordinate Reader Crashes!",
+          "storyPrompt": "Terracrest's height reader crashes with a `ValueError` when it tries to split the 3D tuple `pos` into variables.",
+          "objective": "Fix the unpacking line so `x`, `y`, and `z` each get a value from `pos`, then print `z` (`3`).",
           "concepts": [
             "tuples",
             "coords_3d"
           ],
           "shardReward": 120,
           "unlockId": null,
-          "bugSummary": "Unpack `pos` into `x, y, z = pos` and print `z`.",
+          "bugSummary": "Unpacking `pos` causes a `ValueError` because there are only two variable names for three numbers.",
           "starterCode": {
             "explorer": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
             "standard": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n",
-            "challenge": "pos = (10, 5, 3)\nx, y = pos\nprint(z)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\npos = (10, 5, 3)\nx, y = pos\nprint(z)\n"
           },
           "referenceSolution": "pos = (10, 5, 3)\nx, y, z = pos\nprint(z)\n",
           "testCode": "assert (x, y, z) == (10, 5, 3) and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "pos = (10, 5, 3)\nx, y, z = pos\nprint(z)",
+            "tier1_nudge": "Pip counts names against numbers: 'Unpacking needs the same number of variable names on the left as values in the tuple, and `z` is what gets printed.'",
+            "tier2_pattern": "<a>, <b>, <c> = <three_value_tuple>\nprint(<c>)",
             "tier3_walkthrough": "Update to:\npos = (10, 5, 3)\nx, y, z = pos\nprint(z)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pos": [
+                  1,
+                  2,
+                  9
+                ]
+              },
+              "expectOutput": "9"
+            }
+          ]
         },
         {
           "id": "trial-32-01-03",
           "trialType": "code",
           "title": "Climb One Terrace Higher",
-          "storyPrompt": "In Blockstone Highlands, try this new power! Given `pos = (3, 4, 1)`, unpack `x, y, z = pos`, create `higher = (x, y, z + 2)`, and `print(higher)`.",
-          "objective": "Given `pos = (3, 4, 1)`, unpack `x, y, z = pos`, create `higher = (x, y, z + 2)`, and `print(higher)`.",
+          "storyPrompt": "Because a tuple is locked, you cannot change its height in place. Instead, unpack `pos` into `x`, `y`, and `z`, then build a new tuple with a bigger `z`.",
+          "objective": "Unpack `pos` into `x`, `y`, and `z`, create the variable `higher` holding the tuple `(x, y, z + 2)`, and print `higher`.",
           "concepts": [
             "tuples",
             "coords_3d"
@@ -112,102 +127,303 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "pos = (3, 4, 1)\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)\n",
           "testCode": "assert higher == (3, 4, 3) and OUTPUT.strip() == \"(3, 4, 3)\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)",
+            "tier1_nudge": "Pip climbs up a ledge: 'Unpack all three values first, then build a new tuple that keeps the first two and adds to the third.'",
+            "tier2_pattern": "<x>, <y>, <z> = <tuple>\nhigher = (<x>, <y>, <z> + <climb>)\nprint(higher)",
             "tier3_walkthrough": "Write:\npos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pos": [
+                  1,
+                  2,
+                  5
+                ]
+              },
+              "expectOutput": "(1, 2, 7)",
+              "testCode": "assert higher == (1, 2, 7)"
+            }
+          ]
+        },
+        {
+          "id": "trial-32-01-03b",
+          "trialType": "code",
+          "title": "Print Position and Height With enumerate()",
+          "storyPrompt": "Before finding the tallest cliff, try `enumerate()` on its own. It pairs each item in a list with its position number starting at `0`, so `for idx, h in enumerate(heights):` gives you both at once.",
+          "objective": "Loop over `heights` with `enumerate()` to unpack `idx` and `h`, and print `idx` and `h` on each turn.",
+          "concepts": [
+            "tuples",
+            "coords_3d",
+            "for_loops"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "heights = [4, 9]\nfor idx, h in enumerate(???):\n    print(idx, h)\n",
+            "standard": "heights = [4, 9]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "heights = [4, 9]\nfor idx, h in enumerate(heights):\n    print(idx, h)\n",
+          "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['0 4', '1 9'], f'Got {lines!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip counts as he walks: '`enumerate(...)` gives you two things on each turn, so put two variable names in the `for` line.'",
+            "tier2_pattern": "for <index>, <value> in enumerate(<list>):\n    print(<index>, <value>)",
+            "tier3_walkthrough": "Add:\nfor idx, h in enumerate(heights):\n    print(idx, h)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "call:enumerate",
+            "call:print"
+          ]
         },
         {
           "id": "trial-32-01-04",
           "trialType": "code",
-          "title": "Measure Elevation Drop",
-          "storyPrompt": "Push deeper into Blockstone Highlands! Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.",
-          "objective": "Given `top = (2, 5, 9)` and `base = (2, 5, 3)`, compute `drop = top[2] - base[2]` and `print(drop)`.",
+          "title": "Find the Tallest Terrace With enumerate()",
+          "storyPrompt": "Now put `enumerate()` to work on the highland cliffs! As your loop checks each `(idx, h)` pair, keep track of the tallest height in `best_h` and its position in `best_idx`.",
+          "objective": "Loop over `heights` with `enumerate()` unpacking `idx` and `h`. If `h` is greater than `best_h`, update `best_h` to `h` and `best_idx` to `idx`. After the loop, print `best_idx`.",
           "concepts": [
             "tuples",
-            "coords_3d"
+            "coords_3d",
+            "for_loops"
           ],
           "shardReward": 130,
           "unlockId": null,
           "starterCode": {
-            "explorer": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\n",
-            "standard": "",
-            "challenge": ""
+            "explorer": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\nfor idx, h in enumerate(___):\n    if h > best_h:\n        best_h = h\n        best_idx = ___\nprint(best_idx)\n",
+            "standard": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\n# Use enumerate(heights) with tuple unpacking to find the index of the tallest terrace\n",
+            "challenge": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\n"
           },
-          "referenceSolution": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)\n",
-          "testCode": "assert drop == 6 and OUTPUT.strip() == \"6\"",
+          "referenceSolution": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\nfor idx, h in enumerate(heights):\n    if h > best_h:\n        best_h = h\n        best_idx = idx\nprint(best_idx)\n",
+          "testCode": "exp = heights.index(max(heights))\nassert best_idx == exp and OUTPUT.strip() == str(exp)",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "top = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)",
-            "tier3_walkthrough": "Write:\ntop = (2, 5, 9)\nbase = (2, 5, 3)\ndrop = top[2] - base[2]\nprint(drop)"
+            "tier1_nudge": "Pip tracks height and spot together: 'Unpack two names in the `for` line, and whenever you find a taller terrace, save both the new height and its position.'",
+            "tier2_pattern": "for <index>, <height> in enumerate(<list>):\n    if <height> > best_h:\n        best_h = <height>\n        best_idx = <index>\nprint(best_idx)",
+            "tier3_walkthrough": "Loop `for idx, h in enumerate(heights):`, and whenever `h > best_h`, update `best_h = h` and `best_idx = idx`, then `print(best_idx)`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "tuple",
+            "call:enumerate"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "heights": [
+                  2,
+                  3,
+                  12,
+                  5
+                ]
+              },
+              "expectOutput": "2",
+              "expectVars": {
+                "best_idx": 2
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Position and Item Together With enumerate()",
+            "prompt": "`enumerate(my_list)` pairs every item with its position number `(idx, item)`. Writing `for idx, h in enumerate(heights):` gives you both the position and the value in one loop.",
+            "question": "In `heights = [4, 9, 6]`, which `(idx, h)` pair has the highest `h`?",
+            "codeSnippet": "heights = [4, 9, 6]\nfor idx, h in enumerate(heights):\n    print(idx, h)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "idx = 2, h = 9",
+                "explanation": "Remember `enumerate()` starts counting positions at `0`! So `4` is at `0`, `9` is at `1`, and `6` is at `2`."
+              },
+              {
+                "id": "b",
+                "label": "idx = 1, h = 9",
+                "explanation": "Nice! `enumerate([4, 9, 6])` gives `(0, 4)`, `(1, 9)`, and `(2, 6)`, so `9` is at position `1`."
+              },
+              {
+                "id": "c",
+                "label": "idx = 9, h = 1",
+                "explanation": "`enumerate()` always puts the position first and the item second: `(idx, h)`."
+              },
+              {
+                "id": "d",
+                "label": "idx = 0, h = 4",
+                "explanation": "`(0, 4)` is the first pair, but `9` at position `1` is taller."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-32-01-05",
           "trialType": "code",
           "title": "Find the Highest Peak",
-          "storyPrompt": "You're right outside Terracrest's vault! Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.",
-          "objective": "Given `peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]`, find the max `z` value into `max_z` and `print(max_z)`.",
+          "storyPrompt": "Three tall peaks guard the path to Terracrest's vault. Each peak in `peaks` is a 3D tuple `(x, y, z)`. Unpack all three values right in your `for` loop to find the biggest height `z`.",
+          "objective": "Loop through `peaks` by unpacking `x`, `y`, and `z`. If `z` is greater than `max_z`, update `max_z` to `z`. After the loop, print `max_z`.",
           "concepts": [
             "tuples",
-            "coords_3d"
+            "coords_3d",
+            "for_loops"
           ],
           "shardReward": 135,
           "unlockId": null,
           "starterCode": {
             "explorer": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)\n",
           "testCode": "assert max_z == 9 and OUTPUT.strip() == \"9\"",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)",
+            "tier1_nudge": "Pip scans each peak: 'The `for` line can unpack all three coordinates at once, so you only need to compare the height inside the loop.'",
+            "tier2_pattern": "for <x>, <y>, <z> in <peaks>:\n    if <z> > max_z:\n        max_z = <z>\nprint(max_z)",
             "tier3_walkthrough": "Write:\npeaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "peaks": [
+                  [
+                    0,
+                    0,
+                    15
+                  ],
+                  [
+                    1,
+                    1,
+                    3
+                  ]
+                ]
+              },
+              "expectOutput": "15",
+              "expectVars": {
+                "max_z": 15
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Unpacking Tuples in a for Loop",
+            "prompt": "When you have a list of 3D tuples like `[(1, 2, 4), (3, 1, 9)]`, a `for` loop can unpack each tuple right in the first line: `for x, y, z in peaks:`.",
+            "question": "What does this loop print?",
+            "codeSnippet": "peaks = [(1, 2, 4), (3, 1, 9)]\nfor x, y, z in peaks:\n    print(z)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "4 then 9",
+                "explanation": "Right! On turn 1, `z` is `4`. On turn 2, `z` is `9`."
+              },
+              {
+                "id": "b",
+                "label": "1 then 3",
+                "explanation": "Those are the `x` values! The loop prints `z`, the third number of each tuple."
+              },
+              {
+                "id": "c",
+                "label": "(1, 2, 4) then (3, 1, 9)",
+                "explanation": "Because the loop unpacks into `x, y, z`, `z` holds just the third number of each tuple."
+              },
+              {
+                "id": "d",
+                "label": "13",
+                "explanation": "The loop prints each `z` on its own line (`4`, then `9`) instead of adding them together."
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-32-01-06",
           "trialType": "code",
           "title": "Raise Terracrest's Bridge (Boss)",
-          "storyPrompt": "Final lock before Terracrest! Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.",
-          "objective": "Given `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`, sum all `z` heights into `total_h`. If `total_h == 10`, print `\"TERRACREST FREE!\"`.",
+          "storyPrompt": "This is the final lock before Terracrest! Three stone pillars hold up the bridge: `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]`. Add up every pillar's height `z` into `total_h` to lift the bridge.",
+          "objective": "Create `pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]` and `total_h = 0`. Loop through `pillars` unpacking `x`, `y`, and `z`, adding each `z` to `total_h`. If `total_h` equals `10`, print `\"TERRACREST FREE!\"`.",
           "concepts": [
             "tuples",
-            "coords_3d"
+            "coords_3d",
+            "for_loops"
           ],
           "shardReward": 150,
           "unlockId": null,
           "starterCode": {
             "explorer": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
-          "testCode": "assert total_h == 10 and OUTPUT.strip() == \"TERRACREST FREE!\"",
+          "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h += z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
+          "testCode": "assert total_h == 10, f\"Expected total_h == 10, got {total_h!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'TERRACREST FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Terracrest!",
-            "tier2_pattern": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")",
-            "tier3_walkthrough": "Write:\npillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")"
+            "tier1_nudge": "Pip raises the bridge: 'Unpack each pillar in the `for` line, add only the height inside the loop, then check the total after the loop at 0 spaces.'",
+            "tier2_pattern": "total_h = 0\nfor <x>, <y>, <z> in <pillars>:\n    total_h += <z>\nif total_h == <target>:\n    print(\"<message>\")",
+            "tier3_walkthrough": "Write:\npillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h += z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "aug_assign",
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pillars": [
+                  [
+                    0,
+                    0,
+                    4
+                  ],
+                  [
+                    1,
+                    0,
+                    6
+                  ]
+                ]
+              },
+              "expectOutput": "TERRACREST FREE!",
+              "expectVars": {
+                "total_h": 10
+              }
+            },
+            {
+              "overrides": {
+                "pillars": [
+                  [
+                    0,
+                    0,
+                    1
+                  ]
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "total_h": 1
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-01-bonus",
           "trialType": "multiple_choice",
-          "title": "Secret Rune: Terracrest's Tuple Riddle!",
-          "storyPrompt": "Hidden Rune in Blockstone Highlands! How are tuples `()` different from lists `[]`?",
-          "objective": "How are tuples `()` different from lists `[]`?",
+          "title": "Secret Rune: Terracrest's Tuple Riddle",
+          "storyPrompt": "You found a hidden stone rune in Blockstone Highlands! Answer its riddle about tuples `()` and lists `[]` to claim the reward.",
+          "objective": "Choose how tuples `()` are different from lists `[]`.",
           "concepts": [
             "tuples",
             "coords_3d"
@@ -218,30 +434,30 @@
           "choices": [
             {
               "id": "a",
-              "label": "Tuples cannot be modified in place (immutable)",
-              "explanation": "Rock solid! Tuples lock coordinates safely so they don't accidentally change!"
+              "label": "Tuples cannot be changed after you make them",
+              "explanation": "Correct! Tuples stay locked so coordinates cannot be changed by mistake."
             },
             {
               "id": "b",
-              "label": "Tuples can only hold strings",
-              "explanation": "Tuples can hold numbers, strings, anything!"
+              "label": "Tuples can only hold text",
+              "explanation": "Tuples can hold numbers, text, or anything else."
             },
             {
               "id": "c",
-              "label": "Tuples cannot be indexed",
-              "explanation": "`point[0]` works just like a list!"
+              "label": "You cannot look up items in a tuple by position",
+              "explanation": "`point[0]` works on a tuple just like it does on a list."
             },
             {
               "id": "d",
-              "label": "No difference",
-              "explanation": "Lists are mutable, tuples are immutable!"
+              "label": "There is no difference",
+              "explanation": "Lists can be changed after you make them, while tuples stay locked."
             }
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip tries to edit a coordinate and gets blocked: 'One of these two collections refuses to change after you create it. That is the whole reason tuples exist.'",
+            "tier2_pattern": "Both tuples and lists can hold any type and let you look up items by position. The difference is whether you can change them later.",
+            "tier3_walkthrough": "Tap Option A (tuples cannot be changed after you make them): tuples stay locked to keep coordinates safe from accidental edits."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -262,21 +478,21 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "glitch",
-            "text": "Welcome to Blockstone Highlands, {heroName}! My dimensional vault will keep Terracrest sealed forever!"
+            "text": "Welcome to Blockstone Highlands, {heroName}! My stone vault will keep Terracrest locked up for good!"
           },
           {
             "speaker": "Terracrest",
             "spriteKey": "pebble",
             "side": "right",
             "vfx": "vault_glow",
-            "text": "Stay sharp, {heroName}! Use everything you mastered in Blockstone Highlands to break Null's lock!"
+            "text": "Stay sharp, {heroName}! Use what you learned in Blockstone Highlands to break Null's lock."
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "none",
-            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Terracrest!"
+            "text": "Chirp! Ready to put your Python skills to work, {heroName}? Let's rescue Terracrest!"
           }
         ],
         "postBoss": [
@@ -285,21 +501,21 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "shatter",
-            "text": "Gah! Outcoded in Blockstone Highlands?! Wait until you face Sky-Forge Foundry, {heroName}!"
+            "text": "No way! Outcoded in Blockstone Highlands? Wait until you reach Sky-Forge Foundry, {heroName}!"
           },
           {
             "speaker": "Terracrest",
             "spriteKey": "pebble",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+            "text": "I'm free, {heroName}! Look around as the hills of Pyria come back to life!"
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "celebrate",
-            "text": "WOOHOO! Terracrest is free! Head through the portal to Sky-Forge Foundry!"
+            "text": "Yes! Terracrest is free! Head through the portal to Sky-Forge Foundry!"
           }
         ]
       }
@@ -313,11 +529,11 @@
         "name": "Anvilwing",
         "title": "Smith of Floating Forges",
         "element": "Fire",
-        "rescueDialogue": "CLANG-BOOM! List comprehensions forge entire arrays in one line! Take Bits 21–24!"
+        "rescueDialogue": "Great forging! One-line list loops build whole lists in a snap. Take Bits 21-24!"
       },
-      "miniVisualUpgrade": "Bits 21–24 Restored: Floating anvil platforms and glowing molten-gold forge channels.",
-      "storyIntro": "High above the clouds, floating stone islands house Sky-Forge Foundry, where iron dragon Anvilwing awaits clean grid loops and list comprehensions.",
-      "storyOutro": "Anvilwing hammers open the crystal chute down to Prism Caverns!",
+      "miniVisualUpgrade": "Bits 21-24 Restored: Floating anvil islands and glowing gold forge streams.",
+      "storyIntro": "High above the clouds, floating stone islands hold Sky-Forge Foundry. Iron dragon Anvilwing needs your help with grid loops and one-line list builders!",
+      "storyOutro": "Anvilwing hammers open the crystal chute leading down to Prism Caverns!",
       "primaryConcepts": [
         "nested_loops",
         "list_comprehensions"
@@ -330,9 +546,9 @@
         {
           "id": "trial-32-02-01",
           "trialType": "multiple_choice",
-          "title": "One-Line List Comprehensions!",
-          "storyPrompt": "Python lets you build a transformed list in ONE clean line: `[n * 2 for n in [1, 2, 3]]`! What does the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "title": "One-Line List Builders!",
+          "storyPrompt": "Python lets you build a brand-new list in one short line, like `[n * 2 for n in [1, 2, 3]]`! It walks through each item and applies the math in front to build the new list.",
+          "objective": "Predict what `print(doubled)` shows when `nums` is `[2, 4, 6]`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -344,65 +560,131 @@
             {
               "id": "a",
               "label": "[4, 8, 12]",
-              "explanation": "CLANG! Each number in `[2, 4, 6]` is multiplied by 2!"
+              "explanation": "Right! Each number in `[2, 4, 6]` gets multiplied by 2, making `[4, 8, 12]`."
             },
             {
               "id": "b",
               "label": "[2, 4, 6]",
-              "explanation": "It multiplies each `n` by 2!"
+              "explanation": "Each `n` gets multiplied by 2, so the numbers change."
             },
             {
               "id": "c",
               "label": "12",
-              "explanation": "It returns a whole new list!"
+              "explanation": "The square brackets `[...]` build a whole new list, not a single number."
             },
             {
               "id": "d",
               "label": "Error",
-              "explanation": "List comprehensions are pure Python magic!"
+              "explanation": "This one-line list loop is valid Python and runs cleanly."
             }
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip reads the one-liner from right to left: 'The `for` part says what to walk through, and the part in front says what to do to each item.'",
+            "tier2_pattern": "A one-line list builder makes a new list the same length as the old one, applying the front formula to every item.",
+            "tier3_walkthrough": "Tap Option A (`[4, 8, 12]`): each of 2, 4, and 6 is doubled, giving a new three-item list."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-32-02-02",
           "trialType": "fix_bug",
-          "title": "Fix the Foundry Comprehension!",
-          "storyPrompt": "Lord Null missed the `in` keyword inside the list comprehension! Put `in` between `x` and `ores`.",
-          "objective": "Fix `[x * 10 for x ores]` to `[x * 10 for x in ores]`.",
+          "title": "The Foundry List Loop Won't Run!",
+          "storyPrompt": "Anvilwing's one-line list builder has a typo, so Python cannot run it to multiply each ore by 10.",
+          "objective": "Fix the one-line list builder so `power` becomes `[10, 20, 30]` and prints `[10, 20, 30]`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
           ],
           "shardReward": 130,
           "unlockId": null,
-          "bugSummary": "Fix `[x * 10 for x ores]` to `[x * 10 for x in ores]`.",
+          "bugSummary": "A missing word in the one-line list builder stops Python from running the code.",
           "starterCode": {
             "explorer": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
             "standard": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n",
-            "challenge": "ores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\nores = [1, 2, 3]\npower = [x * 10 for x ores]\nprint(power)\n"
           },
           "referenceSolution": "ores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)\n",
           "testCode": "assert power == [10, 20, 30] and OUTPUT.strip() == \"[10, 20, 30]\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "ores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)",
+            "tier1_nudge": "Pip reads the line aloud: 'Say it like a sentence: \"for each x IN ores\". One little word is missing.'",
+            "tier2_pattern": "[<formula> for <item> in <list>]",
             "tier3_walkthrough": "Update to:\nores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "ores": [
+                  2,
+                  5
+                ]
+              },
+              "expectOutput": "[20, 50]",
+              "expectVars": {
+                "power": [
+                  20,
+                  50
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-32-02-02b",
+          "trialType": "code",
+          "title": "Your First One-Line List Builder",
+          "storyPrompt": "Before adding `if` filters or double loops, write a simple one-line list builder from scratch that doubles every number in `nums`.",
+          "objective": "Create the variable `doubled` using a one-line list builder that multiplies each number in `nums` by 2, then print `doubled`.",
+          "concepts": [
+            "list_comprehensions"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "nums = [2, 4, 6]\ndoubled = [n * 2 for n in ???]\nprint(doubled)\n",
+            "standard": "nums = [2, 4, 6]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "nums = [2, 4, 6]\ndoubled = [n * 2 for n in nums]\nprint(doubled)\n",
+          "testCode": "assert doubled == [4, 8, 12]\nassert OUTPUT.strip() == '[4, 8, 12]', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the brackets: 'The whole one-line list builder lives inside `[ ]`, with the math rule first and the `for` part after it.'",
+            "tier2_pattern": "doubled = [<item> * <factor> for <item> in <list>]\nprint(doubled)",
+            "tier3_walkthrough": "Add:\ndoubled = [n * 2 for n in nums]\nprint(doubled)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "nums": [
+                  1,
+                  5
+                ]
+              },
+              "expectOutput": "[2, 10]",
+              "expectVars": {
+                "doubled": [
+                  2,
+                  10
+                ]
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-02-03",
           "trialType": "code",
-          "title": "Filter with a Comprehension",
-          "storyPrompt": "In Sky-Forge Foundry, try this new power! Use `[n for n in [5, 12, 8, 20] if n >= 10]` to build `hot` and `print(hot)`.",
-          "objective": "Use `[n for n in [5, 12, 8, 20] if n >= 10]` to build `hot` and `print(hot)`.",
+          "title": "Filter a List in One Line",
+          "storyPrompt": "Only the hottest metal bars are ready for Anvilwing's forge! Add an `if` check at the end of a one-line list builder to keep only temperatures that are at least `10`.",
+          "objective": "Using `temps`, create the variable `hot` with a one-line list builder that keeps only numbers `>= 10`, then print `hot`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -411,24 +693,74 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "temps = [5, 12, 8, 20]\n# Build hot with a comprehension keeping only temps that are at least 10\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)\n",
           "testCode": "assert hot == [12, 20] and OUTPUT.strip() == \"[12, 20]\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)",
+            "tier1_nudge": "Pip sorts the glowing bars: 'An `if` at the end of a one-line list builder decides which items get kept.'",
+            "tier2_pattern": "hot = [<item> for <item> in <list> if <item> >= <limit>]\nprint(hot)",
             "tier3_walkthrough": "Write:\ntemps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "temps": [
+                  15,
+                  2,
+                  30
+                ]
+              },
+              "expectOutput": "[15, 30]",
+              "expectVars": {
+                "hot": [
+                  15,
+                  30
+                ]
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Filtering Inside a One-Line List Builder",
+            "prompt": "You can add an `if` filter at the end of a one-line list builder to keep only matching items: `[n for n in nums if n >= 10]`.",
+            "question": "What list does `[n for n in [5, 12, 8, 20] if n >= 10]` build?",
+            "codeSnippet": "hot = [n for n in [5, 12, 8, 20] if n >= 10]\nprint(hot)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[5, 8]",
+                "explanation": "Those are the numbers smaller than `10`! The filter keeps items where `n >= 10`."
+              },
+              {
+                "id": "b",
+                "label": "[False, True, False, True]",
+                "explanation": "The `if` part chooses which `n` values to keep instead of putting `True` and `False` in the list."
+              },
+              {
+                "id": "c",
+                "label": "[12, 20]",
+                "explanation": "Nice! Only `12` and `20` are at least `10`, so the new list is `[12, 20]`."
+              },
+              {
+                "id": "d",
+                "label": "2",
+                "explanation": "A one-line list builder always makes a new list (`[12, 20]`), not a count."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-02-04",
           "trialType": "code",
-          "title": "Generate 2D Isometric Coords",
-          "storyPrompt": "Push deeper into Sky-Forge Foundry! Build `coords = [(x, y) for x in range(2) for y in range(2)]` and `print(len(coords))`.",
-          "objective": "Build `coords = [(x, y) for x in range(2) for y in range(2)]` and `print(len(coords))`.",
+          "title": "Build 2D Grid Coordinates",
+          "storyPrompt": "Anvilwing needs a tiny 2-by-2 map of `(x, y)` grid spots! Use two `for` parts inside one list builder to pair every `x` in `range(2)` with every `y` in `range(2)`.",
+          "objective": "Create the variable `coords` holding every `(x, y)` tuple for `x` in `range(2)` and `y` in `range(2)` using a one-line list builder, then print `len(coords)`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -437,24 +769,58 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "coords = [(x, y) for x in range(2) for y in range(2)]\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "# Build coords with two for clauses, then print how many pairs it holds\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))\n",
           "testCode": "assert coords == [(0, 0), (0, 1), (1, 0), (1, 1)] and OUTPUT.strip() == \"4\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))",
+            "tier1_nudge": "Pip walks a grid in one line: 'A one-line list builder can have two `for` parts, pairing every item from the first with every item from the second.'",
+            "tier2_pattern": "coords = [(<a>, <b>) for <a> in range(<n>) for <b> in range(<m>)]\nprint(len(coords))",
             "tier3_walkthrough": "Write:\ncoords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "tuple",
+            "call:len"
+          ],
+          "introChoice": {
+            "title": "Double Loops in a One-Line List Builder",
+            "prompt": "Just like nested `for` loops, a one-line list builder can have two `for` parts to make every `(x, y)` pair on a 2D grid!",
+            "question": "How many `(x, y)` pairs does `[(x, y) for x in range(2) for y in range(2)]` create?",
+            "codeSnippet": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "2",
+                "explanation": "Each of the 2 values of `x` (`0, 1`) pairs with both values of `y` (`0, 1`), giving `2 * 2` pairs."
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Count all pairs of `x` in `0, 1` and `y` in `0, 1`: `(0, 0)`, `(0, 1)`, `(1, 0)`, `(1, 1)`."
+              },
+              {
+                "id": "c",
+                "label": "4",
+                "explanation": "Spot on! `2 * 2 = 4` pairs: `[(0, 0), (0, 1), (1, 0), (1, 1)]`."
+              },
+              {
+                "id": "d",
+                "label": "8",
+                "explanation": "`range(2)` has 2 numbers (`0` and `1`), so `2 * 2 = 4` pairs."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-02-05",
           "trialType": "code",
-          "title": "Uppercase Rune Tags",
-          "storyPrompt": "You're right outside Anvilwing's vault! Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.",
-          "objective": "Given `tags = [\"iron\", \"gold\"]`, build `loud = [t.upper() for t in tags]` and `print(loud)`.",
+          "title": "Shout the Rune Tags",
+          "storyPrompt": "The labels outside Anvilwing's vault need to be stamped in capital letters! You can use `.upper()` right at the front of a one-line list builder.",
+          "objective": "Using `tags`, create the variable `loud` with a one-line list builder that turns each word into uppercase with `.upper()`, then print `loud`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -463,24 +829,119 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "tags = [\"iron\", \"gold\"]\n# Build loud with a comprehension that uppercases every tag\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)\n",
-          "testCode": "assert loud == [\"IRON\", \"GOLD\"] and OUTPUT.strip() == \"['IRON', 'GOLD']\"",
+          "testCode": "assert isinstance(loud, list), f\"Expected loud to be a list, got {loud!r}\"\nif loud != [\"IRON\", \"GOLD\"]:\n    if [str(x).upper() for x in loud] == [\"IRON\", \"GOLD\"]:\n        assert False, f\"Almost! Make sure every tag is ALL CAPS using .upper() (got {loud!r})!\"\n    assert False, f\"Expected loud == ['IRON', 'GOLD'], got {loud!r}\"\nassert OUTPUT.strip() == \"['IRON', 'GOLD']\", f\"Expected printed ['IRON', 'GOLD'], got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)",
+            "tier1_nudge": "Pip stamps the tags: 'The front part of a one-line list builder can call `.upper()` on each word.'",
+            "tier2_pattern": "loud = [<item>.upper() for <item> in <list>]\nprint(loud)",
             "tier3_walkthrough": "Write:\ntags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "method_call:upper"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "tags": [
+                  "fire",
+                  "ice"
+                ]
+              },
+              "expectOutput": "['FIRE', 'ICE']",
+              "expectVars": {
+                "loud": [
+                  "FIRE",
+                  "ICE"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-32-02-05b",
+          "trialType": "code",
+          "title": "Drop the Brackets Inside sum()",
+          "storyPrompt": "Anvilwing shows you a neat shortcut! When a one-line list builder is the only thing inside a call like `sum(...)`, you can leave out the square brackets. Python still uses the exact same words in the same order, but hands over one value at a time instead of building a full list first.",
+          "objective": "Double each weight in `ores` inside `sum(...)` without square brackets, store the result in `total`, then print `total`.",
+          "concepts": [
+            "list_comprehensions",
+            "basic_math"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "ores = [4, 6, 5]\ntotal = sum(o * 2 for o in ???)\nprint(total)\n",
+            "standard": "ores = [4, 6, 5]\n# Total the doubled ores with a bracket-less comprehension inside sum()\n",
+            "challenge": ""
+          },
+          "referenceSolution": "ores = [4, 6, 5]\ntotal = sum(o * 2 for o in ores)\nprint(total)\n",
+          "testCode": "assert total == 30, f'Expected 30, got {total!r}'\nassert OUTPUT.strip() == '30', f\"Expected \\\"30\\\", got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip points at `sum(...)`: 'Leave out the square brackets `[ ]` inside `sum(...)`. Keep the `for ... in ...` words the exact same.'",
+            "tier2_pattern": "`total = sum(<item> * <factor> for <item> in <list>)`\n`print(total)`",
+            "tier3_walkthrough": "Add:\n`total = sum(o * 2 for o in ores)`\n`print(total)`"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "gen_exp",
+            "call:sum",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "ores": [
+                  1,
+                  2
+                ]
+              },
+              "expectOutput": "6",
+              "expectVars": {
+                "total": 6
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "A One-Line Loop Without Brackets",
+            "prompt": "You already build lists with `[n * 2 for n in nums]`. When you put that straight inside a function like `sum(...)`, you can drop the square brackets: `sum(n * 2 for n in nums)`. Python works out one value at a time instead of making a whole list first.",
+            "question": "What does `sum(n * 2 for n in [1, 2, 3])` give?",
+            "codeSnippet": "print(sum(n * 2 for n in [1, 2, 3]))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[2, 4, 6]",
+                "explanation": "That is the list you get with brackets, before `sum(...)` adds the numbers into one total."
+              },
+              {
+                "id": "b",
+                "label": "12",
+                "explanation": "Spot on! It doubles 1, 2, and 3 into 2, 4, and 6, and `sum(...)` adds them to 12."
+              },
+              {
+                "id": "c",
+                "label": "6",
+                "explanation": "That is 1 + 2 + 3 without doubling. The `n * 2` at the front doubles each number first."
+              },
+              {
+                "id": "d",
+                "label": "An error, because the square brackets are required",
+                "explanation": "Square brackets are optional when the one-line loop is the only thing inside `sum(...)`."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-32-02-06",
           "trialType": "code",
           "title": "Ignite Anvilwing's Sky-Forge (Boss)",
-          "storyPrompt": "Final lock before Anvilwing! Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.",
-          "objective": "Given `bars = [10, 25, 40, 15]`, build `forged = [b * 2 for b in bars if b >= 20]`. If `sum(forged) == 130`, print `\"ANVILWING FREE!\"`.",
+          "storyPrompt": "This is the final lock before Anvilwing! Given `bars = [10, 25, 40, 15]`, keep only bars that are at least `20` and double each one in a single list builder.",
+          "objective": "Create `bars = [10, 25, 40, 15]` and build `forged` using a one-line list builder that doubles every bar in `bars` that is `>= 20`. If `sum(forged)` equals `130`, print `\"ANVILWING FREE!\"`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -490,23 +951,57 @@
           "starterCode": {
             "explorer": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")\n",
-          "testCode": "assert forged == [50, 80] and OUTPUT.strip() == \"ANVILWING FREE!\"",
+          "testCode": "assert forged == [50, 80], f\"Expected forged == [50, 80], got {forged!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'ANVILWING FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Anvilwing!",
-            "tier2_pattern": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")",
+            "tier1_nudge": "Pip fires up the forge: 'One list builder can change and filter items at the same time. Put the doubling rule in front and the `if` filter at the end.'",
+            "tier2_pattern": "forged = [<item> * <factor> for <item> in <list> if <item> >= <limit>]\nif sum(forged) == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nbars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "call:sum"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "bars": [
+                  30,
+                  35,
+                  5
+                ]
+              },
+              "expectOutput": "ANVILWING FREE!",
+              "expectVars": {
+                "forged": [
+                  60,
+                  70
+                ]
+              }
+            },
+            {
+              "overrides": {
+                "bars": [
+                  5,
+                  10
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "forged": []
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-02-bonus",
           "trialType": "multiple_choice",
-          "title": "Secret Rune: Anvilwing's Square Riddle!",
-          "storyPrompt": "Hidden Rune in Sky-Forge Foundry! What does `[n * n for n in range(1, 4)]` produce?",
-          "objective": "What does `[n * n for n in range(1, 4)]` produce?",
+          "title": "Secret Rune: Anvilwing's Square Riddle",
+          "storyPrompt": "You found a hidden forge rune in Sky-Forge Foundry! Solve its quick one-line list riddle to unlock the bonus prize.",
+          "objective": "Predict what `[n * n for n in range(1, 4)]` produces.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -518,29 +1013,29 @@
             {
               "id": "a",
               "label": "[1, 4, 9]",
-              "explanation": "Forged in fire! 1×1=1, 2×2=4, 3×3=9!"
+              "explanation": "Correct! `1 * 1 = 1`, `2 * 2 = 4`, and `3 * 3 = 9`."
             },
             {
               "id": "b",
               "label": "[1, 2, 3]",
-              "explanation": "It squares each `n`!"
+              "explanation": "It multiplies each `n` by itself (`n * n`), so the numbers grow."
             },
             {
               "id": "c",
               "label": "[2, 4, 6]",
-              "explanation": "That's `n * 2`, not `n * n`!"
+              "explanation": "That would be `n * 2`, not `n * n`."
             },
             {
               "id": "d",
               "label": "[1, 4, 9, 16]",
-              "explanation": "`range(1, 4)` stops at 3!"
+              "explanation": "`range(1, 4)` stops before `4`, so it only uses `1`, `2`, and `3`."
             }
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip multiplies each number by itself: 'Look at the front part of the list builder. It uses the loop variable twice.'",
+            "tier2_pattern": "`range(1, 4)` walks through `1`, `2`, and `3`, and the front part multiplies each number by itself.",
+            "tier3_walkthrough": "Tap Option A (`[1, 4, 9]`): `1 * 1`, `2 * 2`, and `3 * 3`, since `range(1, 4)` stops before `4`."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -561,21 +1056,21 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "glitch",
-            "text": "Welcome to Sky-Forge Foundry, {heroName}! My dimensional vault will keep Anvilwing sealed forever!"
+            "text": "Welcome to Sky-Forge Foundry, {heroName}! My iron vault will keep Anvilwing sealed up for good!"
           },
           {
             "speaker": "Anvilwing",
             "spriteKey": "emberwing",
             "side": "right",
             "vfx": "vault_glow",
-            "text": "Stay sharp, {heroName}! Use everything you mastered in Sky-Forge Foundry to break Null's lock!"
+            "text": "Stay sharp, {heroName}! Use what you learned in Sky-Forge Foundry to break Null's lock."
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "none",
-            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Anvilwing!"
+            "text": "Chirp! Ready to put your Python skills to work, {heroName}? Let's rescue Anvilwing!"
           }
         ],
         "postBoss": [
@@ -584,21 +1079,21 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "shatter",
-            "text": "Gah! Outcoded in Sky-Forge Foundry?! Wait until you face Prism Caverns, {heroName}!"
+            "text": "No way! Outcoded in Sky-Forge Foundry? Wait until you reach Prism Caverns, {heroName}!"
           },
           {
             "speaker": "Anvilwing",
             "spriteKey": "emberwing",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+            "text": "I'm free, {heroName}! Feel the floating forges of Pyria roar back to life!"
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "celebrate",
-            "text": "WOOHOO! Anvilwing is free! Head through the portal to Prism Caverns!"
+            "text": "Yes! Anvilwing is free! Head through the portal to Prism Caverns!"
           }
         ]
       }
@@ -610,13 +1105,13 @@
       "dragon": {
         "id": "dragon-lumina",
         "name": "Lumina",
-        "title": "Weaver of Crystal Light",
+        "title": "Keeper of Crystal Light",
         "element": "Light",
-        "rescueDialogue": "SHIMMER! Sets and nested dicts light every crystal tunnel! Take Bits 25–28!"
+        "rescueDialogue": "Bright work! Sets and nested dictionaries light up every crystal tunnel. Take Bits 25-28!"
       },
-      "miniVisualUpgrade": "Bits 25–28 Restored: Refracting crystal spires and glowing prism bridges.",
-      "storyIntro": "Beneath the foundry sparkle the Prism Caverns! Here **sets** remove duplicates automatically and **nested dictionaries** map glowing crystal caves.",
-      "storyOutro": "Lumina focuses a prism beam straight toward Null's Polygon Citadel!",
+      "miniVisualUpgrade": "Bits 25-28 Restored: Glowing crystal towers and bright prism bridges.",
+      "storyIntro": "Deep under the foundry sparkle the Prism Caverns! Here **sets** drop duplicate items on their own, and **nested dictionaries** map out glowing crystal caves.",
+      "storyOutro": "Lumina aims a bright crystal beam straight toward The Crystal Archives!",
       "primaryConcepts": [
         "dictionaries_nested",
         "sets"
@@ -630,8 +1125,8 @@
           "id": "trial-32-03-01",
           "trialType": "multiple_choice",
           "title": "Meet Python Sets!",
-          "storyPrompt": "A **set** (`set(...)` or `{1, 2, 3}`) keeps ONLY unique items — duplicates vanish automatically! What does `len(set([\"red\", \"blue\", \"red\"]))` equal?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "storyPrompt": "A **set** (`set(...)` or `{1, 2, 3}`) is a bag of items that only keeps unique values. Any repeats vanish on their own! Unlike a dictionary (`{key: value}`), a set holds single items with no `:` colons.",
+          "objective": "Predict what `print(len(unique))` displays after `set()` is used on `[\"red\", \"blue\", \"red\"]`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -643,65 +1138,109 @@
             {
               "id": "a",
               "label": "2",
-              "explanation": "Crystal clear! The duplicate `\"red\"` is removed, leaving `{\"red\", \"blue\"}` (2 items)!"
+              "explanation": "Crystal clear! The extra `\"red\"` vanishes, leaving `{\"red\", \"blue\"}`, which is 2 items."
             },
             {
               "id": "b",
               "label": "3",
-              "explanation": "Sets remove duplicate items!"
+              "explanation": "Sets drop duplicate items, so `\"red\"` is only counted once."
             },
             {
               "id": "c",
               "label": "1",
-              "explanation": "`\"red\"` and `\"blue\"` are 2 distinct colors!"
+              "explanation": "`\"red\"` and `\"blue\"` are 2 different colors, so both stay."
             },
             {
               "id": "d",
               "label": "Error",
-              "explanation": "Converting a list with `set()` is built-in!"
+              "explanation": "Turning a list into a set with `set()` is built right into Python."
             }
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip holds up the matching shard: 'A set refuses to keep two copies of the same thing, so count how many different colors there are.'",
+            "tier2_pattern": "`set(...)` drops every repeat, and `len(...)` counts how many items are left.",
+            "tier3_walkthrough": "Tap Option A (`2`): the repeated `\"red\"` turns into one, leaving two different colors."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-32-03-02",
           "trialType": "fix_bug",
-          "title": "Fix the Nested Dict Lookup!",
-          "storyPrompt": "Lord Null misspelled `\"north\"` as `\"norht\"` in the cavern map lookup! Fix the key.",
-          "objective": "Change `\"norht\"` to `\"north\"` so `print(cavern[\"gate\"][\"north\"])` outputs `\"OPEN\"`.",
+          "title": "The Cavern Map Raises KeyError!",
+          "storyPrompt": "Lumina's nested room map crashes with a `KeyError` when checking the northern gate.",
+          "objective": "Fix the nested dictionary lookup so it prints `OPEN`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
           ],
           "shardReward": 140,
           "unlockId": null,
-          "bugSummary": "Change `\"norht\"` to `\"north\"` so `print(cavern[\"gate\"][\"north\"])` outputs `\"OPEN\"`.",
+          "bugSummary": "Looking up the northern gate causes a `KeyError` because the inner key is spelled wrong.",
           "starterCode": {
             "explorer": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
             "standard": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n",
-            "challenge": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n"
+            "challenge": "# Challenge: find and fix the bug with no hints\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"norht\"])\n"
           },
           "referenceSolution": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])\n",
-          "testCode": "assert OUTPUT.strip() == \"OPEN\"",
+          "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'OPEN'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])",
+            "tier1_nudge": "Pip checks the inner key letter by letter: 'Both keys have to match a real key in the dictionary. Compare the spelling against line 1.'",
+            "tier2_pattern": "print(<dict>[\"<outer_key>\"][\"<inner_key>\"])",
             "tier3_walkthrough": "Update to:\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "cavern": {
+                  "gate": {
+                    "north": "LOCKED"
+                  }
+                }
+              },
+              "expectOutput": "LOCKED"
+            }
+          ],
+          "introChoice": {
+            "title": "Nested Dictionary Lookups",
+            "prompt": "A dictionary can hold another dictionary inside it! To reach the inner value, put two square-bracket lookups side by side: `cavern[\"gate\"][\"north\"]`.",
+            "question": "What does `cavern[\"gate\"][\"north\"]` give you?",
+            "codeSnippet": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "gate",
+                "explanation": "`\"gate\"` is the outer key, whose value is the inner dictionary `{\"north\": \"OPEN\"}`."
+              },
+              {
+                "id": "b",
+                "label": "{\"north\": \"OPEN\"}",
+                "explanation": "That is `cavern[\"gate\"]`. Adding `[\"north\"]` steps one level deeper to get `\"OPEN\"`."
+              },
+              {
+                "id": "c",
+                "label": "OPEN",
+                "explanation": "Spot on! First `cavern[\"gate\"]` grabs the inner dictionary, then `[\"north\"]` gets `\"OPEN\"`."
+              },
+              {
+                "id": "d",
+                "label": "KeyError",
+                "explanation": "Both keys (`\"gate\"` and `\"north\"`) exist and are spelled right, so it works cleanly."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-03-03",
           "trialType": "code",
-          "title": "Deduplicate Crystal Shards",
-          "storyPrompt": "In Prism Caverns, try this new power! Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.",
-          "objective": "Given `found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]`, set `unique_count = len(set(found))` and `print(unique_count)`.",
+          "title": "Drop Duplicate Crystal Shards",
+          "storyPrompt": "Your backpack has repeat crystal colors in `found`. Turn the list into a `set` to drop the duplicates, then count how many unique colors are left with `len()`.",
+          "objective": "Using `found`, create the variable `unique_count` storing the number of unique crystal colors (using `set()` and `len()`), then print `unique_count`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -710,24 +1249,102 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\n# Count how many DISTINCT colors are in found\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)\n",
           "testCode": "assert unique_count == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)",
+            "tier1_nudge": "Pip sorts the shard pile: 'Turn the list into a set to drop the repeats, then count what is left.'",
+            "tier2_pattern": "unique_count = len(set(<list>))\nprint(unique_count)",
             "tier3_walkthrough": "Write:\nfound = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "call:set",
+            "call:len"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "found": [
+                  "a",
+                  "a",
+                  "b"
+                ]
+              },
+              "expectOutput": "2",
+              "expectVars": {
+                "unique_count": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-32-03-03b",
+          "trialType": "code",
+          "title": "Combine Sets With Union (|)",
+          "storyPrompt": "Sets have their own special symbols! The union symbol `|` puts all unique items from two sets together. Even if an item is in both sets, it still shows up only once.",
+          "objective": "Create the variable `all_gems` by combining sets `a` and `b` with `|`, then print `len(all_gems)`.",
+          "concepts": [
+            "sets"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "a = {\"cyan\", \"gold\"}\nb = {\"gold\", \"ruby\"}\nall_gems = a | ???\nprint(len(all_gems))\n",
+            "standard": "a = {\"cyan\", \"gold\"}\nb = {\"gold\", \"ruby\"}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "a = {\"cyan\", \"gold\"}\nb = {\"gold\", \"ruby\"}\nall_gems = a | b\nprint(len(all_gems))\n",
+          "testCode": "assert all_gems == {'cyan', 'gold', 'ruby'}\nassert OUTPUT.strip() == '3', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip pours both pouches together: 'The `|` symbol combines two sets, and a gem in both still appears only once.'",
+            "tier2_pattern": "all_gems = <first_set> | <second_set>\nprint(len(all_gems))",
+            "tier3_walkthrough": "Add:\nall_gems = a | b\nprint(len(all_gems))"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "call:len",
+            "call:print"
+          ],
+          "introChoice": {
+            "title": "Set Union (|) Combines Unique Items",
+            "prompt": "With sets, `a | b` makes the **union**: all unique items from `a` and `b` combined, with duplicates counted only once.",
+            "question": "How many items are in `{\"cyan\", \"gold\"} | {\"gold\", \"ruby\"}`?",
+            "codeSnippet": "a = {\"cyan\", \"gold\"}\nb = {\"gold\", \"ruby\"}\nprint(len(a | b))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "4",
+                "explanation": "Sets drop duplicates on their own, so `\"gold\"` is only counted once."
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Spot on! The unique items are `\"cyan\"`, `\"gold\"`, and `\"ruby\"`: 3 total."
+              },
+              {
+                "id": "c",
+                "label": "1",
+                "explanation": "Only `\"gold\"` is in both sets, but `a | b` keeps everything from either set, giving all 3 unique gems."
+              },
+              {
+                "id": "d",
+                "label": "2",
+                "explanation": "`a | b` keeps items from both sets: `\"cyan\"`, `\"gold\"`, and `\"ruby\"` (3 items)."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-32-03-04",
           "trialType": "code",
           "title": "Set Intersection (&)",
-          "storyPrompt": "Push deeper into Prism Caverns! Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.",
-          "objective": "Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.",
+          "storyPrompt": "You already combined two sets with `|` (union, everything from either set). Now meet its partner `&` (**intersection**), which keeps only the items that appear in both sets.",
+          "objective": "Using sets `a` and `b`, create the variable `common` storing only the colors in both sets with `&`, then print `len(common)`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -736,24 +1353,87 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))\n",
           "testCode": "assert common == {\"gold\", \"ruby\"} and OUTPUT.strip() == \"2\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))",
+            "tier1_nudge": "Pip compares the two pouches: 'The `&` symbol keeps only the items that show up in both sets.'",
+            "tier2_pattern": "common = <first_set> & <second_set>\nprint(len(common))",
             "tier3_walkthrough": "Write:\na = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "set",
+            "call:len"
+          ],
+          "introChoice": {
+            "title": "Set Intersection (&)",
+            "prompt": "With Python sets, the `&` symbol finds the **intersection**: a new set with only the items that appear in both sets.",
+            "question": "What does `{\"cyan\", \"gold\", \"ruby\"} & {\"gold\", \"ruby\", \"jade\"}` produce?",
+            "codeSnippet": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b",
+            "choices": [
+              {
+                "id": "a",
+                "label": "{\"cyan\", \"gold\", \"ruby\", \"jade\"}",
+                "explanation": "That is the union (`a | b`), which combines everything. Intersection (`a & b`) keeps only shared items."
+              },
+              {
+                "id": "b",
+                "label": "{\"cyan\", \"jade\"}",
+                "explanation": "Those are the items that are not shared! `a & b` keeps items found in both `a` and `b`."
+              },
+              {
+                "id": "c",
+                "label": "{\"gold\", \"ruby\"}",
+                "explanation": "Yes! Only `\"gold\"` and `\"ruby\"` are in both sets, so `a & b` is `{\"gold\", \"ruby\"}`."
+              },
+              {
+                "id": "d",
+                "label": "set() (empty)",
+                "explanation": "Look closely: `\"gold\"` and `\"ruby\"` are in both sets!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-32-03-04b",
+          "trialType": "code",
+          "title": "Read a Nested Vault Value",
+          "storyPrompt": "Let's practice nested dictionaries again! Put two square-bracket lookups side by side (`vault[\"east\"][\"gems\"]`) to grab the gem count inside the east room.",
+          "objective": "Create the variable `count` by reading `vault[\"east\"][\"gems\"]`, then print `count`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "vault = {\"east\": {\"gems\": 15}}\ncount = vault[\"east\"][\"???\"]\nprint(count)\n",
+            "standard": "vault = {\"east\": {\"gems\": 15}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "vault = {\"east\": {\"gems\": 15}}\ncount = vault[\"east\"][\"gems\"]\nprint(count)\n",
+          "testCode": "assert count == 15\nassert OUTPUT.strip() == '15', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip opens two lids in a row: 'Put two bracket lookups side by side: the outer key first, then the inner key.'",
+            "tier2_pattern": "count = <dict>[\"<outer_key>\"][\"<inner_key>\"]\nprint(count)",
+            "tier3_walkthrough": "Add:\ncount = vault[\"east\"][\"gems\"]\nprint(count)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "subscript",
+            "call:print"
+          ]
         },
         {
           "id": "trial-32-03-05",
           "trialType": "code",
           "title": "Read a Nested Room Map",
-          "storyPrompt": "You're right outside Lumina's vault! Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.",
-          "objective": "Given `rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}`, set `dest = rooms[\"hall\"][\"next\"]` and `print(dest)`.",
+          "storyPrompt": "Lumina's cave map `rooms` stores each room's details in an inner dictionary. Check where the `\"hall\"` leads next!",
+          "objective": "Create the variable `dest` by reading `\"next\"` inside `rooms[\"hall\"]`, then print `dest`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -762,24 +1442,43 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\n# Read the hall's next room into dest, then print it\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)\n",
-          "testCode": "assert dest == \"vault\" and OUTPUT.strip() == \"vault\"",
+          "testCode": "assert dest == \"vault\", f\"Expected dest == 'vault', got {dest!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'vault'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)",
+            "tier1_nudge": "Pip follows the map: 'Use two lookups in a row: the room name first, then the key inside that room.'",
+            "tier2_pattern": "dest = <dict>[\"<room>\"][\"<key>\"]\nprint(dest)",
             "tier3_walkthrough": "Write:\nrooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "rooms": {
+                  "hall": {
+                    "next": "spire",
+                    "gems": 3
+                  }
+                }
+              },
+              "expectOutput": "spire",
+              "expectVars": {
+                "dest": "spire"
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-03-06",
           "trialType": "code",
-          "title": "Align Lumina's Crystal Graph (Boss)",
-          "storyPrompt": "Final lock before Lumina! Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.",
-          "objective": "Given `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`, sum `n[\"power\"]` for all nodes into `beam`. If `beam == 100`, print `\"LUMINA FREE!\"`.",
+          "title": "Align Lumina's Crystal Map (Boss)",
+          "storyPrompt": "This is the final lock before Lumina! Three crystal nodes power the prism: `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}`. Pull `\"power\"` out of every node in `nodes.values()` and add them up.",
+          "objective": "Create `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}` and build `beam` by summing `[n[\"power\"] for n in nodes.values()]`. If `beam` equals `100`, print `\"LUMINA FREE!\"`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -789,23 +1488,60 @@
           "starterCode": {
             "explorer": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
-          "testCode": "assert beam == 100 and OUTPUT.strip() == \"LUMINA FREE!\"",
+          "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum([n[\"power\"] for n in nodes.values()])\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
+          "testCode": "assert beam == 100, f\"Expected beam == 100, got {beam!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'LUMINA FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Lumina!",
-            "tier2_pattern": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")",
-            "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")"
+            "tier1_nudge": "Pip lines up the crystals: 'Each value in the outer dictionary is its own small dictionary. Pull the power number out of each one in a list and add them up with `sum()`.'",
+            "tier2_pattern": "beam = sum([<node>[\"<key>\"] for <node> in <dict>.values()])\nif beam == <target>:\n    print(\"<message>\")",
+            "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum([n[\"power\"] for n in nodes.values()])\nif beam == 100:\n    print(\"LUMINA FREE!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "list_comp",
+            "dict",
+            "call:sum",
+            "method_call:values"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "nodes": {
+                  "A": {
+                    "power": 60
+                  },
+                  "B": {
+                    "power": 40
+                  }
+                }
+              },
+              "expectOutput": "LUMINA FREE!",
+              "expectVars": {
+                "beam": 100
+              }
+            },
+            {
+              "overrides": {
+                "nodes": {
+                  "A": {
+                    "power": 10
+                  }
+                }
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "beam": 10
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-03-bonus",
           "trialType": "multiple_choice",
-          "title": "Secret Rune: Lumina's Set Union!",
-          "storyPrompt": "Hidden Rune in Prism Caverns! What does `{1, 2} | {2, 3}` produce?",
-          "objective": "What does `{1, 2} | {2, 3}` produce?",
+          "title": "Secret Rune: Lumina's Set Union",
+          "storyPrompt": "You found a hidden crystal rune in Prism Caverns! Predict how many items are in the combined set `{1, 2} | {2, 3}`.",
+          "objective": "Predict what `print(len({1, 2} | {2, 3}))` displays.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -817,29 +1553,29 @@
             {
               "id": "a",
               "label": "3",
-              "explanation": "Radiant! Union `|` combines both sets without duplicates: `{1, 2, 3}`!"
+              "explanation": "Right! Union `|` combines both sets with no duplicates, giving `{1, 2, 3}` (3 items)."
             },
             {
               "id": "b",
               "label": "4",
-              "explanation": "Duplicate `2` only appears once!"
+              "explanation": "The repeated `2` only stays once in a set."
             },
             {
               "id": "c",
               "label": "1",
-              "explanation": "That's intersection `&`!"
+              "explanation": "That would be intersection `&`, which keeps only `2`."
             },
             {
               "id": "d",
               "label": "Error",
-              "explanation": "`|` is set union!"
+              "explanation": "`|` is the built-in union symbol for combining two sets."
             }
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip merges two small sets: 'Union keeps everything from either side, but a set never keeps the same number twice.'",
+            "tier2_pattern": "Count the unique numbers across both sets, remembering that the shared number is counted only once.",
+            "tier3_walkthrough": "Tap Option A (`3`): the union is `{1, 2, 3}`, because the repeated `2` is kept only once."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -860,21 +1596,21 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "glitch",
-            "text": "Welcome to Prism Caverns, {heroName}! My dimensional vault will keep Lumina sealed forever!"
+            "text": "Welcome to Prism Caverns, {heroName}! My crystal vault will keep Lumina locked up for good!"
           },
           {
             "speaker": "Lumina",
             "spriteKey": "glacier",
             "side": "right",
             "vfx": "vault_glow",
-            "text": "Stay sharp, {heroName}! Use everything you mastered in Prism Caverns to break Null's lock!"
+            "text": "Stay sharp, {heroName}! Use what you learned in Prism Caverns to break Null's lock."
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "none",
-            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Lumina!"
+            "text": "Chirp! Ready to put your Python skills to work, {heroName}? Let's rescue Lumina!"
           }
         ],
         "postBoss": [
@@ -883,43 +1619,928 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "shatter",
-            "text": "Gah! Outcoded in Prism Caverns?! Wait until you face Null's Polygon Citadel, {heroName}!"
+            "text": "No way! Outcoded in Prism Caverns? Wait until you reach The Crystal Archives, {heroName}!"
           },
           {
             "speaker": "Lumina",
             "spriteKey": "glacier",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+            "text": "I'm free, {heroName}! Watch the crystal caves of Pyria light up around you!"
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "celebrate",
-            "text": "WOOHOO! Lumina is free! Head through the portal to Null's Polygon Citadel!"
+            "text": "Yes! Lumina is free! Head through the portal to The Crystal Archives!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-32-05-archives",
+      "number": 4,
+      "name": "The Crystal Archives",
+      "dragon": {
+        "id": "dragon-chronis",
+        "name": "Chronis",
+        "title": "Keeper of Nested Maps",
+        "element": "Crystal",
+        "rescueDialogue": "Nice work! Every hidden chamber in the Crystal Archives is mapped again. Take this 32-Bit Prism and head toward Shieldwall Bastion!"
+      },
+      "miniVisualUpgrade": "32-Bit Upgrade: Glowing crystal archive shelves and bright room reflections appear.",
+      "storyIntro": "Deep below Prism Caverns lie the Crystal Archives, where dragon Chronis guards Pyria's nested room maps! Practice nested dictionaries (dictionaries inside dictionaries) to unlock the archive doors.",
+      "storyOutro": "Chronis rises above the archive towers, lighting the way to Shieldwall Bastion!",
+      "primaryConcepts": [
+        "dictionaries_nested"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-32-05-01",
+          "trialType": "multiple_choice",
+          "title": "Read a Nested Room Map!",
+          "storyPrompt": "Welcome to the Crystal Archives! A **nested dictionary** stores one dictionary inside another. Put two bracket lookups side by side (outer key first, inner key second) like `rooms[\"hall\"][\"gems\"]`.",
+          "objective": "Predict what `print(rooms[\"hall\"][\"gems\"])` displays.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "codeSnippet": "rooms = {\n    \"hall\": {\"gems\": 12, \"lit\": True},\n    \"vault\": {\"gems\": 40, \"lit\": False}\n}\nprint(rooms[\"hall\"][\"gems\"])",
+          "choices": [
+            {
+              "id": "a",
+              "label": "40",
+              "explanation": "`40` is inside `\"vault\"`, not `\"hall\"`."
+            },
+            {
+              "id": "b",
+              "label": "12",
+              "explanation": "Spot on! `rooms[\"hall\"]` gets the hall dictionary, and `[\"gems\"]` grabs `12`."
+            },
+            {
+              "id": "c",
+              "label": "True",
+              "explanation": "`True` is stored under `\"lit\"`, while `\"gems\"` holds `12`."
+            },
+            {
+              "id": "d",
+              "label": "{\"gems\": 12, \"lit\": True}",
+              "explanation": "That is `rooms[\"hall\"]`. Adding `[\"gems\"]` steps one level deeper to get `12`."
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip points at the two brackets: 'Step into the outer room dictionary first, then look up the second key inside it.'",
+            "tier2_pattern": "The first lookup picks one room out of `rooms`; the second picks a key inside that room.",
+            "tier3_walkthrough": "Tap Option B (`12`): the first lookup gets the hall dictionary, and the second reads `12` from `\"gems\"`."
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-05-02",
+          "trialType": "fix_bug",
+          "title": "The Archive KeyError!",
+          "storyPrompt": "Lord Null scrambled a key name in the archive lookup, causing a `KeyError`! Fix the misspelled inner key so Python prints `OPEN`.",
+          "objective": "Fix the inner key in `print(archive[\"north\"][...])` so it prints `OPEN`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "bugSummary": "The nested lookup causes a `KeyError` because the inner key is spelled wrong.",
+          "starterCode": {
+            "explorer": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"dor\"])\n",
+            "standard": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"dor\"])\n",
+            "challenge": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"dor\"])\n"
+          },
+          "referenceSolution": "archive = {\"north\": {\"door\": \"OPEN\"}}\nprint(archive[\"north\"][\"door\"])\n",
+          "testCode": "assert OUTPUT.strip() == 'OPEN', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip squints at line 2: 'Compare the spelling of the inner key in the `print` line with the key defined in `archive` on line 1.'",
+            "tier2_pattern": "print(<dict>[\"<outer_key>\"][\"<inner_key>\"])",
+            "tier3_walkthrough": "Change `\"dor\"` to `\"door\"`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "dict",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-03",
+          "trialType": "code",
+          "title": "Read a Nested Boss Name",
+          "storyPrompt": "Check who guards the north wing inside the nested `atlas` dictionary!",
+          "objective": "Create the variable `guardian` by reading `atlas[\"north\"][\"boss\"]`, then print `guardian`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"???\"]\nprint(guardian)\n",
+            "standard": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)\n",
+          "testCode": "assert guardian == 'Chronis'\nassert OUTPUT.strip() == 'Chronis', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip opens two lids in turn: 'Put the two keys side by side (the wing first, then the key inside it) and save the result in `guardian`.'",
+            "tier2_pattern": "guardian = <dict>[\"<outer_key>\"][\"<inner_key>\"]\nprint(guardian)",
+            "tier3_walkthrough": "Add:\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-04",
+          "trialType": "code",
+          "title": "Update a Value Inside a Nested Dict",
+          "storyPrompt": "You can also update a value inside a nested dictionary with `+=`! Add `10` gold to the west vault.",
+          "objective": "Increase `vault[\"west\"][\"gold\"]` by `10`, then print `vault[\"west\"][\"gold\"]`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += ???\nprint(vault[\"west\"][\"gold\"])\n",
+            "standard": "vault = {\"west\": {\"gold\": 25}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])\n",
+          "testCode": "assert vault['west']['gold'] == 35\nassert OUTPUT.strip() == '35', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip tops up the west vault: 'Put both keys side by side, then use `+=` to add to the number stored there.'",
+            "tier2_pattern": "<dict>[\"<room>\"][\"<key>\"] += <amount>\nprint(<dict>[\"<room>\"][\"<key>\"])",
+            "tier3_walkthrough": "Add:\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "subscript",
+            "call:print"
+          ],
+          "introChoice": {
+            "title": "Updating Inside a Nested Dictionary",
+            "prompt": "Just like updating a regular dictionary, chaining two keys with `+=` updates the inner value directly: `vault[\"west\"][\"gold\"] += 10`.",
+            "question": "What does `print(vault[\"west\"][\"gold\"])` display after `+= 10`?",
+            "codeSnippet": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "25",
+                "explanation": "`+= 10` changes the inner value from `25` to `35`."
+              },
+              {
+                "id": "b",
+                "label": "10",
+                "explanation": "`+= 10` adds 10 to `25` instead of replacing it with `10`."
+              },
+              {
+                "id": "c",
+                "label": "35",
+                "explanation": "Nice! `25 + 10` updates `vault[\"west\"][\"gold\"]` to `35`."
+              },
+              {
+                "id": "d",
+                "label": "KeyError",
+                "explanation": "Both keys (`\"west\"` and `\"gold\"`) exist, so it updates cleanly."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-32-05-05",
+          "trialType": "code",
+          "title": "Add an Inner Key to a Nested Dict",
+          "storyPrompt": "The east corridor is dark! You can add a brand-new key inside an inner dictionary just by assigning a value to it.",
+          "objective": "Store `True` at `rooms[\"east\"][\"lit\"]`, then print `rooms[\"east\"][\"lit\"]`.",
+          "concepts": [
+            "dictionaries_nested",
+            "booleans"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"east\": {\"gems\": 5}}\nrooms[\"east\"][\"lit\"] = ???\nprint(rooms[\"east\"][\"lit\"])\n",
+            "standard": "rooms = {\"east\": {\"gems\": 5}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"east\": {\"gems\": 5}}\nrooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])\n",
+          "testCode": "assert rooms['east']['lit'] is True\nassert OUTPUT.strip() == 'True', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip lights the east hallway: 'Assigning to an inner key that does not exist yet creates it. Remember `True` starts with a capital letter and has no quotes.'",
+            "tier2_pattern": "<dict>[\"<room>\"][\"<new_key>\"] = <value>\nprint(<dict>[\"<room>\"][\"<new_key>\"])",
+            "tier3_walkthrough": "Add:\nrooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "subscript",
+            "bool",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-06",
+          "trialType": "code",
+          "title": "Sum All Rooms in a Nested Dict",
+          "storyPrompt": "When you loop over `rooms.values()`, each turn hands you one inner room dictionary! Pull `\"gems\"` from each room and add it to `total`.",
+          "objective": "Loop over `rooms.values()`, adding each room's `\"gems\"` value into `total`, then print `total`.",
+          "concepts": [
+            "dictionaries_nested",
+            "for_loops",
+            "dict_iteration"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\nfor r in rooms.values():\n    total += r[\"???\"]\nprint(total)\n",
+            "standard": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\nfor r in rooms.values():\n    total += r[\"gems\"]\nprint(total)\n",
+          "testCode": "assert total == 35\nassert OUTPUT.strip() == '35', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip walks from room to room: 'Looping over `.values()` gives you each inner room dictionary, so grab its gem count and add it to `total`.'",
+            "tier2_pattern": "for <room> in <dict>.values():\n    total += <room>[\"<key>\"]\nprint(total)",
+            "tier3_walkthrough": "Add:\nfor r in rooms.values():\n    total += r[\"gems\"]\nprint(total)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-06b",
+          "trialType": "code",
+          "title": "Loop Keys and Values With .items()",
+          "storyPrompt": "`.values()` only gives you the room dictionaries, but the archive book needs each room's name too! `.items()` hands over both on every turn as a `(key, value)` pair, which you can unpack into two variables right in the `for` line.",
+          "objective": "Loop over `rooms` with `.items()`, unpacking each pair into `name` and `room`, and print `name` and `room[\"gems\"]` on each turn.",
+          "concepts": [
+            "dictionaries_nested",
+            "dict_iteration",
+            "for_loops"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\nfor name, room in rooms.???():\n    print(name, room[\"gems\"])\n",
+            "standard": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\nfor name, room in rooms.items():\n    print(name, room[\"gems\"])\n",
+          "testCode": "_lines = [l.strip() for l in OUTPUT.strip().splitlines() if l.strip()]\nassert _lines == ['hall 12', 'vault 40'], f\"Expected ['hall 12', 'vault 40'], got {_lines!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip points to the `for` line: 'Use the dictionary command that hands over both the key and the value together as a pair.'",
+            "tier2_pattern": "for <name>, <room> in <dict>.items():\n    print(<name>, <room>[\"<key>\"])",
+            "tier3_walkthrough": "Add:\nfor name, room in rooms.items():\n    print(name, room[\"gems\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "method_call:items",
+            "subscript",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "rooms": {
+                  "crypt": {
+                    "gems": 7
+                  }
+                }
+              },
+              "expectOutput": "crypt 7"
+            }
+          ],
+          "introChoice": {
+            "title": "Keys and Values Together With .items()",
+            "prompt": "`.keys()` gives you just the keys and `.values()` gives you just the values. `.items()` gives you both at once: each turn hands over a `(key, value)` pair that you unpack into two variables in the `for` line.",
+            "question": "What does this loop print?",
+            "codeSnippet": "gems = {\"ruby\": 4, \"opal\": 6}\nfor name, count in gems.items():\n    print(name, count)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "ruby then opal",
+                "explanation": "That is what `.keys()` would give you. `.items()` brings the value along too."
+              },
+              {
+                "id": "b",
+                "label": "4 then 6",
+                "explanation": "That is what `.values()` would give you. `.items()` brings the key along too."
+              },
+              {
+                "id": "c",
+                "label": "ruby 4 then opal 6",
+                "explanation": "Spot on! Each turn unpacks one pair, so `name` holds the key and `count` holds its value, printed together on one line."
+              },
+              {
+                "id": "d",
+                "label": "An error because a for loop cannot unpack two variables",
+                "explanation": "A `(key, value)` pair is a tuple, so unpacking it in the `for` line works cleanly."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-32-05-07",
+          "trialType": "code",
+          "title": "Unlock Chronis's Crystal Archive (Boss)",
+          "storyPrompt": "Chronis's vault only counts gems from rooms that are open! Loop through `rooms.values()`, check each room's `\"open\"` flag, and add its `\"gems\"` when it is `True`.",
+          "objective": "Create `total = 0` and loop over `rooms.values()`. If `r[\"open\"]` is `True`, add `r[\"gems\"]` to `total`. After the loop, if `total` equals `50`, print `\"CHRONIS FREE!\"`.",
+          "concepts": [
+            "dictionaries_nested",
+            "for_loops",
+            "conditionals_if"
+          ],
+          "shardReward": 85,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")\n",
+            "standard": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")\n",
+          "testCode": "assert total == 50\nassert OUTPUT.strip() == 'CHRONIS FREE!', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip checks each door before counting: 'Test the room's flag inside the loop and add its gems only when the door is open, then check the total after the loop.'",
+            "tier2_pattern": "total = 0\nfor <room> in <dict>.values():\n    if <room>[\"<flag>\"]:\n        total += <room>[\"<key>\"]\nif total == <target>:\n    print(\"<message>\")",
+            "tier3_walkthrough": "Add:\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "if",
+            "subscript",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-05-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Chronis's Nested Key Riddle",
+          "storyPrompt": "A glowing rune waits in the archive! Count what `len(atlas[\"east\"])` returns.",
+          "objective": "Predict the length of the inner dictionary `atlas[\"east\"]`.",
+          "concepts": [
+            "dictionaries_nested"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "codeSnippet": "atlas = {\"east\": {\"a\": 1, \"b\": 2, \"c\": 3}}\nprint(len(atlas[\"east\"]))",
+          "choices": [
+            {
+              "id": "a",
+              "label": "1",
+              "explanation": "`len(atlas)` is `1`, but `len(atlas[\"east\"])` counts the keys inside the inner dictionary."
+            },
+            {
+              "id": "b",
+              "label": "3",
+              "explanation": "Spot on! The inner dictionary `{\"a\": 1, \"b\": 2, \"c\": 3}` has 3 keys."
+            },
+            {
+              "id": "c",
+              "label": "6",
+              "explanation": "`len()` counts how many keys are inside (3), not the sum of the numbers."
+            },
+            {
+              "id": "d",
+              "label": "4",
+              "explanation": "Only count the keys inside `atlas[\"east\"]`: `a`, `b`, and `c` (3 keys)."
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip points at the inner dictionary: '`len()` is checking the dictionary stored under `\"east\"`, not the outer one.'",
+            "tier2_pattern": "`len()` on an inner dictionary counts how many keys that inner dictionary has.",
+            "tier3_walkthrough": "Tap Option B (`3`): `len()` checks the inner dictionary, which holds three keys (`a`, `b`, and `c`)."
+          },
+          "difficultyOverride": null
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-05-07",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Stop right there, {heroName}! You will not unlock Chronis's vault in the Crystal Archives!"
+          },
+          {
+            "speaker": "Chronis",
+            "spriteKey": "mire",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "You practiced every piece, {heroName}! Put it all together and break Lord Null's lock."
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! We've got this, {heroName}. Let's rescue Chronis!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "My Crystal Archives lock broke? Returning `None`... I'm out of here!"
+          },
+          {
+            "speaker": "Chronis",
+            "spriteKey": "mire",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "Thank you, {heroName}! My scales shine again, and the portal to Shieldwall Bastion is open!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "Yes! Chronis is free! Onward to Shieldwall Bastion!"
+          }
+        ]
+      }
+    },
+    {
+      "id": "realm-32-06-bastion",
+      "number": 5,
+      "name": "Shieldwall Bastion",
+      "dragon": {
+        "id": "dragon-aegis",
+        "name": "Aegis",
+        "title": "Warden of Safe Spells",
+        "element": "Prism",
+        "rescueDialogue": "Strong work! Your try/except shields blocked every glitch. Take this Prism Shield into Null's Polygon Citadel!"
+      },
+      "miniVisualUpgrade": "32-Bit Upgrade: Glowing prism shields guard the fortress walls.",
+      "storyIntro": "Before heading to Null's Polygon Citadel, train at Shieldwall Bastion with guardian dragon Aegis! Learn `try / except` safety nets so bad text, dividing by zero, and missing keys never crash your spells.",
+      "storyOutro": "Aegis spreads his prism wings and opens the grand gate to Null's Polygon Citadel!",
+      "primaryConcepts": [
+        "error_handling"
+      ],
+      "difficultyOverride": null,
+      "trials": [
+        {
+          "id": "trial-32-06-01",
+          "trialType": "multiple_choice",
+          "title": "How try / except Protects Your Code!",
+          "storyPrompt": "Welcome to Shieldwall Bastion! Wrapping risky code in `try:` and adding `except ValueError:` acts like a safety net. If an error happens, Python jumps to `except` instead of crashing.",
+          "objective": "Predict what this `try / except` block prints.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "codeSnippet": "try:\n    n = int(\"boom\")\n    print(n)\nexcept ValueError:\n    print(\"BLOCKED\")",
+          "choices": [
+            {
+              "id": "a",
+              "label": "BLOCKED",
+              "explanation": "Spot on! `int(\"boom\")` causes a `ValueError`, so Python jumps straight to `except ValueError:` and prints `BLOCKED`."
+            },
+            {
+              "id": "b",
+              "label": "boom",
+              "explanation": "`int(\"boom\")` fails right away before `print(n)` can run."
+            },
+            {
+              "id": "c",
+              "label": "0",
+              "explanation": "`int()` causes a `ValueError` instead of giving back `0`."
+            },
+            {
+              "id": "d",
+              "label": "Crash with ValueError",
+              "explanation": "`except ValueError:` catches the error so your code does not crash."
+            }
+          ],
+          "correctChoiceId": "a",
+          "hints": {
+            "tier1_nudge": "Pip points at the `try` block: 'Can Python turn a word like `\"boom\"` into a whole number? Think about where Python jumps when that fails.'",
+            "tier2_pattern": "When a risky line inside `try:` fails with a matching error, Python skips the rest of `try:` and runs the `except` block.",
+            "tier3_walkthrough": "Tap Option A (`BLOCKED`): `int(\"boom\")` causes a `ValueError`, so Python skips `print(n)` and runs the `except` block."
+          },
+          "difficultyOverride": null
+        },
+        {
+          "id": "trial-32-06-02",
+          "trialType": "fix_bug",
+          "title": "The Broken Shield Colon!",
+          "storyPrompt": "Just like `if` and `for`, both `try:` and `except ...:` must end with a colon `:`! Fix the missing colon so Python prints `SHIELDED`.",
+          "objective": "Fix the missing punctuation on the `try` line so Python catches the error and prints `SHIELDED`.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "bugSummary": "A missing colon after `try` stops Python from running the block.",
+          "starterCode": {
+            "explorer": "try\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n",
+            "standard": "try\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n",
+            "challenge": "try\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n"
+          },
+          "referenceSolution": "try:\n    x = 10 // 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED\")\n",
+          "testCode": "assert OUTPUT.strip() == 'SHIELDED', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip taps line 1: 'Every block header in Python (`if`, `for`, `try`, `except`) needs the same punctuation mark at the end.'",
+            "tier2_pattern": "try<colon>\n    ...",
+            "tier3_walkthrough": "Change `try` to `try:`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "call:print"
+          ],
+          "introChoice": {
+            "title": "Whole-Number Division (//)",
+            "prompt": "Python's double slash `//` divides and keeps only the whole number, dropping whatever is left over. For example, `9 // 2` is `4`, because 2 fits into 9 four full times with `1` left over.",
+            "question": "What does `17 // 5` equal?",
+            "codeSnippet": "print(17 // 5)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "2",
+                "explanation": "`2` is the leftover (`17 % 5`). `//` asks how many full times 5 fits into 17."
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Spot on! 5 fits into 17 three full times (`5 * 3 = 15`), and `//` drops the `2` left over."
+              },
+              {
+                "id": "c",
+                "label": "4",
+                "explanation": "`//` always rounds down, never up. Four fives is `20`, which is bigger than `17`."
+              },
+              {
+                "id": "d",
+                "label": "17",
+                "explanation": "`//` still divides; it just gives back a whole number instead of a decimal."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
+          "id": "trial-32-06-03",
+          "trialType": "code",
+          "title": "Catch a Bad Number (ValueError)",
+          "storyPrompt": "Practice catching `ValueError`! Try turning `raw` into a whole number with `int(raw)` inside `try:`. If that fails, catch `ValueError` and use `0` instead.",
+          "objective": "Inside `try:`, store `int(raw)` in the variable `val`. If `ValueError` happens, catch it with `except ValueError:` and store `0` in `val`. After the block, print `val`.",
+          "concepts": [
+            "error_handling",
+            "type_conversion"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = \"bad\"\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = ???\nprint(val)\n",
+            "standard": "raw = \"bad\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "raw = \"bad\"\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)\n",
+          "testCode": "assert val == 0\nassert OUTPUT.strip() == '0', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip shields the conversion: 'Put the risky `int(...)` line inside `try:` and the backup number inside `except ValueError:`, then print after both.'",
+            "tier2_pattern": "try:\n    val = int(<text>)\nexcept ValueError:\n    val = <fallback>\nprint(val)",
+            "tier3_walkthrough": "Add:\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "int_call",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": "42"
+              },
+              "expectOutput": "42",
+              "expectVars": {
+                "val": 42
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-32-06-04",
+          "trialType": "code",
+          "title": "Catch Divide-by-Zero (ZeroDivisionError)",
+          "storyPrompt": "Dividing by `0` causes a `ZeroDivisionError`! Wrap `a // b` in a `try / except` safety net so dividing by zero gives `0` instead of crashing.",
+          "objective": "Inside `try:`, store `a // b` in the variable `ans`. If `ZeroDivisionError` happens, catch it and store `0` in `ans`. After the block, print `ans`.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "a = 20\nb = 0\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = ???\nprint(ans)\n",
+            "standard": "a = 20\nb = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "a = 20\nb = 0\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)\n",
+          "testCode": "assert ans == 0\nassert OUTPUT.strip() == '0', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip guards the divide: 'Dividing by zero has its own error name. Catch that error and fall back to a safe number.'",
+            "tier2_pattern": "try:\n    ans = <a> // <b>\nexcept ZeroDivisionError:\n    ans = <fallback>\nprint(ans)",
+            "tier3_walkthrough": "Add:\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "math_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "a": 20,
+                "b": 4
+              },
+              "expectOutput": "5",
+              "expectVars": {
+                "ans": 5
+              }
+            }
+          ]
+        },
+        {
+          "id": "trial-32-06-05",
+          "trialType": "code",
+          "title": "Catch a Missing Key (KeyError)",
+          "storyPrompt": "Looking up a key that is not in a dictionary causes a `KeyError`! Catch `KeyError` so checking `rooms[name]` safely falls back to `\"MISSING\"`.",
+          "objective": "Inside `try:`, store `rooms[name]` in the variable `status`. If `KeyError` happens, catch it and store `\"MISSING\"` in `status`. After the block, print `status`.",
+          "concepts": [
+            "error_handling",
+            "dictionaries"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"???\"\nprint(status)\n",
+            "standard": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)\n",
+          "testCode": "assert status == 'MISSING'\nassert OUTPUT.strip() == 'MISSING', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip reaches for a room that is not on the map: 'A missing dictionary key causes its own named error. Catch it and store a backup label.'",
+            "tier2_pattern": "try:\n    status = <dict>[<name>]\nexcept KeyError:\n    status = \"<fallback>\"\nprint(status)",
+            "tier3_walkthrough": "Add:\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "subscript",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "name": "north"
+              },
+              "expectOutput": "OPEN",
+              "expectVars": {
+                "status": "OPEN"
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Catching KeyError",
+            "prompt": "Looking up a missing key like `d[\"missing\"]` causes a `KeyError`. You can catch it with `except KeyError:`.",
+            "question": "Which error does `{\"a\": 1}[\"b\"]` cause?",
+            "codeSnippet": "d = {\"a\": 1}\nprint(d[\"b\"])",
+            "choices": [
+              {
+                "id": "a",
+                "label": "ValueError",
+                "explanation": "`ValueError` is for bad values like `int(\"abc\")`. Missing dictionary keys cause `KeyError`."
+              },
+              {
+                "id": "b",
+                "label": "ZeroDivisionError",
+                "explanation": "`ZeroDivisionError` only happens when dividing by `0`."
+              },
+              {
+                "id": "c",
+                "label": "KeyError",
+                "explanation": "Spot on! Missing dictionary keys cause `KeyError`."
+              },
+              {
+                "id": "d",
+                "label": "IndexError",
+                "explanation": "`IndexError` is for lists; dictionaries cause `KeyError`."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
+          "id": "trial-32-06-06",
+          "trialType": "code",
+          "title": "Skip Bad Entries in a Loop",
+          "storyPrompt": "Sometimes a list has a few bad strings mixed in with real numbers! Put `try / except ValueError:` inside your loop and use `continue` to skip any bad item.",
+          "objective": "Loop over `items`. Inside the loop, try adding `int(x)` to `total`; if `ValueError` happens, catch it and `continue`. After the loop, print `total`.",
+          "concepts": [
+            "error_handling",
+            "for_loops"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
+            "standard": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\n",
+            "challenge": ""
+          },
+          "referenceSolution": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
+          "testCode": "assert total == 20\nassert OUTPUT.strip() == '20', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip skips the bad entries: 'Put both `try` and `except` inside the loop so one bad word only skips its own turn instead of stopping the loop.'",
+            "tier2_pattern": "for <item> in <list>:\n    try:\n        total += int(<item>)\n    except ValueError:\n        continue\nprint(total)",
+            "tier3_walkthrough": "Add:\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "try",
+            "except",
+            "int_call",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-06-07",
+          "trialType": "code",
+          "title": "Raise Aegis's Error-Proof Shield (Boss)",
+          "storyPrompt": "Combine functions and `try / except`! Build a helper function `safe_parse(text)` that turns text into a whole number or returns `0` if it cannot, then add up all the numbers in `raw`.",
+          "objective": "Define `safe_parse(text)` to return `int(text)` inside `try:`, or return `0` on `ValueError`. Add `safe_parse(s)` for every `s` in `raw` into `power`. If `power` equals `40`, print `\"AEGIS FREE!\"`.",
+          "concepts": [
+            "error_handling",
+            "functions_def",
+            "functions_return",
+            "for_loops"
+          ],
+          "shardReward": 85,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "raw = [\"10\", \"null\", \"30\"]\ndef safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\npower = sum(safe_parse(s) for s in raw)\nif power == 40:\n    print(\"AEGIS FREE!\")\n",
+            "standard": "raw = [\"10\", \"null\", \"30\"]\n",
+            "challenge": ""
+          },
+          "referenceSolution": "raw = [\"10\", \"null\", \"30\"]\ndef safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\npower = 0\nfor s in raw:\n    power += safe_parse(s)\nif power == 40:\n    print(\"AEGIS FREE!\")\n",
+          "testCode": "assert safe_parse('7') == 7 and safe_parse('bad') == 0\nassert power == 40\nassert OUTPUT.strip() == 'AEGIS FREE!', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip raises the shield: 'Inside the function, return the whole number when it works and the backup value when it fails. Then loop over `raw` to add up the results and check the total.'",
+            "tier2_pattern": "def safe_parse(<text>):\n    try:\n        return int(<text>)\n    except ValueError:\n        return <fallback>\n\npower = 0\nfor <s> in <list>:\n    power += safe_parse(<s>)\nif power == <target>:\n    print(\"<message>\")",
+            "tier3_walkthrough": "Write `safe_parse(text)`, sum `safe_parse(s)` over `raw` into `power`, and if `power == 40: print(\"AEGIS FREE!\")`."
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "try",
+            "except",
+            "return",
+            "call:print"
+          ]
+        },
+        {
+          "id": "trial-32-06-bonus",
+          "trialType": "multiple_choice",
+          "isBonus": true,
+          "title": "Secret Rune: Aegis's Safety-Net Riddle",
+          "storyPrompt": "A glowing shield rune asks a quick question: when does an `except` block run?",
+          "objective": "Choose when Python runs an `except` block.",
+          "concepts": [
+            "error_handling"
+          ],
+          "shardReward": 55,
+          "unlockId": null,
+          "choices": [
+            {
+              "id": "a",
+              "label": "Always, right after try finishes",
+              "explanation": "If `try` finishes with no error, Python skips the `except` block."
+            },
+            {
+              "id": "b",
+              "label": "Only when code inside try causes a matching error",
+              "explanation": "Spot on! `except` is a safety net that only runs when a matching error happens."
+            },
+            {
+              "id": "c",
+              "label": "Before the try block runs",
+              "explanation": "Python always runs the `try` block first."
+            },
+            {
+              "id": "d",
+              "label": "Never, because it is a comment",
+              "explanation": "`except` is real Python code that catches errors while your program runs."
+            }
+          ],
+          "correctChoiceId": "b",
+          "hints": {
+            "tier1_nudge": "Pip chirps: 'Think of `except` like a safety net. It only catches you if something goes wrong!'",
+            "tier2_pattern": "The `try` block always runs first. Python only jumps into `except` if something inside `try` fails.",
+            "tier3_walkthrough": "Tap Option B: `except` is a safety net, so it only runs when the `try` block causes a matching error."
+          },
+          "difficultyOverride": null
+        }
+      ],
+      "cutscenes": {
+        "bossTrialId": "trial-32-06-07",
+        "preBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "glitch",
+            "text": "Stop right there, {heroName}! You will not unlock Aegis's vault in Shieldwall Bastion!"
+          },
+          {
+            "speaker": "Aegis",
+            "spriteKey": "gale",
+            "side": "right",
+            "vfx": "vault_glow",
+            "text": "You practiced every piece, {heroName}! Put it all together and break Lord Null's lock."
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "none",
+            "text": "Chirp! We've got this, {heroName}. Let's rescue Aegis!"
+          }
+        ],
+        "postBoss": [
+          {
+            "speaker": "Lord Null",
+            "spriteKey": "lord_null",
+            "side": "right",
+            "vfx": "shatter",
+            "text": "My Shieldwall Bastion lock broke? Returning `None`... I'm out of here!"
+          },
+          {
+            "speaker": "Aegis",
+            "spriteKey": "gale",
+            "side": "right",
+            "vfx": "bit_restore",
+            "text": "Thank you, {heroName}! My scales shine again, and the portal to Null's Polygon Citadel is open!"
+          },
+          {
+            "speaker": "Pip",
+            "spriteKey": "pip",
+            "side": "left",
+            "vfx": "celebrate",
+            "text": "Yes! Aegis is free! Onward to Null's Polygon Citadel!"
           }
         ]
       }
     },
     {
       "id": "realm-32-04-citadel",
-      "number": 4,
+      "number": 6,
       "name": "Null's Polygon Citadel",
       "dragon": {
         "id": "dragon-vortex",
         "name": "Vortex",
         "title": "Guardian of the 32nd Bit",
         "element": "Gravity",
-        "rescueDialogue": "WHOA-BOOM! All 32 Bits restored! Brace yourself—Pyria is warping into full 64-Bit Nintendo 64 3D!"
+        "rescueDialogue": "All 32 Bits are back! Hold on tight: Pyria is jumping into full 64-Bit Nintendo 64 3D!"
       },
-      "miniVisualUpgrade": "Bit 32 Restored — 64-BIT ERA UPGRADE! The flat isometric tiles burst into free-roam chunky Gouraud-shaded 3D!",
-      "storyIntro": "Lord Null's Polygon Citadel floats in isometric wireframe space! Master `try / except` error shields and combine your 32-Bit skills to rescue Vortex!",
-      "storyOutro": "Vortex spins open a swirling 3D polygon portal — welcome to the 64-Bit Nintendo 64 Era!",
+      "miniVisualUpgrade": "Bit 32 Restored: 64-Bit Era Unlocked! The 3D block tiles burst into a full free-roam chunky 3D world!",
+      "storyIntro": "Lord Null's Polygon Citadel floats in glowing wireframe space! Use your `try / except` shields and everything you learned in the 32-Bit Era to rescue Vortex!",
+      "storyOutro": "Vortex spins open a swirling 3D portal. Welcome to the 64-Bit Nintendo 64 Era!",
       "primaryConcepts": [
         "error_handling",
         "tuples",
-        "dictionaries_nested"
+        "dictionaries_nested",
+        "functions_def"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -929,135 +2550,293 @@
         {
           "id": "trial-32-04-01",
           "trialType": "multiple_choice",
-          "title": "Catching Errors with try / except!",
-          "storyPrompt": "Lord Null loves planting crash traps like dividing by zero! `try / except` catches an error safely so your spell keeps running! What will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "title": "Catching Bad input() With try / except!",
+          "storyPrompt": "Remember `input()` always gives back text! If a player types `\"null\"` when your code expects a number, `int(input(...))` causes a `ValueError`. Wrapping it in `try:` / `except ValueError:` catches the crash safely.",
+          "objective": "Predict what this `try / except` block prints when the player types `\"null\"`.",
           "concepts": [
-            "error_handling",
-            "tuples",
-            "dictionaries_nested"
+            "error_handling"
           ],
           "shardReward": 150,
           "unlockId": null,
-          "codeSnippet": "try:\n    x = 10 / 0\nexcept ZeroDivisionError:\n    print(\"SHIELDED!\")",
+          "codeSnippet": "# Suppose the user types \"null\" at the prompt:\ntry:\n    level = int(input(\"Level: \"))\n    print(level)\nexcept ValueError:\n    print(\"SHIELDED!\")",
           "choices": [
             {
               "id": "a",
-              "label": "SHIELDED!",
-              "explanation": "Gravity-defying! `except ZeroDivisionError:` catches the crash and prints `SHIELDED!`!"
+              "label": "null",
+              "explanation": "`int(\"null\")` fails before `print(level)` ever runs."
             },
             {
               "id": "b",
-              "label": "10",
-              "explanation": "10 / 0 triggers `ZeroDivisionError`!"
+              "label": "SHIELDED!",
+              "explanation": "Yes! `input()` gives `\"null\"`, `int(\"null\")` causes a `ValueError`, and `except ValueError:` catches it and prints `SHIELDED!`."
             },
             {
               "id": "c",
-              "label": "Crash",
-              "explanation": "`try / except` prevents the crash!"
+              "label": "0",
+              "explanation": "`int()` does not turn bad words into `0`. It causes a `ValueError`."
             },
             {
               "id": "d",
-              "label": "Nothing",
-              "explanation": "The `except` block runs!"
+              "label": "Crashes with ValueError",
+              "explanation": "Because `try / except ValueError:` wraps the call, Python catches the error instead of crashing."
             }
           ],
-          "correctChoiceId": "a",
+          "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip checks the input: 'What happens when Python tries to turn a word into a whole number inside a `try` block?'",
+            "tier2_pattern": "When `int(...)` fails on non-number text, Python jumps straight into the matching `except ValueError:` block.",
+            "tier3_walkthrough": "Tap Option B (`SHIELDED!`): `int(\"null\")` triggers `ValueError`, so the `except` block runs and prints `SHIELDED!`."
           },
           "difficultyOverride": null
         },
         {
           "id": "trial-32-04-02",
           "trialType": "fix_bug",
-          "title": "Fix the try / except Colon!",
-          "storyPrompt": "Lord Null removed the colon `:` from `except ValueError`! Put `:` back so bad input is caught safely.",
-          "objective": "Add `:` after `except ValueError` so it prints `SAFE`.",
+          "title": "The Glitch Shield Won't Run! (and pass)",
+          "storyPrompt": "When you want an `except` block to safely ignore a bad value and do nothing, Python has the word `pass` as a do-nothing placeholder. Right now Vortex's shield loop cannot run because a punctuation mark is missing.",
+          "objective": "Fix the broken `try / except` block so it skips bad entries with `pass` and prints `10`.",
           "concepts": [
             "error_handling",
             "tuples",
-            "dictionaries_nested"
+            "dictionaries_nested",
+            "for_loops"
           ],
           "shardReward": 160,
           "unlockId": null,
-          "bugSummary": "Add `:` after `except ValueError` so it prints `SAFE`.",
+          "bugSummary": "A missing colon stops Python from running the `try / except` block.",
           "starterCode": {
-            "explorer": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
-            "standard": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n",
-            "challenge": "try:\n    n = int(\"null\")\nexcept ValueError\n    print(\"SAFE\")\n"
+            "explorer": "raw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError\n        pass\nprint(total)\n",
+            "standard": "raw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError\n        pass\nprint(total)\n",
+            "challenge": "# Challenge: find and fix the bug with no hints\nraw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError\n        pass\nprint(total)\n"
           },
-          "referenceSolution": "try:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")\n",
-          "testCode": "assert OUTPUT.strip() == \"SAFE\"",
+          "referenceSolution": "raw = [\"10\", \"null\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError:\n        pass\nprint(total)\n",
+          "testCode": "assert total == sum(int(x) for x in raw if x.isdigit()) and OUTPUT.strip() == str(total)",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "try:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")",
-            "tier3_walkthrough": "Update to:\ntry:\n    n = int(\"null\")\nexcept ValueError:\n    print(\"SAFE\")"
+            "tier1_nudge": "Check the punctuation at the end of every block header (`for`, `try`, `except`).",
+            "tier2_pattern": "try:\n    <risky line>\nexcept <ErrorName><punctuation>\n    pass",
+            "tier3_walkthrough": "Add a colon `:` at the end of `except ValueError:` so `pass` safely skips `\"null\"` and prints `10`."
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "for",
+            "aug_assign",
+            "int_call"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": [
+                  "5",
+                  "bad",
+                  "7"
+                ]
+              },
+              "expectOutput": "12",
+              "expectVars": {
+                "total": 12
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Catching ValueError and Skipping With pass",
+            "prompt": "When `int(\"null\")` fails with a `ValueError`, you can catch it with `except ValueError:` and write `pass` (Python's do-nothing word) to skip the bad item and keep looping!",
+            "question": "What does `total` equal after this loop finishes?",
+            "codeSnippet": "raw = [\"10\", \"null\", \"5\"]\ntotal = 0\nfor s in raw:\n    try:\n        total += int(s)\n    except ValueError:\n        pass\nprint(total)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "15",
+                "explanation": "Spot on! `\"10\"` adds `10`, `\"null\"` is safely skipped by `except ValueError: pass`, and `\"5\"` adds `5` for `15`."
+              },
+              {
+                "id": "b",
+                "label": "10",
+                "explanation": "`pass` does not stop the loop. It just skips `\"null\"` and moves on to `\"5\"`."
+              },
+              {
+                "id": "c",
+                "label": "0",
+                "explanation": "`\"10\"` and `\"5\"` turn into numbers cleanly with `int(s)` and get added to `total`."
+              },
+              {
+                "id": "d",
+                "label": "It crashes with ValueError",
+                "explanation": "Because `except ValueError:` catches the error from `int(\"null\")`, the loop finishes without crashing."
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-32-04-03",
           "trialType": "code",
-          "title": "Safe Number Parser",
-          "storyPrompt": "In Null's Polygon Citadel, try this new power! Write `def safe_int(text):` using `try: return int(text)` and `except ValueError: return 0`. Print `safe_int(\"oops\")`.",
-          "objective": "Write `def safe_int(text):` using `try: return int(text)` and `except ValueError: return 0`. Print `safe_int(\"oops\")`.",
+          "title": "Safe Number Reader",
+          "storyPrompt": "Build a reusable safety shield! Write a function `safe_int(text)` that tries to turn `text` into a whole number and returns `0` if `ValueError` happens.",
+          "objective": "Define `safe_int(text)` to return `int(text)` inside `try:`, or return `0` on `ValueError`. Then print `safe_int(\"oops\")`.",
           "concepts": [
             "error_handling",
             "tuples",
-            "dictionaries_nested"
+            "dictionaries_nested",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 165,
           "unlockId": null,
           "starterCode": {
             "explorer": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "# Define safe_int(text) returning int(text), or 0 when the text is not a number\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))\n",
           "testCode": "assert safe_int(\"42\") == 42 and safe_int(\"oops\") == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))",
+            "tier1_nudge": "Pip shields the function: 'Both branches use `return`: one hands back the whole number, and the other hands back the backup value.'",
+            "tier2_pattern": "def safe_int(<text>):\n    try:\n        return int(<text>)\n    except ValueError:\n        return <fallback>\n\nprint(safe_int(\"<bad_text>\"))",
             "tier3_walkthrough": "Write:\ndef safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "try",
+            "except",
+            "int_call"
+          ]
+        },
+        {
+          "id": "trial-32-04-03b",
+          "trialType": "code",
+          "title": "Whole-Number Division (//)",
+          "storyPrompt": "Let's practice `//` (whole-number division) once more before building your `safe_div` spell! `20 // 6` gives `3` and drops the leftover.",
+          "objective": "Create the variable `whole` storing `20 // 6`, then print `whole`.",
+          "concepts": [
+            "basic_math",
+            "error_handling"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "whole = 20 // ???\nprint(whole)\n",
+            "standard": "# Compute 20 // 6 into whole and print whole\n",
+            "challenge": ""
+          },
+          "referenceSolution": "whole = 20 // 6\nprint(whole)\n",
+          "testCode": "assert whole == 3\nassert OUTPUT.strip() == '3', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip divides and drops the leftover: 'The double-slash `//` keeps only the whole part of the division.'",
+            "tier2_pattern": "whole = <a> // <b>\nprint(whole)",
+            "tier3_walkthrough": "Write:\nwhole = 20 // 6\nprint(whole)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:print"
+          ]
         },
         {
           "id": "trial-32-04-04",
           "trialType": "code",
           "title": "Safe Division Spell",
-          "storyPrompt": "Push deeper into Null's Polygon Citadel! Write `def safe_div(a, b):` returning `a // b` or `0` on `ZeroDivisionError`. Print `safe_div(20, 0)`.",
-          "objective": "Write `def safe_div(a, b):` returning `a // b` or `0` on `ZeroDivisionError`. Print `safe_div(20, 0)`.",
+          "storyPrompt": "Null's citadel loves throwing zero into division spells! Write a function `safe_div(a, b)` that returns `a // b`, or returns `0` if `ZeroDivisionError` happens.",
+          "objective": "Define `safe_div(a, b)` to return `a // b` inside `try:`, or return `0` on `ZeroDivisionError`. Then print `safe_div(20, 0)`.",
           "concepts": [
             "error_handling",
             "tuples",
-            "dictionaries_nested"
+            "dictionaries_nested",
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 170,
           "unlockId": null,
           "starterCode": {
             "explorer": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "# Define safe_div(a, b) returning a // b, or 0 when b is zero\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))\n",
           "testCode": "assert safe_div(20, 4) == 5 and safe_div(20, 0) == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))",
+            "tier1_nudge": "Pip guards the divide: 'Dividing by zero causes its own error name, so put that name in the `except` line.'",
+            "tier2_pattern": "def safe_div(<a>, <b>):\n    try:\n        return <a> // <b>\n    except ZeroDivisionError:\n        return <fallback>\n\nprint(safe_div(<a>, <b>))",
             "tier3_walkthrough": "Write:\ndef safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "def",
+            "return",
+            "try",
+            "except"
+          ],
+          "introChoice": {
+            "title": "Whole-Number Division (//)",
+            "prompt": "In Python, single `/` gives a decimal (`7 / 2` is `3.5`), while double `//` does whole-number division and drops any leftover (`7 // 2` is `3`).",
+            "question": "What does `20 // 6` equal?",
+            "codeSnippet": "print(20 // 6)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "3",
+                "explanation": "Nice! 6 fits into 20 three full times (`6 * 3 = 18`), so `20 // 6` is `3`."
+              },
+              {
+                "id": "b",
+                "label": "2",
+                "explanation": "`2` is the leftover (`20 % 6`), while `20 // 6` asks how many full times 6 fits into 20."
+              },
+              {
+                "id": "c",
+                "label": "3.333...",
+                "explanation": "That is regular `/` division! Double `//` drops the decimal part and gives a whole number."
+              },
+              {
+                "id": "d",
+                "label": "4",
+                "explanation": "`//` always rounds down, never up. `6 * 4 = 24` is too big!"
+              }
+            ],
+            "correctChoiceId": "a"
+          }
+        },
+        {
+          "id": "trial-32-04-04b",
+          "trialType": "code",
+          "title": "Square a Number With **",
+          "storyPrompt": "Before using `** 2` in 3D distance math, practice Python's power symbol `**` by itself! `5 ** 2` means 5 squared (`5 * 5 = 25`).",
+          "objective": "Create the variable `sq` storing `5 ** 2`, then print `sq`.",
+          "concepts": [
+            "basic_math",
+            "tuples"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "sq = 5 ** ???\nprint(sq)\n",
+            "standard": "# Compute 5 ** 2 into sq and print sq\n",
+            "challenge": ""
+          },
+          "referenceSolution": "sq = 5 ** 2\nprint(sq)\n",
+          "testCode": "assert sq == 25\nassert OUTPUT.strip() == '25', f'Got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip squares the number: 'The double star `**` multiplies a number by itself instead of multiplying the two numbers together.'",
+            "tier2_pattern": "sq = <base> ** <power>\nprint(sq)",
+            "tier3_walkthrough": "Write:\nsq = 5 ** 2\nprint(sq)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:print"
+          ]
         },
         {
           "id": "trial-32-04-05",
           "trialType": "code",
           "title": "3D Distance Squared",
-          "storyPrompt": "You're right outside Vortex's vault! Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.",
-          "objective": "Given `p1 = (1, 2, 3)` and `p2 = (4, 6, 3)`, compute `d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2` and `print(d2)`.",
+          "storyPrompt": "Two floating beacons `p1` and `p2` mark the path to Vortex's vault! Find their squared 3D distance by subtracting each matching coordinate (`[0]`, `[1]`, `[2]`), squaring each difference with `** 2`, and adding all three together.",
+          "objective": "Using the 3D point tuples `p1` and `p2`, create the variable `d2` storing `(p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2`, then print `d2`.",
           "concepts": [
             "error_handling",
             "tuples",
@@ -1067,51 +2846,137 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\n",
-            "standard": "",
-            "challenge": ""
+            "standard": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\n",
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)\n",
           "testCode": "assert d2 == 25 and OUTPUT.strip() == \"25\"",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)",
-            "tier3_walkthrough": "Write:\np1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)"
+            "tier1_nudge": "Pip measures the gap one axis at a time: 'Subtract each matching coordinate, square each difference with `** 2`, then add all three together.'",
+            "tier2_pattern": "`d2 = (<p2>[0]-<p1>[0])**2 + (<p2>[1]-<p1>[1])**2 + (<p2>[2]-<p1>[2])**2`\nprint(d2)",
+            "tier3_walkthrough": "Write:\np1 = (1, 2, 3)\np2 = (4, 6, 3)\n`d2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2`\nprint(d2)"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "tuple"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "p1": [
+                  0,
+                  0,
+                  0
+                ],
+                "p2": [
+                  1,
+                  2,
+                  2
+                ]
+              },
+              "expectOutput": "9",
+              "expectVars": {
+                "d2": 9
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Powers With **",
+            "prompt": "In Python, `**` raises a number to a power! For example, `3 ** 2` means 3 squared (`3 * 3 = 9`), and `2 ** 3` means `2 * 2 * 2 = 8`.",
+            "question": "What does `(4 - 1) ** 2` equal?",
+            "codeSnippet": "print((4 - 1) ** 2)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "6",
+                "explanation": "Watch out: `**` is a power, not multiplying! `3 ** 2` is `3 * 3`, not `3 * 2`."
+              },
+              {
+                "id": "b",
+                "label": "1",
+                "explanation": "`4 - 1` is `3`, and squaring `3` gives `9`."
+              },
+              {
+                "id": "c",
+                "label": "15",
+                "explanation": "Because of the parentheses, `4 - 1` runs first (`3`), then `3 ** 2` gives `9`."
+              },
+              {
+                "id": "d",
+                "label": "9",
+                "explanation": "Spot on! First `4 - 1` is `3`, then `3 ** 2` (`3 * 3`) is `9`."
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-32-04-06",
           "trialType": "code",
           "title": "Collapse Null's Polygon Core (Era 3 Boss)",
-          "storyPrompt": "Final lock before Vortex! Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.",
-          "objective": "Parse `raw = [\"10\", \"glitch\", \"22\"]` using `try/except ValueError` to sum valid ints into `bits`. If `bits == 32`, print `\"64-BIT UNLOCKED!\"`.",
+          "storyPrompt": "This is the final lock of the 32-Bit Era! Lord Null hid a glitch word inside `raw = [\"10\", \"glitch\", \"22\"]`. Loop through `raw`, turn each valid number into a whole number with `int()`, add it to `bits`, and skip bad words using `try / except ValueError:` and `pass`.",
+          "objective": "Create `raw = [\"10\", \"glitch\", \"22\"]` and `bits = 0`. Loop over `raw`, adding `int(item)` to `bits` inside `try:` and skipping `ValueError` with `pass`. After the loop, if `bits` equals `32`, print `\"64-BIT UNLOCKED!\"`.",
           "concepts": [
             "error_handling",
-            "tuples",
-            "dictionaries_nested"
+            "for_loops"
           ],
           "shardReward": 190,
           "unlockId": null,
           "starterCode": {
             "explorer": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    \n",
             "standard": "",
-            "challenge": ""
+            "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
-          "testCode": "assert bits == 32 and OUTPUT.strip() == \"64-BIT UNLOCKED!\"",
+          "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits += int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
+          "testCode": "assert bits == 32, f\"Expected bits == 32, got {bits!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = '64-BIT UNLOCKED!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Vortex!",
-            "tier2_pattern": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")",
-            "tier3_walkthrough": "Write:\nraw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")"
+            "tier1_nudge": "Pip breaks the core: 'Put `try` and `except` inside the loop and use `pass` when conversion fails, so a glitch word gets skipped instead of stopping the loop.'",
+            "tier2_pattern": "bits = 0\nfor <item> in <list>:\n    try:\n        bits += int(<item>)\n    except ValueError:\n        pass\nif bits == <target>:\n    print(\"<message>\")",
+            "tier3_walkthrough": "Write:\nraw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits += int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")"
           },
-          "difficultyOverride": null
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "try",
+            "except",
+            "for",
+            "if",
+            "aug_assign",
+            "int_call"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "raw": [
+                  "12",
+                  "oops",
+                  "20"
+                ]
+              },
+              "expectOutput": "64-BIT UNLOCKED!",
+              "expectVars": {
+                "bits": 32
+              }
+            },
+            {
+              "overrides": {
+                "raw": [
+                  "5",
+                  "oops"
+                ]
+              },
+              "expectOutput": "",
+              "expectVars": {
+                "bits": 5
+              }
+            }
+          ]
         },
         {
           "id": "trial-32-04-bonus",
           "trialType": "multiple_choice",
-          "title": "Secret Rune: Vortex's 32-Bit Crown Riddle!",
-          "storyPrompt": "Hidden Rune in Null's Polygon Citadel! What does `2 ** 5` equal?",
-          "objective": "What does `2 ** 5` equal?",
+          "title": "Secret Rune: Vortex's 32-Bit Crown Riddle",
+          "storyPrompt": "You found a hidden gravity rune in Null's Polygon Citadel! Solve its power riddle to claim the treasure.",
+          "objective": "Predict what `print(2 ** 5)` displays.",
           "concepts": [
             "error_handling",
             "tuples",
@@ -1124,29 +2989,29 @@
             {
               "id": "a",
               "label": "32",
-              "explanation": "32-Bit Legend! `2 * 2 * 2 * 2 * 2 = 32`!"
+              "explanation": "32-Bit Legend! `2 * 2 * 2 * 2 * 2 = 32`."
             },
             {
               "id": "b",
               "label": "64",
-              "explanation": "That's `2 ** 6` — the Nintendo 64 Era awaits!"
+              "explanation": "That is `2 ** 6`, which is the 64-Bit Era waiting ahead!"
             },
             {
               "id": "c",
               "label": "10",
-              "explanation": "`**` is exponent!"
+              "explanation": "`**` is a power, not `2 * 5`."
             },
             {
               "id": "d",
               "label": "16",
-              "explanation": "That's `2 ** 4`!"
+              "explanation": "That is `2 ** 4` (`2 * 2 * 2 * 2`)."
             }
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip doubles five times in a row: '`**` multiplies the first number by itself as many times as the second number says.'",
+            "tier2_pattern": "Multiply `2` by itself five times in a row.",
+            "tier3_walkthrough": "Tap Option A (`32`): `2 ** 5` is `2 * 2 * 2 * 2 * 2`."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -1167,21 +3032,21 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "glitch",
-            "text": "Welcome to Null's Polygon Citadel, {heroName}! My dimensional vault will keep Vortex sealed forever!"
+            "text": "Welcome to Null's Polygon Citadel, {heroName}! My floating vault will keep Vortex locked up for good!"
           },
           {
             "speaker": "Vortex",
             "spriteKey": "spark",
             "side": "right",
             "vfx": "vault_glow",
-            "text": "Stay sharp, {heroName}! Use everything you mastered in Null's Polygon Citadel to break Null's lock!"
+            "text": "Stay sharp, {heroName}! Use everything you learned in Null's Polygon Citadel to break Null's lock."
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "none",
-            "text": "Chirp! Ready to unleash real Python magic, {heroName}? Let's rescue Vortex!"
+            "text": "Chirp! Ready to put your Python skills to work, {heroName}? Let's rescue Vortex!"
           }
         ],
         "postBoss": [
@@ -1190,21 +3055,21 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "shatter",
-            "text": "IMPOSSIBLE!! You broke through Null's Polygon Citadel?! Retreating to Polygon Valley (64-Bit N64 Era!)!"
+            "text": "No way! You broke through Null's Polygon Citadel? Retreating to Polygon Valley in the 64-Bit Era!"
           },
           {
             "speaker": "Vortex",
             "spriteKey": "spark",
             "side": "right",
             "vfx": "bit_restore",
-            "text": "ROAR! I'm free, {heroName}! Feel the geometry of Pyria level up around you!"
+            "text": "I'm free, {heroName}! Watch the world of Pyria leap into full 3D around you!"
           },
           {
             "speaker": "Pip",
             "spriteKey": "pip",
             "side": "left",
             "vfx": "celebrate",
-            "text": "WOOHOO!! ERA COMPLETE! Step through the portal into Polygon Valley (64-Bit N64 Era!)!"
+            "text": "Era complete! Vortex is free! Step through the portal into Polygon Valley and the 64-Bit Era!"
           }
         ]
       }

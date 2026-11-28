@@ -1,7 +1,7 @@
 // Crisp HTML5 Canvas Overworld Engine for Pyria (8-Bit, 16-Bit, 32-Bit Isometric 2.5D, 64-Bit N64 3D)
 
 import { audio } from './audio.js?v=20261127i';
-import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127i';
+import { pickN64Entity, renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127v';
 
 const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
@@ -61,6 +61,7 @@ export class WorldEngine {
       x: 5,
       y: 17,
       dir: 'down',
+      facingAngle: 0,
       moving: false,
       animTimer: 0,
       frame: 0,
@@ -73,6 +74,7 @@ export class WorldEngine {
       x: 4,
       y: 17,
       dir: 'down',
+      facingAngle: 0,
       frame: 0,
       animTimer: 0,
     };
@@ -81,10 +83,16 @@ export class WorldEngine {
     // Camera top-left in world pixels (smoothly lerped toward hero)
     this.camera = { x: 0, y: 0, initialized: false };
 
-    // Cached offscreen terrain layer for the corner minimap
+    // Cached offscreen terrain layer for the corner minimap + cached radial glow sprites
     this.minimapCanvas = null;
     this.minimapCacheKey = null;
     this.minimapRect = null;
+    this.lightSpriteCache = new Map();
+    this.minimapMarkers = [];
+    this.wayfinderRect = null;
+
+    // Auto-pathing state (BFS tile-center waypoints)
+    this.autoPath = null;
 
     // Input state
     this.keys = new Set();
@@ -105,17 +113,29 @@ export class WorldEngine {
     this.bindEvents();
   }
 
+  isInputLocked() {
+    if (this.paused) return true;
+    if (typeof document !== 'undefined') {
+      if (document.querySelector('.cutscene-overlay')) return true;
+      const modal = document.getElementById('modal-backdrop');
+      if (modal && !modal.classList.contains('hidden')) return true;
+    }
+    return false;
+  }
+
   bindEvents() {
     this._onKeyDown = (e) => {
-      if (this.paused) return;
+      if (this.isInputLocked()) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
 
       const key = e.key.toLowerCase();
       if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
         e.preventDefault();
+        if (this.autoPath) this.cancelAutoPath();
         this.keys.add(key);
       } else if (key === 'e' || key === ' ' || key === 'enter') {
         e.preventDefault();
+        if (e.repeat) return;
         this.triggerInteract();
       }
     };
@@ -132,17 +152,48 @@ export class WorldEngine {
     };
 
     const handleCanvasTap = (clientX, clientY) => {
-      if (this.paused || !this.map) return;
+      if (this.isInputLocked() || !this.map) return;
       const rect = this.canvas.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
       const cx = (clientX - rect.left) * (this.canvas.width / rect.width);
       const cy = (clientY - rect.top) * (this.canvas.height / rect.height);
 
-      // Ignore clicks inside the corner minimap overlay
+      // Click on top-left Wayfinder pill -> auto-walk to next objective
+      if (this.wayfinderRect) {
+        const w = this.wayfinderRect;
+        if (cx >= w.x && cx <= w.x + w.w && cy >= w.y && cy <= w.y + w.h) {
+          if (this.autoPath) {
+            this.cancelAutoPath();
+          } else {
+            this.startAutoPathToNextObjective();
+          }
+          return;
+        }
+      }
+
+      // Click inside the corner minimap overlay -> fast-travel or auto-path to clicked marker
       if (this.minimapRect) {
         const m = this.minimapRect;
         if (cx >= m.x && cx <= m.x + m.w && cy >= m.y && cy <= m.y + m.h) {
+          this.handleMinimapClick(cx, cy);
           return;
         }
+      }
+
+      // 64-Bit 3D perspective hit-testing against projected entity screen targets
+      if (this.eraKey === '64bit') {
+        const hit = pickN64Entity(cx, cy);
+        if (hit) {
+          const dHero = Math.hypot(hit.x + 0.5 - this.hero.x, hit.y + 0.5 - this.hero.y);
+          if (dHero <= 3.6 && this.callbacks.onInteract) {
+            this.callbacks.onInteract(hit);
+            return;
+          }
+        }
+        if (this.nearestEntity) {
+          this.triggerInteract();
+        }
+        return;
       }
 
       const camX = Math.round(this.camera.x);
@@ -179,8 +230,31 @@ export class WorldEngine {
       handleCanvasTap(e.clientX, e.clientY);
     };
 
+    this._onCanvasMouseMove = (e) => {
+      if (this.isInputLocked() || !this.map) {
+        this.canvas.style.cursor = 'default';
+        return;
+      }
+      const rect = this.canvas.getBoundingClientRect();
+      const cx = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+      const cy = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+      let pointer = false;
+      if (this.wayfinderRect) {
+        const w = this.wayfinderRect;
+        if (cx >= w.x && cx <= w.x + w.w && cy >= w.y && cy <= w.y + w.h) pointer = true;
+      }
+      if (!pointer && this.minimapRect) {
+        const m = this.minimapRect;
+        if (cx >= m.x && cx <= m.x + m.w && cy >= m.y && cy <= m.y + m.h) {
+          pointer = Boolean(this.findMinimapMarkerAt(cx, cy));
+        }
+      }
+      this.canvas.style.cursor = pointer ? 'pointer' : 'default';
+    };
+
     let canvasTouchStart = null;
     this._onCanvasTouchStart = (e) => {
+      if (this.isInputLocked()) return;
       e.preventDefault();
       if (e.changedTouches.length > 0) {
         const t = e.changedTouches[0];
@@ -188,9 +262,14 @@ export class WorldEngine {
       }
     };
     this._onCanvasTouchMove = (e) => {
+      if (this.isInputLocked()) return;
       e.preventDefault();
     };
     this._onCanvasTouchEnd = (e) => {
+      if (this.isInputLocked()) {
+        canvasTouchStart = null;
+        return;
+      }
       e.preventDefault();
       if (!canvasTouchStart) return;
       for (const t of e.changedTouches) {
@@ -217,6 +296,7 @@ export class WorldEngine {
     window.addEventListener('blur', this._onBlur);
     window.addEventListener('resize', this._onResize);
     this.canvas.addEventListener('click', this._onCanvasClick);
+    this.canvas.addEventListener('mousemove', this._onCanvasMouseMove);
     this.canvas.addEventListener('touchstart', this._onCanvasTouchStart, { passive: false });
     this.canvas.addEventListener('touchmove', this._onCanvasTouchMove, { passive: false });
     this.canvas.addEventListener('touchend', this._onCanvasTouchEnd, { passive: false });
@@ -231,6 +311,7 @@ export class WorldEngine {
     window.removeEventListener('blur', this._onBlur);
     window.removeEventListener('resize', this._onResize);
     this.canvas.removeEventListener('click', this._onCanvasClick);
+    this.canvas.removeEventListener('mousemove', this._onCanvasMouseMove);
     this.canvas.removeEventListener('touchstart', this._onCanvasTouchStart);
     this.canvas.removeEventListener('touchmove', this._onCanvasTouchMove);
     this.canvas.removeEventListener('touchend', this._onCanvasTouchEnd);
@@ -255,7 +336,30 @@ export class WorldEngine {
       this.keys.clear();
       this.dpadDir = null;
       this.virtualVec = { dx: 0, dy: 0 };
+      this.cancelAutoPath();
     }
+  }
+
+  getCompletedSet() {
+    return new Set([
+      ...(this.save?.solvedTrials || []),
+      ...(this.save?.completedTrials || []),
+    ]);
+  }
+
+  /**
+   * Returns true if a secret bonus rune is still sealed (core realm trials / boss not yet cleared).
+   */
+  isBonusTrialLocked(ent, completed = null) {
+    if (!ent || ent.type !== 'bonus_trial') return false;
+    const solved = completed || this.getCompletedSet();
+    if (ent.refId && solved.has(ent.refId)) return false;
+    if (ent.requiredTrialId && !solved.has(ent.requiredTrialId)) return true;
+    const coreTrials = (this.map?.entities || []).filter((e) => e.type === 'trial' && e.refId);
+    if (coreTrials.length > 0 && coreTrials.some((e) => !solved.has(e.refId))) {
+      return true;
+    }
+    return false;
   }
 
   setVirtualVector(dx, dy) {
@@ -265,12 +369,14 @@ export class WorldEngine {
       this.dpadDir = null;
       return;
     }
+    if (this.autoPath) this.cancelAutoPath();
     const clamped = Math.min(1, mag);
     this.virtualVec = { dx: (dx / mag) * clamped, dy: (dy / mag) * clamped };
     this.dpadDir = null;
   }
 
   setVirtualDirection(dir) {
+    if (dir && this.autoPath) this.cancelAutoPath();
     this.dpadDir = dir || null;
     this.virtualVec = { dx: 0, dy: 0 };
   }
@@ -305,12 +411,17 @@ export class WorldEngine {
     this.hero.x = startX;
     this.hero.y = startY;
     this.hero.dir = 'down';
+    this.hero.facingAngle = 0;
     this.pip.x = startX - 0.9;
     this.pip.y = startY;
+    this.pip.dir = 'down';
+    this.pip.facingAngle = 0;
     this.trail = [];
     this.currentRegionId = null;
     this.camera.initialized = false;
     this.minimapCacheKey = null;
+    this.minimapMarkers = [];
+    this.cancelAutoPath();
 
     this.initParticles();
     this.resizeCanvas();
@@ -456,16 +567,50 @@ export class WorldEngine {
 
     const dynamicOverrides = this.getDynamicStateMap();
 
-    if (!this.paused) {
-      const { dx, dy } = this.getMovementVector();
+    if (!this.isInputLocked()) {
+      const manual = this.getMovementVector();
+      let dx = manual.dx;
+      let dy = manual.dy;
       const hasSwiftBoots = this.save.appearance?.boots === 'boots_swift';
-      const speed = hasSwiftBoots ? 6.2 : 4.4; // tiles per second
+      const speed = hasSwiftBoots ? 6.8 : 4.6; // tiles per second
+
+      if (dx !== 0 || dy !== 0) {
+        if (this.autoPath) this.cancelAutoPath();
+      } else if (this.autoPath && this.autoPath.waypoints.length > 0) {
+        const wp = this.autoPath.waypoints[this.autoPath.index];
+        if (!wp) {
+          this.finishAutoPath();
+        } else {
+          const wdx = wp.x - this.hero.x;
+          const wdy = wp.y - this.hero.y;
+          const wdist = Math.hypot(wdx, wdy);
+          if (wdist <= Math.max(0.14, speed * dt * 0.9)) {
+            this.hero.x = wp.x;
+            this.hero.y = wp.y;
+            this.autoPath.index += 1;
+            if (this.autoPath.index >= this.autoPath.waypoints.length) {
+              this.finishAutoPath();
+            } else {
+              const nextWp = this.autoPath.waypoints[this.autoPath.index];
+              const ndx = nextWp.x - this.hero.x;
+              const ndy = nextWp.y - this.hero.y;
+              const nd = Math.hypot(ndx, ndy) || 1;
+              dx = ndx / nd;
+              dy = ndy / nd;
+            }
+          } else {
+            dx = wdx / wdist;
+            dy = wdy / wdist;
+          }
+        }
+      }
 
       this.hero.moving = dx !== 0 || dy !== 0;
       if (this.hero.stepSoundCooldown > 0) this.hero.stepSoundCooldown -= dt;
       if (this.hero.bumpSoundCooldown > 0) this.hero.bumpSoundCooldown -= dt;
 
       if (this.hero.moving) {
+        this.hero.facingAngle = Math.atan2(dx, dy);
         if (Math.abs(dx) > Math.abs(dy)) {
           this.hero.dir = dx < 0 ? 'left' : 'right';
         } else {
@@ -490,8 +635,10 @@ export class WorldEngine {
           if (this.trail.length > 24) this.trail.shift();
           if (this.hero.stepSoundCooldown <= 0) {
             audio.playStep();
-            this.hero.stepSoundCooldown = hasSwiftBoots ? 0.22 : 0.3;
+            this.hero.stepSoundCooldown = hasSwiftBoots ? 0.2 : 0.28;
           }
+        } else if (this.autoPath) {
+          this.cancelAutoPath();
         } else if (this.hero.bumpSoundCooldown <= 0) {
           audio.playBump();
           this.hero.bumpSoundCooldown = 0.35;
@@ -519,6 +666,7 @@ export class WorldEngine {
     if (pipDist > 0.12) {
       this.pip.x += pipDx * Math.min(1, dt * 6);
       this.pip.y += pipDy * Math.min(1, dt * 6);
+      this.pip.facingAngle = Math.atan2(pipDx, pipDy);
       if (Math.abs(pipDx) > Math.abs(pipDy)) {
         this.pip.dir = pipDx < 0 ? 'left' : 'right';
       } else {
@@ -526,6 +674,7 @@ export class WorldEngine {
       }
     } else {
       this.pip.dir = this.hero.dir;
+      this.pip.facingAngle = this.hero.facingAngle;
     }
 
     this.pip.animTimer += dt;
@@ -593,8 +742,276 @@ export class WorldEngine {
   }
 
   triggerInteract() {
+    if (this.isInputLocked()) return;
     if (this.nearestEntity && this.callbacks.onInteract) {
       this.callbacks.onInteract(this.nearestEntity);
+    }
+  }
+
+  getCompletedSet() {
+    return new Set([
+      ...(this.save?.solvedTrials || []),
+      ...(this.save?.completedTrials || []),
+    ]);
+  }
+
+  getRescuedSet() {
+    return new Set(this.save?.rescuedDragons || []);
+  }
+
+  /**
+   * Returns true if all core trials in the current realm map are solved (or the realm's dragon is rescued).
+   */
+  isRealmCleared(completed = null, rescued = null) {
+    if (!this.map) return false;
+    const solved = completed || this.getCompletedSet();
+    const dragons = rescued || this.getRescuedSet();
+    const vault = (this.map.entities || []).find((e) => e.type === 'vault' && e.refId);
+    if (vault && dragons.has(vault.refId)) return true;
+    const coreTrials = (this.map.entities || []).filter((e) => e.type === 'trial' && e.refId);
+    return coreTrials.length > 0 && coreTrials.every((e) => solved.has(e.refId));
+  }
+
+  /**
+   * Returns true if the player is allowed to fast-travel directly to `ent`.
+   */
+  canFastTravelToEntity(ent, completed = null, rescued = null) {
+    if (!ent || !this.map) return false;
+    const solved = completed || this.getCompletedSet();
+    const dragons = rescued || this.getRescuedSet();
+    const cleared = this.isRealmCleared(solved, dragons);
+
+    if (ent.type === 'trial') {
+      return Boolean(cleared || (ent.refId && solved.has(ent.refId)));
+    }
+    if (ent.type === 'vault') {
+      const reqMet = !ent.requiredTrialId || solved.has(ent.requiredTrialId);
+      return Boolean(cleared || (ent.refId && dragons.has(ent.refId)) || reqMet);
+    }
+    if (ent.type === 'portal') {
+      return !ent.requiredTrialId || solved.has(ent.requiredTrialId);
+    }
+    if (ent.type === 'bonus_trial') {
+      return Boolean(ent.refId && solved.has(ent.refId));
+    }
+    if (ent.type === 'workshop' || ent.type === 'npc') {
+      return Boolean(cleared || solved.size > 0);
+    }
+    return false;
+  }
+
+  findSafeStandTileNear(ent, dynamicOverrides = null) {
+    if (!this.map || !ent) return null;
+    const dyn = dynamicOverrides || this.getDynamicStateMap();
+    const candidates = [
+      [ent.x, ent.y],
+      [ent.x, ent.y + 1],
+      [ent.x, ent.y - 1],
+      [ent.x - 1, ent.y],
+      [ent.x + 1, ent.y],
+      [ent.x - 1, ent.y + 1],
+      [ent.x + 1, ent.y + 1],
+      [ent.x - 1, ent.y - 1],
+      [ent.x + 1, ent.y - 1],
+    ];
+    for (const [tx, ty] of candidates) {
+      if (!this.isTileBlocked(tx, ty, dyn) && this.canStandAt(tx + 0.5, ty + 0.5, dyn)) {
+        return { x: tx + 0.5, y: ty + 0.5 };
+      }
+    }
+    return null;
+  }
+
+  fastTravelToEntity(ent) {
+    if (!this.map || !ent) return { ok: false, reason: 'no_target' };
+    const dyn = this.getDynamicStateMap();
+    const spot = this.findSafeStandTileNear(ent, dyn);
+    if (!spot) return { ok: false, reason: 'blocked' };
+
+    this.cancelAutoPath();
+    this.hero.x = spot.x;
+    this.hero.y = spot.y;
+    const fdx = ent.x + 0.5 - spot.x;
+    const fdy = ent.y + 0.5 - spot.y;
+    if (Math.abs(fdx) > 0.05 || Math.abs(fdy) > 0.05) {
+      this.hero.dir = Math.abs(fdx) > Math.abs(fdy) ? (fdx < 0 ? 'left' : 'right') : (fdy < 0 ? 'up' : 'down');
+    }
+    this.pip.x = spot.x - 0.85;
+    this.pip.y = spot.y + 0.1;
+    this.trail = [];
+    this.snapCameraToHero();
+    audio.playPortal();
+    if (this.callbacks.onFastTravel) {
+      this.callbacks.onFastTravel(ent);
+    }
+    return { ok: true, entity: ent };
+  }
+
+  /**
+   * 4-way BFS over walkable tiles from the hero's current tile to a walkable tile
+   * at or adjacent to `targetEntity`.
+   */
+  findPathToEntity(targetEntity) {
+    if (!this.map || !targetEntity) return null;
+    const dyn = this.getDynamicStateMap();
+    const startX = Math.max(0, Math.min(this.map.width - 1, Math.floor(this.hero.x)));
+    const startY = Math.max(0, Math.min(this.map.height - 1, Math.floor(this.hero.y)));
+    const targetBlocked = this.isTileBlocked(targetEntity.x, targetEntity.y, dyn);
+
+    const isGoal = (tx, ty) => {
+      if (!targetBlocked) {
+        return tx === targetEntity.x && ty === targetEntity.y;
+      }
+      const dist = Math.hypot(tx - targetEntity.x, ty - targetEntity.y);
+      return dist <= 1.45;
+    };
+
+    if (isGoal(startX, startY)) {
+      return [];
+    }
+
+    const width = this.map.width;
+    const height = this.map.height;
+    const visited = new Uint8Array(width * height);
+    const parent = new Int32Array(width * height).fill(-1);
+    const queue = new Int32Array(width * height);
+    let head = 0;
+    let tail = 0;
+
+    const startIdx = startY * width + startX;
+    visited[startIdx] = 1;
+    queue[tail++] = startIdx;
+
+    const dirs = [
+      [0, -1],
+      [1, 0],
+      [0, 1],
+      [-1, 0],
+    ];
+
+    let goalIdx = -1;
+    while (head < tail) {
+      const cur = queue[head++];
+      const cx = cur % width;
+      const cy = (cur - cx) / width;
+
+      for (const [ox, oy] of dirs) {
+        const nx = cx + ox;
+        const ny = cy + oy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const nIdx = ny * width + nx;
+        if (visited[nIdx]) continue;
+        if (this.isTileBlocked(nx, ny, dyn)) continue;
+        visited[nIdx] = 1;
+        parent[nIdx] = cur;
+        if (isGoal(nx, ny)) {
+          goalIdx = nIdx;
+          break;
+        }
+        queue[tail++] = nIdx;
+      }
+      if (goalIdx !== -1) break;
+    }
+
+    if (goalIdx === -1) return null;
+
+    const waypoints = [];
+    let trace = goalIdx;
+    while (trace !== -1 && trace !== startIdx) {
+      const tx = trace % width;
+      const ty = (trace - tx) / width;
+      waypoints.push({ x: tx + 0.5, y: ty + 0.5 });
+      trace = parent[trace];
+    }
+    waypoints.reverse();
+    return waypoints;
+  }
+
+  startAutoPathToEntity(targetEntity) {
+    if (!this.map || !targetEntity) return { ok: false, reason: 'no_target' };
+    const distNow = Math.hypot(targetEntity.x + 0.5 - this.hero.x, targetEntity.y + 0.5 - this.hero.y);
+    if (distNow <= 1.65) {
+      this.cancelAutoPath();
+      return { ok: true, arrived: true, entity: targetEntity };
+    }
+    const waypoints = this.findPathToEntity(targetEntity);
+    if (!waypoints) {
+      return { ok: false, reason: 'blocked', entity: targetEntity };
+    }
+    if (waypoints.length === 0) {
+      return { ok: true, arrived: true, entity: targetEntity };
+    }
+    this.autoPath = {
+      waypoints,
+      index: 0,
+      targetEntity,
+      label: targetEntity.label || 'Objective',
+    };
+    audio.playClick();
+    if (this.callbacks.onAutoPathChange) {
+      this.callbacks.onAutoPathChange(this.autoPath);
+    }
+    return { ok: true, arrived: false, entity: targetEntity, steps: waypoints.length };
+  }
+
+  startAutoPathToNextObjective() {
+    const completed = this.getCompletedSet();
+    const rescued = this.getRescuedSet();
+    const next = this.getNextObjectiveEntity(completed, rescued);
+    if (!next || !next.entity) {
+      return { ok: false, reason: 'no_objective' };
+    }
+    return this.startAutoPathToEntity(next.entity);
+  }
+
+  cancelAutoPath() {
+    if (!this.autoPath) return;
+    this.autoPath = null;
+    if (this.callbacks.onAutoPathChange) {
+      this.callbacks.onAutoPathChange(null);
+    }
+  }
+
+  finishAutoPath() {
+    const target = this.autoPath?.targetEntity || null;
+    this.autoPath = null;
+    if (target) {
+      const fdx = target.x + 0.5 - this.hero.x;
+      const fdy = target.y + 0.5 - this.hero.y;
+      if (Math.abs(fdx) > 0.05 || Math.abs(fdy) > 0.05) {
+        this.hero.dir = Math.abs(fdx) > Math.abs(fdy) ? (fdx < 0 ? 'left' : 'right') : (fdy < 0 ? 'up' : 'down');
+      }
+    }
+    if (this.callbacks.onAutoPathChange) {
+      this.callbacks.onAutoPathChange(null);
+    }
+  }
+
+  findMinimapMarkerAt(cx, cy) {
+    let best = null;
+    let bestDist = 13;
+    for (const mk of this.minimapMarkers || []) {
+      const d = Math.hypot(mk.x - cx, mk.y - cy);
+      if (d <= bestDist) {
+        bestDist = d;
+        best = mk;
+      }
+    }
+    return best;
+  }
+
+  handleMinimapClick(cx, cy) {
+    const marker = this.findMinimapMarkerAt(cx, cy);
+    if (!marker || !marker.entity) return;
+    const completed = this.getCompletedSet();
+    const rescued = this.getRescuedSet();
+    if (this.canFastTravelToEntity(marker.entity, completed, rescued)) {
+      this.fastTravelToEntity(marker.entity);
+    } else {
+      const res = this.startAutoPathToEntity(marker.entity);
+      if (this.callbacks.onMinimapAutoPath) {
+        this.callbacks.onMinimapAutoPath(marker.entity, res);
+      }
     }
   }
 
@@ -633,34 +1050,36 @@ export class WorldEngine {
     const endRow = Math.min(this.map.height - 1, Math.ceil((camY + this.canvas.height) / TILE_PX) + 1);
 
     const sparkRescued = rescued.has('dragon-spark');
-    const pebbleRescued = rescued.has('dragon-pebble');
+    const is16Bit = this.eraKey === '16bit';
+    const lightSources = is16Bit ? [] : null;
 
     // 1. Ground & Decor layers (integer pixel snapped to prevent subpixel seams)
     for (let y = startRow; y <= endRow; y++) {
       for (let x = startCol; x <= endCol; x++) {
         const sx = x * TILE_PX - camX;
         const sy = y * TILE_PX - camY;
-        const key = `${x},${y}`;
-        const ov = dynamicOverrides.get(key);
-
-        let groundTile = this.map.layers.ground[y][x];
-        if (ov && ov.layer === 'ground') {
-          groundTile = ov.tile;
-        }
+        const groundTile = this.getEffectiveGroundTile(x, y, dynamicOverrides);
         this.sprites.drawTile(ctx, groundTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
 
-        // Animated water, lava & starfield shimmer
+        // Animated water, lava & starfield shimmer (before SNES shoreline banks so glints stay in water)
         if (groundTile === 'water') {
-          const shimmer = Math.sin(this.time * 3 + x * 0.9 + y * 0.7);
-          if (shimmer > 0.55) {
-            ctx.fillStyle = 'rgba(186, 230, 253, 0.28)';
-            ctx.fillRect(sx + 8, sy + 14 + Math.round(shimmer * 4), 16, 4);
+          if (is16Bit) {
+            this.drawSnesWaterAnimation(ctx, x, y, sx, sy);
+          } else {
+            const shimmer = Math.sin(this.time * 3 + x * 0.9 + y * 0.7);
+            if (shimmer > 0.55) {
+              ctx.fillStyle = 'rgba(186, 230, 253, 0.28)';
+              ctx.fillRect(sx + 8, sy + 14 + Math.round(shimmer * 4), 16, 4);
+            }
           }
         } else if (groundTile === 'lava') {
           const pulse = Math.sin(this.time * 4 + x * 1.1 + y * 0.8);
           if (pulse > 0.4) {
-            ctx.fillStyle = 'rgba(253, 224, 71, 0.42)';
+            ctx.fillStyle = is16Bit ? 'rgba(254, 240, 138, 0.52)' : 'rgba(253, 224, 71, 0.42)';
             ctx.fillRect(sx + 10, sy + 16, 14, 5);
+          }
+          if (is16Bit && x % 2 === 0 && y % 2 === 0) {
+            lightSources.push({ x: sx + TILE_PX * 0.5, y: sy + TILE_PX * 0.5, r: TILE_PX * 1.5, rgb: '249, 115, 22', alpha: 0.11 });
           }
         } else if (groundTile === 'star_tile') {
           const twinkle = Math.sin(this.time * 5 + x * 2.3 + y * 1.7);
@@ -670,21 +1089,90 @@ export class WorldEngine {
           }
         }
 
+        // 16-Bit SNES organic terrain transitions & non-repeating micro-variation
+        if (is16Bit) {
+          this.drawSnesGroundDetails(ctx, x, y, sx, sy, groundTile, dynamicOverrides);
+        }
+
         // Bit 1 visual upgrade: swaying flower pixels after Spark is rescued
         if (sparkRescued && groundTile === 'grass_flower') {
           const sway = Math.round(Math.sin(this.time * 4 + x + y) * 2);
           ctx.fillStyle = 'rgba(254, 240, 138, 0.55)';
           ctx.fillRect(sx + 20 + sway, sy + 14, 4, 4);
         }
+      }
+    }
 
-        let decorTile = this.map.layers.decor[y][x];
-        if (ov && ov.layer === 'decor') {
-          decorTile = ov.tile;
-        }
-        if (decorTile) {
+    // 1b. 16-Bit SNES Directional Cast Shadows + Decor Layer
+    for (let y = startRow; y <= endRow; y++) {
+      for (let x = startCol; x <= endCol; x++) {
+        const sx = x * TILE_PX - camX;
+        const sy = y * TILE_PX - camY;
+        const decorTile = this.getEffectiveDecorTile(x, y, dynamicOverrides);
+        if (!decorTile) continue;
+
+        if (is16Bit) {
+          this.drawSnesDecorShadow(ctx, x, y, sx, sy, decorTile, dynamicOverrides);
+          if (decorTile === 'tree' || decorTile === 'pine_tree') {
+            // Fuller overhanging SNES canopy anchored at base
+            const h = Math.round(TILE_PX * 1.16);
+            const w = Math.round(TILE_PX * 1.1);
+            this.sprites.drawTile(ctx, decorTile, this.eraKey, sx - Math.round((w - TILE_PX) / 2), sy - (h - TILE_PX), w, h);
+          } else {
+            this.sprites.drawTile(ctx, decorTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
+          }
+          // Register dynamic SNES point light sources
+          if (decorTile === 'campfire' || decorTile === 'torch') {
+            const flicker = 0.9 + 0.1 * Math.sin(this.time * 11 + x * 3 + y);
+            lightSources.push({
+              x: sx + TILE_PX * 0.5,
+              y: sy + TILE_PX * 0.35,
+              r: TILE_PX * (decorTile === 'campfire' ? 2.5 : 2.1) * flicker,
+              rgb: '251, 146, 60',
+              alpha: decorTile === 'campfire' ? 0.34 : 0.26,
+            });
+          } else if (decorTile === 'portal' || decorTile === 'crystal_pillar') {
+            const pulse = 0.88 + 0.12 * Math.sin(this.time * 4.5 + x);
+            lightSources.push({
+              x: sx + TILE_PX * 0.5,
+              y: sy + TILE_PX * 0.5,
+              r: TILE_PX * 2.1 * pulse,
+              rgb: '56, 189, 248',
+              alpha: 0.28,
+            });
+          } else if (decorTile === 'vault_shrine') {
+            lightSources.push({
+              x: sx + TILE_PX * 0.5,
+              y: sy + TILE_PX * 0.45,
+              r: TILE_PX * 2.4,
+              rgb: '250, 204, 21',
+              alpha: 0.28,
+            });
+          }
+        } else {
           this.sprites.drawTile(ctx, decorTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
         }
       }
+    }
+
+    // 1.5. Auto-path breadcrumb dots on the overworld floor
+    if (this.autoPath && this.autoPath.waypoints.length > 0) {
+      ctx.save();
+      const pulse = 0.55 + 0.35 * Math.sin(this.time * 7);
+      for (let i = this.autoPath.index; i < this.autoPath.waypoints.length; i++) {
+        const wp = this.autoPath.waypoints[i];
+        const wx = Math.round(wp.x * TILE_PX - camX);
+        const wy = Math.round(wp.y * TILE_PX - camY);
+        if (wx < -12 || wy < -12 || wx > this.canvas.width + 12 || wy > this.canvas.height + 12) continue;
+        const isFinal = i === this.autoPath.waypoints.length - 1;
+        ctx.fillStyle = isFinal
+          ? `rgba(250, 204, 21, ${pulse.toFixed(2)})`
+          : `rgba(56, 189, 248, ${(pulse * 0.85).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(wx, wy, isFinal ? 6 : 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     }
 
     // 2. Entities (sorted by Y along with Hero & Pip for clean depth)
@@ -705,6 +1193,12 @@ export class WorldEngine {
         const py = Math.round(this.pip.y * TILE_PX - camY);
         const pipSize = TILE_PX * 0.85;
         const bob = Math.round(Math.sin(this.time * 6) * 2);
+        if (is16Bit) {
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+          ctx.beginPath();
+          ctx.ellipse(px, py + 2, pipSize * 0.3, pipSize * 0.13, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
         this.sprites.drawPip(
           ctx,
           this.save.appearance,
@@ -719,7 +1213,7 @@ export class WorldEngine {
       },
     });
 
-    // Hero
+    // Hero (shadow.png is already layer 0 of drawHero, so no extra runtime ellipse)
     drawList.push({
       sortY: this.hero.y,
       draw: () => {
@@ -745,6 +1239,11 @@ export class WorldEngine {
       item.draw();
     }
 
+    // 2b. 16-Bit SNES Dynamic Lighting, Drifting Cloud Shadows & Golden-Hour Atmosphere
+    if (is16Bit) {
+      this.renderSnesAtmosphere(ctx, lightSources, camX, camY);
+    }
+
     // 3. Biome Ambiance Particles (per-Realm palette; subtle ambient glow or full Bit Restored radiance)
     const BIOME_PARTICLE_RGB = {
       'realm-01-meadow': '253, 224, 71',  // gold fireflies
@@ -753,19 +1252,29 @@ export class WorldEngine {
       'realm-04-hollow': '186, 230, 253', // icy-blue snowflakes
       'realm-05-woods': '190, 242, 100',  // lime/gold wisps
       'realm-06-crypt': '45, 212, 191',   // misty teal spores
+      'realm-16-01-shallows': '125, 211, 252', // lagoon spray & sun motes
+      'realm-16-02-market': '253, 224, 71',    // harbor sunlit dust
+      'realm-16-03-grotto': '196, 181, 253',   // iridescent pearl glints
+      'realm-16-04-lighthouse': '186, 230, 253',
     };
     const anyRescued = rescued.size > 0;
     const isAtmosphericBiome = ['realm-03-cavern', 'realm-04-hollow', 'realm-05-woods', 'realm-06-crypt'].includes(
       this.map.realmId
     );
-    if (anyRescued || isAtmosphericBiome) {
+    if (is16Bit || anyRescued || isAtmosphericBiome) {
       const rgb = BIOME_PARTICLE_RGB[this.map.realmId] || '253, 224, 71';
-      const intensity = anyRescued ? 1.0 : 0.6;
+      const intensity = anyRescued ? 1.0 : (is16Bit ? 0.78 : 0.6);
       for (const p of this.particles) {
         const sx = p.x - camX;
         const sy = p.y - camY;
         if (sx < -8 || sy < -8 || sx > this.canvas.width + 8 || sy > this.canvas.height + 8) continue;
         const alpha = (0.3 + 0.48 * Math.sin(this.time * 3.5 + p.phase)) * intensity;
+        if (is16Bit) {
+          ctx.fillStyle = `rgba(${rgb}, ${(alpha * 0.32).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(Math.round(sx) + 2, Math.round(sy) + 2, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.fillStyle = `rgba(${rgb}, ${alpha.toFixed(2)})`;
         ctx.fillRect(Math.round(sx), Math.round(sy), 4, 4);
       }
@@ -774,6 +1283,351 @@ export class WorldEngine {
     // 4. Next-Objective Wayfinder Arrow + Corner Minimap Overlay
     this.renderWayfinder(ctx, completed, rescued);
     this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
+  }
+
+  getEffectiveGroundTile(x, y, dynamicOverrides) {
+    if (!this.map) return 'grass';
+    const cx = Math.max(0, Math.min(this.map.width - 1, x));
+    const cy = Math.max(0, Math.min(this.map.height - 1, y));
+    const ov = dynamicOverrides.get(`${cx},${cy}`);
+    if (ov && ov.layer === 'ground') return ov.tile;
+    return this.map.layers.ground[cy]?.[cx] || 'grass';
+  }
+
+  getEffectiveDecorTile(x, y, dynamicOverrides) {
+    if (!this.map) return null;
+    const cx = Math.max(0, Math.min(this.map.width - 1, x));
+    const cy = Math.max(0, Math.min(this.map.height - 1, y));
+    const ov = dynamicOverrides.get(`${cx},${cy}`);
+    if (ov && ov.layer === 'decor') return ov.tile;
+    return this.map.layers.decor[cy]?.[cx] || null;
+  }
+
+  /**
+   * 16-Bit SNES auto-tiled organic shorelines, feathered grass-over-dirt borders,
+   * stone curbs, and non-repeating world micro-variation.
+   */
+  drawSnesGroundDetails(ctx, x, y, sx, sy, groundTile, dynamicOverrides) {
+    const isGrass = (t) => t === 'grass' || t === 'grass_flower' || t === 'flower_bed';
+    const isWater = (t) => t === 'water';
+    const isLiquid = (t) => t === 'water' || t === 'lava';
+    const hash = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+
+    // 1. Non-repeating subtle ground micro-variation so large regions feel hand-painted
+    if (isGrass(groundTile)) {
+      const m = hash % 11;
+      if (m === 0) {
+        // Warm sunlit clover patch
+        ctx.fillStyle = 'rgba(134, 239, 172, 0.22)';
+        ctx.fillRect(sx + 6 + (hash % 18), sy + 8 + ((hash >> 4) % 18), 14, 8);
+      } else if (m === 3) {
+        // Tiny extra wildflower bud
+        const fx = sx + 8 + (hash % 28);
+        const fy = sy + 8 + ((hash >> 3) % 28);
+        ctx.fillStyle = (hash & 1) ? '#fef08a' : '#f8fafc';
+        ctx.fillRect(fx, fy, 3, 3);
+      } else if (m === 6) {
+        // Soft deeper turf cluster
+        ctx.fillStyle = 'rgba(22, 101, 52, 0.16)';
+        ctx.fillRect(sx + 10 + (hash % 16), sy + 12 + ((hash >> 5) % 16), 12, 6);
+      }
+    } else if (groundTile === 'dirt_path' || groundTile === 'sand') {
+      const m = hash % 7;
+      if (m === 0) {
+        const px = sx + 6 + (hash % 32);
+        const py = sy + 6 + ((hash >> 3) % 32);
+        ctx.fillStyle = 'rgba(255, 248, 220, 0.35)';
+        ctx.fillRect(px, py, 4, 2);
+        ctx.fillStyle = 'rgba(120, 72, 32, 0.32)';
+        ctx.fillRect(px, py + 2, 4, 2);
+      } else if (m === 4) {
+        ctx.fillStyle = 'rgba(138, 94, 52, 0.12)';
+        ctx.fillRect(sx + 8, sy + 14 + ((hash >> 4) % 14), 22, 5);
+      }
+    }
+
+    const n = this.getEffectiveGroundTile(x, y - 1, dynamicOverrides);
+    const s = this.getEffectiveGroundTile(x, y + 1, dynamicOverrides);
+    const w = this.getEffectiveGroundTile(x - 1, y, dynamicOverrides);
+    const e = this.getEffectiveGroundTile(x + 1, y, dynamicOverrides);
+
+    // 2. Auto-tiled SNES Riverbanks & Shorelines on water tiles bordering land
+    if (isWater(groundTile)) {
+      const foamOffset = Math.round(Math.sin(this.time * 3.2 + x * 0.9 + y * 0.7) * 1.5);
+      const SHORE_STYLES = {
+        sand: { lip: '#f2d28b', undercut: '#9a7136', bank: '#c2954e' },
+        dirt_path: { lip: '#c89e6a', undercut: '#613c1d', bank: '#8a5e34' },
+        stone_floor: { lip: '#94a3b8', undercut: '#2f3744', bank: '#475569' },
+        ice_floor: { lip: '#e0f2fe', undercut: '#0369a1', bank: '#38bdf8' },
+        obsidian_floor: { lip: '#4c1d95', undercut: '#0f0a1e', bank: '#1e1b4b' },
+        brass_floor: { lip: '#d97706', undercut: '#451a03', bank: '#78350f' },
+        default: { lip: '#3ea647', undercut: '#14331d', bank: '#6b4423' },
+      };
+      const shoreFor = (t) => SHORE_STYLES[t] || SHORE_STYLES.default;
+
+      if (!isLiquid(n) && n !== 'bridge_wood' && n !== 'bridge_broken') {
+        const st = shoreFor(n);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx, sy, TILE_PX, 4);
+        ctx.fillStyle = st.undercut;
+        ctx.fillRect(sx, sy + 4, TILE_PX, 2);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx, sy + 6, TILE_PX, 7);
+        ctx.fillStyle = 'rgba(10, 32, 64, 0.45)';
+        ctx.fillRect(sx, sy + 13, TILE_PX, 3);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.72)';
+        ctx.fillRect(sx + 2, sy + 15 + foamOffset, TILE_PX - 4, 2);
+      }
+      if (!isLiquid(s) && s !== 'bridge_wood' && s !== 'bridge_broken') {
+        const st = shoreFor(s);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.58)';
+        ctx.fillRect(sx + 3, sy + TILE_PX - 8 - foamOffset, TILE_PX - 6, 2);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx, sy + TILE_PX - 6, TILE_PX, 3);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx, sy + TILE_PX - 3, TILE_PX, 3);
+      }
+      if (!isLiquid(w) && w !== 'bridge_wood' && w !== 'bridge_broken') {
+        const st = shoreFor(w);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx, sy, 4, TILE_PX);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx + 4, sy, 4, TILE_PX);
+        ctx.fillStyle = 'rgba(10, 32, 64, 0.32)';
+        ctx.fillRect(sx + 8, sy, 3, TILE_PX);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.65)';
+        ctx.fillRect(sx + 10 + foamOffset, sy + 4, 2, TILE_PX - 8);
+      }
+      if (!isLiquid(e) && e !== 'bridge_wood' && e !== 'bridge_broken') {
+        const st = shoreFor(e);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.62)';
+        ctx.fillRect(sx + TILE_PX - 11 - foamOffset, sy + 4, 2, TILE_PX - 8);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx + TILE_PX - 8, sy, 4, TILE_PX);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx + TILE_PX - 4, sy, 4, TILE_PX);
+      }
+    }
+
+    // 3. Organic Feathered Grass-over-Dirt / Grass-over-Sand Path Edges
+    if (groundTile === 'dirt_path' || groundTile === 'sand') {
+      const grassEdge = '#3ea647';
+      const grassDark = '#236b33';
+      const dirtRim = 'rgba(120, 74, 34, 0.35)';
+      const step = 6;
+
+      if (isGrass(n)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((x * 7 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + i, sy + depth, step, 2);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + i, sy + depth - 2, step, 2);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx + i, sy, step, depth - 2);
+        }
+      }
+      if (isGrass(s)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((x * 5 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + i, sy + TILE_PX - depth - 2, step, 2);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + i, sy + TILE_PX - depth, step, 2);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx + i, sy + TILE_PX - depth + 2, step, depth - 2);
+        }
+      }
+      if (isGrass(w)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((y * 7 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + depth, sy + i, 2, step);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + depth - 2, sy + i, 2, step);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx, sy + i, depth - 2, step);
+        }
+      }
+      if (isGrass(e)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((y * 5 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + TILE_PX - depth - 2, sy + i, 2, step);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + TILE_PX - depth, sy + i, 2, step);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx + TILE_PX - depth + 2, sy + i, depth - 2, step);
+        }
+      }
+      // Smoothly rounded inner corners when two adjacent sides border grass
+      if (isGrass(n) && isGrass(w)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx, sy, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + 6, sy + 6, 3, 3);
+      }
+      if (isGrass(n) && isGrass(e)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx + TILE_PX - 8, sy, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + TILE_PX - 9, sy + 6, 3, 3);
+      }
+      if (isGrass(s) && isGrass(w)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx, sy + TILE_PX - 8, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + 6, sy + TILE_PX - 9, 3, 3);
+      }
+      if (isGrass(s) && isGrass(e)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx + TILE_PX - 8, sy + TILE_PX - 8, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + TILE_PX - 9, sy + TILE_PX - 9, 3, 3);
+      }
+    }
+
+    // 4. Subtle stone floor curb & drop shadow when bordering grass/dirt
+    if (groundTile === 'stone_floor' || groundTile === 'brass_floor') {
+      if (isGrass(s) || s === 'dirt_path') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.fillRect(sx, sy + TILE_PX - 3, TILE_PX, 3);
+      }
+      if (isGrass(e) || e === 'dirt_path') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+        ctx.fillRect(sx + TILE_PX - 3, sy, 3, TILE_PX);
+      }
+    }
+  }
+
+  /**
+   * 16-Bit SNES layered animated water caustics & sun-glint sparkles.
+   */
+  drawSnesWaterAnimation(ctx, x, y, sx, sy) {
+    const wave = Math.sin(this.time * 2.6 + x * 0.8 + y * 0.6);
+    const shiftX = Math.round(Math.sin(this.time * 1.8 + y * 1.1) * 4);
+    ctx.fillStyle = 'rgba(158, 224, 255, 0.28)';
+    ctx.fillRect(sx + 8 + shiftX, sy + 12 + Math.round(wave * 2), 18, 3);
+    ctx.fillStyle = 'rgba(186, 230, 253, 0.22)';
+    ctx.fillRect(sx + 20 - shiftX, sy + 30 - Math.round(wave * 2), 14, 2);
+
+    const glint = Math.sin(this.time * 4.5 + x * 2.1 + y * 1.7);
+    if (glint > 0.72) {
+      ctx.fillStyle = 'rgba(240, 249, 255, 0.82)';
+      const gx = sx + 10 + ((x * 13 + y * 7) % 26);
+      const gy = sy + 10 + ((x * 5 + y * 11) % 26);
+      ctx.fillRect(gx, gy, 4, 2);
+      ctx.fillRect(gx + 1, gy - 1, 2, 4);
+    }
+  }
+
+  /**
+   * 16-Bit SNES directional cast shadows (sun from top-left -> shadow down-right).
+   */
+  drawSnesDecorShadow(ctx, x, y, sx, sy, decorTile, dynamicOverrides) {
+    const isWall = (t) => t === 'stone_wall' || t === 'ice_wall' || t === 'obsidian_wall' || t === 'mossy_gate_closed';
+    if (isWall(decorTile)) {
+      const nDecor = this.getEffectiveDecorTile(x, y - 1, dynamicOverrides);
+      const sDecor = this.getEffectiveDecorTile(x, y + 1, dynamicOverrides);
+      const eDecor = this.getEffectiveDecorTile(x + 1, y, dynamicOverrides);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.3)';
+      if (!isWall(sDecor)) {
+        ctx.fillRect(sx + 4, sy + TILE_PX, TILE_PX + (isWall(eDecor) ? 0 : 4), 10);
+      }
+      if (!isWall(eDecor)) {
+        const topY = isWall(nDecor) ? sy : sy + 4;
+        ctx.fillRect(sx + TILE_PX, topY, 8, sy + TILE_PX - topY);
+      }
+      return;
+    }
+
+    if (decorTile === 'tree' || decorTile === 'pine_tree') {
+      ctx.fillStyle = 'rgba(12, 32, 24, 0.34)';
+      ctx.beginPath();
+      ctx.ellipse(sx + TILE_PX * 0.58, sy + TILE_PX * 0.86, TILE_PX * 0.44, TILE_PX * 0.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (
+      decorTile === 'bush' ||
+      decorTile === 'statue' ||
+      decorTile === 'vault_shrine' ||
+      decorTile === 'column' ||
+      decorTile === 'crystal_pillar' ||
+      decorTile === 'anvil' ||
+      decorTile === 'chest_closed' ||
+      decorTile === 'chest_open' ||
+      decorTile === 'coral' ||
+      decorTile === 'gear_prop'
+    ) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+      ctx.beginPath();
+      ctx.ellipse(sx + TILE_PX * 0.54, sy + TILE_PX * 0.82, TILE_PX * 0.36, TILE_PX * 0.15, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  getCachedLightSprite(rgb, radius, alpha) {
+    const r = Math.max(16, Math.round(radius / 8) * 8);
+    const a = Math.round(alpha * 50) / 50;
+    const key = `${rgb}:${r}:${a}`;
+    if (this.lightSpriteCache.has(key)) return this.lightSpriteCache.get(key);
+    const off = document.createElement('canvas');
+    off.width = r * 2;
+    off.height = r * 2;
+    const octx = off.getContext('2d');
+    const grad = octx.createRadialGradient(r, r, 2, r, r, r);
+    grad.addColorStop(0, `rgba(${rgb}, ${a.toFixed(2)})`);
+    grad.addColorStop(0.5, `rgba(${rgb}, ${(a * 0.35).toFixed(2)})`);
+    grad.addColorStop(1, `rgba(${rgb}, 0)`);
+    octx.fillStyle = grad;
+    octx.fillRect(0, 0, r * 2, r * 2);
+    if (this.lightSpriteCache.size > 48) this.lightSpriteCache.clear();
+    this.lightSpriteCache.set(key, off);
+    return off;
+  }
+
+  /**
+   * 16-Bit SNES atmospheric pass: dynamic radial point lights (campfires, torches,
+   * portals, shrines), slow drifting cloud shadows, and warm golden-hour sunlight wash.
+   */
+  renderSnesAtmosphere(ctx, lightSources, camX, camY) {
+    const W = this.canvas.width;
+    const H = this.canvas.height;
+    ctx.save();
+
+    // 1. Subtle slow-drifting SNES cloud shadows wrapped cleanly by exact 440px stride
+    const stride = 440;
+    const cloudOffset = (this.time * 18) % stride;
+    const camShiftX = ((camX * 0.25) % stride + stride) % stride;
+    const maxCols = Math.ceil(W / stride) + 1;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.055)';
+    for (let i = -1; i <= maxCols; i++) {
+      const cx = i * stride + cloudOffset - camShiftX;
+      const cy = (((i * 190 + 120 - camY * 0.2) % (H + 260)) + (H + 260)) % (H + 260) - 100;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 170, 62, -0.22, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 2. Dynamic point-light glow halos (cached offscreen radial sprites)
+    if (lightSources && lightSources.length > 0) {
+      ctx.globalCompositeOperation = 'lighter';
+      for (const ls of lightSources) {
+        const sprite = this.getCachedLightSprite(ls.rgb, ls.r, ls.alpha);
+        const half = sprite.width * 0.5;
+        ctx.drawImage(sprite, Math.round(ls.x - half), Math.round(ls.y - half));
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    // 3. Warm SNES top-left sunlight wash + soft edge depth
+    const sunGrad = ctx.createLinearGradient(0, 0, W, H);
+    sunGrad.addColorStop(0, 'rgba(254, 243, 199, 0.08)');
+    sunGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+    sunGrad.addColorStop(1, 'rgba(15, 23, 42, 0.14)');
+    ctx.fillStyle = sunGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.restore();
   }
 
   getNextObjectiveEntity(completed, rescued) {
@@ -803,11 +1657,17 @@ export class WorldEngine {
 
   renderWayfinder(ctx, completed, rescued) {
     const next = this.getNextObjectiveEntity(completed, rescued);
-    if (!next) return;
+    if (!next) {
+      this.wayfinderRect = null;
+      return;
+    }
     const dx = next.entity.x + 0.5 - this.hero.x;
     const dy = next.entity.y + 0.5 - this.hero.y;
     const dist = Math.hypot(dx, dy);
-    if (dist < 4.5) return; // Already right next to it!
+    if (dist < 4.5 && !this.autoPath) {
+      this.wayfinderRect = null;
+      return; // Already right next to it!
+    }
 
     const angle = Math.atan2(dy, dx);
     // 8-way compass arrow
@@ -815,8 +1675,10 @@ export class WorldEngine {
     const dirIdx = ((Math.round(angle / (Math.PI / 4)) % 8) + 8) % 8;
     const arrow = dirs[dirIdx];
     const steps = Math.round(dist);
-    const shortName = next.text.length > 26 ? `${next.text.slice(0, 24)}…` : next.text;
-    const label = `${arrow} ${shortName} (${steps}m)`;
+    const shortName = next.text.length > 24 ? `${next.text.slice(0, 22)}…` : next.text;
+    const label = this.autoPath
+      ? `🧭 Walking to ${shortName} (${steps}m) · Click to stop`
+      : `${arrow} ${shortName} (${steps}m) · Click to walk`;
 
     ctx.save();
     ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
@@ -825,6 +1687,7 @@ export class WorldEngine {
     const pillH = 26;
     const px = 14;
     const py = 14;
+    this.wayfinderRect = { x: px, y: py, w: pillW, h: pillH };
 
     const pulse = 0.78 + 0.22 * Math.sin(this.time * 5);
     ctx.fillStyle = 'rgba(11, 16, 32, 0.86)';
@@ -848,26 +1711,198 @@ export class WorldEngine {
   }
 
   ensureMinimapTerrainCache(dynamicOverrides, completed) {
-    const cacheKey = `${this.map.id}:${[...completed].sort().join(',')}`;
+    const is64 = this.eraKey === '64bit';
+    const isRich = this.eraKey !== '8bit';
+    const styleKey = is64 ? '64bit' : isRich ? '16bit' : '8bit';
+    const cacheKey = `${this.map.id}:${styleKey}:${[...completed].sort().join(',')}`;
     if (this.minimapCanvas && this.minimapCacheKey === cacheKey) {
       return this.minimapCanvas;
     }
+    const cell = is64 ? 3 : isRich ? 2 : 1;
     const off = document.createElement('canvas');
-    off.width = this.map.width;
-    off.height = this.map.height;
+    off.width = this.map.width * cell;
+    off.height = this.map.height * cell;
     const octx = off.getContext('2d');
+    const elevLayer = this.map.layers?.elevation;
+    const colLayer = this.map.layers?.collision;
+
+    const getElev = (tx, ty, g) => {
+      if (tx < 0 || ty < 0 || tx >= this.map.width || ty >= this.map.height) return 0;
+      if (elevLayer && elevLayer[ty] && typeof elevLayer[ty][tx] === 'number') {
+        return elevLayer[ty][tx];
+      }
+      if (g === 'water' || g === 'lava') return 0;
+      if (g === 'stone_floor') return 1.3;
+      return 1;
+    };
+
+    const isTallDecor = (t) =>
+      t === 'tree' ||
+      t === 'pine_tree' ||
+      t === 'stone_wall' ||
+      t === 'ice_wall' ||
+      t === 'obsidian_wall' ||
+      t === 'mossy_gate_closed' ||
+      t === 'column' ||
+      t === 'crystal_pillar';
 
     for (let y = 0; y < this.map.height; y++) {
       for (let x = 0; x < this.map.width; x++) {
-        const ov = dynamicOverrides.get(`${x},${y}`);
-        let groundTile = this.map.layers.ground[y][x];
-        if (ov && ov.layer === 'ground') groundTile = ov.tile;
-        let decorTile = this.map.layers.decor[y][x];
-        if (ov && ov.layer === 'decor') decorTile = ov.tile;
+        const groundTile = this.getEffectiveGroundTile(x, y, dynamicOverrides);
+        const decorTile = this.getEffectiveDecorTile(x, y, dynamicOverrides);
 
-        const key = decorTile && MINIMAP_COLORS[decorTile] ? decorTile : groundTile;
-        octx.fillStyle = MINIMAP_COLORS[key] || '#1e293b';
-        octx.fillRect(x, y, 1, 1);
+        if (!isRich) {
+          const key = decorTile && MINIMAP_COLORS[decorTile] ? decorTile : groundTile;
+          octx.fillStyle = MINIMAP_COLORS[key] || '#1e293b';
+          octx.fillRect(x, y, 1, 1);
+          continue;
+        }
+
+        if (is64) {
+          // 64-Bit N64 3D elevation-relief minimap (3x3 px per tile)
+          const px = x * 3;
+          const py = y * 3;
+          const elev = getElev(x, y, groundTile);
+          const blocked = colLayer && colLayer[y] && colLayer[y][x] === 1;
+          const isVoid = groundTile === 'star_tile' && elev === 0 && blocked && !decorTile;
+
+          octx.fillStyle = isVoid ? '#090b1d' : (MINIMAP_COLORS[groundTile] || '#1e293b');
+          octx.fillRect(px, py, 3, 3);
+
+          // Elevation brightness tint so terraced hills & floating islands read clearly in 3D
+          if (!isVoid && groundTile !== 'water' && groundTile !== 'lava') {
+            if (elev >= 2) {
+              const lift = Math.min(0.28, (elev - 1) * 0.09);
+              octx.fillStyle = `rgba(255, 255, 255, ${lift.toFixed(2)})`;
+              octx.fillRect(px, py, 3, 3);
+            }
+          }
+
+          // Top-left cliff highlight & bottom-right cliff shadow + Observatory cyan rim
+          const eN = getElev(x, y - 1, this.getEffectiveGroundTile(x, y - 1, dynamicOverrides));
+          const eS = getElev(x, y + 1, this.getEffectiveGroundTile(x, y + 1, dynamicOverrides));
+          const eW = getElev(x - 1, y, this.getEffectiveGroundTile(x - 1, y, dynamicOverrides));
+          const eE = getElev(x + 1, y, this.getEffectiveGroundTile(x + 1, y, dynamicOverrides));
+          if (!isVoid && elev > 0) {
+            const isVoidN = y > 0 && this.getEffectiveGroundTile(x, y - 1, dynamicOverrides) === 'star_tile' && eN === 0 && colLayer?.[y - 1]?.[x] === 1;
+            const isVoidS = y + 1 < this.map.height && this.getEffectiveGroundTile(x, y + 1, dynamicOverrides) === 'star_tile' && eS === 0 && colLayer?.[y + 1]?.[x] === 1;
+            const isVoidW = x > 0 && this.getEffectiveGroundTile(x - 1, y, dynamicOverrides) === 'star_tile' && eW === 0 && colLayer?.[y]?.[x - 1] === 1;
+            const isVoidE = x + 1 < this.map.width && this.getEffectiveGroundTile(x + 1, y, dynamicOverrides) === 'star_tile' && eE === 0 && colLayer?.[y]?.[x + 1] === 1;
+
+            if (isVoidN || isVoidS || isVoidW || isVoidE) {
+              // Glowing crystal parapet outline on floating Observatory platforms
+              octx.fillStyle = 'rgba(186, 230, 253, 0.85)';
+              if (isVoidN) octx.fillRect(px, py, 3, 1);
+              if (isVoidS) octx.fillRect(px, py + 2, 3, 1);
+              if (isVoidW) octx.fillRect(px, py, 1, 3);
+              if (isVoidE) octx.fillRect(px + 2, py, 1, 3);
+            } else {
+              if (elev > eN) {
+                octx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+                octx.fillRect(px, py, 3, 1);
+              }
+              if (elev > eW) {
+                octx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+                octx.fillRect(px, py, 1, 3);
+              }
+              if (elev > eS) {
+                octx.fillStyle = 'rgba(8, 12, 24, 0.52)';
+                octx.fillRect(px, py + 2, 3, 1);
+              }
+              if (elev > eE) {
+                octx.fillStyle = 'rgba(8, 12, 24, 0.44)';
+                octx.fillRect(px + 2, py, 1, 3);
+              }
+            }
+          }
+
+          // Water shoreline highlight & bridge plank contrast
+          if (groundTile === 'water') {
+            octx.fillStyle = 'rgba(125, 211, 252, 0.45)';
+            if (this.getEffectiveGroundTile(x, y - 1, dynamicOverrides) !== 'water') octx.fillRect(px, py, 3, 1);
+            if (this.getEffectiveGroundTile(x, y + 1, dynamicOverrides) !== 'water') octx.fillRect(px, py + 2, 3, 1);
+          } else if (groundTile === 'bridge_wood' || groundTile === 'bridge_broken') {
+            octx.fillStyle = groundTile === 'bridge_wood' ? '#fde68a' : '#a16207';
+            octx.fillRect(px, py + 1, 3, 1);
+          }
+
+          // 3D Decor elevation & soft cast shadow
+          if (decorTile && MINIMAP_COLORS[decorTile]) {
+            if (isTallDecor(decorTile)) {
+              octx.fillStyle = 'rgba(6, 10, 22, 0.52)';
+              if (x + 1 < this.map.width) octx.fillRect(px + 3, py + 1, 1, 3);
+              if (y + 1 < this.map.height) octx.fillRect(px + 1, py + 3, 3, 1);
+            }
+            octx.fillStyle = MINIMAP_COLORS[decorTile];
+            octx.fillRect(px, py, 3, 3);
+            if (isTallDecor(decorTile)) {
+              octx.fillStyle = 'rgba(255, 255, 255, 0.30)';
+              octx.fillRect(px, py, 2, 1);
+              octx.fillStyle = 'rgba(6, 10, 22, 0.36)';
+              octx.fillRect(px + 2, py + 2, 1, 1);
+            }
+          }
+          continue;
+        }
+
+        const px = x * 2;
+        const py = y * 2;
+        const baseColor = MINIMAP_COLORS[groundTile] || '#1e293b';
+        octx.fillStyle = baseColor;
+        octx.fillRect(px, py, 2, 2);
+
+        // Subtle 16-bit SNES terrain relief & shoreline shallows
+        if (groundTile === 'grass' || groundTile === 'grass_flower' || groundTile === 'flower_bed') {
+          if (((x * 7 + y * 13) & 3) === 0) {
+            octx.fillStyle = 'rgba(134, 239, 172, 0.24)';
+            octx.fillRect(px, py, 1, 1);
+          }
+          if (groundTile !== 'grass') {
+            octx.fillStyle = '#fde047';
+            octx.fillRect(px + 1, py, 1, 1);
+          }
+        } else if (groundTile === 'water') {
+          const n = this.getEffectiveGroundTile(x, y - 1, dynamicOverrides);
+          const s = this.getEffectiveGroundTile(x, y + 1, dynamicOverrides);
+          const w = this.getEffectiveGroundTile(x - 1, y, dynamicOverrides);
+          const e = this.getEffectiveGroundTile(x + 1, y, dynamicOverrides);
+          octx.fillStyle = '#7dd3fc';
+          if (n !== 'water' && n !== 'bridge_wood' && n !== 'bridge_broken') octx.fillRect(px, py, 2, 1);
+          if (s !== 'water' && s !== 'bridge_wood' && s !== 'bridge_broken') octx.fillRect(px, py + 1, 2, 1);
+          if (w !== 'water' && w !== 'bridge_wood' && w !== 'bridge_broken') octx.fillRect(px, py, 1, 2);
+          if (e !== 'water' && e !== 'bridge_wood' && e !== 'bridge_broken') octx.fillRect(px + 1, py, 1, 2);
+        } else if (groundTile === 'dirt_path' || groundTile === 'sand') {
+          octx.fillStyle = 'rgba(255, 248, 220, 0.22)';
+          octx.fillRect(px, py, 1, 1);
+          const s = this.getEffectiveGroundTile(x, y + 1, dynamicOverrides);
+          const e = this.getEffectiveGroundTile(x + 1, y, dynamicOverrides);
+          octx.fillStyle = 'rgba(92, 56, 24, 0.28)';
+          if (s === 'grass' || s === 'grass_flower') octx.fillRect(px, py + 1, 2, 1);
+          if (e === 'grass' || e === 'grass_flower') octx.fillRect(px + 1, py, 1, 2);
+        } else if (groundTile === 'bridge_wood') {
+          octx.fillStyle = '#fde68a';
+          octx.fillRect(px, py, 2, 1);
+        } else if (groundTile === 'stone_floor' || groundTile === 'brass_floor') {
+          octx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+          octx.fillRect(px, py, 1, 1);
+        }
+
+        // Decor elevation + sunlit top-left highlight & bottom-right drop shadow
+        if (decorTile && MINIMAP_COLORS[decorTile]) {
+          if (isTallDecor(decorTile)) {
+            octx.fillStyle = 'rgba(10, 16, 28, 0.45)';
+            if (x + 1 < this.map.width) octx.fillRect(px + 2, py + 1, 1, 2);
+            if (y + 1 < this.map.height) octx.fillRect(px + 1, py + 2, 2, 1);
+          }
+          octx.fillStyle = MINIMAP_COLORS[decorTile];
+          octx.fillRect(px, py, 2, 2);
+          if (isTallDecor(decorTile)) {
+            octx.fillStyle = 'rgba(255, 255, 255, 0.24)';
+            octx.fillRect(px, py, 1, 1);
+            octx.fillStyle = 'rgba(10, 16, 28, 0.32)';
+            octx.fillRect(px + 1, py + 1, 1, 1);
+          }
+        }
       }
     }
 
@@ -879,44 +1914,215 @@ export class WorldEngine {
   renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY) {
     if (this.canvas.width < 420 || this.canvas.height < 280) {
       this.minimapRect = null;
+      this.minimapMarkers = [];
       return;
     }
 
+    const is64 = this.eraKey === '64bit';
+    const isRich = this.eraKey !== '8bit';
     const scale = this.map.width >= 48 ? 3 : 4;
     const mapW = this.map.width * scale;
     const mapH = this.map.height * scale;
-    const pad = 6;
+    const pad = is64 ? 8 : isRich ? 7 : 6;
     const boxW = mapW + pad * 2;
     const boxH = mapH + pad * 2;
     const boxX = this.canvas.width - boxW - 14;
     const boxY = 14;
 
     this.minimapRect = { x: boxX, y: boxY, w: boxW, h: boxH };
+    this.minimapMarkers = [];
 
     ctx.save();
-    // Translucent dark RPG frame
-    ctx.fillStyle = 'rgba(11, 16, 32, 0.82)';
-    ctx.fillRect(boxX, boxY, boxW, boxH);
-    ctx.strokeStyle = 'rgba(75, 97, 150, 0.9)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(boxX, boxY, boxW, boxH);
+    if (is64) {
+      // Iconic N64 translucent cobalt-and-gold HUD radar frame (Ocarina of Time / SM64 style)
+      const rr = (x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      };
+
+      // Soft ambient drop shadow
+      rr(boxX + 3, boxY + 5, boxW, boxH, 10);
+      ctx.fillStyle = 'rgba(4, 8, 20, 0.55)';
+      ctx.fill();
+
+      // Translucent deep cobalt N64 glass backing
+      rr(boxX, boxY, boxW, boxH, 10);
+      const frameBg = ctx.createLinearGradient(boxX, boxY, boxX, boxY + boxH);
+      frameBg.addColorStop(0, 'rgba(15, 29, 64, 0.86)');
+      frameBg.addColorStop(1, 'rgba(9, 16, 36, 0.90)');
+      ctx.fillStyle = frameBg;
+      ctx.fill();
+
+      // Metallic sky-blue & gold N64 bevel rim
+      const rimGrad = ctx.createLinearGradient(boxX, boxY, boxX + boxW, boxY + boxH);
+      rimGrad.addColorStop(0, '#7dd3fc');
+      rimGrad.addColorStop(0.5, '#facc15');
+      rimGrad.addColorStop(1, '#38bdf8');
+      ctx.strokeStyle = rimGrad;
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      // Inner recessed map bezel
+      rr(boxX + pad - 1.5, boxY + pad - 1.5, mapW + 3, mapH + 3, 5);
+      ctx.strokeStyle = 'rgba(125, 211, 252, 0.42)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // North compass badge perched at top-center of N64 radar
+      const ncx = boxX + boxW * 0.5;
+      const ncy = boxY + 1;
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(ncx, ncy, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('N', ncx, ncy + 0.5);
+    } else if (isRich) {
+      // Ornate 16-Bit SNES beveled gold-trimmed RPG map frame
+      ctx.fillStyle = 'rgba(6, 10, 20, 0.48)';
+      ctx.fillRect(boxX + 3, boxY + 4, boxW, boxH);
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+
+      // Outer bronze/gold bevel border
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(boxX + 0.5, boxY + 0.5, boxW - 1, boxH - 1);
+
+      // Top-left sunlit gold rim & bottom-right warm umber shade
+      ctx.fillStyle = '#fde68a';
+      ctx.fillRect(boxX - 1, boxY - 1, boxW + 2, 1.5);
+      ctx.fillRect(boxX - 1, boxY - 1, 1.5, boxH + 2);
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(boxX - 1, boxY + boxH - 0.5, boxW + 2, 1.5);
+      ctx.fillRect(boxX + boxW - 0.5, boxY - 1, 1.5, boxH + 2);
+
+      // Inner recessed trim around map viewport
+      ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(boxX + pad - 1.5, boxY + pad - 1.5, mapW + 3, mapH + 3);
+
+      // Gleaming gold corner rivets
+      const rivets = [
+        [boxX + 2.5, boxY + 2.5],
+        [boxX + boxW - 2.5, boxY + 2.5],
+        [boxX + 2.5, boxY + boxH - 2.5],
+        [boxX + boxW - 2.5, boxY + boxH - 2.5],
+      ];
+      for (const [rx, ry] of rivets) {
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(rx - 1.5, ry - 1.5, 3, 3);
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(rx, ry, 1.5, 1.5);
+      }
+    } else {
+      // Classic 8-bit translucent dark RPG frame
+      ctx.fillStyle = 'rgba(11, 16, 32, 0.82)';
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+      ctx.strokeStyle = 'rgba(75, 97, 150, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+    }
 
     const mx = boxX + pad;
     const my = boxY + pad;
 
-    // Terrain bitmap scaled crisp
+    // Terrain bitmap (smooth N64 bilinear filtering in 64-bit, crisp pixel art in 8/16/32-bit)
     const terrain = this.ensureMinimapTerrainCache(dynamicOverrides, completed);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(terrain, mx, my, mapW, mapH);
+    ctx.imageSmoothingEnabled = is64;
+    if (is64) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(mx, my, mapW, mapH, 4) : ctx.rect(mx, my, mapW, mapH);
+      ctx.clip();
+      ctx.drawImage(terrain, mx, my, mapW, mapH);
+      // Subtle N64 glass dome sheen
+      const sheen = ctx.createLinearGradient(mx, my, mx + mapW, my + mapH);
+      sheen.addColorStop(0, 'rgba(186, 230, 253, 0.14)');
+      sheen.addColorStop(0.45, 'rgba(255, 255, 255, 0)');
+      sheen.addColorStop(1, 'rgba(4, 10, 28, 0.22)');
+      ctx.fillStyle = sheen;
+      ctx.fillRect(mx, my, mapW, mapH);
+      ctx.restore();
+    } else {
+      ctx.drawImage(terrain, mx, my, mapW, mapH);
+      if (isRich) {
+        // Subtle warm sunlit sheen across SNES map
+        const sheen = ctx.createLinearGradient(mx, my, mx + mapW, my + mapH);
+        sheen.addColorStop(0, 'rgba(254, 243, 199, 0.08)');
+        sheen.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+        sheen.addColorStop(1, 'rgba(15, 23, 42, 0.16)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(mx, my, mapW, mapH);
+      }
+    }
 
-    // Subtle viewport rectangle
-    const viewX = Math.max(0, (camX / TILE_PX) * scale);
-    const viewY = Math.max(0, (camY / TILE_PX) * scale);
-    const viewW = Math.min(mapW - viewX, (this.canvas.width / TILE_PX) * scale);
-    const viewH = Math.min(mapH - viewY, (this.canvas.height / TILE_PX) * scale);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
+    // 3D Perspective Camera View Cone (64-Bit) OR 2D Viewport Rectangle (8/16/32-Bit)
+    if (is64) {
+      const hmx = mx + this.hero.x * scale;
+      const hmy = my + this.hero.y * scale;
+      const coneDepth = 15 * scale;
+      const coneHalfW = 10.5 * scale;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(mx, my, mapW, mapH);
+      ctx.clip();
+      const coneGrad = ctx.createLinearGradient(hmx, hmy, hmx, hmy - coneDepth);
+      coneGrad.addColorStop(0, 'rgba(125, 211, 252, 0.34)');
+      coneGrad.addColorStop(0.65, 'rgba(250, 204, 21, 0.14)');
+      coneGrad.addColorStop(1, 'rgba(250, 204, 21, 0.0)');
+      ctx.fillStyle = coneGrad;
+      ctx.beginPath();
+      ctx.moveTo(hmx, hmy + 2 * scale);
+      ctx.lineTo(hmx - coneHalfW, hmy - coneDepth);
+      ctx.lineTo(hmx + coneHalfW, hmy - coneDepth);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.35)';
+      ctx.lineWidth = 0.9;
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      const viewX = Math.max(0, (camX / TILE_PX) * scale);
+      const viewY = Math.max(0, (camY / TILE_PX) * scale);
+      const viewW = Math.min(mapW - viewX, (this.canvas.width / TILE_PX) * scale);
+      const viewH = Math.min(mapH - viewY, (this.canvas.height / TILE_PX) * scale);
+      ctx.strokeStyle = isRich ? 'rgba(254, 240, 138, 0.68)' : 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
+    }
+
+    // Active auto-path trail on minimap
+    if (this.autoPath && this.autoPath.waypoints.length > 0) {
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([3, 2]);
+      ctx.beginPath();
+      ctx.moveTo(mx + this.hero.x * scale, my + this.hero.y * scale);
+      for (let i = this.autoPath.index; i < this.autoPath.waypoints.length; i++) {
+        const wp = this.autoPath.waypoints[i];
+        ctx.lineTo(mx + wp.x * scale, my + wp.y * scale);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // Entity markers
     const foundEggs = new Set(this.save.foundEasterEggs || []);
@@ -932,6 +2138,7 @@ export class WorldEngine {
           ctx.beginPath();
           ctx.arc(ex, ey, 3.2, 0, Math.PI * 2);
           ctx.fill();
+          this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         }
         continue;
       }
@@ -945,6 +2152,7 @@ export class WorldEngine {
       }
 
       if (ent.type === 'trial') {
+        this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         const isDone = completed.has(ent.refId);
         if (isDone) {
           ctx.fillStyle = '#10b981';
@@ -987,6 +2195,7 @@ export class WorldEngine {
         ctx.lineWidth = 1;
         ctx.strokeRect(ex - 2.5, ey - 2.5, 5, 5);
       } else if (ent.type === 'vault') {
+        this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         ctx.fillStyle = `rgba(239, 68, 68, ${(0.75 + 0.25 * pulse).toFixed(2)})`;
         ctx.beginPath();
         ctx.arc(ex, ey, 5 + pulse * 1.1, 0, Math.PI * 2);
@@ -995,6 +2204,7 @@ export class WorldEngine {
         ctx.lineWidth = 1.3;
         ctx.stroke();
       } else if (ent.type === 'portal') {
+        this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         ctx.fillStyle = '#38bdf8';
         ctx.beginPath();
         ctx.arc(ex, ey, 3.2, 0, Math.PI * 2);
@@ -1002,17 +2212,38 @@ export class WorldEngine {
       }
     }
 
-    // Hero pulsing cyan/white dot
+    // Hero marker (directional SNES chevron in 16-bit+, pulsing dot in 8-bit)
     const hx = Math.round(mx + this.hero.x * scale);
     const hy = Math.round(my + this.hero.y * scale);
     ctx.fillStyle = `rgba(56, 189, 248, ${(0.45 + 0.45 * pulse).toFixed(2)})`;
     ctx.beginPath();
-    ctx.arc(hx, hy, 4.5 + pulse * 1.2, 0, Math.PI * 2);
+    ctx.arc(hx, hy, 5 + pulse * 1.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(hx, hy, 2.4, 0, Math.PI * 2);
-    ctx.fill();
+    if (isRich) {
+      const dirAngle = is64 && typeof this.hero.facingAngle === 'number'
+        ? Math.PI / 2 - this.hero.facingAngle
+        : ({ right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[this.hero.dir] ?? Math.PI / 2);
+      ctx.save();
+      ctx.translate(hx, hy);
+      ctx.rotate(dirAngle);
+      ctx.beginPath();
+      ctx.moveTo(is64 ? 5.6 : 4.6, 0);
+      ctx.lineTo(is64 ? -3.8 : -3.2, is64 ? -4.0 : -3.4);
+      ctx.lineTo(is64 ? -1.6 : -1.4, 0);
+      ctx.lineTo(is64 ? -3.8 : -3.2, is64 ? 4.0 : 3.4);
+      ctx.closePath();
+      ctx.fillStyle = is64 ? '#fef08a' : '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 2.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.restore();
   }
@@ -1032,6 +2263,12 @@ export class WorldEngine {
         ctx.fillRect(sx + TILE_PX / 2 - 3, sy - 6 + bob, 6, 6);
       }
     } else if (ent.type === 'npc') {
+      if (this.eraKey === '16bit') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.32)';
+        ctx.beginPath();
+        ctx.ellipse(sx + TILE_PX * 0.5, sy + TILE_PX * 0.86, TILE_PX * 0.32, TILE_PX * 0.13, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
       this.sprites.drawNpc(ctx, ent.spriteKey, this.eraKey, sx, sy - 4 + bob, TILE_PX, TILE_PX);
     } else if (ent.type === 'vault') {
       const isRescued = rescued.has(ent.refId);
@@ -1040,6 +2277,12 @@ export class WorldEngine {
       ctx.beginPath();
       ctx.arc(sx + TILE_PX / 2, sy + TILE_PX / 2, TILE_PX * 0.55, 0, Math.PI * 2);
       ctx.fill();
+      if (this.eraKey === '16bit') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.32)';
+        ctx.beginPath();
+        ctx.ellipse(sx + TILE_PX * 0.5, sy + TILE_PX * 0.84, TILE_PX * 0.36, TILE_PX * 0.14, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
       this.sprites.drawNpc(ctx, ent.spriteKey, this.eraKey, sx, sy - 6 + bob, TILE_PX, TILE_PX);
     } else if (ent.type === 'portal') {
       const unlocked = !ent.requiredTrialId || completed.has(ent.requiredTrialId);
@@ -1120,6 +2363,21 @@ export class WorldEngine {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('✓', cx, cy + 1);
+        ctx.textBaseline = 'alphabetic';
+      } else if (ent.type === 'bonus_trial' && this.isBonusTrialLocked(ent, completed)) {
+        // Sealed secret bonus rune (unlocked after defeating the realm boss / core trials)
+        ctx.fillStyle = 'rgba(100, 116, 139, 0.34)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🔒', cx, cy + 0.5);
         ctx.textBaseline = 'alphabetic';
       } else {
         // Subtle mysterious violet/gold sparkle rewarding sharp-eyed explorers

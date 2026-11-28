@@ -64,34 +64,399 @@ def _pyria_exit_sandbox():
     if _pyria_saved_modules is not None:
         sys.modules.update(_pyria_saved_modules)
         _pyria_saved_modules = None
+
+import time as _pyria_time
+
+class _PyriaStreamingBuffer:
+    MAX_BYTES = 16384
+    MAX_LINES = 200
+    FLUSH_INTERVAL_SEC = 0.05
+    FLUSH_CHUNK_BYTES = 512
+    TRUNCATED_NOTICE = "\\n... (output truncated)"
+
+    def __init__(self, emit_cb=None):
+        self._emit = emit_cb
+        self._parts = []
+        self._pending = []
+        self._total_bytes = 0
+        self._total_lines = 0
+        self._pending_bytes = 0
+        self._truncated = False
+        self._last_flush = 0.0
+
+    def writable(self):
+        return True
+
+    def isatty(self):
+        return False
+
+    def write(self, s):
+        if not isinstance(s, str):
+            s = str(s)
+        n = len(s)
+        if n == 0 or self._truncated:
+            return n
+
+        remaining_bytes = self.MAX_BYTES - self._total_bytes
+        remaining_lines = self.MAX_LINES - self._total_lines
+        new_lines = s.count("\\n")
+
+        if n > remaining_bytes or new_lines > remaining_lines:
+            chunk = s[:max(0, remaining_bytes)]
+            if chunk.count("\\n") > remaining_lines:
+                kept = chunk.split("\\n")[:max(0, remaining_lines)]
+                chunk = "\\n".join(kept)
+            if chunk:
+                self._parts.append(chunk)
+                self._pending.append(chunk)
+                self._total_bytes += len(chunk)
+                self._total_lines += chunk.count("\\n")
+                self._pending_bytes += len(chunk)
+            self._parts.append(self.TRUNCATED_NOTICE)
+            self._pending.append(self.TRUNCATED_NOTICE)
+            self._truncated = True
+            self.flush()
+            return n
+
+        self._parts.append(s)
+        self._pending.append(s)
+        self._total_bytes += n
+        self._total_lines += new_lines
+        self._pending_bytes += n
+
+        now = _pyria_time.monotonic()
+        if self._pending_bytes >= self.FLUSH_CHUNK_BYTES or (now - self._last_flush) >= self.FLUSH_INTERVAL_SEC:
+            self.flush()
+        return n
+
+    def flush(self):
+        if self._pending and self._emit is not None:
+            chunk = "".join(self._pending)
+            self._pending.clear()
+            self._pending_bytes = 0
+            self._last_flush = _pyria_time.monotonic()
+            try:
+                self._emit(chunk)
+            except Exception:
+                pass
+
+    def getvalue(self):
+        return "".join(self._parts)
 `;
 
   const TRIAL_HARNESS_PY = `
+import ast
+import copy
 import io
 import json
+import math
 import contextlib
 import traceback
 
-def _pyria_run_trial(payload_json):
+def _pyria_shout(*args, **kwargs):
+    print(*(a.upper() if isinstance(a, str) else a for a in args), **kwargs)
+
+def _pyria_has_single_construct(tree, token):
+    if token.startswith("call:"):
+        target = token[5:]
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == target:
+                return True
+        return False
+    if token.startswith("method_call:"):
+        target = token[12:]
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == target:
+                return True
+        return False
+    if token == "str_call":
+        return _pyria_has_single_construct(tree, "call:str")
+    if token == "int_call":
+        return _pyria_has_single_construct(tree, "call:int")
+    if token == "float_call":
+        return _pyria_has_single_construct(tree, "call:float")
+
+    for node in ast.walk(tree):
+        if token == "if" and isinstance(node, ast.If):
+            return True
+        elif token == "elif" and isinstance(node, ast.If) and len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If):
+            return True
+        elif token == "else" and isinstance(node, ast.If) and len(node.orelse) > 0 and not (len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If)):
+            return True
+        elif token == "for" and isinstance(node, ast.For):
+            return True
+        elif token == "while" and isinstance(node, ast.While):
+            return True
+        elif token == "while_true" and isinstance(node, ast.While) and isinstance(node.test, ast.Constant) and node.test.value is True:
+            return True
+        elif token == "break" and isinstance(node, ast.Break):
+            return True
+        elif token == "continue" and isinstance(node, ast.Continue):
+            return True
+        elif token == "def" and isinstance(node, ast.FunctionDef):
+            return True
+        elif token == "return" and isinstance(node, ast.Return):
+            return True
+        elif token == "class" and isinstance(node, ast.ClassDef):
+            return True
+        elif token == "try" and isinstance(node, ast.Try):
+            return True
+        elif token == "except" and isinstance(node, ast.ExceptHandler):
+            return True
+        elif token == "with" and isinstance(node, ast.With):
+            return True
+        elif token == "list_comp" and isinstance(node, ast.ListComp):
+            return True
+        elif token == "gen_exp" and isinstance(node, ast.GeneratorExp):
+            return True
+        elif token == "lambda" and isinstance(node, ast.Lambda):
+            return True
+        elif token == "str_concat" and (
+            (isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add))
+            or (isinstance(node, ast.AugAssign) and isinstance(node.op, ast.Add))
+        ):
+            return True
+        elif token == "aug_assign" and isinstance(node, ast.AugAssign):
+            return True
+        elif token == "assign" and isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+            return True
+        elif token == "compare" and isinstance(node, ast.Compare):
+            return True
+        elif token == "bool_op" and (
+            isinstance(node, ast.BoolOp)
+            or (isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not))
+        ):
+            return True
+        elif token == "in_op" and isinstance(node, ast.Compare) and any(isinstance(op, (ast.In, ast.NotIn)) for op in node.ops):
+            return True
+        elif token == "math_op" and (
+            (isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow)))
+            or (isinstance(node, ast.AugAssign) and isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow)))
+        ):
+            return True
+        elif token == "fstring" and isinstance(node, ast.JoinedStr):
+            return True
+        elif token == "self_attr" and isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == "self":
+            return True
+        elif token == "list" and (
+            isinstance(node, (ast.List, ast.ListComp))
+            or (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "list")
+        ):
+            return True
+        elif token == "dict" and (
+            isinstance(node, (ast.Dict, ast.DictComp))
+            or (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "dict")
+        ):
+            return True
+        elif token == "tuple" and (
+            isinstance(node, ast.Tuple)
+            or (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "tuple")
+        ):
+            return True
+        elif token == "set" and (
+            isinstance(node, (ast.Set, ast.SetComp))
+            or (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "set")
+        ):
+            return True
+        elif token == "slice" and isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Slice):
+            return True
+        elif token == "subscript" and isinstance(node, ast.Subscript):
+            return True
+        elif token == "none" and isinstance(node, ast.Constant) and node.value is None:
+            return True
+        elif token == "bool" and isinstance(node, ast.Constant) and isinstance(node.value, bool):
+            return True
+    return False
+
+def _pyria_has_construct(tree, spec):
+    parts = [p.strip() for p in str(spec).split("|") if p.strip()]
+    if not parts:
+        return True
+    return any(_pyria_has_single_construct(tree, part) for part in parts)
+
+_PYRIA_CONSTRUCT_HINTS = {
+    "if": "Try using an 'if' statement to make a decision!",
+    "elif": "Try using 'elif' to check another condition!",
+    "else": "Try adding an 'else:' branch for when the condition is False!",
+    "for": "Try using a 'for' loop to repeat through each item!",
+    "while": "Try using a 'while' loop to keep repeating while the condition is True!",
+    "while_true": "Try using a 'while True:' loop with a 'break' when you're done!",
+    "break": "Try using 'break' to exit the loop when the stopping condition is met!",
+    "continue": "Try using 'continue' to skip to the next step of the loop!",
+    "def": "Try defining a reusable function with 'def'!",
+    "return": "Make sure your function uses 'return' to send back its answer!",
+    "class": "Try creating a 'class' blueprint!",
+    "try": "Try wrapping the risky code in a 'try:' / 'except:' block!",
+    "except": "Try adding an 'except:' block to catch the error!",
+    "with": "Try using a 'with' statement!",
+    "list_comp": "Try building the list using a list comprehension like '[... for x in ...]'!",
+    "gen_exp": "Try passing the comprehension straight into the call with no square brackets, like 'sum(x for x in ...)'!",
+    "lambda": "Try using a short 'lambda' function!",
+    "str_concat": "Try using '+' to glue the strings together!",
+    "aug_assign": "Try using a shortcut operator like '+=' or '-=' to update the variable!",
+    "assign": "Try storing your value in a variable using '='!",
+    "compare": "Try using a comparison operator like '==', '!=', '<', or '>'!",
+    "bool_op": "Try combining conditions with 'and', 'or', or 'not'!",
+    "in_op": "Try using the 'in' operator to check if an item is inside!",
+    "math_op": "Try computing the result with a math operator (+, -, *, /, //, %) instead of typing the answer directly!",
+    "fstring": "Try using an f-string like f'Hello {name}' to put variables inside your text!",
+    "self_attr": "Try storing or reading attributes on 'self' (like 'self.name')!",
+    "list": "Try creating a list using square brackets '[...]'!",
+    "dict": "Try creating a dictionary using curly braces '{key: value}'!",
+    "tuple": "Try creating a tuple using parentheses '(...)'!",
+    "set": "Try creating a set!",
+    "slice": "Try using a slice like 'text[0:4]' to grab part of the sequence!",
+    "subscript": "Try indexing with square brackets like 'items[0]' or 'data[key]'!",
+    "none": "Try using 'None' to represent an empty value!",
+    "bool": "Try using 'True' or 'False'!",
+    "str_call": "Try using 'str()' to turn a value into text!",
+    "int_call": "Try using 'int()' to turn a value into a whole number!",
+    "float_call": "Try using 'float()' to turn a value into a decimal number!",
+}
+
+def _pyria_single_construct_hint(token):
+    if token in _PYRIA_CONSTRUCT_HINTS:
+        return _PYRIA_CONSTRUCT_HINTS[token]
+    if token.startswith("call:"):
+        return f"Try calling '{token[5:]}()' in your spell!"
+    if token.startswith("method_call:"):
+        return f"Try calling the '.{token[12:]}()' method in your spell!"
+    return f"Try using '{token}' in your spell to practice this Trial's concept!"
+
+def _pyria_construct_hint(spec):
+    parts = [p.strip() for p in str(spec).split("|") if p.strip()]
+    if len(parts) <= 1:
+        return _pyria_single_construct_hint(parts[0] if parts else str(spec))
+    return _pyria_single_construct_hint(parts[0])
+
+def _pyria_apply_variant_overrides(source_code, overrides):
+    tree = ast.parse(source_code, "<your_spell>")
+    remaining = dict(overrides)
+    new_body = []
+    for stmt in tree.body:
+        if (
+            isinstance(stmt, ast.Assign)
+            and len(stmt.targets) == 1
+            and isinstance(stmt.targets[0], ast.Name)
+            and stmt.targets[0].id in remaining
+        ):
+            var_name = stmt.targets[0].id
+            val_expr = ast.parse(repr(remaining.pop(var_name)), mode="eval").body
+            new_stmt = ast.Assign(targets=stmt.targets, value=val_expr)
+            ast.copy_location(new_stmt, stmt)
+            ast.fix_missing_locations(new_stmt)
+            new_body.append(new_stmt)
+        elif (
+            isinstance(stmt, ast.AnnAssign)
+            and isinstance(stmt.target, ast.Name)
+            and stmt.target.id in remaining
+            and stmt.value is not None
+        ):
+            var_name = stmt.target.id
+            val_expr = ast.parse(repr(remaining.pop(var_name)), mode="eval").body
+            new_stmt = ast.AnnAssign(
+                target=stmt.target,
+                annotation=stmt.annotation,
+                value=val_expr,
+                simple=stmt.simple,
+            )
+            ast.copy_location(new_stmt, stmt)
+            ast.fix_missing_locations(new_stmt)
+            new_body.append(new_stmt)
+        else:
+            new_body.append(stmt)
+    tree.body = new_body
+    ast.fix_missing_locations(tree)
+    return compile(tree, "<your_spell>", "exec")
+
+def _pyria_values_match(actual, expected):
+    if isinstance(actual, float) and isinstance(expected, (int, float)) and not isinstance(expected, bool):
+        return math.isclose(actual, float(expected), rel_tol=1e-6, abs_tol=1e-6)
+    if isinstance(expected, float) and isinstance(actual, (int, float)) and not isinstance(actual, bool):
+        return math.isclose(float(actual), expected, rel_tol=1e-6, abs_tol=1e-6)
+    return actual == expected
+
+def _pyria_run_trial(payload_json, emit_stdout=None):
     payload = json.loads(payload_json)
     student_code = payload.get("studentCode", "")
     test_code = payload.get("testCode", "")
+    required_constructs = payload.get("requiredConstructs") or []
+    variants = payload.get("variants") or []
 
     ns = {
         "say": print,
-        "shout": print,
+        "shout": _pyria_shout,
     }
-    buf = io.StringIO()
+    buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
     stage = "student"
     try:
+        student_ast = ast.parse(student_code, "<your_spell>")
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
-            exec(compile(student_code, "<your_spell>", "exec"), ns)
+            exec(compile(student_ast, "<your_spell>", "exec"), ns)
+        buf.flush()
         ns["OUTPUT"] = buf.getvalue()
         stage = "test"
         if test_code:
             with contextlib.redirect_stderr(err_buf):
                 exec(compile(test_code, "<trial_check>", "exec"), ns)
+
+        stage = "constructs"
+        if isinstance(required_constructs, list):
+            for spec in required_constructs:
+                if not _pyria_has_construct(student_ast, spec):
+                    raise AssertionError(_pyria_construct_hint(spec))
+
+        stage = "variants"
+        if isinstance(variants, list):
+            for variant in variants:
+                if not isinstance(variant, dict):
+                    continue
+                overrides = variant.get("overrides") or {}
+                if not isinstance(overrides, dict):
+                    overrides = {}
+                default_msg = (
+                    variant.get("message")
+                    or "Pip tested your spell with different starting values and got a different result! Make sure your code uses the variables instead of typing the final answer directly."
+                )
+                variant_code = _pyria_apply_variant_overrides(student_code, overrides)
+                variant_ns = {
+                    "say": print,
+                    "shout": _pyria_shout,
+                }
+                variant_ns.update(copy.deepcopy(overrides))
+                v_buf = io.StringIO()
+                v_err = io.StringIO()
+                try:
+                    with contextlib.redirect_stdout(v_buf), contextlib.redirect_stderr(v_err):
+                        exec(variant_code, variant_ns)
+                except Exception:
+                    raise AssertionError(default_msg)
+                v_out = v_buf.getvalue()
+                variant_ns["OUTPUT"] = v_out
+
+                if "expectOutput" in variant and variant["expectOutput"] is not None:
+                    actual_norm = v_out.replace("\\r\\n", "\\n").strip()
+                    expect_norm = str(variant["expectOutput"]).replace("\\r\\n", "\\n").strip()
+                    if actual_norm != expect_norm:
+                        raise AssertionError(default_msg)
+
+                expect_vars = variant.get("expectVars")
+                if isinstance(expect_vars, dict):
+                    for k, expected_val in expect_vars.items():
+                        if k not in variant_ns or not _pyria_values_match(variant_ns[k], expected_val):
+                            raise AssertionError(default_msg)
+
+                v_test = variant.get("testCode")
+                if isinstance(v_test, str) and v_test.strip():
+                    try:
+                        with contextlib.redirect_stderr(v_err):
+                            exec(compile(v_test, "<variant_check>", "exec"), variant_ns)
+                    except AssertionError as ae:
+                        raise AssertionError(str(ae) or default_msg)
+                    except Exception:
+                        raise AssertionError(default_msg)
+
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
@@ -103,6 +468,7 @@ def _pyria_run_trial(payload_json):
             "stage": "done",
         })
     except SyntaxError as e:
+        buf.flush()
         return json.dumps({
             "passed": False,
             "stdout": buf.getvalue(),
@@ -114,6 +480,7 @@ def _pyria_run_trial(payload_json):
             "stage": stage,
         })
     except Exception as e:
+        buf.flush()
         tb = e.__traceback__
         line_no = None
         while tb is not None:
@@ -138,7 +505,7 @@ import json
 import contextlib
 import traceback
 
-def _pyria_run_charcreate(payload_json):
+def _pyria_run_charcreate(payload_json, emit_stdout=None):
     payload = json.loads(payload_json)
     code = payload.get("code", "")
     state = dict(payload.get("currentAppearance", {}))
@@ -160,31 +527,34 @@ def _pyria_run_charcreate(payload_json):
         options = allowed.get("skin", [])
         if not isinstance(tone, str):
             raise TypeError('preview_skin() needs a quoted skin name, like preview_skin("warm_tan")')
-        if tone not in options:
+        key = tone.strip().lower()
+        if key not in options:
             raise ValueError(f"Unknown skin '{tone}'. Choose one of: {', '.join(options)}")
-        state["skin"] = tone
-        events.append(f"Skin tone set to {tone}")
-        print(f"Skin preview: {tone}")
+        state["skin"] = key
+        events.append(f"Skin tone set to {key}")
+        print(f"Skin preview: {key}")
 
     def preview_hair(style):
         options = allowed.get("hair", [])
         if not isinstance(style, str):
             raise TypeError('preview_hair() needs a quoted hairstyle, like preview_hair("spiky")')
-        if style not in options:
+        key = style.strip().lower()
+        if key not in options:
             raise ValueError(f"Unknown hair '{style}'. Choose one of: {', '.join(options)}")
-        state["hair"] = style
-        events.append(f"Hairstyle set to {style}")
-        print(f"Hair preview: {style}")
+        state["hair"] = key
+        events.append(f"Hairstyle set to {key}")
+        print(f"Hair preview: {key}")
 
     def preview_tunic(color):
         options = allowed.get("tunic", [])
         if not isinstance(color, str):
             raise TypeError('preview_tunic() needs a quoted color, like preview_tunic("emerald")')
-        if color not in options:
+        key = color.strip().lower()
+        if key not in options:
             raise ValueError(f"Unknown tunic '{color}'. Choose one of: {', '.join(options)}")
-        state["tunic"] = color
-        events.append(f"Tunic color set to {color}")
-        print(f"Tunic preview: {color}")
+        state["tunic"] = key
+        events.append(f"Tunic color set to {key}")
+        print(f"Tunic preview: {key}")
 
     def confirm_hero():
         confirmed["value"] = True
@@ -198,11 +568,12 @@ def _pyria_run_charcreate(payload_json):
         "preview_tunic": preview_tunic,
         "confirm_hero": confirm_hero,
     }
-    buf = io.StringIO()
+    buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(code, "<hero_forge>", "exec"), ns)
+        buf.flush()
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
@@ -255,7 +626,7 @@ import json
 import contextlib
 import traceback
 
-def _pyria_run_workshop(payload_json):
+def _pyria_run_workshop(payload_json, emit_stdout=None):
     payload = json.loads(payload_json)
     code = payload.get("code", "")
     unlockables = payload.get("unlockables", [])
@@ -265,6 +636,13 @@ def _pyria_run_workshop(payload_json):
     stats = dict(save.get("stats", {"charisma": 0, "courage": 0}))
     owned = list(save.get("ownedUnlockIds", []))
     shards = [int(save.get("byteShards", 0))]
+    inv_raw = save.get("inventory") if isinstance(save.get("inventory"), dict) else {}
+    inventory = {
+        "arrows": max(0, int(inv_raw.get("arrows", 0))),
+        "potions": max(0, int(inv_raw.get("potions", 0))),
+    }
+    raw_custom = save.get("customItems") if isinstance(save.get("customItems"), list) else []
+    custom_items = [x for x in raw_custom if isinstance(x, str)][:20]
     purchased = []
     equipped = []
 
@@ -429,6 +807,66 @@ def _pyria_run_workshop(payload_json):
         verb = "Stitched and equipped" if bought else "Equipped"
         print(f"{verb} {item['name']}! Pip chirps happily! ({shards[0]} Shards left)")
 
+    def get_shards():
+        return shards[0]
+
+    def forge_arrows(count=1):
+        if not isinstance(count, int) or isinstance(count, bool) or count < 1 or count > 50:
+            raise ValueError("forge_arrows() needs a whole number from 1 to 50, like forge_arrows(5)")
+        cost = 5 * count
+        if shards[0] < cost:
+            raise ValueError(
+                f"Not enough Byte Shards for {count} Dragon Arrow(s)! You need {cost} Shards, but you have {shards[0]}."
+            )
+        shards[0] -= cost
+        inventory["arrows"] = int(inventory.get("arrows", 0)) + count
+        purchased.append(f"{count}x Dragon Arrows")
+        print(f"Forged {count} Dragon Arrow(s)! Total arrows: {inventory['arrows']}. ({shards[0]} Shards left)")
+
+    def brew_potion(count=1):
+        if not isinstance(count, int) or isinstance(count, bool) or count < 1 or count > 50:
+            raise ValueError("brew_potion() needs a whole number from 1 to 50, like brew_potion(2)")
+        cost = 10 * count
+        if shards[0] < cost:
+            raise ValueError(
+                f"Not enough Byte Shards for {count} Starlight Potion(s)! You need {cost} Shards, but you have {shards[0]}."
+            )
+        shards[0] -= cost
+        inventory["potions"] = int(inventory.get("potions", 0)) + count
+        purchased.append(f"{count}x Starlight Potions")
+        print(f"Brewed {count} Starlight Potion(s)! Total potions: {inventory['potions']}. ({shards[0]} Shards left)")
+
+    def forge_custom(item_or_name, power=1):
+        if isinstance(item_or_name, str):
+            name = item_or_name.strip()
+            pwr = power
+            elem = None
+        elif hasattr(item_or_name, "name"):
+            name = str(getattr(item_or_name, "name", "")).strip()
+            pwr = getattr(item_or_name, "power", power)
+            elem = getattr(item_or_name, "element", None)
+        else:
+            raise TypeError('forge_custom() needs an item name (like forge_custom("Flame Blade", 5)) or an object with a .name attribute!')
+        if not name or len(name) > 40:
+            raise ValueError("Custom item name must be between 1 and 40 characters!")
+        if not isinstance(pwr, int) or isinstance(pwr, bool) or pwr < 1:
+            raise ValueError("Custom item power must be a positive whole number, like 5!")
+        elem_clean = str(elem).strip() if elem is not None and str(elem).strip() else None
+        if elem_clean is not None and len(elem_clean) > 24:
+            raise ValueError("Custom item element must be 24 characters or fewer!")
+        if len(custom_items) >= 20:
+            raise ValueError("Bram's trophy shelf is full (max 20 custom forged items)!")
+        cost = 15
+        if shards[0] < cost:
+            raise ValueError(
+                f"Not enough Byte Shards to forge '{name}'! You need {cost} Shards, but you have {shards[0]}."
+            )
+        shards[0] -= cost
+        label = f"{name} ({elem_clean}, Power {pwr})" if elem_clean else f"{name} (Power {pwr})"
+        custom_items.append(label)
+        purchased.append(label)
+        print(f"Bram cheers: Magnificent craft! Forged {label}! ({shards[0]} Shards left)")
+
     ns = {
         "wear_hat": wear_hat,
         "set_tunic_color": set_tunic_color,
@@ -438,12 +876,17 @@ def _pyria_run_workshop(payload_json):
         "add_charisma": add_charisma,
         "add_courage": add_courage,
         "equip_pip_scarf": equip_pip_scarf,
+        "get_shards": get_shards,
+        "forge_arrows": forge_arrows,
+        "brew_potion": brew_potion,
+        "forge_custom": forge_custom,
     }
-    buf = io.StringIO()
+    buf = _PyriaStreamingBuffer(emit_stdout)
     err_buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf), contextlib.redirect_stderr(err_buf):
             exec(compile(code, "<bram_workshop>", "exec"), ns)
+        buf.flush()
         return json.dumps({
             "passed": True,
             "stdout": buf.getvalue(),
@@ -454,6 +897,8 @@ def _pyria_run_workshop(payload_json):
             "byteShards": shards[0],
             "purchased": purchased,
             "equipped": equipped,
+            "inventory": inventory,
+            "customItems": custom_items,
             "errorType": None,
             "errorMessage": None,
             "errorLine": None,
@@ -549,6 +994,12 @@ self.onmessage = async (event) => {
 
     const payloadJson = JSON.stringify(msg.payload || {});
     py.globals.set('_pyria_payload_json', payloadJson);
+    const emitStdout = (chunk) => {
+      if (typeof chunk === 'string' && chunk.length > 0) {
+        self.postMessage({ type: 'stdout', id: msg.id, chunk });
+      }
+    };
+    py.globals.set('_pyria_emit_stdout', emitStdout);
 
     let fnName = '_pyria_run_trial';
     if (msg.mode === 'charcreate') fnName = '_pyria_run_charcreate';
@@ -557,10 +1008,11 @@ self.onmessage = async (event) => {
     let resultJson;
     py.runPython('_pyria_enter_sandbox()');
     try {
-      resultJson = py.runPython(fnName + '(_pyria_payload_json)');
+      resultJson = py.runPython(fnName + '(_pyria_payload_json, _pyria_emit_stdout)');
     } finally {
       py.runPython('_pyria_exit_sandbox()');
       py.globals.delete('_pyria_payload_json');
+      py.globals.delete('_pyria_emit_stdout');
     }
 
     self.postMessage({
@@ -633,7 +1085,12 @@ self.onmessage = async (event) => {
         revokeBlobUrl();
         const data = event.data;
         if (!data || typeof data.type !== 'string') return;
-        if (data.type === 'ready' || data.type === 'init_error' || data.type === 'result') {
+        if (
+          data.type === 'ready' ||
+          data.type === 'init_error' ||
+          data.type === 'result' ||
+          data.type === 'stdout'
+        ) {
           sendToParent(data);
         }
       };

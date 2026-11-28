@@ -1,5 +1,11 @@
 // Modular Sprite & Tileset Renderer matching assets/sprites/manifest.json & assets/tilesets/manifest.json
 
+import {
+  drawHero3DPortrait,
+  drawNpc3DPortrait,
+  drawPip3DPortrait,
+} from './n64Portrait.js?v=20261127v';
+
 const DIRECTION_ROWS = {
   down: 0,
   up: 1,
@@ -12,6 +18,7 @@ export class SpriteManager {
     this.spriteManifest = spriteManifest;
     this.tilesetManifest = tilesetManifest;
     this.imageCache = new Map();
+    this.onImageLoaded = null;
   }
 
   loadImage(src) {
@@ -21,6 +28,9 @@ export class SpriteManager {
     const entry = { img: new Image(), loaded: false, failed: false };
     entry.img.onload = () => {
       entry.loaded = true;
+      if (typeof this.onImageLoaded === 'function') {
+        this.onImageLoaded(src);
+      }
     };
     entry.img.onerror = () => {
       entry.failed = true;
@@ -32,25 +42,25 @@ export class SpriteManager {
 
   getSpriteImage(relPath) {
     if (!relPath) return null;
-    const entry = this.loadImage(`/assets/sprites/${relPath}?v=20261127i`);
+    const entry = this.loadImage(`/assets/sprites/${relPath}?v=20261127m`);
     return entry.loaded ? entry.img : null;
   }
 
   normalizeEra(eraKey = '8bit') {
-    return eraKey === '8bit' ? '8bit' : '16bit';
+    return ['16bit', '32bit', '64bit'].includes(eraKey) ? '16bit' : '8bit';
   }
 
   getTilesetImage(eraKey = '8bit') {
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
-    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261127i`);
+    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261127z`);
     return entry.loaded ? entry.img : null;
   }
 
   getNpcsImage(eraKey = '8bit') {
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
-    const entry = this.loadImage(`/assets/tilesets/${era.npcsImage}?v=20261127i`);
+    const entry = this.loadImage(`/assets/tilesets/${era.npcsImage}?v=20261127m`);
     return entry.loaded ? entry.img : null;
   }
 
@@ -61,6 +71,20 @@ export class SpriteManager {
     const layers = this.spriteManifest.layers;
     if (layers.shadow?.default?.[key]) this.getSpriteImage(layers.shadow.default[key]);
     if (layers.companion?.pip_base?.[key]) this.getSpriteImage(layers.companion.pip_base[key]);
+  }
+
+  preloadHero(appearance, eraKey = '8bit') {
+    if (!appearance) return;
+    const key = this.normalizeEra(eraKey);
+    const order = this.spriteManifest.layerOrder?.default || [];
+    for (const slot of order) {
+      const relPath = this.resolveHeroLayerPath(slot, appearance, key);
+      if (relPath) this.getSpriteImage(relPath);
+    }
+    if (appearance.pipScarf) {
+      const scarfPath = this.spriteManifest.layers.companion_neck?.[appearance.pipScarf]?.[key];
+      if (scarfPath) this.getSpriteImage(scarfPath);
+    }
   }
 
   getEraSpec(eraKey = '8bit') {
@@ -123,6 +147,9 @@ export class SpriteManager {
    * Draws the modular layered Hero sprite at (dx, dy) with size (dw, dh).
    */
   drawHero(ctx, appearance, eraKey, direction, frameIndex, dx, dy, dw, dh) {
+    if (eraKey === '64bit' && drawHero3DPortrait(ctx, appearance, direction, frameIndex, dx, dy, dw, dh)) {
+      return;
+    }
     const spec = this.getEraSpec(eraKey);
     const row = DIRECTION_ROWS[direction] ?? 0;
     const col = ((frameIndex % spec.heroFramesPerDirection) + spec.heroFramesPerDirection) % spec.heroFramesPerDirection;
@@ -149,6 +176,9 @@ export class SpriteManager {
    * Draws animated Pip + optional companion_neck scarf.
    */
   drawPip(ctx, appearance, eraKey, direction, frameIndex, dx, dy, dw, dh) {
+    if (eraKey === '64bit' && drawPip3DPortrait(ctx, appearance, direction, frameIndex, dx, dy, dw, dh)) {
+      return;
+    }
     const key = this.normalizeEra(eraKey);
     const spec = this.getEraSpec(key);
     const row = DIRECTION_ROWS[direction] ?? 0;
@@ -193,8 +223,11 @@ export class SpriteManager {
   /**
    * Draws an NPC or Dragon sprite from npcs_and_dragons sheet.
    */
-  drawNpc(ctx, npcKey, eraKey, dx, dy, dw, dh) {
+  drawNpc(ctx, npcKey, eraKey, dx, dy, dw, dh, direction = null) {
     if (!npcKey) return false;
+    if (eraKey === '64bit' && drawNpc3DPortrait(ctx, npcKey, direction, dx, dy, dw, dh)) {
+      return true;
+    }
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
     const rect = era.npcs[npcKey];
@@ -213,30 +246,124 @@ export class SpriteManager {
   }
 
   /**
-   * Renders a crisp Hero + Pip preview diorama on a preview canvas.
+   * Draws an era-aware portrait backdrop for NPC dialogue, dragon rescue, and HUD portraits.
+   */
+  drawPortraitBackdrop(ctx, w, h, eraKey = '8bit', theme = 'meadow') {
+    const isRich = this.normalizeEra(eraKey) !== '8bit';
+    if (!isRich) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, w, h);
+      return;
+    }
+
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    if (theme === 'dragon') {
+      sky.addColorStop(0, '#1e1b4b');
+      sky.addColorStop(0.6, '#312e81');
+      sky.addColorStop(1, '#1e293b');
+    } else if (theme === 'hud') {
+      sky.addColorStop(0, '#1e3a5f');
+      sky.addColorStop(1, '#14532d');
+    } else {
+      sky.addColorStop(0, '#1d4ed8');
+      sky.addColorStop(0.55, '#38bdf8');
+      sky.addColorStop(0.72, '#43a64a');
+      sky.addColorStop(1, '#1b5e2e');
+    }
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+
+    // Warm SNES radial spotlight behind portrait subject
+    const glow = ctx.createRadialGradient(w * 0.5, h * 0.45, 2, w * 0.5, h * 0.45, w * 0.58);
+    glow.addColorStop(0, theme === 'dragon' ? 'rgba(250, 204, 21, 0.34)' : 'rgba(254, 243, 199, 0.28)');
+    glow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  /**
+   * Renders a crisp Hero + Pip preview diorama on a preview canvas (era-aware 8-bit vs 16-bit SNES).
    */
   drawHeroAndPipPreview(canvas, appearance, eraKey = '8bit', direction = 'down', frameIndex = 0) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
+    const isRich = this.normalizeEra(eraKey) !== '8bit';
     ctx.clearRect(0, 0, w, h);
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = eraKey === '64bit';
 
-    // Soft pixel ground pad
-    ctx.fillStyle = 'rgba(52, 211, 153, 0.16)';
-    ctx.beginPath();
-    ctx.ellipse(w * 0.44, h * 0.78, w * 0.24, h * 0.1, 0, 0, Math.PI * 2);
-    ctx.fill();
+    if (eraKey === '64bit') {
+      // N64 cobalt sky + emerald hill studio backdrop for 3D character showcase
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1e3a8a');
+      bg.addColorStop(0.62, '#38bdf8');
+      bg.addColorStop(0.64, '#2d6a4f');
+      bg.addColorStop(1, '#143628');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
 
-    ctx.fillStyle = 'rgba(246, 201, 69, 0.16)';
-    ctx.beginPath();
-    ctx.ellipse(w * 0.74, h * 0.8, w * 0.13, h * 0.07, 0, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = 'rgba(10, 14, 24, 0.36)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.44, h * 0.80, w * 0.22, h * 0.09, 0, 0, Math.PI * 2);
+      ctx.fill();
 
-    const heroSize = Math.min(w * 0.56, h * 0.72);
-    const pipSize = heroSize * 0.54;
-    const bob = frameIndex % 2 === 1 ? -2 : 0;
+      ctx.fillStyle = 'rgba(10, 14, 24, 0.30)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.75, h * 0.81, w * 0.12, h * 0.06, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (isRich) {
+      // Lush 16-Bit SNES miniature diorama backdrop
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, '#1e3a8a');
+      sky.addColorStop(0.52, '#38bdf8');
+      sky.addColorStop(0.56, '#43a64a');
+      sky.addColorStop(1, '#1b5e2e');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+
+      const sun = ctx.createRadialGradient(w * 0.25, h * 0.18, 2, w * 0.35, h * 0.35, w * 0.72);
+      sun.addColorStop(0, 'rgba(254, 243, 199, 0.32)');
+      sun.addColorStop(1, 'rgba(254, 243, 199, 0)');
+      ctx.fillStyle = sun;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = 'rgba(21, 128, 61, 0.55)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.54, h * 0.81, w * 0.42, h * 0.14, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.44, h * 0.79, w * 0.16, h * 0.06, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.74, h * 0.81, w * 0.1, h * 0.045, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      const sparkleY = frameIndex % 2 === 0 ? 0 : -2;
+      ctx.fillStyle = 'rgba(254, 240, 138, 0.85)';
+      ctx.fillRect(Math.round(w * 0.18), Math.round(h * 0.28 + sparkleY), 2, 2);
+      ctx.fillRect(Math.round(w * 0.84), Math.round(h * 0.24 - sparkleY), 2, 2);
+      ctx.fillRect(Math.round(w * 0.62), Math.round(h * 0.16 + sparkleY), 2, 2);
+    } else {
+      // Classic 8-bit soft pixel ground pad
+      ctx.fillStyle = 'rgba(52, 211, 153, 0.16)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.44, h * 0.78, w * 0.24, h * 0.1, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(246, 201, 69, 0.16)';
+      ctx.beginPath();
+      ctx.ellipse(w * 0.74, h * 0.8, w * 0.13, h * 0.07, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const heroSize = eraKey === '64bit' ? Math.min(w * 0.68, h * 0.86) : Math.min(w * 0.56, h * 0.72);
+    const pipSize = heroSize * 0.56;
+    const bob = frameIndex % 2 === 1 ? (eraKey === '64bit' ? -4 : -2) : 0;
 
     this.drawHero(
       ctx,
@@ -245,7 +372,7 @@ export class SpriteManager {
       direction,
       frameIndex,
       w * 0.44 - heroSize / 2,
-      h * 0.78 - heroSize * 0.92,
+      h * 0.82 - heroSize * 0.90,
       heroSize,
       heroSize
     );
@@ -256,8 +383,8 @@ export class SpriteManager {
       eraKey,
       direction,
       frameIndex,
-      w * 0.74 - pipSize / 2,
-      h * 0.8 - pipSize * 0.9 + bob,
+      w * 0.75 - pipSize / 2,
+      h * 0.80 - pipSize * 0.92 + bob,
       pipSize,
       pipSize
     );

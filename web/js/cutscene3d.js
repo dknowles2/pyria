@@ -6,7 +6,7 @@
 const ERA_SEQUENCE = [
   {
     key: 'switch3d',
-    src: '/assets/concept-art/eras/era-06-hd-era.jpg',
+    src: '/assets/cutscenes/eras/era-06-hd-era.jpg',
     label: '⚠ GLITCH STORM!  SWITCH-ERA HD 3D',
     shortLabel: 'SWITCH HD 3D',
     bits: 1.0,
@@ -16,7 +16,7 @@ const ERA_SEQUENCE = [
   },
   {
     key: '128bit',
-    src: '/assets/concept-art/eras/era-05-128bit-gamecube-ps2.jpg',
+    src: '/assets/cutscenes/eras/era-05-128bit-gamecube-ps2.jpg',
     label: '▼ BIT-DRAIN!  KICKED BACK TO 128-BIT',
     shortLabel: '128-BIT 3D',
     bits: 0.80,
@@ -26,7 +26,7 @@ const ERA_SEQUENCE = [
   },
   {
     key: '64bit',
-    src: '/assets/concept-art/eras/era-04-64bit-n64.jpg',
+    src: '/assets/cutscenes/eras/era-04-64bit-n64.jpg',
     label: '▼ BIT-DRAIN!  KICKED BACK TO 64-BIT N64',
     shortLabel: '64-BIT N64',
     bits: 0.60,
@@ -36,7 +36,7 @@ const ERA_SEQUENCE = [
   },
   {
     key: '32bit',
-    src: '/assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg',
+    src: '/assets/cutscenes/eras/era-03-32bit-ps1-isometric.jpg',
     label: '▼ BIT-DRAIN!  KICKED BACK TO 32-BIT ISO',
     shortLabel: '32-BIT ISO',
     bits: 0.42,
@@ -46,7 +46,7 @@ const ERA_SEQUENCE = [
   },
   {
     key: '16bit',
-    src: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+    src: '/assets/cutscenes/eras/era-02-16bit-snes.jpg',
     label: '▼ CRITICAL!  FLATTENED TO 16-BIT SNES',
     shortLabel: '16-BIT SNES',
     bits: 0.24,
@@ -56,7 +56,7 @@ const ERA_SEQUENCE = [
   },
   {
     key: '8bit',
-    src: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+    src: '/assets/cutscenes/eras/era-01-8bit-nes.jpg',
     label: '✖ TIME-KICKED TO 8-BIT NES  •  0/8 BITS',
     shortLabel: '8-BIT NES',
     bits: 0.08,

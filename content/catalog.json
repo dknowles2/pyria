@@ -105,8 +105,8 @@
       "category": "boots",
       "name": "Swift-Step Boots",
       "description": "Increases overworld walk speed across mossy stones and dungeon tiles.",
-      "shardCost": 55,
-      "unlockRealmId": "realm-02-ruins",
+      "shardCost": 35,
+      "unlockRealmId": "realm-01-meadow",
       "eraId": "era-01-8bit",
       "spriteLayer": "footwear",
       "spriteKey": "boots_swift"
@@ -206,6 +206,127 @@
       "eraId": "era-02-16bit",
       "spriteLayer": "offhand",
       "spriteKey": "shield_coral"
+    }
+  ],
+  "consumables": [
+    {
+      "id": "consumable-arrows",
+      "functionCall": "forge_arrows(1)",
+      "inventoryKey": "arrows",
+      "name": "Rune Arrows (Stackable)",
+      "description": "Forges glowing pixel arrows. Use a `for` loop or `forge_arrows(5)` to craft a whole quiver!",
+      "shardCost": 5
+    },
+    {
+      "id": "consumable-potions",
+      "functionCall": "brew_potion(1)",
+      "inventoryKey": "potions",
+      "name": "Starlight Potion (Stackable)",
+      "description": "Brews a sparkling dragon-energy potion. Great for testing loops and shard math!",
+      "shardCost": 10
+    },
+    {
+      "id": "consumable-custom",
+      "functionCall": "forge_custom(\"Starblade\", 5)",
+      "inventoryKey": "customItems",
+      "name": "Custom Relic Forge (Stackable)",
+      "description": "Pass a `class` instance with `.name` & `.power` (or name & power) to forge your own custom relic!",
+      "shardCost": 15
+    }
+  ],
+  "workshopRecipes": [
+    {
+      "id": "recipe-loop-arrows",
+      "title": "Quiver of 5 Rune Arrows",
+      "concept": "Loops (`for`)",
+      "minSolvedTrials": 6,
+      "shardEstimate": 25,
+      "description": "Use a `for` loop to forge 5 stackable Rune Arrows (5 Shards each = 25 Shards).",
+      "starterCode": "# Forge 5 Rune Arrows using a for loop!\nfor i in range(5):\n    forge_arrows(1)\n"
+    },
+    {
+      "id": "recipe-if-budget",
+      "title": "Smart Shard Shopper",
+      "concept": "Conditionals (`if`/`elif`/`else`)",
+      "minSolvedTrials": 4,
+      "shardEstimate": 0,
+      "description": "Check `get_shards()` with `if`/`elif`/`else` to automatically forge the best gear you can afford!",
+      "starterCode": "# Pick gear automatically based on your Byte Shards!\nbudget = get_shards()\nif budget >= 35:\n    equip_boots(\"swift\")\nelif budget >= 25:\n    wear_hat(\"explorer\")\nelif budget >= 5:\n    forge_arrows(1)\nelse:\n    print(\"Saving up more Byte Shards!\")\n"
+    },
+    {
+      "id": "recipe-def-loadout",
+      "title": "Reusable Loadout Builder",
+      "concept": "Functions (`def`)",
+      "minSolvedTrials": 12,
+      "shardEstimate": 25,
+      "description": "Define a `def` function that equips gear and crafts a custom number of arrows & potions.",
+      "starterCode": "# Define a reusable adventure loadout function!\ndef build_loadout(arrows, potions):\n    forge_arrows(arrows)\n    brew_potion(potions)\n\nbuild_loadout(3, 1)\n"
+    },
+    {
+      "id": "recipe-class-relic",
+      "title": "Custom Relic Blueprint",
+      "concept": "Classes (`class`)",
+      "minSolvedTrials": 24,
+      "shardEstimate": 15,
+      "description": "Create your own Python `class` with `.name` and `.power`, then pass an instance to `forge_custom()`!",
+      "starterCode": "# Design your own Relic class and forge it!\nclass Relic:\n    def __init__(self, name, power):\n        self.name = name\n        self.power = power\n\nmy_relic = Relic(\"Dragonfang Blade\", 10)\nforge_custom(my_relic)\n"
+    }
+  ],
+  "workshopChallenges": [
+    {
+      "id": "ws-chal-arrow-bundle",
+      "title": "Quiver Math Review",
+      "concept": "Variables & Arithmetic",
+      "realmHint": "Era 1 Review",
+      "shardReward": 15,
+      "prompt": "Set `quivers = 3` and `arrows_per_quiver = 6`, compute `total_arrows = quivers * arrows_per_quiver`, and print `total_arrows`.",
+      "starterCode": "# Calculate the total arrows across 3 quivers of 6\nquivers = 3\narrows_per_quiver = 6\n",
+      "requiredConstructs": ["assign", "math_op"],
+      "testCode": "assert total_arrows == 18, f'Expected total_arrows == 18, got {total_arrows!r}'\nassert OUTPUT.strip() == '18', f'Expected output \"18\", got {OUTPUT.strip()!r}'\n"
+    },
+    {
+      "id": "ws-chal-budget-check",
+      "title": "Bram's Bargain Check",
+      "concept": "Conditionals (`if`/`else`)",
+      "realmHint": "Era 1 Review",
+      "shardReward": 20,
+      "prompt": "Given `shards = 40` and `price = 35`, use `if`/`else` to print `\"Forge it!\"` if `shards >= price`, otherwise print `\"Keep saving!\"`.",
+      "starterCode": "shards = 40\nprice = 35\n# Write an if/else check below:\n",
+      "requiredConstructs": ["if", "else"],
+      "testCode": "assert OUTPUT.strip() == 'Forge it!', f'Expected \"Forge it!\", got {OUTPUT.strip()!r}'\n"
+    },
+    {
+      "id": "ws-chal-loop-forging",
+      "title": "Anvil Rhythm Loop",
+      "concept": "For Loops",
+      "realmHint": "Era 1–2 Review",
+      "shardReward": 20,
+      "prompt": "Use a `for` loop with `range(1, 5)` to print `\"Hammer 1\"` through `\"Hammer 4\"` on separate lines.",
+      "starterCode": "# Use a for loop to print Hammer 1 through Hammer 4\n",
+      "requiredConstructs": ["for"],
+      "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['Hammer 1', 'Hammer 2', 'Hammer 3', 'Hammer 4'], f'Got {lines!r}'\n"
+    },
+    {
+      "id": "ws-chal-loadout-fn",
+      "title": "Forge Cost Function",
+      "concept": "Functions (`def` & `return`)",
+      "realmHint": "Era 2–3 Review",
+      "shardReward": 25,
+      "prompt": "Write a function `bundle_cost(arrows, potions)` that returns `arrows * 5 + potions * 10`, then print `bundle_cost(4, 2)`.",
+      "starterCode": "# Define bundle_cost(arrows, potions) and print bundle_cost(4, 2)\n",
+      "requiredConstructs": ["def", "return"],
+      "testCode": "assert callable(bundle_cost), 'Define bundle_cost(arrows, potions)!'\nassert bundle_cost(4, 2) == 40, f'Expected 40, got {bundle_cost(4, 2)!r}'\nassert bundle_cost(1, 3) == 35, f'Expected 35 for (1, 3), got {bundle_cost(1, 3)!r}'\nassert OUTPUT.strip() == '40', f'Expected output \"40\", got {OUTPUT.strip()!r}'\n"
+    },
+    {
+      "id": "ws-chal-relic-class",
+      "title": "Masterwork Relic Class",
+      "concept": "Classes (`class`)",
+      "realmHint": "Era 3–4 Review",
+      "shardReward": 30,
+      "prompt": "Create a class `Relic` whose `__init__(self, name, power)` stores `self.name` and `self.power`, and a `describe(self)` method returning `f\"{self.name}: {self.power}\"`. Create `r = Relic(\"Sunburst\", 9)` and print `r.describe()`.",
+      "starterCode": "# Build the Relic class and print r.describe()\n",
+      "requiredConstructs": ["class", "def", "return"],
+      "testCode": "test_r = Relic('Moonbeam', 7)\nassert test_r.name == 'Moonbeam' and test_r.power == 7\nassert test_r.describe() == 'Moonbeam: 7', f'Expected \"Moonbeam: 7\", got {test_r.describe()!r}'\nassert OUTPUT.strip() == 'Sunburst: 9', f'Expected \"Sunburst: 9\", got {OUTPUT.strip()!r}'\n"
     }
   ]
 }
