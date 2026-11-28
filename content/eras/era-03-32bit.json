@@ -33,7 +33,7 @@
           "trialType": "multiple_choice",
           "title": "Meet 3D Coordinate Tuples (x, y, z)!",
           "storyPrompt": "Welcome to 32-Bit Blockstone Highlands! A **tuple** like `(4, 7, 2)` is an ordered collection in parentheses `(...)` that acts like a locked list — once created, its items can't be changed (immutable), making it ideal for 3D coordinates `(x, y, z)`. You can unpack all three values in one line: `x, y, z = pos`!",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(z)` displays after `x, y, z = pos` unpacks the tuple `(4, 7, 2)`.",
           "concepts": [
             "tuples",
             "coords_3d"
@@ -65,9 +65,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip lines up the three slots: 'Unpacking hands out the tuple's values left to right — so which name ends up with the third one?'",
+            "tier2_pattern": "`x, y, z = pos` gives the first value to `x`, the second to `y` and the third to `z`.",
+            "tier3_walkthrough": "Tap Option A (`2`) — `z` receives the third value of `(4, 7, 2)`."
           },
           "difficultyOverride": null
         },
@@ -92,8 +92,8 @@
           "referenceSolution": "pos = (10, 5, 3)\nx, y, z = pos\nprint(z)\n",
           "testCode": "assert (x, y, z) == (10, 5, 3) and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "pos = ___\nx, y, z = ___\nprint(___)",
+            "tier1_nudge": "Pip counts names against values: 'Unpacking needs exactly as many names on the left as the tuple has values — and `z` is being printed.'",
+            "tier2_pattern": "<a>, <b>, <c> = <three_value_tuple>\nprint(<c>)",
             "tier3_walkthrough": "Update to:\npos = (10, 5, 3)\nx, y, z = pos\nprint(z)"
           },
           "difficultyOverride": null,
@@ -133,8 +133,8 @@
           "referenceSolution": "pos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)\n",
           "testCode": "assert higher == (3, 4, 3) and OUTPUT.strip() == \"(3, 4, 3)\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "pos = ___\nx, y, z = ___\nhigher = ___\nprint(___)",
+            "tier1_nudge": "Pip climbs one terrace: 'Unpack the three values first, then build a NEW tuple reusing two of them and raising the third.'",
+            "tier2_pattern": "<x>, <y>, <z> = <tuple>\nhigher = (<x>, <y>, <z> + <climb>)\nprint(higher)",
             "tier3_walkthrough": "Write:\npos = (3, 4, 1)\nx, y, z = pos\nhigher = (x, y, z + 2)\nprint(higher)"
           },
           "difficultyOverride": null,
@@ -176,8 +176,8 @@
           "referenceSolution": "heights = [4, 9]\nfor idx, h in enumerate(heights):\n    print(idx, h)\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['0 4', '1 9'], f'Got {lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Write `for idx, h in enumerate(heights):` and indent `print(idx, h)`!'",
-            "tier2_pattern": "for idx, h in enumerate(heights):\n    print(idx, h)",
+            "tier1_nudge": "Pip counts as he walks: '`enumerate(...)` hands over two things each turn, so put two names in the `for` header.'",
+            "tier2_pattern": "for <index>, <value> in enumerate(<list>):\n    print(<index>, <value>)",
             "tier3_walkthrough": "Add:\nfor idx, h in enumerate(heights):\n    print(idx, h)"
           },
           "difficultyOverride": null,
@@ -208,8 +208,8 @@
           "referenceSolution": "heights = [4, 9, 6]\nbest_idx = 0\nbest_h = 0\nfor idx, h in enumerate(heights):\n    if h > best_h:\n        best_h = h\n        best_idx = idx\nprint(best_idx)\n",
           "testCode": "exp = heights.index(max(heights))\nassert best_idx == exp and OUTPUT.strip() == str(exp)",
           "hints": {
-            "tier1_nudge": "Use `for idx, h in enumerate(heights):` to unpack both the position and height on each step.",
-            "tier2_pattern": "for idx, h in enumerate(___):\n    if h > best_h:\n        best_h = ___\n        best_idx = ___",
+            "tier1_nudge": "Pip tracks height and position together: 'Unpack two names in the `for` header, and remember to save BOTH the new best height and the index where you found it.'",
+            "tier2_pattern": "for <index>, <height> in enumerate(<list>):\n    if <height> > best_h:\n        best_h = <height>\n        best_idx = <index>\nprint(best_idx)",
             "tier3_walkthrough": "Loop `for idx, h in enumerate(heights):`, and whenever `h > best_h`, update `best_h = h` and `best_idx = idx`, then `print(best_idx)`."
           },
           "difficultyOverride": null,
@@ -286,8 +286,8 @@
           "referenceSolution": "peaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)\n",
           "testCode": "assert max_z == 9 and OUTPUT.strip() == \"9\"",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "peaks = ___\nmax_z = ___\nfor ___ in ___:\n    if ___:\n        max_z = ___\nprint(___)",
+            "tier1_nudge": "Pip reads each peak: 'The `for` header can unpack all three coordinates at once, so you can compare just the height inside the loop.'",
+            "tier2_pattern": "for <x>, <y>, <z> in <peaks>:\n    if <z> > max_z:\n        max_z = <z>\nprint(max_z)",
             "tier3_walkthrough": "Write:\npeaks = [(1, 2, 4), (3, 1, 9), (5, 5, 6)]\nmax_z = 0\nfor x, y, z in peaks:\n    if z > max_z:\n        max_z = z\nprint(max_z)"
           },
           "difficultyOverride": null,
@@ -369,8 +369,8 @@
           "referenceSolution": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h += z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")\n",
           "testCode": "assert total_h == 10, f\"Expected total_h == 10, got {total_h!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'TERRACREST FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Terracrest!",
-            "tier2_pattern": "pillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")",
+            "tier1_nudge": "Pip raises the bridge: 'Unpack each pillar in the `for` header, add only the height inside the loop, then test the total after it at 0 spaces.'",
+            "tier2_pattern": "total_h = 0\nfor <x>, <y>, <z> in <pillars>:\n    total_h = total_h + <z>\nif total_h == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\npillars = [(0, 0, 2), (1, 0, 5), (2, 0, 3)]\ntotal_h = 0\nfor x, y, z in pillars:\n    total_h = total_h + z\nif total_h == 10:\n    print(\"TERRACREST FREE!\")"
           },
           "difficultyOverride": null,
@@ -455,9 +455,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip tries to edit a coordinate and fails: 'One of these two collections refuses to be changed after it is built — that is the whole reason tuples exist.'",
+            "tier2_pattern": "Both can hold any type and both can be indexed; the difference is whether you can change them afterwards.",
+            "tier3_walkthrough": "Tap Option A (tuples cannot be modified in place) — they are immutable, which keeps coordinates safe from accidental edits."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -548,7 +548,7 @@
           "trialType": "multiple_choice",
           "title": "One-Line List Comprehensions!",
           "storyPrompt": "Python lets you build a transformed list in ONE clean line: `[n * 2 for n in [1, 2, 3]]`! What does the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(doubled)` displays for `[n * 2 for n in nums]` when `nums` is `[2, 4, 6]`.",
           "concepts": [
             "nested_loops",
             "list_comprehensions"
@@ -580,9 +580,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip reads the one-liner right to left: 'The `for` part says what to walk through; the part in front says what to do to each item.'",
+            "tier2_pattern": "A comprehension builds a brand-new list the same length as the old one, with the expression applied to each item.",
+            "tier3_walkthrough": "Tap Option A (`[4, 8, 12]`) — each of 2, 4 and 6 is doubled, giving a new three-item list."
           },
           "difficultyOverride": null
         },
@@ -607,8 +607,8 @@
           "referenceSolution": "ores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)\n",
           "testCode": "assert power == [10, 20, 30] and OUTPUT.strip() == \"[10, 20, 30]\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "ores = ___\npower = ___\nprint(___)",
+            "tier1_nudge": "Pip reads the comprehension aloud: 'Say it as a sentence — \"for each x IN ores\" — and one little word is missing.'",
+            "tier2_pattern": "[<expression> for <item> in <list>]",
             "tier3_walkthrough": "Update to:\nores = [1, 2, 3]\npower = [x * 10 for x in ores]\nprint(power)"
           },
           "difficultyOverride": null,
@@ -652,8 +652,8 @@
           "referenceSolution": "nums = [2, 4, 6]\ndoubled = [n * 2 for n in nums]\nprint(doubled)\n",
           "testCode": "assert doubled == [4, 8, 12]\nassert OUTPUT.strip() == '[4, 8, 12]', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Put `[n * 2 for n in nums]` inside square brackets!'",
-            "tier2_pattern": "doubled = [n * 2 for n in nums]\nprint(doubled)",
+            "tier1_nudge": "Pip squares the brackets: 'The whole comprehension lives inside `[ ]`, with the expression first and the `for` part after it.'",
+            "tier2_pattern": "doubled = [<item> * <factor> for <item> in <list>]\nprint(doubled)",
             "tier3_walkthrough": "Add:\ndoubled = [n * 2 for n in nums]\nprint(doubled)"
           },
           "difficultyOverride": null,
@@ -693,14 +693,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\n",
-            "standard": "",
+            "standard": "temps = [5, 12, 8, 20]\n# Build hot with a comprehension keeping only temps that are at least 10\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "temps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)\n",
           "testCode": "assert hot == [12, 20] and OUTPUT.strip() == \"[12, 20]\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "temps = ___\nhot = ___\nprint(___)",
+            "tier1_nudge": "Pip filters the hot bars: 'An `if` on the END of a comprehension decides which items get kept at all.'",
+            "tier2_pattern": "hot = [<item> for <item> in <list> if <item> >= <threshold>]\nprint(hot)",
             "tier3_walkthrough": "Write:\ntemps = [5, 12, 8, 20]\nhot = [n for n in temps if n >= 10]\nprint(hot)"
           },
           "difficultyOverride": null,
@@ -769,14 +769,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "coords = [(x, y) for x in range(2) for y in range(2)]\n",
-            "standard": "",
+            "standard": "# Build coords with two for clauses, then print how many pairs it holds\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "coords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))\n",
           "testCode": "assert coords == [(0, 0), (0, 1), (1, 0), (1, 1)] and OUTPUT.strip() == \"4\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "coords = ___\nprint(___)",
+            "tier1_nudge": "Pip walks a grid in one line: 'A comprehension can carry TWO `for` clauses, and it pairs every item from the first with every item from the second.'",
+            "tier2_pattern": "coords = [(<a>, <b>) for <a> in range(<n>) for <b> in range(<m>)]\nprint(len(coords))",
             "tier3_walkthrough": "Write:\ncoords = [(x, y) for x in range(2) for y in range(2)]\nprint(len(coords))"
           },
           "difficultyOverride": null,
@@ -829,14 +829,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\n",
-            "standard": "",
+            "standard": "tags = [\"iron\", \"gold\"]\n# Build loud with a comprehension that uppercases every tag\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "tags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)\n",
           "testCode": "assert isinstance(loud, list), f\"Expected loud to be a list, got {loud!r}\"\nif loud != [\"IRON\", \"GOLD\"]:\n    if [str(x).upper() for x in loud] == [\"IRON\", \"GOLD\"]:\n        assert False, f\"Almost! Make sure every tag is ALL CAPS using .upper() (got {loud!r})!\"\n    assert False, f\"Expected loud == ['IRON', 'GOLD'], got {loud!r}\"\nassert OUTPUT.strip() == \"['IRON', 'GOLD']\", f\"Expected printed ['IRON', 'GOLD'], got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "tags = ___\nloud = ___\nprint(___)",
+            "tier1_nudge": "Pip shouts the tags: 'The expression at the front of a comprehension can call a method on each item.'",
+            "tier2_pattern": "loud = [<item>.upper() for <item> in <list>]\nprint(loud)",
             "tier3_walkthrough": "Write:\ntags = [\"iron\", \"gold\"]\nloud = [t.upper() for t in tags]\nprint(loud)"
           },
           "difficultyOverride": null,
@@ -882,8 +882,8 @@
           "referenceSolution": "bars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")\n",
           "testCode": "assert forged == [50, 80], f\"Expected forged == [50, 80], got {forged!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'ANVILWING FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Anvilwing!",
-            "tier2_pattern": "bars = ___\nforged = ___\nif ___:\n    print(___)",
+            "tier1_nudge": "Pip fires the forge: 'One comprehension can transform AND filter — the expression goes in front, the `if` goes on the end.'",
+            "tier2_pattern": "forged = [<item> * <factor> for <item> in <list> if <item> >= <threshold>]\nif sum(forged) == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nbars = [10, 25, 40, 15]\nforged = [b * 2 for b in bars if b >= 20]\nif sum(forged) == 130:\n    print(\"ANVILWING FREE!\")"
           },
           "difficultyOverride": null,
@@ -959,9 +959,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip multiplies each number by itself: 'Read the expression at the front — it uses the loop variable twice.'",
+            "tier2_pattern": "`range(1, 4)` walks 1, 2 and 3, and the expression multiplies each one by itself.",
+            "tier3_walkthrough": "Tap Option A (`[1, 4, 9]`) — 1×1, 2×2 and 3×3, with `range(1, 4)` stopping before 4."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -1052,7 +1052,7 @@
           "trialType": "multiple_choice",
           "title": "Meet Python Sets!",
           "storyPrompt": "A **set** (`set(...)` or `{1, 2, 3}`) is an unordered collection that keeps ONLY unique items — duplicates vanish automatically! Unlike a dictionary (`{key: value}`), a set just holds single values with no `:` colons. What does `len(set([\"red\", \"blue\", \"red\"]))` equal?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(len(unique))` displays after `set()` is applied to `[\"red\", \"blue\", \"red\"]`.",
           "concepts": [
             "dictionaries_nested",
             "sets"
@@ -1084,9 +1084,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip holds up the duplicate shard: 'A set refuses to keep two copies of the same thing — so count the DISTINCT colors.'",
+            "tier2_pattern": "`set(...)` drops every repeat, and `len(...)` then counts what is left.",
+            "tier3_walkthrough": "Tap Option A (`2`) — the repeated `\"red\"` collapses into one, leaving two distinct colors."
           },
           "difficultyOverride": null
         },
@@ -1111,8 +1111,8 @@
           "referenceSolution": "cavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'OPEN'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "cavern = ___\nprint(___)",
+            "tier1_nudge": "Pip reads the inner key letter by letter: 'Both lookups have to match a key that really exists — compare the spelling against the dictionary above.'",
+            "tier2_pattern": "print(<dict>[\"<outer_key>\"][\"<inner_key>\"])",
             "tier3_walkthrough": "Update to:\ncavern = {\"gate\": {\"north\": \"OPEN\"}}\nprint(cavern[\"gate\"][\"north\"])"
           },
           "difficultyOverride": null,
@@ -1175,14 +1175,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\n",
-            "standard": "",
+            "standard": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\n# Count how many DISTINCT colors are in found\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "found = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)\n",
           "testCode": "assert unique_count == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "found = ___\nunique_count = ___\nprint(___)",
+            "tier1_nudge": "Pip sorts the shard pile: 'Turn the list into a set to drop the repeats, then count what survives — both in one line.'",
+            "tier2_pattern": "unique_count = len(set(<list>))\nprint(unique_count)",
             "tier3_walkthrough": "Write:\nfound = [\"cyan\", \"gold\", \"cyan\", \"violet\", \"gold\"]\nunique_count = len(set(found))\nprint(unique_count)"
           },
           "difficultyOverride": null,
@@ -1225,8 +1225,8 @@
           "referenceSolution": "a = {\"cyan\", \"gold\"}\nb = {\"gold\", \"ruby\"}\nall_gems = a | b\nprint(len(all_gems))\n",
           "testCode": "assert all_gems == {'cyan', 'gold', 'ruby'}\nassert OUTPUT.strip() == '3', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at `|`: 'Write `all_gems = a | b` and then `print(len(all_gems))`!'",
-            "tier2_pattern": "all_gems = a | b\nprint(len(all_gems))",
+            "tier1_nudge": "Pip tips both pouches together: 'The union operator combines two sets, and a gem in both still appears only once.'",
+            "tier2_pattern": "all_gems = <first_set> | <second_set>\nprint(len(all_gems))",
             "tier3_walkthrough": "Add:\nall_gems = a | b\nprint(len(all_gems))"
           },
           "difficultyOverride": null,
@@ -1285,8 +1285,8 @@
           "referenceSolution": "a = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))\n",
           "testCode": "assert common == {\"gold\", \"ruby\"} and OUTPUT.strip() == \"2\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "a = ___\nb = ___\ncommon = ___\nprint(___)",
+            "tier1_nudge": "Pip overlaps the two pouches: 'The intersection operator keeps only what appears in BOTH sets.'",
+            "tier2_pattern": "common = <first_set> & <second_set>\nprint(len(common))",
             "tier3_walkthrough": "Write:\na = {\"cyan\", \"gold\", \"ruby\"}\nb = {\"gold\", \"ruby\", \"jade\"}\ncommon = a & b\nprint(len(common))"
           },
           "difficultyOverride": null,
@@ -1343,8 +1343,8 @@
           "referenceSolution": "vault = {\"east\": {\"gems\": 15}}\ncount = vault[\"east\"][\"gems\"]\nprint(count)\n",
           "testCode": "assert count == 15\nassert OUTPUT.strip() == '15', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'First `[\"east\"]`, then `[\"gems\"]`: `vault[\"east\"][\"gems\"]`!'",
-            "tier2_pattern": "count = vault[\"east\"][\"gems\"]\nprint(count)",
+            "tier1_nudge": "Pip opens two lids in turn: 'Chain the brackets — the outer key first, then the inner key inside it.'",
+            "tier2_pattern": "count = <dict>[\"<outer_key>\"][\"<inner_key>\"]\nprint(count)",
             "tier3_walkthrough": "Add:\ncount = vault[\"east\"][\"gems\"]\nprint(count)"
           },
           "difficultyOverride": null,
@@ -1368,14 +1368,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\n",
-            "standard": "",
+            "standard": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\n# Read the hall's next room into dest, then print it\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "rooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)\n",
           "testCode": "assert dest == \"vault\", f\"Expected dest == 'vault', got {dest!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'vault'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "rooms = ___\ndest = ___\nprint(___)",
+            "tier1_nudge": "Pip follows the map: 'Two lookups in a row — the room first, then the key inside that room.'",
+            "tier2_pattern": "dest = <dict>[\"<room>\"][\"<key>\"]\nprint(dest)",
             "tier3_walkthrough": "Write:\nrooms = {\"hall\": {\"next\": \"vault\", \"gems\": 12}}\ndest = rooms[\"hall\"][\"next\"]\nprint(dest)"
           },
           "difficultyOverride": null,
@@ -1419,9 +1419,9 @@
           "referenceSolution": "nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum([n[\"power\"] for n in nodes.values()])\nif beam == 100:\n    print(\"LUMINA FREE!\")\n",
           "testCode": "assert beam == 100, f\"Expected beam == 100, got {beam!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'LUMINA FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Lumina!",
-            "tier2_pattern": "beam = sum([n[___] for n in nodes.___()])\nif beam == 100:\n    print(___)",
-            "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum(n[\"power\"] for n in nodes.values())\nif beam == 100:\n    print(\"LUMINA FREE!\")"
+            "tier1_nudge": "Pip aligns the crystal graph: 'Each value of the outer dictionary is itself a dictionary, so pull one key out of each and total them.'",
+            "tier2_pattern": "beam = sum([<node>[\"<key>\"] for <node> in <dict>.values()])\nif beam == <target>:\n    print(\"<message>\")",
+            "tier3_walkthrough": "Write:\nnodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}\nbeam = sum([n[\"power\"] for n in nodes.values()])\nif beam == 100:\n    print(\"LUMINA FREE!\")"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
@@ -1499,9 +1499,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip merges two tiny sets: 'The union keeps everything from either side, but a set never stores the same value twice.'",
+            "tier2_pattern": "Count the distinct values across both sets, remembering that the shared one is kept only once.",
+            "tier3_walkthrough": "Tap Option A (`3`) — the union is `{1, 2, 3}`, because the repeated `2` is kept only once."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -1620,8 +1620,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip points: 'First look up `\"hall\"`, then look up `\"gems\"` inside it!'",
-            "tier2_pattern": "rooms[\"hall\"][\"gems\"] -> 12",
-            "tier3_walkthrough": "Tap Option B (`12`)!"
+            "tier2_pattern": "The first lookup picks one room out of the map; the second picks a key inside that room.",
+            "tier3_walkthrough": "Tap Option B (`12`) — the first lookup gets the hall's dictionary, and the second reads `12` out of it."
           },
           "difficultyOverride": null
         },
@@ -1646,7 +1646,7 @@
           "testCode": "assert OUTPUT.strip() == 'OPEN', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip squints: 'Check the spelling of `\"dor\"` vs `\"door\"`!'",
-            "tier2_pattern": "print(archive[\"north\"][\"door\"])",
+            "tier2_pattern": "print(<dict>[\"<outer_key>\"][\"<inner_key>\"])",
             "tier3_walkthrough": "Change `\"dor\"` to `\"door\"`."
           },
           "difficultyOverride": null,
@@ -1675,8 +1675,8 @@
           "referenceSolution": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)\n",
           "testCode": "assert guardian == 'Chronis'\nassert OUTPUT.strip() == 'Chronis', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Chain `atlas[\"north\"][\"boss\"]` and print `guardian`!'",
-            "tier2_pattern": "guardian = atlas[\"north\"][\"boss\"]\nprint(guardian)",
+            "tier1_nudge": "Pip opens two lids in turn: 'Chain the two keys — the wing first, then what is stored inside it — and save the result in `guardian`.'",
+            "tier2_pattern": "guardian = <dict>[\"<outer_key>\"][\"<inner_key>\"]\nprint(guardian)",
             "tier3_walkthrough": "Add:\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)"
           },
           "difficultyOverride": null,
@@ -1705,8 +1705,8 @@
           "referenceSolution": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])\n",
           "testCode": "assert vault['west']['gold'] == 35\nassert OUTPUT.strip() == '35', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Use `vault[\"west\"][\"gold\"] += 10` and print it!'",
-            "tier2_pattern": "vault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])",
+            "tier1_nudge": "Pip tops up the west vault: 'Chain both keys, then use `+=` to raise the value sitting at the end of that chain.'",
+            "tier2_pattern": "<dict>[\"<room>\"][\"<key>\"] += <amount>\nprint(<dict>[\"<room>\"][\"<key>\"])",
             "tier3_walkthrough": "Add:\nvault[\"west\"][\"gold\"] += 10\nprint(vault[\"west\"][\"gold\"])"
           },
           "difficultyOverride": null,
@@ -1764,8 +1764,8 @@
           "referenceSolution": "rooms = {\"east\": {\"gems\": 5}}\nrooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])\n",
           "testCode": "assert rooms['east']['lit'] is True\nassert OUTPUT.strip() == 'True', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Assign `rooms[\"east\"][\"lit\"] = True` (capital T, no quotes!) and print it!'",
-            "tier2_pattern": "rooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])",
+            "tier1_nudge": "Pip lights the east corridor: 'Assigning to an inner key that does not exist yet creates it — and the value here is a Boolean, capital letter and no quotes.'",
+            "tier2_pattern": "<dict>[\"<room>\"][\"<new_key>\"] = <value>\nprint(<dict>[\"<room>\"][\"<new_key>\"])",
             "tier3_walkthrough": "Add:\nrooms[\"east\"][\"lit\"] = True\nprint(rooms[\"east\"][\"lit\"])"
           },
           "difficultyOverride": null,
@@ -1796,8 +1796,8 @@
           "referenceSolution": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\nfor r in rooms.values():\n    total += r[\"gems\"]\nprint(total)\n",
           "testCode": "assert total == 35\nassert OUTPUT.strip() == '35', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Loop `for r in rooms.values():` and add `r[\"gems\"]` to `total`!'",
-            "tier2_pattern": "for r in rooms.values():\n    total += r[\"gems\"]\nprint(total)",
+            "tier1_nudge": "Pip walks the rooms: 'Looping a dictionary's values hands you each inner room, so pull one key out of each and add it to the running total.'",
+            "tier2_pattern": "for <room> in <dict>.values():\n    total += <room>[\"<key>\"]\nprint(total)",
             "tier3_walkthrough": "Add:\nfor r in rooms.values():\n    total += r[\"gems\"]\nprint(total)"
           },
           "difficultyOverride": null,
@@ -1829,7 +1829,7 @@
           "testCode": "_lines = [l.strip() for l in OUTPUT.strip().splitlines() if l.strip()]\nassert _lines == ['hall 12', 'vault 40'], f\"Expected ['hall 12', 'vault 40'], got {_lines!r}\"\n",
           "hints": {
             "tier1_nudge": "Pip points to the loop header: 'Use `rooms.items()` so every turn hands you the room NAME and its dictionary together!'",
-            "tier2_pattern": "for name, room in rooms.items():\n    print(name, room[\"gems\"])",
+            "tier2_pattern": "for <name>, <room> in <dict>.items():\n    print(<name>, <room>[\"<key>\"])",
             "tier3_walkthrough": "Add:\nfor name, room in rooms.items():\n    print(name, room[\"gems\"])"
           },
           "difficultyOverride": null,
@@ -1902,8 +1902,8 @@
           "referenceSolution": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")\n",
           "testCode": "assert total == 50\nassert OUTPUT.strip() == 'CHRONIS FREE!', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points: 'Check `if r[\"open\"]:` inside `for r in rooms.values():` before adding `r[\"gems\"]`!'",
-            "tier2_pattern": "total = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")",
+            "tier1_nudge": "Pip checks each door before counting: 'Test the room's flag inside the loop and add its gems only on the turns that pass, then compare the total afterwards.'",
+            "tier2_pattern": "total = 0\nfor <room> in <dict>.values():\n    if <room>[\"<flag>\"]:\n        total += <room>[\"<key>\"]\nif total == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Add:\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")"
           },
           "difficultyOverride": null,
@@ -1952,8 +1952,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip counts: 'Count the keys inside `{\"a\": 1, \"b\": 2, \"c\": 3}`!'",
-            "tier2_pattern": "len({\"a\": 1, \"b\": 2, \"c\": 3}) -> 3",
-            "tier3_walkthrough": "Tap Option B (`3`)!"
+            "tier2_pattern": "`len()` on the inner dictionary counts its keys, not the outer one's.",
+            "tier3_walkthrough": "Tap Option B (`3`) — `len()` is applied to the INNER dictionary, which holds three keys."
           },
           "difficultyOverride": null
         }
@@ -2064,8 +2064,8 @@
           "correctChoiceId": "a",
           "hints": {
             "tier1_nudge": "Pip points: '`int(\"boom\")` triggers `except ValueError:`!'",
-            "tier2_pattern": "except ValueError: runs -> BLOCKED",
-            "tier3_walkthrough": "Tap Option A (`BLOCKED`)!"
+            "tier2_pattern": "When the risky line raises an error, Python abandons the rest of the `try` block and jumps to the matching `except`.",
+            "tier3_walkthrough": "Tap Option A (`BLOCKED`) — `int(\"boom\")` raises a ValueError, so Python abandons the rest of the `try` block and runs the `except` instead."
           },
           "difficultyOverride": null
         },
@@ -2149,8 +2149,8 @@
           "referenceSolution": "raw = \"bad\"\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)\n",
           "testCode": "assert val == 0\nassert OUTPUT.strip() == '0', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Wrap `val = int(raw)` in `try:` and put `val = 0` inside `except ValueError:`!'",
-            "tier2_pattern": "try:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)",
+            "tier1_nudge": "Pip shields the conversion: 'Put the risky conversion inside the `try` block and the fallback value inside the `except` block, then print after both.'",
+            "tier2_pattern": "try:\n    val = int(<text>)\nexcept ValueError:\n    val = <fallback>\nprint(val)",
             "tier3_walkthrough": "Add:\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = 0\nprint(val)"
           },
           "difficultyOverride": null,
@@ -2191,8 +2191,8 @@
           "referenceSolution": "a = 20\nb = 0\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)\n",
           "testCode": "assert ans == 0\nassert OUTPUT.strip() == '0', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Catch `ZeroDivisionError` and set `ans = 0`!'",
-            "tier2_pattern": "try:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)",
+            "tier1_nudge": "Pip guards the divide: 'Dividing by zero raises its own named error — catch that one by name and fall back to a safe value.'",
+            "tier2_pattern": "try:\n    ans = <a> // <b>\nexcept ZeroDivisionError:\n    ans = <fallback>\nprint(ans)",
             "tier3_walkthrough": "Add:\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = 0\nprint(ans)"
           },
           "difficultyOverride": null,
@@ -2235,8 +2235,8 @@
           "referenceSolution": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)\n",
           "testCode": "assert status == 'MISSING'\nassert OUTPUT.strip() == 'MISSING', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points: 'Catch `KeyError` and set `status = \"MISSING\"`!'",
-            "tier2_pattern": "try:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)",
+            "tier1_nudge": "Pip reaches for a room that is not there: 'A missing dictionary key raises its own named error — catch that one and fall back to a placeholder.'",
+            "tier2_pattern": "try:\n    status = <dict>[<name>]\nexcept KeyError:\n    status = \"<fallback>\"\nprint(status)",
             "tier3_walkthrough": "Add:\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"MISSING\"\nprint(status)"
           },
           "difficultyOverride": null,
@@ -2307,8 +2307,8 @@
           "referenceSolution": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
           "testCode": "assert total == 20\nassert OUTPUT.strip() == '20', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Put `try: total += int(x)` and `except ValueError: continue` inside the `for` loop!'",
-            "tier2_pattern": "for x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)",
+            "tier1_nudge": "Pip skips the bad entries: 'Both the `try` and its `except` go INSIDE the loop, so one bad string only skips its own turn instead of stopping everything.'",
+            "tier2_pattern": "for <item> in <list>:\n    try:\n        total += int(<item>)\n    except ValueError:\n        continue\nprint(total)",
             "tier3_walkthrough": "Add:\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)"
           },
           "difficultyOverride": null,
@@ -2342,8 +2342,8 @@
           "referenceSolution": "raw = [\"10\", \"null\", \"30\"]\ndef safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\npower = 0\nfor s in raw:\n    power += safe_parse(s)\nif power == 40:\n    print(\"AEGIS FREE!\")\n",
           "testCode": "assert safe_parse('7') == 7 and safe_parse('bad') == 0\nassert power == 40\nassert OUTPUT.strip() == 'AEGIS FREE!', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Define `safe_parse(text)` with `try/except ValueError`, loop over `raw` summing into `power`, then print `\"AEGIS FREE!\"`!'",
-            "tier2_pattern": "def safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0",
+            "tier1_nudge": "Pip raises the shield: 'The function returns the number when the text converts and the fallback when it does not; sum its results across the list, then announce success only if the total matches.'",
+            "tier2_pattern": "def safe_parse(<text>):\n    try:\n        return int(<text>)\n    except ValueError:\n        return <fallback>\n\npower = 0\nfor <s> in <list>:\n    power += safe_parse(<s>)\nif power == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write `safe_parse(text)`, sum `safe_parse(s)` over `raw` into `power`, and if `power == 40: print(\"AEGIS FREE!\")`."
           },
           "difficultyOverride": null,
@@ -2392,8 +2392,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip chirps: 'Think of `except` like a safety net — it only catches you if something fails!'",
-            "tier2_pattern": "Runs only on a matching error inside try",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier2_pattern": "A `try` block always runs first; the `except` block is only reached if something inside it goes wrong.",
+            "tier3_walkthrough": "Tap Option B — `except` is a safety net, so it runs only when the `try` block raises a matching error."
           },
           "difficultyOverride": null
         }
@@ -2478,7 +2478,7 @@
           "trialType": "multiple_choice",
           "title": "Catching Bad input() with try / except!",
           "storyPrompt": "Remember `input()` always returns text (`str`)! If a player types `\"null\"` when your code expects a number, `int(input(...))` raises a `ValueError`. Wrapping risky code in `try:` / `except ValueError:` catches the crash safely!",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what this `try / except` block prints when the typed command is `\"null\"`.",
           "concepts": [
             "error_handling"
           ],
@@ -2539,7 +2539,7 @@
           "testCode": "assert total == sum(int(x) for x in raw if x.isdigit()) and OUTPUT.strip() == str(total)",
           "hints": {
             "tier1_nudge": "Check the punctuation at the end of every block header (`for`, `try`, `except`).",
-            "tier2_pattern": "try:\n    total += int(s)\nexcept ValueError___\n    pass",
+            "tier2_pattern": "try:\n    <risky line>\nexcept <ErrorName><punctuation>\n    pass",
             "tier3_walkthrough": "Add a colon `:` at the end of `except ValueError:` so `pass` safely skips `\"null\"` and prints `10`."
           },
           "difficultyOverride": null,
@@ -2612,14 +2612,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\n",
-            "standard": "",
+            "standard": "# Define safe_int(text) returning int(text), or 0 when the text is not a number\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))\n",
           "testCode": "assert safe_int(\"42\") == 42 and safe_int(\"oops\") == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "def safe_int(___):\n    try:\n        return ___\n    except ___:\n        return ___\nprint(___)",
+            "tier1_nudge": "Pip shields the parser: 'Both branches `return` — one hands back the converted number, the other hands back the fallback.'",
+            "tier2_pattern": "def safe_int(<text>):\n    try:\n        return int(<text>)\n    except ValueError:\n        return <fallback>\n\nprint(safe_int(\"<bad_text>\"))",
             "tier3_walkthrough": "Write:\ndef safe_int(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\nprint(safe_int(\"oops\"))"
           },
           "difficultyOverride": null,
@@ -2651,8 +2651,8 @@
           "referenceSolution": "whole = 20 // 6\nprint(whole)\n",
           "testCode": "assert whole == 3\nassert OUTPUT.strip() == '3', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Use double slash `//` for whole-number division: `whole = 20 // 6`!'",
-            "tier2_pattern": "whole = 20 // 6\nprint(whole)",
+            "tier1_nudge": "Pip divides and drops the remainder: 'The double-slash operator keeps only the whole part of the division.'",
+            "tier2_pattern": "whole = <a> // <b>\nprint(whole)",
             "tier3_walkthrough": "Write:\nwhole = 20 // 6\nprint(whole)"
           },
           "difficultyOverride": null,
@@ -2679,14 +2679,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\n",
-            "standard": "",
+            "standard": "# Define safe_div(a, b) returning a // b, or 0 when b is zero\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))\n",
           "testCode": "assert safe_div(20, 4) == 5 and safe_div(20, 0) == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "def safe_div(___):\n    try:\n        return ___\n    except ___:\n        return ___\nprint(___)",
+            "tier1_nudge": "Pip guards the divide: 'Dividing by zero raises its own kind of error, so name that one in the `except` line.'",
+            "tier2_pattern": "def safe_div(<a>, <b>):\n    try:\n        return <a> // <b>\n    except ZeroDivisionError:\n        return <fallback>\n\nprint(safe_div(<a>, <b>))",
             "tier3_walkthrough": "Write:\ndef safe_div(a, b):\n    try:\n        return a // b\n    except ZeroDivisionError:\n        return 0\nprint(safe_div(20, 0))"
           },
           "difficultyOverride": null,
@@ -2746,8 +2746,8 @@
           "referenceSolution": "sq = 5 ** 2\nprint(sq)\n",
           "testCode": "assert sq == 25\nassert OUTPUT.strip() == '25', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at `**`: 'Write `sq = 5 ** 2` and then `print(sq)`!'",
-            "tier2_pattern": "sq = 5 ** 2\nprint(sq)",
+            "tier1_nudge": "Pip squares the number: 'The double-star operator raises a number to a power, rather than multiplying the two together.'",
+            "tier2_pattern": "sq = <base> ** <power>\nprint(sq)",
             "tier3_walkthrough": "Write:\nsq = 5 ** 2\nprint(sq)"
           },
           "difficultyOverride": null,
@@ -2778,8 +2778,8 @@
           "referenceSolution": "p1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)\n",
           "testCode": "assert d2 == 25 and OUTPUT.strip() == \"25\"",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "p1 = ___\np2 = ___\nd2 = ___\nprint(___)",
+            "tier1_nudge": "Pip measures the gap axis by axis: 'Subtract the matching coordinates, square each difference, then add all three together.'",
+            "tier2_pattern": "d2 = (<p2>[0]-<p1>[0])**2 + (<p2>[1]-<p1>[1])**2 + (<p2>[2]-<p1>[2])**2\nprint(d2)",
             "tier3_walkthrough": "Write:\np1 = (1, 2, 3)\np2 = (4, 6, 3)\nd2 = (p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2\nprint(d2)"
           },
           "difficultyOverride": null,
@@ -2856,8 +2856,8 @@
           "referenceSolution": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits += int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")\n",
           "testCode": "assert bits == 32, f\"Expected bits == 32, got {bits!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = '64-BIT UNLOCKED!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Vortex!",
-            "tier2_pattern": "raw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")",
+            "tier1_nudge": "Pip collapses the core: 'Try the conversion inside the loop and `pass` on failure, so a corrupted entry is skipped instead of stopping the loop.'",
+            "tier2_pattern": "bits = 0\nfor <item> in <list>:\n    try:\n        bits = bits + int(<item>)\n    except ValueError:\n        pass\nif bits == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nraw = [\"10\", \"glitch\", \"22\"]\nbits = 0\nfor item in raw:\n    try:\n        bits = bits + int(item)\n    except ValueError:\n        pass\nif bits == 32:\n    print(\"64-BIT UNLOCKED!\")"
           },
           "difficultyOverride": null,
@@ -2935,9 +2935,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip doubles five times over: '`**` multiplies the base by itself as many times as the second number says.'",
+            "tier2_pattern": "Multiply 2 by itself five times over.",
+            "tier3_walkthrough": "Tap Option A (`32`) — `2 ** 5` is 2×2×2×2×2."
           },
           "difficultyOverride": null,
           "isBonus": true,
