@@ -1084,9 +1084,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip holds up the duplicate shard: 'A set refuses to keep two copies of the same thing — so count the DISTINCT colours.'",
+            "tier1_nudge": "Pip holds up the duplicate shard: 'A set refuses to keep two copies of the same thing — so count the DISTINCT colors.'",
             "tier2_pattern": "`set(...)` drops every repeat, and `len(...)` then counts what is left.",
-            "tier3_walkthrough": "Tap Option A (`2`) — the repeated `\"red\"` collapses into one, leaving two distinct colours."
+            "tier3_walkthrough": "Tap Option A (`2`) — the repeated `\"red\"` collapses into one, leaving two distinct colors."
           },
           "difficultyOverride": null
         },
@@ -1621,7 +1621,7 @@
           "hints": {
             "tier1_nudge": "Pip points: 'First look up `\"hall\"`, then look up `\"gems\"` inside it!'",
             "tier2_pattern": "The first lookup picks one room out of the map; the second picks a key inside that room.",
-            "tier3_walkthrough": "Tap Option B (`12`)!"
+            "tier3_walkthrough": "Tap Option B (`12`) — the first lookup gets the hall's dictionary, and the second reads `12` out of it."
           },
           "difficultyOverride": null
         },
@@ -1675,7 +1675,7 @@
           "referenceSolution": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)\n",
           "testCode": "assert guardian == 'Chronis'\nassert OUTPUT.strip() == 'Chronis', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Chain `atlas[\"north\"][\"boss\"]` and print `guardian`!'",
+            "tier1_nudge": "Pip opens two lids in turn: 'Chain the two keys — the wing first, then what is stored inside it — and save the result in `guardian`.'",
             "tier2_pattern": "guardian = <dict>[\"<outer_key>\"][\"<inner_key>\"]\nprint(guardian)",
             "tier3_walkthrough": "Add:\nguardian = atlas[\"north\"][\"boss\"]\nprint(guardian)"
           },
@@ -1953,7 +1953,7 @@
           "hints": {
             "tier1_nudge": "Pip counts: 'Count the keys inside `{\"a\": 1, \"b\": 2, \"c\": 3}`!'",
             "tier2_pattern": "`len()` on the inner dictionary counts its keys, not the outer one's.",
-            "tier3_walkthrough": "Tap Option B (`3`)!"
+            "tier3_walkthrough": "Tap Option B (`3`) — `len()` is applied to the INNER dictionary, which holds three keys."
           },
           "difficultyOverride": null
         }
@@ -2065,7 +2065,7 @@
           "hints": {
             "tier1_nudge": "Pip points: '`int(\"boom\")` triggers `except ValueError:`!'",
             "tier2_pattern": "When the risky line raises an error, Python abandons the rest of the `try` block and jumps to the matching `except`.",
-            "tier3_walkthrough": "Tap Option A (`BLOCKED`)!"
+            "tier3_walkthrough": "Tap Option A (`BLOCKED`) — `int(\"boom\")` raises a ValueError, so Python abandons the rest of the `try` block and runs the `except` instead."
           },
           "difficultyOverride": null
         },
@@ -2307,7 +2307,7 @@
           "referenceSolution": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
           "testCode": "assert total == 20\nassert OUTPUT.strip() == '20', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Put `try: total += int(x)` and `except ValueError: continue` inside the `for` loop!'",
+            "tier1_nudge": "Pip skips the bad entries: 'Both the `try` and its `except` go INSIDE the loop, so one bad string only skips its own turn instead of stopping everything.'",
             "tier2_pattern": "for <item> in <list>:\n    try:\n        total += int(<item>)\n    except ValueError:\n        continue\nprint(total)",
             "tier3_walkthrough": "Add:\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)"
           },
