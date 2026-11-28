@@ -709,7 +709,7 @@ export function buildPip3D(builder, wx, wy, wz, yaw, appearance, time) {
 }
 
 // ---- 3. NPCs & VAULT DRAGONS ----
-export function buildNpc3D(builder, spriteKey, wx, wy, wz, time) {
+export function buildNpc3D(builder, spriteKey, wx, wy, wz, time, yaw = 0) {
   const bob = Math.sin(time * 2.5 + wx * 1.7 + wz) * 0.02;
 
   // Vault Dragons (majestic sculpted N64 dragons with ribbed wings & curved tails!)
@@ -717,7 +717,7 @@ export function buildNpc3D(builder, spriteKey, wx, wy, wz, time) {
     const pal = DRAGON_PALETTES[spriteKey];
     const flap = Math.sin(time * 5.2 + wx) * 0.42;
     const hover = 0.24 + Math.sin(time * 3.0 + wx) * 0.10;
-    builder.setRoot(wx, wy + hover, wz, 0, 1.32);
+    builder.setRoot(wx, wy + hover, wz, yaw, 1.32);
 
     builder.addBall(0, 0.36, 0, 0.24, 0.24, 0.32, pal.body, 8);
     builder.addBall(0, 0.32, 0.10, 0.16, 0.18, 0.22, pal.belly, 7);
@@ -737,7 +737,7 @@ export function buildNpc3D(builder, spriteKey, wx, wy, wz, time) {
 
   // Lord Null (towering sculpted dark obsidian/violet villain with spiked mantle)
   if (spriteKey === 'lord_null') {
-    builder.setRoot(wx, wy + bob, wz, 0, 1.25);
+    builder.setRoot(wx, wy + bob, wz, yaw, 1.25);
     const robe = [0.14, 0.08, 0.24];
     const trim = [0.56, 0.18, 0.88];
     const glow = [0.98, 0.22, 0.32];
@@ -758,7 +758,7 @@ export function buildNpc3D(builder, spriteKey, wx, wy, wz, time) {
 
   // Elder Ada (detailed sage in layered shoulder mantle, pleated teal/gold robe, draped hair, crystal staff)
   if (spriteKey === 'elder_ada') {
-    builder.setRoot(wx, wy + bob, wz, 0, 1.04);
+    builder.setRoot(wx, wy + bob, wz, yaw, 1.04);
     const robe = [0.12, 0.54, 0.56];
     const robeLight = [0.18, 0.66, 0.66];
     const gold = [0.95, 0.80, 0.28];
@@ -814,7 +814,7 @@ export function buildNpc3D(builder, spriteKey, wx, wy, wz, time) {
   }
 
   // Bram the Tinkerer (sturdy sculpted blacksmith with beard, goggles, rolled sleeves & gloves)
-  builder.setRoot(wx, wy + bob, wz, 0, 1.02);
+  builder.setRoot(wx, wy + bob, wz, yaw, 1.02);
   const apron = [0.68, 0.36, 0.16];
   const apronDark = [0.48, 0.24, 0.11];
   const shirt = [0.42, 0.24, 0.14];

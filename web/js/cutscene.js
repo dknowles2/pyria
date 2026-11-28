@@ -17,6 +17,10 @@ const BIOME_BACKDROPS = {
   'realm-04-hollow': ['#12263a', '#09121e'],
   'realm-05-woods': ['#15281c', '#0a140e'],
   'realm-06-crypt': ['#10262b', '#071216'],
+  'realm-64-01-valley': ['#1d4ed8', '#143628'],
+  'realm-64-02-courtyard': ['#1e40af', '#334155'],
+  'realm-64-03-observatory': ['#0b1026', '#312e81'],
+  'realm-64-04-sanctum': ['#2e1065', '#7f1d1d'],
 };
 
 const CUTSCENE_IMG_CACHE = new Map();
@@ -305,7 +309,7 @@ export function playCutscene({
       </div>
 
       <div class="cutscene-stage-wrap">
-        <canvas id="cutscene-canvas" width="640" height="296" class="pixel-canvas cutscene-canvas"></canvas>
+        <canvas id="cutscene-canvas" width="640" height="296" class="${eraKey === '64bit' ? 'cutscene-canvas' : 'pixel-canvas cutscene-canvas'}"></canvas>
       </div>
 
       <div class="cutscene-bar cutscene-bottom">
@@ -588,10 +592,16 @@ export function playCutscene({
 
     // 3. Left side: Customized Hero + hovering Pip
     const heroAlpha = beat.side === 'left' ? 1.0 : 0.72;
+    const is64 = eraKey === '64bit';
     ctx.globalAlpha = heroAlpha;
     if (sprites) {
-      sprites.drawHero(ctx, appearance, eraKey, 'right', animFrame, 56, 66, 48, 48);
-      sprites.drawPip(ctx, appearance, eraKey, 'right', animFrame, 104, 72 + bob, 26, 26);
+      if (is64) {
+        sprites.drawHero(ctx, appearance, eraKey, 'right', animFrame, 52, 58, 56, 56);
+        sprites.drawPip(ctx, appearance, eraKey, 'right', animFrame, 106, 66 + bob, 32, 32);
+      } else {
+        sprites.drawHero(ctx, appearance, eraKey, 'right', animFrame, 56, 66, 48, 48);
+        sprites.drawPip(ctx, appearance, eraKey, 'right', animFrame, 104, 72 + bob, 26, 26);
+      }
     }
     ctx.globalAlpha = 1.0;
 
@@ -603,7 +613,11 @@ export function playCutscene({
         rightAlpha = Math.max(0.08, 1 - elapsedSec * 0.85);
       }
       ctx.globalAlpha = rightAlpha;
-      sprites.drawNpc(ctx, rightSpriteKey, eraKey, 210 + slideOffset, 64 + bob, 48, 48);
+      if (is64) {
+        sprites.drawNpc(ctx, rightSpriteKey, eraKey, 204 + slideOffset, 56 + bob, 56, 56, 'left');
+      } else {
+        sprites.drawNpc(ctx, rightSpriteKey, eraKey, 210 + slideOffset, 64 + bob, 48, 48);
+      }
       ctx.globalAlpha = 1.0;
     }
 

@@ -1,6 +1,6 @@
 // Zero-dependency 32-Bit (PS1/GBA Isometric 2.5D) & 64-Bit (Nintendo 64 Textured 3D) Canvas Renderers
 
-import { pickN64Entity, renderN64WebGL } from './n64Renderer.js?v=20261127u';
+import { pickN64Entity, renderN64WebGL } from './n64Renderer.js?v=20261127v';
 export { pickN64Entity };
 
 const TILE_PALETTE = {

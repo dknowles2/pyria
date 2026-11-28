@@ -1,5 +1,11 @@
 // Modular Sprite & Tileset Renderer matching assets/sprites/manifest.json & assets/tilesets/manifest.json
 
+import {
+  drawHero3DPortrait,
+  drawNpc3DPortrait,
+  drawPip3DPortrait,
+} from './n64Portrait.js?v=20261127v';
+
 const DIRECTION_ROWS = {
   down: 0,
   up: 1,
@@ -123,6 +129,9 @@ export class SpriteManager {
    * Draws the modular layered Hero sprite at (dx, dy) with size (dw, dh).
    */
   drawHero(ctx, appearance, eraKey, direction, frameIndex, dx, dy, dw, dh) {
+    if (eraKey === '64bit' && drawHero3DPortrait(ctx, appearance, direction, frameIndex, dx, dy, dw, dh)) {
+      return;
+    }
     const spec = this.getEraSpec(eraKey);
     const row = DIRECTION_ROWS[direction] ?? 0;
     const col = ((frameIndex % spec.heroFramesPerDirection) + spec.heroFramesPerDirection) % spec.heroFramesPerDirection;
@@ -149,6 +158,9 @@ export class SpriteManager {
    * Draws animated Pip + optional companion_neck scarf.
    */
   drawPip(ctx, appearance, eraKey, direction, frameIndex, dx, dy, dw, dh) {
+    if (eraKey === '64bit' && drawPip3DPortrait(ctx, appearance, direction, frameIndex, dx, dy, dw, dh)) {
+      return;
+    }
     const key = this.normalizeEra(eraKey);
     const spec = this.getEraSpec(key);
     const row = DIRECTION_ROWS[direction] ?? 0;
@@ -193,8 +205,11 @@ export class SpriteManager {
   /**
    * Draws an NPC or Dragon sprite from npcs_and_dragons sheet.
    */
-  drawNpc(ctx, npcKey, eraKey, dx, dy, dw, dh) {
+  drawNpc(ctx, npcKey, eraKey, dx, dy, dw, dh, direction = null) {
     if (!npcKey) return false;
+    if (eraKey === '64bit' && drawNpc3DPortrait(ctx, npcKey, direction, dx, dy, dw, dh)) {
+      return true;
+    }
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
     const rect = era.npcs[npcKey];
@@ -221,22 +236,33 @@ export class SpriteManager {
     const w = canvas.width;
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = eraKey === '64bit';
 
-    // Soft pixel ground pad
-    ctx.fillStyle = 'rgba(52, 211, 153, 0.16)';
+    if (eraKey === '64bit') {
+      // N64 cobalt sky + emerald hill studio backdrop for 3D character showcase
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1e3a8a');
+      bg.addColorStop(0.62, '#38bdf8');
+      bg.addColorStop(0.64, '#2d6a4f');
+      bg.addColorStop(1, '#143628');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // Soft ground shadow pads
+    ctx.fillStyle = eraKey === '64bit' ? 'rgba(10, 14, 24, 0.36)' : 'rgba(52, 211, 153, 0.16)';
     ctx.beginPath();
-    ctx.ellipse(w * 0.44, h * 0.78, w * 0.24, h * 0.1, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.44, h * 0.80, w * 0.22, h * 0.09, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = 'rgba(246, 201, 69, 0.16)';
+    ctx.fillStyle = eraKey === '64bit' ? 'rgba(10, 14, 24, 0.30)' : 'rgba(246, 201, 69, 0.16)';
     ctx.beginPath();
-    ctx.ellipse(w * 0.74, h * 0.8, w * 0.13, h * 0.07, 0, 0, Math.PI * 2);
+    ctx.ellipse(w * 0.75, h * 0.81, w * 0.12, h * 0.06, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    const heroSize = Math.min(w * 0.56, h * 0.72);
-    const pipSize = heroSize * 0.54;
-    const bob = frameIndex % 2 === 1 ? -2 : 0;
+    const heroSize = eraKey === '64bit' ? Math.min(w * 0.68, h * 0.86) : Math.min(w * 0.56, h * 0.72);
+    const pipSize = heroSize * 0.56;
+    const bob = frameIndex % 2 === 1 ? (eraKey === '64bit' ? -4 : -2) : 0;
 
     this.drawHero(
       ctx,
@@ -245,7 +271,7 @@ export class SpriteManager {
       direction,
       frameIndex,
       w * 0.44 - heroSize / 2,
-      h * 0.78 - heroSize * 0.92,
+      h * 0.82 - heroSize * 0.90,
       heroSize,
       heroSize
     );
@@ -256,8 +282,8 @@ export class SpriteManager {
       eraKey,
       direction,
       frameIndex,
-      w * 0.74 - pipSize / 2,
-      h * 0.8 - pipSize * 0.9 + bob,
+      w * 0.75 - pipSize / 2,
+      h * 0.80 - pipSize * 0.92 + bob,
       pipSize,
       pipSize
     );
