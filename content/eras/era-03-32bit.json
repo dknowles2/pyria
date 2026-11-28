@@ -1210,7 +1210,7 @@
           "id": "trial-32-03-03b",
           "trialType": "code",
           "title": "Combine Sets With Union (|)",
-          "storyPrompt": "Just as `&` finds items in BOTH sets (intersection), `|` combines ALL unique items from either set (union)!",
+          "storyPrompt": "Sets have their own math operators! The union operator `|` combines ALL the unique items from two sets — and because a set never keeps duplicates, anything sitting in both sets still shows up only once.",
           "objective": "Create the variable `all_gems` as the union of sets `a` and `b` using |, then print len(`all_gems`).",
           "concepts": [
             "sets"
@@ -1254,7 +1254,7 @@
               {
                 "id": "c",
                 "label": "1",
-                "explanation": "`1` would be `a & b` (intersection — only `\"gold\"`). `a | b` combines all unique items!"
+                "explanation": "Only `\"gold\"` sits in BOTH sets, but `a | b` keeps everything from either set — all 3 unique gems!"
               },
               {
                 "id": "d",
@@ -1269,7 +1269,7 @@
           "id": "trial-32-03-04",
           "trialType": "code",
           "title": "Set Intersection (&)",
-          "storyPrompt": "Sets support fast math operators: `&` finds the **intersection** (items in BOTH sets), while `|` finds the **union** (items in EITHER set).",
+          "storyPrompt": "You already combined two sets with `|` (the union — everything from either set). Meet its partner `&`, the **intersection**, which keeps ONLY the items that appear in BOTH sets.",
           "objective": "Find colors shared by BOTH sets `a = {\"cyan\", \"gold\", \"ruby\"}` and `b = {\"gold\", \"ruby\", \"jade\"}` using `common = a & b`, then `print(len(common))`.",
           "concepts": [
             "dictionaries_nested",
@@ -2023,7 +2023,36 @@
             "try",
             "except",
             "call:print"
-          ]
+          ],
+          "introChoice": {
+            "title": "Whole-Number Division (//)",
+            "prompt": "Python's double slash `//` divides and keeps only the WHOLE number, throwing away whatever is left over. So `20 // 6` is `3`, because 6 fits into 20 three full times.",
+            "question": "What does `20 // 6` evaluate to?",
+            "codeSnippet": "print(20 // 6)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "2",
+                "explanation": "`2` is the leftover (`20 % 6`). `//` asks how many full times 6 fits into 20 instead."
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Spot on! 6 fits into 20 three full times (`6 * 3 = 18`), so `20 // 6` is `3`."
+              },
+              {
+                "id": "c",
+                "label": "4",
+                "explanation": "`//` always rounds DOWN, never up — four sixes would be `24`, which is too big!"
+              },
+              {
+                "id": "d",
+                "label": "20",
+                "explanation": "`//` really does divide — it just hands back a whole number instead of a decimal."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-32-06-03",
@@ -2530,7 +2559,7 @@
           "id": "trial-32-04-03b",
           "trialType": "code",
           "title": "Whole-Number Division (//)",
-          "storyPrompt": "Before combining `//` with `try / except ZeroDivisionError`, practice `//` (integer/floor division) by itself! `20 // 6` returns `3` (dropping the remainder).",
+          "storyPrompt": "More practice with `//` (whole-number division) before the 3D distance math ahead! `20 // 6` returns `3`, dropping the remainder.",
           "objective": "Create the variable `whole` storing `20 // 6`, then print `whole`.",
           "concepts": [
             "basic_math",

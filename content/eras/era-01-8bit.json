@@ -195,33 +195,33 @@
           ],
           "introChoice": {
             "title": "Two Lines in a Row!",
-            "prompt": "Python reads your spellbook from TOP to BOTTOM, one line at a time! And `shout(\"...\")` works just like `say(\"...\")`, printing a bold message on its own line.",
+            "prompt": "Python reads your spellbook from TOP to BOTTOM, one line at a time! `shout(\"...\")` puts its message on its own line just like `say(\"...\")` — except `shout()` always SHOUTS, turning your text into ALL CAPS.",
             "question": "What will Python display when these two lines run?",
             "codeSnippet": "shout(\"Go!\")\nshout(\"Spark!\")",
             "choices": [
               {
                 "id": "a",
-                "label": "One line: Go! Spark!",
-                "code": "Go! Spark!",
+                "label": "One line: GO! SPARK!",
+                "code": "GO! SPARK!",
                 "explanation": "Close! Each `shout(...)` puts its message on its OWN separate line."
               },
               {
                 "id": "b",
-                "label": "Two lines: Go! then Spark!",
-                "code": "Go!\nSpark!",
-                "explanation": "Spot on! Python runs line 1 first (`Go!`) and then moves down to line 2 (`Spark!`)!"
+                "label": "Two lines: GO! then SPARK!",
+                "code": "GO!\nSPARK!",
+                "explanation": "Spot on! Python runs line 1 first (`GO!`), then moves down to line 2 (`SPARK!`) — and `shout()` puts both in ALL CAPS!"
               },
               {
                 "id": "c",
-                "label": "Only the last line: Spark!",
-                "code": "Spark!",
+                "label": "Only the last line: SPARK!",
+                "code": "SPARK!",
                 "explanation": "Nope — Python runs EVERY line from top to bottom, not just the last one!"
               },
               {
                 "id": "d",
-                "label": "Backwards: Spark! then Go!",
-                "code": "Spark!\nGo!",
-                "explanation": "Not quite! Python always starts at line 1 and works downward."
+                "label": "Two lines, but not shouted: Go! then Spark!",
+                "code": "Go!\nSpark!",
+                "explanation": "Almost! Both lines DO run in order, but `shout()` turns every message into ALL CAPS: `GO!` and `SPARK!`."
               }
             ],
             "correctChoiceId": "b"
@@ -352,7 +352,7 @@
           "trialType": "code",
           "title": "Unseal Spark's Lightning Vault",
           "storyPrompt": "You reached Spark's Lightning Vault! Combine everything you mastered in Whispering Meadow: shout the ready signal on line 1, then glue two strings together on line 2 to unseal the vault!",
-          "objective": "Line 1: `shout(\"SPARK READY!\")`. Line 2: use `say()` with `+` to join `\"Open\"` and `\"the vault!\"` (put the space in either string, like `\"Open \" + \"the vault!\"` or `\"Open\" + \" the vault!\"`).",
+          "objective": "Line 1: use `shout()` with `Spark ready!` (remember, `shout()` prints it in ALL CAPS). Line 2: use `say()` with `+` to join `\"Open\"` and `\"the vault!\"` (put the space in either string, like `\"Open \" + \"the vault!\"` or `\"Open\" + \" the vault!\"`).",
           "concepts": [
             "function_calls",
             "strings",
@@ -1890,44 +1890,44 @@
         {
           "id": "trial-04-01",
           "trialType": "multiple_choice",
-          "title": "Predict the if / elif / else Path!",
-          "storyPrompt": "Welcome to Frostbite Hollow! When you have THREE or more choices, Python uses `if`, `elif` (short for 'else if'), and `else` — checking top-to-bottom and stopping at the FIRST True branch. Read the code below: what will Python `print()`?",
-          "objective": "Trace the `if / elif / else` code with `temp = 20` and choose what Python will `print()`.",
+          "title": "Meet print() — say()'s Real Name!",
+          "storyPrompt": "Welcome to Frostbite Hollow! Time for a secret: `say()` was a training spell. The REAL Python function for showing things on screen is `print()` — and it works exactly the same way. The golden rule comes along too: quotes mean literal text, and NO quotes opens the variable box. What will the code below print?",
+          "objective": "Predict what `print(\"Hello!\")` and `print(dragon)` display when `dragon` holds `Glacier`.",
           "concepts": [
-            "conditionals_elif_else",
-            "comparisons",
-            "print_output"
+            "print_output",
+            "strings",
+            "variables"
           ],
           "shardReward": 40,
           "unlockId": "tunic-navy",
-          "codeSnippet": "temp = 20\nif temp <= 0:\n    print(\"FROZEN\")\nelif temp <= 25:\n    print(\"CHILLY\")\nelse:\n    print(\"WARM\")",
+          "codeSnippet": "dragon = \"Glacier\"\nprint(\"Hello!\")\nprint(dragon)",
           "choices": [
             {
               "id": "a",
-              "label": "FROZEN",
-              "explanation": "Not quite! `temp` is `20`, and `20 <= 0` is False, so Python skips the first `if` branch."
+              "label": "Two lines: Hello! then dragon",
+              "explanation": "Careful! That would need quotes: `print(\"dragon\")`. With NO quotes, Python opens the `dragon` box and prints `Glacier`."
             },
             {
               "id": "b",
-              "label": "CHILLY",
-              "explanation": "Nailed it! `20 <= 0` is False, so Python checks `elif temp <= 25`—that's True! Python prints `CHILLY` and skips `else`."
+              "label": "One line: Hello! Glacier",
+              "explanation": "Almost! Each `print(...)` always finishes with its own line, so `Hello!` and `Glacier` land on two separate lines."
             },
             {
               "id": "c",
-              "label": "WARM",
-              "explanation": "Almost! `else` only runs if BOTH `if` and `elif` are False—but `20 <= 25` IS True!"
+              "label": "Two lines: Hello! then Glacier",
+              "explanation": "Spot on! `print(\"Hello!\")` prints the quoted text, and `print(dragon)` opens the box to print `Glacier` — each on its own line."
             },
             {
               "id": "d",
-              "label": "FROZEN, CHILLY, and WARM",
-              "explanation": "Good guess, but Python only runs ONE branch in an `if / elif / else` chain—the very first one that is True!"
+              "label": "Error — `print` is not a real Python spell",
+              "explanation": "The opposite! `print()` is real Python, used by programmers everywhere — `say()` was the training-wheels version."
             }
           ],
-          "correctChoiceId": "b",
+          "correctChoiceId": "c",
           "hints": {
-            "tier1_nudge": "Pip traces with a claw: 'Plug 20 in for temp: is 20 <= 0? No! Is 20 <= 25? Yes!'",
-            "tier2_pattern": "Python checks top-to-bottom and runs ONLY the first True branch (`elif temp <= 25:`).",
-            "tier3_walkthrough": "Tap Option B (`CHILLY`) because 20 is not <= 0, but 20 IS <= 25!"
+            "tier1_nudge": "Pip chirps: 'print() behaves exactly like say() — and watch the quotes! Line 2 has them, line 3 does not.'",
+            "tier2_pattern": "Line 2 prints the literal text `Hello!`; line 3 opens the `dragon` box and prints `Glacier`. Each print() gets its own line.",
+            "tier3_walkthrough": "Tap Option C (`Hello!` then `Glacier`) — two separate lines, because every print() ends its own line."
           },
           "difficultyOverride": null
         },
@@ -2047,7 +2047,36 @@
               },
               "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\nassert _norm(OUTPUT.strip()) == _norm('melted')\nassert isinstance(ice_state, str) and ice_state.strip().upper() == 'MELTED'\n"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Predict the if / elif / else Path!",
+            "prompt": "When you have THREE or more choices, Python uses `if`, `elif` (short for 'else if'), and `else`. Python checks them top-to-bottom and runs ONLY the FIRST branch that is `True`, then skips the rest.",
+            "question": "What will Python print when `temp` is `20`?",
+            "codeSnippet": "temp = 20\nif temp <= 0:\n    print(\"FROZEN\")\nelif temp <= 25:\n    print(\"CHILLY\")\nelse:\n    print(\"WARM\")",
+            "choices": [
+              {
+                "id": "a",
+                "label": "FROZEN",
+                "explanation": "Not quite! `temp` is `20`, and `20 <= 0` is False, so Python skips the first `if` branch."
+              },
+              {
+                "id": "b",
+                "label": "CHILLY",
+                "explanation": "Nailed it! `20 <= 0` is False, so Python checks `elif temp <= 25`—that's True! Python prints `CHILLY` and skips `else`."
+              },
+              {
+                "id": "c",
+                "label": "WARM",
+                "explanation": "Almost! `else` only runs if BOTH `if` and `elif` are False—but `20 <= 25` IS True!"
+              },
+              {
+                "id": "d",
+                "label": "FROZEN, CHILLY, and WARM",
+                "explanation": "Good guess, but Python only runs ONE branch in an `if / elif / else` chain—the very first one that is True!"
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-04-02b",
@@ -2165,11 +2194,11 @@
           "shardReward": 50,
           "unlockId": null,
           "starterCode": {
-            "explorer": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    \nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
-            "standard": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\n# Add your elif branch for shards >= 10 here:\n\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
+            "explorer": "shards = 50 + 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    \nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
+            "standard": "shards = 50 + 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\n# Add your elif branch for shards >= 10 here:\n\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
             "challenge": ""
           },
-          "referenceSolution": "shards = 11 * 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    badge = \"BRONZE\"\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
+          "referenceSolution": "shards = 50 + 5\nif shards >= 80:\n    badge = \"GOLD\"\nelif shards >= 40:\n    badge = \"SILVER\"\nelif shards >= 10:\n    badge = \"BRONZE\"\nelse:\n    badge = \"STARTER\"\nprint(badge)\n",
           "testCode": "assert shards == 55, f\"Expected 55 shards, got {shards!r}\"\nassert isinstance(badge, str) and badge.strip().upper() == 'SILVER', f\"Expected badge to be 'SILVER', got {badge!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_got = OUTPUT.strip()\nassert _got, \"Nothing was printed yet! Make sure you call print(...).\"\nif _norm(_got) != _norm('SILVER'):\n    if \"\".join(_norm(_got)) == \"\".join(_norm('SILVER')):\n        assert False, f'Almost! Some words got squished together (got {_got!r}). Check the spaces between words!'\n    assert False, f\"Expected 'SILVER', got {_got!r} (check your spelling!)\"\n",
           "hints": {
             "tier1_nudge": "Pip sparkles: 'Python stops at the FIRST True branch — so 55 matches SILVER!'",
@@ -4069,13 +4098,42 @@
             "for",
             "call:range",
             "call:print"
-          ]
+          ],
+          "introChoice": {
+            "title": "Shortcut Accumulator (+=)",
+            "prompt": "Adding to a running total is so common that Python has a shortcut: `charge += 5` means the EXACT same thing as `charge = charge + 5`!",
+            "question": "What does `charge` equal after this loop?",
+            "codeSnippet": "charge = 0\nfor i in range(3):\n    charge += 5\nprint(charge)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "5",
+                "explanation": "`+=` ADDS 5 every single turn (`0 -> 5 -> 10 -> 15`) rather than just setting it to 5 once!"
+              },
+              {
+                "id": "b",
+                "label": "0",
+                "explanation": "`charge` starts at `0`, but the loop runs 3 times and each turn adds `5`!"
+              },
+              {
+                "id": "c",
+                "label": "15",
+                "explanation": "Spot on! `range(3)` gives 3 turns, and `charge += 5` adds 5 each time: `0 -> 5 -> 10 -> 15`!"
+              },
+              {
+                "id": "d",
+                "label": "3",
+                "explanation": "`3` is how many TIMES the loop runs — each of those turns adds `5` to `charge`!"
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-07-05",
           "trialType": "code",
           "title": "Sum the Storm Crystals",
-          "storyPrompt": "Five sky crystals hold power levels `1, 2, 3, 4, 5`. Meet a clean Python shortcut: instead of writing `total = total + crystal`, you can write `total += crystal` to add right into `total`! Sum crystals 1 through 5 in a loop and print the final total.",
+          "storyPrompt": "Five sky crystals hold power levels `1, 2, 3, 4, 5`. You already used `+=` to add a FIXED amount every turn — now add the loop variable itself with `total += crystal`, so each turn adds whatever that crystal's power happens to be! Sum crystals 1 through 5 and print the final total.",
           "objective": "Start total at 0, loop through numbers 1 to 5 adding each number to total using +=, then print total once after the loop.",
           "concepts": [
             "for_loops",
@@ -4105,8 +4163,8 @@
             "call:print"
           ],
           "introChoice": {
-            "title": "Shortcut Accumulator (+=)",
-            "prompt": "Adding to a running total is so common that Python has a shortcut: `total += crystal` means the EXACT same thing as `total = total + crystal`!",
+            "title": "Adding the Loop Variable with +=",
+            "prompt": "You know `total += 5` adds a fixed `5` each turn. Put the loop variable in instead — `total += n` — and each turn adds whatever number `n` is holding right then!",
             "question": "What does `total` equal after this loop?",
             "codeSnippet": "total = 0\nfor n in range(1, 4):\n    total += n\nprint(total)",
             "choices": [

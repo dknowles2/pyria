@@ -6165,7 +6165,39 @@
             "class",
             "self_attr",
             "def"
-          ]
+          ],
+          "introChoice": {
+            "title": "Why Every Method Needs self",
+            "prompt": "To give each object its OWN data, Python runs a special setup method called `__init__` whenever you create one. Its FIRST parameter is ALWAYS `self` — 'this brand-new object being built right now' — so `self.name = name` can attach the name onto it.",
+            "question": "Which `__init__` line lets Python hand the new object in as `self`?",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Option A",
+                "code": "def __init__(name):",
+                "explanation": "This is the bug below! Python always passes the new object first, so with only one parameter there is no room for the name — you get a TypeError."
+              },
+              {
+                "id": "b",
+                "label": "Option B",
+                "code": "def __init__(self, name):",
+                "explanation": "Spot on! `self` comes FIRST, then `name`. Python passes the new object as `self` automatically, so `self.name = name` can attach the name onto it."
+              },
+              {
+                "id": "c",
+                "label": "Option C",
+                "code": "def __init__(self):",
+                "explanation": "Close, but this one accepts no name at all! `Dragon(\"Comet\")` needs a second parameter to catch `\"Comet\"`."
+              },
+              {
+                "id": "d",
+                "label": "Option D",
+                "code": "def __init__(name, self):",
+                "explanation": "The order matters! Python always hands over the new object FIRST, so `self` has to be the first parameter."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
         },
         {
           "id": "trial-16-14-03",
