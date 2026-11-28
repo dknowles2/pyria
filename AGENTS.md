@@ -20,6 +20,7 @@ Pyria is primarily for **kids around 10 years old**. All player-facing text—in
 - **No Claude-style mannered prose**: No em-dashes (`—`) in player-facing text, no purple prose (*sabotaged*, *diorama*, *isometric*, *Gouraud-shaded*, *shimmering*, *woven from*), no cheesy sound-effect openers or all-caps hype (*"Splash-sparkle!"*, *"RUMBLE-CRUNCH!"*, *"WOOHOO!"*, *"IMPOSSIBLE!!"*), and no canned template openers.
 - **No unexplained coding jargon**: Avoid *syntax*, *snippet*, *parameter*, *argument*, *attribute*, *method*, *override*, *subclass*, *superclass*, *iterate*, *concatenate*, *invoke*, *negate*, *immutable*, *deduplicate*, *invariant*, *runtime exception*, *zero-based index*, *expression*, *comprehension*, *data structures*. Always introduce real Python concepts in concrete, everyday words.
 - Follow all detailed authoring and verification rules in `.agents/rules/lesson-authoring.md` whenever editing lesson or curriculum content.
+- `npm run test:text` enforces the rules above over `content/eras/*.json`, `content/game.json`, `content/maps/*.json`, `web/js/*.js` and `web/index.html`. Map entity labels are player-visible, so when you retitle a trial, update its map marker too (`content/maps/<realm>.json`).
 
 ## Keep the Main Website (`site/`) Accurate
 
@@ -47,6 +48,8 @@ Run the relevant test suites before completing changes:
 
 ```bash
 npm run test:content   # Validate content JSON schemas, AST constructs & curriculum rules
+npm run test:parse     # Parse-check every browser JS module (test:web only loads some)
+npm run test:text      # Check player-facing text against rule 0 (plain English for ~10yo)
 npm run test:web       # Web client & build script unit tests
 npm run typecheck      # TypeScript check for worker/
 npm test               # Cloudflare Worker + D1 Vitest suite

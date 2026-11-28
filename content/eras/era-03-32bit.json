@@ -593,7 +593,6 @@
           "storyPrompt": "Anvilwing's one-line list builder has a typo, so Python cannot run it to multiply each ore by 10.",
           "objective": "Fix the one-line list builder so `power` becomes `[10, 20, 30]` and prints `[10, 20, 30]`.",
           "concepts": [
-            "nested_loops",
             "list_comprehensions"
           ],
           "shardReward": 130,
@@ -686,7 +685,6 @@
           "storyPrompt": "Only the hottest metal bars are ready for Anvilwing's forge! Add an `if` check at the end of a one-line list builder to keep only temperatures that are at least `10`.",
           "objective": "Using `temps`, create the variable `hot` with a one-line list builder that keeps only numbers `>= 10`, then print `hot`.",
           "concepts": [
-            "nested_loops",
             "list_comprehensions"
           ],
           "shardReward": 135,
@@ -762,8 +760,8 @@
           "storyPrompt": "Anvilwing needs a tiny 2-by-2 map of `(x, y)` grid spots! Use two `for` parts inside one list builder to pair every `x` in `range(2)` with every `y` in `range(2)`.",
           "objective": "Create the variable `coords` holding every `(x, y)` tuple for `x` in `range(2)` and `y` in `range(2)` using a one-line list builder, then print `len(coords)`.",
           "concepts": [
-            "nested_loops",
-            "list_comprehensions"
+            "list_comprehensions",
+            "tuples"
           ],
           "shardReward": 140,
           "unlockId": null,
@@ -822,7 +820,6 @@
           "storyPrompt": "The labels outside Anvilwing's vault need to be stamped in capital letters! You can use `.upper()` right at the front of a one-line list builder.",
           "objective": "Using `tags`, create the variable `loud` with a one-line list builder that turns each word into uppercase with `.upper()`, then print `loud`.",
           "concepts": [
-            "nested_loops",
             "list_comprehensions"
           ],
           "shardReward": 145,
@@ -869,8 +866,8 @@
           "storyPrompt": "Anvilwing shows you a neat shortcut! When a one-line list builder is the only thing inside a call like `sum(...)`, you can leave out the square brackets. Python still uses the exact same words in the same order, but hands over one value at a time instead of building a full list first.",
           "objective": "Double each weight in `ores` inside `sum(...)` without square brackets, store the result in `total`, then print `total`.",
           "concepts": [
-            "list_comprehensions",
-            "basic_math"
+            "basic_math",
+            "generator_expressions"
           ],
           "shardReward": 60,
           "unlockId": null,
@@ -943,7 +940,6 @@
           "storyPrompt": "This is the final lock before Anvilwing! Given `bars = [10, 25, 40, 15]`, keep only bars that are at least `20` and double each one in a single list builder.",
           "objective": "Create `bars = [10, 25, 40, 15]` and build `forged` using a one-line list builder that doubles every bar in `bars` that is `>= 20`. If `sum(forged)` equals `130`, print `\"ANVILWING FREE!\"`.",
           "concepts": [
-            "nested_loops",
             "list_comprehensions"
           ],
           "shardReward": 160,
@@ -1171,8 +1167,7 @@
           "storyPrompt": "Lumina's nested room map crashes with a `KeyError` when checking the northern gate.",
           "objective": "Fix the nested dictionary lookup so it prints `OPEN`.",
           "concepts": [
-            "dictionaries_nested",
-            "sets"
+            "dictionaries_nested"
           ],
           "shardReward": 140,
           "unlockId": null,
@@ -1242,7 +1237,6 @@
           "storyPrompt": "Your backpack has repeat crystal colors in `found`. Turn the list into a `set` to drop the duplicates, then count how many unique colors are left with `len()`.",
           "objective": "Using `found`, create the variable `unique_count` storing the number of unique crystal colors (using `set()` and `len()`), then print `unique_count`.",
           "concepts": [
-            "dictionaries_nested",
             "sets"
           ],
           "shardReward": 145,
@@ -1346,7 +1340,6 @@
           "storyPrompt": "You already combined two sets with `|` (union, everything from either set). Now meet its partner `&` (**intersection**), which keeps only the items that appear in both sets.",
           "objective": "Using sets `a` and `b`, create the variable `common` storing only the colors in both sets with `&`, then print `len(common)`.",
           "concepts": [
-            "dictionaries_nested",
             "sets"
           ],
           "shardReward": 150,
@@ -1435,8 +1428,7 @@
           "storyPrompt": "Lumina's cave map `rooms` stores each room's details in an inner dictionary. Check where the `\"hall\"` leads next!",
           "objective": "Create the variable `dest` by reading `\"next\"` inside `rooms[\"hall\"]`, then print `dest`.",
           "concepts": [
-            "dictionaries_nested",
-            "sets"
+            "dictionaries_nested"
           ],
           "shardReward": 155,
           "unlockId": null,
@@ -1481,7 +1473,8 @@
           "objective": "Create `nodes = {\"A\": {\"power\": 25}, \"B\": {\"power\": 35}, \"C\": {\"power\": 40}}` and build `beam` by summing `[n[\"power\"] for n in nodes.values()]`. If `beam` equals `100`, print `\"LUMINA FREE!\"`.",
           "concepts": [
             "dictionaries_nested",
-            "sets"
+            "list_comprehensions",
+            "dict_iteration"
           ],
           "shardReward": 170,
           "unlockId": null,
@@ -1666,7 +1659,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 55,
+          "shardReward": 135,
           "unlockId": null,
           "codeSnippet": "rooms = {\n    \"hall\": {\"gems\": 12, \"lit\": True},\n    \"vault\": {\"gems\": 40, \"lit\": False}\n}\nprint(rooms[\"hall\"][\"gems\"])",
           "choices": [
@@ -1708,7 +1701,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 55,
+          "shardReward": 145,
           "unlockId": null,
           "bugSummary": "The nested lookup causes a `KeyError` because the inner key is spelled wrong.",
           "starterCode": {
@@ -1739,7 +1732,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 60,
+          "shardReward": 150,
           "unlockId": null,
           "starterCode": {
             "explorer": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"???\"]\nprint(guardian)\n",
@@ -1769,7 +1762,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 60,
+          "shardReward": 155,
           "unlockId": null,
           "starterCode": {
             "explorer": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += ???\nprint(vault[\"west\"][\"gold\"])\n",
@@ -1828,7 +1821,7 @@
             "dictionaries_nested",
             "booleans"
           ],
-          "shardReward": 65,
+          "shardReward": 160,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"east\": {\"gems\": 5}}\nrooms[\"east\"][\"lit\"] = ???\nprint(rooms[\"east\"][\"lit\"])\n",
@@ -1860,7 +1853,7 @@
             "for_loops",
             "dict_iteration"
           ],
-          "shardReward": 65,
+          "shardReward": 165,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\nfor r in rooms.values():\n    total += r[\"???\"]\nprint(total)\n",
@@ -1892,7 +1885,7 @@
             "dict_iteration",
             "for_loops"
           ],
-          "shardReward": 65,
+          "shardReward": 60,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\nfor name, room in rooms.???():\n    print(name, room[\"gems\"])\n",
@@ -1966,7 +1959,7 @@
             "for_loops",
             "conditionals_if"
           ],
-          "shardReward": 85,
+          "shardReward": 175,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")\n",
@@ -1998,7 +1991,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 55,
+          "shardReward": 155,
           "unlockId": null,
           "codeSnippet": "atlas = {\"east\": {\"a\": 1, \"b\": 2, \"c\": 3}}\nprint(len(atlas[\"east\"]))",
           "choices": [
@@ -2110,7 +2103,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 55,
+          "shardReward": 140,
           "unlockId": null,
           "codeSnippet": "try:\n    n = int(\"boom\")\n    print(n)\nexcept ValueError:\n    print(\"BLOCKED\")",
           "choices": [
@@ -2152,7 +2145,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 55,
+          "shardReward": 150,
           "unlockId": null,
           "bugSummary": "A missing colon after `try` stops Python from running the block.",
           "starterCode": {
@@ -2213,7 +2206,7 @@
             "error_handling",
             "type_conversion"
           ],
-          "shardReward": 60,
+          "shardReward": 155,
           "unlockId": null,
           "starterCode": {
             "explorer": "raw = \"bad\"\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = ???\nprint(val)\n",
@@ -2255,7 +2248,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 60,
+          "shardReward": 160,
           "unlockId": null,
           "starterCode": {
             "explorer": "a = 20\nb = 0\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = ???\nprint(ans)\n",
@@ -2299,7 +2292,7 @@
             "error_handling",
             "dictionaries"
           ],
-          "shardReward": 65,
+          "shardReward": 165,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"???\"\nprint(status)\n",
@@ -2371,7 +2364,7 @@
             "error_handling",
             "for_loops"
           ],
-          "shardReward": 65,
+          "shardReward": 170,
           "unlockId": null,
           "starterCode": {
             "explorer": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
@@ -2406,7 +2399,7 @@
             "functions_return",
             "for_loops"
           ],
-          "shardReward": 85,
+          "shardReward": 180,
           "unlockId": null,
           "starterCode": {
             "explorer": "raw = [\"10\", \"null\", \"30\"]\ndef safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\npower = sum(safe_parse(s) for s in raw)\nif power == 40:\n    print(\"AEGIS FREE!\")\n",
@@ -2439,7 +2432,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 55,
+          "shardReward": 160,
           "unlockId": null,
           "choices": [
             {
@@ -2597,8 +2590,6 @@
           "objective": "Fix the broken `try / except` block so it skips bad entries with `pass` and prints `10`.",
           "concepts": [
             "error_handling",
-            "tuples",
-            "dictionaries_nested",
             "for_loops"
           ],
           "shardReward": 160,
@@ -2677,8 +2668,6 @@
           "objective": "Define `safe_int(text)` to return `int(text)` inside `try:`, or return `0` on `ValueError`. Then print `safe_int(\"oops\")`.",
           "concepts": [
             "error_handling",
-            "tuples",
-            "dictionaries_nested",
             "functions_def",
             "functions_return"
           ],
@@ -2712,8 +2701,7 @@
           "storyPrompt": "Let's practice `//` (whole-number division) once more before building your `safe_div` spell! `20 // 6` gives `3` and drops the leftover.",
           "objective": "Create the variable `whole` storing `20 // 6`, then print `whole`.",
           "concepts": [
-            "basic_math",
-            "error_handling"
+            "basic_math"
           ],
           "shardReward": 60,
           "unlockId": null,
@@ -2744,8 +2732,6 @@
           "objective": "Define `safe_div(a, b)` to return `a // b` inside `try:`, or return `0` on `ZeroDivisionError`. Then print `safe_div(20, 0)`.",
           "concepts": [
             "error_handling",
-            "tuples",
-            "dictionaries_nested",
             "functions_def",
             "functions_return"
           ],
@@ -2807,8 +2793,7 @@
           "storyPrompt": "Before using `** 2` in 3D distance math, practice Python's power symbol `**` by itself! `5 ** 2` means 5 squared (`5 * 5 = 25`).",
           "objective": "Create the variable `sq` storing `5 ** 2`, then print `sq`.",
           "concepts": [
-            "basic_math",
-            "tuples"
+            "basic_math"
           ],
           "shardReward": 60,
           "unlockId": null,
@@ -2838,9 +2823,8 @@
           "storyPrompt": "Two floating beacons `p1` and `p2` mark the path to Vortex's vault! Find their squared 3D distance by subtracting each matching coordinate (`[0]`, `[1]`, `[2]`), squaring each difference with `** 2`, and adding all three together.",
           "objective": "Using the 3D point tuples `p1` and `p2`, create the variable `d2` storing `(p2[0]-p1[0])**2 + (p2[1]-p1[1])**2 + (p2[2]-p1[2])**2`, then print `d2`.",
           "concepts": [
-            "error_handling",
             "tuples",
-            "dictionaries_nested"
+            "coords_3d"
           ],
           "shardReward": 175,
           "unlockId": null,

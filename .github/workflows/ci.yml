@@ -71,6 +71,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Parse-check every browser JS module
+        run: npm run test:parse
+
       - name: Run Web JS unit tests with coverage
         run: npm run test:web:coverage
 
@@ -108,3 +111,6 @@ jobs:
 
       - name: Validate game content, trials, and maps
         run: npm run test:content
+
+      - name: Check player-facing text against rule 0
+        run: npm run test:text

@@ -190,7 +190,7 @@
     {"id": "chest-01-05", "type": "chest", "x": 58, "y": 35, "label": "Banner Island Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-01-04"},
     {"id": "chest-01-06", "type": "chest", "x": 36, "y": 4, "label": "Firefly Alcove Chest", "refId": null, "spriteKey": "chest_closed", "shardReward": 25, "requiredTrialId": "trial-01-03"},
     {"id": "bonus-trial-01", "type": "bonus_trial", "x": 2, "y": 23, "label": "Secret Rune: Pip's Favorite Snack!", "refId": "trial-01-bonus", "spriteKey": "torch"},
-    {"id": "egg-01-a", "type": "easter_egg", "x": 20, "y": 44, "label": "Suspicious Square Bush", "refId": null, "spriteKey": "statue", "title": "The Forbidden Dirt Block", "message": "You peek behind the leaves and find a perfectly square block of grass with a note: 'Never dig straight down! — A friendly Minecraft villager.'", "shardReward": 15},
+    {"id": "egg-01-a", "type": "easter_egg", "x": 20, "y": 44, "label": "Suspicious Square Bush", "refId": null, "spriteKey": "statue", "title": "The Forbidden Dirt Block", "message": "You peek behind the leaves and find a perfectly square block of grass with a note: 'Never dig straight down! From a friendly Minecraft villager.'", "shardReward": 15},
     {"id": "egg-01-b", "type": "easter_egg", "x": 21, "y": 3, "label": "Crumpled Purple Note", "refId": null, "spriteKey": "campfire", "title": "Lord Null's Secret Diary #1", "message": "Dear Diary: Day 4. Today Pip stole my favorite evil rubber ducky. If a 10-year-old Code-Tamer rescues Spark, I am SO moving to a volcano.", "shardReward": 15}
   ]
 }

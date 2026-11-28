@@ -328,8 +328,8 @@ test('#95: translateErrorForPip covers later Python concepts (colons, indentatio
     errorMessage: "name 'self' is not defined",
     errorLine: 4,
   });
-  assert.match(selfNameRes.pipMessage, /class method/i);
-  assert.match(selfNameRes.pipMessage, /def method\(self/);
+  assert.match(selfNameRes.pipMessage, /action that belongs to a class/i);
+  assert.match(selfNameRes.pipMessage, /def roar\(self/);
 
   // Normal NameError still gives variable hint
   const normalNameRes = translateErrorForPip({

@@ -18,7 +18,7 @@
       },
       "miniVisualUpgrade": "Bits 33-40 Restored: Bright green 3D hills, deep blue skies, and spinning 3D gems.",
       "storyIntro": "Pyria leaps into 3D! Green hills stretch toward a faraway castle. Use Python classes to build and control 3D objects in Polygon Valley.",
-      "storyOutro": "Polywing glides across the valley and opens the giant stone gates to Gouraud Courtyard.",
+      "storyOutro": "Polywing glides across the valley and opens the giant stone gates to Stonelight Courtyard.",
       "primaryConcepts": [
         "classes_intro",
         "world_scripting_3d"
@@ -376,7 +376,7 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "shatter",
-            "text": "You broke my lock in Polygon Valley? Wait until you reach Gouraud Courtyard, {heroName}!"
+            "text": "You broke my lock in Polygon Valley? Wait until you reach Stonelight Courtyard, {heroName}!"
           },
           {
             "speaker": "Polywing",
@@ -390,7 +390,7 @@
             "spriteKey": "pip",
             "side": "left",
             "vfx": "celebrate",
-            "text": "Polywing is free! Head through the portal to Gouraud Courtyard."
+            "text": "Polywing is free! Head through the portal to Stonelight Courtyard."
           }
         ]
       }
@@ -398,7 +398,7 @@
     {
       "id": "realm-64-02-courtyard",
       "number": 2,
-      "name": "Gouraud Courtyard",
+      "name": "Stonelight Courtyard",
       "dragon": {
         "id": "dragon-vertex",
         "name": "Vertex",
@@ -685,8 +685,9 @@
           "storyPrompt": "Torches and fountains are different classes, but both have a `tick()` action. That means one short loop can run `tick()` on both of them in a single list!",
           "objective": "With `Torch` (returning `\"flicker\"`) and `Fountain` (returning `\"splash\"`), create `objs = [Torch(), Fountain()]`, collect `o.tick()` for each `o` in `objs` into `out` using a one-line list loop `[... for ... in ...]`, and print `out`.",
           "concepts": [
-            "class_inheritance",
-            "world_scripting_3d"
+            "world_scripting_3d",
+            "classes_intro",
+            "list_comprehensions"
           ],
           "shardReward": 200,
           "unlockId": null,
@@ -742,7 +743,7 @@
         {
           "id": "trial-64-02-06",
           "trialType": "code",
-          "title": "Unlock Gouraud Courtyard (Boss)",
+          "title": "Unlock Stonelight Courtyard (Boss)",
           "storyPrompt": "Vertex's castle gate needs double the stone blocks to open! Build a parent `Mesh` class and a child `CastleMesh` class that doubles the count.",
           "objective": "Create `class Mesh:` saving `self.verts`, and child class `CastleMesh(Mesh)` with `double_verts(self)` returning `self.verts * 2`. If `CastleMesh(32).double_verts() == 64`, print `\"VERTEX FREE!\"`.",
           "concepts": [
@@ -776,7 +777,7 @@
           "id": "trial-64-02-bonus",
           "trialType": "multiple_choice",
           "title": "Secret Rune: Vertex's super() Riddle",
-          "storyPrompt": "A stone rune in Gouraud Courtyard tests what you remember about `super()`.",
+          "storyPrompt": "A stone rune in Stonelight Courtyard tests what you remember about `super()`.",
           "objective": "Pick what `super()` lets a child class do.",
           "concepts": [
             "class_inheritance",
@@ -816,8 +817,8 @@
           "difficultyOverride": null,
           "isBonus": true,
           "bonusKitReward": {
-            "name": "Vertex's Gouraud Shield (+1 Hint)",
-            "description": "Hidden treasure from Gouraud Courtyard.",
+            "name": "Vertex's Stonelight Shield (+1 Hint)",
+            "description": "Hidden treasure from Stonelight Courtyard.",
             "unlockId": "bonus-trial-64-02",
             "equipLayer": "tunic",
             "equipKey": "amber"
@@ -832,7 +833,7 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "glitch",
-            "text": "You made it to Gouraud Courtyard, {heroName}, but Vertex is staying locked inside this vault!"
+            "text": "You made it to Stonelight Courtyard, {heroName}, but Vertex is staying locked inside this vault!"
           },
           {
             "speaker": "Vertex",
@@ -905,7 +906,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 65,
+          "shardReward": 180,
           "unlockId": null,
           "codeSnippet": "class Cube:\n    def draw(self): return \"BOX\"\nclass Cone:\n    def draw(self): return \"TIP\"\n\nshapes = [Cube(), Cone()]\nprint([s.draw() for s in shapes])",
           "choices": [
@@ -948,7 +949,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 65,
+          "shardReward": 190,
           "unlockId": null,
           "bugSummary": "Missing `self.` before `lights` causes a `NameError`.",
           "starterCode": {
@@ -981,7 +982,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 70,
+          "shardReward": 195,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Box3D:\n    def __init__(self, w, h, d):\n        self.w, self.h, self.d = w, h, d\n    def volume(self):\n        return self.w * self.h * ???\n\nprint(Box3D(2, 3, 4).volume())\n",
@@ -1014,7 +1015,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 70,
+          "shardReward": 200,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Entity:\n    def __init__(self, name): self.name = name\n\nclass Scene:\n    def __init__(self, items):\n        self.items = items\n    def count(self):\n        return len(self.???)\n\ns = Scene([Entity(\"A\"), Entity(\"B\")])\nprint(s.count())\n",
@@ -1048,7 +1049,7 @@
             "world_scripting_3d",
             "list_comprehensions"
           ],
-          "shardReward": 75,
+          "shardReward": 205,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Lamp:\n    def update(self): return \"glow\"\nclass Door:\n    def update(self): return \"creak\"\n\nprops = [Lamp(), Door()]\nevents = [p.update() for p in ???]\nprint(events)\n",
@@ -1079,7 +1080,7 @@
             "class_inheritance",
             "world_scripting_3d"
           ],
-          "shardReward": 75,
+          "shardReward": 210,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Prop:\n    def describe(self): return \"STATIC\"\n\nclass MovingProp(Prop):\n    def describe(self):\n        return \"???\"\n\nprint(MovingProp().describe())\n",
@@ -1111,7 +1112,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 95,
+          "shardReward": 220,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Gear:\n    def __init__(self, power): self.power = power\n\nclass Engine:\n    def __init__(self, parts): self.parts = parts\n    def total_power(self):\n        return sum(p.power for p in self.parts)\n\nif Engine([Gear(20), Gear(44)]).total_power() == 64:\n    print(\"VECTOR FREE!\")\n",
@@ -1145,7 +1146,7 @@
             "class_inheritance",
             "world_scripting_3d"
           ],
-          "shardReward": 65,
+          "shardReward": 200,
           "unlockId": null,
           "choices": [
             {
@@ -1256,7 +1257,7 @@
           "concepts": [
             "debugging"
           ],
-          "shardReward": 65,
+          "shardReward": 185,
           "unlockId": null,
           "choices": [
             {
@@ -1302,7 +1303,7 @@
             "debugging",
             "for_loops"
           ],
-          "shardReward": 65,
+          "shardReward": 195,
           "unlockId": null,
           "bugSummary": "`total` starts at `1` instead of `0`, so `assert total == 10` fails.",
           "starterCode": {
@@ -1334,7 +1335,7 @@
             "debugging",
             "functions_def"
           ],
-          "shardReward": 70,
+          "shardReward": 200,
           "unlockId": null,
           "starterCode": {
             "explorer": "def double(n):\n    return n * 2\n\nassert double(5) == ???\nassert double(0) == 0\nprint(\"PASSED\")\n",
@@ -1367,7 +1368,7 @@
             "functions_return",
             "conditionals_if"
           ],
-          "shardReward": 70,
+          "shardReward": 205,
           "unlockId": null,
           "starterCode": {
             "explorer": "def bigger(a, b):\n    if a >= b:\n        return a\n    return ???\n\nassert bigger(3, 8) == 8\nprint(bigger(3, 8))\n",
@@ -1402,7 +1403,7 @@
             "functions_return",
             "conditionals_if"
           ],
-          "shardReward": 75,
+          "shardReward": 210,
           "unlockId": null,
           "starterCode": {
             "explorer": "def safe_avg(nums):\n    if len(nums) == 0:\n        return 0\n    return sum(nums) // len(???)\n\nassert safe_avg([]) == 0\nprint(safe_avg([10, 20]))\n",
@@ -1436,7 +1437,7 @@
             "debugging",
             "functions_def"
           ],
-          "shardReward": 75,
+          "shardReward": 215,
           "unlockId": null,
           "starterCode": {
             "explorer": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\n\nassert clamp(-5, 0, 10) == 0\nassert clamp(5, 0, 10) == ???\nassert clamp(20, 0, 10) == 10\nprint(\"ALL 3 PASSED\")\n",
@@ -1468,7 +1469,7 @@
             "functions_def",
             "functions_return"
           ],
-          "shardReward": 95,
+          "shardReward": 225,
           "unlockId": null,
           "starterCode": {
             "explorer": "def is_valid_bit(n):\n    return 1 <= n <= 64\n\nassert is_valid_bit(64)\nassert not is_valid_bit(0)\nprint(\"VERIFY FREE!\")\n",
@@ -1501,7 +1502,7 @@
             "debugging",
             "range_function"
           ],
-          "shardReward": 65,
+          "shardReward": 205,
           "unlockId": null,
           "choices": [
             {
@@ -1657,8 +1658,7 @@
           "storyPrompt": "Quasar's self-test stops with an `AssertionError` because `total` is `10` instead of `15`. Remember where `range(1, 5)` stops!",
           "objective": "Fix the `range(...)` call so `total` equals `15` and `assert total == 15` passes.",
           "concepts": [
-            "debugging",
-            "sorting_lambdas"
+            "debugging"
           ],
           "shardReward": 200,
           "unlockId": null,
@@ -1852,7 +1852,8 @@
           "objective": "Define `clamp(n, lo, hi)` returning `max(lo, min(hi, n))`. Check `assert clamp(15, 0, 10) == 10`, then print `clamp(15, 0, 10)`.",
           "concepts": [
             "debugging",
-            "sorting_lambdas"
+            "functions_def",
+            "functions_return"
           ],
           "shardReward": 210,
           "unlockId": null,
@@ -2180,7 +2181,6 @@
           "objective": "Fix `is_complete` so it checks `self.bits` and prints `True`.",
           "concepts": [
             "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
             "debugging"
           ],
@@ -2215,7 +2215,6 @@
           "objective": "Create `class Spell3D:` saving `self.pos`, with `step(self, dx, dy, dz)` updating `self.pos` to `(x + dx, y + dy, z + dz)`. Create `s = Spell3D((1, 1, 1))`, call `s.step(2, 3, 4)`, and print `s.pos`.",
           "concepts": [
             "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
             "debugging"
           ],
@@ -2247,10 +2246,10 @@
           "storyPrompt": "The Dragon Council is gathering for the final showdown! Sort the council from strongest to weakest so the top leader leads the charge.",
           "objective": "Create `council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]`, sort it from biggest to smallest `\"p\"` into `leaders` using `sorted()` and a `lambda`, then print `leaders[0][\"n\"]`.",
           "concepts": [
-            "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
-            "debugging"
+            "debugging",
+            "sorting_lambdas",
+            "dictionaries"
           ],
           "shardReward": 270,
           "unlockId": null,
@@ -2346,7 +2345,6 @@
           "objective": "Create `class PyriaCrown:` saving `self.era_bits = [8, 16, 32, 8]` and a `total(self)` action returning `sum(self.era_bits)`. Create `c = PyriaCrown()`, check `assert c.total() == 64`, and print `\"64-BIT PYRIA RESTORED!\"`.",
           "concepts": [
             "classes_intro",
-            "class_inheritance",
             "world_scripting_3d",
             "debugging"
           ],

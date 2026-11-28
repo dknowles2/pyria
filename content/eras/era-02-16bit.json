@@ -1401,8 +1401,7 @@
           "storyPrompt": "Nacre's pearls need to be shared out between the chests! Python's single slash `/` divides numbers, and it always gives back a **float** (a number with a decimal point), even when the split comes out even.",
           "objective": "Create the variable `per_chest` holding `pearls` divided by `chests`, then print `per_chest`.",
           "concepts": [
-            "basic_math",
-            "type_conversion"
+            "basic_math"
           ],
           "shardReward": 45,
           "unlockId": null,
@@ -1790,7 +1789,7 @@
           "concepts": [
             "lists",
             "list_iteration",
-            "conditionals_elif_else"
+            "conditionals_if"
           ],
           "shardReward": 80,
           "unlockId": null,
@@ -1841,8 +1840,7 @@
           "objective": "Start with `signals = [3, 5, 7]` and an empty list `boosted`. Loop over `signals`, add each signal times 2 to `boosted`, and print `boosted`.",
           "concepts": [
             "lists",
-            "list_iteration",
-            "conditionals_elif_else"
+            "list_iteration"
           ],
           "shardReward": 85,
           "unlockId": null,
@@ -2053,7 +2051,7 @@
           "concepts": [
             "lists",
             "list_iteration",
-            "conditionals_elif_else"
+            "conditionals_if"
           ],
           "shardReward": 105,
           "unlockId": null,
@@ -2674,8 +2672,7 @@
           "storyPrompt": "Tock's pendulum counter is supposed to print only the final count `4`, but it prints `1`, `2`, `3`, `4` instead.",
           "objective": "Fix the indentation so only the final value `4` prints.",
           "concepts": [
-            "while_loops",
-            "conditionals_if"
+            "while_loops"
           ],
           "shardReward": 90,
           "unlockId": null,
@@ -2704,7 +2701,6 @@
           "storyPrompt": "Tock needs to spot the golden pendulum and stop searching as soon as it shows up.",
           "objective": "Start `found` at `False` and loop through `[\"brass\", \"iron\", \"gold\", \"lead\"]`: if an item equals `'gold'`, set `found` to `True` and stop the loop with `break`. Print `found` after the loop.",
           "concepts": [
-            "while_loops",
             "conditionals_if",
             "for_loops"
           ],
@@ -2737,7 +2733,6 @@
           "storyPrompt": "Some cogs in the hallway are jammed (negative numbers). Use `continue` to skip any negative number and add up only the good ones.",
           "objective": "Start `total` at 0 and loop through `[5, -2, 10, -1, 5]`: if a number is less than 0, skip it with `continue`; otherwise, add it to `total`. Print `total` after the loop.",
           "concepts": [
-            "while_loops",
             "conditionals_if",
             "for_loops"
           ],
@@ -2800,7 +2795,6 @@
           "objective": "Loop over `parts`: if an item equals `'rust'`, skip it with `continue`; otherwise, add 1 to `good`. Print `good` after the loop.",
           "concepts": [
             "for_loops",
-            "while_loops",
             "conditionals_if"
           ],
           "shardReward": 45,
@@ -2848,8 +2842,8 @@
           "storyPrompt": "Before putting `input()` inside a `while True:` loop, practice calling `input()` once by itself! `input(\"Command: \")` reads the next command text and gives it back so you can save it in a variable.",
           "objective": "Call `input('Command: ')`, store the returned text in the variable `cmd`, and print `cmd`.",
           "concepts": [
-            "while_loops",
-            "conditionals_if"
+            "function_calls",
+            "variables"
           ],
           "shardReward": 45,
           "unlockId": null,
@@ -3681,7 +3675,6 @@
           "storyPrompt": "In Python, `None` (capital N, no quotes) is a special value meaning **nothing / no value yet**, and we check for it using `is None`.",
           "objective": "If the variable `slot` is `None`, print `'EMPTY'`.",
           "concepts": [
-            "functions_return",
             "conditionals_if"
           ],
           "shardReward": 50,
@@ -5365,7 +5358,6 @@
           "storyPrompt": "Crucible's core monitor crashes with a `KeyError` when checking the temperature.",
           "objective": "Fix the dictionary lookup so it prints `900`.",
           "concepts": [
-            "functions_return",
             "dictionaries"
           ],
           "shardReward": 120,
@@ -5436,7 +5428,6 @@
           "storyPrompt": "Dictionaries are great for counting how many times each ore appears! (Tip: just like `.values()` gives all values, `.keys()` gives all keys in a dictionary.)",
           "objective": "Loop over `ore = [\"gold\", \"iron\", \"gold\"]`, count how many times each item appears in `counts` using `.get(x, 0) + 1`, and print `counts[\"gold\"]`.",
           "concepts": [
-            "functions_return",
             "dictionaries"
           ],
           "shardReward": 130,
@@ -5508,7 +5499,6 @@
           "storyPrompt": "Combine two ingredient dictionaries into one fresh dictionary without changing the originals!",
           "objective": "Copy dictionary `a` into a new dictionary `c` with `dict(a)`, merge dictionary `b` into `c` with `.update(b)`, and print how many keys `c` has.",
           "concepts": [
-            "functions_return",
             "dictionaries",
             "dict_iteration"
           ],
@@ -7000,9 +6990,7 @@
           "objective": "Fix the `is_open` action so it sends back `True` when `bits >= 16`.",
           "concepts": [
             "functions_return",
-            "dictionaries",
-            "classes_intro",
-            "nested_loops"
+            "classes_intro"
           ],
           "shardReward": 140,
           "unlockId": null,
@@ -7034,10 +7022,8 @@
           "storyPrompt": "Call every rescued dragon from all four Acts to the throne! Add up the dragon counts stored in the `acts` dictionary.",
           "objective": "Using `acts`, create the variable `total_dragons` holding the sum of all dictionary values, then print `total_dragons`.",
           "concepts": [
-            "functions_return",
             "dictionaries",
-            "classes_intro",
-            "nested_loops"
+            "dict_iteration"
           ],
           "shardReward": 145,
           "unlockId": null,
@@ -7081,10 +7067,8 @@
           "storyPrompt": "Lord Null hid his lock code inside a 2D grid of numbers! Use nested loops to add up only the even numbers.",
           "objective": "Loop through `matrix = [[2, 3], [4, 5], [6, 7]]`: if a number is even (`n % 2 == 0`), add it to `even_sum`. Print `even_sum` after the loops.",
           "concepts": [
-            "functions_return",
-            "dictionaries",
-            "classes_intro",
-            "nested_loops"
+            "nested_loops",
+            "lists"
           ],
           "shardReward": 150,
           "unlockId": null,
@@ -7134,10 +7118,7 @@
           "storyPrompt": "Forge a `Prism` blueprint that can double its own power! Build the class, upgrade a prism once, and print its new power.",
           "objective": "Build a `Prism` class storing `power` and an `upgrade(self)` action that doubles `self.power`. Create `p = Prism(8)`, call `p.upgrade()`, and print `p.power`.",
           "concepts": [
-            "functions_return",
-            "dictionaries",
-            "classes_intro",
-            "nested_loops"
+            "classes_intro"
           ],
           "shardReward": 155,
           "unlockId": null,
@@ -7168,9 +7149,7 @@
           "objective": "Define an `EraCore` class storing `bits` and a `restore(self)` action: if `self.bits` is at least 16, return `\"32-BIT UNLOCKED!\"`; otherwise, return `\"LOCKED\"`. Create `EraCore(16)` and print its `.restore()` result.",
           "concepts": [
             "functions_return",
-            "dictionaries",
-            "classes_intro",
-            "nested_loops"
+            "classes_intro"
           ],
           "shardReward": 165,
           "unlockId": null,

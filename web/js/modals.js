@@ -73,7 +73,7 @@ function buildChallengeObjectiveHtml(trial) {
     uniqueTargets.length > 0
       ? ` Target text: ${uniqueTargets.map((t) => `<code class="inline-md-code">${escapeHtml(t)}</code>`).join(', ')}.`
       : '';
-  return `Solve the story quest above using your Python skills — code hints are hidden in Challenge Mode!${targetNote}`;
+  return `Solve the story quest above using your Python skills. Code hints are hidden in Challenge Mode!${targetNote}`;
 }
 
 function renderTrialBriefHtml({
@@ -99,7 +99,7 @@ function renderTrialBriefHtml({
     (Boolean(rawObjective) && Boolean(rawPrompt) && !primaryNorm.includes(objectiveNorm));
 
   const rawBugSummary = isFixBug
-    ? String(trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!').trim()
+    ? String(trial.bugSummary || 'Lord Null broke this spell. Find and fix the bug, then run it!').trim()
     : '';
   const bugNorm = rawBugSummary.toLowerCase();
   const showBugNote =
@@ -1819,7 +1819,7 @@ export class ModalManager {
       </div>
 
       <p class="muted-text" style="margin-top:-6px;">
-        "No buttons in my shop, kid! Write real Python — loops, <code>if</code> checks, functions, or classes — to forge gear, stock stackable items, or try spaced-review challenges!"
+        "No buttons in my shop, kid! Write real Python (loops, <code>if</code> checks, functions, or classes) to forge gear, stock stackable items, or try spaced-review challenges!"
       </p>
 
       <div class="workshop-grid">
@@ -2042,10 +2042,10 @@ export class ModalManager {
               }
               if (it.wentOverHere) {
                 const need = Math.max(1, it.cost - Math.max(0, it.shardsBefore));
-                return `<div class="ws-cart-line over-trigger">⚠️ <strong>Line ${it.lineNumber}</strong>: ${escapeHtml(it.name)} (−${it.cost} 💎) — <strong>went over budget here!</strong> (had ${Math.max(0, it.shardsBefore)} 💎, need ${need} more)</div>`;
+                return `<div class="ws-cart-line over-trigger">⚠️ <strong>Line ${it.lineNumber}</strong>: ${escapeHtml(it.name)} (−${it.cost} 💎): <strong>went over budget here!</strong> (had ${Math.max(0, it.shardsBefore)} 💎, need ${need} more)</div>`;
               }
               if (it.overBudget) {
-                return `<div class="ws-cart-line over-after">Line ${it.lineNumber}: ${escapeHtml(it.name)} (−${it.cost} 💎) — still over budget</div>`;
+                return `<div class="ws-cart-line over-after">Line ${it.lineNumber}: ${escapeHtml(it.name)} (−${it.cost} 💎): still over budget</div>`;
               }
               return `<div class="ws-cart-line ok">Line ${it.lineNumber}: ${escapeHtml(it.name)} (−${it.cost} 💎 → ${it.shardsAfter} left) ✓</div>`;
             })
@@ -2257,7 +2257,7 @@ export class ModalManager {
               ${
                 spentEarlier > 0
                   ? `You have <strong>${startShards} 💎</strong> total. Earlier lines used <strong>${spentEarlier} 💎</strong> (leaving <strong>${leftAtFailure} 💎</strong>), then <strong>${escapeHtml(itemName)}</strong>${lineTag} costs <strong>${neededCost} 💎</strong> (short by <strong>${missing} 💎</strong>). Delete${res.errorLine ? ` Line ${Number(res.errorLine)}` : ' a line'} and run again!`
-                  : `You have <strong>${startShards} 💎</strong>, and <strong>${escapeHtml(itemName)}</strong>${lineTag} costs <strong>${neededCost} 💎</strong> — earn <strong>${missing} more Byte Shards</strong> from Trials or hidden chests!`
+                  : `You have <strong>${startShards} 💎</strong>, and <strong>${escapeHtml(itemName)}</strong>${lineTag} costs <strong>${neededCost} 💎</strong>. Earn <strong>${missing} more Byte Shards</strong> from Trials or hidden chests!`
               }
             </div>
           `;
@@ -2397,7 +2397,7 @@ export class ModalManager {
           <p class="muted-text" style="margin:0; font-size:12.5px;">
             ${escapeHtml(
               subtitle ||
-                'Your secret key to play on any tablet or computer! Shown only once — write it down or copy it.'
+                'Your secret key to play on any tablet or computer! Shown only once, so write it down or copy it.'
             )}
           </p>
         </div>
