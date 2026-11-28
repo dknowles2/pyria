@@ -23,28 +23,28 @@
       "id": "pip",
       "name": "Pip",
       "role": "Dragon Sidekick & Code Guide",
-      "personality": "Playful, curious, encouraging tiny glitch-hatchling who translates scary Python errors into friendly clues and offers 3-tier hints.",
-      "catchphrase": "Chirp! One line at a time, Code-Tamer \u2014 we've got this!"
+      "personality": "Playful, curious tiny dragon who turns scary Python errors into friendly clues and gives helpful hints.",
+      "catchphrase": "One line at a time, Code-Tamer. We've got this!"
     },
     {
       "id": "elder-ada",
       "name": "Elder Ada",
       "role": "Keeper of the Great Compiler",
-      "personality": "Wise, warm storyteller who remembers when Pyria shone in full 3D color and guides the hero from Realm to Realm.",
+      "personality": "Kind, wise storyteller who remembers when Pyria was in full 3D color and guides you from Realm to Realm.",
       "catchphrase": "Every rescued dragon brings another Bit of our world back to life."
     },
     {
       "id": "bram",
       "name": "Bram the Tinkerer",
       "role": "Workshop Master & Gear Smith",
-      "personality": "Boisterous, inventive dwarven engineer who only accepts Python function calls to forge gear and stat upgrades with Byte Shards.",
-      "catchphrase": "No buttons in my shop, kid! Write the call and watch the sparks fly!"
+      "personality": "Loud, cheerful dwarf builder who only takes Python commands to make gear and upgrades with Byte Shards.",
+      "catchphrase": "No buttons in my shop, kid! Type the command and watch the sparks fly!"
     },
     {
       "id": "lord-null",
       "name": "Lord Null",
       "role": "The Bit-Thief Overlord",
-      "personality": "Dramatic, glitchy villain obsessed with turning Pyria into an empty void of None and syntax errors.",
+      "personality": "Goofy, glitchy villain who wants to turn Pyria into an empty void of None and broken code.",
       "catchphrase": "Soon all of Pyria will return None! Mwahahaha!"
     }
   ],
@@ -54,46 +54,46 @@
       "label": "Calling Functions",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 2,
-      "description": "Invoking built-in or helper functions with parentheses and arguments."
+      "description": "Running commands with parentheses and inputs inside them."
     },
     {
       "id": "print_output",
       "label": "Printing Output",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 4,
-      "description": "Displaying messages to the console using print()."
+      "description": "Showing messages on the screen with print()."
     },
     {
       "id": "strings",
       "label": "Strings & Text",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 4,
-      "description": "Creating, quoting, and combining text values."
+      "description": "Writing text inside quotes and joining pieces of text together."
     },
     {
       "id": "variables",
       "label": "Variables",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 5,
-      "description": "Storing and updating named values with =."
+      "description": "Saving and updating values in named boxes with =."
     },
     {
       "id": "basic_math",
       "label": "Basic Math",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 5,
-      "description": "Using +, -, *, /, //, **, and % with numbers and variables."
+      "description": "Doing math with +, -, *, /, //, **, and % using numbers and variables."
     },
     {
       "id": "type_conversion",
       "label": "Changing Types (str / int / float)",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 4,
-      "description": "Converting between text and numbers with str(), int(), and float(), and knowing which type an operator hands back."
+      "description": "Turning values between text and numbers with str(), int(), and float()."
     },
     {
       "id": "booleans",
-      "label": "Booleans",
+      "label": "True & False",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 5,
       "description": "Working with True and False values."
@@ -110,189 +110,189 @@
       "label": "If Statements",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 5,
-      "description": "Running indented code blocks only when a condition is True."
+      "description": "Running indented code only when a check is True."
     },
     {
       "id": "conditionals_elif_else",
       "label": "If / Elif / Else",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 6,
-      "description": "Choosing among multiple branches with if, elif, and else."
+      "description": "Picking between different paths with if, elif, and else."
     },
     {
       "id": "boolean_logic",
-      "label": "Boolean Logic (and/or/not)",
+      "label": "And / Or / Not",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 7,
-      "description": "Combining and negating conditions with and, or, and not."
+      "description": "Combining or flipping True/False checks with and, or, and not."
     },
     {
       "id": "string_methods",
-      "label": "String Methods",
+      "label": "Text Tricks",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 7,
-      "description": "Transforming text using .strip(), .upper(), .lower(), and .replace()."
+      "description": "Changing text with .strip(), .upper(), .lower(), and .replace()."
     },
     {
       "id": "for_loops",
       "label": "For Loops",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 8,
-      "description": "Repeating code a set number of times using for loops."
+      "description": "Repeating code a set number of times with a for loop."
     },
     {
       "id": "range_function",
       "label": "Using range()",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 8,
-      "description": "Generating number sequences with range(stop) and range(start, stop)."
+      "description": "Counting through numbers with range(stop) and range(start, stop)."
     },
     {
       "id": "lists",
       "label": "Lists",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 4,
-      "description": "Storing ordered collections of items in square brackets."
+      "description": "Keeping a group of items in order inside square brackets [ ]."
     },
     {
       "id": "list_indexing",
-      "label": "List Indexing",
+      "label": "List Positions",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 4,
-      "description": "Reading and updating list elements by zero-based index."
+      "description": "Reading and changing items in a list by their position number, starting at 0."
     },
     {
       "id": "list_iteration",
-      "label": "Looping Over Lists",
+      "label": "Looping Through Lists",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 6,
-      "description": "Processing every item in a list with a for loop."
+      "description": "Going through every item in a list one by one with a for loop."
     },
     {
       "id": "while_loops",
       "label": "While Loops",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 8,
-      "description": "Repeating actions while a condition remains True."
+      "description": "Repeating code as long as a check stays True."
     },
     {
       "id": "functions_def",
-      "label": "Defining Functions",
+      "label": "Making Functions",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 10,
-      "description": "Creating reusable spells with def and parameters."
+      "description": "Building your own reusable commands with def and inputs."
     },
     {
       "id": "functions_return",
       "label": "Returning Values",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 10,
-      "description": "Sending computed results back from a function using return."
+      "description": "Sending an answer back from a function with return."
     },
     {
       "id": "dictionaries",
       "label": "Dictionaries",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 12,
-      "description": "Mapping keys to values with curly braces {}."
+      "description": "Storing label-and-value pairs inside curly braces {}."
     },
     {
       "id": "dict_iteration",
-      "label": "Looping Over Dictionaries",
+      "label": "Looping Through Dictionaries",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 12,
-      "description": "Visiting a dictionary's keys, values, or key/value pairs with .keys(), .values(), and .items()."
+      "description": "Going through a dictionary's labels, values, or pairs with .keys(), .values(), and .items()."
     },
     {
       "id": "nested_loops",
       "label": "Nested Loops",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 14,
-      "description": "Running a loop inside another loop for grids and combinations."
+      "description": "Putting one loop inside another to work with grids and pairs."
     },
     {
       "id": "classes_intro",
       "label": "Intro to Classes",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 16,
-      "description": "Modeling dragons and gear with simple Python classes and __init__."
+      "description": "Making blueprints for dragons and gear using Python classes and __init__."
     },
     {
       "id": "f_strings",
       "label": "f-Strings",
       "minEra": "era-02-16bit",
       "maxBasicRealm": 12,
-      "description": "Formatting strings cleanly with f\"...{var}...\"."
+      "description": "Plugging variables straight into text with f\"...{var}...\"."
     },
     {
       "id": "tuples",
       "label": "Tuples",
       "minEra": "era-03-32bit",
       "maxBasicRealm": 2,
-      "description": "Immutable ordered collections like (x, y, z) and tuple unpacking."
+      "description": "Locked lists in parentheses like (x, y, z) that you can split into variables."
     },
     {
       "id": "coords_3d",
-      "label": "3D Coordinates (x, y, z)",
+      "label": "3D Spots (x, y, z)",
       "minEra": "era-03-32bit",
       "maxBasicRealm": 2,
-      "description": "Working with 3D positions and elevation math in isometric and 3D worlds."
+      "description": "Using x, y, and height z to place things in 3D worlds."
     },
     {
       "id": "list_comprehensions",
-      "label": "List Comprehensions",
+      "label": "One-Line Lists",
       "minEra": "era-03-32bit",
       "maxBasicRealm": 3,
-      "description": "Building transformed or filtered lists in a single clean Python expression."
+      "description": "Building a new or filtered list in one short line of Python."
     },
     {
       "id": "dictionaries_nested",
       "label": "Nested Dictionaries",
       "minEra": "era-03-32bit",
       "maxBasicRealm": 4,
-      "description": "Storing structured rooms, graphs, and entities inside nested dicts."
+      "description": "Putting dictionaries inside dictionaries to organize rooms and game data."
     },
     {
       "id": "sets",
       "label": "Sets",
       "minEra": "era-03-32bit",
       "maxBasicRealm": 4,
-      "description": "Deduplicating values and computing set intersections/unions."
+      "description": "Keeping only unique items and finding what groups share."
     },
     {
       "id": "error_handling",
       "label": "Try / Except",
       "minEra": "era-03-32bit",
       "maxBasicRealm": 4,
-      "description": "Catching runtime exceptions safely with try and except blocks."
+      "description": "Catching errors with try and except so your program does not crash."
     },
     {
       "id": "class_inheritance",
       "label": "Class Inheritance",
       "minEra": "era-04-64bit",
       "maxBasicRealm": 3,
-      "description": "Creating specialized subclasses with super() and method overrides."
+      "description": "Making new classes that copy powers from a parent class and add their own."
     },
     {
       "id": "world_scripting_3d",
-      "label": "3D World Scripting",
+      "label": "3D World Coding",
       "minEra": "era-04-64bit",
       "maxBasicRealm": 4,
-      "description": "Scripting 3D entities, cameras, and movement using Python classes."
+      "description": "Controlling 3D characters, cameras, and movement with Python classes."
     },
     {
       "id": "debugging",
-      "label": "Debugging & Assertions",
+      "label": "Finding Bugs & Checks",
       "minEra": "era-04-64bit",
       "maxBasicRealm": 4,
-      "description": "Finding off-by-one bugs and verifying invariants with assert."
+      "description": "Spotting tricky bugs and checking your answers with assert."
     },
     {
       "id": "sorting_lambdas",
-      "label": "Sorting & Lambdas",
+      "label": "Sorting & Short Rules",
       "minEra": "era-04-64bit",
       "maxBasicRealm": 4,
-      "description": "Sorting objects and 3D polygons with sorted(..., key=lambda ...)."
+      "description": "Sorting items with sorted(..., key=lambda ...) using a tiny one-line rule."
     }
   ]
 }

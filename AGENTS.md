@@ -12,6 +12,15 @@ Guidelines for AI agents and contributors working in this repository.
 - `assets/` — Sprites, tilesets, concept art, and gameplay screenshots.
 - `scripts/` — Asset bundling (`build-assets.mjs`), content validation (`validate-content.mjs`), and calibration reports (`calibration_report.py`).
 
+## Player-Facing Text & Lesson Tone (Kids ~10 Years Old)
+
+Pyria is primarily for **kids around 10 years old**. All player-facing text—including lessons, trials, hints, dragon dialogue, cutscenes, concept descriptions, and game UI helper copy (`content/eras/*.json`, `content/game.json`, `web/js/modals.js`, etc.)—must follow plain, kid-friendly English:
+
+- **Plain, direct English**: Short sentences, everyday words, warm RPG tone—never CS-textbook phrasing or overcaffeinated chatbot hype.
+- **No Claude-style mannered prose**: No em-dashes (`—`) in player-facing text, no purple prose (*sabotaged*, *diorama*, *isometric*, *Gouraud-shaded*, *shimmering*, *woven from*), no cheesy sound-effect openers or all-caps hype (*"Splash-sparkle!"*, *"RUMBLE-CRUNCH!"*, *"WOOHOO!"*, *"IMPOSSIBLE!!"*), and no canned template openers.
+- **No unexplained coding jargon**: Avoid *syntax*, *snippet*, *parameter*, *argument*, *attribute*, *method*, *override*, *subclass*, *superclass*, *iterate*, *concatenate*, *invoke*, *negate*, *immutable*, *deduplicate*, *invariant*, *runtime exception*, *zero-based index*, *expression*, *comprehension*, *data structures*. Always introduce real Python concepts in concrete, everyday words.
+- Follow all detailed authoring and verification rules in `.agents/rules/lesson-authoring.md` whenever editing lesson or curriculum content.
+
 ## Keep the Main Website (`site/`) Accurate
 
 **Before finishing any user-facing change, check whether `site/` needs to be updated so `https://pyria.dev` stays accurate.**
