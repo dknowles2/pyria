@@ -33,7 +33,7 @@
           "trialType": "multiple_choice",
           "title": "Level Up Classes for 3D Worlds!",
           "storyPrompt": "You already mastered classes in Starlight Bridge & Storm Bastion — now put them to work scripting 3D entities! Notice how `Hero3D` combines Era 2 classes with Era 3 tuple unpacking (`self.x, self.y, self.z = x, y, z`).",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(h.z)` displays after `h.jump()` runs on a `Hero3D` created at z = 0.",
           "concepts": [
             "classes_intro",
             "world_scripting_3d",
@@ -66,9 +66,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip watches the hero leap: 'Find which coordinate `jump()` changes, and what it was before the jump.'",
+            "tier2_pattern": "`jump()` adds its lift onto the object's own z, and the object keeps the new value afterwards.",
+            "tier3_walkthrough": "Tap Option A (`5`) — `self.z` starts at 0 and `jump()` raises it by 5."
           },
           "difficultyOverride": null
         },
@@ -93,8 +93,8 @@
           "referenceSolution": "class Player:\n    def __init__(self, x):\n        self.x = x\n    def move(self, dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)\n",
           "testCode": "assert p.x == 5 and OUTPUT.strip() == \"5\"\n_p2 = Player(10)\n_p2.move(4, 0)\nassert _p2.x == 14",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "class Player:\n    def __init__(___):\n        self.x = ___\n    def move(___):\n        self.x = ___\np = ___\n___",
+            "tier1_nudge": "Pip reads the TypeError: 'Every method needs the object as its FIRST parameter — `__init__` has it, but the other method does not.'",
+            "tier2_pattern": "    def <method>(self, <a>, <b>):\n        self.<attribute> = self.<attribute> + <a>",
             "tier3_walkthrough": "Update to:\nclass Player:\n    def __init__(self, x):\n        self.x = x\n    def move(self, dx, dy):\n        self.x = self.x + dx\n\np = Player(2)\np.move(3, 0)\nprint(p.x)"
           },
           "difficultyOverride": null,
@@ -119,14 +119,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\n",
-            "standard": "",
+            "standard": "# Define class Gem3D with x, y, z and value, plus coords() returning the three coordinates as a tuple\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())\n",
           "testCode": "assert Gem3D(2, 4, 6, 10).coords() == (2, 4, 6) and Gem3D(4, 5, 6, 10).coords() == (4, 5, 6) and OUTPUT.strip() == \"(2, 4, 6)\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "class Gem3D:\n    def __init__(___):\n        self.x, self.y, self.z, self.value = ___\n    def coords(___):\n        return ___\nprint(___)",
+            "tier1_nudge": "Pip cuts a 3D gem: 'Store all four values on the object in one line, then have the method hand back just the three coordinates as a tuple.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self, <a>, <b>, <c>, <d>):\n        self.<a>, self.<b>, self.<c>, self.<d> = <a>, <b>, <c>, <d>\n    def <method>(self):\n        return (self.<a>, self.<b>, self.<c>)\n\nprint(<Name>(<args>).<method>())",
             "tier3_walkthrough": "Write:\nclass Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())"
           },
           "difficultyOverride": null,
@@ -157,8 +157,8 @@
           "referenceSolution": "class Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = str(Dragon(\"Polywing\", \"Sky\"))\n_exp = 'Polywing (Sky)'\nassert isinstance(_val, str), f\"Expected str(Dragon('Polywing', 'Sky')) to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in str(Dragon('Polywing', 'Sky')) ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = str(Dragon(\"Pip\", \"Fire\"))\n_exp = 'Pip (Fire)'\nassert isinstance(_val, str), f\"Expected str(Dragon('Pip', 'Fire')) to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in str(Dragon('Pip', 'Fire')) ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Polywing (Sky)'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in output ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.name = ___\n        self.elem = ___\n    def __str__(___):\n        return ___\nprint(___)",
+            "tier1_nudge": "Pip prints the dragon itself: 'Give the class the special method Python looks for when printing an object, and return the text you want shown.'",
+            "tier2_pattern": "    def __str__(self):\n        return f\"{self.<attr_a>} ({self.<attr_b>})\"\n\nprint(<Name>(\"<value>\", \"<value>\"))",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name, elem):\n        self.name = name\n        self.elem = elem\n    def __str__(self):\n        return f\"{self.name} ({self.elem})\"\nprint(Dragon(\"Polywing\", \"Sky\"))"
           },
           "difficultyOverride": null,
@@ -219,8 +219,8 @@
           "referenceSolution": "class Entity:\n    def __init__(self, z):\n        self.z = z\n\nclass Camera:\n    def __init__(self, target, offset=5):\n        self.target = target\n        self.offset = offset\n    def view_z(self):\n        return self.target.z + self.offset\n\nhero = Entity(10)\ncam = Camera(hero)\nprint(cam.view_z())\n",
           "testCode": "assert cam.view_z() == 15 and Camera(Entity(20), 3).view_z() == 23 and OUTPUT.strip() == \"15\"",
           "hints": {
-            "tier1_nudge": "Store `self.target = target` and `self.offset = offset` in `Camera.__init__`, then return `self.target.z + self.offset` in `view_z`.",
-            "tier2_pattern": "class Camera:\n    def __init__(self, target, offset=5):\n        self.target = ___\n        self.offset = ___\n    def view_z(self):\n        return self.target.z + ___",
+            "tier1_nudge": "Pip mounts the camera: 'The camera stores the whole entity, not a copy of its height — so its method reaches through to the target and adds the offset.'",
+            "tier2_pattern": "    def <method>(self):\n        return self.<target>.<attribute> + self.<offset>\n\n<obj> = <Entity>(<value>)\ncam = <Camera>(<obj>)\nprint(cam.<method>())",
             "tier3_walkthrough": "Define `Entity(z)` and `Camera(target, offset=5)` with `view_z(self)` returning `self.target.z + self.offset`, then create `hero = Entity(10)`, `cam = Camera(hero)`, and `print(cam.view_z())`."
           },
           "difficultyOverride": null,
@@ -280,8 +280,8 @@
           "referenceSolution": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += lift\n\nf = Flyer()\nf.flap(10)\nf.flap(15)\nif f.alt >= 25:\n    print(\"POLYWING FREE!\")\n",
           "testCode": "assert f.alt == 25, f\"Expected f.alt == 25, got {f.alt!r}\"\n_f2 = Flyer()\n_f2.flap(7)\nassert _f2.alt == 7, f\"Expected Flyer().flap(7) to set alt == 7, got {_f2.alt!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'POLYWING FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Use `self.alt += lift` inside `flap()`, call `f.flap(10)` and `f.flap(15)`, then check `if f.alt >= 25:`.",
-            "tier2_pattern": "class Flyer:\n    def __init__(self):\n        self.alt = 0\n    def flap(self, lift):\n        self.alt += ___\n# flap(10), flap(15), check if f.alt >= 25",
+            "tier1_nudge": "Pip beats his wings twice: 'The method raises the altitude by whatever lift it is given, so calling it twice stacks both lifts before you check the total.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self):\n        self.<attribute> = 0\n    def <method>(self, <lift>):\n        self.<attribute> += <lift>\n\n<obj> = <Name>()\n<obj>.<method>(<lift>)\n<obj>.<method>(<lift>)\nif <obj>.<attribute> >= <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Define `class Flyer:` with `__init__` setting `self.alt = 0` and `flap(self, lift)` doing `self.alt += lift`. Create `f = Flyer()`, call `f.flap(10)` and `f.flap(15)`, and `if f.alt >= 25: print(\"POLYWING FREE!\")`."
           },
           "difficultyOverride": null,
@@ -330,9 +330,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip prints an object straight out: 'Python looks for one particular double-underscore method whenever you print an object — which one describes it as text?'",
+            "tier2_pattern": "`__init__` builds the object and `__len__` answers `len()`; the one you want is asked for by `print()`.",
+            "tier3_walkthrough": "Tap Option A (`__str__`) — `print()` calls it automatically to get the object's readable text."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -423,7 +423,7 @@
           "trialType": "multiple_choice",
           "title": "Class Inheritance!",
           "storyPrompt": "When `class FireDragon(Dragon):` inherits from `Dragon`, it automatically gets all of `Dragon`'s methods AND can add its own! What will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(FireDragon(\"Vertex\").breath())` displays when `FireDragon` subclasses `Dragon`.",
           "concepts": [
             "class_inheritance",
             "world_scripting_3d"
@@ -455,9 +455,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip traces the family tree: 'The subclass writes no `__init__` of its own, so where does its name come from?'",
+            "tier2_pattern": "A subclass inherits the parent's methods, so `self.name` is whatever the parent's `__init__` stored.",
+            "tier3_walkthrough": "Tap Option A (`Vertex: FIRE!`) — `__init__` is inherited and stores `\"Vertex\"`, which `breath()` then reads."
           },
           "difficultyOverride": null
         },
@@ -482,8 +482,8 @@
           "referenceSolution": "class Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon(Dragon):\n    pass\n\nprint(IceDragon().roar())\n",
           "testCode": "assert issubclass(IceDragon, Dragon), \"Expected IceDragon to inherit from Dragon: class IceDragon(Dragon):\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = IceDragon().roar()\n_exp = 'ROAR!'\nassert isinstance(_val, str), f\"Expected IceDragon().roar() to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'ROAR!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "class Dragon:\n    def roar(___):\n        return ___\nclass IceDragon(Dragon):\n    ___\nprint(___)",
+            "tier1_nudge": "Pip reads the AttributeError: 'The subclass has no roar of its own and is not connected to the one that does — the connection goes in the `class` line.'",
+            "tier2_pattern": "class <Subclass>(<Parent>):\n    pass",
             "tier3_walkthrough": "Update to:\nclass Dragon:\n    def roar(self):\n        return \"ROAR!\"\n\nclass IceDragon(Dragon):\n    pass\n\nprint(IceDragon().roar())"
           },
           "difficultyOverride": null,
@@ -513,8 +513,8 @@
           "referenceSolution": "class Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())\n",
           "testCode": "assert issubclass(BossDragon, Dragon) and Dragon().power() == 20 and BossDragon().power() == 100 and OUTPUT.strip() == \"100\"",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "class Dragon:\n    def power(___):\n        return ___\nclass BossDragon(Dragon):\n    def power(___):\n        return ___\nprint(___)",
+            "tier1_nudge": "Pip swaps one spell for another: 'Give the subclass a method with the SAME name as the parent's, and the subclass's version wins.'",
+            "tier2_pattern": "class <Subclass>(<Parent>):\n    def <same_method_name>(self):\n        return <new_value>\n\nprint(<Subclass>().<same_method_name>())",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def power(self):\n        return 20\n\nclass BossDragon(Dragon):\n    def power(self):\n        return 100\nprint(BossDragon().power())"
           },
           "difficultyOverride": null,
@@ -573,8 +573,8 @@
           "referenceSolution": "class Dragon:\n    def speed(self):\n        return 10\n\nclass SwiftDragon(Dragon):\n    def speed(self):\n        return 50\n\nprint(SwiftDragon().speed())\n",
           "testCode": "assert issubclass(SwiftDragon, Dragon)\nassert SwiftDragon().speed() == 50\nassert OUTPUT.strip() == '50', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Put `(Dragon)` after `class SwiftDragon` and define `def speed(self): return 50`!'",
-            "tier2_pattern": "class SwiftDragon(Dragon):\n    def speed(self):\n        return 50\n\nprint(SwiftDragon().speed())",
+            "tier1_nudge": "Pip points at the class line: 'Name the parent in the parentheses, then define a method with the same name as the parent's to replace it.'",
+            "tier2_pattern": "class <Subclass>(<Parent>):\n    def <same_method_name>(self):\n        return <new_value>\n\nprint(<Subclass>().<same_method_name>())",
             "tier3_walkthrough": "Add:\nclass SwiftDragon(Dragon):\n    def speed(self):\n        return 50\n\nprint(SwiftDragon().speed())"
           },
           "difficultyOverride": null,
@@ -605,8 +605,8 @@
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)\n",
           "testCode": "assert issubclass(SkyDragon, Dragon) and SkyDragon(\"Gale\", 50).altitude == 50 and SkyDragon(\"Pip\", 10).name == \"Pip\" and OUTPUT.strip() == \"50\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.name = ___\nclass SkyDragon(Dragon):\n    def __init__(___):\n        ___\n        self.altitude = ___",
+            "tier1_nudge": "Pip calls upstairs: 'When a subclass writes its own `__init__`, it replaces the parent's — so it must call the parent's setup itself before adding anything new.'",
+            "tier2_pattern": "class <Subclass>(<Parent>):\n    def __init__(self, <parent_arg>, <new_arg>):\n        super().__init__(<parent_arg>)\n        self.<new_attribute> = <new_arg>\n\nprint(<Subclass>(\"<value>\", <value>).<new_attribute>)",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SkyDragon(Dragon):\n    def __init__(self, name, altitude):\n        super().__init__(name)\n        self.altitude = altitude\nprint(SkyDragon(\"Gale\", 50).altitude)"
           },
           "difficultyOverride": null,
@@ -666,8 +666,8 @@
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n\nclass SeaDragon(Dragon):\n    def __init__(self, name, depth):\n        super().__init__(name)\n        self.depth = depth\n\nprint(SeaDragon(\"Mire\", 30).depth)\n",
           "testCode": "sd = SeaDragon('Mire', 30)\nassert issubclass(SeaDragon, Dragon) and sd.name == 'Mire' and sd.depth == 30\nassert OUTPUT.strip() == '30', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Call `super().__init__(name)` first, then set `self.depth = depth`!'",
-            "tier2_pattern": "class SeaDragon(Dragon):\n    def __init__(self, name, depth):\n        super().__init__(name)\n        self.depth = depth",
+            "tier1_nudge": "Pip chirps: 'Run the parent's setup FIRST so the inherited attribute is stored, then add the subclass's own one underneath.'",
+            "tier2_pattern": "class <Subclass>(<Parent>):\n    def __init__(self, <parent_arg>, <new_arg>):\n        super().__init__(<parent_arg>)\n        self.<new_attribute> = <new_arg>\n\nprint(<Subclass>(\"<value>\", <value>).<new_attribute>)",
             "tier3_walkthrough": "Add:\nclass SeaDragon(Dragon):\n    def __init__(self, name, depth):\n        super().__init__(name)\n        self.depth = depth\n\nprint(SeaDragon(\"Mire\", 30).depth)"
           },
           "difficultyOverride": null,
@@ -698,8 +698,8 @@
           "referenceSolution": "class Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)\n",
           "testCode": "assert Torch().tick() == \"flicker\" and Fountain().tick() == \"splash\", \"Check Torch.tick() and Fountain.tick() return values!\"\nassert out == [\"flicker\", \"splash\"], f\"Expected out == ['flicker', 'splash'], got {out!r}\"\nassert OUTPUT.strip() == \"['flicker', 'splash']\", f\"Expected printed ['flicker', 'splash'], got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "class Torch:\n    def tick(___):\n        return ___\nclass Fountain:\n    def tick(___):\n        return ___\nobjs = ___",
+            "tier1_nudge": "Pip ticks the whole scene at once: 'Both classes answer to the same method name, so one comprehension can call it across a mixed list.'",
+            "tier2_pattern": "<list> = [<ClassA>(), <ClassB>()]\nout = [<item>.<shared_method>() for <item> in <list>]\nprint(out)",
             "tier3_walkthrough": "Write:\nclass Torch:\n    def tick(self):\n        return \"flicker\"\nclass Fountain:\n    def tick(self):\n        return \"splash\"\nobjs = [Torch(), Fountain()]\nout = [o.tick() for o in objs]\nprint(out)"
           },
           "difficultyOverride": null,
@@ -759,8 +759,8 @@
           "referenceSolution": "class Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    print(\"VERTEX FREE!\")\n",
           "testCode": "assert issubclass(CastleMesh, Mesh), \"Expected CastleMesh to inherit from Mesh: class CastleMesh(Mesh):\"\nassert CastleMesh(32).double_verts() == 64 and CastleMesh(12).double_verts() == 24, \"Expected double_verts() to return self.verts * 2\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'VERTEX FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Vertex!",
-            "tier2_pattern": "class Mesh:\n    def __init__(___):\n        self.verts = ___\nclass CastleMesh(Mesh):\n    def double_verts(___):\n        return ___\nif ___:",
+            "tier1_nudge": "Pip raises the castle mesh: 'The parent stores the count; the subclass adds a method that reads it through `self` and doubles it.'",
+            "tier2_pattern": "class <Parent>:\n    def __init__(self, <value>):\n        self.<attribute> = <value>\nclass <Subclass>(<Parent>):\n    def <method>(self):\n        return self.<attribute> * <factor>\n\nif <Subclass>(<value>).<method>() == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nclass Mesh:\n    def __init__(self, verts):\n        self.verts = verts\nclass CastleMesh(Mesh):\n    def double_verts(self):\n        return self.verts * 2\nif CastleMesh(32).double_verts() == 64:\n    print(\"VERTEX FREE!\")"
           },
           "difficultyOverride": null,
@@ -809,9 +809,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip reaches up to the parent class: 'Think about what `super()` is FOR — it is how a subclass reuses something it inherited.'",
+            "tier2_pattern": "`super()` is about reuse, not deletion or speed — it reaches the version of a method the parent defined.",
+            "tier3_walkthrough": "Tap Option A (calling a method from its parent class) — `super().__init__(name)` reuses the parent's setup."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -933,8 +933,8 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip says: 'Call `.draw()` on `Cube()` then `Cone()`!'",
-            "tier2_pattern": "['BOX', 'TIP']",
-            "tier3_walkthrough": "Tap Option B (`['BOX', 'TIP']`)!"
+            "tier2_pattern": "Each object in the list runs ITS OWN version of the shared method name, in list order.",
+            "tier3_walkthrough": "Tap Option B (`['BOX', 'TIP']`) — each class answers `.draw()` its own way, and the comprehension keeps them in order."
           },
           "difficultyOverride": null
         },
@@ -959,8 +959,8 @@
           "referenceSolution": "class Scene:\n    def __init__(self, lights):\n        self.lights = lights\n    def total_light(self):\n        return sum(self.lights)\n\nprint(Scene([10, 20]).total_light())\n",
           "testCode": "assert OUTPUT.strip() == '30', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip taps line 5: 'Inside a method, read object attributes with `self.lights`!'",
-            "tier2_pattern": "return sum(self.lights)",
+            "tier1_nudge": "Pip taps line 5: 'A bare name inside a method is a brand-new local variable — only the `self.` prefix reaches the object's own data.'",
+            "tier2_pattern": "    def <method>(self):\n        return sum(self.<attribute>)",
             "tier3_walkthrough": "Change `sum(lights)` to `sum(self.lights)`."
           },
           "difficultyOverride": null,
@@ -991,8 +991,8 @@
           "referenceSolution": "class Box3D:\n    def __init__(self, w, h, d):\n        self.w, self.h, self.d = w, h, d\n    def volume(self):\n        return self.w * self.h * self.d\n\nprint(Box3D(2, 3, 4).volume())\n",
           "testCode": "assert Box3D(2, 3, 4).volume() == 24 and Box3D(1, 5, 2).volume() == 10\nassert OUTPUT.strip() == '24', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Define `def volume(self):` returning `self.w * self.h * self.d`!'",
-            "tier2_pattern": "    def volume(self):\n        return self.w * self.h * self.d",
+            "tier1_nudge": "Pip measures the box: 'Multiply the three stored dimensions together and hand the answer back.'",
+            "tier2_pattern": "    def <method>(self):\n        return self.<a> * self.<b> * self.<c>\n\nprint(<Name>(<args>).<method>())",
             "tier3_walkthrough": "Add `volume(self)` and `print(Box3D(2, 3, 4).volume())`."
           },
           "difficultyOverride": null,
@@ -1024,8 +1024,8 @@
           "referenceSolution": "class Entity:\n    def __init__(self, name):\n        self.name = name\n\nclass Scene:\n    def __init__(self, items):\n        self.items = items\n    def count(self):\n        return len(self.items)\n\ns = Scene([Entity(\"A\"), Entity(\"B\")])\nprint(s.count())\n",
           "testCode": "assert s.count() == 2\nassert OUTPUT.strip() == '2', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Return `len(self.items)` inside `count(self)`!'",
-            "tier2_pattern": "    def count(self):\n        return len(self.items)",
+            "tier1_nudge": "Pip counts the scene: 'The scene stores a whole list, so the method can just measure that list's length.'",
+            "tier2_pattern": "    def <method>(self):\n        return len(self.<attribute>)\n\n<obj> = <Scene>([<Entity>(\"<value>\"), <Entity>(\"<value>\")])\nprint(<obj>.<method>())",
             "tier3_walkthrough": "Add `count(self)`, create `s = Scene([Entity(\"A\"), Entity(\"B\")])`, and `print(s.count())`."
           },
           "difficultyOverride": null,
@@ -1058,8 +1058,8 @@
           "referenceSolution": "class Lamp:\n    def update(self):\n        return \"glow\"\n\nclass Door:\n    def update(self):\n        return \"creak\"\n\nprops = [Lamp(), Door()]\nevents = [p.update() for p in props]\nprint(events)\n",
           "testCode": "assert events == ['glow', 'creak']\nassert OUTPUT.strip() == \"['glow', 'creak']\", f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Put `[Lamp(), Door()]` in `props`, then `[p.update() for p in props]`!'",
-            "tier2_pattern": "props = [Lamp(), Door()]\nevents = [p.update() for p in props]\nprint(events)",
+            "tier1_nudge": "Pip updates every prop: 'Build the mixed list first, then one comprehension calls the shared method name on each item.'",
+            "tier2_pattern": "props = [<ClassA>(), <ClassB>()]\nevents = [<item>.<shared_method>() for <item> in props]\nprint(events)",
             "tier3_walkthrough": "Add:\nprops = [Lamp(), Door()]\nevents = [p.update() for p in props]\nprint(events)"
           },
           "difficultyOverride": null,
@@ -1089,8 +1089,8 @@
           "referenceSolution": "class Prop:\n    def describe(self):\n        return \"STATIC\"\n\nclass MovingProp(Prop):\n    def describe(self):\n        return \"MOVING\"\n\nprint(MovingProp().describe())\n",
           "testCode": "assert issubclass(MovingProp, Prop) and MovingProp().describe() == 'MOVING'\nassert OUTPUT.strip() == 'MOVING', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Write `class MovingProp(Prop):` and override `describe(self)` to return `\"MOVING\"`!'",
-            "tier2_pattern": "class MovingProp(Prop):\n    def describe(self):\n        return \"MOVING\"",
+            "tier1_nudge": "Pip animates a static prop: 'Name the parent in the class line, then define a method with the same name to replace the parent's answer.'",
+            "tier2_pattern": "class <Subclass>(<Parent>):\n    def <same_method_name>(self):\n        return \"<new_value>\"\n\nprint(<Subclass>().<same_method_name>())",
             "tier3_walkthrough": "Add `MovingProp(Prop)` and `print(MovingProp().describe())`."
           },
           "difficultyOverride": null,
@@ -1121,8 +1121,8 @@
           "referenceSolution": "class Gear:\n    def __init__(self, power):\n        self.power = power\n\nclass Engine:\n    def __init__(self, parts):\n        self.parts = parts\n    def total_power(self):\n        return sum(p.power for p in self.parts)\n\nif Engine([Gear(20), Gear(44)]).total_power() == 64:\n    print(\"VECTOR FREE!\")\n",
           "testCode": "assert Engine([Gear(10), Gear(5)]).total_power() == 15\nassert OUTPUT.strip() == 'VECTOR FREE!', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Define `Engine` with `self.parts = parts` and `total_power(self)` summing `p.power`!'",
-            "tier2_pattern": "class Engine:\n    def __init__(self, parts):\n        self.parts = parts\n    def total_power(self):\n        return sum(p.power for p in self.parts)",
+            "tier1_nudge": "Pip powers the engine: 'The engine stores a list of part objects, so its method adds up one attribute read off every part.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self, <parts>):\n        self.<parts> = <parts>\n    def <method>(self):\n        return sum(<part>.<attribute> for <part> in self.<parts>)\n\nif <Name>([<Part>(<value>), <Part>(<value>)]).<method>() == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Define `Engine`, then check `if Engine([Gear(20), Gear(44)]).total_power() == 64: print(\"VECTOR FREE!\")`."
           },
           "difficultyOverride": null,
@@ -1172,8 +1172,8 @@
           "correctChoiceId": "a",
           "hints": {
             "tier1_nudge": "Pip grins: 'Remember how `[o.tick() for o in objs]` worked on both `Torch` and `Fountain`!'",
-            "tier2_pattern": "Same method name across different classes",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier2_pattern": "Think about what one loop can do when every object answers to the same method name.",
+            "tier3_walkthrough": "Tap Option A — one loop can call the same method name across different object types, each responding its own way."
           },
           "difficultyOverride": null
         }
@@ -1287,8 +1287,8 @@
           "correctChoiceId": "c",
           "hints": {
             "tier1_nudge": "Pip points at `max(4, 9)`: 'Which one is the BIGGER number of 4 and 9?'",
-            "tier2_pattern": "max(4, 9) is 9, not 4",
-            "tier3_walkthrough": "Tap Option C!"
+            "tier2_pattern": "Three of these comparisons are true, so find the one whose two sides really differ.",
+            "tier3_walkthrough": "Tap Option C — `max(4, 9)` is 9, so `9 == 4` is False and the assertion fires."
           },
           "difficultyOverride": null
         },
@@ -1313,8 +1313,8 @@
           "referenceSolution": "total = 0\nfor n in [2, 3, 5]:\n    total += n\nassert total == 10\nprint(total)\n",
           "testCode": "assert total == 10\nassert OUTPUT.strip() == '10', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at line 1: 'An accumulator sum should start at `0`, not `1`!'",
-            "tier2_pattern": "total = 0",
+            "tier1_nudge": "Pip points at line 1: 'A running total must begin from nothing, or every answer comes out one too many.'",
+            "tier2_pattern": "<total> = <starting_value>    # a sum starts from nothing",
             "tier3_walkthrough": "Change `total = 1` to `total = 0`."
           },
           "difficultyOverride": null,
@@ -1344,8 +1344,8 @@
           "referenceSolution": "def double(n):\n    return n * 2\n\nassert double(5) == 10\nassert double(0) == 0\nprint(\"PASSED\")\n",
           "testCode": "assert OUTPUT.strip() == 'PASSED', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Write `assert double(5) == 10`, `assert double(0) == 0`, and `print(\"PASSED\")`!'",
-            "tier2_pattern": "assert double(5) == 10\nassert double(0) == 0\nprint(\"PASSED\")",
+            "tier1_nudge": "Pip tests the helper twice: 'Write one `assert` per case — a normal input and an edge case — then print only if both pass.'",
+            "tier2_pattern": "assert <func>(<input>) == <expected>\nassert <func>(<edge_input>) == <expected>\nprint(\"<message>\")",
             "tier3_walkthrough": "Add:\nassert double(5) == 10\nassert double(0) == 0\nprint(\"PASSED\")"
           },
           "difficultyOverride": null,
@@ -1377,8 +1377,8 @@
           "referenceSolution": "def bigger(a, b):\n    if a >= b:\n        return a\n    return b\n\nassert bigger(3, 8) == 8\nprint(bigger(3, 8))\n",
           "testCode": "assert bigger(9, 2) == 9 and bigger(3, 8) == 8 and bigger(5, 5) == 5\nassert OUTPUT.strip() == '8', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'If `a >= b`, return `a`; otherwise return `b`!'",
-            "tier2_pattern": "def bigger(a, b):\n    if a >= b:\n        return a\n    return b",
+            "tier1_nudge": "Pip weighs the two numbers: 'Return the first when it is the larger or equal, and let a plain `return` below handle the other case.'",
+            "tier2_pattern": "def <func>(<a>, <b>):\n    if <a> >= <b>:\n        return <a>\n    return <b>\n\nassert <func>(<a>, <b>) == <expected>\nprint(<func>(<a>, <b>))",
             "tier3_walkthrough": "Complete `bigger(a, b)`, add `assert bigger(3, 8) == 8`, and `print(bigger(3, 8))`."
           },
           "difficultyOverride": null,
@@ -1412,8 +1412,8 @@
           "referenceSolution": "def safe_avg(nums):\n    if len(nums) == 0:\n        return 0\n    return sum(nums) // len(nums)\n\nassert safe_avg([]) == 0\nprint(safe_avg([10, 20]))\n",
           "testCode": "assert safe_avg([]) == 0 and safe_avg([10, 20]) == 15\nassert OUTPUT.strip() == '15', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check `if len(nums) == 0: return 0` first, then `return sum(nums) // len(nums)`!'",
-            "tier2_pattern": "def safe_avg(nums):\n    if len(nums) == 0:\n        return 0\n    return sum(nums) // len(nums)",
+            "tier1_nudge": "Pip guards the empty list: 'Check for the empty case FIRST and return early, so the averaging line never divides by zero.'",
+            "tier2_pattern": "def <func>(<nums>):\n    if len(<nums>) == <empty_length>:\n        return <fallback>\n    return sum(<nums>) // len(<nums>)\n\nassert <func>([]) == <fallback>\nprint(<func>(<list>))",
             "tier3_walkthrough": "Complete `safe_avg(nums)`, add `assert safe_avg([]) == 0`, and `print(safe_avg([10, 20]))`."
           },
           "difficultyOverride": null,
@@ -1446,8 +1446,8 @@
           "referenceSolution": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\n\nassert clamp(-5, 0, 10) == 0\nassert clamp(5, 0, 10) == 5\nassert clamp(20, 0, 10) == 10\nprint(\"ALL 3 PASSED\")\n",
           "testCode": "assert OUTPUT.strip() == 'ALL 3 PASSED', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip counts: 'Test `-5` (-> 0), `5` (-> 5), and `20` (-> 10), then print `\"ALL 3 PASSED\"`!'",
-            "tier2_pattern": "assert clamp(-5, 0, 10) == 0\nassert clamp(5, 0, 10) == 5\nassert clamp(20, 0, 10) == 10\nprint(\"ALL 3 PASSED\")",
+            "tier1_nudge": "Pip tests low, middle and high: 'Three asserts — one below the range, one inside it, one above — then print once they all pass.'",
+            "tier2_pattern": "assert <func>(<below>, <lo>, <hi>) == <lo>\nassert <func>(<inside>, <lo>, <hi>) == <inside>\nassert <func>(<above>, <lo>, <hi>) == <hi>\nprint(\"<message>\")",
             "tier3_walkthrough": "Add the 3 `assert` lines and `print(\"ALL 3 PASSED\")`."
           },
           "difficultyOverride": null,
@@ -1478,8 +1478,8 @@
           "referenceSolution": "def is_valid_bit(n):\n    return 1 <= n <= 64\n\nassert is_valid_bit(64)\nassert not is_valid_bit(0)\nprint(\"VERIFY FREE!\")\n",
           "testCode": "assert is_valid_bit(1) is True and is_valid_bit(64) is True and is_valid_bit(0) is False and is_valid_bit(65) is False\nassert OUTPUT.strip() == 'VERIFY FREE!', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Return `1 <= n <= 64` inside `is_valid_bit(n)`, then run both asserts and print `\"VERIFY FREE!\"`!'",
-            "tier2_pattern": "def is_valid_bit(n):\n    return 1 <= n <= 64",
+            "tier1_nudge": "Pip checks the bit range: 'The function returns the comparison itself, so it hands back True only when the number sits inside both limits.'",
+            "tier2_pattern": "def <func>(<n>):\n    return <lo> <= <n> <= <hi>\n\nassert <func>(<valid>)\nassert not <func>(<invalid>)\nprint(\"<message>\")",
             "tier3_walkthrough": "Write `is_valid_bit(n)`, both `assert` lines, and `print(\"VERIFY FREE!\")`."
           },
           "difficultyOverride": null,
@@ -1528,8 +1528,8 @@
           "correctChoiceId": "a",
           "hints": {
             "tier1_nudge": "Pip grins: 'Remember how `range(start, stop)` stops one BEFORE `stop`!'",
-            "tier2_pattern": "range(1, 5) -> 1, 2, 3, 4",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier2_pattern": "`range(start, stop)` never includes `stop` itself, so one of the numbers you expected was never visited.",
+            "tier3_walkthrough": "Tap Option A — `range(1, 5)` visits 1, 2, 3 and 4 and stops before 5, so 5 is never added."
           },
           "difficultyOverride": null
         }
@@ -1612,7 +1612,7 @@
           "trialType": "multiple_choice",
           "title": "Sorting with lambda!",
           "storyPrompt": "In 3D graphics, you sort objects back-to-front by depth `z` using `sorted(items, key=lambda x: x[\"z\"])`! Which star comes FIRST?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(ordered[0][\"n\"])` displays after the stars are sorted by their `\"z\"` value.",
           "concepts": [
             "debugging",
             "sorting_lambdas"
@@ -1644,9 +1644,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip sorts by depth: 'A plain `sorted()` puts the SMALLEST key first — so which star has the smallest z?'",
+            "tier2_pattern": "The `key=` function picks which value to sort on, and the default order runs smallest first.",
+            "tier3_walkthrough": "Tap Option A (`B`) — `B` has the smaller z, so it lands at index 0."
           },
           "difficultyOverride": null
         },
@@ -1671,8 +1671,8 @@
           "referenceSolution": "total = sum(range(1, 6))\nassert total == 15\nprint(total)\n",
           "testCode": "assert total == 15 and OUTPUT.strip() == \"15\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "total = ___\nassert ___\nprint(___)",
+            "tier1_nudge": "Pip re-counts the range: 'The sum is one number short, and `range(start, stop)` never includes `stop` itself.'",
+            "tier2_pattern": "total = sum(range(<start>, <stop>))\nassert total == <expected>\nprint(total)",
             "tier3_walkthrough": "Update to:\ntotal = sum(range(1, 6))\nassert total == 15\nprint(total)"
           },
           "difficultyOverride": null,
@@ -1728,8 +1728,8 @@
           "referenceSolution": "assert 3 * 4 == 12\nprint(\"OK\")\n",
           "testCode": "assert OUTPUT.strip() == 'OK', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Write `assert 3 * 4 == 12` on line 1 and `print(\"OK\")` on line 2!'",
-            "tier2_pattern": "assert 3 * 4 == 12\nprint(\"OK\")",
+            "tier1_nudge": "Pip states a truth: 'Write the claim after `assert` — if it holds, Python says nothing and carries on to the print.'",
+            "tier2_pattern": "assert <expression> == <expected>\nprint(\"<message>\")",
             "tier3_walkthrough": "Write:\nassert 3 * 4 == 12\nprint(\"OK\")"
           },
           "difficultyOverride": null,
@@ -1752,14 +1752,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\n",
-            "standard": "",
+            "standard": "# Sort dragons by power, highest first, into ranked -- then print the top dragon's name\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])\n",
           "testCode": "assert ranked[0][0] == \"Nova\", f\"Expected top dragon to be 'Nova', got {ranked[0][0]!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Nova'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "dragons = ___\nranked = ___\nprint(___)",
+            "tier1_nudge": "Pip ranks the dragons: 'The key function picks the power out of each pair, and one extra argument flips the order so the biggest comes first.'",
+            "tier2_pattern": "ranked = sorted(<list>, key=lambda <item>: <item>[<index>], reverse=True)\nprint(ranked[0][<index>])",
             "tier3_walkthrough": "Write:\ndragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])"
           },
           "difficultyOverride": null,
@@ -1833,8 +1833,8 @@
           "referenceSolution": "stars = [{\"n\": \"Far\", \"z\": 9}, {\"n\": \"Near\", \"z\": 2}]\nnear_first = sorted(stars, key=lambda s: s[\"z\"])\nprint(near_first[0][\"n\"])\n",
           "testCode": "assert near_first[0]['n'] == 'Near'\nassert OUTPUT.strip() == 'Near', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at lambda: 'Use `key=lambda s: s[\"z\"]` inside `sorted(stars, ...)`!'",
-            "tier2_pattern": "near_first = sorted(stars, key=lambda s: s[\"z\"])\nprint(near_first[0][\"n\"])",
+            "tier1_nudge": "Pip points at the key function: 'The little function picks which value to sort on — here it should reach the depth inside each star.'",
+            "tier2_pattern": "near_first = sorted(<list>, key=lambda <item>: <item>[\"<key>\"])\nprint(near_first[0][\"<key>\"])",
             "tier3_walkthrough": "Add:\nnear_first = sorted(stars, key=lambda s: s[\"z\"])\nprint(near_first[0][\"n\"])"
           },
           "difficultyOverride": null,
@@ -1858,14 +1858,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\n",
-            "standard": "",
+            "standard": "# Define clamp(n, lo, hi), assert it caps 15 to 10, then print the result\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))\n",
           "testCode": "assert clamp(15, 0, 10) == 10 and clamp(-5, 0, 10) == 0 and clamp(5, 0, 10) == 5 and OUTPUT.strip() == \"10\"",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "def clamp(___):\n    return ___\nassert ___\nprint(___)",
+            "tier1_nudge": "Pip clamps the value: 'Cap it from above first, then lift it from below — one call nested inside the other.'",
+            "tier2_pattern": "def <func>(<n>, <lo>, <hi>):\n    return max(<lo>, min(<hi>, <n>))\n\nassert <func>(<n>, <lo>, <hi>) == <expected>\nprint(<func>(<n>, <lo>, <hi>))",
             "tier3_walkthrough": "Write:\ndef clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))"
           },
           "difficultyOverride": null,
@@ -1917,14 +1917,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\n",
-            "standard": "",
+            "standard": "# Sort polys from farthest to nearest by z into draw_order, then print the first id\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])\n",
           "testCode": "assert draw_order[0][\"id\"] == \"far\", f\"Expected farthest polygon 'far' first, got {draw_order[0]!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'far'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "polys = ___\ndraw_order = ___\nprint(___)",
+            "tier1_nudge": "Pip paints back to front: 'Sort on the depth value, and flip the order so the farthest polygon is drawn first.'",
+            "tier2_pattern": "draw_order = sorted(<list>, key=lambda <item>: <item>[\"<depth_key>\"], reverse=True)\nprint(draw_order[0][\"<id_key>\"])",
             "tier3_walkthrough": "Write:\npolys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])"
           },
           "difficultyOverride": null,
@@ -1971,8 +1971,8 @@
           "referenceSolution": "stars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]\norder = sorted(stars, key=lambda s: s[\"z\"], reverse=True)\nassert order[0][\"name\"] == \"Alpha\"\nprint(\"QUASAR FREE!\")\n",
           "testCode": "assert order[0][\"name\"] == \"Alpha\", f\"Expected farthest star 'Alpha' first, got {order[0]!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'QUASAR FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Quasar!",
-            "tier2_pattern": "stars = ___\norder = ___\nassert ___\nprint(___)",
+            "tier1_nudge": "Pip aligns the star-mesh: 'Sort on depth with the order flipped, then assert the name sitting at index 0 before announcing.'",
+            "tier2_pattern": "order = sorted(<list>, key=lambda <item>: <item>[\"<depth_key>\"], reverse=True)\nassert order[0][\"<name_key>\"] == \"<expected>\"\nprint(\"<message>\")",
             "tier3_walkthrough": "Write:\nstars = [{\"name\": \"Beta\", \"z\": 4}, {\"name\": \"Alpha\", \"z\": 12}]\norder = sorted(stars, key=lambda s: s[\"z\"], reverse=True)\nassert order[0][\"name\"] == \"Alpha\"\nprint(\"QUASAR FREE!\")"
           },
           "difficultyOverride": null,
@@ -2036,9 +2036,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip calls a nameless function: 'A `lambda` is a tiny function written inline — the part after the colon is what it hands back.'",
+            "tier2_pattern": "The part after the colon is the body, and the value in the second set of parentheses is what goes in.",
+            "tier3_walkthrough": "Tap Option A (`15`) — the lambda adds 5 to whatever it is given, and it is given 10."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -2132,7 +2132,7 @@
           "trialType": "multiple_choice",
           "title": "64-Bit Grand Finale Check!",
           "storyPrompt": "You've mastered 8-Bit, 16-Bit, 32-Bit, and 64-Bit Python! What will this combined class + comprehension print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(sum(b.v for b in bits))` displays for two `Bit` objects holding 16 and 48.",
           "concepts": [
             "classes_intro",
             "class_inheritance",
@@ -2166,9 +2166,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip traces each line carefully!",
-            "tier2_pattern": "Check the values step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip totals the bits: 'Each item in the list is an object, so the sum reads one attribute off each of them.'",
+            "tier2_pattern": "One value is read off every object in the list and the results are added together.",
+            "tier3_walkthrough": "Tap Option A (`64`) — the two objects hold 16 and 48, which add to 64."
           },
           "difficultyOverride": null
         },
@@ -2195,8 +2195,8 @@
           "referenceSolution": "class SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return self.bits == 64\n\nprint(SanctumCore(64).is_complete())\n",
           "testCode": "assert SanctumCore(64).is_complete() is True and SanctumCore(32).is_complete() is False and OUTPUT.strip() == \"True\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted line!",
-            "tier2_pattern": "class SanctumCore:\n    def __init__(___):\n        self.bits = ___\n    def is_complete(___):\n        return ___\nprint(___)",
+            "tier1_nudge": "Pip reads the NameError: 'Inside a method, a bare name is not the object's attribute — it needs the `self.` prefix to be found.'",
+            "tier2_pattern": "    def <method>(self):\n        return self.<attribute> == <target>",
             "tier3_walkthrough": "Update to:\nclass SanctumCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_complete(self):\n        return self.bits == 64\n\nprint(SanctumCore(64).is_complete())"
           },
           "difficultyOverride": null,
@@ -2223,14 +2223,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\n",
-            "standard": "",
+            "standard": "# Define class Spell3D holding a pos tuple, with step(dx, dy, dz) moving it -- then start at (1, 1, 1) and step (2, 3, 4)\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)\n",
           "testCode": "assert s.pos == (3, 4, 5) and OUTPUT.strip() == \"(3, 4, 5)\"\n_s2 = Spell3D((5, 5, 5))\n_s2.step(1, -1, 2)\nassert _s2.pos == (6, 4, 7)",
           "hints": {
-            "tier1_nudge": "Pip cheers you on!",
-            "tier2_pattern": "class Spell3D:\n    def __init__(___):\n        self.pos = ___\n    def step(___):\n        x, y, z = ___\n        self.pos = ___\ns = ___",
+            "tier1_nudge": "Pip scripts a 3D path: 'Unpack the stored position into three names, then build a BRAND-NEW tuple with each one shifted.'",
+            "tier2_pattern": "    def <method>(self, <dx>, <dy>, <dz>):\n        <x>, <y>, <z> = self.<attribute>\n        self.<attribute> = (<x> + <dx>, <y> + <dy>, <z> + <dz>)",
             "tier3_walkthrough": "Write:\nclass Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)"
           },
           "difficultyOverride": null,
@@ -2256,14 +2256,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\n",
-            "standard": "",
+            "standard": "# Sort the council by power, highest first, into leaders -- then print the top name\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])\n",
           "testCode": "assert leaders[0][\"n\"] == \"Aurelion\", f\"Expected top leader 'Aurelion', got {leaders[0]!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Aurelion'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip double-checks your logic!",
-            "tier2_pattern": "council = ___\nleaders = ___\nprint(___)",
+            "tier1_nudge": "Pip ranks the council: 'Sort on the power key with the order flipped, then read the name out of the first entry.'",
+            "tier2_pattern": "leaders = sorted(<list>, key=lambda <item>: <item>[\"<power_key>\"], reverse=True)\nprint(leaders[0][\"<name_key>\"])",
             "tier3_walkthrough": "Write:\ncouncil = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])"
           },
           "difficultyOverride": null,
@@ -2310,8 +2310,8 @@
           "referenceSolution": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power += int(s)\n    except ValueError:\n        pass\nprint(crown_power)\n",
           "testCode": "assert crown_power == 64 and OUTPUT.strip() == \"64\"",
           "hints": {
-            "tier1_nudge": "Pip sparks with excitement!",
-            "tier2_pattern": "shards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)",
+            "tier1_nudge": "Pip shields the last shards: 'Try the conversion inside the loop and let the `except` quietly skip a corrupted entry, so one bad shard does not stop the rest.'",
+            "tier2_pattern": "for <item> in <list>:\n    try:\n        crown_power += int(<item>)\n    except ValueError:\n        pass\nprint(crown_power)",
             "tier3_walkthrough": "Write:\nshards = [\"32\", \"null\", \"32\"]\ncrown_power = 0\nfor s in shards:\n    try:\n        crown_power = crown_power + int(s)\n    except ValueError:\n        pass\nprint(crown_power)"
           },
           "difficultyOverride": null,
@@ -2360,8 +2360,8 @@
           "referenceSolution": "class PyriaCrown:\n    def __init__(self):\n        self.era_bits = [8, 16, 32, 8]\n    def total(self):\n        return sum(self.era_bits)\n\nc = PyriaCrown()\nassert c.total() == 64\nprint(\"64-BIT PYRIA RESTORED!\")\n",
           "testCode": "assert c.total() == 64, f\"Expected c.total() == 64, got {c.total()!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = '64-BIT PYRIA RESTORED!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "One last spell to free Aurelion!",
-            "tier2_pattern": "class PyriaCrown:\n    def __init__(___):\n        self.era_bits = ___\n    def total(___):\n        return ___\nc = ___\nassert ___",
+            "tier1_nudge": "Pip claims the crown: 'The class stores the list of era bits, and its method totals them — then one assert proves the total before you announce it.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self):\n        self.<attribute> = [<values>]\n    def <method>(self):\n        return sum(self.<attribute>)\n\n<obj> = <Name>()\nassert <obj>.<method>() == <target>\nprint(\"<message>\")",
             "tier3_walkthrough": "Write:\nclass PyriaCrown:\n    def __init__(self):\n        self.era_bits = [8, 16, 32, 8]\n    def total(self):\n        return sum(self.era_bits)\n\nc = PyriaCrown()\nassert c.total() == 64\nprint(\"64-BIT PYRIA RESTORED!\")"
           },
           "difficultyOverride": null,
@@ -2412,9 +2412,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip grins: 'Trace it carefully!'",
-            "tier2_pattern": "Evaluate step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip doubles six times over: '`**` raises the base to a power — it multiplies the number by itself, not by the exponent.'",
+            "tier2_pattern": "Multiply 2 by itself as many times as the second number says.",
+            "tier3_walkthrough": "Tap Option A (`64`) — `2 ** 6` is 2 multiplied by itself six times."
           },
           "difficultyOverride": null,
           "isBonus": true,
