@@ -27,10 +27,10 @@ import { audio } from './audio.js?v=20261127i';
 import { music, resolveRegionTheme } from './music.js?v=20261127i';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
-import { SpriteManager } from './sprites.js?v=20261127i';
-import { WorldEngine } from './world.js?v=20261127i';
-import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127k';
-import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
+import { SpriteManager } from './sprites.js?v=20261127m';
+import { WorldEngine } from './world.js?v=20261127l';
+import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127m';
+import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127p';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -540,6 +540,18 @@ async function runStoryCutsceneById(cutsceneId, { markSeen = false } = {}) {
 }
 
 // ==================== HUD UPDATES ====================
+function renderHudPortrait() {
+  const save = state.activeSave;
+  const portraitCanvas = $('#hud-portrait');
+  if (!save || !portraitCanvas || !state.sprites) return;
+  const eraKey = normalizeVisualEra(save.visualEra);
+  const ctx = portraitCanvas.getContext('2d');
+  ctx.clearRect(0, 0, portraitCanvas.width, portraitCanvas.height);
+  ctx.imageSmoothingEnabled = false;
+  state.sprites.drawPortraitBackdrop(ctx, portraitCanvas.width, portraitCanvas.height, eraKey, 'hud');
+  state.sprites.drawHero(ctx, save.appearance, eraKey, 'down', 0, 0, 0, 32, 32);
+}
+
 function updateHud() {
   const save = state.activeSave;
   if (!save) return;
@@ -583,12 +595,7 @@ function updateHud() {
   }
 
   // Hero mini portrait
-  const portraitCanvas = $('#hud-portrait');
-  if (portraitCanvas && state.sprites) {
-    const ctx = portraitCanvas.getContext('2d');
-    ctx.clearRect(0, 0, portraitCanvas.width, portraitCanvas.height);
-    state.sprites.drawHero(ctx, save.appearance, eraKey, 'down', 0, 0, 0, 32, 32);
-  }
+  renderHudPortrait();
 
   // Rescued dragons summary (data-driven across all Realms in the current Era)
   const dragonsEl = $('#hud-dragons');
@@ -1372,7 +1379,7 @@ async function enterOverworld(save) {
 // ==================== ENTITY INTERACTIONS ====================
 async function handleEntityInteract(entity) {
   const save = state.activeSave;
-  const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
+  const eraKey = normalizeVisualEra(save.visualEra);
   const completed = getSolvedTrialsSet(save);
   const rescued = new Set(save.rescuedDragons || []);
 
@@ -1718,7 +1725,7 @@ async function handleEntityInteract(entity) {
 function openWorkshop() {
   const save = state.activeSave;
   if (!save) return;
-  const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
+  const eraKey = normalizeVisualEra(save.visualEra);
   state.modals.openWorkshopModal({
     catalog: state.catalog,
     save,
@@ -2126,6 +2133,15 @@ async function init() {
     state.catalog = config.catalog;
     state.era = state.eras.get('era-01-8bit') || [...state.eras.values()][0] || null;
     state.sprites = new SpriteManager(spriteManifest, tilesetManifest);
+    let portraitRedrawScheduled = false;
+    state.sprites.onImageLoaded = () => {
+      if (portraitRedrawScheduled || !state.activeSave) return;
+      portraitRedrawScheduled = true;
+      requestAnimationFrame(() => {
+        portraitRedrawScheduled = false;
+        renderHudPortrait();
+      });
+    };
     state.sprites.preloadCore('8bit');
     state.sprites.preloadCore('16bit');
     renderAccountIdentityBar();

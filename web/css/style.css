@@ -1604,6 +1604,7 @@ textarea, input, pre, code {
 }
 
 .npc-portrait-canvas {
+  box-sizing: content-box;
   width: 64px;
   height: 64px;
   flex-shrink: 0;

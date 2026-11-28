@@ -2324,29 +2324,84 @@ def upscale_pip_frame_snes32(src: Canvas, add_shadow: bool = False) -> Canvas:
 
 
 def polish_snes_hero_sheet(sheet: Canvas) -> Canvas:
-    """Gives 16-Bit 32x32 hero layers authentic SNES colored outlines and richer fabric depth."""
+    """Gives 16-Bit 32x32 hero layers authentic SNES colored outlines, directional
+    top-left sunlit rim lighting, cool bottom-right volume shading, and specular glints.
+    """
     out = sheet.copy()
 
     def clamp(v: int) -> int:
         return max(0, min(255, v))
 
+    def shift_rgb(c: RGBA, dr: int, dg: int, db: int) -> RGBA:
+        return (clamp(c[0] + dr), clamp(c[1] + dg), clamp(c[2] + db), c[3])
+
+    def luma(c: RGBA) -> float:
+        return 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]
+
+    def frame_get(fx0: int, fy0: int, x: int, y: int) -> RGBA:
+        if fx0 <= x < fx0 + 32 and fy0 <= y < fy0 + 32:
+            return sheet.get(x, y)
+        return TRANSPARENT
+
     for y in range(sheet.h):
+        fy0 = (y // 32) * 32
         for x in range(sheet.w):
+            fx0 = (x // 32) * 32
             c = sheet.get(x, y)
             if c[3] != 255:
                 continue
-            # Tint harsh NES outline pixels toward adjacent fill colors (SNES colored-outline look)
+
+            up = frame_get(fx0, fy0, x, y - 1)
+            dn = frame_get(fx0, fy0, x, y + 1)
+            lt = frame_get(fx0, fy0, x - 1, y)
+            rt = frame_get(fx0, fy0, x + 1, y)
+
+            # 1. Soft colored SNES outlines (tinted by adjacent fill color)
             if c == OUTLINE:
-                nbrs = []
-                for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
-                    n = sheet.get(x + dx, y + dy)
-                    if n[3] == 255 and n != OUTLINE and n != EYE_DARK:
-                        nbrs.append(n)
+                # Only round true outer 90-degree outline corners where both inner orthogonal
+                # neighbors are also OUTLINE (preserves ears, hair spikes, clasps, and shield tips)
+                if (
+                    (up[3] == 0 and lt[3] == 0 and dn == OUTLINE and rt == OUTLINE) or
+                    (up[3] == 0 and rt[3] == 0 and dn == OUTLINE and lt == OUTLINE) or
+                    (dn[3] == 0 and lt[3] == 0 and up == OUTLINE and rt == OUTLINE) or
+                    (dn[3] == 0 and rt[3] == 0 and up == OUTLINE and lt == OUTLINE)
+                ):
+                    out.set(x, y, TRANSPARENT)
+                    continue
+                nbrs = [n for n in (up, dn, lt, rt) if n[3] == 255 and n != OUTLINE and n != EYE_DARK]
                 if nbrs:
                     ar = sum(n[0] for n in nbrs) // len(nbrs)
                     ag = sum(n[1] for n in nbrs) // len(nbrs)
                     ab = sum(n[2] for n in nbrs) // len(nbrs)
-                    out.set(x, y, (clamp(ar // 4 + 14), clamp(ag // 4 + 12), clamp(ab // 4 + 24), 255))
+                    out.set(x, y, (clamp(ar // 4 + 16), clamp(ag // 4 + 14), clamp(ab // 4 + 26), 255))
+                continue
+
+            # Preserve crisp eye pixels
+            if c == EYE_DARK or c == EYE_WHITE:
+                continue
+
+            # 2. Directional top-left sunlit rim & bottom-right cool volume bevel
+            col = c
+            is_top_edge = (up[3] == 0 or up == OUTLINE)
+            is_left_edge = (lt[3] == 0 or lt == OUTLINE)
+            is_bot_edge = (dn[3] == 0 or dn == OUTLINE)
+            is_right_edge = (rt[3] == 0 or rt == OUTLINE)
+
+            if is_top_edge and not is_bot_edge:
+                col = shift_rgb(col, 20, 18, 12)
+            elif is_bot_edge and not is_top_edge:
+                col = shift_rgb(col, -20, -18, -8)
+
+            if is_left_edge and not is_right_edge:
+                col = shift_rgb(col, 14, 14, 10)
+            elif is_right_edge and not is_left_edge:
+                col = shift_rgb(col, -16, -14, -6)
+
+            # Specular highlight on bright trim/gold/hair highlights
+            if luma(c) > 210 and is_top_edge:
+                col = shift_rgb(col, 18, 18, 16)
+
+            out.set(x, y, col)
     return out
 
 
@@ -2424,7 +2479,7 @@ def main() -> None:
     save_sheet("8bit", "pip_scarf_ember", scarf8)
     pip16_raw, scarf16_raw = build_pip_sprites(frames=4)
     pip16_frames = {
-        d: [upscale_pip_frame_snes32(extract_frame(pip16_raw, 16, 16, r, f), add_shadow=True) for f in range(4)]
+        d: [upscale_pip_frame_snes32(extract_frame(pip16_raw, 16, 16, r, f), add_shadow=False) for f in range(4)]
         for r, d in enumerate(DIRECTIONS)
     }
     scarf16_frames = {
