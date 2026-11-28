@@ -84,7 +84,7 @@
           "trialType": "multiple_choice",
           "title": "Peek Inside a List!",
           "storyPrompt": "Welcome to the 16-Bit Era! A Python **list** is an ordered, changeable collection of values inside square brackets `[...]` (like `[\"aqua\", \"pearl\", \"coral\"]`), and Python starts counting positions (indexes) at **0**! What will `print(crystals[0])` display?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(crystals[0])` displays when `crystals` is `[\"aqua\", \"pearl\", \"coral\"]`.",
           "concepts": [
             "lists",
             "list_indexing"
@@ -116,9 +116,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip counts on his claws: 'Python starts numbering list slots at 0, not 1 — so which crystal is sitting in slot 0?'",
+            "tier2_pattern": "Python numbers list slots from the left starting at `0`, so slot `0` is whichever item was written first.",
+            "tier3_walkthrough": "Tap Option A (`aqua`) — index `0` is always the very first item in a list."
           },
           "difficultyOverride": null
         },
@@ -143,8 +143,8 @@
           "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\"]\nprint(len(crystals))\n",
           "testCode": "assert len(crystals) == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "crystals = ___\nprint(___)",
+            "tier1_nudge": "Pip peers at the end of line 1: 'Every opening square bracket `[` needs a closing `]` before the line ends!'",
+            "tier2_pattern": "crystals = [<item>, <item>, <item>]\nprint(len(crystals))",
             "tier3_walkthrough": "Update the code to:\ncrystals = [\"aqua\", \"pearl\", \"coral\"]\nprint(len(crystals))"
           },
           "difficultyOverride": null,
@@ -185,7 +185,7 @@
           "testCode": "assert first == 'aqua', f'Expected \"aqua\", got {first!r}'\nassert OUTPUT.strip() == 'aqua', f'Expected \"aqua\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps 0: 'Python starts counting list positions at 0, so `crystals[0]` is the first item!'",
-            "tier2_pattern": "first = crystals[0]\nprint(first)",
+            "tier2_pattern": "first = crystals[<index>]\nprint(first)",
             "tier3_walkthrough": "Add:\nfirst = crystals[0]\nprint(first)"
           },
           "difficultyOverride": null,
@@ -231,7 +231,7 @@
           "testCode": "assert first == crystals[0], f\"Expected first == {crystals[0]!r}, got {first!r}\"\nassert last == crystals[-1], f\"Expected last == {crystals[-1]!r}, got {last!r}\"\nassert sigil == code[0], f\"Expected sigil == {code[0]!r}, got {sigil!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = f\"{crystals[0]} {crystals[-1]} {code[0]}\"\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "Both lists and strings start at index 0, and index -1 grabs the very last item.",
-            "tier2_pattern": "first = crystals[___]\nlast = crystals[___]\nsigil = code[___]\nprint(first, last, sigil)",
+            "tier2_pattern": "first = <list>[0]\nlast = <list>[-1]\nsigil = <string>[0]\nprint(first, last, sigil)",
             "tier3_walkthrough": "Set `first = crystals[0]`, `last = crystals[-1]`, and `sigil = code[0]`, then call `print(first, last, sigil)`."
           },
           "difficultyOverride": null,
@@ -301,14 +301,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\n",
-            "standard": "",
+            "standard": "bag = [\"shell\", \"coral\"]\n# Append \"pearl\" to bag, then print how many items it holds\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))\n",
           "testCode": "assert isinstance(bag, list) and len(bag) == 3, f\"Expected bag to have 3 items, got {bag!r}\"\nif bag != [\"shell\", \"coral\", \"pearl\"]:\n    if [str(x).strip().lower() for x in bag] == [\"shell\", \"coral\", \"pearl\"]:\n        assert False, f\"Almost! Check capitalization/spacing in bag — expected ['shell', 'coral', 'pearl'], got {bag!r}.\"\n    assert False, f\"Expected bag == ['shell', 'coral', 'pearl'], got {bag!r}\"\nassert OUTPUT.strip() == \"3\", f\"Expected printed 3, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "bag = ___\n___\nprint(___)",
+            "tier1_nudge": "Pip drops a pearl into the bag: 'Use `.append(...)` to add the pearl onto the end of `bag`, then `len(...)` to count how many items it holds.'",
+            "tier2_pattern": "<list>.append(<new_item>)\nprint(len(<list>))",
             "tier3_walkthrough": "Write:\nbag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))"
           },
           "difficultyOverride": null,
@@ -373,14 +373,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\n",
-            "standard": "",
+            "standard": "tiles = [\"sand\", \"broken\", \"sand\"]\n# Replace the broken middle tile, then print that slot\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "tiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\nprint(tiles[1])\n",
           "testCode": "assert isinstance(tiles, list) and len(tiles) >= 2, f\"Expected tiles list, got {tiles!r}\"\nassert tiles[1] == \"coral\", f\"Expected tiles[1] == 'coral', got {tiles[1]!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'coral'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "tiles = ___\ntiles[1] = ___\nprint(___)",
+            "tier1_nudge": "Pip points at the middle slot: 'The broken tile sits at index 1, so assign straight into that slot with `tiles[1] = ...`.'",
+            "tier2_pattern": "<list>[1] = <new_value>\nprint(<list>[1])",
             "tier3_walkthrough": "Write:\ntiles = [\"sand\", \"broken\", \"sand\"]\ntiles[1] = \"coral\"\nprint(tiles[1])"
           },
           "difficultyOverride": null,
@@ -457,8 +457,8 @@
           "referenceSolution": "crystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\nprint(crystal_count)\n",
           "testCode": "assert first_crystal == \"aqua\", f\"Expected first_crystal == 'aqua', got {first_crystal!r}\"\nassert last_crystal == \"amber\", f\"Expected last_crystal == 'amber', got {last_crystal!r}\"\nassert crystal_count == 4, f\"Expected crystal_count == 4, got {crystal_count!r}\"\nassert OUTPUT.strip() == \"4\", f\"Expected printed 4, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Ripple!'",
-            "tier2_pattern": "crystals = ___\nfirst_crystal = ___\nlast_crystal = ___\ncrystal_count = ___\nprint(___)",
+            "tier1_nudge": "Pip glows with reef-light: 'Three facts from one list — `[0]` for the first, `[-1]` for the last, and `len(...)` for how many.'",
+            "tier2_pattern": "first_crystal = <list>[0]\nlast_crystal = <list>[-1]\ncrystal_count = len(<list>)\nprint(crystal_count)",
             "tier3_walkthrough": "Write:\ncrystals = [\"aqua\", \"pearl\", \"coral\", \"amber\"]\nfirst_crystal = crystals[0]\nlast_crystal = crystals[-1]\ncrystal_count = len(crystals)\nprint(crystal_count)"
           },
           "difficultyOverride": null,
@@ -522,9 +522,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip reads the shells backwards: 'A negative index counts from the END of the list — which shell is last?'",
+            "tier2_pattern": "Negative indexes count from the RIGHT end: `-1` is the last item, `-2` the one before it, and so on.",
+            "tier3_walkthrough": "Tap Option B (`opal`) — index `-1` always grabs the very last item."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -616,7 +616,7 @@
           "trialType": "multiple_choice",
           "title": "Looping Over a List!",
           "storyPrompt": "You can loop directly over every item in a list with `for item in crates:`! What will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `for c in crates:` prints when `crates` is `[\"fish\", \"salt\"]`.",
           "concepts": [
             "lists",
             "list_iteration"
@@ -648,9 +648,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip walks the crates one at a time: 'Looping over a list hands you the ITEMS themselves, not their slot numbers.'",
+            "tier2_pattern": "Turn 1 puts `\"fish\"` into `c`, turn 2 puts `\"salt\"` into `c`, and each `print(c)` takes its own line.",
+            "tier3_walkthrough": "Tap Option A (`fish` then `salt`) — the loop visits each item in order and prints one per line."
           },
           "difficultyOverride": null
         },
@@ -675,8 +675,8 @@
           "referenceSolution": "crates = [\"rope\", \"sail\", \"map\"]\nfor item in crates:\n    print(item)\n",
           "testCode": "_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call print(...).\"\nassert len(_lines) == 3, f\"Expected 3 lines of output, got {len(_lines)}: {_lines!r}\"\nif _lines[0] != 'rope':\n    if _lines[0].lower() == 'rope':\n        assert False, f\"Almost on line 1! Check capitalization — expected 'rope', got {_lines[0]!r}.\"\n    assert False, f\"Line 1: expected 'rope', got {_lines[0]!r}\"\nif _lines[1] != 'sail':\n    if _lines[1].lower() == 'sail':\n        assert False, f\"Almost on line 2! Check capitalization — expected 'sail', got {_lines[1]!r}.\"\n    assert False, f\"Line 2: expected 'sail', got {_lines[1]!r}\"\nif _lines[2] != 'map':\n    if _lines[2].lower() == 'map':\n        assert False, f\"Almost on line 3! Check capitalization — expected 'map', got {_lines[2]!r}.\"\n    assert False, f\"Line 3: expected 'map', got {_lines[2]!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "crates = ___\nfor ___ in ___:\n    print(___)",
+            "tier1_nudge": "Pip taps the end of the `for` line: 'Every `for` line needs a colon `:` at the end, exactly like an `if` line does!'",
+            "tier2_pattern": "for <item> in <list>:\n    print(<item>)",
             "tier3_walkthrough": "Update the code to:\ncrates = [\"rope\", \"sail\", \"map\"]\nfor item in crates:\n    print(item)"
           },
           "difficultyOverride": null,
@@ -764,7 +764,7 @@
           "testCode": "expected = sum(1 for c in crates if c in rare)\nassert found == expected and OUTPUT.strip() == str(expected)",
           "hints": {
             "tier1_nudge": "Check membership with `if c in rare:` inside your `for` loop, then add 1 to `found`.",
-            "tier2_pattern": "for c in crates:\n    if ___ in ___:\n        found += 1\nprint(found)",
+            "tier2_pattern": "for <item> in <crates>:\n    if <item> in <rare_list>:\n        found += 1\nprint(found)",
             "tier3_walkthrough": "Loop `for c in crates:`, check `if c in rare:`, increment `found += 1`, and `print(found)` at the end."
           },
           "difficultyOverride": null,
@@ -812,7 +812,7 @@
           "testCode": "_expected = [c.upper() for c in banner]\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Print each letter inside your loop.\"\nif _lines != _expected:\n    if [l.upper() for l in _lines] == _expected:\n        assert False, f\"Almost! Make sure every letter is ALL CAPS using .upper() (got {_lines!r})!\"\n    assert False, f\"Expected {_expected!r}, got {_lines!r}\"\n",
           "hints": {
             "tier1_nudge": "A `for` loop over a string visits one letter at a time, and `.upper()` capitalizes each letter.",
-            "tier2_pattern": "for ch in ___:\n    print(___.upper())",
+            "tier2_pattern": "for <letter> in <string>:\n    print(<letter>.upper())",
             "tier3_walkthrough": "Write `for ch in banner:` and indent `print(ch.upper())` inside the loop."
           },
           "difficultyOverride": null,
@@ -849,8 +849,8 @@
           "referenceSolution": "gold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    print(\"GULLWING FREE!\")\n",
           "testCode": "assert harbor_gold == 80, f\"Expected harbor_gold == 80, got {harbor_gold!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'GULLWING FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Gullwing!'",
-            "tier2_pattern": "gold_bags = ___\nharbor_gold = ___\nfor ___ in ___:\n    harbor_gold = ___\nif ___:\n    print(___)",
+            "tier1_nudge": "Pip hauls the gold bags aboard: 'Start `harbor_gold` at 0 and add each bag INSIDE the loop, then check the total AFTER the loop at 0 spaces.'",
+            "tier2_pattern": "harbor_gold = 0\nfor <bag> in <list>:\n    harbor_gold = harbor_gold + <bag>\nif harbor_gold >= 80:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\ngold_bags = [10, 25, 15, 30]\nharbor_gold = 0\nfor g in gold_bags:\n    harbor_gold = harbor_gold + g\nif harbor_gold >= 80:\n    print(\"GULLWING FREE!\")"
           },
           "difficultyOverride": null,
@@ -923,9 +923,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip rummages through the crate list: '`in` asks a yes/no question — so what KIND of value does it hand back?'",
+            "tier2_pattern": "`\"map\"` really is one of the three items, and `in` answers with a Boolean.",
+            "tier3_walkthrough": "Tap Option A (`True`) — `\"map\"` is in the list, and `in` answers `True` or `False`, never an index."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -1018,7 +1018,7 @@
           "trialType": "multiple_choice",
           "title": "Finding the Biggest Pearl!",
           "storyPrompt": "Python has built-in list helpers `max()` (biggest), `min()` (smallest), and `sum()` (total)! What does `print(max([12, 45, 29]))` print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(max(pearls))` displays when `pearls` is `[12, 45, 29]`.",
           "concepts": [
             "lists",
             "list_indexing",
@@ -1051,9 +1051,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip weighs the three pearls: '`max()` hunts for the BIGGEST number in the list.'",
+            "tier2_pattern": "Compare 12, 45 and 29 — `max()` returns the largest, `min()` the smallest, `sum()` the total.",
+            "tier3_walkthrough": "Tap Option B (`45`) — it is the biggest of 12, 45 and 29."
           },
           "difficultyOverride": null
         },
@@ -1079,8 +1079,8 @@
           "referenceSolution": "pearls = [30, 10, 20]\nordered = sorted(pearls)\nprint(ordered)\n",
           "testCode": "assert ordered == [10, 20, 30] and OUTPUT.strip() == \"[10, 20, 30]\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "pearls = ___\nordered = ___\nprint(___)",
+            "tier1_nudge": "Pip squints at line 2: 'Python says `sortd` is not defined — read that function name letter by letter!'",
+            "tier2_pattern": "ordered = sorted(<list>)\nprint(ordered)",
             "tier3_walkthrough": "Update the code to:\npearls = [30, 10, 20]\nordered = sorted(pearls)\nprint(ordered)"
           },
           "difficultyOverride": null,
@@ -1158,7 +1158,7 @@
           "testCode": "assert top_two == ['opal', 'jade'], f'Expected [\"opal\", \"jade\"], got {top_two!r}'\nassert OUTPUT.strip() == \"['opal', 'jade']\", f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip chirps: 'Use `gems[:2]` to grab the first 2 items!'",
-            "tier2_pattern": "top_two = gems[:2]\nprint(top_two)",
+            "tier2_pattern": "top_two = gems[:<how_many>]\nprint(top_two)",
             "tier3_walkthrough": "Add:\ntop_two = gems[:2]\nprint(top_two)"
           },
           "difficultyOverride": null,
@@ -1207,7 +1207,7 @@
           "testCode": "assert top_two == gems[:2], f\"Expected top_two == {gems[:2]!r}, got {top_two!r}\"\nassert mid == code[1:4], f\"Expected mid == {code[1:4]!r}, got {mid!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = f\"{gems[:2]} {code[1:4]}\"\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "Remember slice stop index is exclusive: `[:2]` grabs indices 0 and 1, and `[1:4]` grabs indices 1, 2, and 3.",
-            "tier2_pattern": "top_two = gems[:___]\nmid = code[___:___]\nprint(top_two, mid)",
+            "tier2_pattern": "top_two = <list>[:2]\nmid = <string>[1:4]\nprint(top_two, mid)",
             "tier3_walkthrough": "Set `top_two = gems[:2]` and `mid = code[1:4]`, then `print(top_two, mid)`."
           },
           "difficultyOverride": null,
@@ -1286,7 +1286,7 @@
           "testCode": "assert total == 80 and low == 15\nassert OUTPUT.strip() == '80 15', f'Expected \"80 15\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip says: 'Pass `scores` into `sum(scores)` and `min(scores)`!'",
-            "tier2_pattern": "total = sum(scores)\nlow = min(scores)\nprint(total, low)",
+            "tier2_pattern": "total = sum(<list>)\nlow = min(<list>)\nprint(total, low)",
             "tier3_walkthrough": "Add:\ntotal = sum(scores)\nlow = min(scores)\nprint(total, low)"
           },
           "difficultyOverride": null,
@@ -1335,7 +1335,7 @@
           "testCode": "exp_total = sum(scores) + float(bonus_text)\nassert total == exp_total and best == max(scores) and low == min(scores) and OUTPUT.strip() == f\"{exp_total} {max(scores)} {min(scores)}\"",
           "hints": {
             "tier1_nudge": "Use `float(bonus_text)` to turn the decimal string into a number, plus `sum()`, `max()`, and `min()` on `scores`.",
-            "tier2_pattern": "total = sum(___) + float(___)\nbest = max(___)\nlow = min(___)\nprint(total, best, low)",
+            "tier2_pattern": "total = sum(<list>) + float(<text_var>)\nbest = max(<list>)\nlow = min(<list>)\nprint(total, best, low)",
             "tier3_walkthrough": "Set `total = sum(scores) + float(bonus_text)`, `best = max(scores)`, `low = min(scores)`, then `print(total, best, low)`."
           },
           "difficultyOverride": null,
@@ -1415,7 +1415,7 @@
           "testCode": "assert per_chest == 3.0, f'Expected 3.0, got {per_chest!r}'\nassert isinstance(per_chest, float), f'Expected a float, because / always hands back a decimal — got {type(per_chest).__name__}'\nassert OUTPUT.strip() == '3.0', f'Expected \"3.0\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip lines up the chests: 'Divide with a single slash — `pearls / chests` — and do not be startled by the `.0` on the end!'",
-            "tier2_pattern": "per_chest = pearls / chests\nprint(per_chest)",
+            "tier2_pattern": "per_chest = pearls / <divisor>\nprint(per_chest)",
             "tier3_walkthrough": "Add:\nper_chest = pearls / chests\nprint(per_chest)"
           },
           "difficultyOverride": null,
@@ -1488,8 +1488,8 @@
           "referenceSolution": "shells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)\n",
           "testCode": "assert big_shells == [18, 24] and OUTPUT.strip() == \"[18, 24]\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "shells = ___\nbig_shells = ___\nfor ___ in ___:\n    if ___:\n        ___\nprint(___)",
+            "tier1_nudge": "Pip holds up an empty basket: 'Start with `big_shells = []`, then `.append()` a shell ONLY on the turns where the `if` check passes.'",
+            "tier2_pattern": "<kept> = []\nfor <item> in <list>:\n    if <item> >= 15:\n        <kept>.append(<item>)\nprint(<kept>)",
             "tier3_walkthrough": "Write:\nshells = [5, 18, 9, 24]\nbig_shells = []\nfor s in shells:\n    if s >= 15:\n        big_shells.append(s)\nprint(big_shells)"
           },
           "difficultyOverride": null,
@@ -1569,8 +1569,8 @@
           "referenceSolution": "lumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    print(\"NACRE FREE!\")\n",
           "testCode": "assert peak == 32, f\"Expected peak == 32, got {peak!r}\"\nassert total == 80, f\"Expected total == 80, got {total!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'NACRE FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Nacre!'",
-            "tier2_pattern": "lumens = ___\npeak = ___\ntotal = ___\nif ___:\n    print(___)",
+            "tier1_nudge": "Pip shines pearl-bright: '`max(lumens)` finds the brightest pearl and `sum(lumens)` the combined glow — then one `if` on the total.'",
+            "tier2_pattern": "peak = max(<list>)\ntotal = sum(<list>)\nif total >= 80:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nlumens = [14, 32, 9, 25]\npeak = max(lumens)\ntotal = sum(lumens)\nif total >= 80:\n    print(\"NACRE FREE!\")"
           },
           "difficultyOverride": null,
@@ -1647,9 +1647,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip lines up 9, 3 and 7: '`min()` hunts for the SMALLEST number, the opposite of `max()`.'",
+            "tier2_pattern": "Compare 9, 3 and 7 — `min()` returns the smallest, `max()` the largest, `sum()` the total.",
+            "tier3_walkthrough": "Tap Option B (`3`) — it is the smallest of 9, 3 and 7."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -1742,7 +1742,7 @@
           "trialType": "multiple_choice",
           "title": "Filtering Beacons in a Loop!",
           "storyPrompt": "In Maelstrom Lighthouse, we combine `for` loops with `if` to keep only strong beacons! What will `strong` contain?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what the list `strong` holds after the loop appends every beacon that is at least 50.",
           "concepts": [
             "lists",
             "list_iteration",
@@ -1775,9 +1775,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip checks each beacon in turn: 'Only the beacons that pass `b >= 50` get appended — walk through 20, 60 and 80 one at a time.'",
+            "tier2_pattern": "20 fails the check and is skipped; 60 and 80 both pass and get appended, in order.",
+            "tier3_walkthrough": "Tap Option B (`[60, 80]`) — 20 is below 50, so only 60 and 80 land in `strong`."
           },
           "difficultyOverride": null
         },
@@ -1803,8 +1803,8 @@
           "referenceSolution": "beacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.append(b)\nprint(strong)\n",
           "testCode": "assert strong == [60, 80] and OUTPUT.strip() == \"[60, 80]\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "beacons = ___\nstrong = ___\nfor ___ in ___:\n    if ___:\n        ___\nprint(___)",
+            "tier1_nudge": "Pip reads the error aloud: 'A Python list has no `.add()` method — what is the list method for adding onto the end?'",
+            "tier2_pattern": "<list>.append(<item>)",
             "tier3_walkthrough": "Update the code to:\nbeacons = [20, 60, 80]\nstrong = []\nfor b in beacons:\n    if b >= 50:\n        strong.append(b)\nprint(strong)"
           },
           "difficultyOverride": null,
@@ -1854,8 +1854,8 @@
           "referenceSolution": "signals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)\n",
           "testCode": "assert boosted == [6, 10, 14] and OUTPUT.strip() == \"[6, 10, 14]\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "signals = ___\nboosted = ___\nfor ___ in ___:\n    ___\nprint(___)",
+            "tier1_nudge": "Pip doubles each signal: 'Append the doubled value itself — the `s * 2` goes INSIDE the `.append(...)` call.'",
+            "tier2_pattern": "for <item> in <list>:\n    <new_list>.append(<item> * 2)\nprint(<new_list>)",
             "tier3_walkthrough": "Write:\nsignals = [3, 5, 7]\nboosted = []\nfor s in signals:\n    boosted.append(s * 2)\nprint(boosted)"
           },
           "difficultyOverride": null,
@@ -1903,8 +1903,8 @@
           "referenceSolution": "waves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)\n",
           "testCode": "assert rough == 2 and calm == 1 and OUTPUT.strip() == \"2 1\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "waves = ___\nrough = ___\ncalm = ___\nfor ___ in ___:\n    if ___:\n        rough = ___",
+            "tier1_nudge": "Pip sorts the waves into two piles: 'One counter goes up in the `if` branch and the other in the `else` branch — never both on the same turn.'",
+            "tier2_pattern": "for <wave> in <list>:\n    if <wave> >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)",
             "tier3_walkthrough": "Write:\nwaves = [2, 8, 5]\nrough = 0\ncalm = 0\nfor w in waves:\n    if w >= 5:\n        rough = rough + 1\n    else:\n        calm = calm + 1\nprint(rough, calm)"
           },
           "difficultyOverride": null,
@@ -1951,8 +1951,8 @@
           "referenceSolution": "raw = \"STORM_CLEAR\"\nclean = raw.replace(\"_\", \"-\")\nprint(clean)\n",
           "testCode": "assert clean == 'STORM-CLEAR'\nassert OUTPUT.strip() == 'STORM-CLEAR', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Call `raw.replace(\"_\", \"-\")` and save it in `clean`!'",
-            "tier2_pattern": "clean = raw.replace(\"_\", \"-\")\nprint(clean)",
+            "tier1_nudge": "Pip chirps: 'Call `.replace(...)` on `raw` — the character to swap out goes first, the replacement second — then save the result in `clean`.'",
+            "tier2_pattern": "clean = raw.replace(\"_\", \"<new_character>\")\nprint(clean)",
             "tier3_walkthrough": "Add:\nclean = raw.replace(\"_\", \"-\")\nprint(clean)"
           },
           "difficultyOverride": null,
@@ -1991,8 +1991,8 @@
           "referenceSolution": "raw = \"STORM_CLEAR_NOW\"\nclean = raw.replace(\"_\", \"-\")\nparts = clean.split(\"-\")\nprint(parts)\n",
           "testCode": "_exp_clean = raw.replace(\"_\", \"-\")\n_exp_parts = _exp_clean.split(\"-\")\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = clean\n_exp = _exp_clean\nassert isinstance(_val, str), f\"Expected clean to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nassert parts == _exp_parts, f\"Expected parts == {_exp_parts!r}, got {parts!r}\"\nassert OUTPUT.strip() == str(_exp_parts), f\"Expected printed {str(_exp_parts)!r}, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "First call `.replace(\"_\", \"-\")` on `raw`, then call `.split(\"-\")` on the result.",
-            "tier2_pattern": "clean = raw.replace(___, ___)\nparts = clean.split(___)\nprint(parts)",
+            "tier1_nudge": "Pip untangles the signal: 'First swap the underscores for hyphens with `.replace(...)`, then chop the cleaned string into a list with `.split(...)`.'",
+            "tier2_pattern": "clean = raw.replace(\"<old>\", \"<new>\")\nparts = clean.split(\"<separator>\")\nprint(parts)",
             "tier3_walkthrough": "Set `clean = raw.replace(\"_\", \"-\")`, then `parts = clean.split(\"-\")`, then `print(parts)`."
           },
           "difficultyOverride": null,
@@ -2065,8 +2065,8 @@
           "referenceSolution": "lamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    print(\"TEMPEST FREE!\")\n",
           "testCode": "assert active == [35, 50], f\"Expected active == [35, 50], got {active!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'TEMPEST FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Tempest!'",
-            "tier2_pattern": "lamps = ___\nactive = ___\nfor ___ in ___:\n    if ___:\n        ___\nif ___:",
+            "tier1_nudge": "Pip lights the great lens: 'Build `active` with an `if` inside the loop, then check `sum(active)` AFTER the loop at 0 spaces.'",
+            "tier2_pattern": "active = []\nfor <lamp> in <list>:\n    if <lamp> >= 30:\n        active.append(<lamp>)\nif sum(active) >= 80:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nlamps = [10, 35, 50, 20]\nactive = []\nfor l in lamps:\n    if l >= 30:\n        active.append(l)\nif sum(active) >= 80:\n    print(\"TEMPEST FREE!\")"
           },
           "difficultyOverride": null,
@@ -2146,9 +2146,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip counts the items one at a time: '`len()` counts HOW MANY items are in the list, not what they add up to.'",
+            "tier2_pattern": "`len()` counts how many items the list holds rather than adding them up — `sum()` would do the adding.",
+            "tier3_walkthrough": "Tap Option B (`4`) — `len()` counts the items, and there are four of them."
           },
           "difficultyOverride": null,
           "isBonus": true,
