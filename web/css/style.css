@@ -2345,6 +2345,12 @@ textarea, input, pre, code {
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
 }
 
+.cutscene-canvas-hd {
+  width: min(100%, 920px);
+  image-rendering: auto;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.78), 0 0 28px rgba(56, 189, 248, 0.18);
+}
+
 .cutscene-bottom {
   border-top: 2px solid rgba(75, 97, 150, 0.55);
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));

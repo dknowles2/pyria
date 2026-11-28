@@ -26,14 +26,14 @@ import {
   redeemHeroPlayToken,
   logoutSession,
 } from './api.js?v=20261128a';
-import { audio } from './audio.js?v=20261127i';
+import { audio } from './audio.js?v=20261127zb';
 import { music, resolveRegionTheme } from './music.js?v=20261127j';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261128a';
 import { WorldEngine } from './world.js?v=20261128a';
 import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127x';
-import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127x';
+import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127zb';
 import { AppRouter } from './router.js?v=20261127l';
 import {
   DEFAULT_FAMILIARITY_ID,
