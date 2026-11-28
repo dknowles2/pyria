@@ -188,6 +188,15 @@ textarea, input, pre, code {
   color: var(--text-muted);
 }
 
+.pill-concept {
+  background: rgba(158, 176, 214, 0.08);
+  color: var(--text-muted);
+  border: 1px solid rgba(158, 176, 214, 0.2);
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.86;
+}
+
 .pill-gold {
   background: rgba(246, 201, 69, 0.18);
   color: var(--accent-gold);
@@ -750,39 +759,54 @@ textarea, input, pre, code {
 
 /* ==================== CODE EDITOR & PIP CONSOLE ==================== */
 .comment-tip-banner {
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.42);
+  background: rgba(158, 176, 214, 0.06);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 9px 12px;
+  padding: 8px 12px;
   font-size: 13px;
   line-height: 1.45;
-  color: #dbeafe;
+  color: var(--text-muted);
 }
 
 .comment-tip-banner code {
-  background: rgba(15, 23, 42, 0.85);
-  color: var(--accent-gold);
+  background: rgba(15, 23, 42, 0.75);
+  color: #cbd5e1;
   padding: 1px 5px;
   border-radius: 4px;
   font-family: var(--font-mono);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .code-editor-shell {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border: 2px solid var(--accent-sky);
+  border: 2px solid var(--border-bright);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--bg-code);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+  box-shadow: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.code-editor-shell:hover {
+  border-color: var(--accent-sky);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
 }
 
 .code-editor-shell:focus-within {
   border-color: var(--accent-emerald);
   box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.22);
+}
+
+.code-editor-shell.is-quiet-focus:focus-within {
+  border-color: var(--border-bright);
+  box-shadow: none;
+}
+
+.code-editor-shell.is-quiet-focus:hover {
+  border-color: var(--accent-sky);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
 }
 
 .code-editor-bar {
@@ -1685,6 +1709,10 @@ textarea, input, pre, code {
   gap: 16px;
 }
 
+.modal-card:focus {
+  outline: none;
+}
+
 .modal-card > * {
   flex-shrink: 0;
 }
@@ -1886,6 +1914,136 @@ textarea, input, pre, code {
 
 .objective-box strong {
   color: var(--accent-sky);
+}
+
+/* Unified Trial Brief Card: problem text is primary, goal is subordinate */
+.trial-brief-card {
+  background: linear-gradient(180deg, rgba(30, 41, 72, 0.96), rgba(22, 31, 56, 0.96));
+  border: 1px solid rgba(246, 201, 69, 0.28);
+  border-left: 4px solid var(--accent-gold);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24);
+}
+
+.trial-brief-card.is-fix-bug {
+  border-color: rgba(251, 113, 133, 0.3);
+  border-left-color: var(--accent-rose);
+}
+
+.trial-brief-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  margin-bottom: 8px;
+}
+
+.trial-brief-card.is-fix-bug .trial-brief-kicker {
+  color: #fda4af;
+}
+
+.trial-problem-text {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: #f8fafc;
+  max-width: 720px;
+}
+
+.trial-bug-note {
+  margin: 10px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid rgba(251, 113, 133, 0.55);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: #fecdd3;
+  max-width: 720px;
+}
+
+.trial-bug-note-label {
+  font-weight: 800;
+  color: #fda4af;
+}
+
+.trial-goal-strip {
+  margin-top: 14px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(158, 176, 214, 0.18);
+  font-size: 14px;
+  line-height: 1.55;
+  color: #b8c7e4;
+}
+
+.trial-goal-row {
+  max-width: 720px;
+}
+
+.trial-goal-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(110, 231, 183, 0.85);
+  margin-right: 4px;
+}
+
+.trial-goal-text {
+  color: #b8c7e4;
+}
+
+.trial-unlock-note {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  max-width: 720px;
+}
+
+.trial-inline-code,
+.trial-brief-card .inline-md-code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  font-weight: 600;
+  background: rgba(10, 15, 30, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  color: #bae6fd;
+  padding: 1px 6px;
+  border-radius: 5px;
+  white-space: break-spaces;
+  overflow-wrap: anywhere;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.trial-inline-key,
+.trial-brief-card .trial-problem-text strong {
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.trial-goal-strip .trial-inline-code,
+.trial-goal-strip .inline-md-code {
+  background: rgba(10, 15, 30, 0.55);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #93c5fd;
+  font-weight: 500;
+}
+
+.trial-goal-strip .trial-inline-key,
+.trial-goal-strip strong {
+  color: #e2e8f0;
+}
+
+@media (max-width: 640px) {
+  .trial-brief-card {
+    padding: 14px 15px;
+  }
+
+  .trial-problem-text {
+    font-size: 15.5px;
+    line-height: 1.58;
+  }
 }
 
 .hint-box {
