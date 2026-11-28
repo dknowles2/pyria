@@ -860,7 +860,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Capital Letters With .upper()",
+            "prompt": "Put `.upper()` after some text to get a copy in all capital letters. `\"gold\".upper()` gives back `\"GOLD\"`. The `()` at the end are needed to make it run.",
+            "question": "What does this code print?",
+            "codeSnippet": "tag = \"iron\"\nprint(tag.upper())",
+            "choices": [
+              {
+                "id": "a",
+                "label": "iron",
+                "explanation": "`.upper()` gives back a copy in capital letters."
+              },
+              {
+                "id": "b",
+                "label": "Iron",
+                "explanation": "`.upper()` capitalizes every letter, not just the first one."
+              },
+              {
+                "id": "c",
+                "label": "IRON",
+                "explanation": "Spot on! `.upper()` turns every letter into a capital."
+              },
+              {
+                "id": "d",
+                "label": "tag",
+                "explanation": "There are no quotes around `tag`, so Python uses the text inside the box."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-02-05b",

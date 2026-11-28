@@ -32,13 +32,13 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 | # | Realm | Dragon Guardian | Python Focus | Mini World Upgrade |
 | :-: | :--- | :--- | :--- | :--- |
 | **1** | **Whispering Meadow** | **Spark** *(Lightning)* | `say()`, `shout()`, strings & string joining (`+`) | Swaying meadow grass & firefly pixels |
-| **2** | **Mossy Ruins** | **Pebble** *(Earth)* | Variables (number & word boxes), basic math (`+`, `*`) | Shaded cliff edges & ruin dust particles |
+| **2** | **Mossy Ruins** | **Pebble** *(Earth)* | Variables (number & word boxes), basic math (`+`, `-`, `*`) | Shaded cliff edges & ruin dust particles |
 | **3** | **Cinder Cavern** | **Emberwing** *(Fire)* | Booleans, `:` colons, 4-space indentation, `=` vs `==`, `if` / `else` | Flickering torchlight & rising embers |
 | **4** | **Frostbite Hollow** | **Glacier** *(Ice)* | Graduating to `print()`, `if` / `elif` / `else` branching | Falling pixel snowflakes & ice highlights |
-| **5** | **Echo Woods** | **Bramble** *(Forest)* | Logical operators (`and`, `or`, `not`) & string methods (`.strip()`, `.upper()`) | Swaying forest canopy & glowing wisps |
-| **6** | **Sunken Crypt** | **Mire** *(Water)* | Multi-branch conditionals, math & string cleanup combined, `str()` to glue text onto numbers | Rippling water & misty crypt spores |
-| **7** | **Obsidian Keep** | **Gale** *(Wind)* | `for` loops & `range()` | Drifting sky-clouds & wind trails |
-| **8** | **Null's Pixel Citadel** | **Nova** *(Starlight)* | 8-Bit Era Capstone (loops + conditionals + modulo `%` + strings) | **All 8 Bits Restored → Upgrades to 16-Bit SNES!** |
+| **5** | **Echo Woods** | **Bramble** *(Forest)* | Logical operators (`and`, `or`, `not`) | Swaying forest canopy & glowing wisps |
+| **6** | **Sunken Crypt** | **Mire** *(Water)* | Review: math, multi-branch conditionals & `and` / `or` combined | Rippling water & misty crypt spores |
+| **7** | **Obsidian Keep** | **Gale** *(Wind)* | `for` loops over the letters of a word, running totals with `+=` | Drifting sky-clouds & wind trails |
+| **8** | **Null's Pixel Citadel** | **Nova** *(Starlight)* | 8-Bit Era Capstone (`if` / `elif` / `else` and `and` / `or` inside loops, building text in a loop) | **All 8 Bits Restored → Upgrades to 16-Bit SNES!** |
 
 ![Whispering Meadow — 8-Bit vs 16-Bit Evolution](assets/world/realm01_meadow_comparison.png)
 
@@ -49,7 +49,7 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 
 | Act | Realms (1–16) | Dragons | Python Focus |
 | :--- | :--- | :--- | :--- |
-| **Act I — Tideglass Archipelago** | 1. Coral Shallows · 2. Driftwood Market · 3. Pearl Grotto · 4. Maelstrom Lighthouse | Ripple, Gullwing, Nacre, Tempest | Lists (`[...]`), zero-based & negative indexing, `.append()`, `len()`/`max()`/`min()`/`sum()`, `/` division & floats, slicing, `for` over lists & filtering |
+| **Act I — Tideglass Archipelago** | 1. Coral Shallows · 2. Driftwood Market · 3. Pearl Grotto · 4. Maelstrom Lighthouse | Ripple, Gullwing, Nacre, Tempest | Lists (`[...]`), zero-based & negative indexing, `.append()`, `len()`/`max()`/`min()`/`sum()`, `/` division & floats, slicing, `for` over lists & filtering, `in` checks, `range()` |
 | **Act II — Clockwork Spire** | 5. Brass Courtyard · 6. Pendulum Halls · 7. Steam Foundry · 8. Grand Chronometer | Sprocket, Tock, Piston, Aether | `while` loops, `break` & `continue`, defining functions (`def`), parameters, default arguments & `return` |
 | **Act III — Alchemist's Caldera** | 9. Sulfur Terrace · 10. Crystal Alembic · 11. Potion Vault · 12. Magma Core | Cinderel, Prism, Elixir, Crucible | Dictionaries (`{...}`), `.get()`, `.values()`, f-strings (`f"{...}"`), lists of dictionaries & frequency counting |
 | **Act IV — Shattered Skyway** | 13. Cloud Dock · 14. Starlight Bridge · 15. Storm Bastion · 16. Null's 16-Bit Throne | Nimbus, Comet, Fulmin, Zenith | Nested loops & 2D grids, intro Classes (`class`, `__init__`, `self`, methods), object lists & **16-Bit Finale → Upgrades to 32-Bit Isometric!** |

@@ -47,7 +47,20 @@ test('buildTrialSuggestions adapts by realm/era progression and extracts trial h
   assert.equal(r1Names.includes('for'), false);
   assert.equal(r1Names.includes('def'), false);
 
-  // Realm 7 (8-bit): print at top (no say/shout), has conditionals, string methods, loops
+  // Realm 5 (8-bit): and / or / not arrive, but no text tools yet
+  const r5 = buildTrialSuggestions({
+    era: { id: 'era-01-8bit' },
+    realm: { number: 5 },
+    trial: {},
+  });
+  const r5Names = r5.map((i) => i.matchText);
+  assert.ok(r5Names.includes('and'));
+  assert.ok(r5Names.includes('not'));
+  assert.equal(r5Names.includes('.lower'), false);
+  assert.equal(r5Names.includes('len'), false);
+  assert.equal(r5Names.includes('for'), false);
+
+  // Realm 7 (8-bit): print at top (no say/shout), conditionals, and loops over letters (range() comes later)
   const r7 = buildTrialSuggestions({
     era: { id: 'era-01-8bit' },
     realm: { number: 7 },
@@ -58,8 +71,11 @@ test('buildTrialSuggestions adapts by realm/era progression and extracts trial h
   assert.equal(r7Names.includes('say'), false);
   assert.ok(r7Names.includes('abs'));
   assert.ok(r7Names.includes('elif'));
-  assert.ok(r7Names.includes('.lower'));
-  assert.ok(r7Names.includes('range'));
+  assert.ok(r7Names.includes('for'));
+  assert.ok(r7.find((i) => i.matchText === 'for').label.startsWith('for letter in'));
+  assert.equal(r7Names.includes('range'), false);
+  assert.equal(r7Names.includes('.lower'), false);
+  assert.equal(r7Names.includes('str'), false);
   assert.equal(r7Names.includes('def'), false);
 
   // Era 2 (16-bit): includes def, return, while, .append
@@ -73,6 +89,21 @@ test('buildTrialSuggestions adapts by realm/era progression and extracts trial h
   assert.ok(e2Names.includes('return'));
   assert.ok(e2Names.includes('while'));
   assert.ok(e2Names.includes('.append'));
+  assert.ok(e2Names.includes('range'));
+  assert.ok(e2Names.includes('len'));
+  assert.ok(e2Names.includes('.upper'));
+
+  // Later eras (32-bit) keep the full toolkit instead of falling back to 8-bit training spells
+  const e3 = buildTrialSuggestions({
+    era: { id: 'era-03-32bit' },
+    realm: { number: 1 },
+    trial: {},
+  });
+  const e3Names = e3.map((i) => i.matchText);
+  assert.equal(e3Names[0], 'print');
+  assert.equal(e3Names.includes('say'), false);
+  assert.ok(e3Names.includes('def'));
+  assert.ok(e3Names.includes('range'));
 });
 
 test('buildWorkshopSuggestions marks owned vs unowned items and generates quoted arg completions', () => {

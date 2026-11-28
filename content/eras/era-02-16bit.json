@@ -126,7 +126,7 @@
           "id": "trial-16-01-02",
           "trialType": "fix_bug",
           "title": "The Reef List Won't Run",
-          "storyPrompt": "Lord Null broke the reef crystal list so Python stops with an error before it can count the 3 crystals.",
+          "storyPrompt": "Lord Null broke the reef crystal list so Python stops with an error before it can count the 3 crystals. The line that counts uses `len(...)`, which tells you how many items a list holds.",
           "objective": "Find and fix the broken code so it runs cleanly and prints `3`.",
           "concepts": [
             "lists",
@@ -162,7 +162,36 @@
               },
               "expectOutput": "2"
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Counting Items With len()",
+            "prompt": "`len(...)` counts how many items are inside a list. For example, `len([\"a\", \"b\"])` gives back `2`.",
+            "question": "What does this code print?",
+            "codeSnippet": "shells = [\"pink\", \"white\", \"gold\", \"blue\"]\nprint(len(shells))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "4",
+                "explanation": "Spot on! The list holds 4 items, so `len(shells)` gives back `4`."
+              },
+              {
+                "id": "b",
+                "label": "3",
+                "explanation": "Count again: pink, white, gold, blue. That's 4 items. Positions start at 0, but counting items starts at 1."
+              },
+              {
+                "id": "c",
+                "label": "shells",
+                "explanation": "There are no quotes around `shells`, so Python counts the items inside the list."
+              },
+              {
+                "id": "d",
+                "label": "pink",
+                "explanation": "`len()` counts the items. To grab the first item, you would use `shells[0]`."
+              }
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-16-01-02b",
@@ -604,7 +633,8 @@
       "storyOutro": "Gullwing soars above the masts, restoring Bit 10 as colorful flags unfurl across the harbor.",
       "primaryConcepts": [
         "lists",
-        "list_iteration"
+        "list_iteration",
+        "range_function"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -789,45 +819,96 @@
                 "found": 2
               }
             }
-          ]
+          ],
+          "introChoice": {
+            "title": "Is It in the List?",
+            "prompt": "Inside an `if`, the word `in` asks a yes-or-no question: is this item inside the list? `\"gold\" in [\"gold\", \"salt\"]` is `True`, and `\"fish\" in [\"gold\", \"salt\"]` is `False`. This is a different job from the `in` on a `for` line.",
+            "question": "What does this code print?",
+            "codeSnippet": "rare = [\"gold\", \"pearl\"]\nprint(\"salt\" in rare)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "True",
+                "explanation": "`salt` is not one of the items in `rare`, so the answer is `False`."
+              },
+              {
+                "id": "b",
+                "label": "salt",
+                "explanation": "`in` gives back `True` or `False`, not the item itself."
+              },
+              {
+                "id": "c",
+                "label": "An error",
+                "explanation": "Checking with `in` works fine on lists."
+              },
+              {
+                "id": "d",
+                "label": "False",
+                "explanation": "Right! `rare` only holds `gold` and `pearl`, so `\"salt\" in rare` is `False`."
+              }
+            ],
+            "correctChoiceId": "d"
+          }
         },
         {
           "id": "trial-16-02-05",
           "trialType": "code",
-          "title": "Spell Out the Harbor Banner",
-          "storyPrompt": "You can loop over a text string one letter at a time, just like a list! Spell out each letter of the harbor banner in capital letters.",
-          "objective": "Loop through every letter in `banner` and print each letter in uppercase on its own line.",
+          "title": "Ring the Harbor Bell With range()",
+          "storyPrompt": "Sometimes you want to repeat something a set number of times, with no list or word to loop over. `range(3)` works like a ready-made list of counting numbers: `0, 1, 2`. So `for i in range(3):` runs 3 times.",
+          "objective": "Write a `for` loop with `range()` that prints `DING` exactly 4 times.",
           "concepts": [
-            "list_iteration",
-            "string_methods"
+            "for_loops",
+            "range_function"
           ],
           "shardReward": 85,
           "unlockId": null,
           "starterCode": {
-            "explorer": "banner = \"tide\"\nfor ch in ___:\n    print(ch.___())\n",
-            "standard": "banner = \"tide\"\n# Loop over every character in banner and print it uppercase\n",
-            "challenge": "banner = \"tide\"\n"
+            "explorer": "for i in range(???):\n    print(\"DING\")\n",
+            "standard": "# Ring the bell 4 times with a for loop and range()\n",
+            "challenge": ""
           },
-          "referenceSolution": "banner = \"tide\"\nfor ch in banner:\n    print(ch.upper())\n",
-          "testCode": "_expected = [c.upper() for c in banner]\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Print each letter inside your loop.\"\nif _lines != _expected:\n    if [l.upper() for l in _lines] == _expected:\n        assert False, f\"Almost! Make sure every letter is ALL CAPS using .upper() (got {_lines!r})!\"\n    assert False, f\"Expected {_expected!r}, got {_lines!r}\"\n",
+          "referenceSolution": "for i in range(4):\n    print(\"DING\")\n",
+          "testCode": "_want = ['DING', 'DING', 'DING', 'DING']\n_lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert _lines == _want, f'Expected {_want!r}, got {_lines!r}'\n",
           "hints": {
-            "tier1_nudge": "A `for` loop over text visits one letter at a time, and `.upper()` turns each letter into a capital letter.",
-            "tier2_pattern": "for <letter> in <string>:\n    print(<letter>.upper())",
-            "tier3_walkthrough": "Write `for ch in banner:` and indent `print(ch.upper())` inside the loop."
+            "tier1_nudge": "Pip rings the bell: \"Put the number of rings inside `range(...)`. The loop runs that many times.\"",
+            "tier2_pattern": "for i in range(<count>):\n    print(\"<sound>\")",
+            "tier3_walkthrough": "Write:\nfor i in range(4):\n    print(\"DING\")"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
             "for",
-            "method_call:upper"
+            "call:range",
+            "call:print"
           ],
-          "variants": [
-            {
-              "overrides": {
-                "banner": "hi"
+          "introChoice": {
+            "title": "Counting With range()",
+            "prompt": "`range(4)` gives the numbers `0, 1, 2, 3`. It starts at 0 and stops just before 4, so there are exactly 4 numbers. That makes `range()` great for repeating something a set number of times.",
+            "question": "What does this loop print?",
+            "codeSnippet": "for i in range(3):\n    print(i)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "1, 2, 3 on separate lines",
+                "explanation": "`range()` starts counting at 0, not 1."
               },
-              "expectOutput": "H\nI"
-            }
-          ]
+              {
+                "id": "b",
+                "label": "0, 1, 2, 3 on separate lines",
+                "explanation": "`range(3)` stops just before 3, so 3 is left out."
+              },
+              {
+                "id": "c",
+                "label": "0, 1, 2 on separate lines",
+                "explanation": "Spot on! `range(3)` starts at 0 and stops just before 3."
+              },
+              {
+                "id": "d",
+                "label": "3",
+                "explanation": "The loop prints `i` on every turn, so you see each number."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-16-02-06",
@@ -1006,7 +1087,8 @@
       "primaryConcepts": [
         "lists",
         "list_indexing",
-        "basic_math"
+        "basic_math",
+        "range_function"
       ],
       "difficultyOverride": {
         "mode": "standard",
@@ -1140,51 +1222,62 @@
         {
           "id": "trial-16-03-02b",
           "trialType": "code",
-          "title": "Slice the First Two Gems ([:2])",
-          "storyPrompt": "Let's practice slicing a list by itself! A slice like `[:2]` grabs position `0` and position `1`, stopping right before position `2`.",
-          "objective": "Create the variable `top_two` holding the first 2 items of `gems` using a slice, then print `top_two`.",
+          "title": "Number the Pearl Shelves (range(start, stop))",
+          "storyPrompt": "Nacre wants the pearl shelves numbered 1 to 5. `range()` can start at a number other than 0! `range(1, 4)` gives `1, 2, 3`. It starts at the first number and stops just before the second one.",
+          "objective": "Use a `for` loop with `range()` to print the numbers 1 through 5, one per line.",
           "concepts": [
-            "lists",
-            "list_indexing"
+            "for_loops",
+            "range_function"
           ],
           "shardReward": 45,
           "unlockId": null,
           "starterCode": {
-            "explorer": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:???]\nprint(top_two)\n",
-            "standard": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\n",
+            "explorer": "for num in range(1, ???):\n    print(num)\n",
+            "standard": "# Print 1 through 5 with a for loop and range(start, stop)\n",
             "challenge": ""
           },
-          "referenceSolution": "gems = [\"opal\", \"jade\", \"ruby\", \"onyx\"]\ntop_two = gems[:2]\nprint(top_two)\n",
-          "testCode": "assert top_two == ['opal', 'jade'], f'Expected [\"opal\", \"jade\"], got {top_two!r}'\nassert OUTPUT.strip() == \"['opal', 'jade']\", f'Got {OUTPUT.strip()!r}'\n",
+          "referenceSolution": "for num in range(1, 6):\n    print(num)\n",
+          "testCode": "_want = ['1', '2', '3', '4', '5']\n_lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert _lines == _want, f'Expected {_want!r}, got {_lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Put a colon and the stop number inside square brackets after `gems` to grab the first 2 items.'",
-            "tier2_pattern": "top_two = gems[:<how_many>]\nprint(top_two)",
-            "tier3_walkthrough": "Add:\ntop_two = gems[:2]\nprint(top_two)"
+            "tier1_nudge": "Pip lines up the pearls: \"Give `range()` a start number and a stop number. Remember that it stops just before the stop number.\"",
+            "tier2_pattern": "for num in range(<start>, <stop>):\n    print(num)",
+            "tier3_walkthrough": "Write:\nfor num in range(1, 6):\n    print(num)"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
-            "assign",
-            "slice",
+            "for",
+            "call:range",
             "call:print"
           ],
-          "variants": [
-            {
-              "overrides": {
-                "gems": [
-                  "a",
-                  "b",
-                  "c"
-                ]
+          "introChoice": {
+            "title": "Counting With range(start, stop)",
+            "prompt": "Give `range()` two numbers and it starts at the first one instead of 0. It still stops just before the second number. So `range(2, 5)` gives `2, 3, 4`.",
+            "question": "Which numbers does this loop print?",
+            "codeSnippet": "for n in range(1, 4):\n    print(n)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "1, 2, 3",
+                "explanation": "Spot on! It starts at 1 and stops just before 4."
               },
-              "expectOutput": "['a', 'b']",
-              "expectVars": {
-                "top_two": [
-                  "a",
-                  "b"
-                ]
+              {
+                "id": "b",
+                "label": "1, 2, 3, 4",
+                "explanation": "`range()` stops just before the second number, so 4 is left out."
+              },
+              {
+                "id": "c",
+                "label": "0, 1, 2, 3",
+                "explanation": "With two numbers, `range()` starts at the first one, which is 1 here."
+              },
+              {
+                "id": "d",
+                "label": "2, 3",
+                "explanation": "Counting starts right at the first number, so 1 is included."
               }
-            }
-          ]
+            ],
+            "correctChoiceId": "a"
+          }
         },
         {
           "id": "trial-16-03-03",
@@ -3782,9 +3875,9 @@
         {
           "id": "trial-16-08-05",
           "trialType": "code",
-          "title": "Is It Even? Function",
-          "storyPrompt": "Aether's clock only ticks on even numbers! Write a short function that returns `True` when a number is even and `False` when it is odd.",
-          "objective": "Write a function `is_even(n)`: if `n` is divisible by 2, return `True`; otherwise, return `False`. Then print the result of calling `is_even(8)`.",
+          "title": "Is It Strong? Function",
+          "storyPrompt": "Aether's clock gears only turn when they are strong enough! Write a short function that returns `True` when a gear's power is at least 10, and `False` when it is less.",
+          "objective": "Write a function `is_strong(n)`: if `n` is at least 10, return `True`; otherwise, return `False`. Then print the result of calling `is_strong(12)`.",
           "concepts": [
             "functions_def",
             "functions_return"
@@ -3792,16 +3885,16 @@
           "shardReward": 115,
           "unlockId": null,
           "starterCode": {
-            "explorer": "def is_even(n):\n    return n % 2 == 0\n",
-            "standard": "# Define is_even(n) to return True when n divides evenly by 2, then print is_even(8)\n",
+            "explorer": "def is_strong(n):\n    return n >= 10\n",
+            "standard": "# Define is_strong(n) to return True when n is at least 10, then print is_strong(12)\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))\n",
-          "testCode": "assert is_even(8) is True and is_even(7) is False and OUTPUT.strip() == \"True\"",
+          "referenceSolution": "def is_strong(n):\n    return n >= 10\n\nprint(is_strong(12))\n",
+          "testCode": "assert callable(is_strong), 'Define is_strong(n)!'\nassert is_strong(12) is True, f'Expected is_strong(12) to be True, got {is_strong(12)!r}'\nassert is_strong(10) is True, f'Expected is_strong(10) to be True, got {is_strong(10)!r}'\nassert is_strong(3) is False, f'Expected is_strong(3) to be False, got {is_strong(3)!r}'\n_want = 'True'\nassert OUTPUT.strip() == _want, f'Expected {_want!r}, got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip splits the number in two: 'A comparison already makes True or False on its own, so the function can return the comparison itself with no `if` needed.'",
-            "tier2_pattern": "def <name>(<input>):\n    return <input> % 2 == 0\n\nprint(<name>(<value>))",
-            "tier3_walkthrough": "Write:\ndef is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))"
+            "tier1_nudge": "Pip tests a gear: 'A comparison already makes True or False on its own, so the function can return the comparison itself with no `if` needed.'",
+            "tier2_pattern": "def <name>(<input>):\n    return <input> >= <limit>\n\nprint(<name>(<value>))",
+            "tier3_walkthrough": "Write:\ndef is_strong(n):\n    return n >= 10\n\nprint(is_strong(12))"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
@@ -3810,29 +3903,29 @@
           ],
           "introChoice": {
             "title": "Returning a True/False Check",
-            "prompt": "A comparison like `n % 2 == 0` already gives back `True` or `False`! So a function can simply `return n % 2 == 0` without even needing an `if`.",
-            "question": "What does `is_even(8)` give back?",
-            "codeSnippet": "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))",
+            "prompt": "A comparison like `n >= 10` already gives back `True` or `False`! So a function can simply `return n >= 10` without even needing an `if`.",
+            "question": "What does `is_strong(12)` give back?",
+            "codeSnippet": "def is_strong(n):\n    return n >= 10\n\nprint(is_strong(12))",
             "choices": [
               {
                 "id": "a",
-                "label": "0",
-                "explanation": "`8 % 2` is `0`, and then `== 0` compares it and gives back `True`."
+                "label": "12",
+                "explanation": "The function returns the answer to the comparison `n >= 10`, not the number itself."
               },
               {
                 "id": "b",
                 "label": "True",
-                "explanation": "Yes! `8 % 2` is `0`, and `0 == 0` is `True`, so `is_even(8)` returns `True`."
+                "explanation": "Yes! `12 >= 10` is `True`, so `is_strong(12)` returns `True`."
               },
               {
                 "id": "c",
                 "label": "False",
-                "explanation": "8 divides evenly by 2 (remainder 0), so `8 % 2 == 0` is `True`."
+                "explanation": "12 is bigger than 10, so `12 >= 10` is `True`."
               },
               {
                 "id": "d",
-                "label": "8",
-                "explanation": "The function returns the result of the comparison `n % 2 == 0`, which is `True`."
+                "label": "10",
+                "explanation": "`10` is the limit in the comparison. The function gives back `True` or `False`."
               }
             ],
             "correctChoiceId": "b"
@@ -7078,8 +7171,8 @@
           "id": "trial-16-16-04",
           "trialType": "code",
           "title": "Decode Null's Grid",
-          "storyPrompt": "Lord Null hid his lock code inside a 2D grid of numbers! Use nested loops to add up only the even numbers.",
-          "objective": "Loop through `matrix = [[2, 3], [4, 5], [6, 7]]`: if a number is even (`n % 2 == 0`), add it to `even_sum`. Print `even_sum` after the loops.",
+          "storyPrompt": "Lord Null hid his lock code inside a 2D grid of numbers! Use nested loops to add up only the numbers bigger than 4.",
+          "objective": "Loop through `matrix = [[2, 3], [4, 5], [6, 7]]`: if a number is greater than 4, add it to `big_sum`. Print `big_sum` after the loops.",
           "concepts": [
             "functions_return",
             "dictionaries",
@@ -7089,16 +7182,16 @@
           "shardReward": 150,
           "unlockId": null,
           "starterCode": {
-            "explorer": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\n",
-            "standard": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\n",
+            "explorer": "matrix = [[2, 3], [4, 5], [6, 7]]\nbig_sum = 0\nfor row in matrix:\n    for n in row:\n        if n > 4:\n            big_sum = big_sum + n\n",
+            "standard": "matrix = [[2, 3], [4, 5], [6, 7]]\nbig_sum = 0\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
-          "referenceSolution": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)\n",
-          "testCode": "assert even_sum == 12 and OUTPUT.strip() == \"12\"",
+          "referenceSolution": "matrix = [[2, 3], [4, 5], [6, 7]]\nbig_sum = 0\nfor row in matrix:\n    for n in row:\n        if n > 4:\n            big_sum = big_sum + n\nprint(big_sum)\n",
+          "testCode": "_want = 18\nassert big_sum == _want, f'Expected big_sum == {_want!r}, got {big_sum!r}'\n_want = '18'\nassert OUTPUT.strip() == _want, f'Expected {_want!r}, got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip decodes the grid: 'Walk the rows with the outer loop and the numbers with the inner one, then test each number with `%` before adding it.'",
-            "tier2_pattern": "for <row> in <matrix>:\n    for <n> in <row>:\n        if <n> % 2 == 0:\n            even_sum = even_sum + <n>\nprint(even_sum)",
-            "tier3_walkthrough": "Write:\nmatrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)"
+            "tier1_nudge": "Pip decodes the grid: 'Walk the rows with the outer loop and the numbers with the inner one, then check each number with `>` before adding it.'",
+            "tier2_pattern": "for <row> in <matrix>:\n    for <n> in <row>:\n        if <n> > <limit>:\n            big_sum = big_sum + <n>\nprint(big_sum)",
+            "tier3_walkthrough": "Write:\nmatrix = [[2, 3], [4, 5], [6, 7]]\nbig_sum = 0\nfor row in matrix:\n    for n in row:\n        if n > 4:\n            big_sum = big_sum + n\nprint(big_sum)"
           },
           "difficultyOverride": null,
           "requiredConstructs": [
@@ -7112,17 +7205,17 @@
                 "matrix": [
                   [
                     2,
-                    1
+                    9
                   ],
                   [
                     4,
-                    3
+                    6
                   ]
                 ]
               },
-              "expectOutput": "6",
+              "expectOutput": "15",
               "expectVars": {
-                "even_sum": 6
+                "big_sum": 15
               }
             }
           ]

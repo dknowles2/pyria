@@ -82,14 +82,14 @@
       "label": "Basic Math",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 5,
-      "description": "Doing math with +, -, *, /, //, **, and % using numbers and variables."
+      "description": "Doing math with +, -, *, /, //, and ** using numbers and variables."
     },
     {
       "id": "type_conversion",
-      "label": "Changing Types (str / int / float)",
-      "minEra": "era-01-8bit",
+      "label": "Changing Types (int / float)",
+      "minEra": "era-02-16bit",
       "maxBasicRealm": 4,
-      "description": "Turning values between text and numbers with str(), int(), and float()."
+      "description": "Turning text into numbers with int() and float()."
     },
     {
       "id": "booleans",
@@ -129,22 +129,22 @@
     {
       "id": "string_methods",
       "label": "Text Tricks",
-      "minEra": "era-01-8bit",
-      "maxBasicRealm": 7,
-      "description": "Changing text with .strip(), .upper(), .lower(), and .replace()."
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 4,
+      "description": "Changing text with tools like .replace(), .split(), and .upper()."
     },
     {
       "id": "for_loops",
       "label": "For Loops",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 8,
-      "description": "Repeating code a set number of times with a for loop."
+      "description": "Repeating code for every letter in a word, every item in a list, or a set number of times."
     },
     {
       "id": "range_function",
       "label": "Using range()",
-      "minEra": "era-01-8bit",
-      "maxBasicRealm": 8,
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 4,
       "description": "Counting through numbers with range(stop) and range(start, stop)."
     },
     {
