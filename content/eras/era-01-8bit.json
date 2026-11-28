@@ -3574,6 +3574,79 @@
           ]
         },
         {
+          "id": "trial-06-04c",
+          "trialType": "fix_bug",
+          "title": "Glue Text to a Number With str()",
+          "storyPrompt": "The diving bell's air gauge needs a label on it! Remember that `+` adds two numbers AND glues two strings — but Python flatly refuses to mix the two, so this readout crashes with a TypeError. Turn the number into text with `str(...)` first, and `+` will happily glue it on.",
+          "objective": "Fix the gauge so it glues the label onto the number and prints: Air left: 35",
+          "concepts": [
+            "strings",
+            "variables",
+            "type_conversion"
+          ],
+          "shardReward": 40,
+          "unlockId": null,
+          "bugSummary": "The air gauge crashes with a TypeError instead of printing Air left: 35.",
+          "starterCode": {
+            "explorer": "# Wrap the number in str(...) so + can glue it on!\nair_left = 35\nprint(\"Air left: \" + ???)\n",
+            "standard": "air_left = 35\nprint(\"Air left: \" + air_left)\n",
+            "challenge": ""
+          },
+          "referenceSolution": "air_left = 35\nprint(\"Air left: \" + str(air_left))\n",
+          "testCode": "assert OUTPUT.strip() == 'Air left: 35', f'Expected \"Air left: 35\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip points at the crash: 'Python will not glue text onto a number — turn `air_left` into text first with `str(air_left)`!'",
+            "tier2_pattern": "print(\"<label>\" + str(<number_variable>))",
+            "tier3_walkthrough": "Change line 2 to:\nprint(\"Air left: \" + str(air_left))"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "str_call",
+            "str_concat",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "air_left": 12
+              },
+              "expectOutput": "Air left: 12"
+            }
+          ],
+          "introChoice": {
+            "title": "Mixing Text and Numbers With str()",
+            "prompt": "The `+` symbol means two different things: it ADDS two numbers (`2 + 3` is `5`) and it GLUES two strings (`\"a\" + \"b\"` is `\"ab\"`). What it will NOT do is mix them — gluing text onto a number stops the spell with a TypeError. `str(7)` turns the **integer** `7` into the **string** `\"7\"`, and then `+` is happy to glue it.",
+            "question": "If `air_left` holds the integer `35`, which line prints `Air left: 35`?",
+            "choices": [
+              {
+                "id": "a",
+                "label": "Option A",
+                "code": "print(\"Air left: \" + air_left)",
+                "explanation": "This is the crash waiting for you in Step 2! `\"Air left: \"` is text and `air_left` is a number, so `+` refuses to mix them."
+              },
+              {
+                "id": "b",
+                "label": "Option B",
+                "code": "print(\"Air left: \" + \"air_left\")",
+                "explanation": "Careful! Quotes around `\"air_left\"` make it the literal word, so this prints `Air left: air_left` instead of the number."
+              },
+              {
+                "id": "c",
+                "label": "Option C",
+                "code": "print(\"Air left: \" + str(air_left))",
+                "explanation": "Spot on! `str(air_left)` turns the integer `35` into the text `\"35\"`, so now `+` is simply gluing two strings together."
+              },
+              {
+                "id": "d",
+                "label": "Option D",
+                "code": "print(str(\"Air left: \") + air_left)",
+                "explanation": "Almost — but `\"Air left: \"` is ALREADY text. It is the number `air_left` that needs `str(...)` wrapped around it."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
+        },
+        {
           "id": "trial-06-05",
           "trialType": "code",
           "title": "Crypt Ferry Weight Check",

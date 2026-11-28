@@ -1320,7 +1320,9 @@
           "storyPrompt": "In Python, a number WITH a decimal point (like `2.5` or `0.5`) is called a **float** (short for floating-point number)—unlike an **integer** (`int`), which is a whole number with no decimal point. When a decimal arrives as text in quotes like `\"2.5\"`, `float(...)` converts it into a real decimal number you can add! You can also find the biggest and smallest values in a list with `max()` and `min()`.",
           "objective": "Convert `bonus_text` with `float()`, add it to the sum of `scores` in `total`, find `best` and `low` from `scores`, and print `total`, `best`, and `low`.",
           "concepts": [
-            "lists"
+            "lists",
+            "basic_math",
+            "type_conversion"
           ],
           "shardReward": 85,
           "unlockId": null,
@@ -1390,6 +1392,78 @@
               }
             ],
             "correctChoiceId": "d"
+          }
+        },
+        {
+          "id": "trial-16-03-04b",
+          "trialType": "code",
+          "title": "Split the Pearls Evenly (/)",
+          "storyPrompt": "Nacre's pearls must be shared out between the tide-chests! Python's single slash `/` divides — and it comes with a surprise: `/` ALWAYS hands back a **float** (a number with a decimal point), even when the split comes out perfectly even.",
+          "objective": "Create the variable `per_chest` holding `pearls` divided by `chests`, then print `per_chest`.",
+          "concepts": [
+            "basic_math",
+            "type_conversion"
+          ],
+          "shardReward": 45,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "pearls = 12\nchests = 4\nper_chest = pearls / ???\nprint(per_chest)\n",
+            "standard": "pearls = 12\nchests = 4\n",
+            "challenge": ""
+          },
+          "referenceSolution": "pearls = 12\nchests = 4\nper_chest = pearls / chests\nprint(per_chest)\n",
+          "testCode": "assert per_chest == 3.0, f'Expected 3.0, got {per_chest!r}'\nassert isinstance(per_chest, float), f'Expected a float, because / always hands back a decimal — got {type(per_chest).__name__}'\nassert OUTPUT.strip() == '3.0', f'Expected \"3.0\", got {OUTPUT.strip()!r}'\n",
+          "hints": {
+            "tier1_nudge": "Pip lines up the chests: 'Divide with a single slash — `pearls / chests` — and do not be startled by the `.0` on the end!'",
+            "tier2_pattern": "per_chest = pearls / chests\nprint(per_chest)",
+            "tier3_walkthrough": "Add:\nper_chest = pearls / chests\nprint(per_chest)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "assign",
+            "math_op",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "pearls": 20,
+                "chests": 8
+              },
+              "expectOutput": "2.5",
+              "expectVars": {
+                "per_chest": 2.5
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "Dividing With /",
+            "prompt": "Python's single slash `/` splits a number into equal parts. Watch for one surprise: `/` ALWAYS gives back a **float** (a number with a decimal point), even when the split is perfectly even — so `8 / 4` is `4.0`, not `4`.",
+            "question": "What does `print(9 / 2)` display?",
+            "codeSnippet": "print(9 / 2)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "4",
+                "explanation": "`/` keeps the leftover half instead of throwing it away, so the answer carries a decimal point."
+              },
+              {
+                "id": "b",
+                "label": "4.5",
+                "explanation": "Spot on! `/` splits 9 into two equal parts of `4.5` each, and shows the decimal."
+              },
+              {
+                "id": "c",
+                "label": "5",
+                "explanation": "`/` never rounds up — half of 9 really is `4.5`."
+              },
+              {
+                "id": "d",
+                "label": "81",
+                "explanation": "That would be `9 * 9`! A single `/` divides instead of multiplying."
+              }
+            ],
+            "correctChoiceId": "b"
           }
         },
         {
@@ -4400,7 +4474,7 @@
           "id": "trial-16-10-01",
           "trialType": "multiple_choice",
           "title": "Magic f-Strings!",
-          "storyPrompt": "Put `f` before quotes (`f\"Hello, {name}!\"`) to drop variables right into text! What will the code below print?",
+          "storyPrompt": "Put `f` before quotes (`f\"Hello, {name}!\"`) to drop variables right into text — no more gluing pieces together with `+` and `str(...)`! What will the code below print?",
           "objective": "Read the Python snippet and tap the correct prediction.",
           "concepts": [
             "f_strings"
@@ -4564,7 +4638,8 @@
           "storyPrompt": "A dictionary's `.values()` gives you all its numbers at once — perfect for `sum(...)` or looping! Let's sum every gem's energy in the alembic.",
           "objective": "Use `.values()` on `gems` to sum all crystal values into `total`, then print `total`.",
           "concepts": [
-            "dictionaries"
+            "dictionaries",
+            "dict_iteration"
           ],
           "shardReward": 120,
           "unlockId": null,
@@ -5434,7 +5509,8 @@
           "objective": "Copy dictionary `a` into a new dictionary `c`, merge dictionary `b` into `c`, and print how many keys `c` has.",
           "concepts": [
             "functions_return",
-            "dictionaries"
+            "dictionaries",
+            "dict_iteration"
           ],
           "shardReward": 135,
           "unlockId": null,
