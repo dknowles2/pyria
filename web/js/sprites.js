@@ -53,7 +53,7 @@ export class SpriteManager {
   getTilesetImage(eraKey = '8bit') {
     const key = this.normalizeEra(eraKey);
     const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
-    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261127z`);
+    const entry = this.loadImage(`/assets/tilesets/${era.tilesetImage}?v=20261128a`);
     return entry.loaded ? entry.img : null;
   }
 
@@ -202,6 +202,23 @@ export class SpriteManager {
         ctx.drawImage(scarfImg, sx, sy, sw, sh, Math.round(dx), Math.round(dy), Math.round(dw), Math.round(dh));
       }
     }
+  }
+
+  hasTile(tileId, eraKey = '8bit') {
+    if (!tileId) return false;
+    const key = this.normalizeEra(eraKey);
+    const era = this.tilesetManifest.eras[key] || this.tilesetManifest.eras['8bit'];
+    return Boolean(era.tiles && era.tiles[tileId]);
+  }
+
+  getTileVariantId(tileId, eraKey, x, y) {
+    if (!tileId || this.normalizeEra(eraKey) === '8bit') return tileId;
+    const era = this.tilesetManifest.eras['16bit'];
+    const group = era?.variants?.[tileId];
+    if (!Array.isArray(group) || group.length < 4) return tileId;
+    // Map (x, y) onto the 2x2 seamless 64x64 world-space macro-tile
+    const idx = ((y & 1) << 1) | (x & 1);
+    return group[idx] || tileId;
   }
 
   /**
