@@ -33,10 +33,16 @@ function escapeHtml(str) {
 
 export function renderSafeMarkdown(str) {
   const escaped = escapeHtml(str);
-  return escaped.replace(/`([^`\n]+)`|\*\*([^*\n]+)\*\*/g, (_, code, bold) => {
-    if (code !== undefined) return `<code class="inline-md-code">${code}</code>`;
-    return `<strong>${bold}</strong>`;
+  const codeSpans = [];
+  const withPlaceholders = escaped.replace(/`([^`\n]+)`/g, (_match, code) => {
+    const token = `\u0000CODE${codeSpans.length}\u0000`;
+    codeSpans.push(`<code class="inline-md-code">${code}</code>`);
+    return token;
   });
+  const withBold = withPlaceholders.replace(/\*\*(?=\S)([^*\n]*?\S)\*\*/g, '<strong>$1</strong>');
+  return withBold
+    .replace(/\u0000CODE(\d+)\u0000/g, (_match, idx) => codeSpans[Number(idx)] || '')
+    .replace(/\n/g, '<br>');
 }
 
 function objectiveHasCodeSpoilers(objective) {
@@ -68,6 +74,71 @@ function buildChallengeObjectiveHtml(trial) {
       ? ` Target text: ${uniqueTargets.map((t) => `<code class="inline-md-code">${escapeHtml(t)}</code>`).join(', ')}.`
       : '';
   return `Solve the story quest above using your Python skills — code hints are hidden in Challenge Mode!${targetNote}`;
+}
+
+function renderTrialBriefHtml({
+  trial,
+  isMultipleChoice = false,
+  isFixBug = false,
+  unlockItem = null,
+  objectiveHtml = null,
+  objectiveId = '',
+  bugHtml = null,
+  bugId = '',
+}) {
+  const rawPrompt = String(trial.storyPrompt || '').trim();
+  const rawObjective = String(trial.objective || '').trim();
+  const primaryText = rawPrompt || rawObjective;
+  const primaryNorm = primaryText.toLowerCase();
+  const objectiveNorm = rawObjective.toLowerCase();
+
+  // Avoid repeating the objective verbatim when storyPrompt already contains it (e.g., Era 3–4 trials)
+  // or when storyPrompt was empty and objective was promoted to the primary text.
+  const showGoalRow =
+    Boolean(objectiveHtml) ||
+    (Boolean(rawObjective) && Boolean(rawPrompt) && !primaryNorm.includes(objectiveNorm));
+
+  const rawBugSummary = isFixBug
+    ? String(trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!').trim()
+    : '';
+  const bugNorm = rawBugSummary.toLowerCase();
+  const showBugNote =
+    isFixBug &&
+    (Boolean(bugHtml) ||
+      (Boolean(rawBugSummary) &&
+        !primaryNorm.includes(bugNorm) &&
+        (!showGoalRow || !objectiveNorm.includes(bugNorm))));
+
+  const showGoalStrip = showGoalRow || Boolean(unlockItem);
+  const goalInner =
+    objectiveHtml ??
+    `<span class="trial-goal-label">${isMultipleChoice ? '✓ Question:' : '✓ Goal:'}</span> <span class="trial-goal-text">${renderSafeMarkdown(rawObjective)}</span>`;
+
+  return `
+    <section class="trial-brief-card${isFixBug ? ' is-fix-bug' : ''}" aria-label="Trial Challenge">
+      <div class="trial-brief-kicker">${isFixBug ? '🐛 The Bug to Fix' : '📜 The Challenge'}</div>
+      ${primaryText ? `<p class="trial-problem-text">${renderSafeMarkdown(primaryText)}</p>` : ''}
+      ${
+        showBugNote
+          ? `<p class="trial-bug-note"><span class="trial-bug-note-label">Bug report:</span> <span${bugId ? ` id="${bugId}"` : ''}>${bugHtml ?? renderSafeMarkdown(rawBugSummary)}</span></p>`
+          : ''
+      }
+      ${
+        showGoalStrip
+          ? `
+            <div class="trial-goal-strip">
+              ${showGoalRow ? `<div${objectiveId ? ` id="${objectiveId}"` : ''} class="trial-goal-row">${goalInner}</div>` : ''}
+              ${
+                unlockItem
+                  ? `<div class="trial-unlock-note">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code class="trial-inline-code">${escapeHtml(unlockItem.functionCall)}</code>)</div>`
+                  : ''
+              }
+            </div>
+          `
+          : ''
+      }
+    </section>
+  `;
 }
 
 const BASE_QUICK_KEYS = [
@@ -258,6 +329,7 @@ export class ModalManager {
   constructor(backdropEl, contentEl, { sprites, onPauseChange }) {
     this.backdrop = backdropEl;
     this.content = contentEl;
+    this.content.setAttribute('tabindex', '-1');
     this.sprites = sprites;
     this.onPauseChange = onPauseChange;
     this.cleanupFns = [];
@@ -286,7 +358,9 @@ export class ModalManager {
     this.allowBackdropClose = allowBackdropClose;
     this.content.className = `modal-card ${sizeClass}`.trim();
     this.content.innerHTML = html;
+    this.content.scrollTop = 0;
     this.backdrop.classList.remove('hidden');
+    this.content.focus({ preventScroll: true });
     if (this.onPauseChange) this.onPauseChange(true);
   }
 
@@ -589,7 +663,7 @@ export class ModalManager {
               <span class="pill pill-green">✓ COMPLETED</span>
               <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
               ${bonusHints > 0 ? `<span class="pill pill-violet">✨ +${bonusHints} Bonus Hint${bonusHints === 1 ? '' : 's'}</span>` : ''}
-              ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+              ${conceptLabels.map((l) => `<span class="pill pill-concept">${escapeHtml(l)}</span>`).join('')}
             </div>
           </div>
           <button class="btn btn-sm btn-ghost" data-close>✕</button>
@@ -602,7 +676,7 @@ export class ModalManager {
             You've already mastered this Trial and claimed its <strong>${trial.shardReward} Byte Shards</strong>!
           </p>
           <p class="muted-text" style="margin:0;">
-            <strong>Objective:</strong> ${renderSafeMarkdown(trial.objective)}
+            <strong>Goal:</strong> ${renderSafeMarkdown(trial.objective)}
           </p>
         </div>
 
@@ -720,18 +794,13 @@ export class ModalManager {
                   : `<span class="pill pill-gold">+${trial.shardReward} Byte Shards</span>`
               }
               ${bonusHints > 0 ? `<span class="pill pill-violet">✨ +${bonusHints} Bonus Hint${bonusHints === 1 ? '' : 's'}</span>` : ''}
-              ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+              ${conceptLabels.map((l) => `<span class="pill pill-concept">${escapeHtml(l)}</span>`).join('')}
             </div>
           </div>
           <button class="btn btn-sm btn-ghost" data-close>✕</button>
         </div>
 
-        <p class="dialogue-text">${renderSafeMarkdown(trial.storyPrompt)}</p>
-
-        <div class="objective-box">
-          <strong>Question:</strong> ${renderSafeMarkdown(trial.objective)}
-          ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
-        </div>
+        ${renderTrialBriefHtml({ trial, isMultipleChoice: true, isFixBug: false, unlockItem })}
 
         ${trial.codeSnippet ? `<pre class="mc-code-snippet"><code>${escapeHtml(trial.codeSnippet)}</code></pre>` : ''}
 
@@ -766,6 +835,8 @@ export class ModalManager {
         `,
         'modal-wide'
       );
+
+      this.content.scrollTop = 0;
 
       const hintBtn = this.content.querySelector('#btn-trial-hint');
       const hintsArea = this.content.querySelector('#trial-hints-area');
@@ -1025,9 +1096,9 @@ export class ModalManager {
 
       const renderObjectiveInnerHtml = () => {
         if (currentMode === 'challenge') {
-          return `<strong>🏆 Challenge Goal:</strong> ${buildChallengeObjectiveHtml(trial)}`;
+          return `<span class="trial-goal-label">🏆 Challenge Goal:</span> <span class="trial-goal-text">${buildChallengeObjectiveHtml(trial)}</span>`;
         }
-        return `<strong>Objective:</strong> ${renderSafeMarkdown(trial.objective)}`;
+        return `<span class="trial-goal-label">✓ Goal:</span> <span class="trial-goal-text">${renderSafeMarkdown(trial.objective)}</span>`;
       };
 
       const initialMaxHints = getEffectiveMaxHints();
@@ -1039,9 +1110,8 @@ export class ModalManager {
             <h2>${isPractice ? '✓ ' : isFixBug ? '🐛 ' : '★ '}${escapeHtml(trial.title)}</h2>
             <div class="modal-badges">
               ${hasIntroChoice ? '<span class="pill pill-green">✓ Step 1 Done · ⌨️ Step 2 of 2: Code It!</span>' : ''}
-              ${isFixBug ? '<span class="pill pill-rose">🐛 Fix the Bug!</span>' : ''}
               <span class="pill pill-blue">${escapeHtml(realm.name)}</span>
-              <span class="pill pill-violet" id="trial-diff-badge">Mode: ${escapeHtml(currentMode)}</span>
+              <span class="pill pill-muted" id="trial-diff-badge">Mode: ${escapeHtml(currentMode)}</span>
               ${
                 isPractice
                   ? '<span class="pill pill-green">✓ COMPLETED · Practice Mode (No Extra Shards)</span>'
@@ -1049,34 +1119,27 @@ export class ModalManager {
               }
               <span id="trial-draft-badge" class="pill pill-gold ${hasRestoredDraft ? '' : 'hidden'}">💾 Restored your saved draft</span>
               ${bonusHints > 0 ? `<span class="pill pill-violet">✨ +${bonusHints} Bonus Hint${bonusHints === 1 ? '' : 's'}</span>` : ''}
-              ${conceptLabels.map((l) => `<span class="pill pill-muted">${escapeHtml(l)}</span>`).join('')}
+              ${conceptLabels.map((l) => `<span class="pill pill-concept">${escapeHtml(l)}</span>`).join('')}
             </div>
           </div>
           <button class="btn btn-sm btn-ghost" data-close>✕</button>
         </div>
 
-        <p class="dialogue-text">${renderSafeMarkdown(trial.storyPrompt)}</p>
+        ${renderTrialBriefHtml({
+          trial,
+          isMultipleChoice: false,
+          isFixBug,
+          unlockItem,
+          objectiveHtml: renderObjectiveInnerHtml(),
+          objectiveId: 'trial-objective-text',
+          bugHtml: isFixBug ? renderBugBannerBody() : null,
+          bugId: isFixBug ? 'trial-bug-summary' : '',
+        })}
 
         <div id="trial-challenge-banner" class="challenge-banner ${currentMode === 'challenge' ? '' : 'hidden'}">
           <span>🏆 <strong>Challenge Mode Active</strong> — Code spoilers hidden · Hints capped at Tier 1</span>
           <span class="pill pill-gold">+${CHALLENGE_BONUS_SHARDS} Bonus Shards &amp; 🏆 Badge</span>
         </div>
-
-        <div class="objective-box">
-          <div id="trial-objective-text">${renderObjectiveInnerHtml()}</div>
-          ${unlockItem ? `<div class="muted-text">Unlocks in Bram's Workshop: <strong>${escapeHtml(unlockItem.name)}</strong> (<code>${escapeHtml(unlockItem.functionCall)}</code>)</div>` : ''}
-        </div>
-
-        ${
-          isFixBug
-            ? `
-              <div id="trial-bug-banner" class="bug-banner">
-                <div class="bug-banner-title">🐛 Fix the Bug!</div>
-                <div id="trial-bug-summary">${renderBugBannerBody()}</div>
-              </div>
-            `
-            : ''
-        }
 
         <div id="trial-comment-tip" class="comment-tip-banner ${showCommentTip ? '' : 'hidden'}">
           <strong>💬 What are <code>#</code> lines?</strong>
@@ -1140,6 +1203,8 @@ export class ModalManager {
       );
 
       const codeEl = this.content.querySelector('#trial-code');
+      const editorShell = this.content.querySelector('.code-editor-shell');
+      const quickKeysBar = this.content.querySelector('#trial-quick-keys');
       const runBtn = this.content.querySelector('#btn-trial-run');
       const hintBtn = this.content.querySelector('#btn-trial-hint');
       const resetBtn = this.content.querySelector('#btn-trial-reset');
@@ -1222,16 +1287,27 @@ export class ModalManager {
         renderRevealedHints();
       };
 
-      // On desktop, auto-focus the coding box with cursor at the end so the blinking caret is obvious.
+      // Desktop "Quiet Ready" auto-focus: keep the caret live without scrolling past the brief
+      // or lighting up the emerald focus halo until the player clicks in or starts typing.
+      this.content.scrollTop = 0;
       if (codeEl && !window.matchMedia?.('(pointer: coarse)')?.matches) {
+        editorShell?.classList.add('is-quiet-focus');
+        const wakeEditorGlow = () => editorShell?.classList.remove('is-quiet-focus');
+        codeEl.addEventListener('pointerdown', wakeEditorGlow, { once: true });
+        codeEl.addEventListener('input', wakeEditorGlow, { once: true });
+        codeEl.addEventListener('keydown', (e) => {
+          if (e.key !== 'Escape') wakeEditorGlow();
+        });
+        quickKeysBar?.addEventListener('pointerdown', wakeEditorGlow, { once: true });
         requestAnimationFrame(() => {
-          codeEl.focus();
+          codeEl.focus({ preventScroll: true });
           const endPos = codeEl.value.length;
           codeEl.selectionStart = codeEl.selectionEnd = endPos;
+          this.content.scrollTop = 0;
         });
       }
 
-      wireQuickKeysBar(this.content.querySelector('#trial-quick-keys'), codeEl, trialQuickKeys);
+      wireQuickKeysBar(quickKeysBar, codeEl, trialQuickKeys);
 
       const trialSuggestions = buildTrialSuggestions({ realm, era, trial });
       const destroyTrialAc = attachAutocomplete(codeEl, () => trialSuggestions);
