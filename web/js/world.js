@@ -1,7 +1,7 @@
 // Crisp HTML5 Canvas Overworld Engine for Pyria (8-Bit, 16-Bit, 32-Bit Isometric 2.5D, 64-Bit N64 3D)
 
 import { audio } from './audio.js?v=20261127i';
-import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127i';
+import { pickN64Entity, renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127u';
 
 const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
@@ -61,6 +61,7 @@ export class WorldEngine {
       x: 5,
       y: 17,
       dir: 'down',
+      facingAngle: 0,
       moving: false,
       animTimer: 0,
       frame: 0,
@@ -73,6 +74,7 @@ export class WorldEngine {
       x: 4,
       y: 17,
       dir: 'down',
+      facingAngle: 0,
       frame: 0,
       animTimer: 0,
     };
@@ -134,6 +136,7 @@ export class WorldEngine {
     const handleCanvasTap = (clientX, clientY) => {
       if (this.paused || !this.map) return;
       const rect = this.canvas.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
       const cx = (clientX - rect.left) * (this.canvas.width / rect.width);
       const cy = (clientY - rect.top) * (this.canvas.height / rect.height);
 
@@ -143,6 +146,22 @@ export class WorldEngine {
         if (cx >= m.x && cx <= m.x + m.w && cy >= m.y && cy <= m.y + m.h) {
           return;
         }
+      }
+
+      // 64-Bit 3D perspective hit-testing against projected entity screen targets
+      if (this.eraKey === '64bit') {
+        const hit = pickN64Entity(cx, cy);
+        if (hit) {
+          const dHero = Math.hypot(hit.x + 0.5 - this.hero.x, hit.y + 0.5 - this.hero.y);
+          if (dHero <= 3.6 && this.callbacks.onInteract) {
+            this.callbacks.onInteract(hit);
+            return;
+          }
+        }
+        if (this.nearestEntity) {
+          this.triggerInteract();
+        }
+        return;
       }
 
       const camX = Math.round(this.camera.x);
@@ -305,8 +324,11 @@ export class WorldEngine {
     this.hero.x = startX;
     this.hero.y = startY;
     this.hero.dir = 'down';
+    this.hero.facingAngle = 0;
     this.pip.x = startX - 0.9;
     this.pip.y = startY;
+    this.pip.dir = 'down';
+    this.pip.facingAngle = 0;
     this.trail = [];
     this.currentRegionId = null;
     this.camera.initialized = false;
@@ -466,6 +488,7 @@ export class WorldEngine {
       if (this.hero.bumpSoundCooldown > 0) this.hero.bumpSoundCooldown -= dt;
 
       if (this.hero.moving) {
+        this.hero.facingAngle = Math.atan2(dx, dy);
         if (Math.abs(dx) > Math.abs(dy)) {
           this.hero.dir = dx < 0 ? 'left' : 'right';
         } else {
@@ -519,6 +542,7 @@ export class WorldEngine {
     if (pipDist > 0.12) {
       this.pip.x += pipDx * Math.min(1, dt * 6);
       this.pip.y += pipDy * Math.min(1, dt * 6);
+      this.pip.facingAngle = Math.atan2(pipDx, pipDy);
       if (Math.abs(pipDx) > Math.abs(pipDy)) {
         this.pip.dir = pipDx < 0 ? 'left' : 'right';
       } else {
@@ -526,6 +550,7 @@ export class WorldEngine {
       }
     } else {
       this.pip.dir = this.hero.dir;
+      this.pip.facingAngle = this.hero.facingAngle;
     }
 
     this.pip.animTimer += dt;

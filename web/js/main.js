@@ -28,7 +28,7 @@ import { music, resolveRegionTheme } from './music.js?v=20261127i';
 import { pyRunner } from './pyRunner.js?v=20261127j';
 import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.js?v=20261127i';
 import { SpriteManager } from './sprites.js?v=20261127i';
-import { WorldEngine } from './world.js?v=20261127i';
+import { WorldEngine } from './world.js?v=20261127u';
 import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127k';
 import { playCutscene, STORY_CUTSCENES } from './cutscene.js?v=20261127i';
 
