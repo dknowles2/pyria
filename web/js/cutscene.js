@@ -603,7 +603,7 @@ export const STORY_CUTSCENES = {
           fromLabel: '32-BIT ISOMETRIC',
           toLabel: '64-BIT NINTENDO 64 3D',
         },
-        text: 'BOOM!! Textured 3D hills, cobalt skies, distant mountains, and sweeping N64 brass fill the horizon!',
+        text: 'Textured 3D hills, deep blue skies, far-off mountains, and big N64 horns fill the view!',
       },
       {
         speaker: 'Lord Null',

@@ -18,7 +18,7 @@
       },
       "miniVisualUpgrade": "Bits 33-40 Restored: Bright green 3D hills, deep blue skies, and spinning 3D gems.",
       "storyIntro": "Pyria leaps into 3D! Green hills stretch toward a faraway castle. Use Python classes to build and control 3D objects in Polygon Valley.",
-      "storyOutro": "Polywing glides across the valley and opens the giant stone gates to Gouraud Courtyard.",
+      "storyOutro": "Polywing glides across the valley and opens the giant stone gates to Stonelight Courtyard.",
       "primaryConcepts": [
         "classes_intro",
         "world_scripting_3d"
@@ -376,7 +376,7 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "shatter",
-            "text": "You broke my lock in Polygon Valley? Wait until you reach Gouraud Courtyard, {heroName}!"
+            "text": "You broke my lock in Polygon Valley? Wait until you reach Stonelight Courtyard, {heroName}!"
           },
           {
             "speaker": "Polywing",
@@ -390,7 +390,7 @@
             "spriteKey": "pip",
             "side": "left",
             "vfx": "celebrate",
-            "text": "Polywing is free! Head through the portal to Gouraud Courtyard."
+            "text": "Polywing is free! Head through the portal to Stonelight Courtyard."
           }
         ]
       }
@@ -398,7 +398,7 @@
     {
       "id": "realm-64-02-courtyard",
       "number": 2,
-      "name": "Gouraud Courtyard",
+      "name": "Stonelight Courtyard",
       "dragon": {
         "id": "dragon-vertex",
         "name": "Vertex",
@@ -743,7 +743,7 @@
         {
           "id": "trial-64-02-06",
           "trialType": "code",
-          "title": "Unlock Gouraud Courtyard (Boss)",
+          "title": "Unlock Stonelight Courtyard (Boss)",
           "storyPrompt": "Vertex's castle gate needs double the stone blocks to open! Build a parent `Mesh` class and a child `CastleMesh` class that doubles the count.",
           "objective": "Create `class Mesh:` saving `self.verts`, and child class `CastleMesh(Mesh)` with `double_verts(self)` returning `self.verts * 2`. If `CastleMesh(32).double_verts() == 64`, print `\"VERTEX FREE!\"`.",
           "concepts": [
@@ -777,7 +777,7 @@
           "id": "trial-64-02-bonus",
           "trialType": "multiple_choice",
           "title": "Secret Rune: Vertex's super() Riddle",
-          "storyPrompt": "A stone rune in Gouraud Courtyard tests what you remember about `super()`.",
+          "storyPrompt": "A stone rune in Stonelight Courtyard tests what you remember about `super()`.",
           "objective": "Pick what `super()` lets a child class do.",
           "concepts": [
             "class_inheritance",
@@ -817,8 +817,8 @@
           "difficultyOverride": null,
           "isBonus": true,
           "bonusKitReward": {
-            "name": "Vertex's Gouraud Shield (+1 Hint)",
-            "description": "Hidden treasure from Gouraud Courtyard.",
+            "name": "Vertex's Stonelight Shield (+1 Hint)",
+            "description": "Hidden treasure from Stonelight Courtyard.",
             "unlockId": "bonus-trial-64-02",
             "equipLayer": "tunic",
             "equipKey": "amber"
@@ -833,7 +833,7 @@
             "spriteKey": "lord_null",
             "side": "right",
             "vfx": "glitch",
-            "text": "You made it to Gouraud Courtyard, {heroName}, but Vertex is staying locked inside this vault!"
+            "text": "You made it to Stonelight Courtyard, {heroName}, but Vertex is staying locked inside this vault!"
           },
           {
             "speaker": "Vertex",

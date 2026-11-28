@@ -80,7 +80,7 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 | # | Realm | Dragon Guardian | Python Focus |
 | :-: | :--- | :--- | :--- |
 | **1** | **Polygon Valley** | **Polywing** *(Sky)* | 3D Entity Classes (`class Hero3D`, `__str__`, camera & movement methods) |
-| **2** | **Gouraud Courtyard** | **Vertex** *(Stone)* | Class Inheritance (`class Sub(Parent):`), `super().__init__()`, method overrides & polymorphism |
+| **2** | **Stonelight Courtyard** | **Vertex** *(Stone)* | Class Inheritance (`class Sub(Parent):`), `super().__init__()`, method overrides & polymorphism |
 | **3** | **Poly-Forge Arena** | **Vector** *(Light)* | Object composition (a `Scene` holding entities), polymorphic `.tick()` / `.draw()` loops & 3D volume methods |
 | **4** | **Clockwork Testing Lab** | **Verify** *(Lightning)* | `assert` self-tests, off-by-one bugs, empty-list edge cases & clamping |
 | **5** | **Star-Mesh Observatory** | **Quasar** *(Starlight)* | Debugging off-by-one bugs, `assert` self-tests, `sorted(..., key=lambda ...)` Painter's Algorithm |
