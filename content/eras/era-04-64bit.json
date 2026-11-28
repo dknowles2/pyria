@@ -905,7 +905,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 65,
+          "shardReward": 180,
           "unlockId": null,
           "codeSnippet": "class Cube:\n    def draw(self): return \"BOX\"\nclass Cone:\n    def draw(self): return \"TIP\"\n\nshapes = [Cube(), Cone()]\nprint([s.draw() for s in shapes])",
           "choices": [
@@ -948,7 +948,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 65,
+          "shardReward": 190,
           "unlockId": null,
           "bugSummary": "Missing `self.` before `lights` causes a `NameError`.",
           "starterCode": {
@@ -981,7 +981,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 70,
+          "shardReward": 195,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Box3D:\n    def __init__(self, w, h, d):\n        self.w, self.h, self.d = w, h, d\n    def volume(self):\n        return self.w * self.h * ???\n\nprint(Box3D(2, 3, 4).volume())\n",
@@ -1014,7 +1014,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 70,
+          "shardReward": 200,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Entity:\n    def __init__(self, name): self.name = name\n\nclass Scene:\n    def __init__(self, items):\n        self.items = items\n    def count(self):\n        return len(self.???)\n\ns = Scene([Entity(\"A\"), Entity(\"B\")])\nprint(s.count())\n",
@@ -1048,7 +1048,7 @@
             "world_scripting_3d",
             "list_comprehensions"
           ],
-          "shardReward": 75,
+          "shardReward": 205,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Lamp:\n    def update(self): return \"glow\"\nclass Door:\n    def update(self): return \"creak\"\n\nprops = [Lamp(), Door()]\nevents = [p.update() for p in ???]\nprint(events)\n",
@@ -1079,7 +1079,7 @@
             "class_inheritance",
             "world_scripting_3d"
           ],
-          "shardReward": 75,
+          "shardReward": 210,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Prop:\n    def describe(self): return \"STATIC\"\n\nclass MovingProp(Prop):\n    def describe(self):\n        return \"???\"\n\nprint(MovingProp().describe())\n",
@@ -1111,7 +1111,7 @@
             "classes_intro",
             "world_scripting_3d"
           ],
-          "shardReward": 95,
+          "shardReward": 220,
           "unlockId": null,
           "starterCode": {
             "explorer": "class Gear:\n    def __init__(self, power): self.power = power\n\nclass Engine:\n    def __init__(self, parts): self.parts = parts\n    def total_power(self):\n        return sum(p.power for p in self.parts)\n\nif Engine([Gear(20), Gear(44)]).total_power() == 64:\n    print(\"VECTOR FREE!\")\n",
@@ -1145,7 +1145,7 @@
             "class_inheritance",
             "world_scripting_3d"
           ],
-          "shardReward": 65,
+          "shardReward": 200,
           "unlockId": null,
           "choices": [
             {
@@ -1256,7 +1256,7 @@
           "concepts": [
             "debugging"
           ],
-          "shardReward": 65,
+          "shardReward": 185,
           "unlockId": null,
           "choices": [
             {
@@ -1302,7 +1302,7 @@
             "debugging",
             "for_loops"
           ],
-          "shardReward": 65,
+          "shardReward": 195,
           "unlockId": null,
           "bugSummary": "`total` starts at `1` instead of `0`, so `assert total == 10` fails.",
           "starterCode": {
@@ -1334,7 +1334,7 @@
             "debugging",
             "functions_def"
           ],
-          "shardReward": 70,
+          "shardReward": 200,
           "unlockId": null,
           "starterCode": {
             "explorer": "def double(n):\n    return n * 2\n\nassert double(5) == ???\nassert double(0) == 0\nprint(\"PASSED\")\n",
@@ -1367,7 +1367,7 @@
             "functions_return",
             "conditionals_if"
           ],
-          "shardReward": 70,
+          "shardReward": 205,
           "unlockId": null,
           "starterCode": {
             "explorer": "def bigger(a, b):\n    if a >= b:\n        return a\n    return ???\n\nassert bigger(3, 8) == 8\nprint(bigger(3, 8))\n",
@@ -1402,7 +1402,7 @@
             "functions_return",
             "conditionals_if"
           ],
-          "shardReward": 75,
+          "shardReward": 210,
           "unlockId": null,
           "starterCode": {
             "explorer": "def safe_avg(nums):\n    if len(nums) == 0:\n        return 0\n    return sum(nums) // len(???)\n\nassert safe_avg([]) == 0\nprint(safe_avg([10, 20]))\n",
@@ -1436,7 +1436,7 @@
             "debugging",
             "functions_def"
           ],
-          "shardReward": 75,
+          "shardReward": 215,
           "unlockId": null,
           "starterCode": {
             "explorer": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\n\nassert clamp(-5, 0, 10) == 0\nassert clamp(5, 0, 10) == ???\nassert clamp(20, 0, 10) == 10\nprint(\"ALL 3 PASSED\")\n",
@@ -1468,7 +1468,7 @@
             "functions_def",
             "functions_return"
           ],
-          "shardReward": 95,
+          "shardReward": 225,
           "unlockId": null,
           "starterCode": {
             "explorer": "def is_valid_bit(n):\n    return 1 <= n <= 64\n\nassert is_valid_bit(64)\nassert not is_valid_bit(0)\nprint(\"VERIFY FREE!\")\n",
@@ -1501,7 +1501,7 @@
             "debugging",
             "range_function"
           ],
-          "shardReward": 65,
+          "shardReward": 205,
           "unlockId": null,
           "choices": [
             {

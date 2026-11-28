@@ -1666,7 +1666,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 55,
+          "shardReward": 135,
           "unlockId": null,
           "codeSnippet": "rooms = {\n    \"hall\": {\"gems\": 12, \"lit\": True},\n    \"vault\": {\"gems\": 40, \"lit\": False}\n}\nprint(rooms[\"hall\"][\"gems\"])",
           "choices": [
@@ -1708,7 +1708,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 55,
+          "shardReward": 145,
           "unlockId": null,
           "bugSummary": "The nested lookup causes a `KeyError` because the inner key is spelled wrong.",
           "starterCode": {
@@ -1739,7 +1739,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 60,
+          "shardReward": 150,
           "unlockId": null,
           "starterCode": {
             "explorer": "atlas = {\"north\": {\"boss\": \"Chronis\"}}\nguardian = atlas[\"north\"][\"???\"]\nprint(guardian)\n",
@@ -1769,7 +1769,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 60,
+          "shardReward": 155,
           "unlockId": null,
           "starterCode": {
             "explorer": "vault = {\"west\": {\"gold\": 25}}\nvault[\"west\"][\"gold\"] += ???\nprint(vault[\"west\"][\"gold\"])\n",
@@ -1828,7 +1828,7 @@
             "dictionaries_nested",
             "booleans"
           ],
-          "shardReward": 65,
+          "shardReward": 160,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"east\": {\"gems\": 5}}\nrooms[\"east\"][\"lit\"] = ???\nprint(rooms[\"east\"][\"lit\"])\n",
@@ -1860,7 +1860,7 @@
             "for_loops",
             "dict_iteration"
           ],
-          "shardReward": 65,
+          "shardReward": 165,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"A\": {\"gems\": 10}, \"B\": {\"gems\": 25}}\ntotal = 0\nfor r in rooms.values():\n    total += r[\"???\"]\nprint(total)\n",
@@ -1892,7 +1892,7 @@
             "dict_iteration",
             "for_loops"
           ],
-          "shardReward": 65,
+          "shardReward": 60,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\nfor name, room in rooms.???():\n    print(name, room[\"gems\"])\n",
@@ -1966,7 +1966,7 @@
             "for_loops",
             "conditionals_if"
           ],
-          "shardReward": 85,
+          "shardReward": 175,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"A\": {\"gems\": 20, \"open\": True}, \"B\": {\"gems\": 99, \"open\": False}, \"C\": {\"gems\": 30, \"open\": True}}\ntotal = 0\nfor r in rooms.values():\n    if r[\"open\"]:\n        total += r[\"gems\"]\nif total == 50:\n    print(\"CHRONIS FREE!\")\n",
@@ -1998,7 +1998,7 @@
           "concepts": [
             "dictionaries_nested"
           ],
-          "shardReward": 55,
+          "shardReward": 155,
           "unlockId": null,
           "codeSnippet": "atlas = {\"east\": {\"a\": 1, \"b\": 2, \"c\": 3}}\nprint(len(atlas[\"east\"]))",
           "choices": [
@@ -2110,7 +2110,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 55,
+          "shardReward": 140,
           "unlockId": null,
           "codeSnippet": "try:\n    n = int(\"boom\")\n    print(n)\nexcept ValueError:\n    print(\"BLOCKED\")",
           "choices": [
@@ -2152,7 +2152,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 55,
+          "shardReward": 150,
           "unlockId": null,
           "bugSummary": "A missing colon after `try` stops Python from running the block.",
           "starterCode": {
@@ -2213,7 +2213,7 @@
             "error_handling",
             "type_conversion"
           ],
-          "shardReward": 60,
+          "shardReward": 155,
           "unlockId": null,
           "starterCode": {
             "explorer": "raw = \"bad\"\ntry:\n    val = int(raw)\nexcept ValueError:\n    val = ???\nprint(val)\n",
@@ -2255,7 +2255,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 60,
+          "shardReward": 160,
           "unlockId": null,
           "starterCode": {
             "explorer": "a = 20\nb = 0\ntry:\n    ans = a // b\nexcept ZeroDivisionError:\n    ans = ???\nprint(ans)\n",
@@ -2299,7 +2299,7 @@
             "error_handling",
             "dictionaries"
           ],
-          "shardReward": 65,
+          "shardReward": 165,
           "unlockId": null,
           "starterCode": {
             "explorer": "rooms = {\"north\": \"OPEN\"}\nname = \"south\"\ntry:\n    status = rooms[name]\nexcept KeyError:\n    status = \"???\"\nprint(status)\n",
@@ -2371,7 +2371,7 @@
             "error_handling",
             "for_loops"
           ],
-          "shardReward": 65,
+          "shardReward": 170,
           "unlockId": null,
           "starterCode": {
             "explorer": "items = [\"5\", \"oops\", \"15\"]\ntotal = 0\nfor x in items:\n    try:\n        total += int(x)\n    except ValueError:\n        continue\nprint(total)\n",
@@ -2406,7 +2406,7 @@
             "functions_return",
             "for_loops"
           ],
-          "shardReward": 85,
+          "shardReward": 180,
           "unlockId": null,
           "starterCode": {
             "explorer": "raw = [\"10\", \"null\", \"30\"]\ndef safe_parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return 0\npower = sum(safe_parse(s) for s in raw)\nif power == 40:\n    print(\"AEGIS FREE!\")\n",
@@ -2439,7 +2439,7 @@
           "concepts": [
             "error_handling"
           ],
-          "shardReward": 55,
+          "shardReward": 160,
           "unlockId": null,
           "choices": [
             {
