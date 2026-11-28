@@ -45,6 +45,12 @@ jobs:
       - name: Validate content integrity
         run: npm run test:content
 
+      - name: Parse-check every browser JS module
+        run: npm run test:parse
+
+      - name: Check player-facing text against rule 0
+        run: npm run test:text
+
   deploy:
     name: Deploy to Cloudflare Workers
     needs: test-and-build
