@@ -75,7 +75,7 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
     case 'IndentationError':
     case 'TabError':
       if (msg.includes('expected an indented block')) {
-        pipMessage = `Watch your spacing${linePart}! After a colon ':' (like 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', or 'with'), the lines inside MUST be pushed over by 4 spaces — put your cursor at the start of that line and tap '⇥ Indent' (or 4 spaces)!`;
+        pipMessage = `Watch your spacing${linePart}! After a colon ':' (like 'if', 'elif', 'else', 'for', 'while', 'def', 'class', 'try', 'except', or 'with'), the lines inside MUST be pushed over by 4 spaces. Put your cursor at the start of that line and tap '⇥ Indent' (or 4 spaces)!`;
       } else if (msg.includes('unexpected indent')) {
         pipMessage = `Extra spaces spotted${linePart}! Normal lines (not inside an 'if', 'for', 'while', 'def', 'class', 'try', or 'with' block) need to start all the way at the left edge with 0 spaces.`;
       } else {
@@ -87,7 +87,7 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
       const match = msg.match(/name '([^']+)' is not defined/);
       const varName = match ? match[1] : null;
       if (varName === 'self') {
-        pipMessage = `Hmm${linePart}, Python doesn't know 'self' here! Remember: 'self' only exists inside a class method, and it must be the first parameter in 'def method(self, ...):'.`;
+        pipMessage = `Hmm${linePart}, Python doesn't know 'self' here! Remember: 'self' only works inside an action that belongs to a class, and it has to be the first input inside '()', like 'def roar(self, ...):'.`;
       } else if (varName) {
         pipMessage = `Hmm${linePart}, Python doesn't know what '${varName}' is yet! Did you spell it the same way, or forget quotes around text like "${varName}"?`;
       } else {
@@ -103,21 +103,21 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
         if (objType === 'NoneType') {
           pipMessage = `Oops${linePart}! That value is None (empty), so it doesn't have '.${attrName}'. Make sure your variable or function actually returned a value before calling '.${attrName}'!`;
         } else {
-          pipMessage = `Pip checked your ${objType}${linePart}, and it doesn't have '.${attrName}'! Double-check the method or attribute spelling — and in a class, make sure you set 'self.${attrName}' inside '__init__' or spelled the method name right!`;
+          pipMessage = `Pip checked your ${objType}${linePart}, and it doesn't have '.${attrName}'! Check the spelling after the dot. Inside a class, make sure you set 'self.${attrName}' in '__init__', or that you spelled the action's name right!`;
         }
       } else {
-        pipMessage = `Pip couldn't find that attribute or method${linePart}! Check your spelling after the dot '.' (and make sure class attributes use 'self.'). Detail: ${msg}`;
+        pipMessage = `Pip couldn't find that name after the dot${linePart}! Check your spelling after the dot '.' (and inside a class, values you stored need 'self.'). Detail: ${msg}`;
       }
       break;
     }
 
     case 'TypeError':
       if (/missing \d+ required positional argument/.test(msg)) {
-        pipMessage = `Almost there${linePart}! You called a function without enough inputs inside '()'. Check how many parameters it expects! (${msg})`;
+        pipMessage = `Almost there${linePart}! You called a function without enough inputs inside '()'. Check how many inputs it expects! (${msg})`;
       } else if (/takes .* positional argument/.test(msg)) {
-        pipMessage = `Whoa${linePart}! You passed a different number of inputs than the function expects inside '()' (if this is a class method, remember 'self' counts as the first parameter!). Detail: ${msg}`;
+        pipMessage = `Whoa${linePart}! You passed a different number of inputs than the function expects inside '()' (if this is an action in a class, remember 'self' counts as the first input!). Detail: ${msg}`;
       } else {
-        pipMessage = `Mix-and-match alert${linePart}! You tried to combine two different kinds of things (like adding text and a number, or passing the wrong kind of argument). Detail: ${msg}`;
+        pipMessage = `Mix-and-match alert${linePart}! You tried to combine two different kinds of things (like adding text and a number, or passing in the wrong kind of value). Detail: ${msg}`;
       }
       break;
 
@@ -145,7 +145,7 @@ export function translateErrorForPip(result, showRawTracebacks = false) {
 
     case 'BootTimeoutError':
       pipMessage =
-        "Hold tight! Pip is still warming up the Python spellbook — tap Run again in a few seconds!";
+        "Hold tight! Pip is still warming up the Python spellbook. Tap Run again in a few seconds!";
       break;
 
     default:
@@ -418,7 +418,7 @@ export class PyRunner {
           stdout: '',
           stderr: '',
           errorType: 'BootTimeoutError',
-          errorMessage: 'Python is still warming up — please try again in a moment!',
+          errorMessage: 'Python is still warming up. Please try again in a moment!',
           rawTraceback: null,
         })
       );

@@ -374,7 +374,7 @@ async function handleHeroSessionExpired(snapshot) {
         onEnterHeroCode: () => openEnterHeroCodeFlow(),
       });
     } else if (!modalAlreadyOpen) {
-      showToast('Your Hero Code changed — progress backed up locally. Enter your new Hero Code!');
+      showToast('Your Hero Code changed. Progress backed up locally. Enter your new Hero Code!');
     }
   } finally {
     sessionExpiredHandling = false;
@@ -687,7 +687,7 @@ function updateHud() {
   const nextTrial = realmTrials.find((t) => !completed.has(t.id));
   let tip = 'Explore the realm! Press E or click nearby to interact.';
   if (nextTrial) {
-    tip = `Next Trial (${solvedInRealm}/${totalInRealm}): ${nextTrial.title} — follow the gold ! marker on your minimap!`;
+    tip = `Next Trial (${solvedInRealm}/${totalInRealm}): ${nextTrial.title}. Follow the gold ! marker on your minimap!`;
   } else if (realmDragon && !rescued.has(realmDragon.id)) {
     tip = `All ${totalInRealm} Trials solved! Head to ${realmDragon.name}'s Logic Vault (red dot on minimap) to rescue ${realmDragon.name}!`;
   } else if (realmDragon && rescued.has(realmDragon.id)) {
@@ -1308,7 +1308,7 @@ async function createHeroForCurrentAuth(newSavePayload) {
       badge: `Current: ${activeHeroLabel}`,
       message: `This will sign out ${activeHeroLabel} on this device so a new adventure can begin.`,
       subtext: linked
-        ? `${activeHeroLabel} is safely linked to an account — you can always generate a fresh Hero Code in the Console!`
+        ? `${activeHeroLabel} is safely linked to an account. You can always generate a fresh Hero Code in the Console!`
         : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later.`,
       confirmLabel: 'Start New Hero',
       confirmClass: 'btn-primary',
@@ -1815,9 +1815,9 @@ async function handleEntityInteractInner(entity) {
     const hasBridgeUnlock = (entity.dynamicTiles || []).some((d) => d.tileWhenUnlocked === 'bridge_wood');
     const hasGateUnlock = (entity.dynamicTiles || []).some((d) => d.tileWhenUnlocked === 'mossy_gate_open');
     const unlockNote = hasBridgeUnlock
-      ? 'The broken bridge is repaired — you can cross now!'
+      ? 'The broken bridge is repaired. You can cross now!'
       : hasGateUnlock
-        ? 'The mossy gate slid open — the path ahead is clear!'
+        ? 'The mossy gate slid open. The path ahead is clear!'
         : null;
 
     const secretsStats = getSecretsStats(save);
@@ -1932,7 +1932,7 @@ async function handleEntityInteractInner(entity) {
       if (!save.seenCutscenes.includes(postBossKey)) {
         save.seenCutscenes.push(postBossKey);
       }
-      showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
+      showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free! ${upgradeNote}`);
       maybeShowGuestCloudNudge(save);
       await refreshLiveContent();
       updateHud();
@@ -1952,7 +1952,7 @@ async function handleEntityInteractInner(entity) {
           const bitNum = realm?.number ?? save.rescuedDragons.length;
           const dragonName = realm?.dragon?.name || 'the Dragon';
           const upgradeNote = realm?.miniVisualUpgrade || 'Portal unlocked!';
-          showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free — ${upgradeNote}`);
+          showToast(`✨ Bit ${bitNum} Restored! ${dragonName} is free! ${upgradeNote}`);
           maybeShowGuestCloudNudge(save);
           await refreshLiveContent();
           updateHud();
@@ -2012,7 +2012,7 @@ async function handleEntityInteractInner(entity) {
         npc: getNpc('elder-ada'),
         spriteKey: 'elder_ada',
         eraKey,
-        message: `Chapter Complete, ${save.heroName}! You've conquered ${currentRealm?.name || 'this Realm'} and rescued ${save.rescuedDragons.length} dragons! Stay tuned for ${nextRealmName} — feel free to return to Whispering Meadow or forge more gear at Bram's Workshop!`,
+        message: `Chapter Complete, ${save.heroName}! You've conquered ${currentRealm?.name || 'this Realm'} and rescued ${save.rescuedDragons.length} dragons! Stay tuned for ${nextRealmName}. Feel free to return to Whispering Meadow or forge more gear at Bram's Workshop!`,
         extraAction: {
           label: 'Return to Whispering Meadow',
           onClick: async () => {
@@ -2162,7 +2162,7 @@ async function handleRoute(ctx) {
 
     if (!save) {
       await state.router.navigate({ name: 'title' }, { replace: true });
-      showToast('Could not load that hero save — returned to Main Title.');
+      showToast('Could not load that hero save. Returned to Main Title.');
       return;
     }
 
@@ -2282,7 +2282,7 @@ function wireControls() {
       badge: `Signed in as ${activeHeroLabel}`,
       message: `Sign out ${activeHeroLabel} on this device?`,
       subtext: linked
-        ? `${activeHeroLabel}'s cloud progress is safe and linked to an account — you can always generate a fresh Hero Code in the Console.`
+        ? `${activeHeroLabel}'s cloud progress is safe and linked to an account. You can always generate a fresh Hero Code in the Console.`
         : `Make sure you have ${activeHeroLabel}'s Hero Code written down so you can sign back in later!`,
       confirmLabel: 'Switch Hero',
       confirmClass: 'btn-sky',
@@ -2450,7 +2450,7 @@ function wireControls() {
     if (!res.ok) {
       audio.playError();
       if (res.reason === 'blocked') {
-        showToast('🧭 Path is blocked right now — try unlocking the gate or bridge first!');
+        showToast('🧭 Path is blocked right now. Try unlocking the gate or bridge first!');
       } else {
         showToast('✨ No remaining objectives in this Realm!');
       }
@@ -2784,7 +2784,7 @@ async function init() {
       onMinimapAutoPath: (ent, res) => {
         if (!res?.ok) {
           audio.playError();
-          showToast(`🧭 Can't reach ${ent.label || 'that marker'} yet — clear earlier paths first!`);
+          showToast(`🧭 Can't reach ${ent.label || 'that marker'} yet. Clear earlier paths first!`);
         } else if (res.arrived) {
           showToast(`✨ You're already next to ${ent.label || 'that marker'}!`);
         } else {
