@@ -119,7 +119,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\n",
-            "standard": "",
+            "standard": "# Define class Gem3D with x, y, z and value, plus coords() returning the three coordinates as a tuple\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Gem3D:\n    def __init__(self, x, y, z, value):\n        self.x, self.y, self.z, self.value = x, y, z, value\n    def coords(self):\n        return (self.x, self.y, self.z)\nprint(Gem3D(2, 4, 6, 10).coords())\n",
@@ -1752,7 +1752,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\n",
-            "standard": "",
+            "standard": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\n# Sort by power, highest first, into ranked -- then print the top dragon's name\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])\n",
@@ -1858,7 +1858,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\n",
-            "standard": "",
+            "standard": "# Define clamp(n, lo, hi), assert it caps 15 to 10, then print the result\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def clamp(n, lo, hi):\n    return max(lo, min(hi, n))\nassert clamp(15, 0, 10) == 10\nprint(clamp(15, 0, 10))\n",
@@ -1917,7 +1917,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\n",
-            "standard": "",
+            "standard": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\n# Sort from farthest to nearest by z into draw_order, then print the first id\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])\n",
@@ -2223,7 +2223,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\n",
-            "standard": "",
+            "standard": "# Define class Spell3D holding a pos tuple, with step(dx, dy, dz) moving it -- then start at (1, 1, 1) and step (2, 3, 4)\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Spell3D:\n    def __init__(self, pos):\n        self.pos = pos\n    def step(self, dx, dy, dz):\n        x, y, z = self.pos\n        self.pos = (x + dx, y + dy, z + dz)\n\ns = Spell3D((1, 1, 1))\ns.step(2, 3, 4)\nprint(s.pos)\n",
@@ -2256,7 +2256,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\n",
-            "standard": "",
+            "standard": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\n# Sort descending by \"p\" into leaders, then print the top name\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])\n",

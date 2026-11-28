@@ -863,6 +863,80 @@
           ]
         },
         {
+          "id": "trial-32-02-05b",
+          "trialType": "code",
+          "title": "Drop the Brackets Inside sum()",
+          "storyPrompt": "Anvilwing shows you a neat shortcut! When a one-line list builder is the only thing inside a call like `sum(...)`, you can leave out the square brackets. Python still uses the exact same words in the same order, but hands over one value at a time instead of building a full list first.",
+          "objective": "Double each weight in `ores` inside `sum(...)` without square brackets, store the result in `total`, then print `total`.",
+          "concepts": [
+            "list_comprehensions",
+            "basic_math"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "ores = [4, 6, 5]\ntotal = sum(o * 2 for o in ???)\nprint(total)\n",
+            "standard": "ores = [4, 6, 5]\n# Total the doubled ores with a bracket-less comprehension inside sum()\n",
+            "challenge": ""
+          },
+          "referenceSolution": "ores = [4, 6, 5]\ntotal = sum(o * 2 for o in ores)\nprint(total)\n",
+          "testCode": "assert total == 30, f'Expected 30, got {total!r}'\nassert OUTPUT.strip() == '30', f\"Expected \\\"30\\\", got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip points at `sum(...)`: 'Leave out the square brackets `[ ]` inside `sum(...)`. Keep the `for ... in ...` words the exact same.'",
+            "tier2_pattern": "`total = sum(<item> * <factor> for <item> in <list>)`\n`print(total)`",
+            "tier3_walkthrough": "Add:\n`total = sum(o * 2 for o in ores)`\n`print(total)`"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "gen_exp",
+            "call:sum",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "ores": [
+                  1,
+                  2
+                ]
+              },
+              "expectOutput": "6",
+              "expectVars": {
+                "total": 6
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "A One-Line Loop Without Brackets",
+            "prompt": "You already build lists with `[n * 2 for n in nums]`. When you put that straight inside a function like `sum(...)`, you can drop the square brackets: `sum(n * 2 for n in nums)`. Python works out one value at a time instead of making a whole list first.",
+            "question": "What does `sum(n * 2 for n in [1, 2, 3])` give?",
+            "codeSnippet": "print(sum(n * 2 for n in [1, 2, 3]))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[2, 4, 6]",
+                "explanation": "That is the list you get with brackets, before `sum(...)` adds the numbers into one total."
+              },
+              {
+                "id": "b",
+                "label": "12",
+                "explanation": "Spot on! It doubles 1, 2, and 3 into 2, 4, and 6, and `sum(...)` adds them to 12."
+              },
+              {
+                "id": "c",
+                "label": "6",
+                "explanation": "That is 1 + 2 + 3 without doubling. The `n * 2` at the front doubles each number first."
+              },
+              {
+                "id": "d",
+                "label": "An error, because the square brackets are required",
+                "explanation": "Square brackets are optional when the one-line loop is the only thing inside `sum(...)`."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
           "id": "trial-32-02-06",
           "trialType": "code",
           "title": "Ignite Anvilwing's Sky-Forge (Boss)",

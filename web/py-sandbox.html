@@ -207,6 +207,8 @@ def _pyria_has_single_construct(tree, token):
             return True
         elif token == "list_comp" and isinstance(node, ast.ListComp):
             return True
+        elif token == "gen_exp" and isinstance(node, ast.GeneratorExp):
+            return True
         elif token == "lambda" and isinstance(node, ast.Lambda):
             return True
         elif token == "str_concat" and (
@@ -288,6 +290,7 @@ _PYRIA_CONSTRUCT_HINTS = {
     "except": "Try adding an 'except:' block to catch the error!",
     "with": "Try using a 'with' statement!",
     "list_comp": "Try building the list using a list comprehension like '[... for x in ...]'!",
+    "gen_exp": "Try passing the comprehension straight into the call with no square brackets, like 'sum(x for x in ...)'!",
     "lambda": "Try using a short 'lambda' function!",
     "str_concat": "Try using '+' to glue the strings together!",
     "aug_assign": "Try using a shortcut operator like '+=' or '-=' to update the variable!",
