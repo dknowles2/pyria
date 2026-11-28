@@ -82,7 +82,14 @@
       "label": "Basic Math",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 5,
-      "description": "Using +, -, *, //, and % with numbers and variables."
+      "description": "Using +, -, *, /, //, **, and % with numbers and variables."
+    },
+    {
+      "id": "type_conversion",
+      "label": "Changing Types (str / int / float)",
+      "minEra": "era-01-8bit",
+      "maxBasicRealm": 4,
+      "description": "Converting between text and numbers with str(), int(), and float(), and knowing which type an operator hands back."
     },
     {
       "id": "booleans",
@@ -188,6 +195,13 @@
       "minEra": "era-02-16bit",
       "maxBasicRealm": 12,
       "description": "Mapping keys to values with curly braces {}."
+    },
+    {
+      "id": "dict_iteration",
+      "label": "Looping Over Dictionaries",
+      "minEra": "era-02-16bit",
+      "maxBasicRealm": 12,
+      "description": "Visiting a dictionary's keys, values, or key/value pairs with .keys(), .values(), and .items()."
     },
     {
       "id": "nested_loops",

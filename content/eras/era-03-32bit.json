@@ -1783,7 +1783,8 @@
           "objective": "Loop over `rooms.values()` summing each room's `gems` into the variable `total`, then print `total`.",
           "concepts": [
             "dictionaries_nested",
-            "for_loops"
+            "for_loops",
+            "dict_iteration"
           ],
           "shardReward": 65,
           "unlockId": null,
@@ -1805,6 +1806,80 @@
             "subscript",
             "call:print"
           ]
+        },
+        {
+          "id": "trial-32-05-06b",
+          "trialType": "code",
+          "title": "Loop Keys AND Values With .items()",
+          "storyPrompt": "`.values()` hands you only the room dictionaries — but the archive ledger needs each room's NAME too! `.items()` hands over BOTH on every turn as a `(key, value)` pair, which you unpack into two variables right in the `for` header, exactly like unpacking a tuple.",
+          "objective": "Loop over `rooms` with `.items()`, unpacking each pair into `name` and `room`, and print `name` followed by that room's `gems` on every turn.",
+          "concepts": [
+            "dictionaries_nested",
+            "dict_iteration",
+            "for_loops"
+          ],
+          "shardReward": 65,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\nfor name, room in rooms.???():\n    print(name, room[\"gems\"])\n",
+            "standard": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\n",
+            "challenge": ""
+          },
+          "referenceSolution": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\nfor name, room in rooms.items():\n    print(name, room[\"gems\"])\n",
+          "testCode": "_lines = [l.strip() for l in OUTPUT.strip().splitlines() if l.strip()]\nassert _lines == ['hall 12', 'vault 40'], f\"Expected ['hall 12', 'vault 40'], got {_lines!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip points to the loop header: 'Use `rooms.items()` so every turn hands you the room NAME and its dictionary together!'",
+            "tier2_pattern": "for name, room in rooms.items():\n    print(name, room[\"gems\"])",
+            "tier3_walkthrough": "Add:\nfor name, room in rooms.items():\n    print(name, room[\"gems\"])"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "for",
+            "method_call:items",
+            "subscript",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "rooms": {
+                  "crypt": {
+                    "gems": 7
+                  }
+                }
+              },
+              "expectOutput": "crypt 7"
+            }
+          ],
+          "introChoice": {
+            "title": "Keys and Values Together With .items()",
+            "prompt": "`.keys()` gives you just the keys and `.values()` just the values. `.items()` gives you BOTH at once — each turn hands over one `(key, value)` pair, and you unpack it into two variables right in the `for` header, the same way you unpack a tuple.",
+            "question": "What does this loop print?",
+            "codeSnippet": "gems = {\"ruby\": 4, \"opal\": 6}\nfor name, count in gems.items():\n    print(name, count)",
+            "choices": [
+              {
+                "id": "a",
+                "label": "ruby then opal",
+                "explanation": "That is what `.keys()` would hand over. `.items()` brings the value along too."
+              },
+              {
+                "id": "b",
+                "label": "4 then 6",
+                "explanation": "That is what `.values()` would hand over. `.items()` brings the key along too."
+              },
+              {
+                "id": "c",
+                "label": "ruby 4 then opal 6",
+                "explanation": "Spot on! Each turn unpacks one pair, so `name` holds the key and `count` holds its value — printed together on one line."
+              },
+              {
+                "id": "d",
+                "label": "An error — a for loop cannot unpack two variables",
+                "explanation": "A `(key, value)` pair IS a tuple, so unpacking it in the `for` header works perfectly."
+              }
+            ],
+            "correctChoiceId": "c"
+          }
         },
         {
           "id": "trial-32-05-07",
@@ -2061,7 +2136,8 @@
           "storyPrompt": "Practice catching `ValueError`! Try converting `raw = \"bad\"` with `int(raw)` into `val`; in `except ValueError:`, set `val = 0`. Print `val` afterward.",
           "objective": "Using `try` / `except ValueError`, try setting `val` to `int(raw)` or fall back to `val = 0`, then print `val`.",
           "concepts": [
-            "error_handling"
+            "error_handling",
+            "type_conversion"
           ],
           "shardReward": 60,
           "unlockId": null,

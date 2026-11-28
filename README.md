@@ -16,7 +16,7 @@
 
 ---
 
-## The 4 Playable Eras & 36 Realms (`307 Trials`)
+## The 4 Playable Eras & 36 Realms (`310 Trials`)
 
 Every single Realm follows a **slow-growth scaffolded cadence** so new concepts never feel like a cliff:
 1. **Multiple Choice (`Predict & Choose`)** — Read real Python and predict the output or spot valid syntax first.
@@ -26,7 +26,7 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 
 ---
 
-### Era 1: The 8-Bit Era — *The Flatlands of Pixels* (NES · 8 Realms · 56 Trials)
+### Era 1: The 8-Bit Era — *The Flatlands of Pixels* (NES · 8 Realms · 83 Trials)
 *Early Realms 1–3 use friendly `say()` and `shout()` training spells before graduating to real `print()` in Realm 4. Rescuing all 8 Dragons restores all 8 Bits and upgrades Pyria to 16-Bit SNES!*
 
 | # | Realm | Dragon Guardian | Python Focus | Mini World Upgrade |
@@ -36,7 +36,7 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 | **3** | **Cinder Cavern** | **Emberwing** *(Fire)* | Booleans, `:` colons, 4-space indentation, `=` vs `==`, `if` / `else` | Flickering torchlight & rising embers |
 | **4** | **Frostbite Hollow** | **Glacier** *(Ice)* | Graduating to `print()`, `if` / `elif` / `else` branching | Falling pixel snowflakes & ice highlights |
 | **5** | **Echo Woods** | **Bramble** *(Forest)* | Logical operators (`and`, `or`, `not`) & string methods (`.strip()`, `.upper()`) | Swaying forest canopy & glowing wisps |
-| **6** | **Sunken Crypt** | **Mire** *(Water)* | Multi-branch conditionals, math & string cleanup combined | Rippling water & misty crypt spores |
+| **6** | **Sunken Crypt** | **Mire** *(Water)* | Multi-branch conditionals, math & string cleanup combined, `str()` to glue text onto numbers | Rippling water & misty crypt spores |
 | **7** | **Obsidian Keep** | **Gale** *(Wind)* | `for` loops & `range()` | Drifting sky-clouds & wind trails |
 | **8** | **Null's Pixel Citadel** | **Nova** *(Starlight)* | 8-Bit Era Capstone (loops + conditionals + modulo `%` + strings) | **All 8 Bits Restored → Upgrades to 16-Bit SNES!** |
 
@@ -44,19 +44,19 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 
 ---
 
-### Era 2: The 16-Bit Era — *The Sunken Isles & Beyond* (SNES · 4 Acts · 16 Realms · 112 Trials)
+### Era 2: The 16-Bit Era — *The Sunken Isles & Beyond* (SNES · 4 Acts · 16 Realms · 128 Trials)
 *Organized into 4 themed Acts of 4 Realms each, with lush 16-bit SNES pixel art and multi-voice synth music:*
 
 | Act | Realms (1–16) | Dragons | Python Focus |
 | :--- | :--- | :--- | :--- |
-| **Act I — Tideglass Archipelago** | 1. Coral Shallows · 2. Driftwood Market · 3. Pearl Grotto · 4. Maelstrom Lighthouse | Ripple, Gullwing, Nacre, Tempest | Lists (`[...]`), zero-based & negative indexing, `.append()`, `len()`/`max()`/`min()`/`sum()`, slicing, `for` over lists & filtering |
+| **Act I — Tideglass Archipelago** | 1. Coral Shallows · 2. Driftwood Market · 3. Pearl Grotto · 4. Maelstrom Lighthouse | Ripple, Gullwing, Nacre, Tempest | Lists (`[...]`), zero-based & negative indexing, `.append()`, `len()`/`max()`/`min()`/`sum()`, `/` division & floats, slicing, `for` over lists & filtering |
 | **Act II — Clockwork Spire** | 5. Brass Courtyard · 6. Pendulum Halls · 7. Steam Foundry · 8. Grand Chronometer | Sprocket, Tock, Piston, Aether | `while` loops, `break` & `continue`, defining functions (`def`), parameters, default arguments & `return` |
-| **Act III — Alchemist's Caldera** | 9. Sulfur Terrace · 10. Crystal Alembic · 11. Potion Vault · 12. Magma Core | Cinderel, Prism, Elixir, Crucible | Dictionaries (`{...}`), `.get()`, `.items()`, f-strings (`f"{...}"`), lists of dictionaries & frequency counting |
+| **Act III — Alchemist's Caldera** | 9. Sulfur Terrace · 10. Crystal Alembic · 11. Potion Vault · 12. Magma Core | Cinderel, Prism, Elixir, Crucible | Dictionaries (`{...}`), `.get()`, `.values()`, f-strings (`f"{...}"`), lists of dictionaries & frequency counting |
 | **Act IV — Shattered Skyway** | 13. Cloud Dock · 14. Starlight Bridge · 15. Storm Bastion · 16. Null's 16-Bit Throne | Nimbus, Comet, Fulmin, Zenith | Nested loops & 2D grids, intro Classes (`class`, `__init__`, `self`, methods), object lists & **16-Bit Finale → Upgrades to 32-Bit Isometric!** |
 
 ---
 
-### Era 3: The 32-Bit Era — *The Isometric Frontier* (PS1 / GBA 2.5D · 6 Realms · 50 Trials)
+### Era 3: The 32-Bit Era — *The Isometric Frontier* (PS1 / GBA 2.5D · 6 Realms · 51 Trials)
 *Pyria tilts into an **Isometric 2.5D Diorama** with elevated terrain terraces (`elevation` heightmaps), extruded 3D stone blocks, and crystalline 32-bit synth music:*
 
 | # | Realm | Dragon Guardian | Python Focus |
@@ -64,7 +64,9 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 | **1** | **Blockstone Highlands** | **Terracrest** *(Earth)* | Tuples `(x, y, z)`, tuple unpacking, 3D elevation math |
 | **2** | **Sky-Forge Foundry** | **Anvilwing** *(Fire)* | List comprehensions (`[x * 2 for x in ... if ...]`) & 2D/3D coordinate grids |
 | **3** | **Prism Caverns** | **Lumina** *(Light)* | Sets (`set()`, `&` intersection, `|` union) & nested dictionary maps |
-| **4** | **Null's Polygon Citadel** | **Vortex** *(Gravity)* | Error handling (`try` / `except`), safe parsers, 3D distance & **32-Bit Finale → Upgrades to 64-Bit N64 3D!** |
+| **4** | **The Crystal Archives** | **Chronis** *(Crystal)* | Nested dictionaries (`rooms["hall"]["gems"]`), updating & adding inner keys, `.values()` / `.items()` loops |
+| **5** | **Shieldwall Bastion** | **Aegis** *(Prism)* | Error shields: `try` / `except ValueError` / `KeyError` / `ZeroDivisionError` with safe fallbacks |
+| **6** | **Null's Polygon Citadel** | **Vortex** *(Gravity)* | Error handling (`try` / `except`), safe parsers, 3D distance & **32-Bit Finale → Upgrades to 64-Bit N64 3D!** |
 
 | Blockstone Highlands | Sky-Forge Foundry | Prism Caverns | Null's Polygon Citadel |
 | :---: | :---: | :---: | :---: |
@@ -79,8 +81,10 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 | :-: | :--- | :--- | :--- |
 | **1** | **Polygon Valley** | **Polywing** *(Sky)* | 3D Entity Classes (`class Hero3D`, `__str__`, camera & movement methods) |
 | **2** | **Gouraud Courtyard** | **Vertex** *(Stone)* | Class Inheritance (`class Sub(Parent):`), `super().__init__()`, method overrides & polymorphism |
-| **3** | **Star-Mesh Observatory** | **Quasar** *(Starlight)* | Debugging off-by-one bugs, `assert` self-tests, `sorted(..., key=lambda ...)` Painter's Algorithm |
-| **4** | **Null's 64-Bit Sanctum** | **Aurelion** *(Crown)* | **Grand 64-Bit Boss Gauntlet** combining Classes, 3D Paths, Sorting & Error Shields to claim the **64-Bit Crown!** |
+| **3** | **Poly-Forge Arena** | **Vector** *(Light)* | Object composition (a `Scene` holding entities), polymorphic `.tick()` / `.draw()` loops & 3D volume methods |
+| **4** | **Clockwork Testing Lab** | **Verify** *(Lightning)* | `assert` self-tests, off-by-one bugs, empty-list edge cases & clamping |
+| **5** | **Star-Mesh Observatory** | **Quasar** *(Starlight)* | Debugging off-by-one bugs, `assert` self-tests, `sorted(..., key=lambda ...)` Painter's Algorithm |
+| **6** | **Null's 64-Bit Sanctum** | **Aurelion** *(Crown)* | **Grand 64-Bit Boss Gauntlet** combining Classes, 3D Paths, Sorting & Error Shields to claim the **64-Bit Crown!** |
 
 ---
 
@@ -181,7 +185,7 @@ Pushing to `main` automatically runs tests, bundles static assets, and deploys v
 Pyria tracks privacy-safe per-trial telemetry (`difficultyMode`, `isPractice`, normalized `errorType`, and elapsed `durationMs`) and rolls up daily aggregates into `trial_stats_daily` so calibration history survives attempt pruning.
 
 - **Trial Calibration Dashboard** (`/builder` locally, and Admin `/console` in Cloudflare production; strictly hidden for non-admin parents):
-  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 307 trials.
+  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 310 trials.
   - Filter by **Era**, **Realm**, **Trial Type**, **Difficulty** (`explorer` / `standard` / `challenge`), **Time Window** (`7d` / `30d` / `90d` / `all`), optional **Since** date (`YYYY-MM-DD`), **Flag status**, and **Include Practice Replays**, or click **Export CSV** (`format=csv`).
   - Click any trial row to open the **Drill-Down Modal** showing hint-tier breakdown (`tier0`–`tier3`), top failure error types / wrong multiple-choice options, daily trend with a **Before vs. After** cutoff date check, and (in local `/builder`) a direct **Edit Trial** jump into **Story & Trials**.
 - **CLI Calibration Report** (`scripts/calibration_report.py`):
