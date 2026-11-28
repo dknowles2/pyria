@@ -4000,7 +4000,7 @@
           "trialType": "multiple_choice",
           "title": "Meet Python Dictionaries {}!",
           "storyPrompt": "Welcome to Act III: Alchemist's Caldera! A **dictionary** (`dict` for short) is a collection of labeled `key: value` pairs inside curly braces `{\"name\": \"Cinderel\", \"power\": 50}`—like a lookup table where you grab a value by its label (key) instead of a position number! What will `print(potion[\"power\"])` output?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(potion[\"power\"])` displays for `{\"name\": \"Ember\", \"power\": 50}`.",
           "concepts": [
             "dictionaries"
           ],
@@ -4031,9 +4031,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip reads the label on the flask: 'A dictionary looks things up by their KEY, not by a slot number — so which key is being asked for here?'",
+            "tier2_pattern": "A dictionary lookup hands back the VALUE filed under that key, never the key itself.",
+            "tier3_walkthrough": "Tap Option A (`50`) — `potion[\"power\"]` returns the value stored under `\"power\"`."
           },
           "difficultyOverride": null
         },
@@ -4057,8 +4057,8 @@
           "referenceSolution": "herbs = {\"fire\": 10, \"ash\": 5}\nprint(herbs[\"fire\"])\n",
           "testCode": "assert herbs[\"fire\"] == 10 and OUTPUT.strip() == \"10\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "herbs = ___\nprint(___)",
+            "tier1_nudge": "Pip peers between the braces: 'Inside a dictionary, a key and its value are joined by a colon `:`, not by an equals sign.'",
+            "tier2_pattern": "<dict> = {\"<key>\": <value>, \"<key>\": <value>}\nprint(<dict>[\"<key>\"])",
             "tier3_walkthrough": "Update the code to:\nherbs = {\"fire\": 10, \"ash\": 5}\nprint(herbs[\"fire\"])"
           },
           "difficultyOverride": null,
@@ -4096,8 +4096,8 @@
           "referenceSolution": "potion = {\"fire\": 10}\nprint(potion[\"fire\"])\n",
           "testCode": "assert potion == {'fire': 10}\nassert OUTPUT.strip() == '10', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at `{}`: 'Use curly braces `{\"fire\": 10}` with a colon `:` between key and value!'",
-            "tier2_pattern": "potion = {\"fire\": 10}\nprint(potion[\"fire\"])",
+            "tier1_nudge": "Pip points at the curly braces: 'A dictionary lives inside `{ }`, with a colon between each key and the value it stores.'",
+            "tier2_pattern": "potion = {\"<key>\": <value>}\nprint(potion[\"<key>\"])",
             "tier3_walkthrough": "Write:\npotion = {\"fire\": 10}\nprint(potion[\"fire\"])"
           },
           "difficultyOverride": null,
@@ -4120,14 +4120,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\n",
-            "standard": "",
+            "standard": "vial = {\"heat\": 20}\n# Add a \"glow\" key worth 15, then print it\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "vial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])\n",
           "testCode": "assert vial[\"glow\"] == 15 and OUTPUT.strip() == \"15\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "vial = ___\nvial[\"glow\"] = ___\nprint(___)",
+            "tier1_nudge": "Pip adds a new compartment: 'Assigning to a key that does not exist yet CREATES it — the same square brackets you use for a lookup.'",
+            "tier2_pattern": "<dict>[\"<new_key>\"] = <value>\nprint(<dict>[\"<new_key>\"])",
             "tier3_walkthrough": "Write:\nvial = {\"heat\": 20}\nvial[\"glow\"] = 15\nprint(vial[\"glow\"])"
           },
           "difficultyOverride": null,
@@ -4200,8 +4200,8 @@
           "referenceSolution": "stock = {\"sulfur\": 4}\nif \"sulfur\" in stock:\n    stock[\"sulfur\"] += 6\nprint(stock[\"sulfur\"])\n",
           "testCode": "assert stock[\"sulfur\"] == 10 and OUTPUT.strip() == \"10\"",
           "hints": {
-            "tier1_nudge": "Use `if \"sulfur\" in stock:` and update the entry with `stock[\"sulfur\"] += 6`.",
-            "tier2_pattern": "if ___ in stock:\n    stock[___] += ___\nprint(stock[\"sulfur\"])",
+            "tier1_nudge": "Pip checks the shelf before reaching: 'Use `in` to confirm the key is really there, then `+=` to raise the value already stored under it.'",
+            "tier2_pattern": "if \"<key>\" in <dict>:\n    <dict>[\"<key>\"] += <amount>\nprint(<dict>[\"<key>\"])",
             "tier3_walkthrough": "Write `if \"sulfur\" in stock:` with indented `stock[\"sulfur\"] += 6`, then `print(stock[\"sulfur\"])`."
           },
           "difficultyOverride": null,
@@ -4248,8 +4248,8 @@
           "referenceSolution": "bag = {\"fire\": 9}\ndef lookup_herb(bag, name):\n    return bag.get(name, 0)\n\nval = lookup_herb(bag, \"ice\")\nprint(val)\n",
           "testCode": "assert lookup_herb({\"fire\": 9}, \"fire\") == 9 and lookup_herb({\"fire\": 9}, \"ice\") == 0 and val == 0 and OUTPUT.strip() == \"0\"",
           "hints": {
-            "tier1_nudge": "Inside `lookup_herb(bag, name)`, return `bag.get(name, 0)`.",
-            "tier2_pattern": "def lookup_herb(bag, name):\n    return bag.get(___, ___)\n\nval = lookup_herb(bag, ___)",
+            "tier1_nudge": "Pip reaches for a jar that is not there: '`.get()` takes the key first and a fallback second, so a missing key hands back the fallback instead of crashing.'",
+            "tier2_pattern": "def lookup_herb(<bag>, <name>):\n    return <bag>.get(<name>, <fallback>)\n\nval = lookup_herb(bag, \"<key>\")\nprint(val)",
             "tier3_walkthrough": "Define `def lookup_herb(bag, name): return bag.get(name, 0)`, then set `val = lookup_herb(bag, \"ice\")` and `print(val)`."
           },
           "difficultyOverride": null,
@@ -4308,8 +4308,8 @@
           "referenceSolution": "tonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    print(\"CINDEREL FREE!\")\n",
           "testCode": "assert total == 50, f\"Expected total == 50, got {total!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'CINDEREL FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Cinderel!'",
-            "tier2_pattern": "tonic = ___\ntotal = ___\nif ___:\n    print(___)",
+            "tier1_nudge": "Pip stirs the tonic: 'Look up both ingredient keys and add them together, then test the total with one `if` at 0 spaces.'",
+            "tier2_pattern": "total = <dict>[\"<key>\"] + <dict>[\"<key>\"]\nif total == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\ntonic = {\"ember\": 30, \"ash\": 20}\ntotal = tonic[\"ember\"] + tonic[\"ash\"]\nif total == 50:\n    print(\"CINDEREL FREE!\")"
           },
           "difficultyOverride": null,
@@ -4380,9 +4380,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip rattles the lids: 'Used on a dictionary, `in` searches the KEYS — and answers with a yes/no value.'",
+            "tier2_pattern": "`in` checks the dictionary's keys and hands back a Boolean, not the value stored there.",
+            "tier3_walkthrough": "Tap Option A (`True`) — `\"ash\"` is one of the keys, so `in` answers `True`."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -4475,7 +4475,7 @@
           "trialType": "multiple_choice",
           "title": "Magic f-Strings!",
           "storyPrompt": "Put `f` before quotes (`f\"Hello, {name}!\"`) to drop variables right into text — no more gluing pieces together with `+` and `str(...)`! What will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(f\"{dragon} fires {beams} beams!\")` displays when `dragon` is `\"Prism\"` and `beams` is 3.",
           "concepts": [
             "f_strings"
           ],
@@ -4506,9 +4506,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip points at the little `f`: 'That `f` in front of the quote is what makes Python swap each `{...}` for the value inside it.'",
+            "tier2_pattern": "Everything outside the braces stays exactly as typed; each `{name}` is replaced by that variable's value.",
+            "tier3_walkthrough": "Tap Option A (`Prism fires 3 beams!`) — `{dragon}` becomes `Prism`, `{beams}` becomes `3`, and the surrounding text is unchanged."
           },
           "difficultyOverride": null
         },
@@ -4532,8 +4532,8 @@
           "referenceSolution": "power = 42\nprint(f\"Crystal power: {power}\")\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Crystal power: 42'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in output ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "power = ___\nprint(___)",
+            "tier1_nudge": "Pip squints at the opening quote: 'Without the `f` in front, Python treats the braces as ordinary text instead of swapping in the value.'",
+            "tier2_pattern": "print(f\"<text> {<variable>}\")",
             "tier3_walkthrough": "Update the code to:\npower = 42\nprint(f\"Crystal power: {power}\")"
           },
           "difficultyOverride": null,
@@ -4568,8 +4568,8 @@
           "referenceSolution": "gem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = label\n_exp = 'Ruby Lv.5'\nassert isinstance(_val, str), f\"Expected label to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in label ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Ruby Lv.5'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in output ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "gem = ___\nrank = ___\nlabel = ___\nprint(___)",
+            "tier1_nudge": "Pip arranges the label: 'Put the `f` before the quote, then drop each variable into its own pair of braces with the plain text around them.'",
+            "tier2_pattern": "label = f\"{<variable>} <text>{<variable>}\"\nprint(label)",
             "tier3_walkthrough": "Write:\ngem = \"Ruby\"\nrank = 5\nlabel = f\"{gem} Lv.{rank}\"\nprint(label)"
           },
           "difficultyOverride": null,
@@ -4608,8 +4608,8 @@
           "referenceSolution": "hero = \"Pip\"\nhp = 50\nstatus = f\"{hero}: {hp}\"\nprint(status)\n",
           "testCode": "assert status == 'Pip: 50'\nassert OUTPUT.strip() == 'Pip: 50', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Write `status = f\"{hero}: {hp}\"` and then `print(status)`!'",
-            "tier2_pattern": "status = f\"{hero}: {hp}\"\nprint(status)",
+            "tier1_nudge": "Pip chirps: 'One f-string can hold both variables — the text between the braces is typed exactly as you want it to appear.'",
+            "tier2_pattern": "status = f\"{<variable>}: {<variable>}\"\nprint(status)",
             "tier3_walkthrough": "Add:\nstatus = f\"{hero}: {hp}\"\nprint(status)"
           },
           "difficultyOverride": null,
@@ -4652,7 +4652,7 @@
           "testCode": "assert total == sum(gems.values()) and OUTPUT.strip() == str(sum(gems.values()))",
           "hints": {
             "tier1_nudge": "Calling `gems.values()` gives the numbers in the dictionary so `sum(...)` can add them.",
-            "tier2_pattern": "total = sum(___.values())\nprint(total)",
+            "tier2_pattern": "total = sum(<dict>.values())\nprint(total)",
             "tier3_walkthrough": "Write `total = sum(gems.values())` and then `print(total)`."
           },
           "difficultyOverride": null,
@@ -4728,7 +4728,7 @@
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = format_item({\"name\": \"Ash\", \"qty\": 7})\n_exp = 'Ash: 7'\nassert isinstance(_val, str), f\"Expected format_item({'name': 'Ash', 'qty': 7}) to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in format_item({'name': 'Ash', 'qty': 7}) ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = f\"{item['name']}: {item['qty']}\"\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in output ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "Use an f-string inside `format_item(item)` with single quotes inside double quotes for the dictionary keys.",
-            "tier2_pattern": "def format_item(item):\n    return f\"{___}: {___}\"\n\nprint(format_item(item))",
+            "tier2_pattern": "def format_item(<item>):\n    return f\"{<item>['<key>']}: {<item>['<key>']}\"\n\nprint(format_item(item))",
             "tier3_walkthrough": "Return `f\"{item['name']}: {item['qty']}\"` inside `format_item(item)`, then `print(format_item(item))`."
           },
           "difficultyOverride": null,
@@ -4759,8 +4759,8 @@
           "referenceSolution": "colors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\nprint(f\"PRISM {light}!\")\n",
           "testCode": "assert light == 100, f\"Expected light == 100, got {light!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'PRISM 100!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in output ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Prism!'",
-            "tier2_pattern": "colors = ___\nlight = ___\nprint(___)",
+            "tier1_nudge": "Pip focuses the beam: 'Total the dictionary's values first, then announce that total with a single f-string.'",
+            "tier2_pattern": "light = sum(<dict>.values())\nprint(f\"<text> {light}!\")",
             "tier3_walkthrough": "Write:\ncolors = {\"red\": 20, \"blue\": 30, \"gold\": 50}\nlight = sum(colors.values())\nprint(f\"PRISM {light}!\")"
           },
           "difficultyOverride": null,
@@ -4821,9 +4821,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip does sums inside the braces: 'Only what sits INSIDE `{...}` gets worked out — the text outside is printed exactly as typed.'",
+            "tier2_pattern": "The part before the braces is plain text; the part inside the braces is calculated.",
+            "tier3_walkthrough": "Tap Option A (`2+3=5`) — the text prints as-is and `{2+3}` is worked out to 5."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -4915,7 +4915,7 @@
           "trialType": "multiple_choice",
           "title": "List of Dictionaries!",
           "storyPrompt": "Games store inventories as a **list of dictionaries**! What does `potions[1][\"hp\"]` grab?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(potions[1][\"hp\"])` displays for a list of two potion dictionaries.",
           "concepts": [
             "dictionaries"
           ],
@@ -4946,9 +4946,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip opens the second flask: 'Read it left to right — the first brackets pick an item out of the LIST, and the second look up a key inside THAT dictionary.'",
+            "tier2_pattern": "The first brackets select a dictionary from the list (counting from 0); the second look up a key inside it.",
+            "tier3_walkthrough": "Tap Option A (`25`) — `potions[1]` is the second dictionary, and its `\"hp\"` key holds 25."
           },
           "difficultyOverride": null
         },
@@ -4972,8 +4972,8 @@
           "referenceSolution": "potions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[1][\"hp\"])\n",
           "testCode": "assert OUTPUT.strip() == \"25\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "potions = ___\nprint(___)",
+            "tier1_nudge": "Pip counts the flasks again: 'The list holds two potions, so the largest valid index is one less than that — the lookup is running off the end.'",
+            "tier2_pattern": "print(<list>[<valid_index>][\"<key>\"])",
             "tier3_walkthrough": "Update the code to:\npotions = [{\"hp\": 10}, {\"hp\": 25}]\nprint(potions[1][\"hp\"])"
           },
           "difficultyOverride": null,
@@ -5015,8 +5015,8 @@
           "referenceSolution": "potions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)\n",
           "testCode": "assert total_hp == 45 and OUTPUT.strip() == \"45\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "potions = ___\ntotal_hp = ___\nfor ___ in ___:\n    total_hp = ___\nprint(___)",
+            "tier1_nudge": "Pip pours each flask in turn: 'The loop variable holds one whole dictionary on every turn, so do the key lookup inside the loop.'",
+            "tier2_pattern": "for <potion> in <list>:\n    total_hp = total_hp + <potion>[\"<key>\"]\nprint(total_hp)",
             "tier3_walkthrough": "Write:\npotions = [{\"hp\": 10}, {\"hp\": 20}, {\"hp\": 15}]\ntotal_hp = 0\nfor p in potions:\n    total_hp = total_hp + p[\"hp\"]\nprint(total_hp)"
           },
           "difficultyOverride": null,
@@ -5062,8 +5062,8 @@
           "referenceSolution": "brews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)\n",
           "testCode": "assert best == 35 and OUTPUT.strip() == \"35\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "brews = ___\nbest = ___\nfor ___ in ___:\n    if ___:\n        best = ___\nprint(___)",
+            "tier1_nudge": "Pip holds the strongest flask aloft: 'Keep the best value found so far, and replace it only on the turns where this brew beats it.'",
+            "tier2_pattern": "for <brew> in <list>:\n    if <brew>[\"<key>\"] > best:\n        best = <brew>[\"<key>\"]\nprint(best)",
             "tier3_walkthrough": "Write:\nbrews = [{\"hp\": 12}, {\"hp\": 35}, {\"hp\": 20}]\nbest = 0\nfor b in brews:\n    if b[\"hp\"] > best:\n        best = b[\"hp\"]\nprint(best)"
           },
           "difficultyOverride": null,
@@ -5113,7 +5113,7 @@
           "testCode": "assert count_rare([{\"rare\": True}]) == 1 and count_rare([{\"rare\": False}]) == 0 and rares == sum(1 for i in shelf if i[\"rare\"]) and OUTPUT.strip() == str(rares)",
           "hints": {
             "tier1_nudge": "Start a counter at 0 inside `count_rare(shelf)`, loop over `shelf`, increment when `item[\"rare\"]` is True, and `return` the count.",
-            "tier2_pattern": "def count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[___]:\n            total += 1\n    return total",
+            "tier2_pattern": "def count_rare(<shelf>):\n    total = 0\n    for <item> in <shelf>:\n        if <item>[\"<key>\"]:\n            total += 1\n    return total",
             "tier3_walkthrough": "Loop over `shelf`, add 1 to `total` whenever `item[\"rare\"]` is True, `return total`, then set `rares = count_rare(shelf)` and `print(rares)`."
           },
           "difficultyOverride": null,
@@ -5145,8 +5145,8 @@
           "referenceSolution": "vials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    print(\"ELIXIR FREE!\")\n",
           "testCode": "assert total_ml == 60, f\"Expected total_ml == 60, got {total_ml!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'ELIXIR FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Elixir!'",
-            "tier2_pattern": "vials = ___\ntotal_ml = ___\nfor ___ in ___:\n    total_ml = ___\nif ___:\n    print(___)",
+            "tier1_nudge": "Pip seals the vault: 'Sum one key out of every dictionary in the list, then check the total with an `if` AFTER the loop at 0 spaces.'",
+            "tier2_pattern": "total_ml = 0\nfor <vial> in <list>:\n    total_ml = total_ml + <vial>[\"<key>\"]\nif total_ml == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nvials = [{\"name\": \"A\", \"ml\": 25}, {\"name\": \"B\", \"ml\": 35}]\ntotal_ml = 0\nfor v in vials:\n    total_ml = total_ml + v[\"ml\"]\nif total_ml == 60:\n    print(\"ELIXIR FREE!\")"
           },
           "difficultyOverride": null,
@@ -5226,9 +5226,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip counts the containers, not what is inside them: '`len()` on a list counts its ITEMS — here each item happens to be a dictionary.'",
+            "tier2_pattern": "`len()` counts the items in the outer list; what is stored inside each one does not change the count.",
+            "tier3_walkthrough": "Tap Option A (`3`) — the list holds three dictionaries, so `len()` is 3."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -5320,7 +5320,7 @@
           "trialType": "multiple_choice",
           "title": "Functions + Dictionaries!",
           "storyPrompt": "You can pass a dictionary straight into a function! What does `score(hero)` return?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(score({\"atk\": 12, \"def\": 8}))` displays.",
           "concepts": [
             "functions_return",
             "dictionaries"
@@ -5352,9 +5352,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip feeds the whole dictionary into the spell: 'Inside the function, the parameter IS that dictionary, so each lookup pulls a value out of it.'",
+            "tier2_pattern": "The function looks up both keys and returns their sum, so work out each lookup first.",
+            "tier3_walkthrough": "Tap Option A (`20`) — `d[\"atk\"]` is 12, `d[\"def\"]` is 8, and the function returns their sum."
           },
           "difficultyOverride": null
         },
@@ -5379,8 +5379,8 @@
           "referenceSolution": "core = {\"temp\": 900}\nprint(core[\"temp\"])\n",
           "testCode": "assert OUTPUT.strip() == \"900\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "core = ___\nprint(___)",
+            "tier1_nudge": "Pip compares the two spellings: 'The dictionary stores only one key — the lookup is asking for a name that was never filed.'",
+            "tier2_pattern": "print(<dict>[\"<key that exists>\"])",
             "tier3_walkthrough": "Update the code to:\ncore = {\"temp\": 900}\nprint(core[\"temp\"])"
           },
           "difficultyOverride": null,
@@ -5412,14 +5412,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def brew_power(r):\n    return r[\"fire\"] * 2\n",
-            "standard": "",
+            "standard": "# Define brew_power(r) to return the \"fire\" value doubled, then print it for {\"fire\": 25}\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))\n",
           "testCode": "assert brew_power({\"fire\": 25}) == 50 and brew_power({\"fire\": 7}) == 14 and OUTPUT.strip() == \"50\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "def brew_power(___):\n    return ___\nprint(___)",
+            "tier1_nudge": "Pip doubles the fire: 'The parameter arrives as a whole dictionary, so look up its key inside the function and return the doubled value.'",
+            "tier2_pattern": "def brew_power(<recipe>):\n    return <recipe>[\"<key>\"] * <factor>\n\nprint(brew_power({\"<key>\": <value>}))",
             "tier3_walkthrough": "Write:\ndef brew_power(r):\n    return r[\"fire\"] * 2\nprint(brew_power({\"fire\": 25}))"
           },
           "difficultyOverride": null,
@@ -5449,8 +5449,8 @@
           "referenceSolution": "ore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])\n",
           "testCode": "assert counts[\"gold\"] == 2 and counts[\"iron\"] == 1 and OUTPUT.strip() == \"2\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "ore = ___\ncounts = ___\nfor ___ in ___:\n    counts[x] = ___\nprint(___)",
+            "tier1_nudge": "Pip tallies the ore: 'On each turn, read the count so far with a fallback of zero, add one, and store it straight back under that same key.'",
+            "tier2_pattern": "for <item> in <list>:\n    counts[<item>] = counts.get(<item>, <fallback>) + 1\nprint(counts[\"<key>\"])",
             "tier3_walkthrough": "Write:\nore = [\"gold\", \"iron\", \"gold\"]\ncounts = {}\nfor x in ore:\n    counts[x] = counts.get(x, 0) + 1\nprint(counts[\"gold\"])"
           },
           "difficultyOverride": null,
@@ -5522,8 +5522,8 @@
           "referenceSolution": "a = {\"x\": 1}\nb = {\"y\": 2}\nc = dict(a)\nc.update(b)\nprint(len(c.keys()))\n",
           "testCode": "assert c == {\"x\": 1, \"y\": 2} and OUTPUT.strip() == \"2\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "a = ___\nb = ___\nc = ___\n___\nprint(___)",
+            "tier1_nudge": "Pip pours one flask into another: '`dict(...)` makes a fresh copy so the original is left untouched, then `.update(...)` tips the second dictionary's pairs into that copy.'",
+            "tier2_pattern": "c = dict(<first>)\nc.update(<second>)\nprint(len(c.keys()))",
             "tier3_walkthrough": "Copy `a` with `c = dict(a)`, merge `b` with `c.update(b)`, and print `len(c.keys())`."
           },
           "difficultyOverride": null,
@@ -5597,8 +5597,8 @@
           "referenceSolution": "def core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = core_status({\"temp\": 300})\n_exp = 'SAFE'\nassert isinstance(_val, str), f\"Expected core_status({'temp': 300}) to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = core_status({\"temp\": 600})\n_exp = 'HOT'\nassert isinstance(_val, str), f\"Expected core_status({'temp': 600}) to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'SAFE'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Crucible!'",
-            "tier2_pattern": "def core_status(___):\n    if ___:\n        return ___\n    return ___\nprint(___)",
+            "tier1_nudge": "Pip reads the core gauge: 'Return one label when the temperature is below the limit; a plain `return` after the `if` covers every other case.'",
+            "tier2_pattern": "def core_status(<core>):\n    if <core>[\"<key>\"] < <limit>:\n        return \"<safe_label>\"\n    return \"<hot_label>\"\n\nprint(core_status({\"<key>\": <value>}))",
             "tier3_walkthrough": "Write:\ndef core_status(d):\n    if d[\"temp\"] < 500:\n        return \"SAFE\"\n    return \"HOT\"\nprint(core_status({\"temp\": 300}))"
           },
           "difficultyOverride": null,
@@ -5646,9 +5646,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip lifts the lids off: '`.keys()` hands over the labels on the compartments, and `list(...)` lays them out in order.'",
+            "tier2_pattern": "`.keys()` gives the key names; `.values()` would give what is stored under them.",
+            "tier3_walkthrough": "Tap Option A (`['a', 'b']`) — `.keys()` gives the key names, and `list(...)` collects them into a list."
           },
           "difficultyOverride": null,
           "isBonus": true,
