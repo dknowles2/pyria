@@ -242,7 +242,7 @@
       "minSolvedTrials": 6,
       "shardEstimate": 25,
       "description": "Use a `for` loop to forge 5 stackable Rune Arrows (5 Shards each = 25 Shards).",
-      "starterCode": "# Forge 5 Rune Arrows using a for loop!\nfor i in range(5):\n    forge_arrows(1)\n"
+      "starterCode": "# Forge 5 Rune Arrows using a for loop: one arrow for each letter!\nfor letter in \"ARROW\":\n    forge_arrows(1)\n"
     },
     {
       "id": "recipe-if-budget",
@@ -301,10 +301,10 @@
       "concept": "For Loops",
       "realmHint": "Era 1–2 Review",
       "shardReward": 20,
-      "prompt": "Use a `for` loop with `range(1, 5)` to print `\"Hammer 1\"` through `\"Hammer 4\"` on separate lines.",
-      "starterCode": "# Use a for loop to print Hammer 1 through Hammer 4\n",
+      "prompt": "Use a `for` loop over the word `\"BRAM\"` to print each letter with `\"!\"` glued on the end, one per line.",
+      "starterCode": "# Use a for loop to print B!, R!, A!, and M! on separate lines\n",
       "requiredConstructs": ["for"],
-      "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['Hammer 1', 'Hammer 2', 'Hammer 3', 'Hammer 4'], f'Got {lines!r}'\n"
+      "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['B!', 'R!', 'A!', 'M!'], f'Got {lines!r}'\n"
     },
     {
       "id": "ws-chal-loadout-fn",

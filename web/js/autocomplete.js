@@ -337,9 +337,10 @@ export function buildCharCreateSuggestions(catalog) {
 
 export function buildTrialSuggestions({ realm, era, trial }) {
   const realmNum = Number(realm?.number) || 1;
-  const isEra2 = era?.id === 'era-02-16bit';
-  const effectiveRealm = isEra2 ? 99 : realmNum;
-  const usesTrainingSpells = !isEra2 && realmNum <= 3;
+  // Any era after the 8-bit era: the player has finished the whole 8-bit curriculum.
+  const isLaterEra = Boolean(era?.id) && era.id !== 'era-01-8bit';
+  const effectiveRealm = isLaterEra ? 99 : realmNum;
+  const usesTrainingSpells = !isLaterEra && realmNum <= 3;
 
   const list = usesTrainingSpells
     ? [
@@ -347,16 +348,10 @@ export function buildTrialSuggestions({ realm, era, trial }) {
         { label: 'say("...")', matchText: 'say', snippet: 'say("$0")', category: 'fn', description: 'Speak a message or value (Pyria training spell for print)' },
         { label: 'shout("...")', matchText: 'shout', snippet: 'shout("$0")', category: 'fn', description: 'Shout a password or command (Pyria training spell for print)' },
         { label: 'print("...")', matchText: 'print', snippet: 'print("$0")', category: 'fn', description: 'Real Python built-in (same as say/shout)' },
-        { label: 'len(text)', matchText: 'len', snippet: 'len($0)', category: 'fn', description: 'Count how many letters or items are inside' },
-        { label: 'str(value)', matchText: 'str', snippet: 'str($0)', category: 'fn', description: 'Turn a number into text' },
-        { label: 'int(value)', matchText: 'int', snippet: 'int($0)', category: 'fn', description: 'Turn text into a whole number' },
       ]
     : [
-        // Realm 4+ and Era 2: real print() right at the top!
+        // Realm 4+ and later eras: real print() right at the top!
         { label: 'print("...")', matchText: 'print', snippet: 'print("$0")', category: 'fn', description: 'Display text or numbers in the output' },
-        { label: 'len(text)', matchText: 'len', snippet: 'len($0)', category: 'fn', description: 'Count how many letters or items are inside' },
-        { label: 'str(value)', matchText: 'str', snippet: 'str($0)', category: 'fn', description: 'Turn a number into text' },
-        { label: 'int(value)', matchText: 'int', snippet: 'int($0)', category: 'fn', description: 'Turn text into a whole number' },
       ];
 
   if (effectiveRealm >= 2) {
@@ -380,25 +375,30 @@ export function buildTrialSuggestions({ realm, era, trial }) {
 
   if (effectiveRealm >= 5) {
     list.push(
-      { label: '.lower()', matchText: '.lower', snippet: '.lower()', category: 'method', description: 'Turn text into lowercase letters' },
-      { label: '.upper()', matchText: '.upper', snippet: '.upper()', category: 'method', description: 'Turn text into ALL CAPS' },
-      { label: '.strip()', matchText: '.strip', snippet: '.strip()', category: 'method', description: 'Trim extra spaces from both ends' },
-      { label: '.replace(old, new)', matchText: '.replace', snippet: '.replace("$0", "")', category: 'method', description: 'Swap part of a string for new text' },
       { label: 'and', matchText: 'and', snippet: 'and ', category: 'keyword', description: 'True only if BOTH sides are True' },
       { label: 'or', matchText: 'or', snippet: 'or ', category: 'keyword', description: 'True if EITHER side is True' },
       { label: 'not', matchText: 'not', snippet: 'not ', category: 'keyword', description: 'Flips True to False and False to True' }
     );
   }
 
-  if (effectiveRealm >= 7) {
+  if (effectiveRealm >= 7 && !isLaterEra) {
+    // 8-bit loops walk through the letters of a word; range() arrives in the 16-bit era.
     list.push(
-      { label: 'for i in range(n):', matchText: 'for', snippet: 'for i in range($0):\n    ', category: 'keyword', description: 'Repeat indented code a set number of times' },
-      { label: 'range(stop)', matchText: 'range', snippet: 'range($0)', category: 'fn', description: 'Generate a sequence of numbers' }
+      { label: 'for letter in word:', matchText: 'for', snippet: 'for letter in $0:\n    ', category: 'keyword', description: 'Repeat indented code once for every letter' }
     );
   }
 
-  if (isEra2) {
+  if (isLaterEra) {
     list.push(
+      { label: 'len(items)', matchText: 'len', snippet: 'len($0)', category: 'fn', description: 'Count how many letters or items are inside' },
+      { label: 'str(value)', matchText: 'str', snippet: 'str($0)', category: 'fn', description: 'Turn a number into text' },
+      { label: 'int(value)', matchText: 'int', snippet: 'int($0)', category: 'fn', description: 'Turn text into a whole number' },
+      { label: 'for i in range(n):', matchText: 'for', snippet: 'for i in range($0):\n    ', category: 'keyword', description: 'Repeat indented code a set number of times' },
+      { label: 'range(stop)', matchText: 'range', snippet: 'range($0)', category: 'fn', description: 'Count from 0 up to just before stop' },
+      { label: '.upper()', matchText: '.upper', snippet: '.upper()', category: 'method', description: 'Turn text into ALL CAPS' },
+      { label: '.lower()', matchText: '.lower', snippet: '.lower()', category: 'method', description: 'Turn text into lowercase letters' },
+      { label: '.strip()', matchText: '.strip', snippet: '.strip()', category: 'method', description: 'Trim extra spaces from both ends' },
+      { label: '.replace(old, new)', matchText: '.replace', snippet: '.replace("$0", "")', category: 'method', description: 'Swap part of a string for new text' },
       { label: 'def name():', matchText: 'def', snippet: 'def $0():\n    ', category: 'keyword', description: 'Define a reusable Python function' },
       { label: 'return value', matchText: 'return', snippet: 'return $0', category: 'keyword', description: 'Send a result back from a function' },
       { label: 'while condition:', matchText: 'while', snippet: 'while $0:\n    ', category: 'keyword', description: 'Repeat while a condition stays True' },
