@@ -1,6 +1,16 @@
 // Retro RPG Letterbox Cinematic Cut-Scene Player for Pyria
+// Renders live, era-authentic in-game backdrops (8-Bit NES, 16-Bit SNES, 32-Bit Isometric 2.5D,
+// and 64-Bit Nintendo 64 Textured 3D) with real-time era-evolution laser wipes.
 
 import { audio } from './audio.js?v=20261127i';
+import {
+  ATLAS_GRID,
+  CELL_CORE,
+  CELL_PAD,
+  CELL_SIZE,
+  TEX,
+  getN64TextureAtlas,
+} from './n64Textures.js?v=20261127u';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -23,26 +33,375 @@ const BIOME_BACKDROPS = {
   'realm-64-04-sanctum': ['#2e1065', '#7f1d1d'],
 };
 
-const CUTSCENE_IMG_CACHE = new Map();
-function getCutsceneImage(src) {
-  if (!src) return null;
-  if (CUTSCENE_IMG_CACHE.has(src)) {
-    const entry = CUTSCENE_IMG_CACHE.get(src);
-    return entry.loaded ? entry.img : null;
+// Extract a single 56x56 tileable texture from the procedural N64 atlas as a CanvasPattern
+const N64_PATTERNS = new Map();
+function getN64Pattern(ctx, slot) {
+  if (N64_PATTERNS.has(slot)) return N64_PATTERNS.get(slot);
+  try {
+    const atlas = getN64TextureAtlas();
+    const gx = slot % ATLAS_GRID;
+    const gy = Math.floor(slot / ATLAS_GRID);
+    const tile = document.createElement('canvas');
+    tile.width = CELL_CORE;
+    tile.height = CELL_CORE;
+    const tctx = tile.getContext('2d');
+    tctx.drawImage(
+      atlas,
+      gx * CELL_SIZE + CELL_PAD,
+      gy * CELL_SIZE + CELL_PAD,
+      CELL_CORE,
+      CELL_CORE,
+      0,
+      0,
+      CELL_CORE,
+      CELL_CORE
+    );
+    const pat = ctx.createPattern(tile, 'repeat');
+    N64_PATTERNS.set(slot, pat);
+    return pat;
+  } catch {
+    return null;
   }
-  const entry = { img: new Image(), loaded: false };
-  entry.img.onload = () => { entry.loaded = true; };
-  entry.img.src = src;
-  CUTSCENE_IMG_CACHE.set(src, entry);
-  return null;
 }
 
-function drawCoverImage(ctx, img, w, h) {
-  if (!img || !img.width || !img.height) return;
-  const scale = Math.max(w / img.width, h / img.height);
-  const dw = img.width * scale;
-  const dh = img.height * scale;
-  ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+function drawIsoCube(ctx, cx, cy, hw, hh, h, top, left, right) {
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - hh);
+  ctx.lineTo(cx + hw, cy);
+  ctx.lineTo(cx, cy + hh);
+  ctx.lineTo(cx - hw, cy);
+  ctx.closePath();
+  ctx.fillStyle = top;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(15, 23, 42, 0.25)';
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+
+  if (h > 0) {
+    ctx.beginPath();
+    ctx.moveTo(cx - hw, cy);
+    ctx.lineTo(cx, cy + hh);
+    ctx.lineTo(cx, cy + hh + h);
+    ctx.lineTo(cx - hw, cy + h);
+    ctx.closePath();
+    ctx.fillStyle = left;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(cx + hw, cy);
+    ctx.lineTo(cx, cy + hh);
+    ctx.lineTo(cx, cy + hh + h);
+    ctx.lineTo(cx + hw, cy + h);
+    ctx.closePath();
+    ctx.fillStyle = right;
+    ctx.fill();
+  }
+}
+
+// Live 8-Bit NES / 16-Bit SNES tileset stage using real game tiles
+function drawTiledEraStage(ctx, eraKey, realmId, sprites, now) {
+  const is16 = eraKey === '16bit';
+  const [cTop, cBot] = BIOME_BACKDROPS[realmId] || (is16 ? ['#1d4ed8', '#0f172a'] : ['#0f172a', '#080c17']);
+  const sky = ctx.createLinearGradient(0, 0, 0, 88);
+  sky.addColorStop(0, is16 ? '#1e3a8a' : cTop);
+  sky.addColorStop(0.65, is16 ? '#38bdf8' : '#1e293b');
+  sky.addColorStop(1, is16 ? '#bae6fd' : cBot);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, 320, 148);
+
+  // Pixel stars (8-bit) or drifting SNES clouds (16-bit)
+  if (!is16) {
+    for (let i = 0; i < 24; i++) {
+      const sx = (i * 47 + 13) % 316;
+      const sy = (i * 29 + 7) % 58;
+      const tw = Math.sin(now * 0.004 + i) > 0.2 ? 0.85 : 0.35;
+      ctx.fillStyle = `rgba(254, 240, 138, ${tw})`;
+      ctx.fillRect(sx, sy, 2, 2);
+    }
+  } else {
+    const drift = (now * 0.008) % 360;
+    for (let i = 0; i < 5; i++) {
+      const cx = ((i * 78 + drift) % 360) - 24;
+      const cy = 14 + (i % 3) * 14;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.fillRect(Math.round(cx), cy, 26, 6);
+      ctx.fillRect(Math.round(cx + 5), cy - 4, 16, 4);
+    }
+  }
+
+  // Distant pixel hills
+  ctx.fillStyle = is16 ? '#1e6b4a' : '#14281d';
+  ctx.beginPath();
+  ctx.moveTo(0, 74);
+  for (let x = 0; x <= 320; x += 32) {
+    const h = 10 + Math.abs(Math.sin(x * 0.03 + 1)) * 16;
+    ctx.lineTo(x, 72 - h);
+  }
+  ctx.lineTo(320, 74);
+  ctx.closePath();
+  ctx.fill();
+
+  // Live in-game ground & decor tiles (16x16 grid across 320x148)
+  const T = 16;
+  const startY = 68;
+  const cols = 20;
+  for (let row = 0; row < 5; row++) {
+    const y = startY + row * T;
+    for (let col = 0; col < cols; col++) {
+      const x = col * T;
+      let gTile = 'grass';
+      if (row === 0 && (col === 8 || col === 9 || col === 10 || col === 11)) {
+        gTile = 'water';
+      } else if (row === 2 || row === 3) {
+        gTile = 'dirt_path';
+      } else if ((col + row) % 5 === 0) {
+        gTile = 'grass_flower';
+      }
+      if (sprites) {
+        sprites.drawTile(ctx, gTile, eraKey, x, y, T, T);
+      } else {
+        ctx.fillStyle = gTile === 'dirt_path' ? '#a67c52' : gTile === 'water' ? '#0284c7' : '#2d6a4f';
+        ctx.fillRect(x, y, T, T);
+      }
+      if (gTile === 'water' && Math.sin(now * 0.004 + col) > 0.3) {
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.45)';
+        ctx.fillRect(x + 3, y + 6, 8, 2);
+      }
+      // Framing trees & torches on the far back row
+      if (row === 0 && sprites) {
+        if (col === 1 || col === 2 || col === 17 || col === 18) {
+          sprites.drawTile(ctx, is16 ? 'pine_tree' : 'tree', eraKey, x, y - 6, T, T);
+        } else if (col === 5 || col === 14) {
+          sprites.drawTile(ctx, 'torch', eraKey, x, y - 4, T, T);
+        }
+      }
+    }
+  }
+}
+
+// Live 32-Bit Isometric 2.5D Diorama stage matching renderIsometric32Bit
+function drawIsometric32Stage(ctx, now) {
+  const sky = ctx.createLinearGradient(0, 0, 0, 148);
+  sky.addColorStop(0, '#0f172a');
+  sky.addColorStop(0.55, '#1e293b');
+  sky.addColorStop(1, '#0b1020');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, 320, 148);
+
+  const HW = 18;
+  const HH = 9;
+  const originX = 160;
+  const originY = 42;
+
+  for (let gy = 0; gy < 7; gy++) {
+    for (let gx = 0; gx < 7; gx++) {
+      const cx = originX + (gx - gy) * HW;
+      const cy = originY + (gx + gy) * HH;
+      const isWater = gy === 0 && gx >= 2 && gx <= 4;
+      const isPath = gy === 3 || gx === 3;
+      const isHigh = (gx === 0 || gy === 0) && !isWater;
+      const elev = isWater ? 0 : isHigh ? 14 : 6;
+      const wave = isWater ? Math.sin(now * 0.004 + gx + gy) * 1.2 : 0;
+
+      if (isWater) {
+        drawIsoCube(ctx, cx, cy - elev + wave, HW, HH, 8, '#29b6f6', '#0288d1', '#01579b');
+      } else if (isPath) {
+        drawIsoCube(ctx, cx, cy - elev, HW, HH, 12 + elev, '#c79c6e', '#9c7248', '#785230');
+      } else if (isHigh) {
+        drawIsoCube(ctx, cx, cy - elev, HW, HH, 14 + elev, '#8d99ae', '#64748b', '#475569');
+      } else {
+        drawIsoCube(ctx, cx, cy - elev, HW, HH, 12 + elev, '#43a047', '#2e7d32', '#1b5e20');
+      }
+
+      // Isometric trees & stone pillars framing the stage
+      if (gy === 1 && (gx === 1 || gx === 5)) {
+        ctx.fillStyle = '#6d4c41';
+        ctx.fillRect(Math.round(cx - 2), Math.round(cy - elev - 10), 4, 10);
+        drawIsoCube(ctx, cx, cy - elev - 18, HW * 0.62, HH * 0.62, 10, '#22c55e', '#15803d', '#14532d');
+      } else if (gx === 0 && gy === 2) {
+        drawIsoCube(ctx, cx, cy - elev - 18, HW * 0.48, HH * 0.48, 18, '#f8fafc', '#cbd5e1', '#64748b');
+      }
+    }
+  }
+}
+
+// Live 64-Bit Nintendo 64 Textured 3D stage matching n64Renderer.js (cobalt sky, clouds, mountains,
+// procedural N64 textures, pine trees, battlements/crystals, and N64 atmospheric horizon fog!)
+function drawN64Stage(ctx, realmId, now) {
+  const id = String(realmId || '').toLowerCase();
+  const isObs = id.includes('observatory') || id.includes('star');
+  const isSanctum = id.includes('sanctum') || id.includes('crypt');
+  const isCourt = id.includes('courtyard') || id.includes('ruins');
+
+  const horizonY = 66;
+  const sky = ctx.createLinearGradient(0, 0, 0, horizonY + 8);
+  if (isSanctum) {
+    sky.addColorStop(0, '#14081f');
+    sky.addColorStop(0.6, '#3b0764');
+    sky.addColorStop(1, '#991b1b');
+  } else if (isObs) {
+    sky.addColorStop(0, '#0b1026');
+    sky.addColorStop(0.6, '#1e1b4b');
+    sky.addColorStop(1, '#4c3f91');
+  } else if (isCourt) {
+    sky.addColorStop(0, '#1e40af');
+    sky.addColorStop(0.6, '#60a5fa');
+    sky.addColorStop(1, '#fde68a');
+  } else {
+    sky.addColorStop(0, '#1d4ed8');
+    sky.addColorStop(0.62, '#38bdf8');
+    sky.addColorStop(1, '#bae6fd');
+  }
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, 320, horizonY + 8);
+
+  // Twinkling stars for Observatory/Sanctum or drifting chunky N64 clouds for Valley/Courtyard
+  if (isObs || isSanctum) {
+    for (let i = 0; i < 36; i++) {
+      const sx = (i * 53 + 11) % 318;
+      const sy = (i * 23 + 5) % (horizonY - 8);
+      const a = 0.4 + 0.6 * Math.abs(Math.sin(now * 0.003 + i));
+      ctx.fillStyle = `rgba(254, 249, 195, ${a.toFixed(2)})`;
+      ctx.fillRect(sx, sy, i % 4 === 0 ? 2 : 1, i % 4 === 0 ? 2 : 1);
+    }
+  } else {
+    const drift = (now * 0.009) % 380;
+    for (let i = 0; i < 5; i++) {
+      const cx = ((i * 82 + drift) % 380) - 36;
+      const cy = 15 + (i % 3) * 14;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.moveTo(cx - 22, cy + 4);
+      ctx.lineTo(cx - 8, cy - 8);
+      ctx.lineTo(cx + 8, cy - 10);
+      ctx.lineTo(cx + 24, cy + 4);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // Layered low-poly N64 distant mountain ring
+  const mFar = isSanctum ? '#4c1d95' : isObs ? '#312e81' : isCourt ? '#7c93b8' : '#60a5fa';
+  const mNear = isSanctum ? '#2e1065' : isObs ? '#1e1b4b' : isCourt ? '#4e6485' : '#3b82f6';
+  const drawRange = (col, baseH, amp, seed) => {
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.moveTo(0, horizonY + 6);
+    for (let i = 0; i <= 12; i++) {
+      const mx = (320 / 12) * i;
+      const pk = baseH + Math.abs(Math.sin(i * 0.8 + seed)) * amp;
+      ctx.lineTo(mx, horizonY + 2 - pk);
+    }
+    ctx.lineTo(320, horizonY + 6);
+    ctx.closePath();
+    ctx.fill();
+  };
+  drawRange(mFar, 12, 22, 1.2);
+  drawRange(mNear, 5, 15, 3.4);
+
+  // Textured N64 Ground Plane using our actual procedural N64 texture atlas!
+  const groundTex = isSanctum ? TEX.OBSIDIAN_FLOOR : isObs ? TEX.STAR_TILE : isCourt ? TEX.STONE_FLOOR : TEX.GRASS;
+  const pathTex = isSanctum ? TEX.STONE_FLOOR : isObs ? TEX.ICE_FLOOR : TEX.DIRT_PATH;
+  const gPat = getN64Pattern(ctx, groundTex);
+  const pPat = getN64Pattern(ctx, pathTex);
+
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.fillStyle = gPat || (isSanctum ? '#2e1b4b' : isObs ? '#1e1b4b' : isCourt ? '#64748b' : '#3a9c46');
+  ctx.fillRect(0, horizonY, 320, 148 - horizonY);
+
+  // Central N64 perspective road/platform leading toward the horizon
+  ctx.beginPath();
+  ctx.moveTo(132, horizonY);
+  ctx.lineTo(188, horizonY);
+  ctx.lineTo(276, 148);
+  ctx.lineTo(44, 148);
+  ctx.closePath();
+  ctx.fillStyle = pPat || '#b88c58';
+  ctx.fill();
+
+  // Sparkling water canal strip in Valley
+  if (!isSanctum && !isObs && !isCourt) {
+    const wPat = getN64Pattern(ctx, TEX.WATER);
+    ctx.save();
+    ctx.translate((now * 0.012) % 56, 0);
+    ctx.fillStyle = wPat || '#29b6f6';
+    ctx.fillRect(-56, horizonY + 4, 432, 14);
+    ctx.restore();
+  }
+
+  // N64 Atmospheric Distance Fog blending ground smoothly into the horizon
+  const fogRgb = isSanctum ? '72, 36, 92' : isObs ? '56, 51, 112' : isCourt ? '194, 214, 235' : '174, 219, 250';
+  const fog = ctx.createLinearGradient(0, horizonY, 0, horizonY + 34);
+  fog.addColorStop(0, `rgba(${fogRgb}, 0.92)`);
+  fog.addColorStop(1, `rgba(${fogRgb}, 0.0)`);
+  ctx.fillStyle = fog;
+  ctx.fillRect(0, horizonY, 320, 34);
+
+  // Framing N64 low-poly 3D props along left/right edges (3-tier pines, castle battlements, or crystals)
+  const drawPine = (px, py, sc) => {
+    ctx.fillStyle = '#6b3e1f';
+    ctx.fillRect(px - 2.5 * sc, py - 10 * sc, 5 * sc, 10 * sc);
+    for (let t = 0; t < 3; t++) {
+      const w = (14 - t * 3) * sc;
+      const y0 = py - (7 + t * 8) * sc;
+      const y1 = y0 - 13 * sc;
+      const grad = ctx.createLinearGradient(px - w, y1, px + w, y0);
+      grad.addColorStop(0, '#4ade80');
+      grad.addColorStop(1, '#14532d');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(px, y1);
+      ctx.lineTo(px - w, y0);
+      ctx.lineTo(px + w, y0);
+      ctx.closePath();
+      ctx.fill();
+    }
+  };
+
+  if (isObs || isSanctum) {
+    // Glowing crystal spires framing the cosmic/sanctum stage
+    for (const [cx, cy, sc] of [[24, 98, 1.1], [296, 98, 1.1], [46, 82, 0.72], [274, 82, 0.72]]) {
+      const cg = ctx.createLinearGradient(cx - 8 * sc, cy - 32 * sc, cx + 8 * sc, cy);
+      cg.addColorStop(0, '#f0abfc');
+      cg.addColorStop(0.5, '#38bdf8');
+      cg.addColorStop(1, '#4c1d95');
+      ctx.fillStyle = cg;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - 34 * sc);
+      ctx.lineTo(cx + 8 * sc, cy - 10 * sc);
+      ctx.lineTo(cx, cy);
+      ctx.lineTo(cx - 8 * sc, cy - 10 * sc);
+      ctx.closePath();
+      ctx.fill();
+    }
+  } else if (isCourt) {
+    // Castle stone rampart silhouette across the background
+    const wallPat = getN64Pattern(ctx, TEX.STONE_WALL);
+    ctx.fillStyle = wallPat || '#64748b';
+    ctx.fillRect(0, horizonY - 12, 320, 22);
+    for (let bx = 8; bx < 320; bx += 28) {
+      ctx.fillRect(bx, horizonY - 18, 14, 6);
+    }
+  } else {
+    drawPine(26, 98, 1.15);
+    drawPine(294, 98, 1.15);
+    drawPine(54, 82, 0.75);
+    drawPine(266, 82, 0.75);
+  }
+  ctx.restore();
+}
+
+function drawEraStage(ctx, targetEra, realmId, sprites, now) {
+  if (targetEra === '64bit') {
+    drawN64Stage(ctx, realmId, now);
+  } else if (targetEra === '32bit') {
+    drawIsometric32Stage(ctx, now);
+  } else if (targetEra === '16bit') {
+    drawTiledEraStage(ctx, '16bit', realmId, sprites, now);
+  } else {
+    drawTiledEraStage(ctx, '8bit', realmId, sprites, now);
+  }
 }
 
 export const STORY_CUTSCENES = {
@@ -60,7 +419,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'elder_ada',
         side: 'right',
         vfx: 'vault_glow',
-        backdropImage: '/assets/concept-art/eras/era-07-modern-4k-sandbox.jpg',
+        stageEra: '64bit',
+        stageRealm: 'realm-64-01-valley',
         text: 'Long ago, the kingdom of Pyria shone in full, vibrant 3D! Great Dragons soared above crystal valleys, and ancient Python spells kept every realm alive.',
       },
       {
@@ -68,7 +428,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'lord_null',
         side: 'right',
         vfx: 'glitch',
-        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+        stageEra: '8bit',
+        stageRealm: 'realm-01-meadow',
         text: 'Mwahahaha! Far too colorful! With my Glitch Storm, I drained Pyria all the way down to flat 8-bit pixels and locked every Dragon inside a Logic Vault! Soon all of Pyria will return None!',
       },
       {
@@ -76,7 +437,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'elder_ada',
         side: 'right',
         vfx: 'none',
-        backdropImage: '/assets/concept-art/hero_and_pip.png',
+        stageEra: '8bit',
+        stageRealm: 'realm-01-meadow',
         text: 'Our only hope is a brave young Code-Tamer with a Python Spellbook — YOU, {heroName}! Every Dragon you rescue restores another Bit of reality and levels up the world.',
       },
       {
@@ -84,7 +446,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'bram',
         side: 'right',
         vfx: 'none',
-        backdropImage: '/assets/concept-art/modular_hero_sheet.png',
+        stageEra: '8bit',
+        stageRealm: 'realm-01-meadow',
         text: "Earn Byte Shards from Trials and hidden chests, kid! Bring 'em to my Workshop and write real Python calls to forge hats, armor, boots, and power-ups!",
       },
       {
@@ -92,7 +455,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'pip',
         side: 'left',
         vfx: 'celebrate',
-        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+        stageEra: '8bit',
+        stageRealm: 'realm-01-meadow',
         text: "Chirp! I'm Pip — your dragon sidekick! I'll fly right beside you with hints whenever you get stuck. Let's rescue Spark in Whispering Meadow and start the Return of the Bits!",
       },
     ],
@@ -112,7 +476,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'emberwing',
         side: 'right',
         vfx: 'bit_restore',
-        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
+        stageEra: '8bit',
+        stageRealm: 'realm-01-meadow',
         text: 'ALL EIGHT BITS ARE WHOLE, {heroName}! Feel the starlight surge across the flatlands as our 8 dragons unite their power!',
       },
       {
@@ -121,8 +486,8 @@ export const STORY_CUTSCENES = {
         side: 'right',
         vfx: 'bit_restore',
         eraTransition: {
-          fromImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
-          toImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+          fromEra: '8bit',
+          toEra: '16bit',
           fromLabel: '8-BIT NES',
           toLabel: '16-BIT SNES',
         },
@@ -133,7 +498,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'lord_null',
         side: 'right',
         vfx: 'glitch',
-        backdropImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+        stageEra: '16bit',
+        stageRealm: 'realm-16-01-shallows',
         text: 'GAAAH! Too many colors! My eyes! Retreat to the Sunken Isles — try surviving 16 Realms of Lists, Functions, and Dictionaries, {heroName}!',
       },
       {
@@ -141,7 +507,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'pip',
         side: 'left',
         vfx: 'celebrate',
-        backdropImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+        stageEra: '16bit',
+        stageRealm: 'realm-16-01-shallows',
         text: 'WOOHOO!! Look at those shimmering 16-bit waves, {heroName}! Next stop: Coral Shallows in the Tideglass Archipelago!',
       },
     ],
@@ -161,7 +528,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'emberwing',
         side: 'right',
         vfx: 'bit_restore',
-        backdropImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
+        stageEra: '16bit',
+        stageRealm: 'realm-16-01-shallows',
         text: 'Incredible, {heroName}! You conquered all four Acts of the 16-Bit Era and shattered Lord Null’s Throne! Watch the horizon tilt upward!',
       },
       {
@@ -170,8 +538,8 @@ export const STORY_CUTSCENES = {
         side: 'right',
         vfx: 'bit_restore',
         eraTransition: {
-          fromImage: '/assets/concept-art/eras/era-02-16bit-snes.jpg',
-          toImage: '/assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg',
+          fromEra: '16bit',
+          toEra: '32bit',
           fromLabel: '16-BIT SNES',
           toLabel: '32-BIT ISOMETRIC 2.5D',
         },
@@ -182,7 +550,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'lord_null',
         side: 'right',
         vfx: 'glitch',
-        backdropImage: '/assets/concept-art/biomes/32bit-polygon-citadel.jpg',
+        stageEra: '32bit',
+        stageRealm: 'realm-32-01-highlands',
         text: 'A THIRD DIMENSION?! Impossible! Wait until you try navigating 3D Tuples, Sets, and Error Traps inside my Polygon Citadel!',
       },
       {
@@ -190,7 +559,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'pip',
         side: 'left',
         vfx: 'celebrate',
-        backdropImage: '/assets/concept-art/biomes/32bit-blockstone-highlands.jpg',
+        stageEra: '32bit',
+        stageRealm: 'realm-32-01-highlands',
         text: 'Chirp-WHOA!! We have HEIGHT now, {heroName}! Welcome to Blockstone Highlands in glorious 32-Bit Isometric 2.5D!',
       },
     ],
@@ -210,7 +580,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'spark',
         side: 'right',
         vfx: 'bit_restore',
-        backdropImage: '/assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg',
+        stageEra: '32bit',
+        stageRealm: 'realm-32-01-highlands',
         text: 'ALL 32 BITS ARE RESTORED!! Hold onto your spellbook, {heroName} — the Isometric Frontier is breaking wide open into full 3D space!',
       },
       {
@@ -219,19 +590,20 @@ export const STORY_CUTSCENES = {
         side: 'right',
         vfx: 'bit_restore',
         eraTransition: {
-          fromImage: '/assets/concept-art/eras/era-03-32bit-ps1-isometric.jpg',
-          toImage: '/assets/concept-art/eras/era-04-64bit-n64.jpg',
+          fromEra: '32bit',
+          toEra: '64bit',
           fromLabel: '32-BIT ISOMETRIC',
           toLabel: '64-BIT NINTENDO 64 3D',
         },
-        text: 'BOOM!! Chunky Gouraud-shaded low-poly hills, cobalt skies, distant mountains, and sweeping N64 brass fill the horizon!',
+        text: 'BOOM!! Textured 3D hills, cobalt skies, distant mountains, and sweeping N64 brass fill the horizon!',
       },
       {
         speaker: 'Lord Null',
         spriteKey: 'lord_null',
         side: 'right',
         vfx: 'glitch',
-        backdropImage: '/assets/concept-art/eras/era-04-64bit-n64.jpg',
+        stageEra: '64bit',
+        stageRealm: 'realm-64-04-sanctum',
         text: 'NO!! FULL 64-BIT POLYGONS?! Fine — face my 64-Bit Sanctum! Only a true master of Python Classes, Inheritance, and 3D Scripting can claim the 64-Bit Crown!',
       },
       {
@@ -239,7 +611,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'pip',
         side: 'left',
         vfx: 'celebrate',
-        backdropImage: '/assets/concept-art/eras/era-04-64bit-n64.jpg',
+        stageEra: '64bit',
+        stageRealm: 'realm-64-01-valley',
         text: 'WOOHOO!! Look at those 3D mountains, {heroName}! Let’s soar into Polygon Valley and win the 64-Bit Crown!',
       },
     ],
@@ -472,18 +845,13 @@ export function playCutscene({
     advance();
   });
 
-  // Preload any concept-art backdrops referenced by beats
-  for (const b of beats) {
-    if (b.backdropImage) getCutsceneImage(b.backdropImage);
-    if (b.eraTransition?.fromImage) getCutsceneImage(b.eraTransition.fromImage);
-    if (b.eraTransition?.toImage) getCutsceneImage(b.eraTransition.toImage);
-  }
-
   const renderFrame = (now) => {
     if (finished) return;
     const beat = beats[beatIndex];
     const elapsedSec = (now - beatStartTime) / 1000;
     const vfx = beat.vfx || 'none';
+    const activeStageEra = beat.stageEra || eraKey;
+    const activeStageRealm = beat.stageRealm || realmId;
 
     // Advance typewriter text
     if (charCount < fullText.length && now - lastTypeTime >= 22) {
@@ -497,7 +865,7 @@ export function playCutscene({
 
     ctx.save();
     ctx.scale(2, 2);
-    ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = activeStageEra === '64bit';
 
     // Subtle screen shake on glitch / shatter
     if (vfx === 'glitch' || (vfx === 'shatter' && elapsedSec < 0.45)) {
@@ -508,37 +876,33 @@ export function playCutscene({
       );
     }
 
-    // 1. Backdrop gradient OR Concept Art / Animated Era-Transition Wipe
-    const [cTop, cBot] = BIOME_BACKDROPS[realmId] || ['#182342', '#0b1020'];
-    const grad = ctx.createLinearGradient(0, 0, 0, 148);
-    grad.addColorStop(0, cTop);
-    grad.addColorStop(1, cBot);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 320, 148);
+    // 1. Live In-Game Era Stage OR Animated Era-Transition Laser Wipe
+    let charEraLeft = activeStageEra;
+    let charEraRight = activeStageEra;
 
     if (beat.eraTransition) {
       const tr = beat.eraTransition;
-      const fromImg = getCutsceneImage(tr.fromImage);
-      const toImg = getCutsceneImage(tr.toImage);
+      const fromEra = tr.fromEra || '8bit';
+      const toEra = tr.toEra || eraKey;
       const sweep = Math.min(1, Math.max(0, (elapsedSec - 0.25) / 2.2));
       const splitX = Math.round(sweep * 320);
 
-      ctx.save();
-      ctx.imageSmoothingEnabled = true;
-      if (fromImg) drawCoverImage(ctx, fromImg, 320, 148);
-      if (toImg && splitX > 0) {
+      // Right side (not yet swept): previous era live stage
+      drawEraStage(ctx, fromEra, activeStageRealm, sprites, now);
+
+      // Left side (swept): newly evolved era live stage!
+      if (splitX > 0) {
         ctx.save();
         ctx.beginPath();
         ctx.rect(0, 0, splitX, 148);
         ctx.clip();
-        drawCoverImage(ctx, toImg, 320, 148);
+        drawEraStage(ctx, toEra, activeStageRealm, sprites, now);
         ctx.restore();
       }
-      ctx.restore();
 
-      // Dark cinema vignette so characters pop
-      ctx.fillStyle = 'rgba(8, 12, 24, 0.36)';
-      ctx.fillRect(0, 0, 320, 148);
+      // Characters evolve live as the golden laser sweeps across their X position!
+      charEraLeft = splitX >= 84 ? toEra : fromEra;
+      charEraRight = splitX >= 232 ? toEra : fromEra;
 
       // Glowing golden evolution laser sweep bar
       if (sweep > 0.01 && sweep < 0.99) {
@@ -560,30 +924,31 @@ export function playCutscene({
       ctx.font = 'bold 8px monospace';
       ctx.textAlign = 'center';
       ctx.fillText(`${tr.fromLabel}  ➔  ${tr.toLabel}`, 160, 18);
-    } else if (beat.backdropImage) {
-      const bgImg = getCutsceneImage(beat.backdropImage);
-      if (bgImg) {
-        ctx.save();
-        ctx.imageSmoothingEnabled = true;
-        drawCoverImage(ctx, bgImg, 320, 148);
-        ctx.restore();
-        ctx.fillStyle = 'rgba(8, 12, 24, 0.44)';
-        ctx.fillRect(0, 0, 320, 148);
-      }
+    } else {
+      drawEraStage(ctx, activeStageEra, activeStageRealm, sprites, now);
     }
 
-    // Ground horizon platform
-    ctx.fillStyle = 'rgba(11, 16, 32, 0.52)';
-    ctx.fillRect(0, 108, 320, 40);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
-    ctx.fillRect(0, 108, 320, 2);
+    // Subtle soft ground shadow pads beneath Left (Hero + Pip) and Right speaker
+    ctx.fillStyle = 'rgba(8, 12, 24, 0.36)';
+    ctx.beginPath();
+    ctx.ellipse(80, 113, 24, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(120, 111, 12, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    if (rightSpriteKey) {
+      const slideOffset = Math.round((1 - rightSlide) * 44);
+      ctx.beginPath();
+      ctx.ellipse(234 + slideOffset, 113, 24, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     // 2. Bit restore rising light pillars (behind characters)
     if (vfx === 'bit_restore') {
-      const pillarAlpha = 0.22 + 0.14 * Math.sin(elapsedSec * 5);
+      const pillarAlpha = 0.20 + 0.12 * Math.sin(elapsedSec * 5);
       ctx.fillStyle = `rgba(246, 201, 69, ${pillarAlpha.toFixed(2)})`;
       ctx.fillRect(212, 0, 44, 114);
-      ctx.fillStyle = `rgba(52, 211, 153, ${(pillarAlpha * 0.75).toFixed(2)})`;
+      ctx.fillStyle = `rgba(52, 211, 153, ${(pillarAlpha * 0.72).toFixed(2)})`;
       ctx.fillRect(62, 0, 38, 114);
     }
 
@@ -591,16 +956,16 @@ export function playCutscene({
     const bob = Math.round(Math.sin(now / 180) * 2);
 
     // 3. Left side: Customized Hero + hovering Pip
-    const heroAlpha = beat.side === 'left' ? 1.0 : 0.72;
-    const is64 = eraKey === '64bit';
+    const heroAlpha = beat.side === 'left' ? 1.0 : 0.80;
+    const leftIs64 = charEraLeft === '64bit';
     ctx.globalAlpha = heroAlpha;
     if (sprites) {
-      if (is64) {
-        sprites.drawHero(ctx, appearance, eraKey, 'right', animFrame, 52, 58, 56, 56);
-        sprites.drawPip(ctx, appearance, eraKey, 'right', animFrame, 106, 66 + bob, 32, 32);
+      if (leftIs64) {
+        sprites.drawHero(ctx, appearance, charEraLeft, 'right', animFrame, 52, 58, 56, 56);
+        sprites.drawPip(ctx, appearance, charEraLeft, 'right', animFrame, 106, 66 + bob, 32, 32);
       } else {
-        sprites.drawHero(ctx, appearance, eraKey, 'right', animFrame, 56, 66, 48, 48);
-        sprites.drawPip(ctx, appearance, eraKey, 'right', animFrame, 104, 72 + bob, 26, 26);
+        sprites.drawHero(ctx, appearance, charEraLeft, 'right', animFrame, 56, 66, 48, 48);
+        sprites.drawPip(ctx, appearance, charEraLeft, 'right', animFrame, 104, 72 + bob, 26, 26);
       }
     }
     ctx.globalAlpha = 1.0;
@@ -608,15 +973,16 @@ export function playCutscene({
     // 4. Right side: Antagonist (Lord Null) or Realm Dragon Guardian
     if (rightSpriteKey && sprites) {
       const slideOffset = Math.round((1 - rightSlide) * 44);
-      let rightAlpha = beat.side === 'right' ? 1.0 : 0.78;
+      const rightIs64 = charEraRight === '64bit';
+      let rightAlpha = beat.side === 'right' ? 1.0 : 0.84;
       if (vfx === 'shatter' && rightSpriteKey === 'lord_null') {
         rightAlpha = Math.max(0.08, 1 - elapsedSec * 0.85);
       }
       ctx.globalAlpha = rightAlpha;
-      if (is64) {
-        sprites.drawNpc(ctx, rightSpriteKey, eraKey, 204 + slideOffset, 56 + bob, 56, 56, 'left');
+      if (rightIs64) {
+        sprites.drawNpc(ctx, rightSpriteKey, charEraRight, 204 + slideOffset, 56 + bob, 56, 56, 'left');
       } else {
-        sprites.drawNpc(ctx, rightSpriteKey, eraKey, 210 + slideOffset, 64 + bob, 48, 48);
+        sprites.drawNpc(ctx, rightSpriteKey, charEraRight, 210 + slideOffset, 64 + bob, 48, 48);
       }
       ctx.globalAlpha = 1.0;
     }

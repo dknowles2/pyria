@@ -33,7 +33,7 @@ import { attachAutocomplete, buildCharCreateSuggestions } from './autocomplete.j
 import { SpriteManager } from './sprites.js?v=20261127v';
 import { WorldEngine } from './world.js?v=20261127v';
 import { ModalManager, attachCodeEditorKeys, attachCodeGutter } from './modals.js?v=20261127v';
-import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127v';
+import { playCutscene, isCutsceneActive, STORY_CUTSCENES } from './cutscene.js?v=20261127w';
 import { AppRouter } from './router.js?v=20261127l';
 import {
   DEFAULT_FAMILIARITY_ID,
