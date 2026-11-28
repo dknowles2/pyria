@@ -47,6 +47,12 @@ Follow these rules whenever creating new lessons/trials or editing existing ones
 ## 6. Hints & Worked Examples
 - Provide all 3 progressive hint tiers (`tier1_nudge`, `tier2_pattern`, `tier3_walkthrough`) plus a clean, idiomatic `referenceSolution`.
 - Remember that when a player exhausts all hints in Explorer or Standard mode, Pip offers **Pip's Worked Example** using `referenceSolution` (or the correct choice + explanation for MC trials)—so keep `referenceSolution` concise, clean, and easy for a beginner to read.
+- **Keep the three tiers strictly progressive — each must add information the previous one withheld:**
+  - `tier1_nudge` is **conceptual**: name the idea, operator, or method and point at the line to look at, but *without* the literal arguments. Write *"Use `.append(...)` to add the pearl onto the end of `bag`"*, not *"Call `bag.append("pearl")`"* — the latter is more specific than Tier 2 and inverts the progression.
+  - `tier2_pattern` is the **shape** of the answer, with `<named_placeholder>` standing in for whatever the player still has to work out. Never paste the finished line: if the player supplies the index, write `first = crystals[<index>]`; if they supply the separator, write `clean = raw.replace("<old>", "<new>")`.
+  - `tier3_walkthrough` is the only tier that gives the **exact code or answer**. For an MC trial it names the option *and* the reason: *"Tap Option B (`opal`) — index `-1` always grabs the very last item."*
+- **An MC `tier2_pattern` must not state the answer.** Explain the rule that decides it instead: *"Compare 12, 45 and 29 — `max()` returns the largest, `min()` the smallest, `sum()` the total"* leaves the player to pick, whereas *"the smallest is 3"* makes Tier 3 redundant.
+- **Never write a filler hint.** A nudge that would fit any trial (*"Double-check your indentation and variable names!"*, *"Combine everything you learned in this realm!"*, *"Trace it carefully!"*) is not a hint; and never send the player to a different difficulty mode for help.
 
 ## 7. Verification
 - After editing any lesson file, always run:

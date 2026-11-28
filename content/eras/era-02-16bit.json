@@ -117,7 +117,7 @@
           "correctChoiceId": "a",
           "hints": {
             "tier1_nudge": "Pip counts on his claws: 'Python starts numbering list slots at 0, not 1 — so which crystal is sitting in slot 0?'",
-            "tier2_pattern": "Slot `0` holds `\"aqua\"`, slot `1` holds `\"pearl\"`, slot `2` holds `\"coral\"`.",
+            "tier2_pattern": "Python numbers list slots from the left starting at `0`, so slot `0` is whichever item was written first.",
             "tier3_walkthrough": "Tap Option A (`aqua`) — index `0` is always the very first item in a list."
           },
           "difficultyOverride": null
@@ -185,7 +185,7 @@
           "testCode": "assert first == 'aqua', f'Expected \"aqua\", got {first!r}'\nassert OUTPUT.strip() == 'aqua', f'Expected \"aqua\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip taps 0: 'Python starts counting list positions at 0, so `crystals[0]` is the first item!'",
-            "tier2_pattern": "first = crystals[0]\nprint(first)",
+            "tier2_pattern": "first = crystals[<index>]\nprint(first)",
             "tier3_walkthrough": "Add:\nfirst = crystals[0]\nprint(first)"
           },
           "difficultyOverride": null,
@@ -307,7 +307,7 @@
           "referenceSolution": "bag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))\n",
           "testCode": "assert isinstance(bag, list) and len(bag) == 3, f\"Expected bag to have 3 items, got {bag!r}\"\nif bag != [\"shell\", \"coral\", \"pearl\"]:\n    if [str(x).strip().lower() for x in bag] == [\"shell\", \"coral\", \"pearl\"]:\n        assert False, f\"Almost! Check capitalization/spacing in bag — expected ['shell', 'coral', 'pearl'], got {bag!r}.\"\n    assert False, f\"Expected bag == ['shell', 'coral', 'pearl'], got {bag!r}\"\nassert OUTPUT.strip() == \"3\", f\"Expected printed 3, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip drops a pearl into the bag: 'Call `bag.append(\"pearl\")` on its own line, then count the bag with `len(bag)`.'",
+            "tier1_nudge": "Pip drops a pearl into the bag: 'Use `.append(...)` to add the pearl onto the end of `bag`, then `len(...)` to count how many items it holds.'",
             "tier2_pattern": "<list>.append(<new_item>)\nprint(len(<list>))",
             "tier3_walkthrough": "Write:\nbag = [\"shell\", \"coral\"]\nbag.append(\"pearl\")\nprint(len(bag))"
           },
@@ -523,7 +523,7 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip reads the shells backwards: 'A negative index counts from the END of the list — which shell is last?'",
-            "tier2_pattern": "Counting back from the end: `-1` is `\"opal\"`, `-2` is `\"silver\"`, `-3` is `\"gold\"`.",
+            "tier2_pattern": "Negative indexes count from the RIGHT end: `-1` is the last item, `-2` the one before it, and so on.",
             "tier3_walkthrough": "Tap Option B (`opal`) — index `-1` always grabs the very last item."
           },
           "difficultyOverride": null,
@@ -1158,7 +1158,7 @@
           "testCode": "assert top_two == ['opal', 'jade'], f'Expected [\"opal\", \"jade\"], got {top_two!r}'\nassert OUTPUT.strip() == \"['opal', 'jade']\", f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip chirps: 'Use `gems[:2]` to grab the first 2 items!'",
-            "tier2_pattern": "top_two = gems[:2]\nprint(top_two)",
+            "tier2_pattern": "top_two = gems[:<how_many>]\nprint(top_two)",
             "tier3_walkthrough": "Add:\ntop_two = gems[:2]\nprint(top_two)"
           },
           "difficultyOverride": null,
@@ -1286,7 +1286,7 @@
           "testCode": "assert total == 80 and low == 15\nassert OUTPUT.strip() == '80 15', f'Expected \"80 15\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip says: 'Pass `scores` into `sum(scores)` and `min(scores)`!'",
-            "tier2_pattern": "total = sum(scores)\nlow = min(scores)\nprint(total, low)",
+            "tier2_pattern": "total = sum(<list>)\nlow = min(<list>)\nprint(total, low)",
             "tier3_walkthrough": "Add:\ntotal = sum(scores)\nlow = min(scores)\nprint(total, low)"
           },
           "difficultyOverride": null,
@@ -1415,7 +1415,7 @@
           "testCode": "assert per_chest == 3.0, f'Expected 3.0, got {per_chest!r}'\nassert isinstance(per_chest, float), f'Expected a float, because / always hands back a decimal — got {type(per_chest).__name__}'\nassert OUTPUT.strip() == '3.0', f'Expected \"3.0\", got {OUTPUT.strip()!r}'\n",
           "hints": {
             "tier1_nudge": "Pip lines up the chests: 'Divide with a single slash — `pearls / chests` — and do not be startled by the `.0` on the end!'",
-            "tier2_pattern": "per_chest = pearls / chests\nprint(per_chest)",
+            "tier2_pattern": "per_chest = pearls / <divisor>\nprint(per_chest)",
             "tier3_walkthrough": "Add:\nper_chest = pearls / chests\nprint(per_chest)"
           },
           "difficultyOverride": null,
@@ -1648,7 +1648,7 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip lines up 9, 3 and 7: '`min()` hunts for the SMALLEST number, the opposite of `max()`.'",
-            "tier2_pattern": "Of 9, 3 and 7 the smallest is 3 — `max()` would give 9 and `sum()` would give 19.",
+            "tier2_pattern": "Compare 9, 3 and 7 — `min()` returns the smallest, `max()` the largest, `sum()` the total.",
             "tier3_walkthrough": "Tap Option B (`3`) — it is the smallest of 9, 3 and 7."
           },
           "difficultyOverride": null,
@@ -1951,8 +1951,8 @@
           "referenceSolution": "raw = \"STORM_CLEAR\"\nclean = raw.replace(\"_\", \"-\")\nprint(clean)\n",
           "testCode": "assert clean == 'STORM-CLEAR'\nassert OUTPUT.strip() == 'STORM-CLEAR', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Call `raw.replace(\"_\", \"-\")` and save it in `clean`!'",
-            "tier2_pattern": "clean = raw.replace(\"_\", \"-\")\nprint(clean)",
+            "tier1_nudge": "Pip chirps: 'Call `.replace(...)` on `raw` — the character to swap out goes first, the replacement second — then save the result in `clean`.'",
+            "tier2_pattern": "clean = raw.replace(\"_\", \"<new_character>\")\nprint(clean)",
             "tier3_walkthrough": "Add:\nclean = raw.replace(\"_\", \"-\")\nprint(clean)"
           },
           "difficultyOverride": null,
@@ -1991,8 +1991,8 @@
           "referenceSolution": "raw = \"STORM_CLEAR_NOW\"\nclean = raw.replace(\"_\", \"-\")\nparts = clean.split(\"-\")\nprint(parts)\n",
           "testCode": "_exp_clean = raw.replace(\"_\", \"-\")\n_exp_parts = _exp_clean.split(\"-\")\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = clean\n_exp = _exp_clean\nassert isinstance(_val, str), f\"Expected clean to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nassert parts == _exp_parts, f\"Expected parts == {_exp_parts!r}, got {parts!r}\"\nassert OUTPUT.strip() == str(_exp_parts), f\"Expected printed {str(_exp_parts)!r}, got {OUTPUT.strip()!r}\"\n",
           "hints": {
-            "tier1_nudge": "First call `.replace(\"_\", \"-\")` on `raw`, then call `.split(\"-\")` on the result.",
-            "tier2_pattern": "clean = <raw>.replace(\"_\", \"-\")\nparts = clean.split(\"-\")\nprint(parts)",
+            "tier1_nudge": "Pip untangles the signal: 'First swap the underscores for hyphens with `.replace(...)`, then chop the cleaned string into a list with `.split(...)`.'",
+            "tier2_pattern": "clean = raw.replace(\"<old>\", \"<new>\")\nparts = clean.split(\"<separator>\")\nprint(parts)",
             "tier3_walkthrough": "Set `clean = raw.replace(\"_\", \"-\")`, then `parts = clean.split(\"-\")`, then `print(parts)`."
           },
           "difficultyOverride": null,
@@ -2147,7 +2147,7 @@
           "correctChoiceId": "b",
           "hints": {
             "tier1_nudge": "Pip counts the items one at a time: '`len()` counts HOW MANY items are in the list, not what they add up to.'",
-            "tier2_pattern": "There are four items in the list; `sum()` would give 100 instead.",
+            "tier2_pattern": "`len()` counts how many items the list holds rather than adding them up — `sum()` would do the adding.",
             "tier3_walkthrough": "Tap Option B (`4`) — `len()` counts the items, and there are four of them."
           },
           "difficultyOverride": null,
