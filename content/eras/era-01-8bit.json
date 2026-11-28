@@ -608,7 +608,7 @@
           "referenceSolution": "hero = \"Pip\"\nsay(hero)\n",
           "testCode": "assert hero == 'Pip', f'Expected hero == \"Pip\", got {hero!r}'\nassert OUTPUT.strip() == 'Pip', f'Expected \"Pip\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip points at the quotes: 'Put quotes around \"Pip\" on line 1, and NO quotes around hero inside say(hero) on line 2!'",
+            "tier1_nudge": "Pip points at the quotes: 'The TEXT needs quotes when you store it; the BOX NAME never does when you pass it along.'",
             "tier2_pattern": "<variable> = \"<text>\"\nsay(<variable>)",
             "tier3_walkthrough": "Write:\nhero = \"Pip\"\nsay(hero)"
           },
@@ -722,7 +722,7 @@
           "referenceSolution": "dragon = \"Pebble\"\nsay(\"Dragon:\")\nsay(dragon)\n",
           "testCode": "lines = [l.strip() for l in OUTPUT.strip().splitlines()]\nassert lines == ['Dragon:', 'Pebble'], f'Expected [\"Dragon:\", \"Pebble\"], got {lines!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'First `say(\"Dragon:\")` WITH quotes, then `say(dragon)` with NO quotes!'",
+            "tier1_nudge": "Pip cheers: 'Line 1 says an exact label, so it needs quotes. Line 2 opens a box, so it must not have them.'",
             "tier2_pattern": "say(\"<label>\")\nsay(<variable>)",
             "tier3_walkthrough": "Add:\nsay(\"Dragon:\")\nsay(dragon)"
           },
@@ -2588,7 +2588,7 @@
             {
               "id": "d",
               "label": "4",
-              "explanation": "`len()` would count the characters; `.lower()` hands back the lowercased string itself."
+              "explanation": "`.lower()` hands back the lowercased text itself, not a count of its letters."
             }
           ],
           "correctChoiceId": "b",
@@ -2693,7 +2693,7 @@
           "referenceSolution": "raw_key = \"gold\"\nkey = raw_key.upper()\nprint(key)\n",
           "testCode": "assert key == 'GOLD', f'Expected \"GOLD\", got {key!r}'\nassert OUTPUT.strip() == 'GOLD', f'Expected \"GOLD\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Call `raw_key.upper()` (with parentheses!) and store it in `key`.'",
+            "tier1_nudge": "Pip chirps: 'There is a string method that turns every letter into capitals — call it with parentheses and store the result in `key`.'",
             "tier2_pattern": "key = <variable>.<method>()\nprint(key)",
             "tier3_walkthrough": "Add:\nkey = raw_key.upper()\nprint(key)"
           },
@@ -3384,7 +3384,7 @@
           "referenceSolution": "start_air = 60\nused_air = 25\nair_left = start_air - used_air\nprint(air_left)\n",
           "testCode": "assert air_left == 35, f'Expected 35, got {air_left!r}'\nassert OUTPUT.strip() == '35', f'Expected \"35\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip taps the minus sign `-`: 'Subtract the used air from the starting air, store the result in its own box, then say what is inside it.'",
+            "tier1_nudge": "Pip taps the minus sign `-`: 'Subtract the used air from the starting air, store the result in its own box, then print what is inside it.'",
             "tier2_pattern": "air_left = <start> - <used>\nprint(air_left)",
             "tier3_walkthrough": "Add:\nair_left = start_air - used_air\nprint(air_left)"
           },
@@ -3475,7 +3475,7 @@
           "referenceSolution": "left_depth = 10\nright_depth = 25\nalert = \"OFF\"\nif (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)\n",
           "testCode": "assert alert == 'ON', f'Expected \"ON\", got {alert!r}'\nassert OUTPUT.strip() == 'ON', f'Expected \"ON\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip blinks: 'With `or`, only ONE side needs to be True — check `(left_depth > 20) or (right_depth > 20)`!'",
+            "tier1_nudge": "Pip blinks: 'With `or`, only ONE side needs to be True — compare each depth against the limit and join the two checks.'",
             "tier2_pattern": "if (<left> > <limit>) or (<right> > <limit>):\n    alert = \"<on_value>\"\n    print(alert)",
             "tier3_walkthrough": "Add:\nif (left_depth > 20) or (right_depth > 20):\n    alert = \"ON\"\n    print(alert)"
           },
