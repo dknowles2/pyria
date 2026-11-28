@@ -11,6 +11,19 @@ description: Pedagogical and authoring rules for creating or editing Pyria lesso
 
 Follow these rules whenever creating new lessons/trials or editing existing ones in `content/eras/*.json`. Target audience: ~10-year-old beginners learning Python step by step.
 
+## 0. Plain English for 10-Year-Olds (No AI/Claude-Style Prose or Weird Jargon)
+All player-facing copy (`storyPrompt`, `objective`, `bugSummary`, `introChoice.*`, `choices[].label`, `choices[].explanation`, `hints.*`, `storyIntro`, `storyOutro`, `dragon.rescueDialogue`, `cutscenes.*`, `bonusKitReward.description`, and `content/game.json`) **must** read like plain, natural English written for a 10-year-old:
+- **Short, clear sentences and everyday words**: Sound warm, encouraging, and direct, like a good kids' RPG, not an overcaffeinated chatbot or a CS textbook.
+- **No AI / Claude-style mannered prose**:
+  - **No em-dashes (`—`)** in player-facing lesson text. Use periods, commas, or colons instead.
+  - **No purple prose or overly fancy words** (avoid *sabotaged*, *diorama*, *isometric*, *Gouraud-shaded*, *cascading*, *coral fronds*, *sea-lanes*, *shimmering*, *gleaming*, *woven from*, *Cistern Gate*, *silent rune cage*). Use simple, vivid words (*broke*, *messed up*, *3D blocks*, *waterfalls*, *glowing*, *stone gate*).
+  - **No cheesy sound-effect openers or all-caps hype** (avoid *"Splash-sparkle!"*, *"Squawk-roar!"*, *"Clink-whirrr!"*, *"RUMBLE-CRUNCH!"*, *"Bzzzt—"*, *"BOOM!"*, *"WOOHOO!"*, *"IMPOSSIBLE!!"*, *"CRISP SHADING!"*).
+  - **No canned template openers** (avoid *"In [Realm], try this new power!"*, *"Put your new skill into action!"*, *"Keep pushing deeper into..."*).
+- **No unexplained coding jargon**:
+  - Avoid words like *syntax*, *snippet*, *parameter*, *argument*, *attribute*, *method*, *override*, *subclass*, *superclass*, *iterate/iterating*, *concatenate*, *invoke*, *negate*, *immutable*, *mutable*, *deduplicate*, *invariant*, *runtime exception*, *zero-based index*, *expression*, *comprehension*, *data structures*.
+  - Whenever a real Python concept is taught, explain it in concrete, everyday terms (e.g., *text* for string, *named box* for variable, *inputs* for parameters/arguments, *position number starting at 0* for index, *locked list in `()`* for tuple, *split into separate variables* for unpack, *blueprint* for class, *action inside a class* for method, *safety net that catches errors* for `try`/`except`, *tiny one-line rule* for `lambda`).
+- **Keep `storyPrompt` and `objective` distinct**: `storyPrompt` briefly sets the scene and explains any new idea in plain words; `objective` is a short, crystal-clear task. Never copy-paste `objective` into `storyPrompt`.
+
 ## 1. One Concept at a Time + Repetition Before Combining
 - **Never introduce two brand-new concepts in the same trial** (e.g., never introduce `*` multiplication and `True`/`False` Booleans together, or variable addition and `str()` together). Teach each new concept in its own focused trial first.
 - **Repeat before combining**: Give players multiple low-stakes repetitions of core fundamentals (strings vs. variables, 4-space indentation, plain `if`, `==`, `<=`/`>=`, `for` loops) before combining them into multi-step or capstone trials. Aim for **8–10 main trials per Realm** in early eras.
@@ -50,8 +63,8 @@ Follow these rules whenever creating new lessons/trials or editing existing ones
 - **Keep the three tiers strictly progressive — each must add information the previous one withheld:**
   - `tier1_nudge` is **conceptual**: name the idea, operator, or method and point at the line to look at, but *without* the literal arguments. Write *"Use `.append(...)` to add the pearl onto the end of `bag`"*, not *"Call `bag.append("pearl")`"* — the latter is more specific than Tier 2 and inverts the progression.
   - `tier2_pattern` is the **shape** of the answer, with `<named_placeholder>` standing in for whatever the player still has to work out. Never paste the finished line: if the player supplies the index, write `first = crystals[<index>]`; if they supply the separator, write `clean = raw.replace("<old>", "<new>")`.
-  - `tier3_walkthrough` is the only tier that gives the **exact code or answer**. For an MC trial it names the option *and* the reason: *"Tap Option B (`opal`) — index `-1` always grabs the very last item."*
-- **An MC `tier2_pattern` must not state the answer.** Explain the rule that decides it instead: *"Compare 12, 45 and 29 — `max()` returns the largest, `min()` the smallest, `sum()` the total"* leaves the player to pick, whereas *"the smallest is 3"* makes Tier 3 redundant.
+  - `tier3_walkthrough` is the only tier that gives the **exact code or answer**. For an MC trial it names the option *and* the reason: *"Tap Option B (`opal`). Position `-1` always grabs the very last item."*
+- **An MC `tier2_pattern` must not state the answer.** Explain the rule that decides it instead: *"Compare 12, 45, and 29: `max()` returns the largest, `min()` the smallest, `sum()` the total."* leaves the player to pick, whereas *"the smallest is 3"* makes Tier 3 redundant.
 - **Never write a filler hint.** A nudge that would fit any trial (*"Double-check your indentation and variable names!"*, *"Combine everything you learned in this realm!"*, *"Trace it carefully!"*) is not a hint; and never send the player to a different difficulty mode for help.
 
 ## 7. Verification

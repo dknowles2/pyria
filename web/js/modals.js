@@ -473,14 +473,14 @@ export class ModalManager {
     const getHintGateMessage = (nextTierNum, isMc) => {
       if (nextTierNum === 2 && failedAttempts < 1) {
         return isMc
-          ? 'Chirp! Try picking an answer first! Make at least <strong>1 attempt</strong> before unlocking <strong>Tier 2: Code Pattern</strong> — guessing and checking helps your brain grow!'
-          : 'Chirp! Give your spell a try first! Press <strong>▶ Run Python Spell</strong> at least once before unlocking <strong>Tier 2: Code Pattern</strong> — making mistakes is how Code-Tamers learn!';
+          ? 'Try picking an answer first! Make at least <strong>1 attempt</strong> before unlocking <strong>Hint 2: Pattern</strong>. Guessing and checking helps you learn!'
+          : 'Give your code a try first! Press <strong>▶ Run Python Spell</strong> at least once before unlocking <strong>Hint 2: Pattern</strong>. Making mistakes is how Code-Tamers learn!';
       }
       if (nextTierNum >= 3 && failedAttempts < 2) {
         const remaining = 2 - failedAttempts;
         return isMc
-          ? `Almost! Try <strong>${remaining} more answer${remaining === 1 ? '' : 's'}</strong> (2 attempts total) before unlocking <strong>Tier ${nextTierNum}</strong>. You've got this!`
-          : `Almost! Try running your spell <strong>${remaining} more time${remaining === 1 ? '' : 's'}</strong> (2 attempts total) before unlocking <strong>Tier ${nextTierNum}</strong>. You've got this!`;
+          ? `Almost! Try <strong>${remaining} more answer${remaining === 1 ? '' : 's'}</strong> (2 attempts total) before unlocking <strong>Hint ${nextTierNum}</strong>. You've got this!`
+          : `Almost! Try running your code <strong>${remaining} more time${remaining === 1 ? '' : 's'}</strong> (2 attempts total) before unlocking <strong>Hint ${nextTierNum}</strong>. You've got this!`;
       }
       return null;
     };
@@ -498,17 +498,17 @@ export class ModalManager {
       if (trial.trialType === 'multiple_choice') {
         const right = (trial.choices || []).find((c) => c.id === trial.correctChoiceId);
         return right
-          ? `Secret Answer: "${right.label}" — ${right.explanation || ''}`
-          : 'Look closely at the exact Python syntax in each choice!';
+          ? `Secret Answer: "${right.label}". ${right.explanation || ''}`
+          : 'Look closely at how each choice is written!';
       }
       return `Pip's Secret Solution Guide:\n${trial.referenceSolution || ''}`;
     };
 
     const hintTiers = [
-      { key: 'tier1_nudge', label: 'Tier 1: Gentle Nudge' },
-      { key: 'tier2_pattern', label: 'Tier 2: Code Pattern' },
-      { key: 'tier3_walkthrough', label: 'Tier 3: Step-by-Step' },
-      { key: 'tier4_secret', label: "Tier 4: 🌟 Pip's Secret Solution Guide", customText: buildTier4SecretHint() },
+      { key: 'tier1_nudge', label: 'Hint 1: Clue' },
+      { key: 'tier2_pattern', label: 'Hint 2: Pattern' },
+      { key: 'tier3_walkthrough', label: 'Hint 3: Step-by-Step' },
+      { key: 'tier4_secret', label: "Hint 4: 🌟 Pip's Secret Answer", customText: buildTier4SecretHint() },
     ];
 
     const renderHintBoxHtml = (t) => {
@@ -516,7 +516,7 @@ export class ModalManager {
         return `
           <div class="hint-box" style="margin-bottom:8px;">
             <div class="hint-box-title">🐉 ${escapeHtml(t.label)}</div>
-            <div style="margin-bottom:6px;">Chirp! Here's a working example — read each line and try typing it into your spellbook:</div>
+            <div style="margin-bottom:6px;">Here is a working example. Read each line and try typing it into your spellbook:</div>
             <pre class="mc-code-snippet"><code>${escapeHtml(trial.referenceSolution.trim())}</code></pre>
           </div>
         `;
@@ -537,7 +537,7 @@ export class ModalManager {
         return `
           <div class="hint-box" style="margin-bottom:8px; border-color: var(--accent-emerald);">
             <div class="hint-box-title">🐉 Pip's Worked Example</div>
-            <div style="margin-bottom:6px;">Chirp! All hints used — here's how to solve this one: <strong>${escapeHtml(right.label)}</strong></div>
+            <div style="margin-bottom:6px;">All hints used! Here is how to solve this one: <strong>${escapeHtml(right.label)}</strong></div>
             ${right.code ? `<pre class="mc-code-snippet" style="margin-bottom:6px;"><code>${escapeHtml(right.code)}</code></pre>` : ''}
             <div>${renderSafeMarkdown(right.explanation || '')}</div>
           </div>
@@ -548,7 +548,7 @@ export class ModalManager {
       return `
         <div class="hint-box" style="margin-bottom:8px; border-color: var(--accent-emerald);">
           <div class="hint-box-title">🐉 Pip's Worked Example</div>
-          <div style="margin-bottom:6px;">Chirp! All hints used — here's an example of how to solve it! Read each line carefully and try typing it into your spellbook:</div>
+          <div style="margin-bottom:6px;">All hints used! Here is an example of how to solve it. Read each line carefully and try typing it into your spellbook:</div>
           <pre class="mc-code-snippet"><code>${escapeHtml(sol)}</code></pre>
         </div>
       `;
@@ -865,7 +865,7 @@ export class ModalManager {
             audio.playError();
             outputEl.className = 'pip-console error';
             outputEl.innerHTML = `
-              <div class="pip-console-header">🐉 Not quite — try another choice!</div>
+              <div class="pip-console-header">🐉 Not quite! Try another choice.</div>
               <div class="pip-console-body">${renderSafeMarkdown(choice.explanation || 'Look closely at each line of the Python spell and try again!')}</div>
             `;
             outputEl.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
@@ -969,7 +969,7 @@ export class ModalManager {
             audio.playError();
             outputEl.className = 'pip-console error';
             outputEl.innerHTML = `
-              <div class="pip-console-header">🐉 Not quite — try another choice!</div>
+              <div class="pip-console-header">🐉 Not quite! Try another choice.</div>
               <div class="pip-console-body">${renderSafeMarkdown(choice.explanation || 'Look closely at the Python example and try again!')}</div>
             `;
             outputEl.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
@@ -1017,10 +1017,10 @@ export class ModalManager {
       const renderBugBannerBody = () => {
         if (currentMode === 'explorer' || failedAttempts >= 1) {
           return renderSafeMarkdown(
-            trial.bugSummary || 'Lord Null sabotaged this spell — find and fix the bug, then run it!'
+            trial.bugSummary || 'Lord Null broke this code. Find and fix the bug, then run it!'
           );
         }
-        return 'Lord Null sabotaged this spell! Read the code carefully, spot what is broken, and run your fix. <em>(A detailed bug clue unlocks after your first test run, or in Explorer mode.)</em>';
+        return 'Lord Null broke this code! Read it carefully, spot what is wrong, and run your fix. <em>(A detailed bug clue unlocks after your first test run, or in Explorer mode.)</em>';
       };
 
       const renderObjectiveInnerHtml = () => {
@@ -1058,7 +1058,7 @@ export class ModalManager {
         <p class="dialogue-text">${renderSafeMarkdown(trial.storyPrompt)}</p>
 
         <div id="trial-challenge-banner" class="challenge-banner ${currentMode === 'challenge' ? '' : 'hidden'}">
-          <span>🏆 <strong>Challenge Mode Active</strong> — Code spoilers hidden · Hints capped at Tier 1</span>
+          <span>🏆 <strong>Challenge Mode Active</strong>: Code spoilers hidden · Hints capped at Hint 1</span>
           <span class="pill pill-gold">+${CHALLENGE_BONUS_SHARDS} Bonus Shards &amp; 🏆 Badge</span>
         </div>
 
@@ -1080,15 +1080,15 @@ export class ModalManager {
 
         <div id="trial-comment-tip" class="comment-tip-banner ${showCommentTip ? '' : 'hidden'}">
           <strong>💬 What are <code>#</code> lines?</strong>
-          Lines starting with <code>#</code> are <strong>comments</strong> — helpful notes that Python completely ignores. Type your real Python code on a <strong>new line without <code>#</code></strong>!
+          Lines starting with <code>#</code> are <strong>comments</strong> (notes that Python skips). Type your real Python code on a <strong>new line without <code>#</code></strong>!
         </div>
 
         ${
           showIndentTip
             ? `
               <div class="comment-tip-banner">
-                <strong>📏 Golden Rule — Colons <code>:</code> &amp; Indentation:</strong>
-                End every <code>if</code>, <code>elif</code>, <code>else</code>, <code>for</code>, or <code>def</code> line with a colon <code>:</code>, then indent the lines inside by <strong>4 spaces</strong> (tap <strong>⇥ Indent</strong> or press <strong>Enter</strong> right after <code>:</code>).
+                <strong>📏 Colons <code>:</code> and Spacing Rule:</strong>
+                End every <code>if</code>, <code>elif</code>, <code>else</code>, <code>for</code>, or <code>def</code> line with a colon <code>:</code>, then push the lines inside over by <strong>4 spaces</strong> (tap <strong>⇥ Indent</strong> or press <strong>Enter</strong> right after <code>:</code>).
               </div>
             `
             : ''
@@ -1316,7 +1316,7 @@ export class ModalManager {
               `
               : `
                 <div class="pip-console-header">🐉 Pip spots a comment-only spell!</div>
-                <div class="pip-console-body">Every line in the coding box starts with <code>#</code> — those are <strong>comments</strong> (notes that Python ignores)! Click inside the coding box, start a new line <strong>without <code>#</code></strong>, type your Python spell, and press <strong>▶ Run Python Spell</strong>!</div>
+                <div class="pip-console-body">Every line in the coding box starts with <code>#</code>. Those are <strong>comments</strong> (notes that Python skips)! Click inside the coding box, start a new line <strong>without <code>#</code></strong>, type your Python code, and press <strong>▶ Run Python Spell</strong>!</div>
               `;
           codeEl.focus();
           const endPos = codeEl.value.length;
