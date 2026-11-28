@@ -155,6 +155,31 @@ class RetroAudio {
       this.playTone(f * 0.5, dur, 'triangle', 0.04, i * 0.08);
     });
   }
+
+  playSwitchChime() {
+    // Lush warm Switch-era major-9th harmonic shimmer
+    const chord = [261.63, 329.63, 392.0, 493.88, 587.33, 783.99];
+    chord.forEach((f, i) => {
+      this.playTone(f, 0.42, 'triangle', 0.045, i * 0.055);
+      this.playTone(f * 2, 0.28, 'sine', 0.022, i * 0.055 + 0.02);
+    });
+  }
+
+  playGlitchDowngrade() {
+    // 6-stage descending bit-crush power-down synced to Switch 3D -> 128 -> 64 -> 32 -> 16 -> 8-Bit!
+    const hits = [
+      [880, 0.0, 'sawtooth'],
+      [659.25, 0.65, 'sawtooth'],
+      [493.88, 1.20, 'sawtooth'],
+      [370.0, 1.75, 'square'],
+      [261.63, 2.30, 'square'],
+      [130.81, 2.85, 'square'],
+    ];
+    for (const [f, delay, type] of hits) {
+      this.playTone(f, 0.22, type, 0.065, delay);
+      this.playTone(f * 0.503, 0.24, 'square', 0.045, delay + 0.04);
+    }
+  }
 }
 
 export const audio = new RetroAudio();
