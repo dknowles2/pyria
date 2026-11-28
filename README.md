@@ -51,7 +51,7 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 | :--- | :--- | :--- | :--- |
 | **Act I — Tideglass Archipelago** | 1. Coral Shallows · 2. Driftwood Market · 3. Pearl Grotto · 4. Maelstrom Lighthouse | Ripple, Gullwing, Nacre, Tempest | Lists (`[...]`), zero-based & negative indexing, `.append()`, `len()`/`max()`/`min()`/`sum()`, `/` division & floats, slicing, `for` over lists & filtering |
 | **Act II — Clockwork Spire** | 5. Brass Courtyard · 6. Pendulum Halls · 7. Steam Foundry · 8. Grand Chronometer | Sprocket, Tock, Piston, Aether | `while` loops, `break` & `continue`, defining functions (`def`), parameters, default arguments & `return` |
-| **Act III — Alchemist's Caldera** | 9. Sulfur Terrace · 10. Crystal Alembic · 11. Potion Vault · 12. Magma Core | Cinderel, Prism, Elixir, Crucible | Dictionaries (`{...}`), `.get()`, `.items()`, f-strings (`f"{...}"`), lists of dictionaries & frequency counting |
+| **Act III — Alchemist's Caldera** | 9. Sulfur Terrace · 10. Crystal Alembic · 11. Potion Vault · 12. Magma Core | Cinderel, Prism, Elixir, Crucible | Dictionaries (`{...}`), `.get()`, `.values()`, f-strings (`f"{...}"`), lists of dictionaries & frequency counting |
 | **Act IV — Shattered Skyway** | 13. Cloud Dock · 14. Starlight Bridge · 15. Storm Bastion · 16. Null's 16-Bit Throne | Nimbus, Comet, Fulmin, Zenith | Nested loops & 2D grids, intro Classes (`class`, `__init__`, `self`, methods), object lists & **16-Bit Finale → Upgrades to 32-Bit Isometric!** |
 
 ---

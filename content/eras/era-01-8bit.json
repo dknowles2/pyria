@@ -4521,7 +4521,7 @@
               {
                 "id": "a",
                 "label": "4",
-                "explanation": "`8 / 2` is `4`, whereas `%` gives the REMAINDER left over after dividing!"
+                "explanation": "Dividing 8 by 2 gives 4, whereas `%` gives the REMAINDER left over after dividing!"
               },
               {
                 "id": "b",

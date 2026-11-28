@@ -82,7 +82,7 @@
       "label": "Basic Math",
       "minEra": "era-01-8bit",
       "maxBasicRealm": 5,
-      "description": "Using +, -, *, //, and % with numbers and variables."
+      "description": "Using +, -, *, /, //, **, and % with numbers and variables."
     },
     {
       "id": "type_conversion",

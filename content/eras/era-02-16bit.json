@@ -1438,7 +1438,7 @@
           ],
           "introChoice": {
             "title": "Dividing With /",
-            "prompt": "Python's single slash `/` splits a number into equal parts. Watch for one surprise: `/` ALWAYS gives back a **float** (a number with a decimal point), even when the split is perfectly even — so `8 / 4` is `4.0`, not `4`.",
+            "prompt": "Python's single slash `/` splits a number into equal parts. Watch for one surprise: `/` ALWAYS gives back a **float** (a number with a decimal point), even when the split is perfectly even — so `8 / 4` is `2.0`, not `2`.",
             "question": "What does `print(9 / 2)` display?",
             "codeSnippet": "print(9 / 2)",
             "choices": [

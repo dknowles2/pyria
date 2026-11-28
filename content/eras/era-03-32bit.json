@@ -1828,7 +1828,7 @@
           "referenceSolution": "rooms = {\"hall\": {\"gems\": 12}, \"vault\": {\"gems\": 40}}\nfor name, room in rooms.items():\n    print(name, room[\"gems\"])\n",
           "testCode": "_lines = [l.strip() for l in OUTPUT.strip().splitlines() if l.strip()]\nassert _lines == ['hall 12', 'vault 40'], f\"Expected ['hall 12', 'vault 40'], got {_lines!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip taps the two blanks: 'Use `rooms.items()` so every turn hands you the room NAME and its dictionary together!'",
+            "tier1_nudge": "Pip points to the loop header: 'Use `rooms.items()` so every turn hands you the room NAME and its dictionary together!'",
             "tier2_pattern": "for name, room in rooms.items():\n    print(name, room[\"gems\"])",
             "tier3_walkthrough": "Add:\nfor name, room in rooms.items():\n    print(name, room[\"gems\"])"
           },
