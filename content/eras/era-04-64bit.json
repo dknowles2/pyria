@@ -1752,7 +1752,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\n",
-            "standard": "# Sort dragons by power, highest first, into ranked -- then print the top dragon's name\n",
+            "standard": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\n# Sort by power, highest first, into ranked -- then print the top dragon's name\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "dragons = [(\"Spark\", 10), (\"Nova\", 80), (\"Pebble\", 30)]\nranked = sorted(dragons, key=lambda d: d[1], reverse=True)\nprint(ranked[0][0])\n",
@@ -1908,7 +1908,7 @@
           "trialType": "code",
           "title": "Back-to-Front Painter's Sort",
           "storyPrompt": "You're right outside Quasar's vault! Sort `polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]` from FARTHEST to NEAREST (`reverse=True`) into `draw_order` and `print(draw_order[0][\"id\"])`.",
-          "objective": "Sort the `polys` list from farthest to nearest by each polygon's `z` depth into `draw_order` using `sorted()` and a `lambda` key, then print the first polygon's `id`.",
+          "objective": "Sort the `polys` list of two polygons from farthest to nearest by each polygon's `z` depth into `draw_order` using `sorted()` and a `lambda` key, then print the first polygon's `id`.",
           "concepts": [
             "debugging",
             "sorting_lambdas"
@@ -1917,7 +1917,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\n",
-            "standard": "# Sort polys from farthest to nearest by z into draw_order, then print the first id\n",
+            "standard": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\n# Sort from farthest to nearest by z into draw_order, then print the first id\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "polys = [{\"id\": \"far\", \"z\": 50}, {\"id\": \"near\", \"z\": 10}]\ndraw_order = sorted(polys, key=lambda p: p[\"z\"], reverse=True)\nprint(draw_order[0][\"id\"])\n",
@@ -2256,7 +2256,7 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\n",
-            "standard": "# Sort the council by power, highest first, into leaders -- then print the top name\n",
+            "standard": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\n# Sort descending by \"p\" into leaders, then print the top name\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "council = [{\"n\": \"Spark\", \"p\": 20}, {\"n\": \"Aurelion\", \"p\": 64}, {\"n\": \"Zenith\", \"p\": 40}]\nleaders = sorted(council, key=lambda d: d[\"p\"], reverse=True)\nprint(leaders[0][\"n\"])\n",
