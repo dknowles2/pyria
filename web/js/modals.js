@@ -402,7 +402,7 @@ export class ModalManager {
         <button class="btn btn-sm btn-ghost" data-close>✕</button>
       </div>
       <div class="dialogue-box">
-        <canvas id="modal-npc-canvas" width="48" height="48" class="pixel-canvas npc-portrait-canvas"></canvas>
+        <canvas id="modal-npc-canvas" width="64" height="64" class="pixel-canvas npc-portrait-canvas"></canvas>
         <div>
           <p class="dialogue-text">${escapeHtml(message)}</p>
           <p class="dialogue-catchphrase">"${escapeHtml(npc.catchphrase)}"</p>
@@ -424,10 +424,20 @@ export class ModalManager {
         npcCanvas.height = 96;
         npcCanvas.classList.remove('pixel-canvas');
       }
-      const ctx = npcCanvas.getContext('2d');
-      ctx.imageSmoothingEnabled = is64;
-      const pad = is64 ? 4 : 4;
-      this.sprites.drawNpc(ctx, spriteKey, eraKey, pad, pad, npcCanvas.width - pad * 2, npcCanvas.height - pad * 2);
+      let tick = 0;
+      const drawPortrait = () => {
+        const ctx = npcCanvas.getContext('2d');
+        ctx.clearRect(0, 0, npcCanvas.width, npcCanvas.height);
+        ctx.imageSmoothingEnabled = is64;
+        this.sprites.drawPortraitBackdrop(ctx, npcCanvas.width, npcCanvas.height, eraKey, 'meadow');
+        const bob = this.sprites.normalizeEra(eraKey) !== '8bit' ? Math.round(Math.sin(tick * 0.4) * (is64 ? 2 : 1.5)) : 0;
+        const pad = is64 ? 6 : 8;
+        this.sprites.drawNpc(ctx, spriteKey, eraKey, pad, pad + bob, npcCanvas.width - pad * 2, npcCanvas.height - pad * 2);
+        tick += 1;
+      };
+      drawPortrait();
+      const iv = setInterval(drawPortrait, 180);
+      this.addCleanup(() => clearInterval(iv));
     }
 
     this.content.querySelectorAll('[data-close]').forEach((btn) => {
@@ -2293,7 +2303,7 @@ export class ModalManager {
       </div>
 
       <div class="dragon-rescue-banner">
-        <canvas id="dragon-rescue-canvas" width="64" height="64" class="pixel-canvas dragon-rescue-canvas"></canvas>
+        <canvas id="dragon-rescue-canvas" width="72" height="72" class="pixel-canvas dragon-rescue-canvas"></canvas>
         <p class="dialogue-text">"${escapeHtml(dragon.rescueDialogue)}"</p>
       </div>
 
@@ -2325,9 +2335,11 @@ export class ModalManager {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.imageSmoothingEnabled = is64;
+        this.sprites.drawPortraitBackdrop(ctx, canvas.width, canvas.height, eraKey, 'dragon');
         const scale = is64 ? 2 : 1;
+        const pad = is64 ? 10 * scale : 10;
         const bob = Math.round(Math.sin(tick * 0.45) * 3 * scale);
-        this.sprites.drawNpc(ctx, spriteKey, eraKey, 8 * scale, 8 * scale + bob, 48 * scale, 48 * scale);
+        this.sprites.drawNpc(ctx, spriteKey, eraKey, pad, pad + bob, canvas.width - pad * 2, canvas.height - pad * 2);
         tick += 1;
       };
       drawDragon();

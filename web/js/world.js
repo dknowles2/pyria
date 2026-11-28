@@ -83,10 +83,11 @@ export class WorldEngine {
     // Camera top-left in world pixels (smoothly lerped toward hero)
     this.camera = { x: 0, y: 0, initialized: false };
 
-    // Cached offscreen terrain layer for the corner minimap
+    // Cached offscreen terrain layer for the corner minimap + cached radial glow sprites
     this.minimapCanvas = null;
     this.minimapCacheKey = null;
     this.minimapRect = null;
+    this.lightSpriteCache = new Map();
     this.minimapMarkers = [];
     this.wayfinderRect = null;
 
@@ -1049,34 +1050,36 @@ export class WorldEngine {
     const endRow = Math.min(this.map.height - 1, Math.ceil((camY + this.canvas.height) / TILE_PX) + 1);
 
     const sparkRescued = rescued.has('dragon-spark');
-    const pebbleRescued = rescued.has('dragon-pebble');
+    const is16Bit = this.eraKey === '16bit';
+    const lightSources = is16Bit ? [] : null;
 
     // 1. Ground & Decor layers (integer pixel snapped to prevent subpixel seams)
     for (let y = startRow; y <= endRow; y++) {
       for (let x = startCol; x <= endCol; x++) {
         const sx = x * TILE_PX - camX;
         const sy = y * TILE_PX - camY;
-        const key = `${x},${y}`;
-        const ov = dynamicOverrides.get(key);
-
-        let groundTile = this.map.layers.ground[y][x];
-        if (ov && ov.layer === 'ground') {
-          groundTile = ov.tile;
-        }
+        const groundTile = this.getEffectiveGroundTile(x, y, dynamicOverrides);
         this.sprites.drawTile(ctx, groundTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
 
-        // Animated water, lava & starfield shimmer
+        // Animated water, lava & starfield shimmer (before SNES shoreline banks so glints stay in water)
         if (groundTile === 'water') {
-          const shimmer = Math.sin(this.time * 3 + x * 0.9 + y * 0.7);
-          if (shimmer > 0.55) {
-            ctx.fillStyle = 'rgba(186, 230, 253, 0.28)';
-            ctx.fillRect(sx + 8, sy + 14 + Math.round(shimmer * 4), 16, 4);
+          if (is16Bit) {
+            this.drawSnesWaterAnimation(ctx, x, y, sx, sy);
+          } else {
+            const shimmer = Math.sin(this.time * 3 + x * 0.9 + y * 0.7);
+            if (shimmer > 0.55) {
+              ctx.fillStyle = 'rgba(186, 230, 253, 0.28)';
+              ctx.fillRect(sx + 8, sy + 14 + Math.round(shimmer * 4), 16, 4);
+            }
           }
         } else if (groundTile === 'lava') {
           const pulse = Math.sin(this.time * 4 + x * 1.1 + y * 0.8);
           if (pulse > 0.4) {
-            ctx.fillStyle = 'rgba(253, 224, 71, 0.42)';
+            ctx.fillStyle = is16Bit ? 'rgba(254, 240, 138, 0.52)' : 'rgba(253, 224, 71, 0.42)';
             ctx.fillRect(sx + 10, sy + 16, 14, 5);
+          }
+          if (is16Bit && x % 2 === 0 && y % 2 === 0) {
+            lightSources.push({ x: sx + TILE_PX * 0.5, y: sy + TILE_PX * 0.5, r: TILE_PX * 1.5, rgb: '249, 115, 22', alpha: 0.11 });
           }
         } else if (groundTile === 'star_tile') {
           const twinkle = Math.sin(this.time * 5 + x * 2.3 + y * 1.7);
@@ -1086,18 +1089,67 @@ export class WorldEngine {
           }
         }
 
+        // 16-Bit SNES organic terrain transitions & non-repeating micro-variation
+        if (is16Bit) {
+          this.drawSnesGroundDetails(ctx, x, y, sx, sy, groundTile, dynamicOverrides);
+        }
+
         // Bit 1 visual upgrade: swaying flower pixels after Spark is rescued
         if (sparkRescued && groundTile === 'grass_flower') {
           const sway = Math.round(Math.sin(this.time * 4 + x + y) * 2);
           ctx.fillStyle = 'rgba(254, 240, 138, 0.55)';
           ctx.fillRect(sx + 20 + sway, sy + 14, 4, 4);
         }
+      }
+    }
 
-        let decorTile = this.map.layers.decor[y][x];
-        if (ov && ov.layer === 'decor') {
-          decorTile = ov.tile;
-        }
-        if (decorTile) {
+    // 1b. 16-Bit SNES Directional Cast Shadows + Decor Layer
+    for (let y = startRow; y <= endRow; y++) {
+      for (let x = startCol; x <= endCol; x++) {
+        const sx = x * TILE_PX - camX;
+        const sy = y * TILE_PX - camY;
+        const decorTile = this.getEffectiveDecorTile(x, y, dynamicOverrides);
+        if (!decorTile) continue;
+
+        if (is16Bit) {
+          this.drawSnesDecorShadow(ctx, x, y, sx, sy, decorTile, dynamicOverrides);
+          if (decorTile === 'tree' || decorTile === 'pine_tree') {
+            // Fuller overhanging SNES canopy anchored at base
+            const h = Math.round(TILE_PX * 1.16);
+            const w = Math.round(TILE_PX * 1.1);
+            this.sprites.drawTile(ctx, decorTile, this.eraKey, sx - Math.round((w - TILE_PX) / 2), sy - (h - TILE_PX), w, h);
+          } else {
+            this.sprites.drawTile(ctx, decorTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
+          }
+          // Register dynamic SNES point light sources
+          if (decorTile === 'campfire' || decorTile === 'torch') {
+            const flicker = 0.9 + 0.1 * Math.sin(this.time * 11 + x * 3 + y);
+            lightSources.push({
+              x: sx + TILE_PX * 0.5,
+              y: sy + TILE_PX * 0.35,
+              r: TILE_PX * (decorTile === 'campfire' ? 2.5 : 2.1) * flicker,
+              rgb: '251, 146, 60',
+              alpha: decorTile === 'campfire' ? 0.34 : 0.26,
+            });
+          } else if (decorTile === 'portal' || decorTile === 'crystal_pillar') {
+            const pulse = 0.88 + 0.12 * Math.sin(this.time * 4.5 + x);
+            lightSources.push({
+              x: sx + TILE_PX * 0.5,
+              y: sy + TILE_PX * 0.5,
+              r: TILE_PX * 2.1 * pulse,
+              rgb: '56, 189, 248',
+              alpha: 0.28,
+            });
+          } else if (decorTile === 'vault_shrine') {
+            lightSources.push({
+              x: sx + TILE_PX * 0.5,
+              y: sy + TILE_PX * 0.45,
+              r: TILE_PX * 2.4,
+              rgb: '250, 204, 21',
+              alpha: 0.28,
+            });
+          }
+        } else {
           this.sprites.drawTile(ctx, decorTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
         }
       }
@@ -1141,6 +1193,12 @@ export class WorldEngine {
         const py = Math.round(this.pip.y * TILE_PX - camY);
         const pipSize = TILE_PX * 0.85;
         const bob = Math.round(Math.sin(this.time * 6) * 2);
+        if (is16Bit) {
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+          ctx.beginPath();
+          ctx.ellipse(px, py + 2, pipSize * 0.3, pipSize * 0.13, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
         this.sprites.drawPip(
           ctx,
           this.save.appearance,
@@ -1155,7 +1213,7 @@ export class WorldEngine {
       },
     });
 
-    // Hero
+    // Hero (shadow.png is already layer 0 of drawHero, so no extra runtime ellipse)
     drawList.push({
       sortY: this.hero.y,
       draw: () => {
@@ -1181,6 +1239,11 @@ export class WorldEngine {
       item.draw();
     }
 
+    // 2b. 16-Bit SNES Dynamic Lighting, Drifting Cloud Shadows & Golden-Hour Atmosphere
+    if (is16Bit) {
+      this.renderSnesAtmosphere(ctx, lightSources, camX, camY);
+    }
+
     // 3. Biome Ambiance Particles (per-Realm palette; subtle ambient glow or full Bit Restored radiance)
     const BIOME_PARTICLE_RGB = {
       'realm-01-meadow': '253, 224, 71',  // gold fireflies
@@ -1189,19 +1252,29 @@ export class WorldEngine {
       'realm-04-hollow': '186, 230, 253', // icy-blue snowflakes
       'realm-05-woods': '190, 242, 100',  // lime/gold wisps
       'realm-06-crypt': '45, 212, 191',   // misty teal spores
+      'realm-16-01-shallows': '125, 211, 252', // lagoon spray & sun motes
+      'realm-16-02-market': '253, 224, 71',    // harbor sunlit dust
+      'realm-16-03-grotto': '196, 181, 253',   // iridescent pearl glints
+      'realm-16-04-lighthouse': '186, 230, 253',
     };
     const anyRescued = rescued.size > 0;
     const isAtmosphericBiome = ['realm-03-cavern', 'realm-04-hollow', 'realm-05-woods', 'realm-06-crypt'].includes(
       this.map.realmId
     );
-    if (anyRescued || isAtmosphericBiome) {
+    if (is16Bit || anyRescued || isAtmosphericBiome) {
       const rgb = BIOME_PARTICLE_RGB[this.map.realmId] || '253, 224, 71';
-      const intensity = anyRescued ? 1.0 : 0.6;
+      const intensity = anyRescued ? 1.0 : (is16Bit ? 0.78 : 0.6);
       for (const p of this.particles) {
         const sx = p.x - camX;
         const sy = p.y - camY;
         if (sx < -8 || sy < -8 || sx > this.canvas.width + 8 || sy > this.canvas.height + 8) continue;
         const alpha = (0.3 + 0.48 * Math.sin(this.time * 3.5 + p.phase)) * intensity;
+        if (is16Bit) {
+          ctx.fillStyle = `rgba(${rgb}, ${(alpha * 0.32).toFixed(2)})`;
+          ctx.beginPath();
+          ctx.arc(Math.round(sx) + 2, Math.round(sy) + 2, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.fillStyle = `rgba(${rgb}, ${alpha.toFixed(2)})`;
         ctx.fillRect(Math.round(sx), Math.round(sy), 4, 4);
       }
@@ -1210,6 +1283,351 @@ export class WorldEngine {
     // 4. Next-Objective Wayfinder Arrow + Corner Minimap Overlay
     this.renderWayfinder(ctx, completed, rescued);
     this.renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY);
+  }
+
+  getEffectiveGroundTile(x, y, dynamicOverrides) {
+    if (!this.map) return 'grass';
+    const cx = Math.max(0, Math.min(this.map.width - 1, x));
+    const cy = Math.max(0, Math.min(this.map.height - 1, y));
+    const ov = dynamicOverrides.get(`${cx},${cy}`);
+    if (ov && ov.layer === 'ground') return ov.tile;
+    return this.map.layers.ground[cy]?.[cx] || 'grass';
+  }
+
+  getEffectiveDecorTile(x, y, dynamicOverrides) {
+    if (!this.map) return null;
+    const cx = Math.max(0, Math.min(this.map.width - 1, x));
+    const cy = Math.max(0, Math.min(this.map.height - 1, y));
+    const ov = dynamicOverrides.get(`${cx},${cy}`);
+    if (ov && ov.layer === 'decor') return ov.tile;
+    return this.map.layers.decor[cy]?.[cx] || null;
+  }
+
+  /**
+   * 16-Bit SNES auto-tiled organic shorelines, feathered grass-over-dirt borders,
+   * stone curbs, and non-repeating world micro-variation.
+   */
+  drawSnesGroundDetails(ctx, x, y, sx, sy, groundTile, dynamicOverrides) {
+    const isGrass = (t) => t === 'grass' || t === 'grass_flower' || t === 'flower_bed';
+    const isWater = (t) => t === 'water';
+    const isLiquid = (t) => t === 'water' || t === 'lava';
+    const hash = ((x * 73856093) ^ (y * 19349663)) >>> 0;
+
+    // 1. Non-repeating subtle ground micro-variation so large regions feel hand-painted
+    if (isGrass(groundTile)) {
+      const m = hash % 11;
+      if (m === 0) {
+        // Warm sunlit clover patch
+        ctx.fillStyle = 'rgba(134, 239, 172, 0.22)';
+        ctx.fillRect(sx + 6 + (hash % 18), sy + 8 + ((hash >> 4) % 18), 14, 8);
+      } else if (m === 3) {
+        // Tiny extra wildflower bud
+        const fx = sx + 8 + (hash % 28);
+        const fy = sy + 8 + ((hash >> 3) % 28);
+        ctx.fillStyle = (hash & 1) ? '#fef08a' : '#f8fafc';
+        ctx.fillRect(fx, fy, 3, 3);
+      } else if (m === 6) {
+        // Soft deeper turf cluster
+        ctx.fillStyle = 'rgba(22, 101, 52, 0.16)';
+        ctx.fillRect(sx + 10 + (hash % 16), sy + 12 + ((hash >> 5) % 16), 12, 6);
+      }
+    } else if (groundTile === 'dirt_path' || groundTile === 'sand') {
+      const m = hash % 7;
+      if (m === 0) {
+        const px = sx + 6 + (hash % 32);
+        const py = sy + 6 + ((hash >> 3) % 32);
+        ctx.fillStyle = 'rgba(255, 248, 220, 0.35)';
+        ctx.fillRect(px, py, 4, 2);
+        ctx.fillStyle = 'rgba(120, 72, 32, 0.32)';
+        ctx.fillRect(px, py + 2, 4, 2);
+      } else if (m === 4) {
+        ctx.fillStyle = 'rgba(138, 94, 52, 0.12)';
+        ctx.fillRect(sx + 8, sy + 14 + ((hash >> 4) % 14), 22, 5);
+      }
+    }
+
+    const n = this.getEffectiveGroundTile(x, y - 1, dynamicOverrides);
+    const s = this.getEffectiveGroundTile(x, y + 1, dynamicOverrides);
+    const w = this.getEffectiveGroundTile(x - 1, y, dynamicOverrides);
+    const e = this.getEffectiveGroundTile(x + 1, y, dynamicOverrides);
+
+    // 2. Auto-tiled SNES Riverbanks & Shorelines on water tiles bordering land
+    if (isWater(groundTile)) {
+      const foamOffset = Math.round(Math.sin(this.time * 3.2 + x * 0.9 + y * 0.7) * 1.5);
+      const SHORE_STYLES = {
+        sand: { lip: '#f2d28b', undercut: '#9a7136', bank: '#c2954e' },
+        dirt_path: { lip: '#c89e6a', undercut: '#613c1d', bank: '#8a5e34' },
+        stone_floor: { lip: '#94a3b8', undercut: '#2f3744', bank: '#475569' },
+        ice_floor: { lip: '#e0f2fe', undercut: '#0369a1', bank: '#38bdf8' },
+        obsidian_floor: { lip: '#4c1d95', undercut: '#0f0a1e', bank: '#1e1b4b' },
+        brass_floor: { lip: '#d97706', undercut: '#451a03', bank: '#78350f' },
+        default: { lip: '#3ea647', undercut: '#14331d', bank: '#6b4423' },
+      };
+      const shoreFor = (t) => SHORE_STYLES[t] || SHORE_STYLES.default;
+
+      if (!isLiquid(n) && n !== 'bridge_wood' && n !== 'bridge_broken') {
+        const st = shoreFor(n);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx, sy, TILE_PX, 4);
+        ctx.fillStyle = st.undercut;
+        ctx.fillRect(sx, sy + 4, TILE_PX, 2);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx, sy + 6, TILE_PX, 7);
+        ctx.fillStyle = 'rgba(10, 32, 64, 0.45)';
+        ctx.fillRect(sx, sy + 13, TILE_PX, 3);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.72)';
+        ctx.fillRect(sx + 2, sy + 15 + foamOffset, TILE_PX - 4, 2);
+      }
+      if (!isLiquid(s) && s !== 'bridge_wood' && s !== 'bridge_broken') {
+        const st = shoreFor(s);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.58)';
+        ctx.fillRect(sx + 3, sy + TILE_PX - 8 - foamOffset, TILE_PX - 6, 2);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx, sy + TILE_PX - 6, TILE_PX, 3);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx, sy + TILE_PX - 3, TILE_PX, 3);
+      }
+      if (!isLiquid(w) && w !== 'bridge_wood' && w !== 'bridge_broken') {
+        const st = shoreFor(w);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx, sy, 4, TILE_PX);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx + 4, sy, 4, TILE_PX);
+        ctx.fillStyle = 'rgba(10, 32, 64, 0.32)';
+        ctx.fillRect(sx + 8, sy, 3, TILE_PX);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.65)';
+        ctx.fillRect(sx + 10 + foamOffset, sy + 4, 2, TILE_PX - 8);
+      }
+      if (!isLiquid(e) && e !== 'bridge_wood' && e !== 'bridge_broken') {
+        const st = shoreFor(e);
+        ctx.fillStyle = 'rgba(224, 247, 255, 0.62)';
+        ctx.fillRect(sx + TILE_PX - 11 - foamOffset, sy + 4, 2, TILE_PX - 8);
+        ctx.fillStyle = st.bank;
+        ctx.fillRect(sx + TILE_PX - 8, sy, 4, TILE_PX);
+        ctx.fillStyle = st.lip;
+        ctx.fillRect(sx + TILE_PX - 4, sy, 4, TILE_PX);
+      }
+    }
+
+    // 3. Organic Feathered Grass-over-Dirt / Grass-over-Sand Path Edges
+    if (groundTile === 'dirt_path' || groundTile === 'sand') {
+      const grassEdge = '#3ea647';
+      const grassDark = '#236b33';
+      const dirtRim = 'rgba(120, 74, 34, 0.35)';
+      const step = 6;
+
+      if (isGrass(n)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((x * 7 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + i, sy + depth, step, 2);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + i, sy + depth - 2, step, 2);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx + i, sy, step, depth - 2);
+        }
+      }
+      if (isGrass(s)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((x * 5 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + i, sy + TILE_PX - depth - 2, step, 2);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + i, sy + TILE_PX - depth, step, 2);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx + i, sy + TILE_PX - depth + 2, step, depth - 2);
+        }
+      }
+      if (isGrass(w)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((y * 7 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + depth, sy + i, 2, step);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + depth - 2, sy + i, 2, step);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx, sy + i, depth - 2, step);
+        }
+      }
+      if (isGrass(e)) {
+        for (let i = 0; i < TILE_PX; i += step) {
+          const depth = 4 + (((y * 5 + i) % 3) * 2);
+          ctx.fillStyle = dirtRim;
+          ctx.fillRect(sx + TILE_PX - depth - 2, sy + i, 2, step);
+          ctx.fillStyle = grassDark;
+          ctx.fillRect(sx + TILE_PX - depth, sy + i, 2, step);
+          ctx.fillStyle = grassEdge;
+          ctx.fillRect(sx + TILE_PX - depth + 2, sy + i, depth - 2, step);
+        }
+      }
+      // Smoothly rounded inner corners when two adjacent sides border grass
+      if (isGrass(n) && isGrass(w)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx, sy, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + 6, sy + 6, 3, 3);
+      }
+      if (isGrass(n) && isGrass(e)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx + TILE_PX - 8, sy, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + TILE_PX - 9, sy + 6, 3, 3);
+      }
+      if (isGrass(s) && isGrass(w)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx, sy + TILE_PX - 8, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + 6, sy + TILE_PX - 9, 3, 3);
+      }
+      if (isGrass(s) && isGrass(e)) {
+        ctx.fillStyle = grassEdge;
+        ctx.fillRect(sx + TILE_PX - 8, sy + TILE_PX - 8, 8, 8);
+        ctx.fillStyle = grassDark;
+        ctx.fillRect(sx + TILE_PX - 9, sy + TILE_PX - 9, 3, 3);
+      }
+    }
+
+    // 4. Subtle stone floor curb & drop shadow when bordering grass/dirt
+    if (groundTile === 'stone_floor' || groundTile === 'brass_floor') {
+      if (isGrass(s) || s === 'dirt_path') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+        ctx.fillRect(sx, sy + TILE_PX - 3, TILE_PX, 3);
+      }
+      if (isGrass(e) || e === 'dirt_path') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
+        ctx.fillRect(sx + TILE_PX - 3, sy, 3, TILE_PX);
+      }
+    }
+  }
+
+  /**
+   * 16-Bit SNES layered animated water caustics & sun-glint sparkles.
+   */
+  drawSnesWaterAnimation(ctx, x, y, sx, sy) {
+    const wave = Math.sin(this.time * 2.6 + x * 0.8 + y * 0.6);
+    const shiftX = Math.round(Math.sin(this.time * 1.8 + y * 1.1) * 4);
+    ctx.fillStyle = 'rgba(158, 224, 255, 0.28)';
+    ctx.fillRect(sx + 8 + shiftX, sy + 12 + Math.round(wave * 2), 18, 3);
+    ctx.fillStyle = 'rgba(186, 230, 253, 0.22)';
+    ctx.fillRect(sx + 20 - shiftX, sy + 30 - Math.round(wave * 2), 14, 2);
+
+    const glint = Math.sin(this.time * 4.5 + x * 2.1 + y * 1.7);
+    if (glint > 0.72) {
+      ctx.fillStyle = 'rgba(240, 249, 255, 0.82)';
+      const gx = sx + 10 + ((x * 13 + y * 7) % 26);
+      const gy = sy + 10 + ((x * 5 + y * 11) % 26);
+      ctx.fillRect(gx, gy, 4, 2);
+      ctx.fillRect(gx + 1, gy - 1, 2, 4);
+    }
+  }
+
+  /**
+   * 16-Bit SNES directional cast shadows (sun from top-left -> shadow down-right).
+   */
+  drawSnesDecorShadow(ctx, x, y, sx, sy, decorTile, dynamicOverrides) {
+    const isWall = (t) => t === 'stone_wall' || t === 'ice_wall' || t === 'obsidian_wall' || t === 'mossy_gate_closed';
+    if (isWall(decorTile)) {
+      const nDecor = this.getEffectiveDecorTile(x, y - 1, dynamicOverrides);
+      const sDecor = this.getEffectiveDecorTile(x, y + 1, dynamicOverrides);
+      const eDecor = this.getEffectiveDecorTile(x + 1, y, dynamicOverrides);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.3)';
+      if (!isWall(sDecor)) {
+        ctx.fillRect(sx + 4, sy + TILE_PX, TILE_PX + (isWall(eDecor) ? 0 : 4), 10);
+      }
+      if (!isWall(eDecor)) {
+        const topY = isWall(nDecor) ? sy : sy + 4;
+        ctx.fillRect(sx + TILE_PX, topY, 8, sy + TILE_PX - topY);
+      }
+      return;
+    }
+
+    if (decorTile === 'tree' || decorTile === 'pine_tree') {
+      ctx.fillStyle = 'rgba(12, 32, 24, 0.34)';
+      ctx.beginPath();
+      ctx.ellipse(sx + TILE_PX * 0.58, sy + TILE_PX * 0.86, TILE_PX * 0.44, TILE_PX * 0.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (
+      decorTile === 'bush' ||
+      decorTile === 'statue' ||
+      decorTile === 'vault_shrine' ||
+      decorTile === 'column' ||
+      decorTile === 'crystal_pillar' ||
+      decorTile === 'anvil' ||
+      decorTile === 'chest_closed' ||
+      decorTile === 'chest_open' ||
+      decorTile === 'coral' ||
+      decorTile === 'gear_prop'
+    ) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.28)';
+      ctx.beginPath();
+      ctx.ellipse(sx + TILE_PX * 0.54, sy + TILE_PX * 0.82, TILE_PX * 0.36, TILE_PX * 0.15, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  getCachedLightSprite(rgb, radius, alpha) {
+    const r = Math.max(16, Math.round(radius / 8) * 8);
+    const a = Math.round(alpha * 50) / 50;
+    const key = `${rgb}:${r}:${a}`;
+    if (this.lightSpriteCache.has(key)) return this.lightSpriteCache.get(key);
+    const off = document.createElement('canvas');
+    off.width = r * 2;
+    off.height = r * 2;
+    const octx = off.getContext('2d');
+    const grad = octx.createRadialGradient(r, r, 2, r, r, r);
+    grad.addColorStop(0, `rgba(${rgb}, ${a.toFixed(2)})`);
+    grad.addColorStop(0.5, `rgba(${rgb}, ${(a * 0.35).toFixed(2)})`);
+    grad.addColorStop(1, `rgba(${rgb}, 0)`);
+    octx.fillStyle = grad;
+    octx.fillRect(0, 0, r * 2, r * 2);
+    if (this.lightSpriteCache.size > 48) this.lightSpriteCache.clear();
+    this.lightSpriteCache.set(key, off);
+    return off;
+  }
+
+  /**
+   * 16-Bit SNES atmospheric pass: dynamic radial point lights (campfires, torches,
+   * portals, shrines), slow drifting cloud shadows, and warm golden-hour sunlight wash.
+   */
+  renderSnesAtmosphere(ctx, lightSources, camX, camY) {
+    const W = this.canvas.width;
+    const H = this.canvas.height;
+    ctx.save();
+
+    // 1. Subtle slow-drifting SNES cloud shadows wrapped cleanly by exact 440px stride
+    const stride = 440;
+    const cloudOffset = (this.time * 18) % stride;
+    const camShiftX = ((camX * 0.25) % stride + stride) % stride;
+    const maxCols = Math.ceil(W / stride) + 1;
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.055)';
+    for (let i = -1; i <= maxCols; i++) {
+      const cx = i * stride + cloudOffset - camShiftX;
+      const cy = (((i * 190 + 120 - camY * 0.2) % (H + 260)) + (H + 260)) % (H + 260) - 100;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, 170, 62, -0.22, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 2. Dynamic point-light glow halos (cached offscreen radial sprites)
+    if (lightSources && lightSources.length > 0) {
+      ctx.globalCompositeOperation = 'lighter';
+      for (const ls of lightSources) {
+        const sprite = this.getCachedLightSprite(ls.rgb, ls.r, ls.alpha);
+        const half = sprite.width * 0.5;
+        ctx.drawImage(sprite, Math.round(ls.x - half), Math.round(ls.y - half));
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    // 3. Warm SNES top-left sunlight wash + soft edge depth
+    const sunGrad = ctx.createLinearGradient(0, 0, W, H);
+    sunGrad.addColorStop(0, 'rgba(254, 243, 199, 0.08)');
+    sunGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+    sunGrad.addColorStop(1, 'rgba(15, 23, 42, 0.14)');
+    ctx.fillStyle = sunGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.restore();
   }
 
   getNextObjectiveEntity(completed, rescued) {
@@ -1499,6 +1917,12 @@ export class WorldEngine {
         ctx.fillRect(sx + TILE_PX / 2 - 3, sy - 6 + bob, 6, 6);
       }
     } else if (ent.type === 'npc') {
+      if (this.eraKey === '16bit') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.32)';
+        ctx.beginPath();
+        ctx.ellipse(sx + TILE_PX * 0.5, sy + TILE_PX * 0.86, TILE_PX * 0.32, TILE_PX * 0.13, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
       this.sprites.drawNpc(ctx, ent.spriteKey, this.eraKey, sx, sy - 4 + bob, TILE_PX, TILE_PX);
     } else if (ent.type === 'vault') {
       const isRescued = rescued.has(ent.refId);
@@ -1507,6 +1931,12 @@ export class WorldEngine {
       ctx.beginPath();
       ctx.arc(sx + TILE_PX / 2, sy + TILE_PX / 2, TILE_PX * 0.55, 0, Math.PI * 2);
       ctx.fill();
+      if (this.eraKey === '16bit') {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.32)';
+        ctx.beginPath();
+        ctx.ellipse(sx + TILE_PX * 0.5, sy + TILE_PX * 0.84, TILE_PX * 0.36, TILE_PX * 0.14, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
       this.sprites.drawNpc(ctx, ent.spriteKey, this.eraKey, sx, sy - 6 + bob, TILE_PX, TILE_PX);
     } else if (ent.type === 'portal') {
       const unlocked = !ent.requiredTrialId || completed.has(ent.requiredTrialId);

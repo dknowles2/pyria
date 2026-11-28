@@ -129,7 +129,7 @@ function drawTiledEraStage(ctx, eraKey, realmId, sprites, now) {
     }
   }
 
-  // Distant pixel hills
+  // Distant pixel hills + warm SNES sunbeam in 16-bit
   ctx.fillStyle = is16 ? '#1e6b4a' : '#14281d';
   ctx.beginPath();
   ctx.moveTo(0, 74);
@@ -140,6 +140,14 @@ function drawTiledEraStage(ctx, eraKey, realmId, sprites, now) {
   ctx.lineTo(320, 74);
   ctx.closePath();
   ctx.fill();
+
+  if (is16) {
+    const sun = ctx.createRadialGradient(48, 18, 4, 48, 18, 150);
+    sun.addColorStop(0, 'rgba(254, 243, 199, 0.28)');
+    sun.addColorStop(1, 'rgba(254, 243, 199, 0)');
+    ctx.fillStyle = sun;
+    ctx.fillRect(0, 0, 320, 148);
+  }
 
   // Live in-game ground & decor tiles (16x16 grid across 320x148)
   const T = 16;
@@ -844,6 +852,16 @@ export function playCutscene({
     if (e.target === skipBtn || e.target === nextBtn) return;
     advance();
   });
+
+  // Preload 8-bit and 16-bit core + custom hero layers so era-transition sweeps never flash blank
+  if (sprites) {
+    sprites.preloadCore('8bit');
+    sprites.preloadCore('16bit');
+    if (typeof sprites.preloadHero === 'function') {
+      sprites.preloadHero(appearance, '8bit');
+      sprites.preloadHero(appearance, '16bit');
+    }
+  }
 
   const renderFrame = (now) => {
     if (finished) return;
