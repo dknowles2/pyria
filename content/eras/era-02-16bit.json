@@ -5112,7 +5112,7 @@
           "referenceSolution": "shelf = [{\"rare\": True}, {\"rare\": False}, {\"rare\": True}]\ndef count_rare(shelf):\n    total = 0\n    for item in shelf:\n        if item[\"rare\"]:\n            total += 1\n    return total\n\nrares = count_rare(shelf)\nprint(rares)\n",
           "testCode": "assert count_rare([{\"rare\": True}]) == 1 and count_rare([{\"rare\": False}]) == 0 and rares == sum(1 for i in shelf if i[\"rare\"]) and OUTPUT.strip() == str(rares)",
           "hints": {
-            "tier1_nudge": "Start a counter at 0 inside `count_rare(shelf)`, loop over `shelf`, increment when `item[\"rare\"]` is True, and `return` the count.",
+            "tier1_nudge": "Pip sorts the rare flasks: 'Start a counter at zero inside the function, loop over the shelf, add one whenever that potion's rare flag is True, and `return` the count at the end.'",
             "tier2_pattern": "def count_rare(<shelf>):\n    total = 0\n    for <item> in <shelf>:\n        if <item>[\"<key>\"]:\n            total += 1\n    return total",
             "tier3_walkthrough": "Loop over `shelf`, add 1 to `total` whenever `item[\"rare\"]` is True, `return total`, then set `rares = count_rare(shelf)` and `print(rares)`."
           },
