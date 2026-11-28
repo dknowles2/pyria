@@ -5740,7 +5740,7 @@
           "trialType": "multiple_choice",
           "title": "Nested Loops (A Loop Inside a Loop)!",
           "storyPrompt": "Welcome to Act IV: Shattered Skyway! A **nested loop** runs an inner loop for every step of an outer loop — perfect for 2D grids! How many stars will print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict how many stars print when a `range(2)` loop wraps around a `range(3)` loop.",
           "concepts": [
             "nested_loops"
           ],
@@ -5771,9 +5771,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip counts the sky grid: 'The INNER loop runs all the way through on every single turn of the outer loop.'",
+            "tier2_pattern": "Each outer turn runs the whole inner loop, so the two counts multiply rather than add.",
+            "tier3_walkthrough": "Tap Option B (`6`) — 2 outer turns, each running 3 inner turns, gives 2 × 3 stars."
           },
           "difficultyOverride": null
         },
@@ -5797,8 +5797,8 @@
           "referenceSolution": "total = 0\nfor r in range(2):\n    for c in range(3):\n        total = total + 1\nprint(total)\n",
           "testCode": "assert total == 6 and OUTPUT.strip() == \"6\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "total = ___\nfor ___ in ___:\n    for ___ in ___:\n        total = ___\nprint(___)",
+            "tier1_nudge": "Pip measures the indents: 'The counting line sits at 0 spaces, so it runs once AFTER both loops instead of inside them — it needs to be indented into both.'",
+            "tier2_pattern": "for <row> in range(<rows>):\n    for <col> in range(<cols>):\n        <counter> = <counter> + 1    # 8 spaces: inside both loops\nprint(<counter>)",
             "tier3_walkthrough": "Update the code to:\ntotal = 0\nfor r in range(2):\n    for c in range(3):\n        total = total + 1\nprint(total)"
           },
           "difficultyOverride": null,
@@ -5825,8 +5825,8 @@
           "referenceSolution": "cells = 0\nfor r in range(2):\n    for c in range(3):\n        cells += 1\nprint(cells)\n",
           "testCode": "assert cells == 6\nassert OUTPUT.strip() == '6', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip counts: '4 spaces before `for c in range(3):`, 8 spaces before `cells += 1`, and 0 spaces before `print(cells)`!'",
-            "tier2_pattern": "for r in range(2):\n    for c in range(3):\n        cells += 1\nprint(cells)",
+            "tier1_nudge": "Pip counts the indents: 'The inner `for` goes one step in, the counting line two steps in, and the print sits at 0 spaces after both loops.'",
+            "tier2_pattern": "for <row> in range(<rows>):\n    for <col> in range(<cols>):\n        cells += <step>\nprint(cells)",
             "tier3_walkthrough": "Complete with:\n    for c in range(3):\n        cells += 1\nprint(cells)"
           },
           "difficultyOverride": null,
@@ -5855,8 +5855,8 @@
           "referenceSolution": "grid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)\n",
           "testCode": "assert total == 10 and OUTPUT.strip() == \"10\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "grid = ___\ntotal = ___\nfor ___ in ___:\n    for ___ in ___:\n        total = ___\nprint(___)",
+            "tier1_nudge": "Pip unpacks the grid: 'The outer loop hands you one ROW at a time; the inner loop then walks the numbers inside that row.'",
+            "tier2_pattern": "for <row> in <grid>:\n    for <value> in <row>:\n        total = total + <value>\nprint(total)",
             "tier3_walkthrough": "Write:\ngrid = [[1, 2], [3, 4]]\ntotal = 0\nfor row in grid:\n    for val in row:\n        total = total + val\nprint(total)"
           },
           "difficultyOverride": null,
@@ -5933,8 +5933,8 @@
           "referenceSolution": "sums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)\n",
           "testCode": "assert sums == [11, 21, 12, 22] and OUTPUT.strip() == \"[11, 21, 12, 22]\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "sums = ___\nfor ___ in ___:\n    for ___ in ___:\n        ___\nprint(___)",
+            "tier1_nudge": "Pip pairs up the docks: 'Every item from the first list meets every item from the second, so the appending happens in the INNER loop.'",
+            "tier2_pattern": "for <a> in <first_list>:\n    for <b> in <second_list>:\n        sums.append(<a> + <b>)\nprint(sums)",
             "tier3_walkthrough": "Write:\nsums = []\nfor a in [1, 2]:\n    for b in [10, 20]:\n        sums.append(a + b)\nprint(sums)"
           },
           "difficultyOverride": null,
@@ -5965,8 +5965,8 @@
           "referenceSolution": "sky = [[4, 9], [12, 3]]\ndef find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if n > best:\n                best = n\n    return best\n\nhighest = find_highest(sky)\nprint(highest)\n",
           "testCode": "assert find_highest([[1, 5], [2, 3]]) == 5 and highest == max(n for r in sky for n in r) and OUTPUT.strip() == str(highest)",
           "hints": {
-            "tier1_nudge": "Use an outer `for row in grid:` loop and an inner `for n in row:` loop, updating `best` whenever `n > best`, then `return best`.",
-            "tier2_pattern": "def find_highest(grid):\n    best = 0\n    for row in grid:\n        for n in row:\n            if ___ > ___:\n                best = ___\n    return best",
+            "tier1_nudge": "Pip scans the sky grid: 'Keep the best value found so far, replace it whenever a cell beats it, and `return` it only once BOTH loops have finished.'",
+            "tier2_pattern": "def find_highest(<grid>):\n    best = 0\n    for <row> in <grid>:\n        for <n> in <row>:\n            if <n> > best:\n                best = <n>\n    return best",
             "tier3_walkthrough": "Inside `find_highest(grid)`, track `best = 0`, loop `for row in grid:` and `for n in row:`, set `best = n` when `n > best`, `return best`, then set `highest = find_highest(sky)` and `print(highest)`."
           },
           "difficultyOverride": null,
@@ -5996,8 +5996,8 @@
           "referenceSolution": "deck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    print(\"NIMBUS FREE!\")\n",
           "testCode": "assert lit == 4, f\"Expected lit == 4, got {lit!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'NIMBUS FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Nimbus!'",
-            "tier2_pattern": "deck = ___\nlit = ___\nfor ___ in ___:\n    for ___ in ___:\n        if ___:\n            lit = ___",
+            "tier1_nudge": "Pip lights the dock: 'Count the matching cells with an `if` inside BOTH loops, then test the count once after the loops at 0 spaces.'",
+            "tier2_pattern": "lit = 0\nfor <row> in <grid>:\n    for <cell> in <row>:\n        if <cell> == <match>:\n            lit = lit + 1\nif lit == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\ndeck = [[1, 0, 1], [1, 1, 0]]\nlit = 0\nfor row in deck:\n    for cell in row:\n        if cell == 1:\n            lit = lit + 1\nif lit == 4:\n    print(\"NIMBUS FREE!\")"
           },
           "difficultyOverride": null,
@@ -6081,9 +6081,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip reads the grid address left to right: 'The first index picks the ROW, and the second picks a position inside that row.'",
+            "tier2_pattern": "The first index selects one inner list; the second index then picks an item out of it.",
+            "tier3_walkthrough": "Tap Option A (`7`) — `grid[1]` is the second row `[7, 8]`, and index `0` of that row is 7."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -6175,7 +6175,7 @@
           "trialType": "multiple_choice",
           "title": "Meet Your First Class Blueprint!",
           "storyPrompt": "A `class` is a blueprint for building custom objects! First, see how a simple class can store an attribute (`kind`) and how calling `Dragon()` builds an object from that blueprint so you can read `d.kind`.",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(d.kind)` displays when `Dragon` defines `kind = \"Star\"`.",
           "concepts": [
             "classes_intro"
           ],
@@ -6233,7 +6233,7 @@
           "testCode": "assert d.name == \"Comet\", f\"Expected d.name == 'Comet', got {d.name!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Comet'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
             "tier1_nudge": "Every method inside a class — including `__init__` — must accept `self` as its very first parameter.",
-            "tier2_pattern": "class Dragon:\n    def __init__(___, name):\n        self.name = name",
+            "tier2_pattern": "class <Name>:\n    def __init__(<first_parameter>, <value>):\n        self.<attribute> = <value>",
             "tier3_walkthrough": "Change `def __init__(name):` to `def __init__(self, name):` so Python can pass the new object as `self`."
           },
           "difficultyOverride": null,
@@ -6289,14 +6289,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\n",
-            "standard": "",
+            "standard": "# Define class Star with __init__(self, brightness), create Star(99), print its brightness\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)\n",
           "testCode": "assert s.brightness == 99 and Star(42).brightness == 42 and OUTPUT.strip() == \"99\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "class Star:\n    def __init__(___):\n        self.brightness = ___\ns = ___\nprint(___)",
+            "tier1_nudge": "Pip kindles a star: 'Store the value onto the object inside `__init__`, then read it back off the object with a dot.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self, <value>):\n        self.<attribute> = <value>\n\n<obj> = <Name>(<value>)\nprint(<obj>.<attribute>)",
             "tier3_walkthrough": "Write:\nclass Star:\n    def __init__(self, brightness):\n        self.brightness = brightness\n\ns = Star(99)\nprint(s.brightness)"
           },
           "difficultyOverride": null,
@@ -6325,8 +6325,8 @@
           "referenceSolution": "class Gem:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)\n",
           "testCode": "assert g.color == 'blue'\nassert Gem('gold').color == 'gold'\nassert OUTPUT.strip() == 'blue', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Don't forget `self` as the first parameter of `def __init__(self, color):`!'",
-            "tier2_pattern": "class Gem:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)",
+            "tier1_nudge": "Pip chirps: 'Remember `self` comes first in the parentheses, before the colour parameter — then attach the value onto the object with a dot.'",
+            "tier2_pattern": "class Gem:\n    def __init__(self, <value>):\n        self.<attribute> = <value>\n\ng = Gem(\"<value>\")\nprint(g.<attribute>)",
             "tier3_walkthrough": "Complete with:\n    def __init__(self, color):\n        self.color = color\n\ng = Gem(\"blue\")\nprint(g.color)"
           },
           "difficultyOverride": null,
@@ -6356,8 +6356,8 @@
           "referenceSolution": "class Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = d.roar()\n_exp = 'Comet ROARS!'\nassert isinstance(_val, str), f\"Expected d.roar() to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in d.roar() ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = Dragon(\"Pip\").roar()\n_exp = 'Pip ROARS!'\nassert isinstance(_val, str), f\"Expected Dragon('Pip').roar() to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in Dragon('Pip').roar() ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Comet ROARS!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in output ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.name = ___\n    def roar(___):\n        return ___\nd = ___",
+            "tier1_nudge": "Pip adds a roar: 'A method is simply a `def` indented inside the class, and it reads the object's own data through `self`.'",
+            "tier2_pattern": "    def <method>(self):\n        return f\"{self.<attribute>} <text>\"\n\n<obj> = <Name>(\"<value>\")\nprint(<obj>.<method>())",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, name):\n        self.name = name\n    def roar(self):\n        return f\"{self.name} ROARS!\"\n\nd = Dragon(\"Comet\")\nprint(d.roar())"
           },
           "difficultyOverride": null,
@@ -6417,8 +6417,8 @@
           "referenceSolution": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power += amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)\n",
           "testCode": "assert d.power == 25 and OUTPUT.strip() == \"25\"\n_d2 = Dragon(5)\n_d2.boost(7)\nassert _d2.power == 12",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "class Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)",
+            "tier1_nudge": "Pip boosts the dragon: 'A method can CHANGE the object's own data — assign back into the attribute and the object keeps the new value.'",
+            "tier2_pattern": "    def <method>(self, <amount>):\n        self.<attribute> += <amount>\n\n<obj> = <Name>(<value>)\n<obj>.<method>(<amount>)\nprint(<obj>.<attribute>)",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, power):\n        self.power = power\n    def boost(self, amt):\n        self.power = self.power + amt\n\nd = Dragon(10)\nd.boost(15)\nprint(d.power)"
           },
           "difficultyOverride": null,
@@ -6478,8 +6478,8 @@
           "referenceSolution": "class Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")\n",
           "testCode": "assert b.is_ready() is True and Bridge(3).is_ready() is False, \"Check Bridge.is_ready() — it should return self.spans >= 5!\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'COMET FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Comet!'",
-            "tier2_pattern": "class Bridge:\n    def __init__(___):\n        self.spans = ___\n    def is_ready(___):\n        return ___\nb = ___",
+            "tier1_nudge": "Pip tests the bridge: 'Have the method RETURN the comparison itself, then call that method straight inside an `if`.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self, <value>):\n        self.<attribute> = <value>\n    def <method>(self):\n        return self.<attribute> >= <target>\n\n<obj> = <Name>(<value>)\nif <obj>.<method>():\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nclass Bridge:\n    def __init__(self, spans):\n        self.spans = spans\n    def is_ready(self):\n        return self.spans >= 5\n\nb = Bridge(6)\nif b.is_ready():\n    print(\"COMET FREE!\")"
           },
           "difficultyOverride": null,
@@ -6528,9 +6528,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip stamps out two dragons: 'A class is a blueprint, not a single object — each one you build keeps its own copy of the data.'",
+            "tier2_pattern": "Every call to the class builds a separate object with its own attributes.",
+            "tier3_walkthrough": "Tap Option A (yes, each object has its own attributes) — one blueprint can stamp out as many objects as you like."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -6622,7 +6622,7 @@
           "trialType": "multiple_choice",
           "title": "List of Dragon Objects!",
           "storyPrompt": "In Storm Bastion, you command a **squad** — a list of `Dragon` objects! What will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(squad[0].p + squad[1].p)` displays for a list of two Dragon objects.",
           "concepts": [
             "classes_intro"
           ],
@@ -6653,9 +6653,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip lines up the squad: 'Pick an object out of the list with brackets, THEN reach inside it with a dot — read it left to right.'",
+            "tier2_pattern": "The brackets select one object from the list; the dot then reads that object's attribute.",
+            "tier3_walkthrough": "Tap Option A (`35`) — `squad[0].p` is 10 and `squad[1].p` is 25, so the sum is 35."
           },
           "difficultyOverride": null
         },
@@ -6679,8 +6679,8 @@
           "referenceSolution": "class Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        self.volts = self.volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)\n",
           "testCode": "assert t.volts == 30 and OUTPUT.strip() == \"30\"\n_t2 = Tower(5)\n_t2.charge()\nassert _t2.volts == 15",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "class Tower:\n    def __init__(___):\n        self.volts = ___\n    def charge(___):\n        self.volts = ___\nt = ___",
+            "tier1_nudge": "Pip spots the missing dot: 'Inside a method, a bare name creates a brand-new local variable — only `self.` reaches the object's own data.'",
+            "tier2_pattern": "    def <method>(self):\n        self.<attribute> = self.<attribute> + <amount>",
             "tier3_walkthrough": "Update the code to:\nclass Tower:\n    def __init__(self, volts):\n        self.volts = volts\n    def charge(self):\n        self.volts = self.volts + 10\n\nt = Tower(20)\nt.charge()\nprint(t.volts)"
           },
           "difficultyOverride": null,
@@ -6710,8 +6710,8 @@
           "referenceSolution": "class Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)\n",
           "testCode": "assert total == 60 and OUTPUT.strip() == \"60\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "class Dragon:\n    def __init__(___):\n        self.p = ___\nsquad = ___\ntotal = ___\nfor ___ in ___:",
+            "tier1_nudge": "Pip tallies the squad: 'The loop variable is a whole dragon on each turn, so reach its power with a dot inside the loop.'",
+            "tier2_pattern": "for <dragon> in <squad>:\n    total = total + <dragon>.<attribute>\nprint(total)",
             "tier3_walkthrough": "Write:\nclass Dragon:\n    def __init__(self, p):\n        self.p = p\nsquad = [Dragon(15), Dragon(20), Dragon(25)]\ntotal = 0\nfor d in squad:\n    total = total + d.p\nprint(total)"
           },
           "difficultyOverride": null,
@@ -6742,8 +6742,8 @@
           "referenceSolution": "class Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)\n",
           "testCode": "assert ready == 2 and OUTPUT.strip() == \"2\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "class Coil:\n    def __init__(___):\n        self.power = ___\ncoils = ___\nready = ___\nfor ___ in ___:",
+            "tier1_nudge": "Pip checks each coil in turn: 'Test the object's attribute in the `if`, and count only the turns that pass.'",
+            "tier2_pattern": "for <coil> in <coils>:\n    if <coil>.<attribute> >= <threshold>:\n        ready = ready + 1\nprint(ready)",
             "tier3_walkthrough": "Write:\nclass Coil:\n    def __init__(self, power):\n        self.power = power\ncoils = [Coil(40), Coil(80), Coil(90)]\nready = 0\nfor c in coils:\n    if c.power >= 50:\n        ready = ready + 1\nprint(ready)"
           },
           "difficultyOverride": null,
@@ -6768,14 +6768,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\n",
-            "standard": "",
+            "standard": "# Define class Shield storing name and hp, add info() returning \"name:hp\", then print it for a Storm shield with 50 HP\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = Shield(\"Storm\", 50).info()\n_exp = 'Storm:50'\nassert isinstance(_val, str), f\"Expected Shield('Storm', 50).info() to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in Shield('Storm', 50).info() ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = Shield(\"Oak\", 12).info()\n_exp = 'Oak:12'\nassert isinstance(_val, str), f\"Expected Shield('Oak', 12).info() to be a string, got {_val!r}\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in Shield('Oak', 12).info() ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'Storm:50'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nassert \"{\" not in _val and \"}\" not in _val, f\"It looks like curly braces were kept literally in output ({_val!r})! Put the letter f right before the opening quote.\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "class Shield:\n    def __init__(___):\n        self.name = ___\n        self.hp = ___\n    def info(___):\n        return ___",
+            "tier1_nudge": "Pip stamps the shield: 'Store BOTH values onto the object in `__init__`, then have the method return them joined by a colon.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self, <a>, <b>):\n        self.<attr_a> = <a>\n        self.<attr_b> = <b>\n    def <method>(self):\n        return f\"{self.<attr_a>}:{self.<attr_b>}\"\n\nprint(<Name>(\"<value>\", <value>).<method>())",
             "tier3_walkthrough": "Write:\nclass Shield:\n    def __init__(self, name, hp):\n        self.name = name\n        self.hp = hp\n    def info(self):\n        return f\"{self.name}:{self.hp}\"\nprint(Shield(\"Storm\", 50).info())"
           },
           "difficultyOverride": null,
@@ -6807,8 +6807,8 @@
           "referenceSolution": "class Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    print(\"FULMIN FREE!\")\n",
           "testCode": "assert surge == 100, f\"Expected surge == 100, got {surge!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'FULMIN FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Fulmin!'",
-            "tier2_pattern": "class Bolt:\n    def __init__(___):\n        self.power = ___\nbolts = ___\nsurge = ___\nfor ___ in ___:",
+            "tier1_nudge": "Pip gathers the bolts: 'Build the list of objects first, sum one attribute across them in a loop, then test the total after the loop at 0 spaces.'",
+            "tier2_pattern": "<list> = [<Name>(<value>), <Name>(<value>), <Name>(<value>)]\nsurge = 0\nfor <bolt> in <list>:\n    surge = surge + <bolt>.<attribute>\nif surge >= <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nclass Bolt:\n    def __init__(self, power):\n        self.power = power\nbolts = [Bolt(30), Bolt(40), Bolt(30)]\nsurge = 0\nfor b in bolts:\n    surge = surge + b.power\nif surge >= 100:\n    print(\"FULMIN FREE!\")"
           },
           "difficultyOverride": null,
@@ -6856,9 +6856,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip points at the first parameter: 'Every method's first parameter is the object it was called on — and Python has one specific name for it.'",
+            "tier2_pattern": "Python's name for the current object is the one written first in every method's parentheses.",
+            "tier3_walkthrough": "Tap Option A (`self`) — Python uses `self`, where some other languages use `this`."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -6952,7 +6952,7 @@
           "trialType": "multiple_choice",
           "title": "16-Bit Finale Warm-Up!",
           "storyPrompt": "You reached Lord Null's 16-Bit Throne! Combine a list, a dictionary, and a loop — what will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `count` holds after one is summed for every bit whose `\"ok\"` value is True.",
           "concepts": [
             "functions_return",
             "dictionaries",
@@ -6986,9 +6986,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip scans the glitch matrix: 'Go through the three dictionaries one at a time and keep only the ones whose `\"ok\"` value is True.'",
+            "tier2_pattern": "One is counted for each dictionary that passes the check, so work out how many pass.",
+            "tier3_walkthrough": "Tap Option A (`2`) — the first and third bits are True and the middle one is False, so two are counted."
           },
           "difficultyOverride": null
         },
@@ -7015,8 +7015,8 @@
           "referenceSolution": "class ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        return self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())\n",
           "testCode": "assert lock.is_open() is True and ThroneLock(8).is_open() is False and OUTPUT.strip() == \"True\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "class ThroneLock:\n    def __init__(___):\n        self.bits = ___\n    def is_open(___):\n        return ___\nlock = ___",
+            "tier1_nudge": "Pip peers at the method's last line: 'The comparison is worked out and then thrown away — a method with no `return` hands back `None`.'",
+            "tier2_pattern": "    def <method>(self):\n        return self.<attribute> >= <target>",
             "tier3_walkthrough": "Update the code to:\nclass ThroneLock:\n    def __init__(self, bits):\n        self.bits = bits\n    def is_open(self):\n        return self.bits >= 16\n\nlock = ThroneLock(16)\nprint(lock.is_open())"
           },
           "difficultyOverride": null,
@@ -7043,14 +7043,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\n",
-            "standard": "",
+            "standard": "# Build the acts dictionary, total its values into total_dragons, then print it\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "acts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)\n",
           "testCode": "assert total_dragons == 16 and OUTPUT.strip() == \"16\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "acts = ___\ntotal_dragons = ___\nprint(___)",
+            "tier1_nudge": "Pip rallies all four Acts: 'Total a dictionary's numbers by passing its values straight into `sum(...)`.'",
+            "tier2_pattern": "total_dragons = sum(<dict>.values())\nprint(total_dragons)",
             "tier3_walkthrough": "Write:\nacts = {\"tide\": 4, \"clock\": 4, \"caldera\": 4, \"sky\": 4}\ntotal_dragons = sum(acts.values())\nprint(total_dragons)"
           },
           "difficultyOverride": null,
@@ -7096,8 +7096,8 @@
           "referenceSolution": "matrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)\n",
           "testCode": "assert even_sum == 12 and OUTPUT.strip() == \"12\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "matrix = ___\neven_sum = ___\nfor ___ in ___:\n    for ___ in ___:\n        if ___:\n            even_sum = ___",
+            "tier1_nudge": "Pip decodes the matrix: 'Walk the rows with the outer loop and the numbers with the inner one, then test each number with `%` before adding it.'",
+            "tier2_pattern": "for <row> in <matrix>:\n    for <n> in <row>:\n        if <n> % 2 == 0:\n            even_sum = even_sum + <n>\nprint(even_sum)",
             "tier3_walkthrough": "Write:\nmatrix = [[2, 3], [4, 5], [6, 7]]\neven_sum = 0\nfor row in matrix:\n    for n in row:\n        if n % 2 == 0:\n            even_sum = even_sum + n\nprint(even_sum)"
           },
           "difficultyOverride": null,
@@ -7143,14 +7143,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\n",
-            "standard": "",
+            "standard": "# Define class Prism storing power with an upgrade() that doubles it, then create Prism(8), upgrade it, and print its power\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "class Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)\n",
           "testCode": "assert p.power == 16 and OUTPUT.strip() == \"16\"\n_p2 = Prism(5)\n_p2.upgrade()\nassert _p2.power == 10",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "class Prism:\n    def __init__(___):\n        self.power = ___\n    def upgrade(___):\n        self.power = ___\np = ___",
+            "tier1_nudge": "Pip forges the prism: 'The upgrade method changes the object's own value — assign the doubled amount back onto the attribute.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self, <value>):\n        self.<attribute> = <value>\n    def <method>(self):\n        self.<attribute> = self.<attribute> * <factor>\n\n<obj> = <Name>(<value>)\n<obj>.<method>()\nprint(<obj>.<attribute>)",
             "tier3_walkthrough": "Write:\nclass Prism:\n    def __init__(self, power):\n        self.power = power\n    def upgrade(self):\n        self.power = self.power * 2\n\np = Prism(8)\np.upgrade()\nprint(p.power)"
           },
           "difficultyOverride": null,
@@ -7182,8 +7182,8 @@
           "referenceSolution": "class EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())\n",
           "testCode": "import re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = EraCore(16).restore()\n_exp = '32-BIT UNLOCKED!'\nassert isinstance(_val, str), f\"Expected EraCore(16).restore() to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nassert EraCore(8).restore() != \"32-BIT UNLOCKED!\", \"Expected EraCore(8).restore() to return 'LOCKED', not '32-BIT UNLOCKED!'\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = '32-BIT UNLOCKED!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Zenith!'",
-            "tier2_pattern": "class EraCore:\n    def __init__(___):\n        self.bits = ___\n    def restore(___):\n        if ___:\n            return ___",
+            "tier1_nudge": "Pip shatters the throne: 'Return one label when the count is high enough; a plain `return` after the `if` covers every other case.'",
+            "tier2_pattern": "class <Name>:\n    def __init__(self, <value>):\n        self.<attribute> = <value>\n    def <method>(self):\n        if self.<attribute> >= <target>:\n            return \"<unlocked_label>\"\n        return \"<locked_label>\"\n\nprint(<Name>(<value>).<method>())",
             "tier3_walkthrough": "Write:\nclass EraCore:\n    def __init__(self, bits):\n        self.bits = bits\n    def restore(self):\n        if self.bits >= 16:\n            return \"32-BIT UNLOCKED!\"\n        return \"LOCKED\"\n\nprint(EraCore(16).restore())"
           },
           "difficultyOverride": null,
@@ -7234,9 +7234,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip doubles and doubles again: '`**` is the power operator — it multiplies a number by itself, rather than multiplying the two numbers together.'",
+            "tier2_pattern": "Multiply 2 by itself as many times as the second number says.",
+            "tier3_walkthrough": "Tap Option B (`16`) — `2 ** 4` is 2 × 2 × 2 × 2."
           },
           "difficultyOverride": null,
           "isBonus": true,
