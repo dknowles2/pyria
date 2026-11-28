@@ -1711,26 +1711,98 @@ export class WorldEngine {
   }
 
   ensureMinimapTerrainCache(dynamicOverrides, completed) {
-    const cacheKey = `${this.map.id}:${[...completed].sort().join(',')}`;
+    const isRich = this.eraKey !== '8bit';
+    const styleKey = isRich ? '16bit' : '8bit';
+    const cacheKey = `${this.map.id}:${styleKey}:${[...completed].sort().join(',')}`;
     if (this.minimapCanvas && this.minimapCacheKey === cacheKey) {
       return this.minimapCanvas;
     }
+    const cell = isRich ? 2 : 1;
     const off = document.createElement('canvas');
-    off.width = this.map.width;
-    off.height = this.map.height;
+    off.width = this.map.width * cell;
+    off.height = this.map.height * cell;
     const octx = off.getContext('2d');
+
+    const isTallDecor = (t) =>
+      t === 'tree' ||
+      t === 'pine_tree' ||
+      t === 'stone_wall' ||
+      t === 'ice_wall' ||
+      t === 'obsidian_wall' ||
+      t === 'mossy_gate_closed' ||
+      t === 'column' ||
+      t === 'crystal_pillar';
 
     for (let y = 0; y < this.map.height; y++) {
       for (let x = 0; x < this.map.width; x++) {
-        const ov = dynamicOverrides.get(`${x},${y}`);
-        let groundTile = this.map.layers.ground[y][x];
-        if (ov && ov.layer === 'ground') groundTile = ov.tile;
-        let decorTile = this.map.layers.decor[y][x];
-        if (ov && ov.layer === 'decor') decorTile = ov.tile;
+        const groundTile = this.getEffectiveGroundTile(x, y, dynamicOverrides);
+        const decorTile = this.getEffectiveDecorTile(x, y, dynamicOverrides);
 
-        const key = decorTile && MINIMAP_COLORS[decorTile] ? decorTile : groundTile;
-        octx.fillStyle = MINIMAP_COLORS[key] || '#1e293b';
-        octx.fillRect(x, y, 1, 1);
+        if (!isRich) {
+          const key = decorTile && MINIMAP_COLORS[decorTile] ? decorTile : groundTile;
+          octx.fillStyle = MINIMAP_COLORS[key] || '#1e293b';
+          octx.fillRect(x, y, 1, 1);
+          continue;
+        }
+
+        const px = x * 2;
+        const py = y * 2;
+        const baseColor = MINIMAP_COLORS[groundTile] || '#1e293b';
+        octx.fillStyle = baseColor;
+        octx.fillRect(px, py, 2, 2);
+
+        // Subtle 16-bit SNES terrain relief & shoreline shallows
+        if (groundTile === 'grass' || groundTile === 'grass_flower' || groundTile === 'flower_bed') {
+          if (((x * 7 + y * 13) & 3) === 0) {
+            octx.fillStyle = 'rgba(134, 239, 172, 0.24)';
+            octx.fillRect(px, py, 1, 1);
+          }
+          if (groundTile !== 'grass') {
+            octx.fillStyle = '#fde047';
+            octx.fillRect(px + 1, py, 1, 1);
+          }
+        } else if (groundTile === 'water') {
+          const n = this.getEffectiveGroundTile(x, y - 1, dynamicOverrides);
+          const s = this.getEffectiveGroundTile(x, y + 1, dynamicOverrides);
+          const w = this.getEffectiveGroundTile(x - 1, y, dynamicOverrides);
+          const e = this.getEffectiveGroundTile(x + 1, y, dynamicOverrides);
+          octx.fillStyle = '#7dd3fc';
+          if (n !== 'water' && n !== 'bridge_wood' && n !== 'bridge_broken') octx.fillRect(px, py, 2, 1);
+          if (s !== 'water' && s !== 'bridge_wood' && s !== 'bridge_broken') octx.fillRect(px, py + 1, 2, 1);
+          if (w !== 'water' && w !== 'bridge_wood' && w !== 'bridge_broken') octx.fillRect(px, py, 1, 2);
+          if (e !== 'water' && e !== 'bridge_wood' && e !== 'bridge_broken') octx.fillRect(px + 1, py, 1, 2);
+        } else if (groundTile === 'dirt_path' || groundTile === 'sand') {
+          octx.fillStyle = 'rgba(255, 248, 220, 0.22)';
+          octx.fillRect(px, py, 1, 1);
+          const s = this.getEffectiveGroundTile(x, y + 1, dynamicOverrides);
+          const e = this.getEffectiveGroundTile(x + 1, y, dynamicOverrides);
+          octx.fillStyle = 'rgba(92, 56, 24, 0.28)';
+          if (s === 'grass' || s === 'grass_flower') octx.fillRect(px, py + 1, 2, 1);
+          if (e === 'grass' || e === 'grass_flower') octx.fillRect(px + 1, py, 1, 2);
+        } else if (groundTile === 'bridge_wood') {
+          octx.fillStyle = '#fde68a';
+          octx.fillRect(px, py, 2, 1);
+        } else if (groundTile === 'stone_floor' || groundTile === 'brass_floor') {
+          octx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+          octx.fillRect(px, py, 1, 1);
+        }
+
+        // Decor elevation + sunlit top-left highlight & bottom-right drop shadow
+        if (decorTile && MINIMAP_COLORS[decorTile]) {
+          if (isTallDecor(decorTile)) {
+            octx.fillStyle = 'rgba(10, 16, 28, 0.45)';
+            if (x + 1 < this.map.width) octx.fillRect(px + 2, py + 1, 1, 2);
+            if (y + 1 < this.map.height) octx.fillRect(px + 1, py + 2, 2, 1);
+          }
+          octx.fillStyle = MINIMAP_COLORS[decorTile];
+          octx.fillRect(px, py, 2, 2);
+          if (isTallDecor(decorTile)) {
+            octx.fillStyle = 'rgba(255, 255, 255, 0.24)';
+            octx.fillRect(px, py, 1, 1);
+            octx.fillStyle = 'rgba(10, 16, 28, 0.32)';
+            octx.fillRect(px + 1, py + 1, 1, 1);
+          }
+        }
       }
     }
 
@@ -1746,10 +1818,11 @@ export class WorldEngine {
       return;
     }
 
+    const isRich = this.eraKey !== '8bit';
     const scale = this.map.width >= 48 ? 3 : 4;
     const mapW = this.map.width * scale;
     const mapH = this.map.height * scale;
-    const pad = 6;
+    const pad = isRich ? 7 : 6;
     const boxW = mapW + pad * 2;
     const boxH = mapH + pad * 2;
     const boxX = this.canvas.width - boxW - 14;
@@ -1759,12 +1832,53 @@ export class WorldEngine {
     this.minimapMarkers = [];
 
     ctx.save();
-    // Translucent dark RPG frame
-    ctx.fillStyle = 'rgba(11, 16, 32, 0.82)';
-    ctx.fillRect(boxX, boxY, boxW, boxH);
-    ctx.strokeStyle = 'rgba(75, 97, 150, 0.9)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(boxX, boxY, boxW, boxH);
+    if (isRich) {
+      // Ornate 16-Bit SNES beveled gold-trimmed RPG map frame
+      ctx.fillStyle = 'rgba(6, 10, 20, 0.48)';
+      ctx.fillRect(boxX + 3, boxY + 4, boxW, boxH);
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+
+      // Outer bronze/gold bevel border
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(boxX + 0.5, boxY + 0.5, boxW - 1, boxH - 1);
+
+      // Top-left sunlit gold rim & bottom-right warm umber shade
+      ctx.fillStyle = '#fde68a';
+      ctx.fillRect(boxX - 1, boxY - 1, boxW + 2, 1.5);
+      ctx.fillRect(boxX - 1, boxY - 1, 1.5, boxH + 2);
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(boxX - 1, boxY + boxH - 0.5, boxW + 2, 1.5);
+      ctx.fillRect(boxX + boxW - 0.5, boxY - 1, 1.5, boxH + 2);
+
+      // Inner recessed trim around map viewport
+      ctx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(boxX + pad - 1.5, boxY + pad - 1.5, mapW + 3, mapH + 3);
+
+      // Gleaming gold corner rivets
+      const rivets = [
+        [boxX + 2.5, boxY + 2.5],
+        [boxX + boxW - 2.5, boxY + 2.5],
+        [boxX + 2.5, boxY + boxH - 2.5],
+        [boxX + boxW - 2.5, boxY + boxH - 2.5],
+      ];
+      for (const [rx, ry] of rivets) {
+        ctx.fillStyle = '#fef08a';
+        ctx.fillRect(rx - 1.5, ry - 1.5, 3, 3);
+        ctx.fillStyle = '#78350f';
+        ctx.fillRect(rx, ry, 1.5, 1.5);
+      }
+    } else {
+      // Classic 8-bit translucent dark RPG frame
+      ctx.fillStyle = 'rgba(11, 16, 32, 0.82)';
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+      ctx.strokeStyle = 'rgba(75, 97, 150, 0.9)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+    }
 
     const mx = boxX + pad;
     const my = boxY + pad;
@@ -1774,12 +1888,22 @@ export class WorldEngine {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(terrain, mx, my, mapW, mapH);
 
+    if (isRich) {
+      // Subtle warm sunlit sheen across SNES map
+      const sheen = ctx.createLinearGradient(mx, my, mx + mapW, my + mapH);
+      sheen.addColorStop(0, 'rgba(254, 243, 199, 0.08)');
+      sheen.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+      sheen.addColorStop(1, 'rgba(15, 23, 42, 0.16)');
+      ctx.fillStyle = sheen;
+      ctx.fillRect(mx, my, mapW, mapH);
+    }
+
     // Subtle viewport rectangle
     const viewX = Math.max(0, (camX / TILE_PX) * scale);
     const viewY = Math.max(0, (camY / TILE_PX) * scale);
     const viewW = Math.min(mapW - viewX, (this.canvas.width / TILE_PX) * scale);
     const viewH = Math.min(mapH - viewY, (this.canvas.height / TILE_PX) * scale);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.strokeStyle = isRich ? 'rgba(254, 240, 138, 0.68)' : 'rgba(255, 255, 255, 0.45)';
     ctx.lineWidth = 1;
     ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
 
@@ -1887,17 +2011,36 @@ export class WorldEngine {
       }
     }
 
-    // Hero pulsing cyan/white dot
+    // Hero marker (directional SNES chevron in 16-bit+, pulsing dot in 8-bit)
     const hx = Math.round(mx + this.hero.x * scale);
     const hy = Math.round(my + this.hero.y * scale);
     ctx.fillStyle = `rgba(56, 189, 248, ${(0.45 + 0.45 * pulse).toFixed(2)})`;
     ctx.beginPath();
-    ctx.arc(hx, hy, 4.5 + pulse * 1.2, 0, Math.PI * 2);
+    ctx.arc(hx, hy, 5 + pulse * 1.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(hx, hy, 2.4, 0, Math.PI * 2);
-    ctx.fill();
+    if (isRich) {
+      const dirAngle = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[this.hero.dir] ?? Math.PI / 2;
+      ctx.save();
+      ctx.translate(hx, hy);
+      ctx.rotate(dirAngle);
+      ctx.beginPath();
+      ctx.moveTo(4.6, 0);
+      ctx.lineTo(-3.2, -3.4);
+      ctx.lineTo(-1.4, 0);
+      ctx.lineTo(-3.2, 3.4);
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(hx, hy, 2.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
     ctx.restore();
   }
