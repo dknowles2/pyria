@@ -1,6 +1,7 @@
 // Retro RPG Letterbox Cinematic Cut-Scene Player for Pyria
 
-import { audio } from './audio.js?v=20261127i';
+import { audio } from './audio.js?v=20261127n';
+import { OpeningCutsceneRenderer } from './cutscene3d.js?v=20261127n';
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -46,7 +47,7 @@ export const STORY_CUTSCENES = {
     id: 'opening',
     label: '📖 Opening Story: The Shattering of Pyria',
     title: '✨ PROLOGUE: THE SHATTERING OF PYRIA',
-    subtitle: 'How the Bits Were Lost — and How Python Brings Them Back',
+    subtitle: 'How Pyria Was Kicked Back in Time — and How Python Brings the Bits Back',
     eraKey: '8bit',
     realmId: 'realm-01-meadow',
     finalButtonLabel: 'Begin Adventure! ▸',
@@ -55,32 +56,34 @@ export const STORY_CUTSCENES = {
         speaker: 'Elder Ada',
         spriteKey: 'elder_ada',
         side: 'right',
-        vfx: 'vault_glow',
-        backdropImage: '/assets/concept-art/eras/era-07-modern-4k-sandbox.jpg',
-        text: 'Long ago, the kingdom of Pyria shone in full, vibrant 3D! Great Dragons soared above crystal valleys, and ancient Python spells kept every realm alive.',
+        vfx: 'none',
+        sceneMode: 'switch3d',
+        sfx: 'switch_chime',
+        text: 'Long ago, the kingdom of Pyria shone in breathtaking modern 3D! Great Dragons soared above sunlit sky-islands and crystal waterfalls, powered by ancient Python spells.',
       },
       {
         speaker: 'Lord Null',
         spriteKey: 'lord_null',
         side: 'right',
         vfx: 'glitch',
-        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
-        text: 'Mwahahaha! Far too colorful! With my Glitch Storm, I drained Pyria all the way down to flat 8-bit pixels and locked every Dragon inside a Logic Vault! Soon all of Pyria will return None!',
+        sceneMode: 'downgrade',
+        sfx: 'glitch_downgrade',
+        text: 'Mwahahaha! Far too many polygons! With my Glitch Storm, I am kicking Pyria all the way back in time to flat, blocky 8-bit pixels — and locking every Dragon in a Logic Vault! Soon all of Pyria will return None!',
       },
       {
         speaker: 'Elder Ada',
         spriteKey: 'elder_ada',
         side: 'right',
         vfx: 'none',
-        backdropImage: '/assets/concept-art/hero_and_pip.png',
-        text: 'Our only hope is a brave young Code-Tamer with a Python Spellbook — YOU, {heroName}! Every Dragon you rescue restores another Bit of reality and levels up the world.',
+        sceneMode: 'meadow8bit',
+        text: 'Our only hope is a brave young Code-Tamer with a Python Spellbook — YOU, {heroName}! Every Dragon you rescue restores more Bits of reality and levels up our world, era by era!',
       },
       {
         speaker: 'Bram the Tinkerer',
         spriteKey: 'bram',
         side: 'right',
         vfx: 'none',
-        backdropImage: '/assets/concept-art/modular_hero_sheet.png',
+        sceneMode: 'meadow8bit',
         text: "Earn Byte Shards from Trials and hidden chests, kid! Bring 'em to my Workshop and write real Python calls to forge hats, armor, boots, and power-ups!",
       },
       {
@@ -88,8 +91,8 @@ export const STORY_CUTSCENES = {
         spriteKey: 'pip',
         side: 'left',
         vfx: 'celebrate',
-        backdropImage: '/assets/concept-art/eras/era-01-8bit-nes.jpg',
-        text: "Chirp! I'm Pip — your dragon sidekick! I'll fly right beside you with hints whenever you get stuck. Let's rescue Spark in Whispering Meadow and start the Return of the Bits!",
+        sceneMode: 'meadow8bit',
+        text: "Chirp! I'm Pip — your dragon sidekick! We got knocked all the way back to 8-bit, {heroName}, so let's rescue Spark in Whispering Meadow and start the Return of the Bits!",
       },
     ],
   },
@@ -268,6 +271,9 @@ export function playCutscene({
       boots: 'boots_default',
     };
 
+    const usesHdScene = beats.some((b) => Boolean(b.sceneMode));
+    const openingRenderer = usesHdScene ? new OpeningCutsceneRenderer() : null;
+
     const overlay = document.createElement('div');
     overlay.className = 'cutscene-overlay';
     overlay.setAttribute('role', 'dialog');
@@ -282,7 +288,7 @@ export function playCutscene({
       </div>
 
       <div class="cutscene-stage-wrap">
-        <canvas id="cutscene-canvas" width="640" height="296" class="pixel-canvas cutscene-canvas"></canvas>
+        <canvas id="cutscene-canvas" width="${usesHdScene ? 1280 : 640}" height="${usesHdScene ? 592 : 296}" class="${usesHdScene ? 'cutscene-canvas cutscene-canvas-hd' : 'pixel-canvas cutscene-canvas'}"></canvas>
       </div>
 
       <div class="cutscene-bar cutscene-bottom">
@@ -318,6 +324,22 @@ export function playCutscene({
     let rightSlide = 0;
     let rafId = null;
     let finished = false;
+    const pointer = { x: 0, y: 0 };
+
+    const onPointerMove = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+    };
+    const onPointerLeave = () => {
+      pointer.x = 0;
+      pointer.y = 0;
+    };
+    if (usesHdScene) {
+      overlay.addEventListener('pointermove', onPointerMove);
+      overlay.addEventListener('pointerleave', onPointerLeave);
+    }
 
     // Seed reusable VFX particles
     const vfxParticles = Array.from({ length: 36 }, (_, i) => ({
@@ -368,6 +390,12 @@ export function playCutscene({
 
       const isLast = beatIndex === beats.length - 1;
       nextBtn.textContent = isLast ? finalButtonLabel : 'Next ▸';
+
+      if (beat.sfx === 'switch_chime') {
+        audio.playSwitchChime();
+      } else if (beat.sfx === 'glitch_downgrade') {
+        audio.playGlitchDowngrade();
+      }
     };
 
     const cleanupAndFinish = () => {
@@ -375,6 +403,11 @@ export function playCutscene({
       finished = true;
       if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('keydown', onKeyDown, true);
+      if (usesHdScene) {
+        overlay.removeEventListener('pointermove', onPointerMove);
+        overlay.removeEventListener('pointerleave', onPointerLeave);
+        openingRenderer?.dispose();
+      }
       overlay.remove();
       resolve();
     };
@@ -446,6 +479,22 @@ export function playCutscene({
       }
 
       rightSlide = Math.min(1, rightSlide + 0.06);
+
+      if (beat.sceneMode && openingRenderer) {
+        openingRenderer.render(ctx, canvas.width, canvas.height, {
+          mode: beat.sceneMode,
+          elapsedSec,
+          nowSec: now / 1000,
+          appearance,
+          sprites,
+          beat,
+          rightSpriteKey,
+          rightSlide,
+          pointer,
+        });
+        rafId = requestAnimationFrame(renderFrame);
+        return;
+      }
 
       ctx.save();
       ctx.scale(2, 2);

@@ -8,9 +8,10 @@
  *   - assets/sprites/** (excluding preview.html, *.py, and top-level showcase *.png)
  *   - assets/tilesets/** (excluding preview.html, *.py, and top-level showcase *.png)
  *   - assets/world/maps_bundle.js
+ *   - assets/concept-art/eras/** (story & era-transition cutscene artwork)
  *
  * Excludes:
- *   - assets/concept-art/**
+ *   - assets/concept-art/** (except eras/)
  *   - assets/screenshots/**
  *   - assets/* /preview.html
  *   - assets/* /*.py
@@ -89,7 +90,7 @@ function main() {
     gameplayAssetFilter
   );
 
-  // 4. Copy assets/world/maps_bundle.js only
+  // 4. Copy assets/world/maps_bundle.js and cutscene era artwork
   const mapsBundleSrc = path.join(ROOT, 'assets', 'world', 'maps_bundle.js');
   if (fs.existsSync(mapsBundleSrc)) {
     const worldDstDir = path.join(DIST, 'assets', 'world');
@@ -97,6 +98,11 @@ function main() {
     fs.copyFileSync(mapsBundleSrc, path.join(worldDstDir, 'maps_bundle.js'));
     total += 1;
   }
+
+  total += copyRecursive(
+    path.join(ROOT, 'assets', 'concept-art', 'eras'),
+    path.join(DIST, 'assets', 'concept-art', 'eras')
+  );
 
   // 5. Write Cloudflare Workers Static Assets _headers file so every static route
   //    (/, /js/*, /css/*, /content/*, /assets/*) carries strict security & cache headers
