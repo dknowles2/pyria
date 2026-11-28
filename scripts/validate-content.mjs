@@ -153,6 +153,21 @@ function main() {
 
       const trials = Array.isArray(realm.trials) ? realm.trials : null;
       check(trials !== null && trials.length > 0, `Realm "${realm.id}" must have at least one trial`);
+
+      // The realm names its own boss trial. Do not infer it from the id suffix:
+      // most realms run -01..-06, but the four realms added later run -01..-07,
+      // so a suffix guess silently picks the second-to-last trial in those.
+      const realmBossTrialId = isPlainObject(realm.cutscenes) ? realm.cutscenes.bossTrialId : undefined;
+      check(
+        typeof realmBossTrialId === 'string' && realmBossTrialId.length > 0,
+        `Realm "${realm.id}" missing cutscenes.bossTrialId`
+      );
+      if (typeof realmBossTrialId === 'string' && Array.isArray(trials)) {
+        check(
+          trials.some((t) => isPlainObject(t) && t.id === realmBossTrialId),
+          `Realm "${realm.id}" cutscenes.bossTrialId "${realmBossTrialId}" is not one of its trials`
+        );
+      }
       for (const trial of trials || []) {
         if (!isPlainObject(trial)) {
           errors.push(`Realm "${realm.id}": trial entry must be an object`);
@@ -256,7 +271,7 @@ function main() {
           eraId,
           id: trial.id,
           trialType,
-          isBoss: trial.id.endsWith('-06'),
+          isBoss: trial.id === realmBossTrialId,
           isBonus: Boolean(trial.isBonus || trial.id.endsWith('-bonus')),
           concepts: trialConcepts || [],
           codeSnippet: typeof trial.codeSnippet === 'string' ? trial.codeSnippet : '',
