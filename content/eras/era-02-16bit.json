@@ -763,7 +763,7 @@
           "referenceSolution": "crates = [\"fish\", \"gold\", \"salt\", \"pearl\"]\nrare = [\"gold\", \"pearl\"]\nfound = 0\nfor c in crates:\n    if c in rare:\n        found += 1\nprint(found)\n",
           "testCode": "expected = sum(1 for c in crates if c in rare)\nassert found == expected and OUTPUT.strip() == str(expected)",
           "hints": {
-            "tier1_nudge": "Check membership with `if c in rare:` inside your `for` loop, then add 1 to `found`.",
+            "tier1_nudge": "Pip checks the manifest: 'Use `in` to ask whether each crate appears in the rare list, and add one to `found` only on the turns where the answer is yes.'",
             "tier2_pattern": "for <item> in <crates>:\n    if <item> in <rare_list>:\n        found += 1\nprint(found)",
             "tier3_walkthrough": "Loop `for c in crates:`, check `if c in rare:`, increment `found += 1`, and `print(found)` at the end."
           },
@@ -2239,7 +2239,7 @@
           "trialType": "multiple_choice",
           "title": "How Does a while Loop Work?",
           "storyPrompt": "Welcome to Act II: Clockwork Spire! A `while` loop repeats **as long as** its condition stays `True`. Always update the counter inside so it stops! What will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what the `while n <= 3:` loop prints when `n` starts at 1.",
           "concepts": [
             "while_loops"
           ],
@@ -2270,9 +2270,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip winds the gear one notch at a time: 'Run the loop in your head turn by turn — print `n`, add 1, then re-check the condition.'",
+            "tier2_pattern": "The loop prints BEFORE adding 1, and keeps going while `n <= 3` is True — remember `<=` includes 3 itself.",
+            "tier3_walkthrough": "Tap Option A (`1, 2, 3`) — it prints 1, 2 and 3, then `n` becomes 4 and `4 <= 3` is False, so the loop stops."
           },
           "difficultyOverride": null
         },
@@ -2296,8 +2296,8 @@
           "referenceSolution": "turns = 0\nwhile turns < 3:\n    turns = turns + 1\nprint(turns)\n",
           "testCode": "assert turns == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "turns = ___\nwhile ___:\n    turns = ___\nprint(___)",
+            "tier1_nudge": "Pip taps the end of the `while` line: 'Every `while` line needs a colon `:` at the end, exactly like `if` and `for` do!'",
+            "tier2_pattern": "while <condition>:\n    <indented action>",
             "tier3_walkthrough": "Update the code to:\nturns = 0\nwhile turns < 3:\n    turns = turns + 1\nprint(turns)"
           },
           "difficultyOverride": null,
@@ -2324,8 +2324,8 @@
           "referenceSolution": "tension = 0\nwhile tension < 20:\n    tension += 5\nprint(tension)\n",
           "testCode": "assert tension == 20 and OUTPUT.strip() == '20'",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "tension = 0\nwhile tension < 20:\n    tension = tension + 5\nprint(tension)",
+            "tier1_nudge": "Pip winds the brass spring: 'Keep looping while the tension is still below the target, and use `+=` to add on every turn.'",
+            "tier2_pattern": "while tension < <target>:\n    tension += <amount>\nprint(tension)",
             "tier3_walkthrough": "Write:\ntension = 0\nwhile tension < 20:\n    tension = tension + 5\nprint(tension)"
           },
           "difficultyOverride": null,
@@ -2353,8 +2353,8 @@
           "referenceSolution": "gears = 0\nwhile gears < 4:\n    gears += 1\nprint(gears)\n",
           "testCode": "assert gears == 4\nassert OUTPUT.strip() == '4', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip counts: 'Write `while gears < 4:`, indent `gears += 1`, and put `print(gears)` at 0 spaces!'",
-            "tier2_pattern": "while gears < 4:\n    gears += 1\nprint(gears)",
+            "tier1_nudge": "Pip counts the gears: 'Loop while `gears` is still below the limit, add one inside the loop, and print AFTER the loop at 0 spaces.'",
+            "tier2_pattern": "while gears < <limit>:\n    gears += <step>\nprint(gears)",
             "tier3_walkthrough": "Add:\nwhile gears < 4:\n    gears += 1\nprint(gears)"
           },
           "difficultyOverride": null,
@@ -2383,8 +2383,8 @@
           "referenceSolution": "sec = 3\nwhile sec > 0:\n    print(sec)\n    sec -= 1\n",
           "testCode": "assert sec == 0 and OUTPUT.strip().splitlines() == ['3', '2', '1']",
           "hints": {
-            "tier1_nudge": "Inside the `while sec > 0:` loop, print `sec` first, then write `sec -= 1`.",
-            "tier2_pattern": "while sec > ___:\n    print(___)\n    sec -= ___",
+            "tier1_nudge": "Pip counts down with the clock: 'Loop while `sec` is still above zero, print it FIRST, then count down by one with `-=`.'",
+            "tier2_pattern": "while sec > <stop_value>:\n    print(sec)\n    sec -= <step>",
             "tier3_walkthrough": "Write `while sec > 0:` with indented `print(sec)` and `sec -= 1`."
           },
           "difficultyOverride": null,
@@ -2449,8 +2449,8 @@
           "referenceSolution": "charge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)\n",
           "testCode": "assert steps == 4 and OUTPUT.strip() == \"4\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "charge = ___\nsteps = ___\nwhile ___:\n    charge = ___\n    steps = ___\nprint(___)",
+            "tier1_nudge": "Pip watches two dials at once: 'One counter tracks the charge and the other counts the turns — both go up inside the same loop.'",
+            "tier2_pattern": "while charge < <target>:\n    charge = charge + <amount>\n    steps = steps + 1\nprint(steps)",
             "tier3_walkthrough": "Write:\ncharge = 10\nsteps = 0\nwhile charge < 50:\n    charge = charge + 10\n    steps = steps + 1\nprint(steps)"
           },
           "difficultyOverride": null,
@@ -2488,8 +2488,8 @@
           "referenceSolution": "gears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    print(\"SPROCKET FREE!\")\n",
           "testCode": "assert gears == 4, f\"Expected gears == 4, got {gears!r}\"\nassert power == 60, f\"Expected power == 60, got {power!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'SPROCKET FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Sprocket!'",
-            "tier2_pattern": "gears = ___\npower = ___\nwhile ___:\n    gears = ___\n    power = ___\nif ___:",
+            "tier1_nudge": "Pip braces the mainspring: 'Count the gears in the loop condition and add to `power` every turn, then check `power` AFTER the loop at 0 spaces.'",
+            "tier2_pattern": "while gears < <count>:\n    gears = gears + 1\n    power = power + <amount>\nif power == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\ngears = 0\npower = 0\nwhile gears < 4:\n    gears = gears + 1\n    power = power + 15\nif power == 60:\n    print(\"SPROCKET FREE!\")"
           },
           "difficultyOverride": null,
@@ -2534,9 +2534,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip points inside the loop body: 'For the condition to ever turn False, something in the loop has to change the variable it tests.'",
+            "tier2_pattern": "A `while` loop re-checks its condition every single turn, so only a change to the tested variable can end it.",
+            "tier3_walkthrough": "Tap Option A (changing `x` so the condition turns False) — `x = x - 1` is what eventually makes `x > 0` False."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -2629,7 +2629,7 @@
           "trialType": "multiple_choice",
           "title": "Using break to Stop Early!",
           "storyPrompt": "Inside a loop, `break` jumps out right away when you find what you're looking for! What will the code below print?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what the loop prints when `break` fires on the turn where `t` is 3.",
           "concepts": [
             "while_loops",
             "conditionals_if"
@@ -2661,9 +2661,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip stops the pendulum mid-swing: 'Read the ORDER of the lines inside the loop — which one runs first on the turn where `t` is 3?'",
+            "tier2_pattern": "`break` leaves the loop immediately, so any line below it is skipped on that turn.",
+            "tier3_walkthrough": "Tap Option A (`1` then `2`) — on the turn where `t` is 3, `break` runs before `print(t)`, so 3 never prints."
           },
           "difficultyOverride": null
         },
@@ -2688,8 +2688,8 @@
           "referenceSolution": "ticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\nprint(ticks)\n",
           "testCode": "assert ticks == 4 and OUTPUT.strip() == \"4\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "ticks = ___\nwhile ___:\n    ticks = ___\nprint(___)",
+            "tier1_nudge": "Pip counts the chimes: 'The print is running on every single turn — move it OUT of the loop so it runs once, at 0 spaces.'",
+            "tier2_pattern": "while <condition>:\n    <update the counter>\nprint(<counter>)    # 0 spaces: after the loop",
             "tier3_walkthrough": "Update the code to:\nticks = 0\nwhile ticks < 4:\n    ticks = ticks + 1\nprint(ticks)"
           },
           "difficultyOverride": null,
@@ -2718,8 +2718,8 @@
           "referenceSolution": "found = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)\n",
           "testCode": "assert found is True and OUTPUT.strip() == \"True\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "found = ___\nfor ___ in ___:\n    if ___:\n        found = ___\n        ___\nprint(___)",
+            "tier1_nudge": "Pip spots the golden pendulum: 'Inside the loop, check for the match, flag it, then `break` out so the remaining pendulums are never visited.'",
+            "tier2_pattern": "for <item> in <list>:\n    if <item> == \"<target>\":\n        found = True\n        break\nprint(found)",
             "tier3_walkthrough": "Write:\nfound = False\nfor p in [\"brass\", \"iron\", \"gold\", \"lead\"]:\n    if p == \"gold\":\n        found = True\n        break\nprint(found)"
           },
           "difficultyOverride": null,
@@ -2751,8 +2751,8 @@
           "referenceSolution": "total = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)\n",
           "testCode": "assert total == 20 and OUTPUT.strip() == \"20\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "total = ___\nfor ___ in ___:\n    if ___:\n        ___\n    total = ___\nprint(___)",
+            "tier1_nudge": "Pip skips the jammed cog: 'When the number is negative, `continue` jumps straight to the next turn, so the adding line below never runs for it.'",
+            "tier2_pattern": "for <item> in <list>:\n    if <item> < 0:\n        continue\n    total = total + <item>\nprint(total)",
             "tier3_walkthrough": "Write:\ntotal = 0\nfor n in [5, -2, 10, -1, 5]:\n    if n < 0:\n        continue\n    total = total + n\nprint(total)"
           },
           "difficultyOverride": null,
@@ -2813,8 +2813,8 @@
           "referenceSolution": "parts = [\"gold\", \"rust\", \"brass\", \"rust\"]\ngood = 0\nfor p in parts:\n    if p == \"rust\":\n        continue\n    good += 1\nprint(good)\n",
           "testCode": "assert good == 2\nassert OUTPUT.strip() == '2', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'When `p == \"rust\"`, write `continue` so `good += 1` is skipped!'",
-            "tier2_pattern": "    if p == \"rust\":\n        continue\n    good += 1\nprint(good)",
+            "tier1_nudge": "Pip tosses the rusty parts aside: 'When a part matches the rusty one, `continue` to the next turn so the counting line gets skipped.'",
+            "tier2_pattern": "    if <item> == \"<skip_value>\":\n        continue\n    good += 1\nprint(good)",
             "tier3_walkthrough": "Complete with:\n    if p == \"rust\":\n        continue\n    good += 1\nprint(good)"
           },
           "difficultyOverride": null,
@@ -2861,8 +2861,8 @@
           "referenceSolution": "commands = [\"WIND\"]\ninput = lambda p=\"\": commands.pop(0)\ncmd = input(\"Command: \")\nprint(cmd)\n",
           "testCode": "assert cmd == 'WIND'\nassert OUTPUT.strip() == 'WIND', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Store `input(\"Command: \")` in `cmd`, then call `print(cmd)`!'",
-            "tier2_pattern": "cmd = input(\"Command: \")\nprint(cmd)",
+            "tier1_nudge": "Pip listens at the speaking tube: 'Whatever `input(...)` hands back is a string — store it in `cmd`, then print it.'",
+            "tier2_pattern": "cmd = input(\"<prompt>\")\nprint(cmd)",
             "tier3_walkthrough": "Add:\ncmd = input(\"Command: \")\nprint(cmd)"
           },
           "difficultyOverride": null,
@@ -2893,8 +2893,8 @@
           "referenceSolution": "commands = [\"WIND\", \"WIND\", \"WIND\", \"STOP\"]\ninput = lambda p=\"\": commands.pop(0)\ndone = 0\nwhile True:\n    cmd = input(\"Command: \")\n    if cmd == \"STOP\":\n        break\n    done += 1\nprint(done)\n",
           "testCode": "assert done == 3 and OUTPUT.strip() == \"3\"",
           "hints": {
-            "tier1_nudge": "Inside `while True:`, grab `cmd = input()`, check `if cmd == \"STOP\": break`, and otherwise add 1 to `done`.",
-            "tier2_pattern": "while True:\n    cmd = input()\n    if cmd == ___:\n        break\n    done += ___",
+            "tier1_nudge": "Pip waits by the command tape: 'A `while True:` loop never stops on its own, so it needs a `break` inside — compare each command against the stop word FIRST, then count the ones that are not it.'",
+            "tier2_pattern": "while True:\n    cmd = input(\"<prompt>\")\n    if cmd == \"<stop_word>\":\n        break\n    done += 1\nprint(done)",
             "tier3_walkthrough": "Start with `done = 0`, write `while True:`, set `cmd = input(\"Command: \")`, `if cmd == \"STOP\": break`, `done += 1`, then `print(done)`."
           },
           "difficultyOverride": null,
@@ -2971,8 +2971,8 @@
           "referenceSolution": "beats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    print(\"TOCK FREE!\")\n",
           "testCode": "assert chime == 21, f\"Expected chime == 21, got {chime!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'TOCK FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Tock!'",
-            "tier2_pattern": "beats = ___\nchime = ___\nwhile ___:\n    beats = ___\n    chime = ___\nif ___:",
+            "tier1_nudge": "Pip keeps the beat: 'Add one to `beats` FIRST, then add the new `beats` value into `chime`, so the chime grows by 1, then 2, then 3.'",
+            "tier2_pattern": "while beats < <count>:\n    beats = beats + 1\n    chime = chime + beats\nif chime == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\nbeats = 0\nchime = 0\nwhile beats < 6:\n    beats = beats + 1\n    chime = chime + beats\nif chime == 21:\n    print(\"TOCK FREE!\")"
           },
           "difficultyOverride": null,
@@ -3018,9 +3018,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip checks the gate before stepping through: 'A `while` loop tests its condition BEFORE the first turn, not after it.'",
+            "tier2_pattern": "Because the condition is tested first, a condition that starts out False never lets the body run at all.",
+            "tier3_walkthrough": "Tap Option A (`0 times`) — the condition is checked before the first turn, so the body never runs and `count` stays 0."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -3112,7 +3112,7 @@
           "trialType": "multiple_choice",
           "title": "Your First Custom Function (def)!",
           "storyPrompt": "With `def`, you can bundle lines of code into your OWN reusable spell! Start with the simplest kind: a function with empty parentheses `()` that runs whenever you call it by name.",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `ring_bell()` prints when it is defined once and then called twice.",
           "concepts": [
             "functions_def"
           ],
@@ -3169,8 +3169,8 @@
           "referenceSolution": "def vent_steam():\n    print(\"HISS!\")\n\nvent_steam()\n",
           "testCode": "import io as _io, contextlib as _cl\n_b = _io.StringIO()\nwith _cl.redirect_stdout(_b):\n    vent_steam()\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = _b.getvalue().strip()\n_exp = 'HISS!'\nassert isinstance(_val, str), f\"Expected vent_steam() output to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'HISS!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "def vent_steam():\n    print(___)\n___",
+            "tier1_nudge": "Pip taps the end of the `def` line: 'Every `def` line needs a colon `:` at the end, before its indented body.'",
+            "tier2_pattern": "def <name>():\n    <indented body>\n\n<name>()",
             "tier3_walkthrough": "Update the code to:\ndef vent_steam():\n    print(\"HISS!\")\n\nvent_steam()"
           },
           "difficultyOverride": null,
@@ -3191,14 +3191,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def blast():\n    print(\"STEAM ON!\")\n",
-            "standard": "",
+            "standard": "# Define blast() so it prints \"STEAM ON!\", then call it twice\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()\n",
           "testCode": "import io as _io, contextlib as _cl\n_b = _io.StringIO()\nwith _cl.redirect_stdout(_b):\n    blast()\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = _b.getvalue().strip()\n_exp = 'STEAM ON!'\nassert isinstance(_val, str), f\"Expected blast() output to be a string, got {_val!r}\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n_lines = [l.strip() for l in OUTPUT.splitlines() if l.strip()]\nassert _lines, \"Nothing was printed yet! Make sure you call print(...).\"\nassert len(_lines) == 2, f\"Expected 2 lines of output, got {len(_lines)}: {_lines!r}\"\nif _lines[0] != 'STEAM ON!':\n    if _lines[0].lower() == 'steam on!':\n        assert False, f\"Almost on line 1! Check capitalization — expected 'STEAM ON!', got {_lines[0]!r}.\"\n    assert False, f\"Line 1: expected 'STEAM ON!', got {_lines[0]!r}\"\nif _lines[1] != 'STEAM ON!':\n    if _lines[1].lower() == 'steam on!':\n        assert False, f\"Almost on line 2! Check capitalization — expected 'STEAM ON!', got {_lines[1]!r}.\"\n    assert False, f\"Line 2: expected 'STEAM ON!', got {_lines[1]!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "def blast():\n    print(___)\n___\n___",
+            "tier1_nudge": "Pip stokes the boiler: 'Define the spell once with `def`, then call it by name on two separate lines below the definition.'",
+            "tier2_pattern": "def <name>():\n    print(\"<message>\")\n\n<name>()\n<name>()",
             "tier3_walkthrough": "Write:\ndef blast():\n    print(\"STEAM ON!\")\n\nblast()\nblast()"
           },
           "difficultyOverride": null,
@@ -3219,14 +3219,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def heat_up(level):\n    print(level * 2)\n",
-            "standard": "",
+            "standard": "# Define heat_up(level) so it prints level doubled, then call it with 15\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def heat_up(level):\n    print(level * 2)\n\nheat_up(15)\n",
           "testCode": "import io, contextlib\n_b = io.StringIO()\nwith contextlib.redirect_stdout(_b):\n    heat_up(7)\nassert _b.getvalue().strip() == \"14\" and OUTPUT.strip() == \"30\"",
           "hints": {
-            "tier1_nudge": "Pip watches carefully: 'Double-check your indentation and variable names!'",
-            "tier2_pattern": "def heat_up(___):\n    print(___)\n___",
+            "tier1_nudge": "Pip slides a dial into the slot: 'A name inside the parentheses of `def` becomes a parameter — the value you pass when calling lands there.'",
+            "tier2_pattern": "def <name>(<parameter>):\n    print(<parameter> * <factor>)\n\n<name>(<value>)",
             "tier3_walkthrough": "Write:\ndef heat_up(level):\n    print(level * 2)\n\nheat_up(15)"
           },
           "difficultyOverride": null,
@@ -3253,8 +3253,8 @@
           "referenceSolution": "def greet(name):\n    print(\"Hi, \" + name)\n\ngreet(\"Piston\")\n",
           "testCode": "assert OUTPUT.strip() == 'Hi, Piston', f'Expected \"Hi, Piston\", got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Put `name` in the parentheses of `def greet(name):`, indent `print(\"Hi, \" + name)`, then call `greet(\"Piston\")`!'",
-            "tier2_pattern": "def greet(name):\n    print(\"Hi, \" + name)\n\ngreet(\"Piston\")",
+            "tier1_nudge": "Pip waves hello: 'Put the parameter name in the parentheses of `def`, then glue it onto the greeting inside the print.'",
+            "tier2_pattern": "def greet(<parameter>):\n    print(\"<greeting>\" + <parameter>)\n\ngreet(\"<dragon_name>\")",
             "tier3_walkthrough": "Write:\ndef greet(name):\n    print(\"Hi, \" + name)\n\ngreet(\"Piston\")"
           },
           "difficultyOverride": null,
@@ -3277,14 +3277,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def double(n):\n    return n * 2\n\nans = double(12)\n",
-            "standard": "",
+            "standard": "# Define double(n) to RETURN n * 2, store double(12) in ans, then print ans\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def double(n):\n    return n * 2\n\nans = double(12)\nprint(ans)\n",
           "testCode": "assert double(12) == 24 and double(5) == 10 and ans == 24 and OUTPUT.strip() == \"24\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "def double(___):\n    return ___\nans = ___\nprint(___)",
+            "tier1_nudge": "Pip catches the answer in a jar: '`return` hands a value back to whoever called the function, so it can be stored in a variable.'",
+            "tier2_pattern": "def <name>(<parameter>):\n    return <parameter> * <factor>\n\nans = <name>(<value>)\nprint(ans)",
             "tier3_walkthrough": "Write:\ndef double(n):\n    return n * 2\n\nans = double(12)\nprint(ans)"
           },
           "difficultyOverride": null,
@@ -3342,8 +3342,8 @@
           "referenceSolution": "def add_five(n):\n    return n + 5\n\nans = add_five(10)\nprint(ans)\n",
           "testCode": "assert add_five(3) == 8\nassert ans == 15\nassert OUTPUT.strip() == '15', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip says: 'Use `return n + 5` inside `def add_five(n):`!'",
-            "tier2_pattern": "def add_five(n):\n    return n + 5\n\nans = add_five(10)\nprint(ans)",
+            "tier1_nudge": "Pip holds out the jar again: 'Use `return` rather than `print` inside the function, so the answer comes back out and can be stored.'",
+            "tier2_pattern": "def add_five(<parameter>):\n    return <parameter> + <amount>\n\nans = add_five(<value>)\nprint(ans)",
             "tier3_walkthrough": "Write:\ndef add_five(n):\n    return n + 5\n\nans = add_five(10)\nprint(ans)"
           },
           "difficultyOverride": null,
@@ -3373,8 +3373,8 @@
           "referenceSolution": "def calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")\n",
           "testCode": "assert calc_pressure(35, 45) == 80 and calc_pressure(10, 20) == 30, \"Check calc_pressure(a, b) — it should return a + b!\"\nassert total == 80, f\"Expected total == 80, got {total!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'PISTON FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Piston!'",
-            "tier2_pattern": "def calc_pressure(___):\n    return ___\ntotal = ___\nif ___:\n    print(___)",
+            "tier1_nudge": "Pip balances two gauges: 'Give the function TWO parameters separated by a comma, return their sum, then test the returned total with an `if`.'",
+            "tier2_pattern": "def <name>(<a>, <b>):\n    return <a> + <b>\n\ntotal = <name>(<reading>, <reading>)\nif total >= <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\ndef calc_pressure(a, b):\n    return a + b\n\ntotal = calc_pressure(35, 45)\nif total >= 80:\n    print(\"PISTON FREE!\")"
           },
           "difficultyOverride": null,
@@ -3421,9 +3421,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip works from the inside out: 'Python finishes the function call first, THEN applies the `+ 10` to whatever came back.'",
+            "tier2_pattern": "Work out what `add(3, 4)` hands back first, then add 10 to that result.",
+            "tier3_walkthrough": "Tap Option B (`17`) — `add(3, 4)` returns 7, and 7 + 10 is 17."
           },
           "difficultyOverride": null,
           "isBonus": true,
@@ -3515,7 +3515,7 @@
           "trialType": "multiple_choice",
           "title": "Default Parameters!",
           "storyPrompt": "Functions can have **default values** like `def chime(times=2):` if you don't pass an argument! What will `print(boost(5))` output?",
-          "objective": "Read the Python snippet and tap the correct prediction.",
+          "objective": "Predict what `print(boost(5))` displays when `boost` is defined with a default `mult=3`.",
           "concepts": [
             "functions_def",
             "functions_return"
@@ -3547,9 +3547,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip studies the code: 'Trace each line from top to bottom!'",
-            "tier2_pattern": "Look closely at the syntax and values on every line.",
-            "tier3_walkthrough": "Tap Option A!"
+            "tier1_nudge": "Pip notices the empty slot: 'Only one argument was passed in, so the second parameter falls back on the default written in the `def` line.'",
+            "tier2_pattern": "`n` takes the value that was passed in; `mult` was not passed, so it uses its default.",
+            "tier3_walkthrough": "Tap Option A (`15`) — `n` is 5 and `mult` falls back to 3, so `5 * 3` is 15."
           },
           "difficultyOverride": null
         },
@@ -3574,8 +3574,8 @@
           "referenceSolution": "def triple(n):\n    return n * 3\n\nprint(triple(7))\n",
           "testCode": "assert triple(7) == 21 and triple(4) == 12 and OUTPUT.strip() == \"21\"",
           "hints": {
-            "tier1_nudge": "Pip points at the highlighted error line!",
-            "tier2_pattern": "def triple(___):\n    return ___\nprint(___)",
+            "tier1_nudge": "Pip peers into an empty jar: 'The function works out the value but never hands it back — a function with no `return` gives `None`.'",
+            "tier2_pattern": "def <name>(<parameter>):\n    return <the computed value>",
             "tier3_walkthrough": "Update the code to:\ndef triple(n):\n    return n * 3\n\nprint(triple(7))"
           },
           "difficultyOverride": null,
@@ -3604,8 +3604,8 @@
           "referenceSolution": "def boost(n, mult=2):\n    return n * mult\n\nprint(boost(5))\n",
           "testCode": "assert boost(5) == 10 and boost(5, 3) == 15\nassert OUTPUT.strip() == '10', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip chirps: 'Return `n * mult` inside `boost`, then call `print(boost(5))`!'",
-            "tier2_pattern": "def boost(n, mult=2):\n    return n * mult\n\nprint(boost(5))",
+            "tier1_nudge": "Pip chirps: 'Return the first parameter multiplied by the second one, then call the function passing ONLY its first argument.'",
+            "tier2_pattern": "def boost(n, mult=<default>):\n    return n * mult\n\nprint(boost(<value>))",
             "tier3_walkthrough": "Complete with:\n    return n * mult\n\nprint(boost(5))"
           },
           "difficultyOverride": null,
@@ -3635,8 +3635,8 @@
           "referenceSolution": "def add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))\n",
           "testCode": "assert add_one(4) == 5 and add_two(8) == 10 and add_two(1) == 3 and OUTPUT.strip() == \"10\"",
           "hints": {
-            "tier1_nudge": "Pip cheers: 'Check the starter pattern in Explorer mode if you want a nudge!'",
-            "tier2_pattern": "def add_one(___):\n    return ___\ndef add_two(___):\n    return ___\nprint(___)",
+            "tier1_nudge": "Pip nests two spells: 'Your new function can call `add_one` twice, passing the result of the first call straight into the second.'",
+            "tier2_pattern": "def <outer>(<parameter>):\n    return <inner>(<inner>(<parameter>))\n\nprint(<outer>(<value>))",
             "tier3_walkthrough": "Write:\ndef add_one(x):\n    return x + 1\n\ndef add_two(x):\n    return add_one(add_one(x))\n\nprint(add_two(8))"
           },
           "difficultyOverride": null,
@@ -3694,8 +3694,8 @@
           "referenceSolution": "slot = None\nif slot is None:\n    print(\"EMPTY\")\n",
           "testCode": "assert OUTPUT.strip() == 'EMPTY', f'Got {OUTPUT.strip()!r}'\n",
           "hints": {
-            "tier1_nudge": "Pip whispers: 'Write `if slot is None:` (capital N, no quotes!) and indent `print(\"EMPTY\")` 4 spaces!'",
-            "tier2_pattern": "if slot is None:\n    print(\"EMPTY\")",
+            "tier1_nudge": "Pip whispers: 'Python has a special word for nothing-at-all — capital letter, no quotes — and you compare against it with `is`.'",
+            "tier2_pattern": "if slot is <nothing_value>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Add:\nif slot is None:\n    print(\"EMPTY\")"
           },
           "difficultyOverride": null,
@@ -3766,8 +3766,8 @@
           "referenceSolution": "def find_gear(gears, target):\n    if target in gears:\n        return target\n    return None\n\nresult = find_gear([4, 6, 10], 99)\nif result is None:\n    print(\"MISSING\")\n",
           "testCode": "assert find_gear([4, 6, 10], 6) == 6, \"Expected find_gear([4, 6, 10], 6) == 6\"\nassert find_gear([4, 6, 10], 99) is None, \"Expected find_gear([4, 6, 10], 99) is None\"\nassert result is None, f\"Expected result is None, got {result!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'MISSING'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Check `if target in gears:` to return `target`, otherwise `return None`. Then test `if result is None:`.",
-            "tier2_pattern": "def find_gear(gears, target):\n    if ___ in ___:\n        return ___\n    return None\n\nif result is None:\n    print(\"MISSING\")",
+            "tier1_nudge": "Pip searches the gear box: 'Return the target when `in` finds it; when the function falls past that check instead, hand back Python's nothing-at-all value — then test the result with `is`.'",
+            "tier2_pattern": "def find_gear(<list>, <target>):\n    if <target> in <list>:\n        return <target>\n    return <nothing_value>\n\nif result is <nothing_value>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Return `target` when `target in gears`, else `return None`. Call `result = find_gear([4, 6, 10], 99)` and print `\"MISSING\"` if `result is None`."
           },
           "difficultyOverride": null,
@@ -3793,14 +3793,14 @@
           "unlockId": null,
           "starterCode": {
             "explorer": "def is_even(n):\n    return n % 2 == 0\n",
-            "standard": "",
+            "standard": "# Define is_even(n) to return True when n divides evenly by 2, then print is_even(8)\n",
             "challenge": "# Challenge: write your solution from scratch\n"
           },
           "referenceSolution": "def is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))\n",
           "testCode": "assert is_even(8) is True and is_even(7) is False and OUTPUT.strip() == \"True\"",
           "hints": {
-            "tier1_nudge": "Pip taps his claws: 'Combine everything you learned in this realm!'",
-            "tier2_pattern": "def is_even(___):\n    return ___\nprint(___)",
+            "tier1_nudge": "Pip splits the number in two: 'A comparison already produces True or False on its own, so the function can return the comparison itself — no `if` needed.'",
+            "tier2_pattern": "def <name>(<parameter>):\n    return <parameter> % 2 == 0\n\nprint(<name>(<value>))",
             "tier3_walkthrough": "Write:\ndef is_even(n):\n    return n % 2 == 0\n\nprint(is_even(8))"
           },
           "difficultyOverride": null,
@@ -3858,8 +3858,8 @@
           "referenceSolution": "def sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")\n",
           "testCode": "assert sync_clock(2) == 150 and sync_clock(1, 15) == 75, \"Check sync_clock(h, m=30) — it should return h * 60 + m!\"\nassert mins == 150, f\"Expected mins == 150, got {mins!r}\"\nimport re as _re\n_norm = lambda s: _re.sub(r\"[^\\w\\s]\", \" \", str(s).lower()).split()\n_val = OUTPUT.strip()\n_exp = 'AETHER FREE!'\nassert _val, \"Nothing was printed yet! Make sure you call print(...).\"\nif _val != _exp:\n    if _val.lower() == _exp.lower():\n        assert False, f\"Almost! Check your capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \" \".join(_val.split()) == _exp:\n        assert False, f\"Almost! Check your spacing — expected {_exp!r}, got {_val!r}.\"\n    if _norm(_val) == _norm(_exp):\n        assert False, f\"Almost! Check your punctuation, spacing, and capitalization — expected {_exp!r}, got {_val!r}.\"\n    if \"\".join(_norm(_val)) == \"\".join(_norm(_exp)):\n        assert False, f\"Almost! Some words got squished together — expected {_exp!r}, got {_val!r}.\"\n    assert False, f\"Expected {_exp!r}, got {_val!r}\"\n",
           "hints": {
-            "tier1_nudge": "Pip roars: 'One final Python spell to free Aether!'",
-            "tier2_pattern": "def sync_clock(___):\n    return ___\nmins = ___\nif ___:\n    print(___)",
+            "tier1_nudge": "Pip sets the great clock: 'Turn the hours into minutes inside the function, add the minutes parameter, and give that parameter a default so the caller can leave it out.'",
+            "tier2_pattern": "def <name>(<hours>, <minutes>=<default>):\n    return <hours> * 60 + <minutes>\n\nmins = <name>(<value>)\nif mins == <target>:\n    print(\"<message>\")",
             "tier3_walkthrough": "Write:\ndef sync_clock(h, m=30):\n    return h * 60 + m\n\nmins = sync_clock(2)\nif mins == 150:\n    print(\"AETHER FREE!\")"
           },
           "difficultyOverride": null,
@@ -3906,9 +3906,9 @@
           ],
           "correctChoiceId": "b",
           "hints": {
-            "tier1_nudge": "Pip sparkles: 'Think carefully about what Python returns here!'",
-            "tier2_pattern": "Trace the expression step by step.",
-            "tier3_walkthrough": "Tap Option B!"
+            "tier1_nudge": "Pip fills both slots this time: 'When the caller DOES pass the second argument, it replaces the default rather than adding to it.'",
+            "tier2_pattern": "Both arguments are supplied here, so the default is never used at all.",
+            "tier3_walkthrough": "Tap Option B (`13`) — passing 10 replaces the default 5, so the function returns 3 + 10."
           },
           "difficultyOverride": null,
           "isBonus": true,
