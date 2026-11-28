@@ -17,7 +17,7 @@ const CONTENT_DIR = path.join(ROOT, 'content');
 const VALID_TRIAL_TYPES = new Set(['code', 'multiple_choice', 'fix_bug']);
 const VALID_SIMPLE_CONSTRUCTS = new Set([
   'if', 'elif', 'else', 'for', 'while', 'while_true', 'break', 'continue',
-  'def', 'return', 'class', 'try', 'except', 'with', 'list_comp', 'lambda',
+  'def', 'return', 'class', 'try', 'except', 'with', 'list_comp', 'gen_exp', 'lambda',
   'str_concat', 'aug_assign', 'assign', 'compare', 'bool_op', 'in_op',
   'math_op', 'fstring', 'self_attr',
   'list', 'dict', 'tuple', 'set', 'slice', 'subscript', 'none', 'bool',
@@ -436,6 +436,7 @@ def has_single_construct(tree, token):
         elif token == "except" and isinstance(n, ast.ExceptHandler): return True
         elif token == "with" and isinstance(n, ast.With): return True
         elif token == "list_comp" and isinstance(n, ast.ListComp): return True
+        elif token == "gen_exp" and isinstance(n, ast.GeneratorExp): return True
         elif token == "lambda" and isinstance(n, ast.Lambda): return True
         elif token == "str_concat" and ((isinstance(n, ast.BinOp) and isinstance(n.op, ast.Add)) or (isinstance(n, ast.AugAssign) and isinstance(n.op, ast.Add))): return True
         elif token == "aug_assign" and isinstance(n, ast.AugAssign): return True

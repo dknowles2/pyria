@@ -6951,8 +6951,8 @@
           "id": "trial-16-16-01",
           "trialType": "multiple_choice",
           "title": "16-Bit Finale Warm-Up!",
-          "storyPrompt": "You reached Lord Null's 16-Bit Throne! Combine a list, a dictionary, and a loop — what will the code below print?",
-          "objective": "Predict what `count` holds after one is summed for every bit whose `\"ok\"` value is True.",
+          "storyPrompt": "You reached Lord Null's 16-Bit Throne! Combine a list, a dictionary and a loop — what will the code below print?",
+          "objective": "Predict what `count` holds after the loop adds one for every bit whose `\"ok\"` value is True.",
           "concepts": [
             "functions_return",
             "dictionaries",
@@ -6961,7 +6961,7 @@
           ],
           "shardReward": 135,
           "unlockId": null,
-          "codeSnippet": "bits = [{\"ok\": True}, {\"ok\": False}, {\"ok\": True}]\ncount = sum(1 for b in bits if b[\"ok\"])\nprint(count)",
+          "codeSnippet": "bits = [{\"ok\": True}, {\"ok\": False}, {\"ok\": True}]\ncount = 0\nfor b in bits:\n    if b[\"ok\"]:\n        count += 1\nprint(count)",
           "choices": [
             {
               "id": "a",
@@ -6986,9 +6986,9 @@
           ],
           "correctChoiceId": "a",
           "hints": {
-            "tier1_nudge": "Pip scans the glitch matrix: 'Go through the three dictionaries one at a time and keep only the ones whose `\"ok\"` value is True.'",
-            "tier2_pattern": "One is counted for each dictionary that passes the check, so work out how many pass.",
-            "tier3_walkthrough": "Tap Option A (`2`) — the first and third bits are True and the middle one is False, so two are counted."
+            "tier1_nudge": "Pip scans the glitch matrix: 'Walk the three dictionaries one at a time and count only the ones whose `\"ok\"` value is True.'",
+            "tier2_pattern": "The counter goes up only on the turns where the `if` passes, so count how many pass.",
+            "tier3_walkthrough": "Tap Option A (`2`) — the first and third bits are True and the middle one is False, so the counter reaches 2."
           },
           "difficultyOverride": null
         },

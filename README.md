@@ -16,7 +16,7 @@
 
 ---
 
-## The 4 Playable Eras & 36 Realms (`310 Trials`)
+## The 4 Playable Eras & 36 Realms (`311 Trials`)
 
 Every single Realm follows a **slow-growth scaffolded cadence** so new concepts never feel like a cliff:
 1. **Multiple Choice (`Predict & Choose`)** — Read real Python and predict the output or spot valid syntax first.
@@ -56,13 +56,13 @@ Every single Realm follows a **slow-growth scaffolded cadence** so new concepts 
 
 ---
 
-### Era 3: The 32-Bit Era — *The Isometric Frontier* (PS1 / GBA 2.5D · 6 Realms · 51 Trials)
+### Era 3: The 32-Bit Era — *The Isometric Frontier* (PS1 / GBA 2.5D · 6 Realms · 52 Trials)
 *Pyria tilts into an **Isometric 2.5D Diorama** with elevated terrain terraces (`elevation` heightmaps), extruded 3D stone blocks, and crystalline 32-bit synth music:*
 
 | # | Realm | Dragon Guardian | Python Focus |
 | :-: | :--- | :--- | :--- |
 | **1** | **Blockstone Highlands** | **Terracrest** *(Earth)* | Tuples `(x, y, z)`, tuple unpacking, 3D elevation math |
-| **2** | **Sky-Forge Foundry** | **Anvilwing** *(Fire)* | List comprehensions (`[x * 2 for x in ... if ...]`) & 2D/3D coordinate grids |
+| **2** | **Sky-Forge Foundry** | **Anvilwing** *(Fire)* | List comprehensions (`[x * 2 for x in ... if ...]`), generator expressions & 2D/3D coordinate grids |
 | **3** | **Prism Caverns** | **Lumina** *(Light)* | Sets (`set()`, `&` intersection, `|` union) & nested dictionary maps |
 | **4** | **The Crystal Archives** | **Chronis** *(Crystal)* | Nested dictionaries (`rooms["hall"]["gems"]`), updating & adding inner keys, `.values()` / `.items()` loops |
 | **5** | **Shieldwall Bastion** | **Aegis** *(Prism)* | Error shields: `try` / `except ValueError` / `KeyError` / `ZeroDivisionError` with safe fallbacks |
@@ -185,7 +185,7 @@ Pushing to `main` automatically runs tests, bundles static assets, and deploys v
 Pyria tracks privacy-safe per-trial telemetry (`difficultyMode`, `isPractice`, normalized `errorType`, and elapsed `durationMs`) and rolls up daily aggregates into `trial_stats_daily` so calibration history survives attempt pruning.
 
 - **Trial Calibration Dashboard** (`/builder` locally, and Admin `/console` in Cloudflare production; strictly hidden for non-admin parents):
-  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 310 trials.
+  - Displays KPIs (Trials with Data, 🔴 Too Hard, 🟡 Too Easy, 🟣 Possible Bug, Overall Median Attempts, Total Overrides) and a sortable table across all 311 trials.
   - Filter by **Era**, **Realm**, **Trial Type**, **Difficulty** (`explorer` / `standard` / `challenge`), **Time Window** (`7d` / `30d` / `90d` / `all`), optional **Since** date (`YYYY-MM-DD`), **Flag status**, and **Include Practice Replays**, or click **Export CSV** (`format=csv`).
   - Click any trial row to open the **Drill-Down Modal** showing hint-tier breakdown (`tier0`–`tier3`), top failure error types / wrong multiple-choice options, daily trend with a **Before vs. After** cutoff date check, and (in local `/builder`) a direct **Edit Trial** jump into **Story & Trials**.
 - **CLI Calibration Report** (`scripts/calibration_report.py`):
