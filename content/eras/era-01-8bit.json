@@ -1919,7 +1919,7 @@
             },
             {
               "id": "d",
-              "label": "Error — `print` is not a real Python spell",
+              "label": "Error — print() is not a real Python spell",
               "explanation": "The opposite! `print()` is real Python, used by programmers everywhere — `say()` was the training-wheels version."
             }
           ],
@@ -1935,7 +1935,7 @@
           "id": "trial-04-01b",
           "trialType": "code",
           "title": "Meet <= (At Most) & >= (At Least)",
-          "storyPrompt": "In Frostbite Hollow, we also upgrade from `say()` to real Python `print()`, and add two handy comparisons: `<=` (**less than or equal to / at most**) and `>=` (**greater than or equal to / at least**). Practice a quick 2-line `if` check with `<=`!",
+          "storyPrompt": "In Frostbite Hollow, let's add two handy comparisons to your toolkit: `<=` (**less than or equal to / at most**) and `>=` (**greater than or equal to / at least**). Practice a quick 2-line `if` check with `<=`!",
           "objective": "If `temp` is at most 0 (less than or equal to 0), print 'FROZEN'.",
           "concepts": [
             "comparisons",

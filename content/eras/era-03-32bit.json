@@ -2026,28 +2026,28 @@
           ],
           "introChoice": {
             "title": "Whole-Number Division (//)",
-            "prompt": "Python's double slash `//` divides and keeps only the WHOLE number, throwing away whatever is left over. So `20 // 6` is `3`, because 6 fits into 20 three full times.",
-            "question": "What does `20 // 6` evaluate to?",
-            "codeSnippet": "print(20 // 6)",
+            "prompt": "Python's double slash `//` divides and keeps only the WHOLE number, throwing away whatever is left over. For example, `9 // 2` is `4`: two fits into nine four full times, with `1` left over.",
+            "question": "What does `17 // 5` evaluate to?",
+            "codeSnippet": "print(17 // 5)",
             "choices": [
               {
                 "id": "a",
                 "label": "2",
-                "explanation": "`2` is the leftover (`20 % 6`). `//` asks how many full times 6 fits into 20 instead."
+                "explanation": "`2` is the leftover (`17 % 5`). `//` asks how many full times 5 fits into 17 instead."
               },
               {
                 "id": "b",
                 "label": "3",
-                "explanation": "Spot on! 6 fits into 20 three full times (`6 * 3 = 18`), so `20 // 6` is `3`."
+                "explanation": "Spot on! 5 fits into 17 three full times (`5 * 3 = 15`), and `//` throws away the `2` left over."
               },
               {
                 "id": "c",
                 "label": "4",
-                "explanation": "`//` always rounds DOWN, never up — four sixes would be `24`, which is too big!"
+                "explanation": "`//` always rounds DOWN, never up — four fives would be `20`, which is already bigger than 17!"
               },
               {
                 "id": "d",
-                "label": "20",
+                "label": "17",
                 "explanation": "`//` really does divide — it just hands back a whole number instead of a decimal."
               }
             ],
@@ -2559,7 +2559,7 @@
           "id": "trial-32-04-03b",
           "trialType": "code",
           "title": "Whole-Number Division (//)",
-          "storyPrompt": "More practice with `//` (whole-number division) before the 3D distance math ahead! `20 // 6` returns `3`, dropping the remainder.",
+          "storyPrompt": "More practice with `//` (whole-number division) before building your `safe_div` spell! `20 // 6` returns `3`, dropping the remainder.",
           "objective": "Create the variable `whole` storing `20 // 6`, then print `whole`.",
           "concepts": [
             "basic_math",
