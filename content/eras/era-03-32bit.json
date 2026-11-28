@@ -863,6 +863,80 @@
           ]
         },
         {
+          "id": "trial-32-02-05b",
+          "trialType": "code",
+          "title": "Drop the Brackets: Generator Expressions",
+          "storyPrompt": "Anvilwing shows you a shortcut! When a comprehension is the ONLY thing inside a call like `sum(...)`, the square brackets are optional. Leave them out and you have a **generator expression** — the same words in the same order, except Python hands the values over one at a time instead of building the whole list first.",
+          "objective": "Total the doubled ore weights by passing a bracket-less comprehension straight into sum(), store it in `total`, then print `total`.",
+          "concepts": [
+            "list_comprehensions",
+            "basic_math"
+          ],
+          "shardReward": 60,
+          "unlockId": null,
+          "starterCode": {
+            "explorer": "ores = [4, 6, 5]\ntotal = sum(o * 2 for o in ???)\nprint(total)\n",
+            "standard": "ores = [4, 6, 5]\n# Total the doubled ores with a bracket-less comprehension inside sum()\n",
+            "challenge": ""
+          },
+          "referenceSolution": "ores = [4, 6, 5]\ntotal = sum(o * 2 for o in ores)\nprint(total)\n",
+          "testCode": "assert total == 30, f'Expected 30, got {total!r}'\nassert OUTPUT.strip() == '30', f\"Expected \\\"30\\\", got {OUTPUT.strip()!r}\"\n",
+          "hints": {
+            "tier1_nudge": "Pip drops the brackets: 'When the comprehension is the only thing inside the call, those square brackets are optional — the words themselves do not change at all.'",
+            "tier2_pattern": "total = sum(<item> * <factor> for <item> in <list>)\nprint(total)",
+            "tier3_walkthrough": "Add:\ntotal = sum(o * 2 for o in ores)\nprint(total)"
+          },
+          "difficultyOverride": null,
+          "requiredConstructs": [
+            "gen_exp",
+            "call:sum",
+            "call:print"
+          ],
+          "variants": [
+            {
+              "overrides": {
+                "ores": [
+                  1,
+                  2
+                ]
+              },
+              "expectOutput": "6",
+              "expectVars": {
+                "total": 6
+              }
+            }
+          ],
+          "introChoice": {
+            "title": "A Comprehension Without Its Brackets",
+            "prompt": "You already build lists with `[n * 2 for n in nums]`. When that comprehension is going straight into a function such as `sum(...)`, you may drop the square brackets entirely: `sum(n * 2 for n in nums)`. That is called a **generator expression**, and it works out one value at a time rather than building the whole list first.",
+            "question": "What does `sum(n * 2 for n in [1, 2, 3])` give?",
+            "codeSnippet": "print(sum(n * 2 for n in [1, 2, 3]))",
+            "choices": [
+              {
+                "id": "a",
+                "label": "[2, 4, 6]",
+                "explanation": "That is the LIST the bracketed version builds — `sum(...)` then adds those values into a single number."
+              },
+              {
+                "id": "b",
+                "label": "12",
+                "explanation": "Spot on! It doubles 1, 2 and 3 into 2, 4 and 6, and `sum(...)` adds those to 12."
+              },
+              {
+                "id": "c",
+                "label": "6",
+                "explanation": "That is 1 + 2 + 3 without the doubling — the expression at the front doubles each value first."
+              },
+              {
+                "id": "d",
+                "label": "An error — the square brackets are required",
+                "explanation": "They are optional when the comprehension is the only thing inside the call, which is exactly what makes it a generator expression."
+              }
+            ],
+            "correctChoiceId": "b"
+          }
+        },
+        {
           "id": "trial-32-02-06",
           "trialType": "code",
           "title": "Ignite Anvilwing's Sky-Forge (Boss)",
