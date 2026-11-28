@@ -1711,17 +1711,30 @@ export class WorldEngine {
   }
 
   ensureMinimapTerrainCache(dynamicOverrides, completed) {
+    const is64 = this.eraKey === '64bit';
     const isRich = this.eraKey !== '8bit';
-    const styleKey = isRich ? '16bit' : '8bit';
+    const styleKey = is64 ? '64bit' : isRich ? '16bit' : '8bit';
     const cacheKey = `${this.map.id}:${styleKey}:${[...completed].sort().join(',')}`;
     if (this.minimapCanvas && this.minimapCacheKey === cacheKey) {
       return this.minimapCanvas;
     }
-    const cell = isRich ? 2 : 1;
+    const cell = is64 ? 3 : isRich ? 2 : 1;
     const off = document.createElement('canvas');
     off.width = this.map.width * cell;
     off.height = this.map.height * cell;
     const octx = off.getContext('2d');
+    const elevLayer = this.map.layers?.elevation;
+    const colLayer = this.map.layers?.collision;
+
+    const getElev = (tx, ty, g) => {
+      if (tx < 0 || ty < 0 || tx >= this.map.width || ty >= this.map.height) return 0;
+      if (elevLayer && elevLayer[ty] && typeof elevLayer[ty][tx] === 'number') {
+        return elevLayer[ty][tx];
+      }
+      if (g === 'water' || g === 'lava') return 0;
+      if (g === 'stone_floor') return 1.3;
+      return 1;
+    };
 
     const isTallDecor = (t) =>
       t === 'tree' ||
@@ -1742,6 +1755,93 @@ export class WorldEngine {
           const key = decorTile && MINIMAP_COLORS[decorTile] ? decorTile : groundTile;
           octx.fillStyle = MINIMAP_COLORS[key] || '#1e293b';
           octx.fillRect(x, y, 1, 1);
+          continue;
+        }
+
+        if (is64) {
+          // 64-Bit N64 3D elevation-relief minimap (3x3 px per tile)
+          const px = x * 3;
+          const py = y * 3;
+          const elev = getElev(x, y, groundTile);
+          const blocked = colLayer && colLayer[y] && colLayer[y][x] === 1;
+          const isVoid = groundTile === 'star_tile' && elev === 0 && blocked && !decorTile;
+
+          octx.fillStyle = isVoid ? '#090b1d' : (MINIMAP_COLORS[groundTile] || '#1e293b');
+          octx.fillRect(px, py, 3, 3);
+
+          // Elevation brightness tint so terraced hills & floating islands read clearly in 3D
+          if (!isVoid && groundTile !== 'water' && groundTile !== 'lava') {
+            if (elev >= 2) {
+              const lift = Math.min(0.28, (elev - 1) * 0.09);
+              octx.fillStyle = `rgba(255, 255, 255, ${lift.toFixed(2)})`;
+              octx.fillRect(px, py, 3, 3);
+            }
+          }
+
+          // Top-left cliff highlight & bottom-right cliff shadow + Observatory cyan rim
+          const eN = getElev(x, y - 1, this.getEffectiveGroundTile(x, y - 1, dynamicOverrides));
+          const eS = getElev(x, y + 1, this.getEffectiveGroundTile(x, y + 1, dynamicOverrides));
+          const eW = getElev(x - 1, y, this.getEffectiveGroundTile(x - 1, y, dynamicOverrides));
+          const eE = getElev(x + 1, y, this.getEffectiveGroundTile(x + 1, y, dynamicOverrides));
+          if (!isVoid && elev > 0) {
+            const isVoidN = y > 0 && this.getEffectiveGroundTile(x, y - 1, dynamicOverrides) === 'star_tile' && eN === 0 && colLayer?.[y - 1]?.[x] === 1;
+            const isVoidS = y + 1 < this.map.height && this.getEffectiveGroundTile(x, y + 1, dynamicOverrides) === 'star_tile' && eS === 0 && colLayer?.[y + 1]?.[x] === 1;
+            const isVoidW = x > 0 && this.getEffectiveGroundTile(x - 1, y, dynamicOverrides) === 'star_tile' && eW === 0 && colLayer?.[y]?.[x - 1] === 1;
+            const isVoidE = x + 1 < this.map.width && this.getEffectiveGroundTile(x + 1, y, dynamicOverrides) === 'star_tile' && eE === 0 && colLayer?.[y]?.[x + 1] === 1;
+
+            if (isVoidN || isVoidS || isVoidW || isVoidE) {
+              // Glowing crystal parapet outline on floating Observatory platforms
+              octx.fillStyle = 'rgba(186, 230, 253, 0.85)';
+              if (isVoidN) octx.fillRect(px, py, 3, 1);
+              if (isVoidS) octx.fillRect(px, py + 2, 3, 1);
+              if (isVoidW) octx.fillRect(px, py, 1, 3);
+              if (isVoidE) octx.fillRect(px + 2, py, 1, 3);
+            } else {
+              if (elev > eN) {
+                octx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+                octx.fillRect(px, py, 3, 1);
+              }
+              if (elev > eW) {
+                octx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+                octx.fillRect(px, py, 1, 3);
+              }
+              if (elev > eS) {
+                octx.fillStyle = 'rgba(8, 12, 24, 0.52)';
+                octx.fillRect(px, py + 2, 3, 1);
+              }
+              if (elev > eE) {
+                octx.fillStyle = 'rgba(8, 12, 24, 0.44)';
+                octx.fillRect(px + 2, py, 1, 3);
+              }
+            }
+          }
+
+          // Water shoreline highlight & bridge plank contrast
+          if (groundTile === 'water') {
+            octx.fillStyle = 'rgba(125, 211, 252, 0.45)';
+            if (this.getEffectiveGroundTile(x, y - 1, dynamicOverrides) !== 'water') octx.fillRect(px, py, 3, 1);
+            if (this.getEffectiveGroundTile(x, y + 1, dynamicOverrides) !== 'water') octx.fillRect(px, py + 2, 3, 1);
+          } else if (groundTile === 'bridge_wood' || groundTile === 'bridge_broken') {
+            octx.fillStyle = groundTile === 'bridge_wood' ? '#fde68a' : '#a16207';
+            octx.fillRect(px, py + 1, 3, 1);
+          }
+
+          // 3D Decor elevation & soft cast shadow
+          if (decorTile && MINIMAP_COLORS[decorTile]) {
+            if (isTallDecor(decorTile)) {
+              octx.fillStyle = 'rgba(6, 10, 22, 0.52)';
+              if (x + 1 < this.map.width) octx.fillRect(px + 3, py + 1, 1, 3);
+              if (y + 1 < this.map.height) octx.fillRect(px + 1, py + 3, 3, 1);
+            }
+            octx.fillStyle = MINIMAP_COLORS[decorTile];
+            octx.fillRect(px, py, 3, 3);
+            if (isTallDecor(decorTile)) {
+              octx.fillStyle = 'rgba(255, 255, 255, 0.30)';
+              octx.fillRect(px, py, 2, 1);
+              octx.fillStyle = 'rgba(6, 10, 22, 0.36)';
+              octx.fillRect(px + 2, py + 2, 1, 1);
+            }
+          }
           continue;
         }
 
@@ -1818,11 +1918,12 @@ export class WorldEngine {
       return;
     }
 
+    const is64 = this.eraKey === '64bit';
     const isRich = this.eraKey !== '8bit';
     const scale = this.map.width >= 48 ? 3 : 4;
     const mapW = this.map.width * scale;
     const mapH = this.map.height * scale;
-    const pad = isRich ? 7 : 6;
+    const pad = is64 ? 8 : isRich ? 7 : 6;
     const boxW = mapW + pad * 2;
     const boxH = mapH + pad * 2;
     const boxX = this.canvas.width - boxW - 14;
@@ -1832,7 +1933,66 @@ export class WorldEngine {
     this.minimapMarkers = [];
 
     ctx.save();
-    if (isRich) {
+    if (is64) {
+      // Iconic N64 translucent cobalt-and-gold HUD radar frame (Ocarina of Time / SM64 style)
+      const rr = (x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      };
+
+      // Soft ambient drop shadow
+      rr(boxX + 3, boxY + 5, boxW, boxH, 10);
+      ctx.fillStyle = 'rgba(4, 8, 20, 0.55)';
+      ctx.fill();
+
+      // Translucent deep cobalt N64 glass backing
+      rr(boxX, boxY, boxW, boxH, 10);
+      const frameBg = ctx.createLinearGradient(boxX, boxY, boxX, boxY + boxH);
+      frameBg.addColorStop(0, 'rgba(15, 29, 64, 0.86)');
+      frameBg.addColorStop(1, 'rgba(9, 16, 36, 0.90)');
+      ctx.fillStyle = frameBg;
+      ctx.fill();
+
+      // Metallic sky-blue & gold N64 bevel rim
+      const rimGrad = ctx.createLinearGradient(boxX, boxY, boxX + boxW, boxY + boxH);
+      rimGrad.addColorStop(0, '#7dd3fc');
+      rimGrad.addColorStop(0.5, '#facc15');
+      rimGrad.addColorStop(1, '#38bdf8');
+      ctx.strokeStyle = rimGrad;
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+
+      // Inner recessed map bezel
+      rr(boxX + pad - 1.5, boxY + pad - 1.5, mapW + 3, mapH + 3, 5);
+      ctx.strokeStyle = 'rgba(125, 211, 252, 0.42)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // North compass badge perched at top-center of N64 radar
+      const ncx = boxX + boxW * 0.5;
+      const ncy = boxY + 1;
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(ncx, ncy, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('N', ncx, ncy + 0.5);
+    } else if (isRich) {
       // Ornate 16-Bit SNES beveled gold-trimmed RPG map frame
       ctx.fillStyle = 'rgba(6, 10, 20, 0.48)';
       ctx.fillRect(boxX + 3, boxY + 4, boxW, boxH);
@@ -1883,29 +2043,70 @@ export class WorldEngine {
     const mx = boxX + pad;
     const my = boxY + pad;
 
-    // Terrain bitmap scaled crisp
+    // Terrain bitmap (smooth N64 bilinear filtering in 64-bit, crisp pixel art in 8/16/32-bit)
     const terrain = this.ensureMinimapTerrainCache(dynamicOverrides, completed);
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(terrain, mx, my, mapW, mapH);
-
-    if (isRich) {
-      // Subtle warm sunlit sheen across SNES map
+    ctx.imageSmoothingEnabled = is64;
+    if (is64) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(mx, my, mapW, mapH, 4) : ctx.rect(mx, my, mapW, mapH);
+      ctx.clip();
+      ctx.drawImage(terrain, mx, my, mapW, mapH);
+      // Subtle N64 glass dome sheen
       const sheen = ctx.createLinearGradient(mx, my, mx + mapW, my + mapH);
-      sheen.addColorStop(0, 'rgba(254, 243, 199, 0.08)');
-      sheen.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
-      sheen.addColorStop(1, 'rgba(15, 23, 42, 0.16)');
+      sheen.addColorStop(0, 'rgba(186, 230, 253, 0.14)');
+      sheen.addColorStop(0.45, 'rgba(255, 255, 255, 0)');
+      sheen.addColorStop(1, 'rgba(4, 10, 28, 0.22)');
       ctx.fillStyle = sheen;
       ctx.fillRect(mx, my, mapW, mapH);
+      ctx.restore();
+    } else {
+      ctx.drawImage(terrain, mx, my, mapW, mapH);
+      if (isRich) {
+        // Subtle warm sunlit sheen across SNES map
+        const sheen = ctx.createLinearGradient(mx, my, mx + mapW, my + mapH);
+        sheen.addColorStop(0, 'rgba(254, 243, 199, 0.08)');
+        sheen.addColorStop(0.55, 'rgba(255, 255, 255, 0)');
+        sheen.addColorStop(1, 'rgba(15, 23, 42, 0.16)');
+        ctx.fillStyle = sheen;
+        ctx.fillRect(mx, my, mapW, mapH);
+      }
     }
 
-    // Subtle viewport rectangle
-    const viewX = Math.max(0, (camX / TILE_PX) * scale);
-    const viewY = Math.max(0, (camY / TILE_PX) * scale);
-    const viewW = Math.min(mapW - viewX, (this.canvas.width / TILE_PX) * scale);
-    const viewH = Math.min(mapH - viewY, (this.canvas.height / TILE_PX) * scale);
-    ctx.strokeStyle = isRich ? 'rgba(254, 240, 138, 0.68)' : 'rgba(255, 255, 255, 0.45)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
+    // 3D Perspective Camera View Cone (64-Bit) OR 2D Viewport Rectangle (8/16/32-Bit)
+    if (is64) {
+      const hmx = mx + this.hero.x * scale;
+      const hmy = my + this.hero.y * scale;
+      const coneDepth = 15 * scale;
+      const coneHalfW = 10.5 * scale;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(mx, my, mapW, mapH);
+      ctx.clip();
+      const coneGrad = ctx.createLinearGradient(hmx, hmy, hmx, hmy - coneDepth);
+      coneGrad.addColorStop(0, 'rgba(125, 211, 252, 0.34)');
+      coneGrad.addColorStop(0.65, 'rgba(250, 204, 21, 0.14)');
+      coneGrad.addColorStop(1, 'rgba(250, 204, 21, 0.0)');
+      ctx.fillStyle = coneGrad;
+      ctx.beginPath();
+      ctx.moveTo(hmx, hmy + 2 * scale);
+      ctx.lineTo(hmx - coneHalfW, hmy - coneDepth);
+      ctx.lineTo(hmx + coneHalfW, hmy - coneDepth);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(186, 230, 253, 0.35)';
+      ctx.lineWidth = 0.9;
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      const viewX = Math.max(0, (camX / TILE_PX) * scale);
+      const viewY = Math.max(0, (camY / TILE_PX) * scale);
+      const viewW = Math.min(mapW - viewX, (this.canvas.width / TILE_PX) * scale);
+      const viewH = Math.min(mapH - viewY, (this.canvas.height / TILE_PX) * scale);
+      ctx.strokeStyle = isRich ? 'rgba(254, 240, 138, 0.68)' : 'rgba(255, 255, 255, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
+    }
 
     // Active auto-path trail on minimap
     if (this.autoPath && this.autoPath.waypoints.length > 0) {
@@ -2019,20 +2220,22 @@ export class WorldEngine {
     ctx.arc(hx, hy, 5 + pulse * 1.2, 0, Math.PI * 2);
     ctx.fill();
     if (isRich) {
-      const dirAngle = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[this.hero.dir] ?? Math.PI / 2;
+      const dirAngle = is64 && typeof this.hero.facingAngle === 'number'
+        ? Math.PI / 2 - this.hero.facingAngle
+        : ({ right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[this.hero.dir] ?? Math.PI / 2);
       ctx.save();
       ctx.translate(hx, hy);
       ctx.rotate(dirAngle);
       ctx.beginPath();
-      ctx.moveTo(4.6, 0);
-      ctx.lineTo(-3.2, -3.4);
-      ctx.lineTo(-1.4, 0);
-      ctx.lineTo(-3.2, 3.4);
+      ctx.moveTo(is64 ? 5.6 : 4.6, 0);
+      ctx.lineTo(is64 ? -3.8 : -3.2, is64 ? -4.0 : -3.4);
+      ctx.lineTo(is64 ? -1.6 : -1.4, 0);
+      ctx.lineTo(is64 ? -3.8 : -3.2, is64 ? 4.0 : 3.4);
       ctx.closePath();
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = is64 ? '#fef08a' : '#ffffff';
       ctx.fill();
       ctx.strokeStyle = '#0f172a';
-      ctx.lineWidth = 1.1;
+      ctx.lineWidth = 1.2;
       ctx.stroke();
       ctx.restore();
     } else {
