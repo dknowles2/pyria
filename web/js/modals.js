@@ -2627,7 +2627,6 @@ export class ModalManager {
     onReturnToTitle,
     onToggleMusic,
     onToggleMute,
-    onCycleEra,
     onGetHeroCode,
   }) {
     const heroName = save?.heroName || 'Code-Tamer';
@@ -2684,9 +2683,6 @@ export class ModalManager {
         <button id="btn-menu-mute" type="button" class="btn btn-sm btn-ghost">
           ${muted ? '🔇 SFX: Off' : '🔊 SFX: On'}
         </button>
-        <button id="btn-menu-era" type="button" class="btn btn-sm btn-ghost">
-          🎨 Style: ${escapeHtml(eraLabel || '8-Bit NES')}
-        </button>
       </div>
       `,
       'modal-compact'
@@ -2742,14 +2738,6 @@ export class ModalManager {
       const nextMuted = onToggleMute ? onToggleMute() : audio.isMuted();
       const btn = this.content.querySelector('#btn-menu-mute');
       if (btn) btn.textContent = nextMuted ? '🔇 SFX: Off' : '🔊 SFX: On';
-    });
-
-    this.content.querySelector('#btn-menu-era')?.addEventListener('click', async () => {
-      const nextLabel = onCycleEra ? await onCycleEra() : eraLabel;
-      const btn = this.content.querySelector('#btn-menu-era');
-      if (btn && nextLabel) btn.textContent = `🎨 Style: ${nextLabel}`;
-      const eraBadge = this.content.querySelector('.modal-badges .pill-blue');
-      if (eraBadge && nextLabel) eraBadge.textContent = nextLabel;
     });
 
     this.content.querySelectorAll('[data-close]').forEach((btn) => {

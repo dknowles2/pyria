@@ -90,7 +90,6 @@ const state = {
     tunic: 'emerald',
   },
   ccDirIndex: 0,
-  ccEraKey: '8bit',
   ccFamiliarity: DEFAULT_FAMILIARITY_ID,
   ccAdvancedMode: false,
   ccAnimTimer: null,
@@ -190,12 +189,6 @@ const VISUAL_ERA_LABELS = {
   '16bit': '16-Bit SNES',
   '32bit': '32-Bit Isometric',
   '64bit': '64-Bit N64 3D',
-};
-const VISUAL_ERA_SHORT = {
-  '8bit': '8-Bit',
-  '16bit': '16-Bit',
-  '32bit': '32-Bit',
-  '64bit': '64-Bit',
 };
 const ERA_TO_VISUAL = {
   'era-01-8bit': '8bit',
@@ -619,7 +612,6 @@ function updateHud() {
   $('#hud-hero-name').textContent = save.heroName || 'Code-Tamer';
   const eraKey = normalizeVisualEra(save.visualEra);
   $('#hud-era-badge').textContent = VISUAL_ERA_LABELS[eraKey] || '8-Bit NES';
-  $('#btn-hud-era-toggle').textContent = VISUAL_ERA_SHORT[eraKey] || '8-Bit';
   $('#hud-realm-name').textContent = state.activeRealm?.name || 'Whispering Meadow';
   const adminJumpEl = $('#hud-admin-realm-jump');
   if (adminJumpEl && state.me?.isAdmin && state.activeRealm?.id) {
@@ -1447,9 +1439,7 @@ function openCharCreateScreen() {
     tunic: cc.defaults.tunic || 'emerald',
   };
   state.ccDirIndex = 0;
-  state.ccEraKey = '8bit';
   state.ccFamiliarity = DEFAULT_FAMILIARITY_ID;
-  $('#btn-preview-era').textContent = '8-Bit View';
   $('#charcreate-code').value = cc.starterCode || buildHeroForgePython(state.ccAppearance);
   state.ccGutter?.setMarks(new Map());
   $('#cc-visual-error')?.classList.add('hidden');
@@ -1475,7 +1465,7 @@ function openCharCreateScreen() {
   if (state.ccAnimTimer) clearInterval(state.ccAnimTimer);
   let frame = 0;
   const draw = () => {
-    state.sprites.drawHeroAndPipPreview(canvas, state.ccAppearance, state.ccEraKey, DIRS[state.ccDirIndex], frame);
+    state.sprites.drawHeroAndPipPreview(canvas, state.ccAppearance, '8bit', DIRS[state.ccDirIndex], frame);
     frame += 1;
   };
   draw();
@@ -1589,15 +1579,9 @@ async function refreshLiveContent() {
 async function loadRealm(realmId, spawnOverride = null) {
   const { era: targetEra, realm: foundRealm } = getEraAndRealm(realmId);
   if (targetEra && state.activeSave) {
-    const prevEraId = state.activeSave.eraId;
     state.era = targetEra;
     state.activeSave.eraId = targetEra.id;
-    if (prevEraId && prevEraId !== targetEra.id) {
-      const upgradedVisual = ERA_TO_VISUAL[targetEra.id];
-      if (upgradedVisual) {
-        state.activeSave.visualEra = upgradedVisual;
-      }
-    }
+    state.activeSave.visualEra = ERA_TO_VISUAL[targetEra.id] || '8bit';
   }
   await refreshLiveContent();
   const realm = getRealm(realmId) || foundRealm;
@@ -1675,7 +1659,7 @@ async function handleEntityInteract(entity) {
 async function handleEntityInteractInner(entity) {
   const save = state.activeSave;
   if (!save) return;
-  const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
+  const eraKey = normalizeVisualEra(save.visualEra);
   const completed = getSolvedTrialsSet(save);
   const rescued = new Set(save.rescuedDragons || []);
 
@@ -2031,7 +2015,7 @@ async function handleEntityInteractInner(entity) {
 function openWorkshop() {
   const save = state.activeSave;
   if (!save) return;
-  const eraKey = save.visualEra === '16bit' ? '16bit' : '8bit';
+  const eraKey = normalizeVisualEra(save.visualEra);
   state.modals.openWorkshopModal({
     catalog: state.catalog,
     save,
@@ -2173,21 +2157,6 @@ async function handleRoute(ctx) {
   }
 }
 
-async function cycleVisualEra() {
-  if (!state.activeSave) return null;
-  audio.playClick();
-  const curr = normalizeVisualEra(state.activeSave.visualEra);
-  const next = VISUAL_ERAS[(VISUAL_ERAS.indexOf(curr) + 1) % VISUAL_ERAS.length];
-  state.activeSave.visualEra = next;
-  state.world.setEraKey(next);
-  music.setEra(next);
-  updateHud();
-  const label = VISUAL_ERA_LABELS[next] || next;
-  showToast(`Switched graphics & music to ${label}!`);
-  await persistSave();
-  return label;
-}
-
 function openGameMenu() {
   if (!state.activeSave || !state.modals) return;
   audio.playClick();
@@ -2218,7 +2187,6 @@ function openGameMenu() {
       updateHud();
       return audio.isMuted();
     },
-    onCycleEra: async () => cycleVisualEra(),
     onGetHeroCode: async () => {
       if (!state.activeSave || heroCodeUpgradeInFlight) return;
       await persistSave();
@@ -2339,13 +2307,6 @@ function wireControls() {
     audio.playClick();
   });
 
-  $('#btn-preview-era').addEventListener('click', () => {
-    state.ccEraKey = state.ccEraKey === '8bit' ? '16bit' : '8bit';
-    $('#btn-preview-era').textContent = state.ccEraKey === '16bit' ? '16-Bit View' : '8-Bit View';
-    music.setEra(state.ccEraKey);
-    audio.playClick();
-  });
-
   $('#btn-charcreate-advanced').addEventListener('click', () => {
     audio.playClick();
     setCharCreateMode(!state.ccAdvancedMode);
@@ -2439,9 +2400,6 @@ function wireControls() {
     }
   });
   $('#btn-hud-workshop').addEventListener('click', () => openWorkshop());
-  $('#btn-hud-era-toggle').addEventListener('click', async () => {
-    await cycleVisualEra();
-  });
 
   for (const sel of ['#btn-hud-music', '#btn-title-music', '#btn-charcreate-music']) {
     $(sel)?.addEventListener('click', () => {
