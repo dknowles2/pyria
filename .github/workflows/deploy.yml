@@ -1,19 +1,21 @@
-name: Test & Deploy to Cloudflare Workers
+name: Deploy to Cloudflare Workers
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 jobs:
   test-and-build:
-    name: Build, Typecheck & Test
+    name: Pre-Deploy Build & Verify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -37,10 +39,16 @@ jobs:
       - name: Run Worker + D1 tests
         run: npm test
 
+      - name: Run Web JS tests
+        run: npm run test:web
+
+      - name: Validate content integrity
+        run: npm run test:content
+
   deploy:
     name: Deploy to Cloudflare Workers
     needs: test-and-build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -61,7 +69,7 @@ jobs:
       - name: Build static assets
         run: npm run build:assets
 
-      - name: Apply D1 migrations and deploy Worker
+      - name: Apply D1 migrations and deploy Workers
         run: |
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ]; then
             echo "CLOUDFLARE_API_TOKEN secret is not configured; skipping deploy."
@@ -69,3 +77,4 @@ jobs:
           fi
           npx wrangler d1 migrations apply pyria-db --remote
           npx wrangler deploy
+          npx wrangler deploy -c wrangler.site.jsonc

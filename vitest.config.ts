@@ -9,6 +9,19 @@ export default defineConfig(async () => {
   return {
     test: {
       include: ['worker/**/*.test.ts'],
+      coverage: {
+        provider: 'istanbul' as const,
+        reportsDirectory: 'reports/coverage/worker',
+        reporter: ['text', 'lcov', 'json-summary'],
+        include: ['worker/**/*.ts'],
+        exclude: ['worker/__tests__/**', 'worker/**/*.test.ts', 'worker/env.d.ts', 'worker/types.ts'],
+        thresholds: {
+          statements: 88,
+          branches: 80,
+          functions: 92,
+          lines: 90,
+        },
+      },
     },
     plugins: [
       cloudflareTest({

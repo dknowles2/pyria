@@ -1,0 +1,73 @@
+---
+trigger: glob
+globs:
+  - "content/eras/*.json"
+  - "content/schema.json"
+  - "content/game.json"
+description: Pedagogical and authoring rules for creating or editing Pyria lessons and trials
+---
+
+# Pyria Lesson & Trial Authoring Rules
+
+Follow these rules whenever creating new lessons/trials or editing existing ones in `content/eras/*.json`. Target audience: ~10-year-old beginners learning Python step by step.
+
+## 0. Plain English for 10-Year-Olds (No AI/Claude-Style Prose or Weird Jargon)
+All player-facing copy (`storyPrompt`, `objective`, `bugSummary`, `introChoice.*`, `choices[].label`, `choices[].explanation`, `hints.*`, `storyIntro`, `storyOutro`, `dragon.rescueDialogue`, `cutscenes.*`, `bonusKitReward.description`, and `content/game.json`) **must** read like plain, natural English written for a 10-year-old:
+- **Short, clear sentences and everyday words**: Sound warm, encouraging, and direct, like a good kids' RPG, not an overcaffeinated chatbot or a CS textbook.
+- **No AI / Claude-style mannered prose**:
+  - **No em-dashes (`—`)** in player-facing lesson text. Use periods, commas, or colons instead.
+  - **No purple prose or overly fancy words** (avoid *sabotaged*, *diorama*, *isometric*, *Gouraud-shaded*, *cascading*, *coral fronds*, *sea-lanes*, *shimmering*, *gleaming*, *woven from*, *Cistern Gate*, *silent rune cage*). Use simple, vivid words (*broke*, *messed up*, *3D blocks*, *waterfalls*, *glowing*, *stone gate*).
+  - **No cheesy sound-effect openers or all-caps hype** (avoid *"Splash-sparkle!"*, *"Squawk-roar!"*, *"Clink-whirrr!"*, *"RUMBLE-CRUNCH!"*, *"Bzzzt—"*, *"BOOM!"*, *"WOOHOO!"*, *"IMPOSSIBLE!!"*, *"CRISP SHADING!"*).
+  - **No canned template openers** (avoid *"In [Realm], try this new power!"*, *"Put your new skill into action!"*, *"Keep pushing deeper into..."*).
+- **No unexplained coding jargon**:
+  - Avoid words like *syntax*, *snippet*, *parameter*, *argument*, *attribute*, *method*, *override*, *subclass*, *superclass*, *iterate/iterating*, *concatenate*, *invoke*, *negate*, *immutable*, *mutable*, *deduplicate*, *invariant*, *runtime exception*, *zero-based index*, *expression*, *comprehension*, *data structures*.
+  - Whenever a real Python concept is taught, explain it in concrete, everyday terms (e.g., *text* for string, *named box* for variable, *inputs* for parameters/arguments, *position number starting at 0* for index, *locked list in `()`* for tuple, *split into separate variables* for unpack, *blueprint* for class, *action inside a class* for method, *safety net that catches errors* for `try`/`except`, *tiny one-line rule* for `lambda`).
+- **Keep `storyPrompt` and `objective` distinct**: `storyPrompt` briefly sets the scene and explains any new idea in plain words; `objective` is a short, crystal-clear task. Never copy-paste `objective` into `storyPrompt`.
+
+## 1. One Concept at a Time + Repetition Before Combining
+- **Never introduce two brand-new concepts in the same trial** (e.g., never introduce `*` multiplication and `True`/`False` Booleans together, or variable addition and `str()` together). Teach each new concept in its own focused trial first.
+- **Repeat before combining**: Give players multiple low-stakes repetitions of core fundamentals (strings vs. variables, 4-space indentation, plain `if`, `==`, `<=`/`>=`, `for` loops) before combining them into multi-step or capstone trials. Aim for **8–10 main trials per Realm** in early eras.
+- Whenever a lesson introduces a **new Python concept, operator, method, data type, or syntax**, teach it via a multiple-choice question **before** asking the player to write code for it:
+  - Use either a standalone `trialType: "multiple_choice"` trial (e.g., Trial 1 of a Realm), OR
+  - A Step 1 `introChoice` object on the `code` or `fix_bug` trial where the concept debuts (Step 1: Predict & Choose → Step 2: Code It in the same modal, preserving realm maps and gate chains).
+
+## 2. Never Assume Prior Knowledge of Data Types or Jargon
+- Explicitly define every Python data type in plain, kid-friendly language with concrete examples and contrasts **before** asking the player to use or convert it:
+  - **String (`str`)**: text wrapped in quotes (e.g., `"Hello"`, `"5"`).
+  - **Integer (`int`)**: a whole number with **no decimal point** and no quotes (e.g., `0`, `6`, `10`, `-3`). Always connect `int()` → *integer (whole number)*.
+  - **Float (`float`)**: a number **with a decimal point** (e.g., `2.5`, `0.5`), contrasted with integers and strings.
+  - **Boolean (`bool`)**: a yes/no truth value—only `True` or `False` (capitalized, no quotes).
+  - **List (`list`)**, **Dictionary (`dict`)**, **Tuple (`tuple`)**, **Set (`set`)**, **Class / Object**: define what each holds, its bracket syntax (`[]`, `{}`, `()`), and how it differs from previously learned types.
+- Introduce comparison operators (`>`, `<`, `==`) and `=` (store) vs `==` (compare) explicitly before expecting players to write conditionals.
+
+## 3. Multiple-Choice Quality & Wrong-Choice Feedback
+- **No untaught concepts in distractors**: Wrong answer choices must only test rules/concepts already introduced. Never sneak an untaught syntax trap (e.g., `=` vs `==` before equality is taught) into a distractor.
+- **Specific explanation on every choice**: Every choice (`a`–`d`) in both standalone `multiple_choice` trials and `introChoice` warm-ups **must** include a friendly, specific `explanation` stating *why* that choice is right or wrong.
+- **Balance correct answers**: Distribute `correctChoiceId` across `a`, `b`, `c`, and `d` rather than putting the right answer in the same slot repeatedly.
+
+## 4. Scaffold `starterCode.standard` to Focus on the New Concept
+- In **non-boss `code` trials** (Trials 1–5), do **not** force players in Standard mode to retype boilerplate setup or author an entire multi-branch/multi-class structure on their very first try:
+  - When teaching a new branch or piece (e.g., adding `else:` to an `if`, adding `elif:` between `if` and `else:`, adding a method to a class, overriding a method on a subclass), pre-provide the surrounding/base structure in `starterCode.standard`.
+  - When an objective starts with *"Given `items = [...]`..."*, pre-provide those input variables in `starterCode.standard`.
+- Keep `starterCode.challenge` blank (`""`) for players who want from-scratch mastery, and keep Boss `#6` trials as un-scaffolded capstones.
+- Verify that `starterCode.standard` never passes the trial (`testCode` + `requiredConstructs` + `variants`) before the player edits it.
+
+## 5. Clear, Condition-First, Explicit-Variable Objectives
+- **Condition first**: Always state conditions before actions in Python's natural order (`If <condition>, ...; otherwise, ...`). Avoid backwards phrasing like `"set X to Y if Z"`.
+- **Be explicit about variables**: Name variables clearly with backticks and explicit verbs (*"create the variable \`crystals\`"*, *"store 'OPEN' in the variable \`gate_status\`"*, *"update the variable \`door\` to 'OPEN'"*) instead of ambiguous `"set X to Y"`.
+- **Keep Challenge Mode spoiler-free**: Avoid putting full code lines or `=`/`>=` syntax inside backticks in `objective` unless needed, so Challenge Mode can display clean English goals without hiding them.
+
+## 6. Hints & Worked Examples
+- Provide all 3 progressive hint tiers (`tier1_nudge`, `tier2_pattern`, `tier3_walkthrough`) plus a clean, idiomatic `referenceSolution`.
+- Remember that when a player exhausts all hints in Explorer or Standard mode, Pip offers **Pip's Worked Example** using `referenceSolution` (or the correct choice + explanation for MC trials)—so keep `referenceSolution` concise, clean, and easy for a beginner to read.
+- **Keep the three tiers strictly progressive — each must add information the previous one withheld:**
+  - `tier1_nudge` is **conceptual**: name the idea, operator, or method and point at the line to look at, but *without* the literal arguments. Write *"Use `.append(...)` to add the pearl onto the end of `bag`"*, not *"Call `bag.append("pearl")`"* — the latter is more specific than Tier 2 and inverts the progression.
+  - `tier2_pattern` is the **shape** of the answer, with `<named_placeholder>` standing in for whatever the player still has to work out. Never paste the finished line: if the player supplies the index, write `first = crystals[<index>]`; if they supply the separator, write `clean = raw.replace("<old>", "<new>")`.
+  - `tier3_walkthrough` is the only tier that gives the **exact code or answer**. For an MC trial it names the option *and* the reason: *"Tap Option B (`opal`). Position `-1` always grabs the very last item."*
+- **An MC `tier2_pattern` must not state the answer.** Explain the rule that decides it instead: *"Compare 12, 45, and 29: `max()` returns the largest, `min()` the smallest, `sum()` the total."* leaves the player to pick, whereas *"the smallest is 3"* makes Tier 3 redundant.
+- **Never write a filler hint.** A nudge that would fit any trial (*"Double-check your indentation and variable names!"*, *"Combine everything you learned in this realm!"*, *"Trace it carefully!"*) is not a hint; and never send the player to a different difficulty mode for help.
+
+## 7. Verification
+- After editing any lesson file, always run:
+  - `npm run test:content` (validates schema, maps, reference solutions, `requiredConstructs`, and `variants`)
+  - `npm run build:assets` (rebuilds `dist/assets/`)

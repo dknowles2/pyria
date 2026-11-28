@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  worker:
+    name: Worker Typecheck, Build & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static assets
+        run: npm run build:assets
+
+      - name: Typecheck Worker TypeScript
+        run: npm run typecheck
+
+      - name: Run Worker + D1 tests with coverage
+        run: npm run test:coverage
+
+      - name: Publish Worker coverage summary
+        if: always() && hashFiles('reports/coverage/worker/coverage-summary.json') != ''
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const s = JSON.parse(fs.readFileSync("reports/coverage/worker/coverage-summary.json", "utf8")).total;
+            const md = [
+              "### Worker Coverage Summary",
+              "| Metric | Covered | Total | Pct |",
+              "| --- | ---: | ---: | ---: |",
+              `| Lines | ${s.lines.covered} | ${s.lines.total} | ${s.lines.pct}% |`,
+              `| Statements | ${s.statements.covered} | ${s.statements.total} | ${s.statements.pct}% |`,
+              `| Functions | ${s.functions.covered} | ${s.functions.total} | ${s.functions.pct}% |`,
+              `| Branches | ${s.branches.covered} | ${s.branches.total} | ${s.branches.pct}% |`,
+            ].join("\n") + "\n";
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+          '
+
+  web:
+    name: Web Frontend Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run Web JS unit tests with coverage
+        run: npm run test:web:coverage
+
+  server:
+    name: Python Server Tests & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install coverage
+        run: python3 -m pip install --disable-pip-version-check 'coverage>=7.6,<8'
+
+      - name: Run Python server tests with coverage
+        run: |
+          python3 -m coverage run --branch --source=server --omit='server/test_*.py' -m unittest discover -s server -p 'test_*.py' -v
+          python3 -m coverage report --show-missing --fail-under=65
+
+  content:
+    name: Content & Map Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate game content, trials, and maps
+        run: npm run test:content

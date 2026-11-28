@@ -1,4 +1,7 @@
-// Zero-dependency 32-Bit (PS1/GBA Isometric 2.5D) & 64-Bit (Nintendo 64 Chunky Gouraud 3D) Canvas Renderers
+// Zero-dependency 32-Bit (PS1/GBA Isometric 2.5D) & 64-Bit (Nintendo 64 Textured 3D) Canvas Renderers
+
+import { pickN64Entity, renderN64WebGL } from './n64Renderer.js?v=20261127v';
+export { pickN64Entity };
 
 const TILE_PALETTE = {
   grass: { top: '#43a047', left: '#2e7d32', right: '#1b5e20' },
@@ -309,6 +312,10 @@ export function renderIsometric32Bit(engine, ctx, dynamicOverrides, completed, o
  * 64-Bit (Nintendo 64) Chunky Gouraud-Shaded Perspective 3D Renderer
  */
 export function renderN643D(engine, ctx, dynamicOverrides, completed, openedChests, rescued) {
+  // Prefer hardware-accelerated WebGL N64 textured 3D renderer; fall back to Canvas 2D if unavailable
+  if (renderN64WebGL(engine, ctx, dynamicOverrides, completed, openedChests)) {
+    return;
+  }
   const { map, hero, pip, sprites, save, time, canvas } = engine;
   const W = canvas.width;
   const H = canvas.height;

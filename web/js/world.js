@@ -1,7 +1,7 @@
 // Crisp HTML5 Canvas Overworld Engine for Pyria (8-Bit, 16-Bit, 32-Bit Isometric 2.5D, 64-Bit N64 3D)
 
 import { audio } from './audio.js?v=20261127i';
-import { renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127i';
+import { pickN64Entity, renderIsometric32Bit, renderN643D } from './renderer3d.js?v=20261127v';
 
 const BASE_TILE_PX = 16;
 const RENDER_SCALE = 3; // 48x48 screen px per 16x16 map tile
@@ -61,6 +61,7 @@ export class WorldEngine {
       x: 5,
       y: 17,
       dir: 'down',
+      facingAngle: 0,
       moving: false,
       animTimer: 0,
       frame: 0,
@@ -73,6 +74,7 @@ export class WorldEngine {
       x: 4,
       y: 17,
       dir: 'down',
+      facingAngle: 0,
       frame: 0,
       animTimer: 0,
     };
@@ -86,6 +88,11 @@ export class WorldEngine {
     this.minimapCacheKey = null;
     this.minimapRect = null;
     this.lightSpriteCache = new Map();
+    this.minimapMarkers = [];
+    this.wayfinderRect = null;
+
+    // Auto-pathing state (BFS tile-center waypoints)
+    this.autoPath = null;
 
     // Input state
     this.keys = new Set();
@@ -106,17 +113,29 @@ export class WorldEngine {
     this.bindEvents();
   }
 
+  isInputLocked() {
+    if (this.paused) return true;
+    if (typeof document !== 'undefined') {
+      if (document.querySelector('.cutscene-overlay')) return true;
+      const modal = document.getElementById('modal-backdrop');
+      if (modal && !modal.classList.contains('hidden')) return true;
+    }
+    return false;
+  }
+
   bindEvents() {
     this._onKeyDown = (e) => {
-      if (this.paused) return;
+      if (this.isInputLocked()) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
 
       const key = e.key.toLowerCase();
       if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
         e.preventDefault();
+        if (this.autoPath) this.cancelAutoPath();
         this.keys.add(key);
       } else if (key === 'e' || key === ' ' || key === 'enter') {
         e.preventDefault();
+        if (e.repeat) return;
         this.triggerInteract();
       }
     };
@@ -133,17 +152,48 @@ export class WorldEngine {
     };
 
     const handleCanvasTap = (clientX, clientY) => {
-      if (this.paused || !this.map) return;
+      if (this.isInputLocked() || !this.map) return;
       const rect = this.canvas.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
       const cx = (clientX - rect.left) * (this.canvas.width / rect.width);
       const cy = (clientY - rect.top) * (this.canvas.height / rect.height);
 
-      // Ignore clicks inside the corner minimap overlay
+      // Click on top-left Wayfinder pill -> auto-walk to next objective
+      if (this.wayfinderRect) {
+        const w = this.wayfinderRect;
+        if (cx >= w.x && cx <= w.x + w.w && cy >= w.y && cy <= w.y + w.h) {
+          if (this.autoPath) {
+            this.cancelAutoPath();
+          } else {
+            this.startAutoPathToNextObjective();
+          }
+          return;
+        }
+      }
+
+      // Click inside the corner minimap overlay -> fast-travel or auto-path to clicked marker
       if (this.minimapRect) {
         const m = this.minimapRect;
         if (cx >= m.x && cx <= m.x + m.w && cy >= m.y && cy <= m.y + m.h) {
+          this.handleMinimapClick(cx, cy);
           return;
         }
+      }
+
+      // 64-Bit 3D perspective hit-testing against projected entity screen targets
+      if (this.eraKey === '64bit') {
+        const hit = pickN64Entity(cx, cy);
+        if (hit) {
+          const dHero = Math.hypot(hit.x + 0.5 - this.hero.x, hit.y + 0.5 - this.hero.y);
+          if (dHero <= 3.6 && this.callbacks.onInteract) {
+            this.callbacks.onInteract(hit);
+            return;
+          }
+        }
+        if (this.nearestEntity) {
+          this.triggerInteract();
+        }
+        return;
       }
 
       const camX = Math.round(this.camera.x);
@@ -180,8 +230,31 @@ export class WorldEngine {
       handleCanvasTap(e.clientX, e.clientY);
     };
 
+    this._onCanvasMouseMove = (e) => {
+      if (this.isInputLocked() || !this.map) {
+        this.canvas.style.cursor = 'default';
+        return;
+      }
+      const rect = this.canvas.getBoundingClientRect();
+      const cx = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+      const cy = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+      let pointer = false;
+      if (this.wayfinderRect) {
+        const w = this.wayfinderRect;
+        if (cx >= w.x && cx <= w.x + w.w && cy >= w.y && cy <= w.y + w.h) pointer = true;
+      }
+      if (!pointer && this.minimapRect) {
+        const m = this.minimapRect;
+        if (cx >= m.x && cx <= m.x + m.w && cy >= m.y && cy <= m.y + m.h) {
+          pointer = Boolean(this.findMinimapMarkerAt(cx, cy));
+        }
+      }
+      this.canvas.style.cursor = pointer ? 'pointer' : 'default';
+    };
+
     let canvasTouchStart = null;
     this._onCanvasTouchStart = (e) => {
+      if (this.isInputLocked()) return;
       e.preventDefault();
       if (e.changedTouches.length > 0) {
         const t = e.changedTouches[0];
@@ -189,9 +262,14 @@ export class WorldEngine {
       }
     };
     this._onCanvasTouchMove = (e) => {
+      if (this.isInputLocked()) return;
       e.preventDefault();
     };
     this._onCanvasTouchEnd = (e) => {
+      if (this.isInputLocked()) {
+        canvasTouchStart = null;
+        return;
+      }
       e.preventDefault();
       if (!canvasTouchStart) return;
       for (const t of e.changedTouches) {
@@ -218,6 +296,7 @@ export class WorldEngine {
     window.addEventListener('blur', this._onBlur);
     window.addEventListener('resize', this._onResize);
     this.canvas.addEventListener('click', this._onCanvasClick);
+    this.canvas.addEventListener('mousemove', this._onCanvasMouseMove);
     this.canvas.addEventListener('touchstart', this._onCanvasTouchStart, { passive: false });
     this.canvas.addEventListener('touchmove', this._onCanvasTouchMove, { passive: false });
     this.canvas.addEventListener('touchend', this._onCanvasTouchEnd, { passive: false });
@@ -232,6 +311,7 @@ export class WorldEngine {
     window.removeEventListener('blur', this._onBlur);
     window.removeEventListener('resize', this._onResize);
     this.canvas.removeEventListener('click', this._onCanvasClick);
+    this.canvas.removeEventListener('mousemove', this._onCanvasMouseMove);
     this.canvas.removeEventListener('touchstart', this._onCanvasTouchStart);
     this.canvas.removeEventListener('touchmove', this._onCanvasTouchMove);
     this.canvas.removeEventListener('touchend', this._onCanvasTouchEnd);
@@ -256,7 +336,30 @@ export class WorldEngine {
       this.keys.clear();
       this.dpadDir = null;
       this.virtualVec = { dx: 0, dy: 0 };
+      this.cancelAutoPath();
     }
+  }
+
+  getCompletedSet() {
+    return new Set([
+      ...(this.save?.solvedTrials || []),
+      ...(this.save?.completedTrials || []),
+    ]);
+  }
+
+  /**
+   * Returns true if a secret bonus rune is still sealed (core realm trials / boss not yet cleared).
+   */
+  isBonusTrialLocked(ent, completed = null) {
+    if (!ent || ent.type !== 'bonus_trial') return false;
+    const solved = completed || this.getCompletedSet();
+    if (ent.refId && solved.has(ent.refId)) return false;
+    if (ent.requiredTrialId && !solved.has(ent.requiredTrialId)) return true;
+    const coreTrials = (this.map?.entities || []).filter((e) => e.type === 'trial' && e.refId);
+    if (coreTrials.length > 0 && coreTrials.some((e) => !solved.has(e.refId))) {
+      return true;
+    }
+    return false;
   }
 
   setVirtualVector(dx, dy) {
@@ -266,12 +369,14 @@ export class WorldEngine {
       this.dpadDir = null;
       return;
     }
+    if (this.autoPath) this.cancelAutoPath();
     const clamped = Math.min(1, mag);
     this.virtualVec = { dx: (dx / mag) * clamped, dy: (dy / mag) * clamped };
     this.dpadDir = null;
   }
 
   setVirtualDirection(dir) {
+    if (dir && this.autoPath) this.cancelAutoPath();
     this.dpadDir = dir || null;
     this.virtualVec = { dx: 0, dy: 0 };
   }
@@ -306,12 +411,17 @@ export class WorldEngine {
     this.hero.x = startX;
     this.hero.y = startY;
     this.hero.dir = 'down';
+    this.hero.facingAngle = 0;
     this.pip.x = startX - 0.9;
     this.pip.y = startY;
+    this.pip.dir = 'down';
+    this.pip.facingAngle = 0;
     this.trail = [];
     this.currentRegionId = null;
     this.camera.initialized = false;
     this.minimapCacheKey = null;
+    this.minimapMarkers = [];
+    this.cancelAutoPath();
 
     this.initParticles();
     this.resizeCanvas();
@@ -457,16 +567,50 @@ export class WorldEngine {
 
     const dynamicOverrides = this.getDynamicStateMap();
 
-    if (!this.paused) {
-      const { dx, dy } = this.getMovementVector();
+    if (!this.isInputLocked()) {
+      const manual = this.getMovementVector();
+      let dx = manual.dx;
+      let dy = manual.dy;
       const hasSwiftBoots = this.save.appearance?.boots === 'boots_swift';
-      const speed = hasSwiftBoots ? 6.2 : 4.4; // tiles per second
+      const speed = hasSwiftBoots ? 6.8 : 4.6; // tiles per second
+
+      if (dx !== 0 || dy !== 0) {
+        if (this.autoPath) this.cancelAutoPath();
+      } else if (this.autoPath && this.autoPath.waypoints.length > 0) {
+        const wp = this.autoPath.waypoints[this.autoPath.index];
+        if (!wp) {
+          this.finishAutoPath();
+        } else {
+          const wdx = wp.x - this.hero.x;
+          const wdy = wp.y - this.hero.y;
+          const wdist = Math.hypot(wdx, wdy);
+          if (wdist <= Math.max(0.14, speed * dt * 0.9)) {
+            this.hero.x = wp.x;
+            this.hero.y = wp.y;
+            this.autoPath.index += 1;
+            if (this.autoPath.index >= this.autoPath.waypoints.length) {
+              this.finishAutoPath();
+            } else {
+              const nextWp = this.autoPath.waypoints[this.autoPath.index];
+              const ndx = nextWp.x - this.hero.x;
+              const ndy = nextWp.y - this.hero.y;
+              const nd = Math.hypot(ndx, ndy) || 1;
+              dx = ndx / nd;
+              dy = ndy / nd;
+            }
+          } else {
+            dx = wdx / wdist;
+            dy = wdy / wdist;
+          }
+        }
+      }
 
       this.hero.moving = dx !== 0 || dy !== 0;
       if (this.hero.stepSoundCooldown > 0) this.hero.stepSoundCooldown -= dt;
       if (this.hero.bumpSoundCooldown > 0) this.hero.bumpSoundCooldown -= dt;
 
       if (this.hero.moving) {
+        this.hero.facingAngle = Math.atan2(dx, dy);
         if (Math.abs(dx) > Math.abs(dy)) {
           this.hero.dir = dx < 0 ? 'left' : 'right';
         } else {
@@ -491,8 +635,10 @@ export class WorldEngine {
           if (this.trail.length > 24) this.trail.shift();
           if (this.hero.stepSoundCooldown <= 0) {
             audio.playStep();
-            this.hero.stepSoundCooldown = hasSwiftBoots ? 0.22 : 0.3;
+            this.hero.stepSoundCooldown = hasSwiftBoots ? 0.2 : 0.28;
           }
+        } else if (this.autoPath) {
+          this.cancelAutoPath();
         } else if (this.hero.bumpSoundCooldown <= 0) {
           audio.playBump();
           this.hero.bumpSoundCooldown = 0.35;
@@ -520,6 +666,7 @@ export class WorldEngine {
     if (pipDist > 0.12) {
       this.pip.x += pipDx * Math.min(1, dt * 6);
       this.pip.y += pipDy * Math.min(1, dt * 6);
+      this.pip.facingAngle = Math.atan2(pipDx, pipDy);
       if (Math.abs(pipDx) > Math.abs(pipDy)) {
         this.pip.dir = pipDx < 0 ? 'left' : 'right';
       } else {
@@ -527,6 +674,7 @@ export class WorldEngine {
       }
     } else {
       this.pip.dir = this.hero.dir;
+      this.pip.facingAngle = this.hero.facingAngle;
     }
 
     this.pip.animTimer += dt;
@@ -594,8 +742,276 @@ export class WorldEngine {
   }
 
   triggerInteract() {
+    if (this.isInputLocked()) return;
     if (this.nearestEntity && this.callbacks.onInteract) {
       this.callbacks.onInteract(this.nearestEntity);
+    }
+  }
+
+  getCompletedSet() {
+    return new Set([
+      ...(this.save?.solvedTrials || []),
+      ...(this.save?.completedTrials || []),
+    ]);
+  }
+
+  getRescuedSet() {
+    return new Set(this.save?.rescuedDragons || []);
+  }
+
+  /**
+   * Returns true if all core trials in the current realm map are solved (or the realm's dragon is rescued).
+   */
+  isRealmCleared(completed = null, rescued = null) {
+    if (!this.map) return false;
+    const solved = completed || this.getCompletedSet();
+    const dragons = rescued || this.getRescuedSet();
+    const vault = (this.map.entities || []).find((e) => e.type === 'vault' && e.refId);
+    if (vault && dragons.has(vault.refId)) return true;
+    const coreTrials = (this.map.entities || []).filter((e) => e.type === 'trial' && e.refId);
+    return coreTrials.length > 0 && coreTrials.every((e) => solved.has(e.refId));
+  }
+
+  /**
+   * Returns true if the player is allowed to fast-travel directly to `ent`.
+   */
+  canFastTravelToEntity(ent, completed = null, rescued = null) {
+    if (!ent || !this.map) return false;
+    const solved = completed || this.getCompletedSet();
+    const dragons = rescued || this.getRescuedSet();
+    const cleared = this.isRealmCleared(solved, dragons);
+
+    if (ent.type === 'trial') {
+      return Boolean(cleared || (ent.refId && solved.has(ent.refId)));
+    }
+    if (ent.type === 'vault') {
+      const reqMet = !ent.requiredTrialId || solved.has(ent.requiredTrialId);
+      return Boolean(cleared || (ent.refId && dragons.has(ent.refId)) || reqMet);
+    }
+    if (ent.type === 'portal') {
+      return !ent.requiredTrialId || solved.has(ent.requiredTrialId);
+    }
+    if (ent.type === 'bonus_trial') {
+      return Boolean(ent.refId && solved.has(ent.refId));
+    }
+    if (ent.type === 'workshop' || ent.type === 'npc') {
+      return Boolean(cleared || solved.size > 0);
+    }
+    return false;
+  }
+
+  findSafeStandTileNear(ent, dynamicOverrides = null) {
+    if (!this.map || !ent) return null;
+    const dyn = dynamicOverrides || this.getDynamicStateMap();
+    const candidates = [
+      [ent.x, ent.y],
+      [ent.x, ent.y + 1],
+      [ent.x, ent.y - 1],
+      [ent.x - 1, ent.y],
+      [ent.x + 1, ent.y],
+      [ent.x - 1, ent.y + 1],
+      [ent.x + 1, ent.y + 1],
+      [ent.x - 1, ent.y - 1],
+      [ent.x + 1, ent.y - 1],
+    ];
+    for (const [tx, ty] of candidates) {
+      if (!this.isTileBlocked(tx, ty, dyn) && this.canStandAt(tx + 0.5, ty + 0.5, dyn)) {
+        return { x: tx + 0.5, y: ty + 0.5 };
+      }
+    }
+    return null;
+  }
+
+  fastTravelToEntity(ent) {
+    if (!this.map || !ent) return { ok: false, reason: 'no_target' };
+    const dyn = this.getDynamicStateMap();
+    const spot = this.findSafeStandTileNear(ent, dyn);
+    if (!spot) return { ok: false, reason: 'blocked' };
+
+    this.cancelAutoPath();
+    this.hero.x = spot.x;
+    this.hero.y = spot.y;
+    const fdx = ent.x + 0.5 - spot.x;
+    const fdy = ent.y + 0.5 - spot.y;
+    if (Math.abs(fdx) > 0.05 || Math.abs(fdy) > 0.05) {
+      this.hero.dir = Math.abs(fdx) > Math.abs(fdy) ? (fdx < 0 ? 'left' : 'right') : (fdy < 0 ? 'up' : 'down');
+    }
+    this.pip.x = spot.x - 0.85;
+    this.pip.y = spot.y + 0.1;
+    this.trail = [];
+    this.snapCameraToHero();
+    audio.playPortal();
+    if (this.callbacks.onFastTravel) {
+      this.callbacks.onFastTravel(ent);
+    }
+    return { ok: true, entity: ent };
+  }
+
+  /**
+   * 4-way BFS over walkable tiles from the hero's current tile to a walkable tile
+   * at or adjacent to `targetEntity`.
+   */
+  findPathToEntity(targetEntity) {
+    if (!this.map || !targetEntity) return null;
+    const dyn = this.getDynamicStateMap();
+    const startX = Math.max(0, Math.min(this.map.width - 1, Math.floor(this.hero.x)));
+    const startY = Math.max(0, Math.min(this.map.height - 1, Math.floor(this.hero.y)));
+    const targetBlocked = this.isTileBlocked(targetEntity.x, targetEntity.y, dyn);
+
+    const isGoal = (tx, ty) => {
+      if (!targetBlocked) {
+        return tx === targetEntity.x && ty === targetEntity.y;
+      }
+      const dist = Math.hypot(tx - targetEntity.x, ty - targetEntity.y);
+      return dist <= 1.45;
+    };
+
+    if (isGoal(startX, startY)) {
+      return [];
+    }
+
+    const width = this.map.width;
+    const height = this.map.height;
+    const visited = new Uint8Array(width * height);
+    const parent = new Int32Array(width * height).fill(-1);
+    const queue = new Int32Array(width * height);
+    let head = 0;
+    let tail = 0;
+
+    const startIdx = startY * width + startX;
+    visited[startIdx] = 1;
+    queue[tail++] = startIdx;
+
+    const dirs = [
+      [0, -1],
+      [1, 0],
+      [0, 1],
+      [-1, 0],
+    ];
+
+    let goalIdx = -1;
+    while (head < tail) {
+      const cur = queue[head++];
+      const cx = cur % width;
+      const cy = (cur - cx) / width;
+
+      for (const [ox, oy] of dirs) {
+        const nx = cx + ox;
+        const ny = cy + oy;
+        if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+        const nIdx = ny * width + nx;
+        if (visited[nIdx]) continue;
+        if (this.isTileBlocked(nx, ny, dyn)) continue;
+        visited[nIdx] = 1;
+        parent[nIdx] = cur;
+        if (isGoal(nx, ny)) {
+          goalIdx = nIdx;
+          break;
+        }
+        queue[tail++] = nIdx;
+      }
+      if (goalIdx !== -1) break;
+    }
+
+    if (goalIdx === -1) return null;
+
+    const waypoints = [];
+    let trace = goalIdx;
+    while (trace !== -1 && trace !== startIdx) {
+      const tx = trace % width;
+      const ty = (trace - tx) / width;
+      waypoints.push({ x: tx + 0.5, y: ty + 0.5 });
+      trace = parent[trace];
+    }
+    waypoints.reverse();
+    return waypoints;
+  }
+
+  startAutoPathToEntity(targetEntity) {
+    if (!this.map || !targetEntity) return { ok: false, reason: 'no_target' };
+    const distNow = Math.hypot(targetEntity.x + 0.5 - this.hero.x, targetEntity.y + 0.5 - this.hero.y);
+    if (distNow <= 1.65) {
+      this.cancelAutoPath();
+      return { ok: true, arrived: true, entity: targetEntity };
+    }
+    const waypoints = this.findPathToEntity(targetEntity);
+    if (!waypoints) {
+      return { ok: false, reason: 'blocked', entity: targetEntity };
+    }
+    if (waypoints.length === 0) {
+      return { ok: true, arrived: true, entity: targetEntity };
+    }
+    this.autoPath = {
+      waypoints,
+      index: 0,
+      targetEntity,
+      label: targetEntity.label || 'Objective',
+    };
+    audio.playClick();
+    if (this.callbacks.onAutoPathChange) {
+      this.callbacks.onAutoPathChange(this.autoPath);
+    }
+    return { ok: true, arrived: false, entity: targetEntity, steps: waypoints.length };
+  }
+
+  startAutoPathToNextObjective() {
+    const completed = this.getCompletedSet();
+    const rescued = this.getRescuedSet();
+    const next = this.getNextObjectiveEntity(completed, rescued);
+    if (!next || !next.entity) {
+      return { ok: false, reason: 'no_objective' };
+    }
+    return this.startAutoPathToEntity(next.entity);
+  }
+
+  cancelAutoPath() {
+    if (!this.autoPath) return;
+    this.autoPath = null;
+    if (this.callbacks.onAutoPathChange) {
+      this.callbacks.onAutoPathChange(null);
+    }
+  }
+
+  finishAutoPath() {
+    const target = this.autoPath?.targetEntity || null;
+    this.autoPath = null;
+    if (target) {
+      const fdx = target.x + 0.5 - this.hero.x;
+      const fdy = target.y + 0.5 - this.hero.y;
+      if (Math.abs(fdx) > 0.05 || Math.abs(fdy) > 0.05) {
+        this.hero.dir = Math.abs(fdx) > Math.abs(fdy) ? (fdx < 0 ? 'left' : 'right') : (fdy < 0 ? 'up' : 'down');
+      }
+    }
+    if (this.callbacks.onAutoPathChange) {
+      this.callbacks.onAutoPathChange(null);
+    }
+  }
+
+  findMinimapMarkerAt(cx, cy) {
+    let best = null;
+    let bestDist = 13;
+    for (const mk of this.minimapMarkers || []) {
+      const d = Math.hypot(mk.x - cx, mk.y - cy);
+      if (d <= bestDist) {
+        bestDist = d;
+        best = mk;
+      }
+    }
+    return best;
+  }
+
+  handleMinimapClick(cx, cy) {
+    const marker = this.findMinimapMarkerAt(cx, cy);
+    if (!marker || !marker.entity) return;
+    const completed = this.getCompletedSet();
+    const rescued = this.getRescuedSet();
+    if (this.canFastTravelToEntity(marker.entity, completed, rescued)) {
+      this.fastTravelToEntity(marker.entity);
+    } else {
+      const res = this.startAutoPathToEntity(marker.entity);
+      if (this.callbacks.onMinimapAutoPath) {
+        this.callbacks.onMinimapAutoPath(marker.entity, res);
+      }
     }
   }
 
@@ -737,6 +1153,26 @@ export class WorldEngine {
           this.sprites.drawTile(ctx, decorTile, this.eraKey, sx, sy, TILE_PX, TILE_PX);
         }
       }
+    }
+
+    // 1.5. Auto-path breadcrumb dots on the overworld floor
+    if (this.autoPath && this.autoPath.waypoints.length > 0) {
+      ctx.save();
+      const pulse = 0.55 + 0.35 * Math.sin(this.time * 7);
+      for (let i = this.autoPath.index; i < this.autoPath.waypoints.length; i++) {
+        const wp = this.autoPath.waypoints[i];
+        const wx = Math.round(wp.x * TILE_PX - camX);
+        const wy = Math.round(wp.y * TILE_PX - camY);
+        if (wx < -12 || wy < -12 || wx > this.canvas.width + 12 || wy > this.canvas.height + 12) continue;
+        const isFinal = i === this.autoPath.waypoints.length - 1;
+        ctx.fillStyle = isFinal
+          ? `rgba(250, 204, 21, ${pulse.toFixed(2)})`
+          : `rgba(56, 189, 248, ${(pulse * 0.85).toFixed(2)})`;
+        ctx.beginPath();
+        ctx.arc(wx, wy, isFinal ? 6 : 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     }
 
     // 2. Entities (sorted by Y along with Hero & Pip for clean depth)
@@ -1221,11 +1657,17 @@ export class WorldEngine {
 
   renderWayfinder(ctx, completed, rescued) {
     const next = this.getNextObjectiveEntity(completed, rescued);
-    if (!next) return;
+    if (!next) {
+      this.wayfinderRect = null;
+      return;
+    }
     const dx = next.entity.x + 0.5 - this.hero.x;
     const dy = next.entity.y + 0.5 - this.hero.y;
     const dist = Math.hypot(dx, dy);
-    if (dist < 4.5) return; // Already right next to it!
+    if (dist < 4.5 && !this.autoPath) {
+      this.wayfinderRect = null;
+      return; // Already right next to it!
+    }
 
     const angle = Math.atan2(dy, dx);
     // 8-way compass arrow
@@ -1233,8 +1675,10 @@ export class WorldEngine {
     const dirIdx = ((Math.round(angle / (Math.PI / 4)) % 8) + 8) % 8;
     const arrow = dirs[dirIdx];
     const steps = Math.round(dist);
-    const shortName = next.text.length > 26 ? `${next.text.slice(0, 24)}…` : next.text;
-    const label = `${arrow} ${shortName} (${steps}m)`;
+    const shortName = next.text.length > 24 ? `${next.text.slice(0, 22)}…` : next.text;
+    const label = this.autoPath
+      ? `🧭 Walking to ${shortName} (${steps}m) · Click to stop`
+      : `${arrow} ${shortName} (${steps}m) · Click to walk`;
 
     ctx.save();
     ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
@@ -1243,6 +1687,7 @@ export class WorldEngine {
     const pillH = 26;
     const px = 14;
     const py = 14;
+    this.wayfinderRect = { x: px, y: py, w: pillW, h: pillH };
 
     const pulse = 0.78 + 0.22 * Math.sin(this.time * 5);
     ctx.fillStyle = 'rgba(11, 16, 32, 0.86)';
@@ -1297,6 +1742,7 @@ export class WorldEngine {
   renderMinimap(ctx, dynamicOverrides, completed, openedChests, camX, camY) {
     if (this.canvas.width < 420 || this.canvas.height < 280) {
       this.minimapRect = null;
+      this.minimapMarkers = [];
       return;
     }
 
@@ -1310,6 +1756,7 @@ export class WorldEngine {
     const boxY = 14;
 
     this.minimapRect = { x: boxX, y: boxY, w: boxW, h: boxH };
+    this.minimapMarkers = [];
 
     ctx.save();
     // Translucent dark RPG frame
@@ -1336,6 +1783,22 @@ export class WorldEngine {
     ctx.lineWidth = 1;
     ctx.strokeRect(Math.round(mx + viewX), Math.round(my + viewY), Math.round(viewW), Math.round(viewH));
 
+    // Active auto-path trail on minimap
+    if (this.autoPath && this.autoPath.waypoints.length > 0) {
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.6;
+      ctx.setLineDash([3, 2]);
+      ctx.beginPath();
+      ctx.moveTo(mx + this.hero.x * scale, my + this.hero.y * scale);
+      for (let i = this.autoPath.index; i < this.autoPath.waypoints.length; i++) {
+        const wp = this.autoPath.waypoints[i];
+        ctx.lineTo(mx + wp.x * scale, my + wp.y * scale);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // Entity markers
     const foundEggs = new Set(this.save.foundEasterEggs || []);
     const pulse = 0.5 + 0.5 * Math.sin(this.time * 6);
@@ -1350,6 +1813,7 @@ export class WorldEngine {
           ctx.beginPath();
           ctx.arc(ex, ey, 3.2, 0, Math.PI * 2);
           ctx.fill();
+          this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         }
         continue;
       }
@@ -1363,6 +1827,7 @@ export class WorldEngine {
       }
 
       if (ent.type === 'trial') {
+        this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         const isDone = completed.has(ent.refId);
         if (isDone) {
           ctx.fillStyle = '#10b981';
@@ -1405,6 +1870,7 @@ export class WorldEngine {
         ctx.lineWidth = 1;
         ctx.strokeRect(ex - 2.5, ey - 2.5, 5, 5);
       } else if (ent.type === 'vault') {
+        this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         ctx.fillStyle = `rgba(239, 68, 68, ${(0.75 + 0.25 * pulse).toFixed(2)})`;
         ctx.beginPath();
         ctx.arc(ex, ey, 5 + pulse * 1.1, 0, Math.PI * 2);
@@ -1413,6 +1879,7 @@ export class WorldEngine {
         ctx.lineWidth = 1.3;
         ctx.stroke();
       } else if (ent.type === 'portal') {
+        this.minimapMarkers.push({ x: ex, y: ey, entity: ent });
         ctx.fillStyle = '#38bdf8';
         ctx.beginPath();
         ctx.arc(ex, ey, 3.2, 0, Math.PI * 2);
@@ -1550,6 +2017,21 @@ export class WorldEngine {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('✓', cx, cy + 1);
+        ctx.textBaseline = 'alphabetic';
+      } else if (ent.type === 'bonus_trial' && this.isBonusTrialLocked(ent, completed)) {
+        // Sealed secret bonus rune (unlocked after defeating the realm boss / core trials)
+        ctx.fillStyle = 'rgba(100, 116, 139, 0.34)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🔒', cx, cy + 0.5);
         ctx.textBaseline = 'alphabetic';
       } else {
         // Subtle mysterious violet/gold sparkle rewarding sharp-eyed explorers
